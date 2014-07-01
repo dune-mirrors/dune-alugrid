@@ -488,22 +488,21 @@ namespace ALUGrid
   };
 
   //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType, class IndexOperatorType> 
+  template <class GridType, class DataCollectorType> 
   class GatherScatterLoadBalance : public GatherScatter
   {
   protected:  
     enum { codim = 0 };
-    typedef typename GridType::template Codim<0>::Entity EntityType;
-    typedef Dune :: MakeableInterfaceObject<
-      typename GridType::template Codim<0>::Entity> MakeableEntityType;
-    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
-
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
-    
+
+    typedef typename GridType::template Codim<0>::Entity      EntityType;
+    typedef Dune :: MakeableInterfaceObject<EntityType>       MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
+
     typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
     
     typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
@@ -513,12 +512,12 @@ namespace ALUGrid
 
     GridType & grid_;
 
-    EntityType     & entity_;
-    RealEntityType & realEntity_;
+    MakeableEntityType  entityObj_;
+    EntityType&         entity_;
+    RealEntityType&     realEntity_;
 
     // data handle 
     DataCollectorType & dc_;
-    IndexOperatorType & idxOp_;
 
     // used MessageBuffer 
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
@@ -528,10 +527,11 @@ namespace ALUGrid
 
   public:
     //! Constructor
-    GatherScatterLoadBalance(GridType & grid, MakeableEntityType & en, 
-        RealEntityType & realEntity , DataCollectorType & dc, IndexOperatorType & idxOp ) 
-      : grid_(grid), entity_(en), realEntity_(realEntity) 
-      , dc_(dc) , idxOp_(idxOp) 
+    GatherScatterLoadBalance(GridType & grid, DataCollectorType & dc )
+      : grid_(grid), 
+        entityObj_( RealEntityType( grid.factory(), grid.maxLevel() ) ), 
+        entity_( entityObj_ ), realEntity_( GridType::getRealImplementation( entity_ ) ), 
+        dc_(dc)
     {}
 
     // return true if dim,codim combination is contained in data set 
@@ -543,9 +543,11 @@ namespace ALUGrid
     //! this method is called from the dunePackAll method of the corresponding 
     //! Macro element class of the BSGrid, see gitter_dune_pll*.*
     //! here the data is written to the ObjectStream 
-    void inlineData ( ObjectStreamType & str , HElementType & elem )
+    void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
     {
       str.write(grid_.maxLevel());
+      // store number of elements to be written (for restore)
+      str.write(estimatedElements);
       // set element and then start 
       alugrid_assert ( elem.level () == 0 );
       realEntity_.setElement(elem);
@@ -558,17 +560,15 @@ namespace ALUGrid
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
       alugrid_assert ( elem.level () == 0 );
-      int mxl; 
+      int mxl = 0; 
       str.read(mxl);
+      int newElements = 0 ;
+      str.read( newElements );
       // set element and then start 
       grid_.setMaxLevel(mxl);
 
-      // reserve memory for new elements 
-      size_t elChunk = idxOp_.newElements();
-      alugrid_assert ( elChunk > 0 );
-      
       realEntity_.setElement(elem);
-      dc_.xtractData(str,entity_, elChunk);
+      dc_.xtractData(str, entity_, newElements);
     }
 
     //! call compress on data 
@@ -593,6 +593,20 @@ namespace ALUGrid
     bool repartition () 
     { 
       return (dc_.userDefinedPartitioning() && dc_.repartition());
+    }
+
+    // return set of ranks data is imported from during load balance
+    // this method is only used for user defined repartitioning  
+    bool importRanks( std::set<int>& ranks ) const 
+    {
+      return dc_.importRanks( ranks );
+    }
+
+    // return set of ranks data is exported to during load balance
+    // this method is only used for user defined repartitioning  
+    bool exportRanks( std::set<int>& ranks ) const 
+    {
+      return dc_.exportRanks( ranks );
     }
 
     // return load weight of given element 
@@ -748,94 +762,6 @@ namespace ALUGrid
       set_.postRefinement( elem );
       return BaseType :: postRefinement(elem );
     }
-  };
-
-  // this class is for counting the tree depth of the 
-  // element when unpacking data from load balance 
-  template <class GridType , class DataHandleType>
-  class LoadBalanceElementCount : public AdaptRestrictProlongType
-  {
-    GridType & grid_;
-    typedef typename GridType::template Codim<0>::Entity EntityType;
-    typedef Dune :: MakeableInterfaceObject<
-      typename GridType::template Codim<0>::Entity> MakeableEntityType;
-    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
-
-    typedef typename GridType::Traits::LeafIndexSet LeafIndexSetType; 
-
-    EntityType & reFather_;
-    EntityType & reSon_;
-    RealEntityType & realFather_;
-    RealEntityType & realSon_;
-   
-    DataHandleType & dh_;
-
-    typedef typename GridType::MPICommunicatorType Comm;
-
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::HElementType HElementType;
-    typedef typename ImplTraits::HBndSegType HBndSegType;
-
-    int newMemSize_;
-
-    using AdaptRestrictProlongType :: postRefinement ;
-    using AdaptRestrictProlongType :: preCoarsening ;
-
-  public:
-    //! Constructor
-    LoadBalanceElementCount (GridType & grid, 
-                             MakeableEntityType & f, RealEntityType & rf, 
-                             MakeableEntityType & s, RealEntityType & rs,
-                             DataHandleType & dh) 
-      : grid_(grid)
-      , reFather_(f)
-      , reSon_(s)
-      , realFather_(rf) 
-      , realSon_(rs) 
-      , dh_(dh) 
-      , newMemSize_ (1) // we have at least one element (the macro element)
-    {
-    }
-
-    virtual ~LoadBalanceElementCount () {}
-
-    //! restrict data , elem is always the father 
-    int postRefinement ( HElementType & elem )
-    {
-      // when called for a macro element, then a new tree is starting 
-      // set to 1 because for only macro elements this method is not called 
-      if( elem.level() == 0 ) newMemSize_ = 1;
-
-      for( HElementType * son = elem.down() ; son ; son= son->next()) 
-      {
-        ++ newMemSize_;
-      }
-      return 0;
-    }
-
-    //! prolong data, elem is the father  
-    int preCoarsening ( HElementType & elem )
-    {
-      return 0;
-    }
-
-    //! restrict data , elem is always the father 
-    //! this method is for ghost elements 
-    int preCoarsening ( HBndSegType & el )
-    {
-      return 0;
-    }
-
-    //! restrict data , elem is always the father 
-    //! this method is for ghost elements 
-    //! we need the ghost method because data is only inlined for interior
-    //! elements, but we have to arange the ghost indices 
-    int postRefinement ( HBndSegType & el )
-    {
-      return 0;
-    }
-
-    int newElements () const { return newMemSize_; }
   };
 
 } // namespace ALUGrid
