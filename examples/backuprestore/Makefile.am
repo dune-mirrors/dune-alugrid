@@ -4,8 +4,8 @@ GRIDDIM = 3
 DATACLEANFILES = dgfparser.log sioncheckpoint checkpoint.* *.*vtu
 CLEANFILES = $(DATACLEANFILES)
 
-exampleslbdir = $(includedir)/examples/backuprestore
-exampleslb_HEADERS = sionlib.hh
+examplesbrdir = $(includedir)/examples/backuprestore
+examplesbr_HEADERS = sionlib.hh paralleldgf.hh
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
