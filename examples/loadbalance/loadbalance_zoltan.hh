@@ -156,7 +156,7 @@ public:
   // internally compute the required information through some global
   // communication. To avoid this overhead the user can provide the ranks
   // of particians from which elements will be moved to the calling partitian.
-  bool importRanks( std::set<int> &ranks) 
+  bool importRanks( std::set<int> &ranks ) const
   {
     ranks.insert( new_partitioning_.importProcs,
                   new_partitioning_.importProcs+new_partitioning_.numImport );
