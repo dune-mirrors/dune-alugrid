@@ -169,7 +169,7 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
+  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool isNew) 
   {
     int elSize;
     os.readObject( elSize );
