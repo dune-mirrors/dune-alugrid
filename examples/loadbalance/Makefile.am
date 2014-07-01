@@ -10,6 +10,8 @@ PROBLEM = -DTRANSPORT
 EXTRAFLAGS = 
 AM_CPPFLAGS += $(EXTRAFLAGS) $(PROBLEM)
 
+EXTRA_DIST = alugrid.cfg 
+
 exampleslbdir = $(includedir)/examples/loadbalanacing
 exampleslb_HEADERS = \
     adaptation.hh  diagnostics.hh  loadbalance_simple.hh  paralleldgf.hh        problem-ball.hh   problem-transport.hh \
