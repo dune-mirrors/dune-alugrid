@@ -17,12 +17,7 @@ exampleslb_HEADERS = \
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
-check_PROGRAMS = main_internal main_simple main_zoltan partition
-
-partition_SOURCES = partition.cc
-partition_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB
-partition_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-partition_LDADD = $(LDADD) $(DUNEMPILIBS)
+check_PROGRAMS = main_internal main_simple main_zoltan 
 
 main_internal_SOURCES = main.cc
 main_internal_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
