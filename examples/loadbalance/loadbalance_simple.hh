@@ -11,13 +11,15 @@ struct SimpleLoadBalanceHandle
   , maxRank_( grid.comm().size() )
   {}
 
-  // this method is called before invoking the repartition method to chec
-  // if user defined partitioning needs to be readjusted
+  // this method is called before invoking the repartition method on the
+  // grid, to check if the user defined partitioning needs to be readjusted
   bool repartition () 
   { 
     angle_ += 2.*M_PI/50.;
     return true;
   }
+  // this is the method, called from the grid for each macro element. 
+  // It returns the rank to which the element is to be moved
   int operator()( const Element &element ) const 
   { 
     typedef typename Element::Geometry::GlobalCoordinate Coordinate;
@@ -34,6 +36,14 @@ struct SimpleLoadBalanceHandle
     }
     else // keep the center on proc 0
       return 0;
+  }
+  // This method can simply return false, in which case ALUGrid will
+  // internally compute the required information through some global
+  // communication. To avoid this overhead the user can provide the ranks
+  // of particians from which elements will be moved to the calling partitian.
+  bool importRanks( std::vector<int> &ranks) 
+  {
+    return false;
   }
 private:
   double angle_;
