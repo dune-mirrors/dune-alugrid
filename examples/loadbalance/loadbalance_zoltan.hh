@@ -156,13 +156,10 @@ public:
   // internally compute the required information through some global
   // communication. To avoid this overhead the user can provide the ranks
   // of particians from which elements will be moved to the calling partitian.
-  bool importRanks( std::vector<int> &ranks) 
+  bool importRanks( std::set<int> &ranks) 
   {
-    std::set<int> importProcs;
-    importProcs.insert( new_partitioning_.importProcs,
-                        new_partitioning_.importProcs+new_partitioning_.numImport );
-    ranks.resize(importProcs.size());
-    std::copy(importProcs.begin(), importProcs.end(), ranks.begin());
+    ranks.insert( new_partitioning_.importProcs,
+                  new_partitioning_.importProcs+new_partitioning_.numImport );
     // std::ostream_iterator< int > output( cout, " " );
     // cout << "Import ranks: ";
     // std::copy( ranks.begin(), ranks.end(), output );
