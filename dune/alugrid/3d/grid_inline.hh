@@ -415,8 +415,6 @@ namespace Dune
   {
     typedef ALU3dGrid< elType, ALUGridNoComm > Grid;
 
-    static bool loadBalance ( Grid &grid ) { return false; }
-
     template< class DataHandle >
     static bool loadBalance ( Grid &grid, DataHandle &data ) { return false; }
   }; // ALU3dGridCommHelper
@@ -427,31 +425,6 @@ namespace Dune
     typedef ALU3dGrid< elType, ALUGridMPIComm > Grid;
     typedef ALU3DSPACE GatherScatter GatherScatterType;
 
-    static bool loadBalance ( Grid &grid )
-    {
-      if( grid.comm().size() <= 1 )
-        return false;
-
-      const bool changed = grid.myGrid().duneLoadBalance();
-      if( changed )
-      {
-        // calculate new maxlevel 
-        // reset size and things  
-        grid.updateStatus();
-        
-        // build new Id Set. Only do that after updateStatus, because here
-        // the item lists are needed 
-        if( grid.globalIdSet_ )
-          grid.globalIdSet_->updateIdSet();
-      
-        // unset all leaf markers
-        grid.clearIsNewMarkers();
-      }
-
-      return changed;
-    }
-
-
     template< class DataHandle >
     static bool loadBalance ( Grid &grid, DataHandle &data )
     {
@@ -459,26 +432,11 @@ namespace Dune
       if( grid.comm().size() <= 1 )
         return false;
 
-      typedef typename Grid :: EntityObject EntityObject;
-      typedef typename EntityObject::ImplementationType EntityImp;
-      EntityObject en     ( EntityImp( grid.factory(), grid.maxLevel()) );
-      EntityObject father ( EntityImp( grid.factory(), grid.maxLevel()) );
-      EntityObject son    ( EntityImp( grid.factory(), grid.maxLevel()) );
-
-      typedef ALU3DSPACE LoadBalanceElementCount< Grid, DataHandle > LDBElCountType;
-
-      // elCount is the adaption restPro operator used during the refinement
-      // cause be creating new elements on processors  
-      LDBElCountType elCount( grid,
-                              father, Grid::getRealImplementation( father ),
-                              son, Grid::getRealImplementation( son ),
-                              data );
-
-      ALU3DSPACE GatherScatterLoadBalance< Grid, DataHandle, LDBElCountType >
-        gs( grid, en, Grid::getRealImplementation( en ), data, elCount );
+      ALU3DSPACE GatherScatterLoadBalance< Grid, DataHandle >
+        gs( grid, data );
     
       // call load Balance 
-      const bool changed = grid.myGrid().duneLoadBalance( gs, elCount );
+      const bool changed = grid.myGrid().loadBalance( &gs );
 
       if( changed )
       {

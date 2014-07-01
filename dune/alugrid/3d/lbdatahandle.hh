@@ -193,18 +193,11 @@ namespace Dune
     }
 
   public:
-    bool userDefinedPartitioning () const 
-    {
-      return false;
-    }
-    bool repartition () const 
-    { 
-      return false;
-    }
-    bool userDefinedLoadWeights () const
-    {
-      return false;
-    }
+    bool userDefinedPartitioning () const { return false; }
+    bool repartition () const { return false; }
+    bool userDefinedLoadWeights () const { return false; }
+    bool importRanks( std::set<int>& ) const  { return false ; }
+    bool exportRanks( std::set<int>& ) const  { return false ; }
     double loadWeight( const Element &element ) const 
     { 
       return -1;
@@ -248,6 +241,20 @@ namespace Dune
     bool repartition () const 
     { 
       return true;
+    }
+
+    // return list of ranks data is imported from 
+    bool importRanks( std::set<int>& ranks ) const 
+    {
+      return ldbHandle_.importRanks( ranks );
+    }
+
+    // return list of ranks data is imported from 
+    bool exportRanks( std::set<int>& ranks ) const 
+    {
+      // this feature is not yet enabled (although implemented in ALU)
+      return false ;
+      // return ldbHandle_.exportRanks( ranks );
     }
 
     // return true if user defined weights have been provided
@@ -295,6 +302,8 @@ namespace Dune
     { return LDBHandleBase::userDefinedLoadWeights(); }
     bool repartition () const 
     { return LDBHandleBase::repartition(); }
+    bool importRanks( std::set<int>& ranks ) const { return LDBHandleBase::importRanks( ranks ); }
+    bool exportRanks( std::set<int>& ranks ) const { return LDBHandleBase::exportRanks( ranks ); }
     int loadWeight( const Element &element ) const 
     { return LDBHandleBase::loadWeight(element); }
     int destination( const Element &element ) const 

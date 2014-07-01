@@ -9,6 +9,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
+#include <dune/common/exceptions.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -43,23 +44,26 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #endif
 
-namespace
+namespace Dune 
 {
   struct EmptyALUDataHandle
   : public Dune::CommDataHandleIF< EmptyALUDataHandle, int >
   {
     EmptyALUDataHandle() {}
-    bool contains ( int dim, int codim ) const
-    { return false; }
-    bool fixedsize ( int dim, int codim ) const
-    { return true; }
+    bool contains ( int dim, int codim ) const  { return false; }
+    bool fixedsize ( int dim, int codim ) const { return true; }
     template <class E>
-    size_t size ( const E &entity ) const
-    { return 0; }
+    size_t size ( const E &entity ) const { return 0; }
     template< class Buffer, class E >
-    void gather ( Buffer &buffer, const E &entity ) const {}
+    void gather ( Buffer &buffer, const E &entity ) const 
+    {
+      DUNE_THROW(InvalidStateException,"EmptyALUDataHandle::gather should never be called!");
+    }
     template< class Buffer, class E >
-    void scatter ( Buffer &buffer, E &entity, size_t n ) {}
+    void scatter ( Buffer &buffer, E &entity, size_t n ) 
+    {
+      DUNE_THROW(InvalidStateException,"EmptyALUDataHandle::scatter should never be called!");
+    }
   };
 }
 
@@ -788,8 +792,6 @@ namespace Dune
     template <class DataHandle>
     bool loadBalanceImpl (DataHandle & data);
 
-    // EmptyALUDataHandle emptyDH_;
-
   public:  
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
                The specific load balancing algorithm is selected from a file alugrid.cfg. 
@@ -797,8 +799,8 @@ namespace Dune
     */
     bool loadBalance ( )
     {
-      EmptyALUDataHandle dh_;
-      return loadBalance(dh_);
+      EmptyALUDataHandle dh;
+      return loadBalance( dh );
     }
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
                The specific load balancing algorithm is selected from a file alugrid.cfg. 

@@ -245,7 +245,7 @@ namespace ALUGrid
       virtual void repartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
       
       virtual bool checkPartitioning(LoadBalancer::DataBase &, GatherScatterType* );
-      virtual bool loadBalancerGridChangesNotify ( GatherScatterType* );
+      virtual bool loadBalance ( GatherScatterType* gs = 0 );
       virtual void loadBalancerMacroGridChangesNotify ();
       virtual void notifyMacroGridChanges ();
       

@@ -85,9 +85,6 @@ namespace ALUGrid
     // postRefinement, no loadBalancing done   
     bool duneAdapt (AdaptRestrictProlongType & arp);
 
-    bool duneLoadBalance (); // call loadBalancer 
-    bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ); // call loadBalancer a
-
   public:  
 
     // communication of border data 

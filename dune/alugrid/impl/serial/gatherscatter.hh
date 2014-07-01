@@ -1,6 +1,8 @@
 #ifndef ALUGRID_SRC_SERIAL_GATHERSCATTER_HH
 #define ALUGRID_SRC_SERIAL_GATHERSCATTER_HH
 
+#include <set>
+
 #include "gitter_sti.h"
 #include "serialize.h"
 
@@ -18,11 +20,21 @@ namespace ALUGrid
     virtual ~GatherScatter () {}
 
     // return true if user defined partitioning methods should be used 
-    virtual bool userDefinedPartitioning () const { alugrid_assert (false); abort(); return false ; }
+    virtual bool userDefinedPartitioning () const { return false ; }
     // return true if user defined load balancing weights are provided
-    virtual bool userDefinedLoadWeights () const { alugrid_assert (false); abort(); return false ; }
+    virtual bool userDefinedLoadWeights () const  { return false ; }
     // returns true if user defined partitioning needs to be readjusted 
     virtual bool repartition () { alugrid_assert (false); abort(); return false; }
+
+    // this method is required for user defined partition 
+    // returns true if the import ranks information was filled into set, false otherwise 
+    // if false was returned a global communication is necessary to obtain this information
+    virtual bool importRanks ( std::set< int >& ) const { return false ; }
+
+    // this method is required for user defined partition 
+    // returns true if the export ranks information was filled into set, false otherwise 
+    // this information can be easily computed locally by the given destinations 
+    virtual bool exportRanks ( std::set< int >& ) const { return false ; }
 
     // return load weight of given element 
     virtual int loadWeight( const Gitter::helement_STI &elem ) const { alugrid_assert (false); abort(); return 1; }
@@ -41,7 +53,7 @@ namespace ALUGrid
     virtual bool containsInterior (const Gitter::hface_STI  & face , ElementPllXIF_t & elif) const { alugrid_assert (false); abort(); return false; }
     virtual bool containsGhost    (const Gitter::hface_STI  & face , ElementPllXIF_t & elif) const { alugrid_assert (false); abort(); return false; }
     
-    virtual void inlineData ( ObjectStreamType & str , Gitter::helement_STI & elem ) { alugrid_assert (false); abort(); }
+    virtual void inlineData ( ObjectStreamType & str , Gitter::helement_STI & elem, const int estimateElements ) { alugrid_assert (false); abort(); }
     virtual void xtractData ( ObjectStreamType & str , Gitter::helement_STI & elem ) { alugrid_assert (false); abort(); }
     
     virtual void sendData ( ObjectStreamType & str , Gitter::hface_STI & elem ) { alugrid_assert (false); abort(); }

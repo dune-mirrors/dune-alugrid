@@ -1361,7 +1361,7 @@ namespace ALUGrid
   double ldbTimerU4 = 0.0;
 
   // --loadBalance 
-  bool GitterPll::loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
+  bool GitterPll::loadBalance( GatherScatterType* gs ) 
   {
     int lap1 = clock ();
 
