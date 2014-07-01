@@ -50,7 +50,7 @@ struct EmptyGatherScatter : public ALUGrid::GatherScatter
 
   bool contains ( int, int ) const { return true ;} 
 
-  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
+  virtual void inlineData ( ObjectStreamType & str , HElemType & elem, const int ) {}
   virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
 };
 
