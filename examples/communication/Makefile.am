@@ -7,7 +7,7 @@ GRIDDIM = 3
 
 SUBDIRS = 
 
-#EXTRA_DIST = alugrid.cfg 
+EXTRA_DIST = check-communication.sh
 
 DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
