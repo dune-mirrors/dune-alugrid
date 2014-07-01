@@ -458,7 +458,7 @@ namespace ALUGrid
       bool refineBalance (balrule_t,int);
       bool coarse ();
       bool bndNotifyCoarsen ();
-      void backup (std::ostream &) const;
+      int  backup  (std::ostream &) const;
       void restore (std::istream &);
 
       // backup and restore index 
@@ -471,7 +471,7 @@ namespace ALUGrid
       // set entry of element to false when index is read 
       void restoreIndex (ObjectStream &, RestoreInfo& );
 
-      void backup (ObjectStream&) const;
+      int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
     protected:
       // non-virtual methods of down and innerVertex 
@@ -485,7 +485,7 @@ namespace ALUGrid
       const innerface_t* inFce() const;
 
       template <class OutStream_t> 
-      void doBackup(OutStream_t &) const;  
+      int  doBackup(OutStream_t &) const;  
       template <class InStream_t> 
       void doRestore(InStream_t &);  
       template< class istream_t >
@@ -571,14 +571,14 @@ namespace ALUGrid
       bool bndNotifyCoarsen ();
 
     public:  
-      void backup (std::ostream &) const;
+      int  backup (std::ostream &) const;
       void restore (std::istream &);
 
-      void backup (ObjectStream&) const;
+      int  backup (ObjectStream&) const;
       void restore (ObjectStream&);
     protected:
       template <class OutStream_t> 
-      void doBackup(OutStream_t &) const;  
+      int  doBackup(OutStream_t &) const;  
       template <class InStream_t> 
       void doRestore(InStream_t &);  
   };
