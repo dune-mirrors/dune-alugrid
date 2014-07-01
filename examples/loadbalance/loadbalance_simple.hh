@@ -41,10 +41,7 @@ struct SimpleLoadBalanceHandle
   // internally compute the required information through some global
   // communication. To avoid this overhead the user can provide the ranks
   // of particians from which elements will be moved to the calling partitian.
-  bool importRanks( std::set<int> &ranks) 
-  {
-    return false;
-  }
+  bool importRanks( std::set<int> &ranks) const { return false; }
 private:
   double angle_;
   int maxRank_;
