@@ -566,10 +566,10 @@ namespace ALUGrid
       bool coarse ();
       bool bndNotifyCoarsen ();
       
-      void backup (std::ostream &) const;
+      int  backup (std::ostream &) const;
       void restore (std::istream &);
       
-      void backup (ObjectStream &) const;
+      int  backup (ObjectStream &) const;
       void restore (ObjectStream &);
       
       // backup and restore index 
@@ -589,7 +589,7 @@ namespace ALUGrid
       const innerface_t* inFce() const;
 
       template <class OutStream_t> 
-      void doBackup(OutStream_t &) const;
+      int  doBackup(OutStream_t &) const;
       
       template <class InStream_t> 
       void doRestore(InStream_t &);
@@ -677,14 +677,14 @@ namespace ALUGrid
       bool coarse ();
       bool bndNotifyCoarsen ();
     public:
-      void backup (std::ostream &) const;
+      int  backup (std::ostream &) const;
       void restore (std::istream &);
       
-      void backup (ObjectStream &) const;
+      int  backup (ObjectStream &) const;
       void restore (ObjectStream &);
     protected:  
       template <class OutStream_t> 
-      void doBackup(OutStream_t &) const;
+      int  doBackup(OutStream_t &) const;
       
       template <class InStream_t> 
       void doRestore(InStream_t &);

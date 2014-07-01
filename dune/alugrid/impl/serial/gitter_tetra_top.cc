@@ -2151,23 +2151,26 @@ namespace ALUGrid
   }
 
   // buckupTetra 
-  template< class A > void TetraTop< A >::backup ( std::ostream &os ) const
+  template< class A > int TetraTop< A >::backup ( std::ostream &os ) const
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
-  template< class A > void TetraTop < A >::backup (ObjectStream& os) const 
+  template< class A > int TetraTop < A >::backup (ObjectStream& os) const 
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A > template<class OutStream_t> 
-  void TetraTop < A >::doBackup (OutStream_t & os) const 
+  int TetraTop < A >::doBackup (OutStream_t & os) const 
   {
     os.put ((char) getrule ()) ;
-    {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ; }
-    {for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ; }
-    {for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backup (os) ; }
+    for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ;
+    for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ;
+    int sons = 0 ;
+    for (const innertetra_t * c = dwnPtr() ; c ; c = c->next (), ++sons ) 
+      sons += c->backup (os) ;
+    return sons ;
   }
 
   // overloaded restoreIndex Method 
@@ -2514,22 +2517,22 @@ namespace ALUGrid
     return x ;
   }
 
-  template< class A > void Periodic3Top< A >::backup ( std::ostream &os ) const
+  template< class A > int Periodic3Top< A >::backup ( std::ostream &os ) const
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
-  template< class A > void Periodic3Top < A >::backup (ObjectStream& os) const 
+  template< class A > int Periodic3Top < A >::backup (ObjectStream& os) const 
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A > template<class OutStream_t>
-  void Periodic3Top < A >::doBackup (OutStream_t& os) const 
+  int Periodic3Top < A >::doBackup (OutStream_t& os) const 
   {
     os.put ((char) getrule ()) ;
     { for (const innerperiodic3_t * c = down () ; c ; c = c->next ()) c->backup (os) ; }
-    return ;
+    return 0;
   }
 
   template< class A > void Periodic3Top< A >::restore ( std::istream &is )

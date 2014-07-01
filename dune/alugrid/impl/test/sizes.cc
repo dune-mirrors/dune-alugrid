@@ -50,7 +50,7 @@ struct EmptyGatherScatter : public ALUGrid::GatherScatter
 
   bool contains ( int, int ) const { return true ;} 
 
-  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
+  virtual void inlineData ( ObjectStreamType & str , HElemType & elem, const int ) {}
   virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
 };
 
@@ -184,12 +184,9 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
 #if HAVE_MPI 
      if( loadBalance ) 
      {
-       // create empty gather scatter 
-       EmptyAdaptRestrictProlong rp;
-
        EmptyGatherScatter gs ( grid.mpAccess().myrank(), grid.mpAccess().psize(), false );
        // load balance 
-       grid.duneLoadBalance( gs , rp );
+       grid.loadBalance( &gs );
      }
 #endif
 
@@ -306,7 +303,8 @@ int main (int argc, char ** argv, const char ** envp)
       }
 
 #if HAVE_MPI
-      gridPtr->duneLoadBalance();
+      EmptyGatherScatter gs ( mpa.myrank(), mpa.psize(), false );
+      gridPtr->loadBalance();
       //if( ! closure ) 
       //  gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
       ALUGrid::GitterDunePll& grid = *gridPtr ;

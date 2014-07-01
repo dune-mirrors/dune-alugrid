@@ -268,7 +268,7 @@ int main (int argc, char ** argv, const char ** envp)
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
     ALUGrid::GitterDunePll grid(macroname.c_str(),a);
-    grid.duneLoadBalance() ;
+    grid.loadBalance() ;
 
     grid.tovtk( "out" );
 #else 
