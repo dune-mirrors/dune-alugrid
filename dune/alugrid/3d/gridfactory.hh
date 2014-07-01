@@ -48,6 +48,7 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
+      typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
     };
 
     typedef unsigned int VertexId;
@@ -247,13 +248,22 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundarySegmentIndex();
+      int element = insertionIndex( *(intersection.inside()) );
+      int face = intersection.indexInInside();
+      FaceType faceId;
+      generateFace( elements_[ element ], face, faceId );
+      typename BoundaryIdMap::const_iterator pos = boundaryIds_.find( faceId );
+      assert( pos != boundaryIds_.end() );
+      assert(pos->second >= 1);
+      if (pos->second == 1)
+        return UINT_MAX;
+      return pos->second-2;
     }
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundary() &&
-        ( insertionIndex(intersection) < numFacesInserted_ );
+      return intersection.boundary() && 
+             (insertionIndex(intersection) < UINT_MAX);
     }
 
   private:
@@ -437,7 +447,7 @@ namespace Dune
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
-    boundaryId.second = 1;
+    boundaryId.second = boundaryIds_.size()+2;
     boundaryIds_.insert( boundaryId );
   }
 
@@ -496,7 +506,7 @@ namespace Dune
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
-    boundaryId.second = 1;
+    boundaryId.second = boundaryIds_.size()+2;
     boundaryIds_.insert( boundaryId );
   }
 
