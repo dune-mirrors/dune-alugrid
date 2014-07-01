@@ -545,7 +545,8 @@ namespace ALUGrid
     //! here the data is written to the ObjectStream 
     void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
     {
-      str.write(grid_.maxLevel());
+      int mxl = grid_.maxLevel();
+      str.write(mxl);
       // store number of elements to be written (for restore)
       str.write(estimatedElements);
       // set element and then start 
