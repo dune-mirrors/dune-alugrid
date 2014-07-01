@@ -3,7 +3,7 @@
 #include <config.h>
 
 // #define NO_2D
-// #define NO_3D
+ #define NO_3D
 
 #include <iostream>
 #include <sstream>
@@ -28,7 +28,7 @@
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 
-#include <dune/alugrid/dgf.hh>
+#include <dune/alugrid/dgf.hh> 
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI 
 #define USE_PARALLEL_TEST 1
@@ -54,27 +54,6 @@ void checkCapabilities(const Grid& grid)
                        "hasEntity is not set correctly"); 
    dune_static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true, 
                        "hasBackupRestoreFacilities is not set correctly"); 
-
-   static const bool reallyParallel = 
-#if ALU3DGRID_PARALLEL
-    Grid :: dimension == 3;
-#else 
-    false ;
-#endif
-   dune_static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel, 
-                       "isParallel is not set correctly"); 
-
-   static const bool reallyCanCommunicate = 
-#if ALU3DGRID_PARALLEL
-    Grid :: dimension == 3;
-#else 
-    false ;
-#endif
-   static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
-     == reallyCanCommunicate;
-   dune_static_assert ( canCommunicate, 
-                       "canCommunicate is not set correctly"); 
-
 }
 
 template <class GridType>
@@ -400,6 +379,7 @@ void writeFile( const GridView& gridView )
 template <class GridType> 
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
 {
+
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType(); 
