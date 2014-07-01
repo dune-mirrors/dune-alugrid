@@ -34,25 +34,6 @@ namespace ALUGrid
     return refined;
   }
 
-  bool GitterDunePll::duneLoadBalance () 
-  {
-    return loadBalancerGridChangesNotify ( ( GatherScatterType* ) 0 );
-  }
-
-  // returns true if grid was repartitioned 
-  bool GitterDunePll::duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) 
-  {
-    // set restriction/prolongation operator 
-    this->setAdaptRestrictProlongOp(arp);
-
-    // do load balancing 
-    const bool repartion = loadBalancerGridChangesNotify ( &gs );
-
-    // remove restriction/prolongation operator 
-    this->removeAdaptRestrictProlongOp ();
-    return repartion;
-  }
-
   std::pair< IteratorSTI < GitterPll::vertex_STI > *, IteratorSTI < GitterPll::vertex_STI > *> 
   GitterDunePll::borderIteratorTT (const vertex_STI * v, int link )
   {

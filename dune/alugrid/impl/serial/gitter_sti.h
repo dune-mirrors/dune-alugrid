@@ -1137,10 +1137,10 @@ namespace ALUGrid
       virtual bool refine () = 0;
       virtual bool coarse () = 0;
 
-      virtual void backup (std::ostream &) const = 0;
+      virtual int  backup  (std::ostream &) const = 0;
       virtual void restore (std::istream &) = 0;
       
-      virtual void backup (ObjectStream &) const = 0;
+      virtual int  backup  (ObjectStream &) const = 0;
       virtual void restore (ObjectStream &) = 0;
 
       // backup and restore index of vertices, should be overloaded in

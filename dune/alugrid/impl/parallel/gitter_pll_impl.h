@@ -50,9 +50,6 @@ namespace ALUGrid
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      
       inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
       const linkagePatternMap_t& linkagePatterns () const { return this->indexManagerStorage().linkagePatterns();  }
       bool doPackLink (const int link, ObjectStream& os );
@@ -117,8 +114,6 @@ namespace ALUGrid
     protected :
       using A::myhedge;
       using A::EDGE1;
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
 
       bool doPackLink (const int link, ObjectStream& os );
     public :
@@ -175,11 +170,8 @@ namespace ALUGrid
 
     protected :
       using A::myhface; 
-
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
-
       bool doPackLink (const int link, ObjectStream& os );
+
     public :
       virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool );
       virtual void attach2 (int);
@@ -240,9 +232,6 @@ namespace ALUGrid
 
       TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
                          myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
-
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
     public :
       virtual int ldbVertexIndex () const;
       virtual void writeStaticState (ObjectStream &, int) const ;
@@ -340,9 +329,6 @@ namespace ALUGrid
     protected:
       inline myperiodic_t & myperiodic () { return *this; }
       inline const myperiodic_t & myperiodic () const { return *this; }
-
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
       bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attachPeriodic( const int destination );
@@ -425,9 +411,6 @@ namespace ALUGrid
     protected:  
       inline myperiodic_t & myperiodic () { return *this; }
       inline const myperiodic_t & myperiodic () const { return *this; }
-
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
       bool doPackLink (const int link, ObjectStream& os );
     public :
       virtual void attachPeriodic( const int destination );
@@ -527,9 +510,6 @@ namespace ALUGrid
       bool doPackLink (const int link, ObjectStream& os, GatherScatterType* );
       bool doPackAll( std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
-      virtual void inlineData (ObjectStream &) throw (ObjectStream::EOFException) {}
-      virtual void xtractData (ObjectStream &) throw (ObjectStream::EOFException) {}
-
       void packAsBndNow (int, ObjectStream &, const bool ) const;
     protected:
       // link number corresponding to rank where element is moved to

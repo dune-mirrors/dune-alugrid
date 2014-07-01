@@ -53,7 +53,7 @@ namespace ALUGrid
     virtual bool containsInterior (const Gitter::hface_STI  & face , ElementPllXIF_t & elif) const { alugrid_assert (false); abort(); return false; }
     virtual bool containsGhost    (const Gitter::hface_STI  & face , ElementPllXIF_t & elif) const { alugrid_assert (false); abort(); return false; }
     
-    virtual void inlineData ( ObjectStreamType & str , Gitter::helement_STI & elem ) { alugrid_assert (false); abort(); }
+    virtual void inlineData ( ObjectStreamType & str , Gitter::helement_STI & elem, const int estimateElements ) { alugrid_assert (false); abort(); }
     virtual void xtractData ( ObjectStreamType & str , Gitter::helement_STI & elem ) { alugrid_assert (false); abort(); }
     
     virtual void sendData ( ObjectStreamType & str , Gitter::hface_STI & elem ) { alugrid_assert (false); abort(); }
