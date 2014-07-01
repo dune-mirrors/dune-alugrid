@@ -1175,7 +1175,7 @@ namespace ALUGrid
   template< class A >
   int Periodic4Top< A >::backup (ObjectStream& os) const 
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A > template<class OutStream_t>
