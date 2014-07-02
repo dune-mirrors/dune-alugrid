@@ -37,11 +37,11 @@ namespace ALUGrid
     virtual bool exportRanks ( std::set< int >& ) const { return false ; }
 
     // return load weight of given element 
-    virtual int loadWeight( const Gitter::helement_STI &elem ) const { alugrid_assert (false); abort(); return 1; }
+    virtual int loadWeight( Gitter::helement_STI &elem ) { alugrid_assert (false); abort(); return 1; }
 
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
-    virtual int destination( const Gitter::helement_STI &elem ) const { alugrid_assert (false); abort(); return -1; }
+    virtual int destination( Gitter::helement_STI &elem ) { alugrid_assert (false); abort(); return -1; }
 
     virtual bool contains(int,int) const = 0;
 
@@ -72,6 +72,12 @@ namespace ALUGrid
     virtual void sendData ( ObjectStreamType & str , const Gitter::hbndseg & elem ) { alugrid_assert (false); abort(); }
     virtual void recvData ( ObjectStreamType & str , Gitter::hbndseg & elem ) { alugrid_assert (false); abort(); }
     virtual void recvData ( ObjectStreamType & str , Gitter::helement_STI  & elem ) { alugrid_assert (false); abort(); }
+
+    virtual void compress () { alugrid_assert (false); abort(); }
+
+    // dummy method to use GatherScatter as empty LoadBalanceHandle 
+    template <class Entity>
+    int operator () ( const Entity& ) const { alugrid_assert (false); abort(); }
   };
 
   typedef GatherScatter GatherScatterType;
