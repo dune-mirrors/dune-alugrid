@@ -43,10 +43,10 @@ namespace ALUGrid
     // this needs the methods userDefinedPartitioning to return true
     virtual int destination( Gitter::helement_STI &elem ) { alugrid_assert (false); abort(); return -1; }
 
-    virtual bool contains(int,int) const { return false; }
+    virtual bool contains(int,int) const { alugrid_assert (false); abort(); return false; }
 
     // returns true if data handle contains user data for redistribution 
-    virtual bool hasUserData () const { return false ; }
+    virtual bool hasUserData () const { alugrid_assert (false); abort(); return false ; }
 
     virtual bool containsItem(const Gitter::helement_STI &elem ) const { alugrid_assert (false); abort(); return false; }
     virtual bool containsItem(const Gitter::hface_STI   & elem ) const { alugrid_assert (false); abort(); return false; }
@@ -80,7 +80,7 @@ namespace ALUGrid
 
     // dummy method to use GatherScatter as empty LoadBalanceHandle 
     template <class Entity>
-    int operator () ( const Entity& ) const { alugrid_assert (false); abort(); }
+    int operator () ( const Entity& ) const { alugrid_assert (false); abort(); return -1; }
   };
 
   typedef GatherScatter GatherScatterType;
