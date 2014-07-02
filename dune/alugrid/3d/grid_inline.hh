@@ -403,68 +403,34 @@ namespace Dune
     return refined;
   }
 
-
-
-  //*****************************************************************
-
+  // load balance grid ( lbData might be a pointer to NULL ) 
   template< ALU3dGridElementType elType, class Comm >
-  struct ALU3dGridCommHelper;
-
-  template< ALU3dGridElementType elType >
-  struct ALU3dGridCommHelper< elType, ALUGridNoComm >
+  inline bool ALU3dGrid< elType, Comm >::loadBalance( GatherScatterType* lbData )
   {
-    typedef ALU3dGrid< elType, ALUGridNoComm > Grid;
-
-    template< class DataHandle >
-    static bool loadBalance ( Grid &grid, DataHandle &data ) { return false; }
-  }; // ALU3dGridCommHelper
-
-  template< ALU3dGridElementType elType >
-  struct ALU3dGridCommHelper< elType, ALUGridMPIComm >
-  {
-    typedef ALU3dGrid< elType, ALUGridMPIComm > Grid;
-    typedef ALU3DSPACE GatherScatter GatherScatterType;
-
-    template< class DataHandle >
-    static bool loadBalance ( Grid &grid, DataHandle &data )
-    {
-
-      if( grid.comm().size() <= 1 )
+    if( comm().size() <= 1 )
         return false;
 
-      ALU3DSPACE GatherScatterLoadBalance< Grid, DataHandle >
-        gs( grid, data );
-    
-      // call load Balance 
-      const bool changed = grid.myGrid().loadBalance( &gs );
+    // call load Balance 
+    const bool changed = myGrid().loadBalance( lbData );
 
-      if( changed )
-      {
-        // calculate new maxlevel 
-        // reset size and things  
-        grid.updateStatus();
+    if( changed )
+    {
+      // calculate new maxlevel 
+      // reset size and things  
+      updateStatus();
 
-        // build new Id Set. Only do that after updateStatus, because here
-        // the item lists are needed 
-        if( grid.globalIdSet_ )
-          grid.globalIdSet_->updateIdSet();
-        
-        // compress data, wrapper for dof manager
-        gs.compress();
+      // build new Id Set. Only do that after updateStatus, because here
+      // the item lists are needed 
+      if( globalIdSet_ )
+        globalIdSet_->updateIdSet();
+      
+      // compress data if lbData is valid 
+      if( lbData ) 
+        lbData->compress() ;
 
-        grid.clearIsNewMarkers();
-      }
-      return changed;
+      clearIsNewMarkers();
     }
-  }; // ALU3dGridCommHelper
-
-
-  // load balance grid  
-  template< ALU3dGridElementType elType, class Comm >
-  template< class DataHandle >
-  inline bool ALU3dGrid< elType, Comm >::loadBalanceImpl ( DataHandle &data )
-  {
-    return ALU3dGridCommHelper< elType, Comm >::loadBalance( *this, data );
+    return changed;
   }
 
   template< ALU3dGridElementType elType, class Comm >

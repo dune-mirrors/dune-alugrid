@@ -10,6 +10,7 @@
 #include <dune/grid/common/adaptcallback.hh>
 
 #include <dune/alugrid/3d/datacollectorcaps.hh>
+#include <dune/alugrid/common/ldbhandleif.hh>
 
 //- local includes 
 #include "alu3dinclude.hh"
@@ -487,154 +488,355 @@ namespace ALUGrid
     }
   };
 
-  //! the corresponding interface class is defined in bsinclude.hh
-  template <class GridType, class DataCollectorType> 
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // --GatherScatterLoadBalance: ALU data handle implementation for user defined load balance
+  //
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  template <class GridType, class LoadBalanceHandleType> 
   class GatherScatterLoadBalance : public GatherScatter
   {
   protected:  
-    enum { codim = 0 };
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< 0 >::InterfaceType  HElementType;
 
-    typedef typename GridType::template Codim<0>::Entity      EntityType;
-    typedef Dune :: MakeableInterfaceObject<EntityType>       MakeableEntityType;
-    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
-
-    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
-    
-    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
-
-    typedef typename ImplTraits::PllElementType PllElementType;
+    typedef typename GridType :: template Codim<0>::Entity           EntityType;
+    typedef Dune :: MakeableInterfaceObject<EntityType>             MakeableEntityType;
 
     GridType & grid_;
 
     MakeableEntityType  entityObj_;
     EntityType&         entity_;
-    RealEntityType&     realEntity_;
 
-    // data handle 
-    DataCollectorType & dc_;
+    // pointer to load balancing user interface (if NULL internal load balancing is used)
+    LoadBalanceHandleType* ldbHandle_;
 
-    // used MessageBuffer 
-    typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
-
-    using GatherScatter :: inlineData ;
-    using GatherScatter :: xtractData ;
+    // true if userDefinedPartitioning is used, false if loadWeights is used
+    // both are disabled if ldbHandle_ is NULL 
+    const bool useExternal_ ;
 
   public:
     //! Constructor
-    GatherScatterLoadBalance(GridType & grid, DataCollectorType & dc )
+    GatherScatterLoadBalance( GridType & grid, 
+                              LoadBalanceHandleType& ldb, 
+                              const bool useExternal )
       : grid_(grid), 
         entityObj_( RealEntityType( grid.factory(), grid.maxLevel() ) ), 
-        entity_( entityObj_ ), realEntity_( GridType::getRealImplementation( entity_ ) ), 
-        dc_(dc)
+        entity_( entityObj_ ),
+        ldbHandle_( &ldb ),
+        useExternal_( useExternal )
     {}
 
-    // return true if dim,codim combination is contained in data set 
-    bool contains(int dim, int codim) const 
-    {
-      return true; 
-    }
-
-    //! this method is called from the dunePackAll method of the corresponding 
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is written to the ObjectStream 
-    void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
-    {
-      int mxl = grid_.maxLevel();
-      str.write(mxl);
-      // store number of elements to be written (for restore)
-      str.write(estimatedElements);
-      // set element and then start 
-      alugrid_assert ( elem.level () == 0 );
-      realEntity_.setElement(elem);
-      dc_.inlineData(str,entity_);
-    }
-
-    //! this method is called from the duneUnpackSelf method of the corresponding 
-    //! Macro element class of the BSGrid, see gitter_dune_pll*.*
-    //! here the data is read from the ObjectStream 
-    void xtractData ( ObjectStreamType & str , HElementType & elem )
-    {
-      alugrid_assert ( elem.level () == 0 );
-      int mxl = 0; 
-      str.read(mxl);
-      int newElements = 0 ;
-      str.read( newElements );
-      // set element and then start 
-      grid_.setMaxLevel(mxl);
-
-      realEntity_.setElement(elem);
-      dc_.xtractData(str, entity_, newElements);
-    }
-
-    //! call compress on data 
-    void compress () 
-    {
-      dc_.compress();
-    } 
+    //! Constructor
+    GatherScatterLoadBalance( GridType & grid ) 
+      : grid_(grid), 
+        entityObj_( RealEntityType( grid.factory(), grid.maxLevel() ) ), 
+        entity_( entityObj_ ),
+        ldbHandle_( 0 ),
+        useExternal_( false )
+    {}
 
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
-      return dc_.userDefinedPartitioning();
+      return useExternal_ && ldbHandle_ ;
     }
 
     // return true if user defined load balancing weights are provided
     bool userDefinedLoadWeights () const
     {
-      return dc_.userDefinedLoadWeights();
+      return ! useExternal_ && ldbHandle_ ;
     }
 
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () 
     { 
-      return (dc_.userDefinedPartitioning() && dc_.repartition());
+      return userDefinedPartitioning() && ldbHandle().repartition();
     }
 
     // return set of ranks data is imported from during load balance
     // this method is only used for user defined repartitioning  
     bool importRanks( std::set<int>& ranks ) const 
     {
-      return dc_.importRanks( ranks );
+      alugrid_assert( userDefinedPartitioning() );
+      return ldbHandle().importRanks( ranks );
     }
 
     // return set of ranks data is exported to during load balance
     // this method is only used for user defined repartitioning  
     bool exportRanks( std::set<int>& ranks ) const 
     {
-      return dc_.exportRanks( ranks );
-    }
-
-    // return load weight of given element 
-    int loadWeight ( const HElementType &elem ) const
-    {
-      alugrid_assert ( elem.level() == 0 );
-      if( dc_.userDefinedLoadWeights() )
-      {
-        realEntity_.setElement( elem );
-        return dc_.loadWeight( entity_ );
-      }
-      else
-        return 1; 
+      alugrid_assert( userDefinedPartitioning() );
+      return ldbHandle().exportRanks( ranks );
     }
 
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
-    int destination ( const HElementType &elem ) const
+    int destination ( HElementType &elem ) const
     { 
+      // make sure userDefinedPartitioning is enabled 
       alugrid_assert ( elem.level () == 0 );
-      if( dc_.userDefinedPartitioning() )
+      alugrid_assert ( userDefinedPartitioning() );
+      return ldbHandle()( setEntity( elem ) );
+    }
+
+    // return load weight of given element 
+    int loadWeight ( HElementType &elem ) const
+    {
+      // make sure userDefinedLoadWeights is enabled 
+      alugrid_assert( userDefinedLoadWeights() );
+      alugrid_assert ( elem.level() == 0 );
+      return ldbHandle()( setEntity( elem ) );
+    }
+
+  protected:
+    EntityType& setEntity( HElementType& elem ) 
+    {  
+      GridType::getRealImplementation( entity_ ).setElement( elem );
+      return entity_ ;
+    }
+
+    LoadBalanceHandleType& ldbHandle() 
+    { 
+      alugrid_assert( ldbHandle_ ); 
+      return *ldbHandle_;
+    }
+
+  };
+
+  ////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // --GatherScatterLoadBalance: ALU data handle implementation for CommDataHandleIF
+  //
+  ////////////////////////////////////////////////////////////////////////////////////////
+  template <class GridType, class LoadBalanceHandleType, class DataHandleImpl, class Data> 
+  class GatherScatterLoadBalanceDataHandle 
+    : public GatherScatterLoadBalance< GridType, LoadBalanceHandleType >
+  {
+    typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType > BaseType ;
+  protected:  
+    static const int dimension = GridType :: dimension ;
+
+    template< int codim >
+    struct Codim
+    {
+      typedef typename GridType :: Traits :: template Codim< codim > :: Entity Entity;
+      typedef typename GridType :: Traits :: template Codim< codim > :: EntityPointer
+        EntityPointer;
+    };
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< 0 >::InterfaceType HElementType;
+
+    typedef typename BaseType :: EntityType  EntityType ;
+
+    typedef Dune::CommDataHandleIF< DataHandleImpl, Data > DataHandleType;
+
+    template <class DH, bool>
+    struct CompressAndReserve
+    {
+      static DataHandleImpl& asImp( DH& dh ) { return static_cast<DataHandleImpl &> (dh); }
+
+      static void reserveMemory( DH& dataHandle, const size_t newElements )
       {
-        realEntity_.setElement( elem );
-        return dc_.destination( entity_ );
+        asImp( dataHandle ).reserveMemory( newElements );
       }
-      else
-        return -1; 
+      static void compress( DH& dataHandle )
+      {
+        asImp( dataHandle ).compress();
+      }
+    };
+
+    template <class DH>
+    struct CompressAndReserve< DH, false >
+    {
+      static void reserveMemory( DH& dataHandle, const size_t newElements ) {}
+      static void compress( DH& dataHandle ) {}
+    };
+
+    // check whether DataHandleImpl is derived from LoadBalanceHandleWithReserveAndCompress
+    static const bool hasCompressAndReserve =  Dune::Conversion< DataHandleImpl,
+                      LoadBalanceHandleWithReserveAndCompress >::exists ;
+    // don't transmit size in case we have special DataHandleImpl
+    static const bool transmitSize = ! hasCompressAndReserve ;
+
+    typedef CompressAndReserve< DataHandleType, hasCompressAndReserve >  CompressAndReserveType;
+
+    // data handle (CommDataHandleIF)
+    DataHandleType& dataHandle_;
+
+    // used MessageBuffer 
+    typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
+
+    using BaseType :: grid_ ;
+    using BaseType :: setEntity ;
+
+  public:
+    //! Constructor taking load balance handle and data handle 
+    GatherScatterLoadBalanceDataHandle( GridType & grid, 
+                                        DataHandleType& dh, 
+                                        LoadBalanceHandleType& ldb, 
+                                        const bool useExternal = false )
+      : BaseType( grid, ldb, useExternal ), 
+        dataHandle_( dh )
+    {}
+
+    //! Constructor for DataHandle only 
+    GatherScatterLoadBalanceDataHandle( GridType& grid, DataHandleType& dh )
+      : BaseType( grid ), 
+        dataHandle_( dh )
+    {}
+
+    // return true if dim,codim combination is contained in data set 
+    bool contains(int dim, int codim) const 
+    {
+      return dataHandle_.contains( dim, codim );
+    }
+
+    // return true if user dataHandle is present which is the case here
+    bool hasUserData() const { return true ; }
+
+    //! this method is called from the dunePackAll method of the corresponding 
+    //! here the data is written to the ObjectStream 
+    void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
+    {
+      // store maxLevel of grid tree 
+      int mxl = grid_.maxLevel();
+      str.write(mxl);
+      // store number of elements to be written (for restore)
+      str.write(estimatedElements);
+      // set element and then start 
+      alugrid_assert ( elem.level () == 0 );
+
+      // pack data for this element 
+      inlineElementData( str, setEntity( elem ) );
+
+      // pack data for all children  
+      for( HElementType *son = elem.down(); son ; son = son->next() )
+        inlineElementData( str, setEntity( *son ) );
+    }
+
+    //! this method is called from the duneUnpackSelf method of the corresponding 
+    //! here the data is read from the ObjectStream 
+    void xtractData ( ObjectStreamType & str , HElementType & elem )
+    {
+      alugrid_assert ( elem.level () == 0 );
+      // read maxLevel 
+      int mxl = 0; 
+      str.read(mxl);
+      // set element and then start 
+      grid_.setMaxLevel(mxl);
+
+      // read number of elements to be restored
+      int newElements = 0 ;
+      str.read( newElements );
+
+      // if data handle provides reserve feature, reserve memory
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      CompressAndReserveType :: reserveMemory( dataHandle_, newElements );
+
+      // unpack data for this element 
+      xtractElementData( str, setEntity( elem ) );
+
+      // unpack data for all children  
+      for( HElementType *son = elem.down(); son ; son = son->next() )
+        xtractElementData( str, setEntity( *son ) );
+    }
+
+    //! call compress on data 
+    void compress () 
+    {
+      // if data handle provides compress, do compress here
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      CompressAndReserveType :: compress( dataHandle_ );
+    } 
+
+  protected:  
+    void inlineElementData ( ObjectStreamType &stream, const EntityType &element )
+    {
+      // call element data direct without creating entity pointer
+      if( dataHandle_.contains( dimension, 0 ) )
+      {
+        inlineEntityData<0>( stream, element );
+      }
+
+      // now call all higher codims 
+      inlineCodimData< 1 >( stream, element );
+      inlineCodimData< 2 >( stream, element );
+      inlineCodimData< 3 >( stream, element );
+    }
+
+    void xtractElementData ( ObjectStreamType &stream, const EntityType &element )
+    {
+      // call element data direct without creating entity pointer
+      if( dataHandle_.contains( dimension, 0 ) )
+      {
+        xtractEntityData<0>( stream, element );
+      }
+
+      // now call all higher codims 
+      xtractCodimData< 1 >( stream, element );
+      xtractCodimData< 2 >( stream, element );
+      xtractCodimData< 3 >( stream, element );
+    }
+
+    template< int codim >
+    void inlineCodimData ( ObjectStream &stream, const EntityType &element ) const
+    {
+      typedef typename Codim< codim > :: EntityPointer EntityPointer;
+
+      if( dataHandle_.contains( dimension, codim ) )
+      {
+        const int numSubEntities = element.template count< codim >();
+        for( int i = 0; i < numSubEntities; ++i )
+        {
+          const  EntityPointer pEntity = element.template subEntity< codim >( i );
+          inlineEntityData< codim >( stream, *pEntity );
+        }
+      }
+    }
+
+    template< int codim >
+    void xtractCodimData ( ObjectStream &stream, const EntityType &element )
+    {
+      typedef typename Codim< codim > :: EntityPointer EntityPointer;
+
+      if( dataHandle_.contains( dimension, codim ) )
+      {
+        const int numSubEntities = element.template count< codim >();
+        for( int i = 0; i < numSubEntities; ++i )
+        {
+          const  EntityPointer pEntity = element.template subEntity< codim >( i );
+          xtractEntityData< codim >( stream, *pEntity );
+        }
+      }
+    }
+
+    template< int codim >
+    void inlineEntityData ( ObjectStreamType &stream,
+                            const typename Codim< codim > :: Entity &entity ) const
+    {
+      if( transmitSize )
+      {
+        const size_t size = dataHandle_.size( entity );
+        stream.write( size );
+      }
+      dataHandle_.gather( stream, entity );
+    }
+
+    template< int codim >
+    void xtractEntityData ( ObjectStreamType &stream,
+                            const typename Codim< codim > :: Entity &entity )
+    {
+      size_t size = 0;
+      if( transmitSize )
+      {
+        stream.read( size );
+      }
+      dataHandle_.scatter( stream, entity, size );
     }
   };
 
