@@ -48,6 +48,8 @@ struct EmptyGatherScatter : public ALUGrid::GatherScatter
     return _rank < (_size-1) ? _rank+1 : 0 ;
   }
 
+  bool hasUserData () const { return true; }
+
   bool contains ( int, int ) const { return true ;} 
 
   virtual void inlineData ( ObjectStreamType & str , HElemType & elem, const int ) {}
