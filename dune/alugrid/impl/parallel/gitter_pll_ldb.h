@@ -221,7 +221,7 @@ namespace ALUGrid
           inline int maxVertexLoad () const;
         public :
           template <class helement_t, class gatherscatter_t >
-          int destination (const helement_t& elem, gatherscatter_t* gs ) const
+          int destination (helement_t& elem, gatherscatter_t* gs ) const
           {
             // if gs is given use this to obtain detination 
             return ( gs ) ? gs->destination( elem ) :

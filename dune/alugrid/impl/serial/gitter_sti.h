@@ -2477,6 +2477,7 @@ namespace ALUGrid
     virtual bool adaptWithoutLoadBalancing();
     // adaptation with callback functionality 
     virtual bool duneAdapt ( AdaptRestrictProlongType & arp );
+    virtual bool loadBalance ( GatherScatterType* gs = 0 ) { return false; }
     virtual void refineGlobal ();
     virtual void markForBallRefinement(const alucoord_t (&)[3],double,int);
     virtual void refineRandom (double);

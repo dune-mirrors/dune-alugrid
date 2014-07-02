@@ -1360,7 +1360,7 @@ namespace ALUGrid
   double ldbTimerU3 = 0.0;
   double ldbTimerU4 = 0.0;
 
-  // --loadBalance 
+  // --loadBalance ( gs can be a pointer to NULL)
   bool GitterPll::loadBalance( GatherScatterType* gs ) 
   {
     int lap1 = clock ();
