@@ -43,7 +43,7 @@ namespace ALUGrid
     // this needs the methods userDefinedPartitioning to return true
     virtual int destination( Gitter::helement_STI &elem ) { alugrid_assert (false); abort(); return -1; }
 
-    virtual bool contains(int,int) const = 0;
+    virtual bool contains(int,int) const { return false; }
 
     // returns true if data handle contains user data for redistribution 
     virtual bool hasUserData () const { return false ; }
