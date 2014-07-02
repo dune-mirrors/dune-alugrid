@@ -504,7 +504,8 @@ namespace ALUGrid
     typedef typename ImplTraits::template Codim< 0 >::InterfaceType  HElementType;
 
     typedef typename GridType :: template Codim<0>::Entity           EntityType;
-    typedef Dune :: MakeableInterfaceObject<EntityType>             MakeableEntityType;
+    typedef Dune :: MakeableInterfaceObject<EntityType>              MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType        EntityImplementationType ;
 
     GridType & grid_;
 
@@ -524,7 +525,7 @@ namespace ALUGrid
                               LoadBalanceHandleType& ldb, 
                               const bool useExternal )
       : grid_(grid), 
-        entityObj_( RealEntityType( grid.factory(), grid.maxLevel() ) ), 
+        entityObj_( EntityImplementationType( grid.factory(), grid.maxLevel() ) ), 
         entity_( entityObj_ ),
         ldbHandle_( &ldb ),
         useExternal_( useExternal )
@@ -533,7 +534,7 @@ namespace ALUGrid
     //! Constructor
     GatherScatterLoadBalance( GridType & grid ) 
       : grid_(grid), 
-        entityObj_( RealEntityType( grid.factory(), grid.maxLevel() ) ), 
+        entityObj_( EntityImplementationType( grid.factory(), grid.maxLevel() ) ), 
         entity_( entityObj_ ),
         ldbHandle_( 0 ),
         useExternal_( false )
@@ -569,8 +570,10 @@ namespace ALUGrid
     // this method is only used for user defined repartitioning  
     bool exportRanks( std::set<int>& ranks ) const 
     {
-      alugrid_assert( userDefinedPartitioning() );
-      return ldbHandle().exportRanks( ranks );
+      // NOTE: This feature is not yet include in the user interface 
+      //alugrid_assert( userDefinedPartitioning() );
+      //return ldbHandle().exportRanks( ranks );
+      return false ;
     }
 
     // return destination (i.e. rank) where the given element should be moved to 
@@ -600,6 +603,12 @@ namespace ALUGrid
     }
 
     LoadBalanceHandleType& ldbHandle() 
+    { 
+      alugrid_assert( ldbHandle_ ); 
+      return *ldbHandle_;
+    }
+
+    const LoadBalanceHandleType& ldbHandle() const
     { 
       alugrid_assert( ldbHandle_ ); 
       return *ldbHandle_;
@@ -785,7 +794,7 @@ namespace ALUGrid
     }
 
     template< int codim >
-    void inlineCodimData ( ObjectStream &stream, const EntityType &element ) const
+    void inlineCodimData ( ObjectStreamType &stream, const EntityType &element ) const
     {
       typedef typename Codim< codim > :: EntityPointer EntityPointer;
 
@@ -801,7 +810,7 @@ namespace ALUGrid
     }
 
     template< int codim >
-    void xtractCodimData ( ObjectStream &stream, const EntityType &element )
+    void xtractCodimData ( ObjectStreamType &stream, const EntityType &element )
     {
       typedef typename Codim< codim > :: EntityPointer EntityPointer;
 
