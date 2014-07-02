@@ -76,7 +76,7 @@ namespace ALUGrid
     virtual void recvData ( ObjectStreamType & str , Gitter::hbndseg & elem ) { alugrid_assert (false); abort(); }
     virtual void recvData ( ObjectStreamType & str , Gitter::helement_STI  & elem ) { alugrid_assert (false); abort(); }
 
-    virtual void compress () { alugrid_assert (false); abort(); }
+    virtual void compress () {}
 
     // dummy method to use GatherScatter as empty LoadBalanceHandle 
     template <class Entity>

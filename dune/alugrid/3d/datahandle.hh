@@ -578,7 +578,7 @@ namespace ALUGrid
 
     // return destination (i.e. rank) where the given element should be moved to 
     // this needs the methods userDefinedPartitioning to return true
-    int destination ( HElementType &elem ) const
+    int destination ( HElementType &elem )
     { 
       // make sure userDefinedPartitioning is enabled 
       alugrid_assert ( elem.level () == 0 );
@@ -587,7 +587,7 @@ namespace ALUGrid
     }
 
     // return load weight of given element 
-    int loadWeight ( HElementType &elem ) const
+    int loadWeight ( HElementType &elem )
     {
       // make sure userDefinedLoadWeights is enabled 
       alugrid_assert( userDefinedLoadWeights() );
