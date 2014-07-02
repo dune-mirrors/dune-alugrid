@@ -497,6 +497,8 @@ namespace ALUGrid
   template <class GridType, class LoadBalanceHandleType> 
   class GatherScatterLoadBalance : public GatherScatter
   {
+    // no copying 
+    GatherScatterLoadBalance( const GatherScatterLoadBalance& );
   protected:  
     typedef typename GridType::MPICommunicatorType Comm;
 
@@ -532,7 +534,7 @@ namespace ALUGrid
     {}
 
     //! Constructor
-    GatherScatterLoadBalance( GridType & grid ) 
+    explicit GatherScatterLoadBalance( GridType & grid ) 
       : grid_(grid), 
         entityObj_( EntityImplementationType( grid.factory(), grid.maxLevel() ) ), 
         entity_( entityObj_ ),
@@ -625,6 +627,9 @@ namespace ALUGrid
   class GatherScatterLoadBalanceDataHandle 
     : public GatherScatterLoadBalance< GridType, LoadBalanceHandleType >
   {
+    // no copying 
+    GatherScatterLoadBalanceDataHandle( const GatherScatterLoadBalanceDataHandle& );
+
     typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType > BaseType ;
   protected:  
     static const int dimension = GridType :: dimension ;
