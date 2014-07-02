@@ -15,10 +15,6 @@
 //- local includes 
 #include "alu3dinclude.hh"
 
-using std::endl;
-using std::cout;
-using std::flush;
-
 namespace ALUGrid
 {
 
@@ -145,10 +141,9 @@ namespace ALUGrid
   protected:  
     enum { codim = 0 };
     const GridType & grid_;
-    typedef typename GridType::template Codim<0>::Entity EntityType;
-    typedef Dune :: MakeableInterfaceObject<
-      typename GridType::template Codim<0>::Entity> MakeableEntityType;
-    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
+    typedef typename GridType::template Codim<0>::Entity       EntityType;
+    typedef typename GridType::EntityObject                    MakeableEntityType ;
+    typedef typename MakeableEntityType :: ImplementationType  RealEntityType;
     
     typedef typename GridType::MPICommunicatorType Comm;
 
@@ -505,14 +500,14 @@ namespace ALUGrid
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< 0 >::InterfaceType  HElementType;
 
-    typedef typename GridType :: template Codim<0>::Entity           EntityType;
-    typedef Dune :: MakeableInterfaceObject<EntityType>              MakeableEntityType;
-    typedef typename MakeableEntityType :: ImplementationType        EntityImplementationType ;
+    typedef typename GridType :: EntityObject                   EntityObjectType;
+    typedef typename GridType :: template Codim< 0 > :: Entity  EntityType ;
+    typedef typename EntityObjectType::ImplementationType       EntityImp;
 
     GridType & grid_;
 
-    MakeableEntityType  entityObj_;
-    EntityType&         entity_;
+    EntityObjectType  entityObj_;
+    EntityType&       entity_;
 
     // pointer to load balancing user interface (if NULL internal load balancing is used)
     LoadBalanceHandleType* ldbHandle_;
@@ -527,7 +522,7 @@ namespace ALUGrid
                               LoadBalanceHandleType& ldb, 
                               const bool useExternal )
       : grid_(grid), 
-        entityObj_( EntityImplementationType( grid.factory(), grid.maxLevel() ) ), 
+        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ), 
         entity_( entityObj_ ),
         ldbHandle_( &ldb ),
         useExternal_( useExternal )
@@ -536,7 +531,7 @@ namespace ALUGrid
     //! Constructor
     explicit GatherScatterLoadBalance( GridType & grid ) 
       : grid_(grid), 
-        entityObj_( EntityImplementationType( grid.factory(), grid.maxLevel() ) ), 
+        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ), 
         entity_( entityObj_ ),
         ldbHandle_( 0 ),
         useExternal_( false )
@@ -636,6 +631,7 @@ namespace ALUGrid
     typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType > BaseType ;
   protected:  
     static const int dimension = GridType :: dimension ;
+    typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
 
     template< int codim >
     struct Codim
@@ -691,6 +687,7 @@ namespace ALUGrid
 
     using BaseType :: grid_ ;
     using BaseType :: setEntity ;
+    using BaseType :: entity_ ;
 
   public:
     //! Constructor taking load balance handle and data handle 
@@ -732,9 +729,13 @@ namespace ALUGrid
       // pack data for this element 
       inlineElementData( str, setEntity( elem ) );
 
+      const HierarchicIterator end = entity_.hend( mxl );
+      for( HierarchicIterator it = entity_.hbegin( mxl ); it != end; ++it )
+        inlineElementData( str, *it );
+
       // pack data for all children  
-      for( HElementType *son = elem.down(); son ; son = son->next() )
-        inlineElementData( str, setEntity( *son ) );
+      //for( HElementType *son = elem.down(); son ; son = son->next() )
+      //  inlineElementData( str, setEntity( *son ) );
     }
 
     //! this method is called from the duneUnpackSelf method of the corresponding 
@@ -759,9 +760,12 @@ namespace ALUGrid
       // unpack data for this element 
       xtractElementData( str, setEntity( elem ) );
 
+      const HierarchicIterator end = entity_.hend( mxl );
+      for( HierarchicIterator it = entity_.hbegin( mxl ); it != end; ++it )
+        xtractElementData( str, *it );
       // unpack data for all children  
-      for( HElementType *son = elem.down(); son ; son = son->next() )
-        xtractElementData( str, setEntity( *son ) );
+      //for( HElementType *son = elem.down(); son ; son = son->next() )
+      //  xtractElementData( str, setEntity( *son ) );
     }
 
     //! call compress on data 
