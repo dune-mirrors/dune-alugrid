@@ -528,7 +528,7 @@ namespace Dune
   {
     if( lockPostAdapt_ )
     { 
-      // call implementation of postAdapt
+      // clear all isNew markers on entities 
       clearIsNewMarkers();
 
       // make that postAdapt has been called

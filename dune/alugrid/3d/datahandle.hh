@@ -542,6 +542,9 @@ namespace ALUGrid
         useExternal_( false )
     {}
 
+    // return false, since no user dataHandle is present
+    bool hasUserData() const { return false ; }
+
     // return true if user defined partitioning methods should be used 
     bool userDefinedPartitioning () const 
     {
