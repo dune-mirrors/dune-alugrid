@@ -2167,8 +2167,8 @@ namespace ALUGrid
     os.put ((char) getrule ()) ;
     for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backup (os) ;
     for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backup (os) ;
-    int sons = 0 ;
-    for (const innertetra_t * c = dwnPtr() ; c ; c = c->next (), ++sons ) 
+    int sons = 1 ;
+    for (const innertetra_t * c = dwnPtr() ; c ; c = c->next () ) 
       sons += c->backup (os) ;
     return sons ;
   }
