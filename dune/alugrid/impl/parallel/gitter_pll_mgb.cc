@@ -1187,12 +1187,16 @@ namespace ALUGrid
         AccessIterator < hface_STI >::Handle w (containerPll ());
         for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+
+      // check if load balance handle also has user data 
+      GatherScatterType* userData = ( gatherScatter && gatherScatter->hasUserData() ) ? gatherScatter : 0 ;
+
       // pack elements 
       {
         AccessIterator < helement_STI >::Handle w (containerPll ());
-        if( gatherScatter ) 
+        if( userData ) 
         {
-          GatherScatterType& gs = *gatherScatter ;
+          GatherScatterType& gs = *userData ;
           for (w.first (); ! w.done (); w.next ()) w.item().dunePackAll( osv, gs );
         }
         else 
@@ -1212,7 +1216,7 @@ namespace ALUGrid
       
       {
         // data handle  
-        UnpackLBData data( containerPll (), mpa, gatherScatter, db );
+        UnpackLBData data( containerPll (), mpa, userData, db );
 
         // pack, exchange, and unpack data 
         mpa.exchange ( osv, data );

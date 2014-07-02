@@ -45,6 +45,9 @@ namespace ALUGrid
 
     virtual bool contains(int,int) const = 0;
 
+    // returns true if data handle contains user data for redistribution 
+    virtual bool hasUserData () const { return false ; }
+
     virtual bool containsItem(const Gitter::helement_STI &elem ) const { alugrid_assert (false); abort(); return false; }
     virtual bool containsItem(const Gitter::hface_STI   & elem ) const { alugrid_assert (false); abort(); return false; }
     virtual bool containsItem(const Gitter::hedge_STI   & elem ) const { alugrid_assert (false); abort(); return false; }
