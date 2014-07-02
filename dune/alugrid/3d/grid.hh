@@ -789,7 +789,7 @@ namespace Dune
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
             < ThisType, GatherScatterType, DataHandleImpl, Data > DataHandleType;
-      DataHandleType dataHandle( *this, &dataHandleIF );
+      DataHandleType dataHandle( *this, dataHandleIF );
 
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
