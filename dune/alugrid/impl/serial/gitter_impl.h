@@ -56,9 +56,6 @@ namespace ALUGrid
             virtual int ghostLevel () const; 
             virtual bool ghostLeaf () const; 
 
-            //virtual int preCoarsening ();
-            //virtual int postRefinement ();
-
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
@@ -85,9 +82,6 @@ namespace ALUGrid
             virtual inline bnd_t bndtype () const;
             virtual int ghostLevel () const;  
             virtual bool ghostLeaf () const;
-
-            //virtual int preCoarsening ();
-            //virtual int postRefinement();
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -459,20 +453,6 @@ namespace ALUGrid
   inline bool GitterBasis::Objects::Hbnd4Default::ghostLeaf () const {
     return leaf();
   }
-
-  /*
-  inline int GitterBasis::Objects::Hbnd4Default::preCoarsening () 
-  {
-    // call preCoarsening on parallel closure elements only 
-    return ( isBorder() ) ? myGrid()->preCoarsening( *this ) : 0; 
-  }
-
-  inline int GitterBasis::Objects::Hbnd4Default::postRefinement () 
-  {
-    // call postRefinement on parallel closure elements 
-    return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
-  }
-  */
 
   inline GitterBasis::Objects::TetraEmpty::
   TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
