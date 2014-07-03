@@ -419,7 +419,7 @@ namespace Dune
       // maxLevel does not need to be recalculated 
       calcExtras();
 
-      // build new Id Set. Only do that after updateStatus, because here
+      // build new Id Set. Only do that after calcExtras, because here
       // the item lists are needed 
       if( globalIdSet_ )
         globalIdSet_->updateIdSet();
