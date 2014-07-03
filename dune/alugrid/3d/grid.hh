@@ -934,10 +934,6 @@ namespace Dune
     // (no interface method) get hierarchic index set of the grid
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
-    // set max of given mxl and actual maxLevel 
-    // for loadBalance 
-    void setMaxLevel (int mxl);
- 
     // no interface method, but has to be public 
     void updateStatus ();
  

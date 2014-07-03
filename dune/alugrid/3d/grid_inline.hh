@@ -415,20 +415,20 @@ namespace Dune
 
     if( changed )
     {
-      // calculate new maxlevel 
       // reset size and things  
-      updateStatus();
+      // maxLevel does not need to be recalculated 
+      calcExtras();
 
       // build new Id Set. Only do that after updateStatus, because here
       // the item lists are needed 
       if( globalIdSet_ )
         globalIdSet_->updateIdSet();
       
-      // compress data if lbData is valid 
-      if( lbData ) 
+      // compress data if lbData is valid and has user data
+      if( lbData && lbData->hasUserData() ) 
         lbData->compress() ;
-
-      clearIsNewMarkers();
+      else // this only needs to be done if no user is present
+        clearIsNewMarkers(); 
     }
     return changed;
   }
