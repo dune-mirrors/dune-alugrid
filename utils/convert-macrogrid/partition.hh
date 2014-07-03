@@ -9,6 +9,7 @@ template< ElementRawID rawId >
 void orderElementHSFC(const std::vector< Vertex > &vertices,
                       std::vector< Element< rawId > > &elements )
 {
+#ifdef USE_ZOLTAN_HSFC_ORDERING
   typedef typename Vertex::Coordinate  CoordinateType ;
 
   CoordinateType maxCoord;
@@ -61,6 +62,9 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
 
   // store newly ordered elements in element vector
   elements.swap( orderedElements );
+#else 
+  std::cerr << "Zoltan not found, no Hilbert space filling curve available." << std::endl;
+#endif
 }
 
 template< ElementRawID rawId >
