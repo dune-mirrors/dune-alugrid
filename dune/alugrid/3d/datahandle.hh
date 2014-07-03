@@ -689,6 +689,13 @@ namespace ALUGrid
     using BaseType :: setEntity ;
     using BaseType :: entity_ ;
 
+    // return true if maxLevel is the same on all cores
+    bool maxLevelConsistency() const
+    {
+      int maxLevel = grid_.maxLevel();
+      maxLevel = grid_.comm().max( maxLevel );
+      return maxLevel == grid_.maxLevel();
+    }
   public:
     //! Constructor taking load balance handle and data handle 
     GatherScatterLoadBalanceDataHandle( GridType & grid, 
@@ -697,13 +704,17 @@ namespace ALUGrid
                                         const bool useExternal = false )
       : BaseType( grid, ldb, useExternal ), 
         dataHandle_( dh )
-    {}
+    {
+      alugrid_assert( maxLevelConsistency() );
+    }
 
     //! Constructor for DataHandle only 
     GatherScatterLoadBalanceDataHandle( GridType& grid, DataHandleType& dh )
       : BaseType( grid ), 
         dataHandle_( dh )
-    {}
+    {
+      alugrid_assert( maxLevelConsistency() );
+    }
 
     // return true if dim,codim combination is contained in data set 
     bool contains(int dim, int codim) const 
@@ -718,24 +729,13 @@ namespace ALUGrid
     //! here the data is written to the ObjectStream 
     void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
     {
-      // store maxLevel of grid tree 
-      int mxl = grid_.maxLevel();
-      str.write(mxl);
       // store number of elements to be written (for restore)
       str.write(estimatedElements);
       // set element and then start 
       alugrid_assert ( elem.level () == 0 );
 
-      // pack data for this element 
-      inlineElementData( str, setEntity( elem ) );
-
-      const HierarchicIterator end = entity_.hend( mxl );
-      for( HierarchicIterator it = entity_.hbegin( mxl ); it != end; ++it )
-        inlineElementData( str, *it );
-
-      // pack data for all children  
-      //for( HElementType *son = elem.down(); son ; son = son->next() )
-      //  inlineElementData( str, setEntity( *son ) );
+      // pack data for the whole hierarchy 
+      inlineHierarchy( str, elem );
     }
 
     //! this method is called from the duneUnpackSelf method of the corresponding 
@@ -743,11 +743,6 @@ namespace ALUGrid
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
       alugrid_assert ( elem.level () == 0 );
-      // read maxLevel 
-      int mxl = 0; 
-      str.read(mxl);
-      // set element and then start 
-      grid_.setMaxLevel(mxl);
 
       // read number of elements to be restored
       int newElements = 0 ;
@@ -757,15 +752,8 @@ namespace ALUGrid
       // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
       CompressAndReserveType :: reserveMemory( dataHandle_, newElements );
 
-      // unpack data for this element 
-      xtractElementData( str, setEntity( elem ) );
-
-      const HierarchicIterator end = entity_.hend( mxl );
-      for( HierarchicIterator it = entity_.hbegin( mxl ); it != end; ++it )
-        xtractElementData( str, *it );
-      // unpack data for all children  
-      //for( HElementType *son = elem.down(); son ; son = son->next() )
-      //  xtractElementData( str, setEntity( *son ) );
+      // unpack data for the hierarchy
+      xtractHierarchy( str, elem );
     }
 
     //! call compress on data 
@@ -777,6 +765,27 @@ namespace ALUGrid
     } 
 
   protected:  
+    // inline data for the hierarchy 
+    void inlineHierarchy( ObjectStreamType & str, HElementType& elem ) 
+    {
+      // pack elements data 
+      inlineElementData( str, setEntity( elem ) );
+      // pack using deep first strategy
+      for( HElementType* son = elem.down(); son ; son = son->next() )
+        inlineHierarchy( str, *son );
+    }
+
+    // inline data for the hierarchy 
+    void xtractHierarchy( ObjectStreamType & str, HElementType& elem ) 
+    {
+      xtractElementData( str, setEntity( elem ) );
+      // reset element is new flag
+      elem.resetRefinedTag();
+      // unpack using deep first strategy
+      for( HElementType* son = elem.down(); son ; son = son->next() )
+        xtractHierarchy( str, *son );
+    }
+
     void inlineElementData ( ObjectStreamType &stream, const EntityType &element )
     {
       // call element data direct without creating entity pointer

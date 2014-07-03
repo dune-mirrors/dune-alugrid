@@ -299,15 +299,6 @@ namespace Dune
   // calc all necessary things that might have changed 
   template< ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< elType, Comm >::setMaxLevel ( int mxl )
-  {
-    maxlevel_ = std::max(maxlevel_,mxl);
-  }
-
-  
-  // calc all necessary things that might have changed 
-  template< ALU3dGridElementType elType, class Comm >
-  alu_inline 
   void ALU3dGrid< elType, Comm >::updateStatus()
   {
     calcMaxLevel();
