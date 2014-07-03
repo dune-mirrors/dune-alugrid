@@ -1,10 +1,4 @@
-bin_PROGRAMS =
-
-EXTRA_PROGRAMS = convert
-
-if ZOLTAN
-bin_PROGRAMS += $(EXTRA_PROGRAMS)
-endif
+bin_PROGRAMS = convert
 
 convertdir = $(includedir)/utils/convert-macrogrid
 convert_HEADERS = partition.hh
