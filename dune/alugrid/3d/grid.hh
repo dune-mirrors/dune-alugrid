@@ -794,6 +794,23 @@ namespace Dune
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
     }
+
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
+               the partitioning can be optimized by providing weights for each element on the macro grid.
+               The specific load balancing algorithm is selected from a file alugrid.cfg. 
+        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element 
+                which the includes in its internal loadbalancing process - for ALUGrid these are all macro elements.
+        \return true if grid has changed 
+    */
+    template< class LBWeights >
+    bool loadBalance ( LBWeights &weights )
+    {
+      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBWeights > LoadBalanceHandleType ;
+      LoadBalanceHandleType loadBalanceHandle( *this, weights, false );
+      // call the above loadBalance method with general GatherScatterType
+      return loadBalance( &loadBalanceHandle );
+    }
+
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
                the partitioning can be optimized by providing weights for each element on the macro grid.
                The specific load balancing algorithm is selected from a file alugrid.cfg. 
@@ -814,6 +831,7 @@ namespace Dune
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
     }
+
     /** \brief Distribute the grid based on a user defined partitioning. 
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
                 of this element. A destination has to be provided for all elements in the grid hierarchy 
@@ -829,6 +847,7 @@ namespace Dune
       LoadBalanceHandleType loadBalanceHandle( *this, destinations, true );
       return loadBalance( &loadBalanceHandle );
     }
+
     /** \brief Distribute the grid based on a user defined partitioning. 
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
                 of this element. A destination has to be provided for all elements in the grid hierarchy 
