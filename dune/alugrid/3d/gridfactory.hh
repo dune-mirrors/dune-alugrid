@@ -256,14 +256,14 @@ namespace Dune
       assert( pos != boundaryIds_.end() );
       assert(pos->second >= 1);
       if (pos->second == 1)
-        return UINT_MAX;
+        return std::numeric_limits<unsigned int>::max();
       return pos->second-2;
     }
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
       return intersection.boundary() && 
-             (insertionIndex(intersection) < UINT_MAX);
+             (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
   private:
