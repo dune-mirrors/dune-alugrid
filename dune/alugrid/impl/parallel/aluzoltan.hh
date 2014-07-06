@@ -8,10 +8,40 @@
 
 #include "mpAccess_MPI.h"
 
+// Warning: Zoltan defines HAVE_MPI itself. However, their definition will
+//          not match ours. The following complicated preprocessor code tries
+//          to cope with this problem.
+
 #if HAVE_ZOLTAN 
-#define ZOLTAN_CONFIG_H_INCLUDED
+
+#ifdef HAVE_MPI
+
+// undefine our definition of HAVE_MPI before including zoltan_cpp.h
+#undef HAVE_MPI
+
 #include <zoltan_cpp.h>
-#endif 
+
+// undefine any definition of HAVE_MPI made by Zoltan
+#ifdef HAVE_MPI
+#undef HAVE_MPI
+#endif // #ifdef HAVE_MPI
+
+// redefine our definition of HAVE_MPI
+#define HAVE_MPI ENABLE_MPI
+
+#else // #ifdef HAVE_MPI
+
+// we have not defined HAVE_MPI, so include zoltan_cpp.h directly
+#include <zoltan_cpp.h>
+
+// undefine any definition of HAVE_MPI made by Zoltan
+#ifdef HAVE_MPI
+#undef HAVE_MPI
+#endif // #ifdef HAVE_MPI
+
+#endif // #else // #ifdef HAVE_MPI
+
+#endif // #if HAVE_ZOLTAN
 
 namespace ALUGridZoltan
 {
