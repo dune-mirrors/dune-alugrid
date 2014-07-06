@@ -14,6 +14,7 @@
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/alugrid/common/objectfactory.hh>
@@ -669,7 +670,7 @@ namespace Dune
     }
     
     /** \brief backup to ostream */
-    void backup( std::ostream& ) const ;
+    void backup( std::ostream&, const ALU3DSPACE MacroFileHeader::Format format  ) const ;
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;
