@@ -664,7 +664,7 @@ namespace Dune
       
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline void ALU2dGrid< dim, dimworld, eltype >::
-  backup( std::ostream& stream ) const 
+  backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
     // write grid to stream 
     myGrid().storeGrid( stream );
