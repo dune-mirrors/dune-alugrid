@@ -13,14 +13,14 @@ mv main main_persistent_callback
 make EXTRAFLAGS="-DUSE_VECTOR_FOR_PWF -DNO_OUTPUT -DCALLBACK_ADAPTATION" PROBLEM="$PROBLEM" clean main
 mv main main_vector_callback
 
-./main_persistent 2 0 3 >& persistent.out
+./main_persistent 2 0 3 none >& persistent.out
 mv speedup.1 persistent.speedup.1
-./main_vector 2 0 3 >& vector.out
+./main_vector 2 0 3 none >& vector.out
 mv speedup.1 vector.speedup.1
 
-./main_persistent_callback 2 0 3 >& persistent_callback.out
+./main_persistent_callback 2 0 3 none >& persistent_callback.out
 mv speedup.1 persistent_callback.speedup.1
-./main_vector_callback 2 0 3 >& vector_callback.out
+./main_vector_callback 2 0 3 none >& vector_callback.out
 mv speedup.1 vector_callback.speedup.1
 
 grep "finished" persistent.out \
