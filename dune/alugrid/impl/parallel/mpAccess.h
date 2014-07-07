@@ -279,7 +279,7 @@ namespace ALUGrid
   inline int MpAccessLocal::recvLink ( int i ) const
   {
     alugrid_assert( _currentRecvLinkage );
-    const typename linkage_t::const_iterator pos = _currentRecvLinkage->find( i );
+    const linkage_t::const_iterator pos = _currentRecvLinkage->find( i );
     alugrid_assert( pos != _currentRecvLinkage->end() );
     return pos->second;
   }
