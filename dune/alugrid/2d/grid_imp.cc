@@ -494,14 +494,14 @@ namespace Dune
     EntityObject father( EntityImp( factory(), maxLevel()) );
     EntityObject son   ( EntityImp( factory(), maxLevel()) );
 
-    int defaultChunk = newElementsChunk_;
-    int actChunk     = refineEstimate_ * refineMarked_;
+    // int defaultChunk = newElementsChunk_;
+    // int actChunk     = refineEstimate_ * refineMarked_;
 
     // guess how many new elements we get
-    int newElements = std::max( actChunk , defaultChunk );
+    // int newElements = std::max( actChunk , defaultChunk );
 
     // reserve memory
-    handle.preAdapt( newElements );
+    // handle.preAdapt( newElements );
 
     bool ref = false;
     {
@@ -520,7 +520,7 @@ namespace Dune
     }
 
     // check whether we have balance
-    handle.postAdapt();
+    // handle.postAdapt();
     
     postAdapt();
     return ref;

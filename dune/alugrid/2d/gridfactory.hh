@@ -172,6 +172,8 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices ) ;
+    virtual void
+    insertProcessBorder ( const std::vector< unsigned int >& vertices ) ;
 
     /** \brief insert a shaped boundary segment into the macro grid
      *
