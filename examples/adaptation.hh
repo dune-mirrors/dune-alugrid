@@ -220,7 +220,7 @@ inline void LeafAdaptation< Grid, Vector >::finalize()
 
   adaptTime_ = adaptTimer_.elapsed();
 
-  const bool callBalance = ((balanceStep_ > 0) && (++balanceCounter_ % balanceStep_ == 0));
+  bool callBalance = ((balanceStep_ > 0) && (++balanceCounter_ % balanceStep_ == 0));
   // make sure everybody is on the same track 
   assert( callBalance == grid_.comm().max( callBalance) );
   // increase balanceCounter if balancing is enabled 
