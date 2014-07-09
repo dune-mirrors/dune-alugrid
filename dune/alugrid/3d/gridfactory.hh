@@ -199,6 +199,9 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< VertexId >& vertices ) ;
 
+    virtual void 
+    insertProcessBorder ( const std::vector< VertexId >& vertices );
+
     /** \brief insert a shaped boundary segment into the macro grid
      *
      *  \param[in]  vertices         vertex indices of boundary face
@@ -451,6 +454,31 @@ namespace Dune
     boundaryIds_.insert( boundaryId );
   }
 
+  template< class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid > ::
+  insertProcessBorder ( const std::vector< unsigned int >& vertices )
+  {
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+    //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
+
+    boundaryProjections_[ faceId ] = 0;
+
+    BndPair boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+      boundaryId.first[ j ] = vertices[ i ];
+    }
+    boundaryId.second = ALU3DSPACE ProcessorBoundary_t ;
+    boundaryIds_.insert( boundaryId );
+  }
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
