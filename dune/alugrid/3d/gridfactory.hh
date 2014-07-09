@@ -251,16 +251,25 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
-      int element = insertionIndex( *(intersection.inside()) );
-      int face = intersection.indexInInside();
+      std::vector< unsigned int > vertices;
+      const typename Codim< 0 >::EntityPointer inPtr = intersection.inside();
+      const typename Codim< 0 >::Entity &in = *inPtr;
+      const Dune::ReferenceElement< double, dimension > &refElem = 
+          Dune::ReferenceElements< double, dimension >::general( in.type() );
+      int faceNr = intersection.indexInInside();
+      const int vxSize = refElem.size( faceNr, 1, dimension );
+      for (int i=0;i<vxSize;++i)
+      {
+        int vxIdx = refElem.subEntity( faceNr, 1 , i , dimension);
+        vertices.push_back( insertionIndex( *(in.template subEntity<dimension>(vxIdx) ) ) );
+      }
       FaceType faceId;
-      generateFace( elements_[ element ], face, faceId );
-      typename BoundaryIdMap::const_iterator pos = boundaryIds_.find( faceId );
-      assert( pos != boundaryIds_.end() );
-      assert(pos->second >= 1);
-      if (pos->second == 1)
+      copyAndSort( vertices, faceId );
+      typename BoundaryIdMap::const_iterator pos = insertionOrder_.find( faceId );
+      if( pos != insertionOrder_.end() )
+        return pos->second;
+      else
         return std::numeric_limits<unsigned int>::max();
-      return pos->second-2;
     }
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
@@ -298,7 +307,7 @@ namespace Dune
 
     VertexVector vertices_;
     ElementVector elements_;
-    BoundaryIdMap boundaryIds_;
+    BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
     const DuneBoundaryProjectionType* globalProjection_ ; 
     BoundaryProjectionMap boundaryProjections_;
@@ -450,8 +459,10 @@ namespace Dune
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
-    boundaryId.second = boundaryIds_.size()+2;
+    boundaryId.second = 1;
     boundaryIds_.insert( boundaryId );
+
+    insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }
 
   template< class ALUGrid >
@@ -534,8 +545,10 @@ namespace Dune
       const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
       boundaryId.first[ j ] = vertices[ i ];
     }
-    boundaryId.second = boundaryIds_.size()+2;
+    boundaryId.second = 1;
     boundaryIds_.insert( boundaryId );
+
+    insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }
 
 
