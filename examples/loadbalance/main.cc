@@ -76,14 +76,21 @@ void method ( int problem, int startLvl, int maxLvl,
 #if HAVE_ZOLTAN && USE_ZOLTANLB
   typedef ZoltanLoadBalanceHandle<Grid> LoadBalancer;
   LoadBalancer ldb(grid);
-#else
+#elif USE_SIMPLELB
   typedef SimpleLoadBalanceHandle<Grid> LoadBalancer;
   LoadBalancer ldb(grid);
+#else
+  typedef SimpleLoadBalanceWeights<Grid> LoadBalancer;
+  LoadBalancer ldb(grid);
 #endif
+
 #if USE_ZOLTANLB || USE_SIMPLELB
+  // use defined repartitioning, see also adaptation.hh 
   if ( ldb.repartition() )
     grid.repartition( ldb ); 
 #else
+  // ALUGrid internal load balancing, weights are the number of leaf elements 
+  // that are underneeth one macro element, see also adaptation.hh
   grid.loadBalance();
 #endif
 

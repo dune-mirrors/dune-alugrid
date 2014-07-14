@@ -5,10 +5,12 @@ DATACLEANFILES = dgfparser.log
 CLEANFILES = $(DATACLEANFILES)
 
 # possible problems are BALL, TRANSPORT, EULER
-PROBLEM = -DTRANSPORT
+PROBLEM = -DBALL
 # extra flags: -DUSE_VECTOR_FOR_PWF -DNO_OUTPUT
 EXTRAFLAGS = 
 AM_CPPFLAGS += $(EXTRAFLAGS) $(PROBLEM)
+AM_LDFLAGS += $(DUNEMPILDFLAGS)
+LDADD += $(DUNEMPILIBS)
 
 EXTRA_DIST = alugrid.cfg 
 
@@ -19,22 +21,19 @@ exampleslb_HEADERS = \
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
-check_PROGRAMS = main_internal main_simple main_zoltan 
+check_PROGRAMS = main_internal main_weights main_simple main_zoltan 
 
 main_internal_SOURCES = main.cc
 main_internal_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
-main_internal_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-main_internal_LDADD = $(LDADD) $(DUNEMPILIBS)
+
+main_weights_SOURCES = main.cc
+main_weights_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_WEIGHTS=1
 
 main_simple_SOURCES = main.cc
-main_simple_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_SIMPLELB 
-main_simple_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-main_simple_LDADD = $(LDADD) $(DUNEMPILIBS)
+main_simple_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_SIMPLELB=1 
 
 main_zoltan_SOURCES = main.cc
-main_zoltan_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB 
-main_zoltan_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-main_zoltan_LDADD = $(LDADD) $(DUNEMPILIBS)
+main_zoltan_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB=1
 endif
 
 dataclean:
