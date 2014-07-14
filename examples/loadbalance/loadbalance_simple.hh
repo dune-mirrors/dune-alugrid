@@ -1,10 +1,14 @@
 #ifndef LOADBALANCE_SIMPLE_HH
 #define LOADBALANCE_SIMPLE_HH
 
+/********************************************************************
+ *
+ *  Simple repartition handle for ALUGrid
+ *
+ ********************************************************************/
 template< class Grid >
 struct SimpleLoadBalanceHandle
 {
-  typedef SimpleLoadBalanceHandle This;
   typedef typename Grid :: Traits :: template Codim<0> :: Entity Element;
   SimpleLoadBalanceHandle ( const Grid &grid )
   : angle_( 0 )
@@ -18,8 +22,9 @@ struct SimpleLoadBalanceHandle
     angle_ += 2.*M_PI/50.;
     return true;
   }
-  // this is the method, called from the grid for each macro element. 
-  // It returns the rank to which the element is to be moved
+
+  /** This is the method, called from the grid for each macro element. 
+      It returns the rank to which the element is to be moved. */
   int operator()( const Element &element ) const 
   { 
     typedef typename Element::Geometry::GlobalCoordinate Coordinate;
@@ -45,6 +50,31 @@ struct SimpleLoadBalanceHandle
 private:
   double angle_;
   int maxRank_;
+};
+
+/********************************************************************
+ *
+ *  Simple weights used with ALUGrid load balancing
+ *
+ ********************************************************************/
+template< class Grid >
+struct SimpleLoadBalanceWeights
+{
+  typedef typename Grid :: Traits :: template Codim<0> :: Entity Element;
+  SimpleLoadBalanceWeights ( const Grid &grid )
+    : grid_( grid )
+  {}
+
+  /** This method is called for each macro element to determine the weight 
+      in the dual graph. */
+  long int operator()( const Element &element ) const 
+  { 
+    // return local id as weight for element 
+    return grid_.localIdSet().id( element );
+  }
+
+protected:
+  const Grid& grid_;
 };
 
 #endif // #ifndef LOADBALNCE_HH
