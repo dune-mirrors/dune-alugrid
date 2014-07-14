@@ -61,16 +61,23 @@ template< class Grid >
 struct SimpleLoadBalanceWeights
 {
   typedef typename Grid :: Traits :: template Codim<0> :: Entity Element;
+  typedef typename Grid :: Traits :: HierarchicIterator HierarchicIterator;
+
   SimpleLoadBalanceWeights ( const Grid &grid )
     : grid_( grid )
   {}
 
   /** This method is called for each macro element to determine the weight 
-      in the dual graph. */
+      in the dual graph. Here, we compute the number of tree elements underneeth 
+      the macro element. */
   long int operator()( const Element &element ) const 
   { 
-    // return local id as weight for element 
-    return grid_.localIdSet().id( element );
+    const int mxl = grid_.maxLevel();
+    const HierarchicIterator end = element.hend( mxl );
+    int leafElements = 1 ;
+    for( HierarchicIterator it = element.hbegin( mxl ); it != end; ++it )
+      ++ leafElements ;
+    return leafElements ;
   }
 
 protected:
