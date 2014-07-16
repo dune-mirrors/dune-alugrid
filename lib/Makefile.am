@@ -1,16 +1,3 @@
-libalugrid_2d_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/impl/2d/grid.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/handle.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/hdlrw.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/mknbrs.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/triang.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/vmmap.cc \
-	$(top_srcdir)/dune/alugrid/impl/2d/vtx_btree.cc
-
-libalugrid_2d_la_CPPFLAGS = $(AM_CPPFLAGS)
-libalugrid_2d_la_LDFLAGS = $(AM_LDFLAGS)
-libalugrid_2d_la_LIBADD = 
-
 libalugrid_serial_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/impl/binaryio.cc \
 	$(top_srcdir)/dune/alugrid/impl/macrofileheader.cc \
@@ -46,12 +33,10 @@ libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZLIB_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_parallel_la_LIBADD = $(ALL_PKG_LIBS) libalugrid_serial.la ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(ZLIB_LIBS)
 
-ALUGRID_IMPL_LIBS=libalugrid_2d.la libalugrid_parallel.la libalugrid_serial.la 
+ALUGRID_IMPL_LIBS=libalugrid_parallel.la libalugrid_serial.la 
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
 
 libdunealugrid_la_SOURCES = \
-	$(top_srcdir)/dune/alugrid/2d/intersection.cc \
-	$(top_srcdir)/dune/alugrid/2d/gridfactory.cc \
 	$(top_srcdir)/dune/alugrid/3d/faceutility.cc \
 	$(top_srcdir)/dune/alugrid/3d/mappings.cc \
 	$(top_srcdir)/dune/alugrid/3d/topology.cc
