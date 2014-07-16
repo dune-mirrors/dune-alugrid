@@ -15,8 +15,9 @@ struct SimpleLoadBalanceHandle
   , maxRank_( grid.comm().size() )
   {}
 
-  // this method is called before invoking the repartition method on the
-  // grid, to check if the user defined partitioning needs to be readjusted
+  /** this method is called before invoking the re-partition
+      method on the grid, to check if the user defined
+      partitioning needs to be readjusted */
   bool repartition () 
   { 
     angle_ += 2.*M_PI/50.;
@@ -42,10 +43,12 @@ struct SimpleLoadBalanceHandle
     else // keep the center on proc 0
       return 0;
   }
-  // This method can simply return false, in which case ALUGrid will
-  // internally compute the required information through some global
-  // communication. To avoid this overhead the user can provide the ranks
-  // of particians from which elements will be moved to the calling partitian.
+
+  /** This method can simply return false, in which case ALUGrid
+      will internally compute the required information through
+      some global communication. To avoid this overhead the user
+      can provide the ranks of particians from which elements will
+      be moved to the calling partitian. */
   bool importRanks( std::set<int> &ranks) const { return false; }
 private:
   double angle_;
