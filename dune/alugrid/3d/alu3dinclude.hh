@@ -146,11 +146,11 @@ namespace Dune
   // ALU3dCodimImplTraits
   // --------------------
 
-  template< ALU3dGridElementType elType, class Comm, int codim >
+  template< int actualDim, int actualDimw,  ALU3dGridElementType elType, class Comm, int codim >
   struct ALU3dCodimImplTraits;
 
-  template< class Comm >
-  struct ALU3dCodimImplTraits< tetra, Comm, 0 >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, tetra, Comm, 0 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
@@ -162,8 +162,8 @@ namespace Dune
     typedef typename GitterImplType::Objects::Hbnd3Default GhostImplementationType;
   };
 
-  template< class Comm >
-  struct ALU3dCodimImplTraits< hexa, Comm, 0 >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, hexa, Comm, 0 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
@@ -175,8 +175,8 @@ namespace Dune
     typedef typename GitterImplType::Objects::Hbnd4Default GhostImplementationType;
   };
 
-  template< class Comm >
-  struct ALU3dCodimImplTraits< tetra, Comm, 1 >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, tetra, Comm, 1 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
@@ -185,8 +185,8 @@ namespace Dune
     typedef typename GitterType::Geometric::hface3_GEO ImplementationType;
   };
 
-  template< class Comm >
-  struct ALU3dCodimImplTraits< hexa, Comm, 1 >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, hexa, Comm, 1 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
@@ -195,8 +195,8 @@ namespace Dune
     typedef typename GitterType::Geometric::hface4_GEO ImplementationType;
   };
 
-  template< ALU3dGridElementType elType, class Comm >
-  struct ALU3dCodimImplTraits< elType, Comm, 2 >
+  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, elType, Comm, 2 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
@@ -205,8 +205,8 @@ namespace Dune
     typedef typename GitterType::Geometric::hedge1_GEO ImplementationType;
   };
 
-  template< ALU3dGridElementType elType, class Comm >
-  struct ALU3dCodimImplTraits< elType, Comm, 3 >
+  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  struct ALU3dCodimImplTraits< actualDim, actualDimw, elType, Comm, 3 >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
@@ -220,11 +220,11 @@ namespace Dune
   // ALU3dImplTraits
   // ---------------
 
-  template< ALU3dGridElementType elType, class Comm >
+  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   struct ALU3dImplTraits;
 
-  template< class Comm >
-  struct ALU3dImplTraits< tetra, Comm >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dImplTraits< actualDim, actualDimw, tetra, Comm >
   : public ALU3dBasicImplTraits< Comm >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
@@ -253,7 +253,7 @@ namespace Dune
 
     template< int codim >
     struct Codim
-    : public ALU3dCodimImplTraits< tetra, Comm, codim >
+    : public ALU3dCodimImplTraits< actualDim, actualDimw, tetra, Comm, codim >
     {};
 
     // access of faces 
@@ -264,8 +264,8 @@ namespace Dune
     }
   };
 
-  template< class Comm >
-  struct ALU3dImplTraits< hexa, Comm >
+  template< int actualDim, int actualDimw, class Comm >
+  struct ALU3dImplTraits< actualDim, actualDimw, hexa, Comm >
   : public ALU3dBasicImplTraits< Comm >
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
@@ -294,7 +294,7 @@ namespace Dune
 
     template< int codim >
     struct Codim
-    : public ALU3dCodimImplTraits< hexa, Comm, codim >
+    : public ALU3dCodimImplTraits< actualDim, actualDimw, hexa, Comm, codim >
     {};
 
     // access of faces 
@@ -419,18 +419,18 @@ namespace Dune
   //  some helper functions 
   /////////////////////////////////////////////////////////////////////////
 
-  template< class Comm >
+  template< int actualDim, int actualDimw,  class Comm >
   struct ALU3dGridFaceGetter
   {
-    static const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
-    getFace( const typename ALU3dImplTraits< tetra, Comm >::GEOElementType& elem, int index)
+    static const typename ALU3dImplTraits< actualDim, actualDimw, tetra, Comm >::GEOFaceType *
+    getFace( const typename ALU3dImplTraits< actualDim, actualDimw, tetra, Comm >::GEOElementType& elem, int index)
     {
       alugrid_assert (index >= 0 && index < 4);
       return elem.myhface3( ElementTopologyMapping< tetra >::dune2aluFace(index) );
     }
 
-    static const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType*
-    getFace( const typename ALU3dImplTraits< hexa, Comm >::GEOElementType &elem, int index )
+    static const typename ALU3dImplTraits< actualDim, actualDimw, hexa, Comm >::GEOFaceType*
+    getFace( const typename ALU3dImplTraits< actualDim, actualDimw, hexa, Comm >::GEOElementType &elem, int index )
     {
       alugrid_assert (index >= 0 && index < 6);
       return elem.myhface4( ElementTopologyMapping< hexa >::dune2aluFace(index) );

@@ -23,7 +23,7 @@ namespace Dune
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
-  template< ALU3dGridElementType, class >
+  template< int actualDim, int actualDimw, ALU3dGridElementType, class >
   class ALU3dGrid;
   class BilinearSurfaceMapping;
   class TrilinearMapping;
@@ -634,15 +634,15 @@ namespace Dune
 
     friend class ALU3dGridIntersectionIterator<GridImp>;
 
-    typedef typename ALU3dImplTraits< elementType, Comm >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< elementType, Comm >::GEOFaceType     GEOFaceType;
-    typedef typename ALU3dImplTraits< elementType, Comm >::GEOEdgeType     GEOEdgeType;
-    typedef typename ALU3dImplTraits< elementType, Comm >::GEOVertexType   GEOVertexType;
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOFaceType     GEOFaceType;
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOEdgeType     GEOEdgeType;
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOVertexType   GEOVertexType;
 
     // interface types 
-    typedef typename ALU3dImplTraits< elementType, Comm >::HFaceType   HFaceType;
-    typedef typename ALU3dImplTraits< elementType, Comm >::HEdgeType   HEdgeType; 
-    typedef typename ALU3dImplTraits< elementType, Comm >::VertexType  VertexType; 
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HFaceType   HFaceType;
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HEdgeType   HEdgeType; 
+    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::VertexType  VertexType; 
 
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;

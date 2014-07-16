@@ -72,11 +72,11 @@ namespace Dune
   };
 #endif  //if 0
 
-  template< ALU3dGridElementType elType, class Comm, class T >
-  class PersistentContainer< ALU3dGrid< elType, Comm >, T >
-  : public ALUGridPersistentContainer< ALU3dGrid< elType, Comm >, T >
+  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm, class T >
+  class PersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T >
+  : public ALUGridPersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T >
   {
-    typedef ALUGridPersistentContainer< ALU3dGrid< elType, Comm >, T > Base;
+    typedef ALUGridPersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T > Base;
 
   public:
     typedef typename Base::Grid Grid;

@@ -863,15 +863,15 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 1, Comm >::ElType ItemType;
 
-    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits< Dune::tetra, Comm >::GEOElementType &el, int i )
+    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, Dune::tetra, Comm >::GEOElementType &el, int i )
     {
       return el.myhface3( i );
     }
    
-    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits< Dune::hexa, Comm >::GEOElementType &el, int i )
+    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld,  Dune::hexa, Comm >::GEOElementType &el, int i )
     {
       return el.myhface4( i );
     }
@@ -896,7 +896,7 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 2, Comm >::ElType ItemType;
 
     static ItemType *getItem ( HElementType &el, int i )
@@ -919,7 +919,7 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 3, Comm >::ElType ItemType;
 
     static ItemType *getItem ( HElementType &el, int i )
@@ -947,13 +947,13 @@ namespace ALUGrid
     typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t; 
     
   private:
-    template< Dune::ALU3dGridElementType elType, int cd >
+    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType, int cd >
     struct SelectVector;
 
-    template< Dune::ALU3dGridElementType elType >
-    struct SelectVector< elType, 1 > 
+    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
+    struct SelectVector< actualDim, actualDimw, elType, 1 > 
     {
-      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw,  elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
 
       static const std::vector< int > &getNotOnItemVector ( int face )
       {
@@ -961,20 +961,20 @@ namespace ALUGrid
       }
     };
 
-    template< Dune::ALU3dGridElementType elType >
-    struct SelectVector< elType, 2 >
+    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
+    struct SelectVector< actualDim, actualDimw, elType, 2 >
     {
-      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw, elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector( int face )
       {
         return GEOElementType::edgesNotOnFace( face );
       }
     };
 
-    template< Dune::ALU3dGridElementType elType >
-    struct SelectVector< elType, 3 > 
+    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
+    struct SelectVector< actualDim, actualDimw, elType, 3 > 
     {
-      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw, elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector ( int face )
       {
         return GEOElementType::verticesNotOnFace( face );
@@ -1045,7 +1045,7 @@ namespace ALUGrid
         ++count;
       }
 
-      const int numItems = SelectVector<GridImp::elementType,codim>::getNotOnItemVector(0).size(); 
+      const int numItems = SelectVector<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType,codim>::getNotOnItemVector(0).size(); 
       const int maxSize = numItems * count;
 
       ghList.getItemList().reserve(maxSize);
@@ -1056,7 +1056,7 @@ namespace ALUGrid
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
-        const std::vector<int> & notOnFace = SelectVector<GridImp::elementType,codim>::
+        const std::vector<int> & notOnFace = SelectVector<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType,codim>::
                                           getNotOnItemVector(ghPair.second); 
         for(int i=0; i<numItems; ++i) 
         {
@@ -1424,7 +1424,7 @@ namespace ALUGrid
       
       for( iter.first(); ! iter.done(); iter.next() )
       {
-        typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
+        typedef typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
         enum { numEdges = Dune::EntityCount< GridImp::elementType >::numEdges };
         
         GEOElementType *elem = 0;

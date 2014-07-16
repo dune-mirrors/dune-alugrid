@@ -741,6 +741,14 @@ namespace Dune
   template class ALU3dGridFactory< ALUGrid< 3, 3, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
+  
+  template class ALU3dGridFactory< ALUGrid< 2, 3, cube, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, conforming > >;
+  
+  template class ALU3dGridFactory< ALUGrid< 2, 2, cube, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, nonconforming > >;
+  template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, conforming > >;
 #endif
 }
 #undef alu_inline

@@ -409,7 +409,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
     :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                           bool removeGeneratedFile )
-  : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
+  : rank_( ALU3dGridCommunications< ALUGrid::actualDimension, ALUGrid::actualDimensionWorld, elementType, MPICommunicatorType >::getRank( communicator ) ),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
@@ -422,7 +422,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
     :: ALU3dGridFactory ( const std::string &filename,
                           const MPICommunicatorType &communicator )
-  : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
+  : rank_( ALU3dGridCommunications< ALUGrid::actualDimension, ALUGrid::actualDimensionWorld, elementType, MPICommunicatorType >::getRank( communicator ) ),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
@@ -436,7 +436,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >
     :: ALU3dGridFactory ( const bool realGrid, 
                           const MPICommunicatorType &communicator )
-  : rank_( ALU3dGridCommunications< elementType, MPICommunicatorType >::getRank( communicator ) ),
+  : rank_( ALU3dGridCommunications< ALUGrid::actualDimension, ALUGrid::actualDimensionWorld, elementType, MPICommunicatorType >::getRank( communicator ) ),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( realGrid ),
