@@ -441,15 +441,14 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
 
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-    //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
 
     boundaryProjections_[ faceId ] = 0;
 
@@ -469,11 +468,11 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid > ::
   insertProcessBorder ( const std::vector< unsigned int >& vertices )
   {
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
 
     boundaryProjections_[ faceId ] = 0;
 
@@ -492,11 +491,11 @@ namespace Dune
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
   {
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
