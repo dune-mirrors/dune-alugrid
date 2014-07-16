@@ -30,7 +30,7 @@ namespace Dune
   class ALU3dGridIntersectionIterator;
   template<int codim, PartitionIteratorType, class GridImp>
   class ALU3dGridLeafIterator;
-  template< ALU3dGridElementType, class >
+  template<int actualDim, int actualDimw, ALU3dGridElementType, class >
   class ALU3dGrid;
 
 /*! 
@@ -71,11 +71,11 @@ public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
    
   typedef typename GridImp::MPICommunicatorType Comm;
 
-  friend class ALU3dGrid< GridImp::elementType, Comm >;
+  friend class ALU3dGrid< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
   friend class ALU3dGridEntity < 0, dim, GridImp >;
   friend class ALU3dGridLevelIterator < cd, All_Partition, GridImp >;
 
-  friend class ALU3dGridHierarchicIndexSet< GridImp::elementType, Comm >;
+  friend class ALU3dGridHierarchicIndexSet< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
 
   template< class > friend class ALU3dGridFactory;
 
@@ -84,7 +84,7 @@ public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
 public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
 
-  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<cd>::InterfaceType      HItemType;
   typedef typename ImplTraits::template Codim<cd>::ImplementationType ItemType;
   typedef typename ImplTraits::VertexType   VertexType; 
@@ -205,7 +205,7 @@ class ALU3dGridEntity<0,dim,GridImp>
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
-  typedef ALU3dImplTraits< elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<0>::InterfaceType     HElementType;
 
   typedef typename ImplTraits::GEOElementType  GEOElementType;
@@ -220,7 +220,7 @@ class ALU3dGridEntity<0,dim,GridImp>
 
   typedef typename ImplTraits::MarkRuleType MarkRuleType;
 
-  friend class ALU3dGrid< elementType, Comm >;
+  friend class ALU3dGrid< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >;
   friend class ALU3dGridIntersectionIterator < GridImp >;
   friend class ALU3dGridIntersectionIterator < const GridImp >;
   friend class ALU3dGridHierarchicIterator   < const GridImp >;
@@ -234,7 +234,7 @@ class ALU3dGridEntity<0,dim,GridImp>
   friend class ALU3dGridLeafIterator <2, All_Partition,GridImp>;
   friend class ALU3dGridLeafIterator <3, All_Partition,GridImp>;
 
-  friend class ALU3dGridHierarchicIndexSet< elementType, Comm >;
+  friend class ALU3dGridHierarchicIndexSet< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >;
 
   template< class > friend class ALU3dGridFactory;
 
@@ -484,9 +484,9 @@ class ALU3dGridEntityPointerBase
 
   friend class ALU3dGridEntity<codim,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::elementType, Comm >;
+  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<codim>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType  HBndSegType; 
@@ -609,9 +609,9 @@ protected:
 
   friend class ALU3dGridEntity<cd,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::elementType, Comm >;
+  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits<GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType HBndSegType; 
@@ -703,9 +703,9 @@ protected:
 
   friend class ALU3dGridEntity<cd,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::elementType, Comm >;
+  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType HBndSegType; 

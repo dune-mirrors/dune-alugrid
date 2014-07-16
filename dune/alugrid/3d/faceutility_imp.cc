@@ -5,8 +5,8 @@ namespace Dune
 {
 
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline ALU3dGridFaceInfo< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::
   ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled ) :
     face_(0),
     innerElement_(0),
@@ -25,9 +25,9 @@ namespace Dune
   }
   
   // points face from inner element away?
-  template< ALU3dGridElementType type, class Comm > 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
   inline void 
-  ALU3dGridFaceInfo< type, Comm >::
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::
   updateFaceInfo(const GEOFaceType& face,
                  int innerLevel,
                  int innerTwist) 
@@ -213,19 +213,19 @@ namespace Dune
   }
 
   // points face from inner element away?
-  template< ALU3dGridElementType type, class Comm > 
-  inline ALU3dGridFaceInfo< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::
   ALU3dGridFaceInfo(const GEOFaceType& face, 
                     int innerTwist) 
   {
     updateFaceInfo(face,innerTwist);
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline ALU3dGridFaceInfo< type, Comm >::~ALU3dGridFaceInfo() {}
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::~ALU3dGridFaceInfo() {}
 
-  template< ALU3dGridElementType type, class Comm > 
-  ALU3dGridFaceInfo< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::
   ALU3dGridFaceInfo ( const ALU3dGridFaceInfo &orig )
   : face_(orig.face_),
     innerElement_(orig.innerElement_),
@@ -242,79 +242,79 @@ namespace Dune
     ghostCellsEnabled_( orig.ghostCellsEnabled_ )
   {}
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline bool ALU3dGridFaceInfo< type, Comm >::isElementLike() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::isElementLike() const {
     return bndType_ < domainBoundary; 
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline bool ALU3dGridFaceInfo< type, Comm >::innerBoundary() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::innerBoundary() const {
     return bndType_ == innerGhostBoundary; 
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline bool ALU3dGridFaceInfo< type, Comm >::outerBoundary() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm > 
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::outerBoundary() const {
     return bndType_ == domainBoundary; 
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline bool ALU3dGridFaceInfo< type, Comm >::boundary() const {
+  template< int actualDim, int actualDimw,  ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::boundary() const {
     return outerBoundary() || (bndType_ == periodicBoundary);
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline bool ALU3dGridFaceInfo< type, Comm >::neighbor() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::neighbor() const 
   {
     return isElementLike() || ( ghostBoundary() && ghostCellsEnabled_ );
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline bool ALU3dGridFaceInfo< type, Comm >::ghostBoundary () const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline bool ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::ghostBoundary () const 
   {
     // when communicator is No_Comm there is no ghost boundary 
     return parallel() ? ( bndType_ == outerGhostBoundary ) : false ;
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline const typename ALU3dGridFaceInfo< type, Comm >::GEOFaceType& 
-  ALU3dGridFaceInfo< type, Comm >::face() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::GEOFaceType& 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::face() const 
   {
     return *face_;
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType& 
-  ALU3dGridFaceInfo< type, Comm >::innerEntity() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::GEOElementType& 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::innerEntity() const 
   {
     alugrid_assert ( ! innerElement_->isboundary() );
     return static_cast<const GEOElementType&>(*innerElement_);
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  inline const typename ALU3dGridFaceInfo< type, Comm >::GEOElementType& 
-  ALU3dGridFaceInfo< type, Comm >::outerEntity() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::GEOElementType& 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::outerEntity() const 
   {
     alugrid_assert ( isElementLike() );
     return static_cast<const GEOElementType&>(*outerElement_);
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType& 
-  ALU3dGridFaceInfo< type, Comm >::innerFace() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::BNDFaceType& 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::innerFace() const 
   {
     alugrid_assert ( innerElement_->isboundary() ); 
     return static_cast<const BNDFaceType&>(*innerElement_);
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridFaceInfo< type, Comm >::BNDFaceType& 
-  ALU3dGridFaceInfo< type, Comm >::boundaryFace() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::BNDFaceType& 
+  ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::boundaryFace() const {
     alugrid_assert ( ! isElementLike() );
     return static_cast<const BNDFaceType&>(*outerElement_);
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::outsideLevel() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::outsideLevel() const 
   {
     alugrid_assert ( outerElement_ );
     alugrid_assert ( !isElementLike() || outerEntity().level() == outerElement_->nbLevel() );
@@ -322,21 +322,21 @@ namespace Dune
     return outerElement_->nbLevel();
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::segmentIndex() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::segmentIndex() const 
   {
     alugrid_assert ( segmentIndex_ >= 0 );
     return segmentIndex_;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::boundaryId() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::boundaryId() const 
   {
     return bndId_;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::innerTwist() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::innerTwist() const 
   {
     // don't check ghost boundaries here 
     alugrid_assert ( ( ! innerBoundary() ) ? 
@@ -344,8 +344,8 @@ namespace Dune
     return innerTwist_; 
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::duneTwist(const int faceIdx, const int aluTwist) const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::duneTwist(const int faceIdx, const int aluTwist) const 
   {
     typedef ElementTopologyMapping<type> ElementTopo;
     typedef FaceTopologyMapping<type> FaceTopo;
@@ -361,8 +361,8 @@ namespace Dune
     return FaceTopo :: aluTwistMap( twist );
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::outerTwist() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::outerTwist() const 
   {
     // don't check ghost boundaries here 
     //alugrid_assert ( (outerBoundary_) ?
@@ -373,28 +373,28 @@ namespace Dune
     return outerTwist_; 
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::innerALUFaceIndex() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::innerALUFaceIndex() const {
     return innerFaceNumber_;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< type, Comm >::outerALUFaceIndex() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::outerALUFaceIndex() const {
     return outerFaceNumber_;
   }
 
-  template< ALU3dGridElementType type, class Comm > 
-  typename ALU3dGridFaceInfo< type, Comm >::ConformanceState 
-  inline ALU3dGridFaceInfo< type, Comm >::conformanceState() const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::ConformanceState 
+  inline ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::conformanceState() const 
   {
     alugrid_assert ( conformanceState_ != UNDEFINED );
     return conformanceState_;
   }
 
   // calculate conformance state 
-  template< ALU3dGridElementType type, class Comm > 
-  typename ALU3dGridFaceInfo< type, Comm >::ConformanceState 
-  inline ALU3dGridFaceInfo< type, Comm >::getConformanceState(const int innerLevel) const 
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  typename ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::ConformanceState 
+  inline ALU3dGridFaceInfo< actualDim, actualDimw, type, Comm >::getConformanceState(const int innerLevel) const 
   {
     ConformanceState result = CONFORMING;
 
@@ -419,8 +419,8 @@ namespace Dune
     return result;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   ALU3dGridGeometricFaceInfoBase(const ConnectorType& connector) :
     connector_(connector),
     coordsSelfLocal_(-1.0),
@@ -429,17 +429,17 @@ namespace Dune
     generatedLocal_(false)
   {}
 
-  template< ALU3dGridElementType type, class Comm >
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
   inline void 
-  ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   resetFaceGeom() 
   { 
     generatedGlobal_ = false;
     generatedLocal_  = false;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   ALU3dGridGeometricFaceInfoBase ( const ALU3dGridGeometricFaceInfoBase &orig )
   : connector_(orig.connector_),
     coordsSelfLocal_(orig.coordsSelfLocal_),
@@ -448,17 +448,17 @@ namespace Dune
     generatedLocal_(orig.generatedLocal_)
   {}
 
-  template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridGeometricFaceInfoBase< type, Comm >::CoordinateType& 
-  ALU3dGridGeometricFaceInfoBase< type, Comm >::intersectionSelfLocal() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::CoordinateType& 
+  ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::intersectionSelfLocal() const {
     generateLocalGeometries();
     alugrid_assert (generatedLocal_);
     return coordsSelfLocal_;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline const typename ALU3dGridGeometricFaceInfoBase< type, Comm >::CoordinateType& 
-  ALU3dGridGeometricFaceInfoBase< type, Comm >::intersectionNeighborLocal() const {
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::CoordinateType& 
+  ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::intersectionNeighborLocal() const {
     alugrid_assert (!connector_.outerBoundary());
     generateLocalGeometries();
     alugrid_assert (generatedLocal_);
@@ -467,30 +467,30 @@ namespace Dune
 
 
   //sepcialisation for tetra and hexa
-  template< class Comm >
-  inline ALU3dGridGeometricFaceInfoTetra< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< actualDim, actualDimw, Comm >::
   ALU3dGridGeometricFaceInfoTetra(const ConnectorType& connector) 
   : Base( connector ), normalUp2Date_( false )
   {}
 
-  template< class Comm >
-  inline void ALU3dGridGeometricFaceInfoTetra< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoTetra< actualDim, actualDimw, Comm >::
   resetFaceGeom() 
   { 
     Base::resetFaceGeom();
     normalUp2Date_ = false;
   }
 
-  template< class Comm >
-  inline ALU3dGridGeometricFaceInfoTetra< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< actualDim, actualDimw, Comm >::
   ALU3dGridGeometricFaceInfoTetra(const ALU3dGridGeometricFaceInfoTetra& orig) 
   : Base( orig ), normalUp2Date_( orig.normalUp2Date_ )
   {}
 
-  template< class Comm >
+  template< int actualDim, int actualDimw, class Comm >
   template <class GeometryImp> 
   inline void
-  ALU3dGridGeometricFaceInfoTetra< Comm >::
+  ALU3dGridGeometricFaceInfoTetra< actualDim, actualDimw, Comm >::
   buildGlobalGeom(GeometryImp& geo) const 
   {
     if (! this->generatedGlobal_) 
@@ -506,9 +506,9 @@ namespace Dune
     }
   }
 
-  template< class Comm >
+  template< int actualDim, int actualDimw, class Comm >
   inline FieldVector<alu3d_ctype, 3> &
-  ALU3dGridGeometricFaceInfoTetra< Comm >::
+  ALU3dGridGeometricFaceInfoTetra< actualDim, actualDimw, Comm >::
   outerNormal(const FieldVector<alu3d_ctype, 2>& local) const 
   {
     // if geomInfo was not reseted then normal is still correct 
@@ -536,34 +536,34 @@ namespace Dune
   }
 
   //-sepcialisation for and hexa 
-  template< class Comm >
-  inline ALU3dGridGeometricFaceInfoHexa< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< actualDim, actualDimw, Comm >::
   ALU3dGridGeometricFaceInfoHexa(const ConnectorType& connector) 
   : Base( connector )
     , mappingGlobal_()
     , mappingGlobalUp2Date_(false) 
   {}
 
-  template< class Comm >
-  inline void ALU3dGridGeometricFaceInfoHexa< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoHexa< actualDim, actualDimw, Comm >::
   resetFaceGeom() 
   { 
     Base::resetFaceGeom();
     mappingGlobalUp2Date_ = false;
   }
 
-  template< class Comm >
-  inline ALU3dGridGeometricFaceInfoHexa< Comm >::
+  template< int actualDim, int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< actualDim, actualDimw, Comm >::
   ALU3dGridGeometricFaceInfoHexa(const ALU3dGridGeometricFaceInfoHexa& orig) 
   : Base( orig )
     , mappingGlobal_(orig.mappingGlobal_)
     , mappingGlobalUp2Date_(orig.mappingGlobalUp2Date_) 
   {}
 
-  template< class Comm >
+  template< int actualDim, int actualDimw, class Comm >
   template <class GeometryImp> 
   inline void
-  ALU3dGridGeometricFaceInfoHexa< Comm >::
+  ALU3dGridGeometricFaceInfoHexa< actualDim, actualDimw, Comm >::
   buildGlobalGeom(GeometryImp& geo) const 
   {
     if (! this->generatedGlobal_) 
@@ -579,9 +579,9 @@ namespace Dune
     }
   }
 
-  template< class Comm >
+  template< int actualDim, int actualDimw, class Comm >
   inline FieldVector<alu3d_ctype, 3> &
-  ALU3dGridGeometricFaceInfoHexa< Comm >::
+  ALU3dGridGeometricFaceInfoHexa< actualDim, actualDimw, Comm >::
   outerNormal(const FieldVector<alu3d_ctype, 2>& local) const 
   {
     // if mapping calculated and affine, nothing more to do  
@@ -614,8 +614,8 @@ namespace Dune
     return outerNormal_;
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline void ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline void ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   generateLocalGeometries() const 
   {
     if (!generatedLocal_) {
@@ -650,8 +650,8 @@ namespace Dune
     } // end if
   }
 
-  template< ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   globalVertexIndex(const int duneFaceIndex, 
                     const int aluFaceTwist,
                     const int duneFaceVertexIndex) const 
@@ -669,8 +669,8 @@ namespace Dune
   }
 
 
-  template< ALU3dGridElementType type, class Comm >
-  inline void ALU3dGridGeometricFaceInfoBase< type, Comm >::
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  inline void ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >::
   referenceElementCoordinatesRefined(SideIdentifier side, 
                                      CoordinateType& result) const 
   {

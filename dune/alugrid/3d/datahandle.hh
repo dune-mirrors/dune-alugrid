@@ -35,7 +35,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
     
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
 
@@ -151,7 +151,7 @@ namespace ALUGrid
     
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
     
@@ -291,7 +291,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
     
@@ -367,7 +367,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
     
@@ -423,7 +423,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
     
@@ -500,7 +500,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
     
@@ -647,7 +647,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType  HBndSegType;
     typedef typename ImplTraits::BNDFaceType  BNDFaceType;
@@ -722,7 +722,7 @@ namespace ALUGrid
     
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
@@ -772,7 +772,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
 
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::HElementType HElementType;
     typedef typename ImplTraits::HBndSegType HBndSegType;
 
