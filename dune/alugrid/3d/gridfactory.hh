@@ -475,10 +475,6 @@ namespace Dune
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
 
-    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
-      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-    //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
-
     boundaryProjections_[ faceId ] = 0;
 
     BndPair boundaryId;
@@ -490,6 +486,7 @@ namespace Dune
     boundaryId.second = ALU3DSPACE ProcessorBoundary_t ;
     boundaryIds_.insert( boundaryId );
   }
+
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
