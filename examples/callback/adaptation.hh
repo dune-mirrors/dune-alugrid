@@ -62,7 +62,7 @@ public:
   /** \brief constructor
    *  \param grid   the grid to be adapted
    */
-  LeafAdaptation ( Grid &grid, const int balanceStep = 1 )
+  LeafAdaptation ( Grid &grid, const int balanceStep = 1, const int balanceCounter = -1 )
   : grid_( grid ),
 #ifdef USE_VECTOR_FOR_PWF
     // create persistent container for codimension 0
@@ -71,7 +71,7 @@ public:
     solution_( 0 ),
     adaptTimer_(),
     balanceStep_( balanceStep ),
-    balanceCounter_( balanceStep-1 ),
+    balanceCounter_( balanceCounter < 0 ? balanceStep-1 : balanceCounter ),
     adaptTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
