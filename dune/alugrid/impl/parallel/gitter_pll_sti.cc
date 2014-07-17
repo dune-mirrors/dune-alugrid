@@ -1520,9 +1520,9 @@ namespace ALUGrid
     if( mpa.myrank() == 0 ) 
     {
       // set default values 
-      _ldbOver = 1.2;
-      // default partitioning whcih does not require external packages 
-      _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurve;
+      _ldbOver = 1.05;
+      // default partitioning which does not require external packages 
+      _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurveLinkage;
 
       std::ifstream in( "alugrid.cfg" );
       if( in )
