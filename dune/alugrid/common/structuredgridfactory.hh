@@ -285,6 +285,16 @@ namespace Dune
     }
 
   protected:  
+    template <int codim, class Entity>
+    int subEntities ( const Entity& entity ) const 
+    {
+#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+      return entity.subEntities( codim );
+#else
+      return entity.template count< codim > ();
+#endif
+    }
+
     template < class int_t >
     static GridPtr< Grid > 
     createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
@@ -337,7 +347,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        alugrid_assert ( numVertices == entity.subEntities( dim ) );
+        alugrid_assert ( numVertices == this->template subEntities< codim >( entity ) );
         for( int i = 0; i < numVertices; ++i )
         {
           const IndexType globalVertexId = indexSet.subIndex( entity, i, dim );
@@ -359,7 +369,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        alugrid_assert ( numVertices == entity.subEntities( dim ) );
+        alugrid_assert ( numVertices == this->template subEntities< codim >( entity ) );
         for( int i = 0; i < numVertices; ++i )
           vertices[ i ] = vertexId[ indexSet.subIndex( entity, i, dim ) ];
         factory.insertElement( entity.type(), vertices );
