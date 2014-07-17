@@ -89,7 +89,7 @@ protected:
       return ;
 
     // get vertex numbers of the element
-    const size_t vxSize = element.template count< Element::dimension > ();
+    const size_t vxSize = element.subEntities( Element::dimension );
     Index vertices[ vxSize ];
     for( size_t i = 0; i < vxSize; ++i )
       vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
@@ -143,7 +143,7 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
         countElements++;
   
         // write vertices
-        const int numCorners = element.template count< dimGrid > ();
+        const int numCorners = element.subEntities( dimGrid );
         for( int i=0; i<numCorners; ++i ) 
         {
           const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
@@ -254,7 +254,7 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
     // convert entity seed into entity pointer 
     const ElementPointer ep = gridView_.grid().entityPointer( *it );
     const Element& element = *ep;
-    const int numCorners = element.template count< dimGrid > ();
+    const int numCorners = element.subEntities( dimGrid );
     for( int i=0; i<numCorners; ++i ) 
     {
       const Index vxIndex = indexSet.subIndex( element, i, dimGrid );

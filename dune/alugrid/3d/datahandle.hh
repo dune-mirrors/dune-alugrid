@@ -821,7 +821,7 @@ namespace ALUGrid
 
       if( dataHandle_.contains( dimension, codim ) )
       {
-        const int numSubEntities = element.template count< codim >();
+        const int numSubEntities = element.subEntities( codim );
         for( int i = 0; i < numSubEntities; ++i )
         {
           const  EntityPointer pEntity = element.template subEntity< codim >( i );
@@ -837,7 +837,7 @@ namespace ALUGrid
 
       if( dataHandle_.contains( dimension, codim ) )
       {
-        const int numSubEntities = element.template count< codim >();
+        const int numSubEntities = element.subEntities( codim );
         for( int i = 0; i < numSubEntities; ++i )
         {
           const  EntityPointer pEntity = element.template subEntity< codim >( i );
