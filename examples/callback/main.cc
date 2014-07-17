@@ -90,8 +90,9 @@ void method ( int problem, int startLvl, int maxLvl,
   }
 
   /* create adaptation method */
+  const int initialBalanceCounter = std::max( int(model.problem().balanceStep() - maxLevel), int(1) );
   typedef LeafAdaptation< Grid, DataType > AdaptationType;
-  AdaptationType adaptation( grid, model.problem().balanceStep() );
+  AdaptationType adaptation( grid, model.problem().balanceStep(), initialBalanceCounter );
 
   for( int i = 0; i <= maxLevel; ++i )
   {
