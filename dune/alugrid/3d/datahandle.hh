@@ -814,6 +814,16 @@ namespace ALUGrid
       xtractCodimData< 3 >( stream, element );
     }
 
+    template <int codim>
+    int subEntities( const EntityType &element ) const 
+    {
+#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+      return element.subEntities( codim );
+#else
+      return element.template count< codim > ();
+#endif
+    }
+
     template< int codim >
     void inlineCodimData ( ObjectStreamType &stream, const EntityType &element ) const
     {
@@ -821,7 +831,7 @@ namespace ALUGrid
 
       if( dataHandle_.contains( dimension, codim ) )
       {
-        const int numSubEntities = element.subEntities( codim );
+        const int numSubEntities = this->template subEntities< codim >( element );
         for( int i = 0; i < numSubEntities; ++i )
         {
           const  EntityPointer pEntity = element.template subEntity< codim >( i );
@@ -837,7 +847,7 @@ namespace ALUGrid
 
       if( dataHandle_.contains( dimension, codim ) )
       {
-        const int numSubEntities = element.subEntities( codim );
+        const int numSubEntities = this->template subEntities< codim >( element );
         for( int i = 0; i < numSubEntities; ++i )
         {
           const  EntityPointer pEntity = element.template subEntity< codim >( i );
