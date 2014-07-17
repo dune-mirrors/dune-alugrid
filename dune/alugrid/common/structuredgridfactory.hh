@@ -337,7 +337,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        alugrid_assert ( numVertices == entity.template count< dim >() );
+        alugrid_assert ( numVertices == entity.subEntities( dim ) );
         for( int i = 0; i < numVertices; ++i )
         {
           const IndexType globalVertexId = indexSet.subIndex( entity, i, dim );
@@ -359,7 +359,7 @@ namespace Dune
         // if the element does not belong to our partitioning, continue 
         if( partitioner.rank( entity ) != myrank ) continue ;
 
-        alugrid_assert ( numVertices == entity.template count< dim >() );
+        alugrid_assert ( numVertices == entity.subEntities( dim ) );
         for( int i = 0; i < numVertices; ++i )
           vertices[ i ] = vertexId[ indexSet.subIndex( entity, i, dim ) ];
         factory.insertElement( entity.type(), vertices );
