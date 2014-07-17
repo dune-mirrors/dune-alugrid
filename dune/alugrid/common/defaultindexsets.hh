@@ -5,6 +5,7 @@
 #include <rpc/rpc.h>
 
 #include <dune/common/forloop.hh>
+#include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/adaptcallback.hh>
@@ -106,7 +107,12 @@ namespace Dune
         }
         else
         {
-          for( int i = 0; i < entity.subEntities( codim ); ++i )
+#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+          const int subEntities = entity.subEntities( codim );
+#else
+          const int subEntities = entity.template count< codim > ();
+#endif
+          for( int i = 0; i < subEntities; ++i )
           {
             Index &idx = codimContainer( entity, i );
             if( idx.index() < 0 )
