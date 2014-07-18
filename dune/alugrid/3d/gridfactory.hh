@@ -152,26 +152,25 @@ namespace Dune
      *  \note The order of the vertices must coincide with the vertex order in
      *        the corresponding DUNE reference element.
      *
-     *  \param[in]  geometry    GeometryType of the boundary element
-     *  \param[in]  faceVertices vertices of the boundary element
-     *  \param[in]  id          boundary identifier of the boundary element,
-     *                          the default value is 0 (invalid boundary id)
+     *  \param[in]  geometry      GeometryType of the boundary element
+     *  \param[in]  faceVertices  vertices of the boundary element
+     *  \param[in]  boundaryId    boundary identifier of the boundary element,
+     *                            the default value is 1
      */
     virtual void
-    insertBoundary ( const GeometryType &geometry,
-                     const std::vector< VertexId > &faceVertices,
-                     const int id );
+    insertBoundary ( const GeometryType &geometry, const std::vector< VertexId > &faceVertices, int boundaryId = 1 );
 
     /** \brief mark a face as boundary (and assign a boundary id)
      *
-     *  \param[in]  element  index of the element, the face belongs to
-     *  \param[in]  face     local number of the face within the element
-     *  \param[in]  id       boundary id to assign to the face
+     *  \param[in]  element     index of the element, the face belongs to
+     *  \param[in]  face        local number of the face within the element
+     *  \param[in]  boundaryId  boundary id to assign to the face,
+     *                          the default value is 1
      */
-    virtual void insertBoundary ( const int element, const int face, const int id );
+    virtual void insertBoundary ( int element, int face, int boundaryId = 1 );
 
     // for testing parallel GridFactory
-    void insertProcessBorder ( const int element, const int face )
+    void insertProcessBorder ( int element, int face )
     {
       insertBoundary( element, face, ALU3DSPACE ProcessorBoundary_t );
     }

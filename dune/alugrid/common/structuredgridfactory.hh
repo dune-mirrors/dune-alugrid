@@ -18,7 +18,7 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
-// include DGF parser implementation for SGrid 
+// include DGF parser implementation for SGrid
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
 
 namespace Dune
@@ -40,14 +40,14 @@ namespace Dune
   {
   public:
     typedef ALUGrid< dim, dimworld, eltype, refineType, Comm > Grid;
-  protected:  
+  protected:
     typedef StructuredGridFactory< Grid > This;
 
   private:
     // SimplePartitioner
     // -----------------
     template< class GV, PartitionIteratorType pitype, class IS = typename GV::IndexSet >
-    class SimplePartitioner 
+    class SimplePartitioner
     {
       typedef SimplePartitioner< GV, pitype, IS > This;
 
@@ -67,7 +67,7 @@ namespace Dune
 
       typedef typename Element::Geometry::GlobalCoordinate VertexType;
 
-      // type of communicator 
+      // type of communicator
       typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
@@ -88,7 +88,7 @@ namespace Dune
 #endif
         maxIndex_( double(indexSet_.size(0)-1) )
       {
-        // compute decomposition of sfc 
+        // compute decomposition of sfc
         calculateElementCuts();
       }
 
@@ -98,11 +98,11 @@ namespace Dune
       {
         alugrid_assert ( Entity::codimension == 0 );
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-        // get center of entity's geometry 
+        // get center of entity's geometry
         VertexType center = entity.geometry().center();
         // get hilbert index in [0,1]
         const double hidx = sfc_.hilbertIndex( center );
-        // transform to element index 
+        // transform to element index
         const long int index = (hidx * maxIndex_);
 #else
         const long int index = indexSet_.index( entity );
@@ -110,7 +110,7 @@ namespace Dune
         return rank( index );
       }
 
-    protected:  
+    protected:
       int rank( long int index ) const
       {
         if( index < elementCuts_[ 0 ] ) return 0;
@@ -127,17 +127,17 @@ namespace Dune
       {
         const size_t nElements = indexSet_.size( 0 );
 
-        // get number of MPI processes  
+        // get number of MPI processes
         const int nRanks = pSize_;
 
-        // get minimal number of entities per process 
+        // get minimal number of entities per process
         const size_t minPerProc = (double(nElements) / double( nRanks ));
         size_t maxPerProc = minPerProc ;
         if( nElements % nRanks != 0 )
           ++ maxPerProc ;
 
-        // calculate percentage of elements with larger number 
-        // of elements per process 
+        // calculate percentage of elements with larger number
+        // of elements per process
         double percentage = (double(nElements) / double( nRanks ));
         percentage -= minPerProc ;
         percentage *= nRanks ;
@@ -147,37 +147,37 @@ namespace Dune
         size_t elementNumber = 0;
         size_t localElementNumber = 0;
         const int lastRank = nRanks - 1;
-        
+
         const size_t size = indexSet_.size( 0 );
-        for( size_t i=0; i<size; ++i ) 
+        for( size_t i=0; i<size; ++i )
         {
-          if( localElementNumber >= elementCount ) 
+          if( localElementNumber >= elementCount )
           {
             elementCuts_[ rank ] = i ;
 
-            // increase rank 
+            // increase rank
             if( rank < lastRank ) ++ rank;
 
-            // reset local number 
+            // reset local number
             localElementNumber = 0;
 
-            // switch to smaller number if red line is crossed 
-            if( elementCount == maxPerProc && rank >= percentage ) 
+            // switch to smaller number if red line is crossed
+            if( elementCount == maxPerProc && rank >= percentage )
               elementCount = minPerProc ;
           }
 
-          // increase counters 
+          // increase counters
           ++elementNumber;
-          ++localElementNumber; 
+          ++localElementNumber;
         }
 
         // set cut for last process
         elementCuts_[ lastRank ] = size ;
 
-        //for( int p=0; p<pSize_; ++p ) 
+        //for( int p=0; p<pSize_; ++p )
         //  std::cout << "P[ " << p << " ] = " << elementCuts_[ p ] << std::endl;
       }
-      
+
       const CollectiveCommunication& comm_;
 
       const GridView& gridView_;
@@ -197,53 +197,53 @@ namespace Dune
     typedef typename Grid::ctype ctype;
     typedef typename MPIHelper :: MPICommunicator MPICommunicatorType ;
 
-    // type of communicator 
+    // type of communicator
     typedef Dune :: CollectiveCommunication< MPICommunicatorType >
         CollectiveCommunication ;
 
-    static GridPtr< Grid > 
-    createCubeGrid( const std::string& filename,  
-                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
+    static GridPtr< Grid >
+    createCubeGrid( const std::string& filename,
+                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       std::ifstream file( filename.c_str() );
-      if( ! file ) 
+      if( ! file )
       {
         DUNE_THROW(InvalidStateException,"file not found " << filename );
       }
       return createCubeGrid( file, filename, mpiComm );
     }
 
-    static GridPtr< Grid > 
-    createCubeGrid( std::istream& input,  
-                    const std::string& name, 
-                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
+    static GridPtr< Grid >
+    createCubeGrid( std::istream& input,
+                    const std::string& name,
+                    MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
       const int myrank = comm.rank();
 
       typedef SGrid< dim, dimworld, ctype > SGridType ;
-      // only work for the new ALUGrid version 
+      // only work for the new ALUGrid version
       // if creation of SGrid fails the DGF file does not contain a proper
-      // IntervalBlock, and thus we cannot create the grid parallel, 
-      // we will use the standard technique 
+      // IntervalBlock, and thus we cannot create the grid parallel,
+      // we will use the standard technique
       bool sgridCreated = true ;
       array<int, dim> dims;
-      FieldVector<ctype, dimworld> lowerLeft ( 0 ); 
-      FieldVector<ctype, dimworld> upperRight( 0 ); 
-      if( myrank == 0 ) 
+      FieldVector<ctype, dimworld> lowerLeft ( 0 );
+      FieldVector<ctype, dimworld> upperRight( 0 );
+      if( myrank == 0 )
       {
         GridPtr< SGridType > sPtr;
-        try 
-        { 
+        try
+        {
           sPtr = GridPtr< SGridType >( input, mpiComm );
         }
-        catch ( DGFException & e ) 
+        catch ( DGFException & e )
         {
           sgridCreated = false ;
           std::cout << "Caught DGFException on creation of SGrid, trying default DGF method!" << std::endl;
         }
-        if( sgridCreated ) 
-        { 
+        if( sgridCreated )
+        {
           SGridType& sgrid = *sPtr ;
           dims = sgrid.dims( 0 );
           lowerLeft  = sgrid.lowerLeft();
@@ -253,14 +253,14 @@ namespace Dune
 
       // get global min to be on the same path
       sgridCreated = comm.min( sgridCreated );
-      if( ! sgridCreated ) 
+      if( ! sgridCreated )
       {
         // use traditional DGF method
         return GridPtr< Grid >( input, mpiComm );
       }
-      else 
-      { 
-        // broadcast array values 
+      else
+      {
+        // broadcast array values
         comm.broadcast( &dims[ 0 ], dim, 0 );
         comm.broadcast( &lowerLeft [ 0 ], dim, 0 );
         comm.broadcast( &upperRight[ 0 ], dim, 0 );
@@ -273,20 +273,20 @@ namespace Dune
     }
 
     template < class int_t >
-    static GridPtr< Grid > 
+    static GridPtr< Grid >
     createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                      const FieldVector<ctype,dimworld>& upperRight,
-                     const array< int_t, dim>& elements, 
-                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )       
+                     const array< int_t, dim>& elements,
+                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( mpiComm );
       std::string name( "Cartesian ALUGrid via SGrid" );
       return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
     }
 
-  protected:  
+  protected:
     template <int codim, class Entity>
-    int subEntities ( const Entity& entity ) const 
+    int subEntities ( const Entity& entity ) const
     {
 #if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
       return entity.subEntities( codim );
@@ -296,21 +296,21 @@ namespace Dune
     }
 
     template < class int_t >
-    static GridPtr< Grid > 
+    static GridPtr< Grid >
     createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
                          const FieldVector<ctype,dimworld>& upperRight,
-                         const array< int_t, dim>& elements, 
+                         const array< int_t, dim>& elements,
                          const CollectiveCommunication& comm,
-                         const std::string& name ) 
+                         const std::string& name )
     {
       const int myrank = comm.rank();
 
       typedef SGrid< dim, dimworld, ctype > SGridType ;
-      FieldVector< int, dim > dims; 
+      FieldVector< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
 
-      // create SGrid to partition and insert elements that belong to process directly 
-      SGridType sgrid( dims, lowerLeft, upperRight );  
+      // create SGrid to partition and insert elements that belong to process directly
+      SGridType sgrid( dims, lowerLeft, upperRight );
 
       typedef typename SGridType :: LeafGridView GridView ;
       typedef typename GridView  :: IndexSet  IndexSet ;
@@ -322,80 +322,66 @@ namespace Dune
       typedef typename IntersectionIterator :: Intersection Intersection ;
 
       GridView gridView = sgrid.leafGridView();
-      const IndexSet& indexSet = gridView.indexSet();
+      const IndexSet &indexSet = gridView.indexSet();
 
-      // get decompostition of the marco grid 
+      // get decompostition of the marco grid
       SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView, comm, lowerLeft, upperRight );
 
+      std::cout << "using Structured grid factory..." << std::endl;
+
       // create ALUGrid GridFactory
-      typedef GridFactory< Grid > Factory ;
-      Factory factory ;
+      GridFactory< Grid > factory;
 
-      typedef typename Factory::VertexId VertexId;
-
-      // create new vector holding vetex ids 
-      typedef std::map< IndexType, VertexId > VertexMapType ;
-      VertexMapType vertexId ;
+      // map global vertex ids to local ones
+      std::map< IndexType, unsigned int > vtxMap;
 
       const int numVertices = (1 << dim);
-      const typename VertexMapType::iterator endVxMap = vertexId.end();
-      const ElementIterator end = gridView.template end< 0 >();
-      VertexId localVertexId = 0 ;
-      for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
+      std::vector< unsigned int > vertices( numVertices );
+
+      int nextElementIndex = 0;
+      //const ElementIterator end = gridView.template end< 0 >();
+      //for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
+      const auto end = gridView.template end< 0 >();
+      for( auto it = gridView.template begin< 0 >(); it != end; ++it )
       {
         const Entity &entity = *it;
-        // if the element does not belong to our partitioning, continue 
-        if( partitioner.rank( entity ) != myrank ) continue ;
+        // if the element does not belong to our partition, continue
+        if( partitioner.rank( entity ) != myrank )
+          continue;
 
-        alugrid_assert ( numVertices == this->template subEntities< codim >( entity ) );
+        // insert vertices and element
+        const typename Entity::Geometry geo = entity.geometry();
+        //alugrid_assert( numVertices == geo.corners() );
         for( int i = 0; i < numVertices; ++i )
         {
-          const IndexType globalVertexId = indexSet.subIndex( entity, i, dim );
-          if( vertexId.find( globalVertexId ) == endVxMap ) 
-          {
-            // insert vertex and global vertex id into factory 
-            factory.insertVertex( (*entity.template subEntity< dim > ( i )).geometry().center(), globalVertexId );
-            // store local vertex id for later insertion of elements 
-            vertexId[ globalVertexId ] = localVertexId ++ ;
-          }
+          const IndexType vtxId = indexSet.subIndex( entity, i, dim );
+          auto result = vtxMap.insert( std::make_pair( vtxId, vtxMap.size() ) );
+          //std::pair< typename std::map< IndexType, unsigned int >::iterator, bool > result
+          //  = vtxMap.insert( std::make_pair( vtxId, nextVtxIndex ) );
+          if( result.second )
+            factory.insertVertex( geo.corner( i ), vtxId );
+          vertices[ i ] = result.first->second;
         }
-      }
-
-      int elIndex = 0;
-      std::vector< VertexId > vertices( numVertices );
-      for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
-      {
-        const Entity &entity = *it;
-        // if the element does not belong to our partitioning, continue 
-        if( partitioner.rank( entity ) != myrank ) continue ;
-
-        alugrid_assert ( numVertices == this->template subEntities< codim >( entity ) );
-        for( int i = 0; i < numVertices; ++i )
-          vertices[ i ] = vertexId[ indexSet.subIndex( entity, i, dim ) ];
         factory.insertElement( entity.type(), vertices );
+        const int elementIndex = nextElementIndex++;
 
-        const IntersectionIterator iend = gridView.iend( entity );
-        for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
+        //const IntersectionIterator iend = gridView.iend( entity );
+        //for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
+        const auto iend = gridView.iend( entity );
+        for( auto iit = gridView.ibegin( entity ); iit != iend; ++iit )
         {
-          const Intersection& intersection = *iit ;
-          const int face = intersection.indexInInside();
-          // insert boundary face in case of domain boundary 
-          if( intersection.boundary() )
-            factory.insertBoundary( elIndex, face, intersection.boundaryId() );
-          // insert process boundary in case the neighboring element has a different rank
-          if( intersection.neighbor() ) 
-          {
-            EntityPointer outside = intersection.outside();
-            if( partitioner.rank( *outside ) != myrank ) 
-            {
-              factory.insertProcessBorder( elIndex, face );
-            }
-          }
+          const Intersection &isec = *iit;
+          const int faceNumber = isec.indexInInside();
+          // insert boundary face in case of domain boundary
+          if( isec.boundary() )
+            factory.insertBoundary( elementIndex, faceNumber );
+          // insert process boundary if the neighboring element has a different rank
+          if( isec.neighbor() && (partitioner.rank( *isec.outside() ) != myrank) )
+            factory.insertProcessBorder( elementIndex, faceNumber );
         }
-        ++elIndex;
       }
 
-      // create grid pointer (behaving like a shared_ptr) 
+      // create grid pointer (behaving like a shared_ptr)
       return GridPtr< Grid> ( factory.createGrid( true, true, name ) );
     }
   };
