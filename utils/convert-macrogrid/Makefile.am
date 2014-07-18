@@ -1,4 +1,4 @@
-bin_PROGRAMS = convert
+check_PROGRAMS = convert
 
 convertdir = $(includedir)/utils/convert-macrogrid
 convert_HEADERS = partition.hh
