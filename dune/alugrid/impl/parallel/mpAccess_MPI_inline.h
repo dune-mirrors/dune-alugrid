@@ -13,6 +13,17 @@ namespace ALUGrid
 {
   inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm ) 
   {
+    int wasInitialized = 0;
+    // check if MPI was initialized, otherwise exit 
+    MPI_Initialized( &wasInitialized );
+    if( ! wasInitialized )
+    {
+      std::cerr << "ERROR: MPI was not initialized at the beginning of the program."
+                << "       Please add the corresponding call to MPI_Init, e.g. by adding `Dune::MPIHelper::instance( argc, argv );`"
+                << "       as a first line of the main routine." << std::endl;
+      std::abort();
+    }
+
     // duplicate mpi communicator 
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
