@@ -327,8 +327,6 @@ namespace Dune
       // get decompostition of the marco grid
       SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView, comm, lowerLeft, upperRight );
 
-      std::cout << "using Structured grid factory..." << std::endl;
-
       // create ALUGrid GridFactory
       GridFactory< Grid > factory;
 
@@ -339,10 +337,10 @@ namespace Dune
       std::vector< unsigned int > vertices( numVertices );
 
       int nextElementIndex = 0;
-      //const ElementIterator end = gridView.template end< 0 >();
-      //for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
-      const auto end = gridView.template end< 0 >();
-      for( auto it = gridView.template begin< 0 >(); it != end; ++it )
+      //const auto end = gridView.template end< 0 >();
+      //for( auto it = gridView.template begin< 0 >(); it != end; ++it )
+      const ElementIterator end = gridView.template end< 0 >();
+      for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
       {
         const Entity &entity = *it;
         // if the element does not belong to our partition, continue
@@ -351,13 +349,13 @@ namespace Dune
 
         // insert vertices and element
         const typename Entity::Geometry geo = entity.geometry();
-        //alugrid_assert( numVertices == geo.corners() );
+        alugrid_assert( numVertices == geo.corners() );
         for( int i = 0; i < numVertices; ++i )
         {
           const IndexType vtxId = indexSet.subIndex( entity, i, dim );
-          auto result = vtxMap.insert( std::make_pair( vtxId, vtxMap.size() ) );
-          //std::pair< typename std::map< IndexType, unsigned int >::iterator, bool > result
-          //  = vtxMap.insert( std::make_pair( vtxId, nextVtxIndex ) );
+          //auto result = vtxMap.insert( std::make_pair( vtxId, vtxMap.size() ) );
+          std::pair< typename std::map< IndexType, unsigned int >::iterator, bool > result
+            = vtxMap.insert( std::make_pair( vtxId, vtxMap.size() ) );
           if( result.second )
             factory.insertVertex( geo.corner( i ), vtxId );
           vertices[ i ] = result.first->second;
@@ -365,10 +363,10 @@ namespace Dune
         factory.insertElement( entity.type(), vertices );
         const int elementIndex = nextElementIndex++;
 
-        //const IntersectionIterator iend = gridView.iend( entity );
-        //for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
-        const auto iend = gridView.iend( entity );
-        for( auto iit = gridView.ibegin( entity ); iit != iend; ++iit )
+        //const auto iend = gridView.iend( entity );
+        //for( auto iit = gridView.ibegin( entity ); iit != iend; ++iit )
+        const IntersectionIterator iend = gridView.iend( entity );
+        for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
         {
           const Intersection &isec = *iit;
           const int faceNumber = isec.indexInInside();
