@@ -4,7 +4,7 @@ DUNE-ALUGrid module
 License
 -------
 
-The ALUGrid library and headers are licensed under the GNU General
+The DUNE-ALUGrid module is licensed under the GNU General
 Public License (GPL) version 2. The full license text can be found 
 in the file COPYING and via http://www.gnu.org/licenses/gpl.html .
 
@@ -16,8 +16,7 @@ The DUNE-ALUGrid code is known to compile with the GNU Compiler version 4.6.x or
 The code also compiles with the INTEL C++ Compiler (tested version 13.1).
 
 The compiler can be chosen by setting the variable CXX correctly, i.e. 
-CXX=g++ or CXX=icpc. For parallel computations the MPI compiler, like mpiCC or mpicxx should
-be used or the include path and lib path adapted. 
+CXX=g++ or CXX=icpc. Please see the documentation of the DUNE build system.
 
 
 Dynamic Load Balancing Options
@@ -38,14 +37,18 @@ Available methods are:
 NONE = 0
 COLLECT = 1 (collect all elements to process 0)
 
-ALUGRID_SpaceFillingCurveNoEdges = 4 
-ALUGRID_SpaceFillingCurve = 5
+ALUGRID_SpaceFillingCurveLinkage       = 4
+ALUGRID_SpaceFillingCurveSerialLinkage = 5
 
-METIS_PartGraphKway = 11
-METIS_PartGraphRecursive = 12
+ALUGRID_SpaceFillingCurve       = 9  (default)
+ALUGRID_SpaceFillingCurveSerial = 10
 
-ParMETIS_V3_PartKway = 13
-ParMETIS_V3_AdaptiveRepart = 14
+METIS_PartGraphKway        = 11
+METIS_PartGraphRecursive   = 12
+
+ZOLTAN_LB_HSFC  = 13
+ZOLTAN_LB_GRAPH = 14
+ZOLTAN_PARMETIS = 15
 
 See the documentation of the corresponding package for detail on the
 methods. 
@@ -69,10 +72,11 @@ VERBOSE_PLL  output produced by parallel grid methods
 Optimization 
 -------------
 
-The ALUGrid code is highly riddled with assert statements. 
+The DUNE-ALUGrid code is highly riddled with assert statements. 
 Therefore it is recommended to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
 statement tests. 
+
 
 Debug
 -----
@@ -88,6 +92,4 @@ NO_OBJECTSTREAM_DEBUG.
 Knowns Bugs 
 -----------
 
-ALUGrid does not work with Myrinet MPI. Up to now we couldn't figure
-out what exactly the problem is. 
-
+- Ghost elements do not work for tetrahedral grid when using bisection refinement.
