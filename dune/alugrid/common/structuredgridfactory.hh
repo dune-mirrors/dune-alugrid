@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <dune/common/array.hh>
+#include <dune/common/version.hh>
 
 #include <dune/common/classname.hh>
 #include <dune/common/exceptions.hh>
