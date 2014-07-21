@@ -756,18 +756,7 @@ namespace ALUGrid
           }
 
           // send data 
-          //const int bufferSize = 
           sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
-
-          /*
-          // post receive if in symmetric mode
-          if( _symmetric ) 
-          {
-            assert( _recvRequest );
-            assert( &_recvRequest[ link ] );
-            postReceive( sendDest[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
-          }
-          */
         }
 
         // set send info 
