@@ -232,9 +232,11 @@ void globalCoarsening(GitterType& grid, int refcount) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
-  MPI_Init(&argc,&argv);
   int rank = 0;
+#if HAVE_MPI
+  MPI_Init(&argc,&argv);
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
 
   int mxl = 0; 
   const char* filename = 0 ;
@@ -333,9 +335,10 @@ int main (int argc, char ** argv, const char ** envp)
     //grid.restore( file );
     // adapt grid 
     
+#if HAVE_MPI
     ExchangeBaryCenter dataHandle ;
     grid.interiorGhostCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
-
+#endif
 
     std::cout << "Grid restored!" << std::endl;
     grid.printsize();
@@ -344,7 +347,9 @@ int main (int argc, char ** argv, const char ** envp)
     globalCoarsening(grid, mxl);
   }
 
+#if HAVE_MPI
   MPI_Finalize();
+#endif
   return 0;
 }
 

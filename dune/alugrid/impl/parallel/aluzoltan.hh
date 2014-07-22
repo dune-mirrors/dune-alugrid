@@ -263,12 +263,12 @@ namespace ALUGridZoltan
                                  const double givenTolerance,
                                  const bool verbose )
   {
-#if HAVE_ZOLTAN 
+#if HAVE_ZOLTAN && HAVE_MPI
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
     if( mpaMPI == 0 )
     {
       std::cerr << "ERROR: wrong mpAccess object, couldn't convert to MpAccessMPI!! in: " << __FILE__ << " line : " << __LINE__ << std::endl;
-      abort();
+      std::abort();
     }
 
     // get communincator (see mpAccess_MPI.cc
@@ -420,9 +420,9 @@ namespace ALUGridZoltan
     return (changes > 0);
 #else 
     std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
-    exit(1);
+    std::abort();
     return false ;
-#endif // #if HAVE_ZOLTAN
+#endif // #if HAVE_ZOLTAN && HAVE_MPI
   } // CALL_Zoltan_LB_Partition 
 
 } // namespace ALUGridZoltan
