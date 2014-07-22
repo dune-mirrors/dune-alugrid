@@ -4,6 +4,13 @@
 #include <config.h>
 /** standard headers **/
 #include <iostream>
+
+#if HAVE_ZOLTAN && USE_ZOLTANLB && ! HAVE_MPI
+#warning "Zoltan cannot be used because MPI is not available"
+#undef USE_ZOLTANLB 
+#define USE_ZOLTANLB 0
+#endif
+
 /** dune (mpi, field-vector and grid type for dgf) **/
 #include <dune/common/fvector.hh>        
 #include <dune/common/timer.hh>        
@@ -269,13 +276,13 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
   
-#if HAVE_ZOLTAN 
+#if HAVE_ZOLTAN && HAVE_MPI
   float version;
   int rc = Zoltan_Initialize(argc, argv, &version);
   if (rc != ZOLTAN_OK){
     printf("sorry zoltan did not initialize successfully...\n");
     MPI_Finalize();
-    exit(0);
+    exit(1);
   }
 #endif
 
