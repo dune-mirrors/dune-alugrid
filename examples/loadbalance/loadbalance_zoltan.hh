@@ -3,7 +3,7 @@
 
 #include <dune/grid/common/gridenums.hh>
 
-#if HAVE_ZOLTAN 
+#if HAVE_ZOLTAN && HAVE_MPI
 
 template< class Grid >
 class ZoltanLoadBalanceHandle
