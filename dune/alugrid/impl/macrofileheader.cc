@@ -28,7 +28,7 @@ namespace ALUGrid
       return true;
     }
     return false;
-  };
+  }
 
 
   template< class T >
