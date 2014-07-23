@@ -16,7 +16,6 @@ namespace ALUGrid
 
   void readBinary ( std::istream &stream, void *data, uint64_t size, BinaryFormat format )
   {
-    int pos = stream.tellg();
     if( format == rawBinary )
       stream.read( static_cast< char * >( data ), size );
     else if( format == zlibCompressed )
