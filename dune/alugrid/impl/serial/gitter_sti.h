@@ -2378,7 +2378,7 @@ namespace ALUGrid
         bool _vertexElementLinkageComputed;
 
       public :
-        void notifyLinkageChange() { _computeLinkage = true ; }
+        void disableLinkageCheck() { _computeLinkage = true ; }
         void linkageComputed() { _computeLinkage = false ; }
         bool computeLinkage () const { return _computeLinkage; }
 

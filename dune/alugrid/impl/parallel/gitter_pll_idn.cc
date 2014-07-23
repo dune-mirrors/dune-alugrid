@@ -706,7 +706,6 @@ namespace ALUGrid
     // compute linkage due to vertex linkage 
     typedef std::map< int, int > elrankmap_t ;
 
-    typedef Gitter :: Geometric :: hbndseg4_GEO hbndseg4_GEO;
     typedef Gitter :: vertex_STI vertex_STI ;
     typedef vertex_STI :: ElementLinkage_t ElementLinkage_t;
 
@@ -859,7 +858,7 @@ namespace ALUGrid
     mpa.removeLinkage ();
 
     clock_t lap1 = clock ();
-    // this does not have to be computed every time (depending on partitioning method)
+    // this does not have to be computed if linkage was restored from file 
     if( computeLinkage() )
     {
       // clear linkage pattern map since it is newly build here
@@ -885,10 +884,11 @@ namespace ALUGrid
         // compute new vertex linkage (does not mean we store the linkage)
         vertexLinkageEstimate ( mpa, storeLinkageInVertices );
       }
-
-      notifyLinkageChange ();
-      // mark linkage as computed 
-      // linkageComputed() ;
+    }
+    else 
+    {
+      // from now on compute linkage every time 
+      disableLinkageCheck();
     }
 
     clock_t lap2 = clock ();
