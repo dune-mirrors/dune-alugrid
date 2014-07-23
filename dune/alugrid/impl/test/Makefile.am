@@ -1,4 +1,4 @@
-noinst_PROGRAMS = sizes backuprestore
+noinst_PROGRAMS = adapt backuprestore sizes
 
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
@@ -26,6 +26,7 @@ ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/parallel/gitter_tetra_top_pll.cc
 
 sizes_SOURCES = sizes.cc $(ALUSOURCES) 
+adapt_SOURCES = adapt.cc $(ALUSOURCES) 
 backuprestore_SOURCES = backuprestore.cc $(ALUSOURCES) 
 
 include $(top_srcdir)/am/global-rules
