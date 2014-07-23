@@ -344,7 +344,7 @@ inline void FiniteVolumeScheme< V, Model >
       const RangeType uLeft = solution.evaluate( entity, point );
       // apply boundary flux 
       RangeType flux; 
-      double ws = model_.boundaryFlux( intersection.boundaryId(), normal, time, point, uLeft, flux );
+      double ws = model_.boundaryFlux( normal, time, point, uLeft, flux );
       waveSpeed = ws * faceVolume;
 
       // calc update on entity
@@ -398,12 +398,10 @@ inline size_t FiniteVolumeScheme< V, Model >
       // no neighbor?
       if( !intersection.neighbor() )
       {
-        const int bndId = intersection.boundaryId();
-
         const GlobalType point = intersectionGeometry.center();
         GlobalType normal = intersection.centerUnitOuterNormal();
         // compute indicator for intersection
-        localIndicator = model_.boundaryIndicator( bndId, normal, time, point, uLeft );
+        localIndicator = model_.boundaryIndicator( normal, time, point, uLeft );
       }
       else
       {

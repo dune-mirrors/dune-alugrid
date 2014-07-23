@@ -151,8 +151,7 @@ struct BallModel : public TransportModel<dimD>
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const int bndId, 
-                             const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal, 
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const

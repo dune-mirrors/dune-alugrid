@@ -424,15 +424,14 @@ struct EulerModel
   // enum { Inflow = 1 , Outflow = 2, Reflection = 3 }; 
 
   /** \copydoc TransportProblem::boundaryFlux */
-  double boundaryFlux ( const int bndId, 
-                        const DomainType &normal, 
+  double boundaryFlux ( const DomainType &normal, 
                         const double time,
                         const DomainType &xGlobal,
                         const RangeType& uLeft,
                         RangeType &flux ) const
   {
     RangeType uRight;
-    boundaryValue(bndId,normal,time,xGlobal,uLeft,uRight);
+    boundaryValue(normal,time,xGlobal,uLeft,uRight);
     return numericalFlux(normal,time,xGlobal,uLeft,uRight,flux);
   }
 
@@ -446,23 +445,21 @@ struct EulerModel
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const int bndId, 
-                             const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal, 
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
   {
     RangeType uRight;
-    boundaryValue(bndId,normal,time,xGlobal,uLeft,uRight);
+    boundaryValue(normal,time,xGlobal,uLeft,uRight);
     return indicator( normal,time,xGlobal, uLeft, uRight );
   }
 
 private:
   /** \brief the boundary flux inserts a ghost cell value into the
    *         numerical flux - this function computes these values for the
-   *         different boundary types determined by bndId */
-  void boundaryValue( const int bndId, 
-                      const DomainType &normal, 
+   *         different boundary types */
+  void boundaryValue( const DomainType &normal, 
                       const double time,
                       const DomainType &xGlobal,
                       const RangeType& uLeft,
