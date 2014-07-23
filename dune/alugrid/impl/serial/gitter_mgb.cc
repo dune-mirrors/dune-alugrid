@@ -1008,7 +1008,6 @@ namespace ALUGrid
       int vxId; 
       in >> vxId; 
       // set vertex linkage according to stores position 
-      const vertexMap_t::iterator end = _vertexMap.end ();
       vertexMap_t::iterator i = _vertexMap.begin ();
       while( vxId != -1 ) 
       {
