@@ -60,6 +60,18 @@ void method ( int problem, int startLvl, int maxLvl,
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
+
+#ifndef BALL
+  if ( grid.comm().size() > 1 &&
+       (grid.overlapSize(0)==0 && grid.ghostSize(0)==0)
+     )
+  {
+    std::cout << "This grid implementation does not support ghost cells and the finite-volume scheme will not work correctly in parallel.";
+    std::cout << std::endl;
+    exit(1);
+  }
+#endif
+
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   std::string outPath( outpath );
