@@ -555,7 +555,7 @@ namespace ALUGrid
     // returns true if user defined partitioning needs to be readjusted 
     bool repartition () 
     { 
-      return userDefinedPartitioning() && ldbHandle().repartition();
+      return userDefinedPartitioning(); // && ldbHandle().repartition();
     }
 
     // return set of ranks data is imported from during load balance
