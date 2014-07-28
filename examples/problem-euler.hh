@@ -131,8 +131,6 @@ public:
         dgfFileName << path << "/dgf/cube_hc_4096.dgf";
       else if( problem_ == 23 )
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-      else if( problem_ == 24 )
-        dgfFileName << path << "/dgf/cube_hc_262144.dgf";
       else if( problem_ == 25 )
         dgfFileName << path << "/dgf/sb3d_" << mpiSize << ".dgf";
       else 
@@ -362,14 +360,12 @@ struct EulerModel
     case 11:
     case 12:
     case 13: 
-    case 14:  
       problem_ = new EulerProblemFFS< dimDomain >( problem );
       break;
     case 2:
     case 21:
     case 22:
     case 23:
-    case 24:
     case 25:
       problem_ = new EulerProblemShockBubble< dimDomain >( problem );
       break;
