@@ -224,11 +224,11 @@ public:
   /** \brief copy interior cell data to overlap of ghost cells */
   void communicate ();
 
-  const bool visitElement ( const Entity& entity ) const 
+  bool visitElement ( const Entity& entity ) const 
   {
     return !data(entity).visited();
   }
-  const bool visitNeighbor ( const Entity& entity, const Entity& neighbor ) const 
+  bool visitNeighbor ( const Entity& entity, const Entity& neighbor ) const 
   {
     return !data(neighbor).visited();
   }
@@ -279,7 +279,6 @@ PiecewiseFunction< View, Range >::initialize ( const ProblemData &problemData )
   typedef typename GridView::template Codim< 0 >::Geometry Geometry;
 
   /* types of vectors */
-  typedef typename Geometry::LocalCoordinate DomainType;
   typedef typename Geometry::GlobalCoordinate GlobalType;
 
   // loop over all entities

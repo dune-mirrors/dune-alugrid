@@ -350,13 +350,13 @@ generateHypergraph()
         // unique id on the macrolevel
 	      neighborGID[0] = gridView.macroId(neighbor); 
         // use the alu specific weight function between neighboring elements
-        weight += gridView.weight( iit );
+        weight += gridView.weight( intersection );
 
 		    for (int i=0; i<NUM_GID_ENTRIES; ++i)
 		    {
 		      tempNborGID.push_back((ZOLTAN_ID_TYPE)neighborGID[i] + 1);
 		    }
-        tempNborWeight.push_back( gridView.weight( iit ) );
+        tempNborWeight.push_back( gridView.weight( intersection ) );
         tempNborProc.push_back( gridView.master( neighbor ) );
 
 		    num_of_neighbors++;
