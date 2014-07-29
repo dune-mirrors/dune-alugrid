@@ -20,12 +20,12 @@ inline void backupSION( const std::string& filename,          // filename
                         const int rank,                       // MPI rank 
                         const std::stringstream& datastream ) // data stream 
 {
+  // the following only makes sense if SIONlib and MPI are available
+#if HAVE_SIONLIB && HAVE_MPI
   // get MPI communicator 
   typedef Dune::MPIHelper::MPICommunicator MPICommunicatorType;
   MPICommunicatorType mpiComm = Dune::MPIHelper::getCommunicator() ;
 
-  // the following only makes sense if SIONlib and MPI are available
-#if HAVE_SIONLIB && HAVE_MPI
   // get data from stream
   std::string data = datastream.str();
 
@@ -80,12 +80,12 @@ inline void restoreSION( const std::string& filename,    // filename
                          const int rank,                 // MPI rank 
                          std::stringstream& datastream ) // data stream 
 {
+  // the following only makes sense if SIONlib and MPI are available
+#if HAVE_SIONLIB && HAVE_MPI
   // get MPI communicator 
   typedef Dune::MPIHelper::MPICommunicator MPICommunicatorType;
   MPICommunicatorType mpiComm = Dune::MPIHelper::getCommunicator() ;
 
-  // the following only makes sense if SIONlib and MPI are available
-#if HAVE_SIONLIB && HAVE_MPI
   // chunkSize is set by sion_paropen_mpi 
   sion_int64 chunkSize = 0;
 
