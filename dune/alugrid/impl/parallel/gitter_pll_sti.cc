@@ -308,6 +308,7 @@ namespace ALUGrid
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
             _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
         }
+        _repeat |= true; //retur();
       } 
       catch (Parallel::AccessPllException) 
       {
@@ -1560,6 +1561,9 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
     mpa.barrier();
 #endif
+
+    // set static rank info
+    __STATIC_myrank = mpa.myrank();
   }
 
 } // namespace ALUGrid
