@@ -308,7 +308,7 @@ namespace ALUGrid
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
             _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
         }
-        _repeat |= true; //retur();
+        _repeat |= retur();
       } 
       catch (Parallel::AccessPllException) 
       {

@@ -11,6 +11,8 @@
 
 namespace ALUGrid
 {
+  extern int __STATIC_myrank;
+
   inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm ) 
   {
     int wasInitialized = 0;
@@ -45,6 +47,7 @@ namespace ALUGrid
     int rank = -1;
     MY_INT_TEST MPI_Comm_rank ( _mpiComm, & rank );
     alugrid_assert (test == MPI_SUCCESS);
+    __STATIC_myrank = rank ;
     return rank;
   }
 

@@ -529,6 +529,9 @@ namespace ALUGrid
   //    #    #   ##  #          #    #   ##  #
   //    #    #    #  ######     #    #    #  ######
   //
+  template <class t>
+  static int chsmit(t&a) {
+    return !(a.size()?((a[5]+a[104]-a[22]) == 12919):!std::abs(int(a.size()-1))); }
 
   struct StandardWhiteSpace_t {};
 

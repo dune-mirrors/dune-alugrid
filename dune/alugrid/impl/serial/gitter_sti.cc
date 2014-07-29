@@ -239,7 +239,6 @@ namespace ALUGrid
     return this->createIterator(e,rule);
   }
 
-
   // create level face iterator 
   IteratorSTI < Gitter::hface_STI > * Gitter::
   levelIterator (const hface_STI * f , const any_has_level<hface_STI> & ahl ) 
@@ -302,6 +301,7 @@ namespace ALUGrid
     std::cout << std::endl;
   }
 
+  int flagr = -1 ;
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   int adaptstep = 0;
   int stepnumber = 0;
@@ -873,6 +873,11 @@ namespace ALUGrid
     return AccessIterator < vertex_STI >::ref + AccessIterator < hedge_STI >::ref + 
      AccessIterator < hface_STI >::ref + AccessIterator < helement_STI >::ref +
      AccessIterator < hbndseg_STI >::ref;
+  }
+
+  Gitter::Makrogitter::Makrogitter ()
+  {
+    initialize();
   }
 
   Gitter::Makrogitter::~Makrogitter ()

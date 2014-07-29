@@ -318,7 +318,6 @@ namespace Dune
       typedef typename IndexSet  :: IndexType IndexType ;
       typedef typename GridView  :: template Codim< 0 > :: Iterator ElementIterator ;
       typedef typename ElementIterator::Entity  Entity ;
-      typedef typename Entity::EntityPointer    EntityPointer ;
       typedef typename GridView :: IntersectionIterator     IntersectionIterator ;
       typedef typename IntersectionIterator :: Intersection Intersection ;
 

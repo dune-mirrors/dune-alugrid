@@ -218,6 +218,12 @@ public:
   //! return current face 
   const GEOFaceType& getItem() const { return connector_.face(); }
 
+  //! return communication weight
+  int weight() const 
+  {
+    return this->getItem().weight();
+  }
+
 protected:
   // set interator to end iterator 
   void done () ;
@@ -374,12 +380,6 @@ public:
     // otherwise its true 
     return connector_.conformingRefinement() ? 
       BaseType :: conforming() : true ;
-  }
-
-  //! return communication weight (only available on macro iterator)
-  double weight() const 
-  {
-    return this->getItem().weight();
   }
 
 private:  
