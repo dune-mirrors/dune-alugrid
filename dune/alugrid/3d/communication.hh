@@ -209,10 +209,10 @@ namespace Dune
 
       Storage ( const Grid &grid, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, grid.maxLevel() ),
-          vertexGatherScatter_( grid, vertex, vertex.impl(), dataHandle ),
-          edgeGatherScatter_( grid, edge, edge.impl(), dataHandle ),
-          faceGatherScatter_( grid, face, face.impl(), dataHandle ),
-          elementGatherScatter_( grid, element, element.impl(), dataHandle )
+          vertexGatherScatter_( grid, vertex, Grid::getRealImplementation( vertex ), dataHandle ),
+          edgeGatherScatter_( grid, edge, Grid::getRealImplementation( edge ), dataHandle ),
+          faceGatherScatter_( grid, face, Grid::getRealImplementation( face ), dataHandle ),
+          elementGatherScatter_( grid, element, Grid::getRealImplementation( element ), dataHandle )
       {}
 
       GatherScatter &vertexGatherScatter () { return vertexGatherScatter_; }
