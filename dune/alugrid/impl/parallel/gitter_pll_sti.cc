@@ -14,7 +14,7 @@
 namespace ALUGrid
 {
 
-  int __STATIC_myrank = -1;
+  extern int __STATIC_myrank ;
   int __STATIC_turn   = -1;
   int __STATIC_phase  = -1;
 

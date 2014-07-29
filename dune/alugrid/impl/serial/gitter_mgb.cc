@@ -13,7 +13,6 @@
 
 namespace ALUGrid
 {
-
   std::pair< Gitter::Geometric::VertexGeo *, bool > MacroGridBuilder::
   InsertUniqueVertex (double x, double y, double z, int i) {
     std::pair< vertexMap_t::iterator, bool > result = _vertexMap.insert( std::make_pair( i, static_cast< VertexGeo * >( 0 ) ) );
