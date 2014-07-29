@@ -1,4 +1,4 @@
-noinst_PROGRAMS = adapt backuprestore sizes
+EXTRA_PROGRAMS = adapt backuprestore sizes
 
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \

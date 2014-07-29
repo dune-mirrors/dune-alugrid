@@ -358,14 +358,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafbegin();
+      return Grid::getRealImplementation( entity ).ileafbegin();
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ileafend();
+      return Grid::getRealImplementation( entity ).ileafend();
     }
 
     /** \brief obtain collective communication object */

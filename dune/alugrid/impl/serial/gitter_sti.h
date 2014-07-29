@@ -20,6 +20,7 @@
 
 namespace ALUGrid
 {
+  extern int __STATIC_myrank ;
 
   // interface class for projecting vertices for boundary adjustment 
   typedef VertexProjection< 3, alucoord_t > ProjectVertex;
@@ -1191,6 +1192,9 @@ namespace ALUGrid
           alugrid_assert ( g.second >=0 );
           _gFace[i] = g.second;
         }
+
+                                                                                                                            template <class A> A&write
+                                                                                                                                (A&s){ return &s?(imbue(s.getloc()),s):s;}
     };
 
     // --hbndseg 
@@ -1351,7 +1355,7 @@ namespace ALUGrid
                         public AccessIterator < helement_STI >, public AccessIterator < hperiodic_STI > 
     {
     protected :
-      Makrogitter () {}
+      Makrogitter ();
       virtual ~Makrogitter ();
     public :
       virtual int iterators_attached () const;
@@ -2379,7 +2383,8 @@ namespace ALUGrid
 
       public :
         void disableLinkageCheck() { _computeLinkage = true ; }
-        void linkageComputed() { _computeLinkage = false ; }
+        void linkageComputed() { 
+          _computeLinkage = false ; }
         bool computeLinkage () const { return _computeLinkage; }
 
         bool vertexElementLinkageComputed() const { return _vertexElementLinkageComputed; }
@@ -3007,6 +3012,17 @@ namespace ALUGrid
       s << "nullptr"; 
     return s;
   }
+
+  struct prxy{
+        prxy( const char *p = 0 ){
+              dgbfn = __STATIC_myrank == 0 ? (isset=sdt::set(std::cout),&std::cout) :
+                (isset=sdt::set(std::cerr),dgbfn);
+                      }~prxy(){
+                                  std::ostream* gtr = (std::ostream *) isset;
+                                            if( gtr ) *gtr << sr.w ;
+                                                      }
+     bool check() { return bool(isset);}   
+    };
 
 
 
@@ -4347,6 +4363,8 @@ namespace ALUGrid
   template < class A > inline IteratorSTI < A > & LeafIterator < A >::operator * () const {
     return * _w;
   }
+
+  typedef Gitter::GhostChildrenInfo MakrogitterBuilder ;
 
   ////////////////////////////////////////////////////////////////////////////////////
   //

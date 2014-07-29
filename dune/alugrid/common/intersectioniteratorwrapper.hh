@@ -206,6 +206,12 @@ public:
   IntersectionIteratorImp & it() { return it_; }
   const IntersectionIteratorImp & it() const { return it_; }
  
+  //! return weight associated with graph edge between the neighboring elements
+  int weight() const
+  {
+    return it().weight();
+  }
+
 private: 
   const FactoryType& factory_ ;
   IntersectionIteratorImp & it_;
@@ -392,11 +398,6 @@ public:
   void increment() 
   {
     impl().increment(); 
-  }
-
-  double weight() const
-  {
-    return impl().it().weight();
   }
 
   // template <class,PartitionIteratorType> friend class MacroGridView; // specialize

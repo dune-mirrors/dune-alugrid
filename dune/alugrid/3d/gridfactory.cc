@@ -322,7 +322,6 @@ namespace Dune
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
-        typedef typename ALU3dBasicImplTraits< MPICommunicatorType >::HBndSegType HBndSegType;
         const std::pair< BndPair, BndPair > &facePair = *it;
         out << facePair.first.first[ 0 ];
         for( unsigned int i = 1; i < numFaceCorners; ++i )
