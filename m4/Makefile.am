@@ -1,4 +1,4 @@
-M4FILES = dune-alugrid.m4 dlmalloc.m4 sionlib.m4 zlib.m4 zoltan.m4
+M4FILES = dune-alugrid.m4 alugridtype.m4 dlmalloc.m4 sionlib.m4 zlib.m4 zoltan.m4
 
 aclocaldir = $(datadir)/aclocal
 aclocal_DATA = $(M4FILES)
