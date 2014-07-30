@@ -2,9 +2,11 @@
 #define ALUGRID_PARALLEL_DGF_HH
 
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
-#include <dune/alugrid/dgf.hh>
 
+#if ! HAVE_ALUGRID
+#include <dune/alugrid/dgf.hh>
 #include <dune/alugrid/common/structuredgridfactory.hh>
+#endif
 
 namespace Dune 
 {
@@ -18,6 +20,7 @@ namespace Dune
     }
   };
 
+#if ! HAVE_ALUGRID
   template < ALUGridRefinementType refineType, class Comm > 
   class CreateParallelGrid< ALUGrid< 3,3, Dune::cube, refineType, Comm > >
   {
@@ -26,14 +29,11 @@ namespace Dune
   public:  
     static GridPtr< Grid > create( const std::string& filename ) 
     {
-#if ! HAVE_ALUGRID
       typedef StructuredGridFactory< Grid > SGF;
       return SGF :: createCubeGrid( filename );
-#else 
-      return GridPtr< Grid > (filename);
-#endif // if ! HAVE_ALUGRID 
     }
   };
+#endif // if ! HAVE_ALUGRID 
 }
 
 #endif
