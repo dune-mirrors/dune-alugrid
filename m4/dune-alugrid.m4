@@ -17,7 +17,7 @@ AC_DEFUN([DUNE_ALUGRID_CHECKS],[
   dnl check whether ALUGrid was found by the dune-grid module 
   dnl this conflicts with this package
   AS_IF([test "x$ALUGRID_CPPFLAGS" != "x"],
-        [AC_MSG_WARN([--with-alugrid conflicts with dune-alugrid module, remove the --with-alugrid from the configure options and rebuild dune-grid and dune-alugrid!])])
+        [AC_MSG_ERROR([--with-alugrid conflicts with dune-alugrid module, remove the --with-alugrid from the configure options, use the --without-alugrid configure option, and rebuild dune-grid and dune-alugrid!])])
 
   DUNE_DEFINE_ALUGRIDTYPE([ALUGRID_CONFORM],[],[Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::conforming >],[dune/alugrid/grid.hh],[dune/alugrid/dgf.hh])
   DUNE_DEFINE_ALUGRIDTYPE([ALUGRID_CUBE],[],[Dune::ALUGrid< dimgrid, dimworld, Dune::cube, Dune::nonconforming >],[dune/alugrid/grid.hh],[dune/alugrid/dgf.hh])
