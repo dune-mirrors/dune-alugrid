@@ -262,7 +262,7 @@ inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const IMPLElementType& item) 
 {
-  if ( elementType == hexa ) 
+  if ( elementType == hexa && mydim == 3 ) 
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
     // of number when calling myvertex 
@@ -294,15 +294,28 @@ buildGeom(const IMPLElementType& item)
     alugrid_assert ( ElementTopo::dune2aluVertex(2) == 2 );
     alugrid_assert ( ElementTopo::dune2aluVertex(3) == 3 );
 
-    // update geo impl 
-    geoImpl().update( item.myvertex(0)->Point(),
-                      item.myvertex(1)->Point(),
-                      item.myvertex(2)->Point(),
-                      item.myvertex(3)->Point() );
+    if( mydim == 3 ) 
+    {
+      // update geo impl 
+      geoImpl().update( item.myvertex(0)->Point(),
+                        item.myvertex(1)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point() );
+    }
+    else if( mydim == 2 ) 
+    {
+      // update geo impl (drop vertex 0)
+      geoImpl().update( item.myvertex(1)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point() );
+    }
   }
 
-  // get volume of element 
-  geoImpl().setVolume( item.volume() );
+  if( mydim == 3 ) 
+  {
+    // get volume of element 
+    geoImpl().setVolume( item.volume() );
+  }
 
   return true;
 }
