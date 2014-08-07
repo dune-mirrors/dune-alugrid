@@ -262,7 +262,9 @@ inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const IMPLElementType& item) 
 {
-  if ( elementType == hexa && mydim == 3 ) 
+  alugrid_assert( int(mydim) == 2 || int(mydim) == 3 );
+
+  if ( elementType == hexa ) 
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
     // of number when calling myvertex 
@@ -275,15 +277,26 @@ buildGeom(const IMPLElementType& item)
     alugrid_assert ( ElementTopo::dune2aluVertex(6) == 7 );
     alugrid_assert ( ElementTopo::dune2aluVertex(7) == 6 );
 
-    // update geo impl 
-    geoImpl().update( item.myvertex(0)->Point(),
-                      item.myvertex(1)->Point(),
-                      item.myvertex(3)->Point(),
-                      item.myvertex(2)->Point(),
-                      item.myvertex(4)->Point(),
-                      item.myvertex(5)->Point(),
-                      item.myvertex(7)->Point(),
-                      item.myvertex(6)->Point() );
+    if( mydim == 3 ) // hexahedron
+    {
+      // update geo impl 
+      geoImpl().update( item.myvertex(0)->Point(),
+                        item.myvertex(1)->Point(),
+                        item.myvertex(3)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(4)->Point(),
+                        item.myvertex(5)->Point(),
+                        item.myvertex(7)->Point(),
+                        item.myvertex(6)->Point() );
+    }
+    else if ( mydim == 2 ) // quadrilateral
+    {
+      // update geo impl (drop vertex 4,5,6,7)
+      geoImpl().update( item.myvertex(0)->Point(),
+                        item.myvertex(1)->Point(),
+                        item.myvertex(3)->Point(),
+                        item.myvertex(2)->Point() );
+    }
   }
   else if( elementType == tetra ) 
   {
@@ -294,7 +307,7 @@ buildGeom(const IMPLElementType& item)
     alugrid_assert ( ElementTopo::dune2aluVertex(2) == 2 );
     alugrid_assert ( ElementTopo::dune2aluVertex(3) == 3 );
 
-    if( mydim == 3 ) 
+    if( mydim == 3 ) // tetrahedron 
     {
       // update geo impl 
       geoImpl().update( item.myvertex(0)->Point(),
@@ -302,7 +315,7 @@ buildGeom(const IMPLElementType& item)
                         item.myvertex(2)->Point(),
                         item.myvertex(3)->Point() );
     }
-    else if( mydim == 2 ) 
+    else if( mydim == 2 ) // triangle
     {
       // update geo impl (drop vertex 0)
       geoImpl().update( item.myvertex(1)->Point(),
