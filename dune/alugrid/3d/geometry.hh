@@ -122,10 +122,10 @@ namespace Dune
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
       { 
-        alugrid_assert ( cdim == 3 );
         c[0] = p[0];
         c[1] = p[1];
-        c[2] = p[2];
+        if( cdim > 2 ) 
+          c[2] = p[2];
       }
 
       template <class CoordPtrType>
