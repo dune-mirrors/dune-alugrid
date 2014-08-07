@@ -1,10 +1,10 @@
-ALUGrid library
+DUNE-ALUGrid module
 ===================
 
 License
 -------
 
-The ALUGrid library and headers are licensed under the GNU General
+The DUNE-ALUGrid module is licensed under the GNU General
 Public License (GPL) version 2. The full license text can be found 
 in the file COPYING and via http://www.gnu.org/licenses/gpl.html .
 
@@ -12,66 +12,11 @@ in the file COPYING and via http://www.gnu.org/licenses/gpl.html .
 Compiler 
 --------
 
-The ALUGrid code is known to compile with the GNU Compiler version 4.1.x or higher. 
-The code also compiles with the INTEL C++ Compiler (tested version 11.1 and 12.0).
+The DUNE-ALUGrid code is known to compile with the GNU Compiler version 4.6.x or higher. 
+The code also compiles with the INTEL C++ Compiler (tested version 13.1).
 
 The compiler can be chosen by setting the variable CXX correctly, i.e. 
-CXX=g++ or CXX=icpc. For parallel computations the MPI compiler, like mpiCC or mpicxx should
-be used or the include path and lib path adapted. 
-
-
-Getting started
----------------
-
-To compile the library ALUGrid has to check several components of
-your system. Run
-
-  ./configure
-
-to commence those tests. See ./configure --help for detail help on options. 
-If you intend to use the parallel version of the
-grid, make sure that you have a version of MPI, 
-and METIS (--with-metis=PATH) or  
-ParMETIS (--with-parmetis=PATH) and supply the respective flags to the 
-configure script. Dynamic load balancing can only be used 
-if either METIS, or ParMETIS, or both are linked to the ALUGrid Library.
-
-For parallel computation the C bindings of MPI are needed, 
-common packages are OpenMPI or MPICH, but also other MPI implementations should work 
-with this code. 
-To compile the parallel version of the library use the 
-$MPICC compiler script (i.e. mpicc -show or mpicc -showme)
-to obtain pre-processor flags and linker flags to add to 
-the CXXFLAGS and LDFLAGS variable. 
-Alternatively, you can use the MPI C++ compiler script to compile the code
-(i.e. ./configure CXX=mpiCC ....). In this case the libmpicxx will 
-also be linked to the libalugrid.a although not needed. 
-
-For example to compile the parallel version of ALUGrid the configure
-command can look as follows: 
-
-./configure CXX=g++ CXXFLAGS="`mpicc -showme:compile`" LDFLAGS="`mpicc -showme:link`" --with-metis="metis_path" --with-party="partylib_path"
-
-or 
-
-./configure CXX=mpiCC --with-metis="metis_path" --with-party="partylib_path"
-
-For METIS and ParMETIS (version 4.0 or higher) see 
-see http://glaros.dtc.umn.edu/gkhome/views/metis
-
-You can use
-
-  ./configure --prefix=PATH
-
-if you don't want ALUGrid to be installed into the default directory
-(i.e. the path were ALUGrid was unpacked).
-
-After configuration
-
-  make
-  make install
-
-build and install ALUGrid.  
+CXX=g++ or CXX=icpc. Please see the documentation of the DUNE build system.
 
 
 Dynamic Load Balancing Options
@@ -85,21 +30,25 @@ available in the directory the program is launched. See
 The file must contain three values: 
 first row:  ldb_under (value < 1.0),  default value is 0.0
 second row: ldb_over (value > 1.0),   default value is 1.2 
-third row: Graph partitioning method, default method is 11 (METIS_PartGraphKway)
+third row: Graph partitioning method, default method is 4 (METIS_PartGraphKway)
 
 Available methods are: 
 
 NONE = 0
 COLLECT = 1 (collect all elements to process 0)
 
-ALUGRID_SpaceFillingCurveNoEdges = 4 
-ALUGRID_SpaceFillingCurve = 5
+ALUGRID_SpaceFillingCurveLinkage       = 4
+ALUGRID_SpaceFillingCurveSerialLinkage = 5
 
-METIS_PartGraphKway = 11
-METIS_PartGraphRecursive = 12
+ALUGRID_SpaceFillingCurve       = 9  (default)
+ALUGRID_SpaceFillingCurveSerial = 10
 
-ParMETIS_V3_PartKway = 13
-ParMETIS_V3_AdaptiveRepart = 14
+METIS_PartGraphKway        = 11
+METIS_PartGraphRecursive   = 12
+
+ZOLTAN_LB_HSFC  = 13
+ZOLTAN_LB_GRAPH = 14
+ZOLTAN_PARMETIS = 15
 
 See the documentation of the corresponding package for detail on the
 methods. 
@@ -123,10 +72,11 @@ VERBOSE_PLL  output produced by parallel grid methods
 Optimization 
 -------------
 
-The ALUGrid code is highly riddled with assert statements. 
+The DUNE-ALUGrid code is highly riddled with assert statements. 
 Therefore it is recommended to compile the library and the application code
 with the CPP variable NDEBUG set (i.e. -DNDEBUG) to avoid all asserts
 statement tests. 
+
 
 Debug
 -----
@@ -142,6 +92,4 @@ NO_OBJECTSTREAM_DEBUG.
 Knowns Bugs 
 -----------
 
-ALUGrid does not work with Myrinet MPI. Up to now we couldn't figure
-out what exactly the problem is. 
-
+- Ghost elements do not work for tetrahedral grid when using bisection refinement.

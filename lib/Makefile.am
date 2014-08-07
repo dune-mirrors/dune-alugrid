@@ -33,14 +33,15 @@ libalugrid_parallel_la_CPPFLAGS = $(AM_CPPFLAGS) $(ZLIB_CPPFLAGS)
 libalugrid_parallel_la_LDFLAGS = $(AM_LDFLAGS)
 libalugrid_parallel_la_LIBADD = $(ALL_PKG_LIBS) libalugrid_serial.la ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(ZLIB_LIBS)
 
+
 ALUGRID_IMPL_LIBS=libalugrid_parallel.la libalugrid_serial.la 
+
 lib_LTLIBRARIES = $(ALUGRID_IMPL_LIBS) libdunealugrid.la
 
 libdunealugrid_la_SOURCES = \
 	$(top_srcdir)/dune/alugrid/3d/faceutility.cc \
 	$(top_srcdir)/dune/alugrid/3d/mappings.cc \
 	$(top_srcdir)/dune/alugrid/3d/topology.cc
-
 
 libdunealugrid_la_CPPFLAGS = $(AM_CPPFLAGS) 
 libdunealugrid_la_LDFLAGS = $(AM_LDFLAGS)

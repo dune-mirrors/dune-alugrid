@@ -16,8 +16,7 @@
 #endif
 
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-#define ZOLTAN_CONFIG_H_INCLUDED
-#include <zoltan_cpp.h>
+#include <dune/alugrid/impl/parallel/aluzoltan.hh>
 
 extern "C" {
   extern double Zoltan_HSFC_InvHilbert3d (Zoltan_Struct *zz, double *coord);
@@ -42,7 +41,8 @@ namespace Dune {
   public:
     SpaceFillingCurveOrdering( const Coordinate& lower, 
                                const Coordinate& upper, 
-                               const CollectiveCommunication& comm )
+                               const CollectiveCommunication& comm =
+                               CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
         zz_( comm )

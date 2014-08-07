@@ -50,6 +50,18 @@ void method ( int problem, int startLvl, int maxLvl,
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
+
+#ifndef BALL
+  if ( grid.comm().size() > 1 &&
+       (grid.overlapSize(0)==0 && grid.ghostSize(0)==0)
+     )
+  {
+    std::cout << "This grid implementation does not support ghost cells and the finite-volume scheme will not work correctly in parallel.";
+    std::cout << std::endl;
+    exit(1);
+  }
+#endif
+
   grid.loadBalance();
   //grid.finalizeGridCreation() ;
   const bool verboseRank = grid.comm().rank() == 0 ;
@@ -66,7 +78,7 @@ void method ( int problem, int startLvl, int maxLvl,
 
   /* get view to leaf grid */
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
-  GridView gridView = grid.leafView< Dune::Interior_Partition >();
+  GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
 
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, ModelType::dimRange > > DataType;
@@ -90,8 +102,9 @@ void method ( int problem, int startLvl, int maxLvl,
   }
 
   /* create adaptation method */
+  const int initialBalanceCounter = std::max( int(model.problem().balanceStep() - maxLevel), int(1) );
   typedef LeafAdaptation< Grid, DataType > AdaptationType;
-  AdaptationType adaptation( grid, model.problem().balanceStep() );
+  AdaptationType adaptation( grid, model.problem().balanceStep(), initialBalanceCounter );
 
   for( int i = 0; i <= maxLevel; ++i )
   {
@@ -119,7 +132,7 @@ void method ( int problem, int startLvl, int maxLvl,
   /* first point where data is saved */
   double saveStep = saveInterval;
   /* cfl number */
-  double cfl = 0.9;
+  double cfl = 0.15;
   /* vector to store update */
   DataType update( gridView );
 
@@ -137,13 +150,13 @@ void method ( int problem, int startLvl, int maxLvl,
 
     // update vector might not be of the right size if grid has changed
     update.resize();
+    // set update to zero 
+    update.clear();
+    double dt;
 
     Dune :: Timer solveTimer ;
-    // apply the spacial operator
-    double dt = scheme( time, solution, update );
-    // multiply time step by CFL number
+    dt = scheme( time, solution, update ) ;
     dt *= cfl;
-
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
 
@@ -165,6 +178,7 @@ void method ( int problem, int startLvl, int maxLvl,
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     size_t elements = scheme.mark( time, solution, gridMarker );
 
+#ifndef NO_OUTPUT
     /* check if data should be written */
     if( time >= saveStep )
     {
@@ -193,6 +207,7 @@ void method ( int problem, int startLvl, int maxLvl,
         std::cout << std::endl;
       }
     }
+#endif
 
     /* call adaptation algorithm */
     if( gridMarker.marked() )

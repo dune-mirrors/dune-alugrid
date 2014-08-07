@@ -44,14 +44,11 @@ namespace Dune
 
 
   template< class ALUGrid >
-  alu_inline
-  typename ALU3dGridFactory< ALUGrid >::VertexId
-  ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const size_t globalId )
+  alu_inline 
+  void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const VertexId globalId )
   {
     foundGlobalIndex_ = true ;
-    const VertexId vertexId = vertices_.size();
     vertices_.push_back( std::make_pair( pos, globalId ) );
-    return vertexId;
   }
 
   
@@ -325,7 +322,6 @@ namespace Dune
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
-        typedef typename ALU3dBasicImplTraits< MPICommunicatorType >::HBndSegType HBndSegType;
         const std::pair< BndPair, BndPair > &facePair = *it;
         out << facePair.first.first[ 0 ];
         for( unsigned int i = 1; i < numFaceCorners; ++i )
@@ -343,6 +339,10 @@ namespace Dune
           out << " " << boundaryId.first[ i ];
         out << std::endl;
       }
+
+      // no linkage 
+      out << int(0) << std::endl; 
+
       out.close();
     }
 
@@ -730,6 +730,78 @@ namespace Dune
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
+
+    // communicate unidentified boundaries and find process borders)
+    typedef MPIHelper::MPICommunicator MPICommunicator;
+    CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+
+    int numBoundariesMine = faceMap.size();
+    std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
+    typedef std::map< FaceType, FaceType, FaceLess > GlobalToLocalFaceMap;
+    GlobalToLocalFaceMap globalFaceMap;
+    {
+      const FaceIterator faceEnd = faceMap.end();
+      int idx = 0;
+      for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
+      {
+        FaceType key;
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          key[ i ] = vertices_[ faceIt->first[ i ] ].second;
+        std::sort( key.begin(), key.end() );
+        globalFaceMap.insert( std::make_pair(key, faceIt->first) );
+        
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
+          boundariesMine[ idx++ ] = key[ i ];
+      }
+    }
+
+    const int numBoundariesMax = comm.max( numBoundariesMine );
+
+    // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
+    if( numBoundariesMax == 0 ) return ;
+
+    // get internal boundaries from each process 
+    std::vector< std::vector< int > > boundariesEach;
+
+#if HAVE_MPI
+    // collect data from all processes 
+    boundariesEach = ALU3DSPACE MpAccessMPI( comm ).gcollect( boundariesMine );
+#else
+    boundariesEach.resize( comm.size() );
+#endif
+    boundariesMine.clear();
+
+    for( int p = 0; p < comm.size(); ++p )
+    {
+      if( p != comm.rank() )
+      {
+        const std::vector< int >& boundariesRank = boundariesEach[ p ];
+        const int bSize = boundariesRank.size();
+        for( int idx = 0; idx < bSize; idx += numFaceCorners )
+        {
+          FaceType key;
+          for( unsigned int i = 0; i < numFaceCorners; ++i )
+            key[ i ] = boundariesRank[ idx + i ];
+
+          const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
+          if( pos_gl != globalFaceMap.end() )
+          {
+            const FaceIterator pos = faceMap.find( pos_gl->second );
+            if ( pos != faceMap.end() )
+            {
+              reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
+              faceMap.erase( pos );
+            }
+            else 
+            {
+              // should never get here but does when this method is called to
+              // construct the "reference" elements for alu
+            }
+          }
+        }
+      }
+      boundariesEach[ p ].clear();
+    } // end for all p 
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();

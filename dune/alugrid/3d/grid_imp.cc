@@ -299,15 +299,6 @@ namespace Dune
   // calc all necessary things that might have changed 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::setMaxLevel ( int mxl )
-  {
-    maxlevel_ = std::max(maxlevel_,mxl);
-  }
-
-  
-  // calc all necessary things that might have changed 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::updateStatus()
   {
     calcMaxLevel();
@@ -407,25 +398,6 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
-  const typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::LevelIndexSet &
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::levelIndexSet ( int level ) const 
-  {
-    // check if level fits in vector  
-    alugrid_assert ( level >= 0 );
-    alugrid_assert ( level < (int) levelIndexVec_.size() );
-
-    if( levelIndexVec_[level] == 0 )
-      levelIndexVec_[level] = 
-        new LevelIndexSetImp ( *this, 
-                               this->template lbegin<0> (level), 
-                               this->template lend<0> (level), 
-                               level );
-    return *(levelIndexVec_[level]);
-  }
-
-
   // global refine 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
@@ -504,218 +476,62 @@ namespace Dune
   // post process grid  
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::postAdapt ()
+  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::clearIsNewMarkers ()
   {
-    { 
-      // old fashioned way 
-      typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
-      IteratorType w (*this, maxLevel(), nlinks() );
-      
-      typedef typename IteratorType::val_t val_t;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::IMPLElementType IMPLElementType;  
-      
-      for (w.first () ; ! w.done () ; w.next ())
-      {
-        val_t & item = w.item();
-
-        alugrid_assert ( item.first || item.second );
-        IMPLElementType * elem = 0; 
-        if( item.first )
-          elem = static_cast<IMPLElementType *> (item.first); 
-        else if( item.second )
-        {
-          elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
-          alugrid_assert ( elem );
-        }
-        if (elem->hasBeenRefined())
-        {
-          elem->resetRefinedTag();
-          // on bisected grids its possible that not only leaf elements where added so
-          // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
-          while (elem->up())
-          {
-            elem = static_cast<IMPLElementType *>(elem->up());
-            elem->resetRefinedTag();
-          }
-        }
-      }
-    }
-
-    // make that postAdapt has been called
-    lockPostAdapt_ = false;
-  }
-
-
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
-  bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
-    ::writeGrid_Ascii( const std::string filename, alu3d_ctype time , bool scientific ) const
-  {     
-    // write ascii only works for serial grids at the moment 
-    if ( this->comm().size() > 1 )
-    {
-      DUNE_THROW(GridError,"ALU3dGrid::writeGrid_Ascii not implemented for parallel grids!");
-    }
+    // old fashioned way 
+    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
+    IteratorType w (*this, maxLevel(), nlinks() );
     
-    std::ofstream file ( filename.c_str() );
-    if(file)
-    {     
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::HElementType    HElementType;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::VertexType      VertexType;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::BNDFaceType     BNDFaceType;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::IMPLElementType IMPLElementType;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::HasFaceType     HasFaceType;
-      typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::GEOVertexType   GEOVertexType;
-          
-      ALU3DSPACE LeafIterator < HElementType > leafElements( myGrid() );
-      file << "!" << elType2Name( elType ) << " Elements = " << leafElements->size() << std::endl;
-
-      ALU3DSPACE LeafIterator < VertexType > leafVertices( myGrid() );
-      { 
-        file << std::endl;
-
-        if( scientific ) 
-        {
-          // use scientific mode 
-          file << std::scientific;
-        }
-      
-        // write coordinates of the vertices 
-        int vxsize = leafVertices->size();
-        file << vxsize << std::endl;
-
-        typedef double ShortVecType[3];
-        ShortVecType * vxvec = new ShortVecType [vxsize];
-        alugrid_assert ( vxvec );
-        
-        for( leafVertices->first(); !leafVertices->done() ; leafVertices->next() )
-        {
-          const GEOVertexType & vertex = 
-            static_cast<GEOVertexType &> (leafVertices->item()); 
-          const double (&p)[3] = vertex.Point();
-          int vxidx = vertex.getIndex();
-          double (&v)[3] = vxvec[vxidx];
-          for(int i=0; i<3; ++i) v[i] = p[i];
-        }
-
-        for(int i=0; i<vxsize; ++i)
-        {
-          file << vxvec[i][0] << " " << vxvec[i][1] << " " << vxvec[i][2] << std::endl;
-        }
-
-        delete [] vxvec;
-      }
-
-      file << std::endl;
-      // write element vertices 
-      {
-        const int novx = (elType == tetra) ? 4 : 8;
-        file << leafElements->size() << std::endl;
-        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
-        {
-          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
-          for(int i=0; i<novx; ++i)
-          {
-            const int vxnum = item.myvertex(i)->getIndex();
-            file << vxnum << " ";
-          }
-          file << std::endl;
-        }
-      }
-
-      // write boundary faces 
-      {
-        file << std::endl;
-        const int nofaces  = (elType == tetra) ? 4 : 6;
-        int bndfaces = 0;
-        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
-        {
-          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
-          for(int i=0; i<nofaces; ++i)
-          {
-            std::pair < HasFaceType * , int > nbpair = item.myneighbour(i);
-            if(nbpair.first->isboundary())
-            {
-              ++bndfaces;
-            }
-          }
-        }
-        file << bndfaces << std::endl;
-      }
-      // write boundary faces 
-      {
-        const int bndvxnum = (elType == tetra) ? 3 : 4;
-        const int nofaces  = (elType == tetra) ? 4 : 6;
-        for( leafElements->first(); !leafElements->done() ; leafElements->next() )
-        {
-          IMPLElementType & item = static_cast<IMPLElementType &> (leafElements->item());
-          for(int i=0; i<nofaces; ++i)
-          {
-            std::pair < HasFaceType * , int > nbpair = item.myneighbour(i);
-            if(nbpair.first->isboundary())
-            {
-              BNDFaceType * face = static_cast<BNDFaceType *> (nbpair.first);
-              file << -(face->bndtype()) << " " << bndvxnum << " ";
-              for(int j=0; j<bndvxnum; j++)
-              {
-                int vxnum = face->myvertex(0,j)->getIndex();
-                file << vxnum << " ";
-              }
-              file << std::endl;
-            }
-          }
-        }
-      }
-
-      {
-        file << std::endl;
-
-        // write coordinates of the vertices 
-        int vxnum = 0;
-        for( leafVertices->first(); !leafVertices->done() ; leafVertices->next() )
-        {
-          file << vxnum << " -1" << std::endl;
-          ++vxnum;
-        }
-      }
-    }
-    return true;
-  }
-
-
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  template <GrapeIOFileFormatType ftype>
-  alu_inline 
-  bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
-    ::writeGrid ( const std::string filename, alu3d_ctype time ) const
-  {
-    switch(ftype)
+    typedef typename IteratorType::val_t val_t;
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
+    
+    for (w.first () ; ! w.done () ; w.next ())
     {
-      case xdr  : return writeGrid_Xdr(filename,time);
-      case ascii: return writeGrid_Ascii(filename,time);
-      default: derr << "Wrong file type in writeGrid method~ \n";
+      val_t & item = w.item();
+
+      alugrid_assert ( item.first || item.second );
+      IMPLElementType * elem = 0; 
+      if( item.first )
+        elem = static_cast<IMPLElementType *> (item.first); 
+      else if( item.second )
+      {
+        elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
+        alugrid_assert ( elem );
+      }
+      if (elem->hasBeenRefined())
+      {
+        elem->resetRefinedTag();
+        // on bisected grids its possible that not only leaf elements where added so
+        // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
+        while (elem->up())
+        {
+          elem = static_cast<IMPLElementType *>(elem->up());
+          elem->resetRefinedTag();
+        }
+      }
     }
-    return false;
   }
 
 
+  // post process grid  
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
-    ::writeGrid_Xdr ( const std::string filename, alu3d_ctype time ) const
+  void ALU3dGrid< elType, Comm >::postAdapt ()
   {
-    std::ofstream out( filename.c_str() );
-    if( ! out ) 
-      std::cerr << "Couldn't open "<< filename << " for writing grid backup" << std::endl;
-    else 
-      myGrid().backup( out );
-    return true;
-  }
+    if( lockPostAdapt_ )
+    { 
+      // clear all isNew markers on entities 
+      clearIsNewMarkers();
 
+      // make that postAdapt has been called
+      lockPostAdapt_ = false;
+    }
+  }
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   inline bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
-    ::writeMacroGrid ( const std::string path, const std::string name ) const
+    ::writeMacroGrid ( const std::string path, const std::string name,
+                       const ALU3DSPACE MacroFileHeader::Format format ) const
   {
     std::stringstream filename;
     filename << path << "/" << name << "." << comm().rank();
@@ -725,7 +541,7 @@ namespace Dune
     if( macro ) 
     {
       // dump distributed macro grid as ascii files 
-      myGrid().container().backupCMode( macro );
+      myGrid().container().dumpMacroGrid( macro, format );
     }
     else 
       std::cerr << "WARNING: couldn't open file `" <<  filename.str() << "' for writing!" << std::endl;
@@ -733,65 +549,13 @@ namespace Dune
     return true;
   }
 
-
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  template <GrapeIOFileFormatType ftype>
-  alu_inline 
-  bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
-    ::readGrid ( const std::string filename, alu3d_ctype & time )
-  {
-    {
-      std::string mName(filename);
-      mName += ".macro";
-      const char * macroName = mName.c_str();
-    
-      { //check if file exists 
-        std::ifstream check ( macroName );
-        if( !check 
-            // only abort on rank 0
-            // on all other ranks this can be empty 
-            && comm().rank() == 0      
-            ) 
-          DUNE_THROW(GridError,"cannot read file " << macroName << "\n");
-        check.close();
-      }
-    
-      // if grid exists delete first 
-      if( mygrid_ ) delete mygrid_;
-      mygrid_ = createALUGrid( macroName );
-    }
-
-
-    alugrid_assert (mygrid_ != 0);
-
-    // check for element type 
-    this->checkMacroGrid ();
-    
-    std::ifstream in( filename.c_str() );
-    if( ! in ) 
-      std::cerr << "Couldn't open file " << filename << " for restoring grid" << std::endl;
-    else 
-      myGrid().restore( in );
-
-    // don't restore time 
-    time = 0;
-  
-    // calculate new maxlevel 
-    // calculate indices 
-    updateStatus();
-
-    // reset refinement markers 
-    postAdapt();
-
-    return true;
-  }
-
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::backup( std::ostream& stream ) const
+  void ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
     // backup grid to given stream 
-    myGrid().backup( stream );
+    myGrid().backup( stream, format );
   }
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
@@ -820,7 +584,7 @@ namespace Dune
     updateStatus();
 
     // reset refinement markers 
-    postAdapt();
+    clearIsNewMarkers();
   }
 
 
@@ -902,83 +666,23 @@ namespace Dune
   template class ALU3dGrid< 2, 2, hexa, ALUGridNoComm >;
   template class ALU3dGrid< 2, 2, tetra, ALUGridNoComm >;
 
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
-
   template class ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >;
-
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
-  
   
   //2-3
-    template class ALU3dGrid< 2, 3, hexa, ALUGridNoComm >;
+  template class ALU3dGrid< 2, 3, hexa, ALUGridNoComm >;
   template class ALU3dGrid< 2, 3, tetra, ALUGridNoComm >;
-
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
 
   template class ALU3dGrid< 2, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 2, 3, tetra, ALUGridMPIComm >;
 
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 3, tetra, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 2, 3, hexa, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
-    
   //3-3
   template class ALU3dGrid< 3, 3, hexa, ALUGridNoComm >;
   template class ALU3dGrid< 3, 3, tetra, ALUGridNoComm >;
 
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridNoComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridNoComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridNoComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridNoComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
-
   template class ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >;
 
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;  
-
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >::readGrid< xdr > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >::readGrid< ascii > (const std::string, alu3d_ctype & );  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >::writeGrid< xdr > (const std::string, alu3d_ctype ) const ;  
-  template bool ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >::writeGrid< ascii > (const std::string, alu3d_ctype ) const ;
 #endif // #if COMPILE_ALUGRID_LIB 
 
 } // end namespace Dune

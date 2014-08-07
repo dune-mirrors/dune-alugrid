@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 
+#define ENABLE_ALUGRID_VTK_OUTPUT
+
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
@@ -104,8 +106,8 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
       sum += (diff * diff);
     }
 
-    std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << " }" << std::endl;
-    std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << " }" << std::endl << std::endl;
+    //std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << " }" << std::endl;
+    //std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << " }" << std::endl << std::endl;
 
     if( sum > 1e-10 ) 
     {
@@ -230,9 +232,11 @@ void globalCoarsening(GitterType& grid, int refcount) {
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
-  MPI_Init(&argc,&argv);
   int rank = 0;
+#if HAVE_MPI
+  MPI_Init(&argc,&argv);
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
 
   int mxl = 0; 
   const char* filename = 0 ;
@@ -262,12 +266,13 @@ int main (int argc, char ** argv, const char ** envp)
   std::stringstream backupname ; 
   backupname << "file." << rank ;
   std::stringstream databuf;
-  //ALUGrid::ObjectStream databuf ;
   {
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
     ALUGrid::GitterDunePll grid(macroname.c_str(),a);
-    grid.duneLoadBalance() ;
+    grid.loadBalance() ;
+
+    grid.tovtk( "out" );
 #else 
     std::ifstream infile( macroname.c_str());
     ALUGrid::GitterDuneImpl grid1( infile );
@@ -317,7 +322,6 @@ int main (int argc, char ** argv, const char ** envp)
   {
     std::cout << "Try to read stringbuf:" << std::endl;
     std::cout << "Data Buffer size: " << databuf.str().size() << std::endl;
-    //std::cout << "Data Buffer size: " << databuf.size() << std::endl;
     // read grid from file 
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
@@ -331,9 +335,10 @@ int main (int argc, char ** argv, const char ** envp)
     //grid.restore( file );
     // adapt grid 
     
+#if HAVE_MPI
     ExchangeBaryCenter dataHandle ;
     grid.interiorGhostCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
-
+#endif
 
     std::cout << "Grid restored!" << std::endl;
     grid.printsize();
@@ -342,7 +347,9 @@ int main (int argc, char ** argv, const char ** envp)
     globalCoarsening(grid, mxl);
   }
 
+#if HAVE_MPI
   MPI_Finalize();
+#endif
   return 0;
 }
 

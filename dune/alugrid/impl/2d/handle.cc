@@ -4,6 +4,7 @@
 
 #include "grid.h"
 #include "handle.h"
+#include "hdlrw.h"
 #include "triang.h"
 #include "vmmap.h"
 

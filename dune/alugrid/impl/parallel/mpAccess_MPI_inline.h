@@ -11,8 +11,21 @@
 
 namespace ALUGrid
 {
+  extern int __STATIC_myrank;
+
   inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm ) 
   {
+    int wasInitialized = 0;
+    // check if MPI was initialized, otherwise exit 
+    MPI_Initialized( &wasInitialized );
+    if( ! wasInitialized )
+    {
+      std::cerr << "ERROR: MPI was not initialized at the beginning of the program."
+                << "       Please add the corresponding call to MPI_Init, e.g. by adding `Dune::MPIHelper::instance( argc, argv );`"
+                << "       as a first line of the main routine." << std::endl;
+      std::abort();
+    }
+
     // duplicate mpi communicator 
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -34,6 +47,7 @@ namespace ALUGrid
     int rank = -1;
     MY_INT_TEST MPI_Comm_rank ( _mpiComm, & rank );
     alugrid_assert (test == MPI_SUCCESS);
+    __STATIC_myrank = rank ;
     return rank;
   }
 
@@ -745,18 +759,7 @@ namespace ALUGrid
           }
 
           // send data 
-          //const int bufferSize = 
           sendLink( sendDest[ link ], _tag, osSend[ link ], _sendRequest[ link ], comm );
-
-          /*
-          // post receive if in symmetric mode
-          if( _symmetric ) 
-          {
-            assert( _recvRequest );
-            assert( &_recvRequest[ link ] );
-            postReceive( sendDest[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
-          }
-          */
         }
 
         // set send info 
@@ -784,7 +787,6 @@ namespace ALUGrid
           // post receive if in symmetric mode
           assert( _recvRequest );
           assert( &_recvRequest[ link ] );
-          std::cout << "Post receive" << std::endl;
           postReceive( recvSource[ link ], _tag, bufferSize, osRecv[ link ], _recvRequest[ link ], comm );
         }
       }
@@ -802,7 +804,7 @@ namespace ALUGrid
         receiveImpl( out );
 
         // do work that can be done between send and receive 
-        dataHandle.meantimeWork() ;
+        dataHandle.localComputation() ;
 
         for( int link=0; link<_recvLinks; ++link ) 
           dataHandle.unpack( link, out[ link ] );
@@ -810,7 +812,7 @@ namespace ALUGrid
       else 
       {
         // do work that can be done between send and receive 
-        dataHandle.meantimeWork() ;
+        dataHandle.localComputation() ;
 
         // create receive message buffers 
         std::vector< ObjectStream > out( 1 );
@@ -985,6 +987,11 @@ namespace ALUGrid
   {
     alugrid_assert ( tag > messagetag+1 );
     return new NonBlockingExchangeMPI( *this, tag );
+  }
+
+  inline MpAccessMPI::NonBlockingExchange *MpAccessMPI::nonBlockingExchange () const
+  {
+    return new NonBlockingExchangeMPI( *this, getMessageTag() );
   }
 
   // --exchange

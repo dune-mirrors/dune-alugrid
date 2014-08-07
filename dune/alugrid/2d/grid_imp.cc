@@ -494,14 +494,14 @@ namespace Dune
     EntityObject father( EntityImp( factory(), maxLevel()) );
     EntityObject son   ( EntityImp( factory(), maxLevel()) );
 
-    int defaultChunk = newElementsChunk_;
-    int actChunk     = refineEstimate_ * refineMarked_;
+    // int defaultChunk = newElementsChunk_;
+    // int actChunk     = refineEstimate_ * refineMarked_;
 
     // guess how many new elements we get
-    int newElements = std::max( actChunk , defaultChunk );
+    // int newElements = std::max( actChunk , defaultChunk );
 
     // reserve memory
-    handle.preAdapt( newElements );
+    // handle.preAdapt( newElements );
 
     bool ref = false;
     {
@@ -520,7 +520,7 @@ namespace Dune
     }
 
     // check whether we have balance
-    handle.postAdapt();
+    // handle.postAdapt();
     
     postAdapt();
     return ref;
@@ -662,83 +662,9 @@ namespace Dune
     return comm_; 
   }
       
-  
-  // **************************************************************
-  // ***************************************************************
-  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  template <GrapeIOFileFormatType ftype>
-  inline bool
-  ALU2dGrid< dim, dimworld, eltype >::writeGrid(const std::string filename, alu2d_ctype time ) const
-  {
-    switch(ftype)
-    {
-      case xdr  : return writeGrid_Xdr(filename,time);
-      case ascii: return writeGrid_Ascii(filename,time);
-      default: derr << "Wrong file type in writeGrid method~ \n";
-    }
-    return false;
-  }
-
-  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  inline bool
-  ALU2dGrid< dim, dimworld, eltype >::writeGrid_Ascii(const std::string filename, alu2d_ctype time ) const
-  {     
-    abort();
-    return true;
-  }
-
-  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  inline bool
-  ALU2dGrid< dim, dimworld, eltype >::writeGrid_Xdr(const std::string filename, alu2d_ctype time ) const
-  {
-    HmeshType & mygrd = myGrid();
-    mygrd.storeGrid(filename.c_str(),time,0);
-
-    // write time and maxlevel 
-    {
-      std::string extraName(filename);
-      extraName += ".extra";
-      std::ofstream out (extraName.c_str());
-      if(out)
-      {
-        out << std::scientific << time << " ";
-        out << maxLevel_ << " ";
-        out.close();
-      }
-      else 
-      {
-        derr << "ALU2dGrid::writeGrid: couldn't open <" << extraName << ">! \n";
-      }
-    }
-    return true;
-  }
-
-  template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  template <GrapeIOFileFormatType ftype>
-  inline bool
-  ALU2dGrid< dim,dimworld, eltype >::readGrid( const std::string filename, alu2d_ctype & time )
-  {
-    // not needed anymore 
-    time = 0;
-    {
-      // if grid exists delete first 
-      if( mygrid_ ) delete mygrid_;
-      mygrid_ = new HmeshType (filename.c_str());
-      alugrid_assert (mygrid_ != 0);
-    }
-
-    // calculate new maxlevel 
-    // calculate indices 
-    updateStatus();
-
-    // cleanup markers 
-    postAdapt();
-    return true;
-  }
-
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   inline void ALU2dGrid< dim, dimworld, eltype >::
-  backup( std::ostream& stream ) const 
+  backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
     // write grid to stream 
     myGrid().storeGrid( stream );

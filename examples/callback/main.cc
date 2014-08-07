@@ -26,9 +26,14 @@
 
 // method
 // ------
-void method ( int problem, int startLevel, int maxLevel, const char* outpath )
+void method ( int problem, int startLvl, int maxLvl, 
+              const char* outpath, const int mpiSize  )
 {
   typedef Dune::GridSelector::GridType Grid;
+
+  const int startLevel = startLvl * Dune :: DGFGridInfo< Grid > :: refineStepsForHalf();
+  const int maxLevel   = maxLvl   * Dune :: DGFGridInfo< Grid > :: refineStepsForHalf();
+
   /** type of pde to solve **/
 #if TRANSPORT
   typedef TransportModel< Grid::dimensionworld > ModelType;
@@ -37,14 +42,26 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
 #elif EULER
   typedef EulerModel< Grid::dimensionworld > ModelType;
 #endif
-  ModelType model(problem);
+  ModelType model( problem );
 
   /* Grid construction ... */
-  std::string name = model.problem().gridFile( "./" );
+  std::string name = model.problem().gridFile( "./", mpiSize );
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
+
+#ifndef BALL
+  if ( grid.comm().size() > 1 &&
+       (grid.overlapSize(0)==0 && grid.ghostSize(0)==0)
+     )
+  {
+    std::cout << "This grid implementation does not support ghost cells and the finite-volume scheme will not work correctly in parallel.";
+    std::cout << std::endl;
+    exit(1);
+  }
+#endif
+
   grid.loadBalance();
   //grid.finalizeGridCreation() ;
   const bool verboseRank = grid.comm().rank() == 0 ;
@@ -61,7 +78,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
 
   /* get view to leaf grid */
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
-  GridView gridView = grid.leafView< Dune::Interior_Partition >();
+  GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
 
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, ModelType::dimRange > > DataType;
@@ -85,8 +102,9 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
   }
 
   /* create adaptation method */
+  const int initialBalanceCounter = std::max( int(model.problem().balanceStep() - maxLevel), int(1) );
   typedef LeafAdaptation< Grid, DataType > AdaptationType;
-  AdaptationType adaptation( grid, solution, model.problem().balanceStep() );
+  AdaptationType adaptation( grid, model.problem().balanceStep(), initialBalanceCounter );
 
   for( int i = 0; i <= maxLevel; ++i )
   {
@@ -95,7 +113,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
     scheme.mark( 0, solution, gridMarker );
     // adapt grid 
     if( gridMarker.marked() )
-      adaptation( );
+      adaptation( solution );
     // initialize solution for new grid
     solution.initialize( model.problem() );
   }
@@ -114,26 +132,31 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
   /* first point where data is saved */
   double saveStep = saveInterval;
   /* cfl number */
-  double cfl = 0.9;
+  double cfl = 0.15;
   /* vector to store update */
   DataType update( gridView );
+
+  /* print info about initialization */
+  if ( verboseRank )  
+    std::cout << "Intialization done!" << std::endl;
 
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
+  const unsigned int maxTimeSteps = model.problem().maxTimeSteps();
   while ( time < endTime ) 
   {
     Dune::Timer overallTimer ;
 
     // update vector might not be of the right size if grid has changed
     update.resize();
+    // set update to zero 
+    update.clear();
+    double dt;
 
     Dune :: Timer solveTimer ;
-    // apply the spacial operator
-    double dt = scheme( time, solution, update );
-    // multiply time step by CFL number
+    dt = scheme( time, solution, update ) ;
     dt *= cfl;
-
     // stop time 
     const double solveTime = solveTimer.elapsed(); 
 
@@ -155,6 +178,7 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     size_t elements = scheme.mark( time, solution, gridMarker );
 
+#ifndef NO_OUTPUT
     /* check if data should be written */
     if( time >= saveStep )
     {
@@ -183,17 +207,17 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
         std::cout << std::endl;
       }
     }
+#endif
 
     /* call adaptation algorithm */
     if( gridMarker.marked() )
-      adaptation( );
+      adaptation( solution );
 
     {
-      const size_t maxDofsPerElem = (elements > 0) ? (solution.size()/elements) : 0;
       // write times to run file 
-      diagnostics.write( time, dt,                   // time and time step
+      diagnostics.write( time, dt,                     // time and time step
                          elements,                     // number of elements
-                         maxDofsPerElem,               // number of dofs per element (max)
+                         ModelType::dimRange,          // number of dofs per element (max)
                          solveTime,                    // time for operator evaluation 
                          commTime + adaptation.communicationTime(), // communication time  
                          adaptation.adaptationTime(),  // time for adaptation 
@@ -202,6 +226,10 @@ void method ( int problem, int startLevel, int maxLevel, const char* outpath )
                          getMemoryUsage() );                   // memory usage
 
     }
+
+    // abort when maximal number of time steps is reached (default is disabled)
+    if( step >= maxTimeSteps ) 
+      break ;
   }           
 
   if( vtkOut ) 
@@ -237,6 +265,11 @@ try
     return 0;
   }
 
+#if HAVE_ALUGRID
+  if( mpi.rank() == 0 ) 
+    std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
+#endif
+     
   // meassure program time 
   Dune::Timer timer ;
 
@@ -248,7 +281,7 @@ try
   const int maxLevel = (argc > 3 ? atoi( argv[ 3 ] ) : startLevel);
 
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
-  method( problem, startLevel, maxLevel, path );
+  method( problem, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI 
   MPI_Barrier ( MPI_COMM_WORLD );
