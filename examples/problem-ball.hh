@@ -35,8 +35,6 @@ struct BallData
       dgfFileName << path << "/dgf/cube_hc_4096.dgf";
     else if ( problem_ == 3 ) 
       dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-    else if ( problem_ == 4 ) 
-      dgfFileName << path << "/dgf/cube_hc_262144.dgf";
     else 
       dgfFileName << path << "/dgf/unitcube3d.dgf";
     return dgfFileName.str();
@@ -114,7 +112,6 @@ struct BallModel : public TransportModel<dimD>
     case 1:
     case 2:
     case 3:
-    case 4:
       problem_ = new BallData< dimDomain >( problem );
       break;
 
@@ -151,8 +148,7 @@ struct BallModel : public TransportModel<dimD>
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const int bndId, 
-                             const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal, 
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const

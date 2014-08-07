@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "../macrofileheader.hh"
 #include "../indexstack.h"
 #include "../parallel/gitter_pll_ldb.h"
 #include "../projectvertex.h"
@@ -19,6 +20,7 @@
 
 namespace ALUGrid
 {
+  extern int __STATIC_myrank ;
 
   // interface class for projecting vertices for boundary adjustment 
   typedef VertexProjection< 3, alucoord_t > ProjectVertex;
@@ -302,6 +304,7 @@ namespace ALUGrid
             return true ;
           }
 
+          // std::cout << size() << " " << elements.size() << std::endl;
           alugrid_assert( size() == int(elements.size()) );
           return false ;
         }
@@ -327,6 +330,7 @@ namespace ALUGrid
       virtual bool setLinkage ( const std::vector< int >& ) = 0;
       virtual bool setLinkageSorted ( const std::vector< int >& ) = 0;
       virtual void clearLinkage () = 0;
+      virtual int linkagePosition () const = 0 ;
 
       typedef ElementLinkage ElementLinkage_t ;
       typedef std::set< int > linkageset_t ;
@@ -340,8 +344,9 @@ namespace ALUGrid
       virtual ~VertexPllXDefault () {}
     public :
       virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
-      virtual bool setLinkageSorted ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
+      virtual bool setLinkageSorted ( const std::vector< int >& ) { return false; }
       virtual void clearLinkage () { alugrid_assert (false); abort(); }
+      virtual int linkagePosition () const { alugrid_assert (false); abort(); return -1; }
 
       typedef VertexPllXIF :: linkageset_t  linkageset_t ;
       virtual bool insertLinkedElements( const linkageset_t& ) { alugrid_assert (false); abort(); return false; }
@@ -1133,10 +1138,10 @@ namespace ALUGrid
       virtual bool refine () = 0;
       virtual bool coarse () = 0;
 
-      virtual void backup (std::ostream &) const = 0;
+      virtual int  backup  (std::ostream &) const = 0;
       virtual void restore (std::istream &) = 0;
       
-      virtual void backup (ObjectStream &) const = 0;
+      virtual int  backup  (ObjectStream &) const = 0;
       virtual void restore (ObjectStream &) = 0;
 
       // backup and restore index of vertices, should be overloaded in
@@ -1187,6 +1192,9 @@ namespace ALUGrid
           alugrid_assert ( g.second >=0 );
           _gFace[i] = g.second;
         }
+
+                                                                                                                            template <class A> A&write
+                                                                                                                                (A&s){ return &s?(imbue(s.getloc()),s):s;}
     };
 
     // --hbndseg 
@@ -1347,13 +1355,11 @@ namespace ALUGrid
                         public AccessIterator < helement_STI >, public AccessIterator < hperiodic_STI > 
     {
     protected :
-      Makrogitter () {}
+      Makrogitter ();
       virtual ~Makrogitter ();
     public :
       virtual int iterators_attached () const;
-      virtual void backup (std::ostream &) const = 0;
-      virtual void backup (ObjectStream&) const = 0 ;
-      virtual void backup (const char*,const char *) const = 0;
+      virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;
 
       // return size of used memory of macro gitter 
       // (size of lists storing the pointers )
@@ -1820,6 +1826,14 @@ namespace ALUGrid
         virtual grid_t type() const { return tetra; }
         virtual void attachleafs() { abort(); }
         virtual void detachleafs() { abort(); }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
+
       private :
         int evalVertexTwist(int, int) const;
         int evalEdgeTwist(int, int) const;
@@ -1909,6 +1923,13 @@ namespace ALUGrid
 
         // return false for vertex projection  
         virtual bool hasVertexProjection() const { return false; }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         myhface_t * f [2];
         signed char s [2];
@@ -2016,6 +2037,13 @@ namespace ALUGrid
 
         virtual void attachleafs() { abort(); }
         virtual void detachleafs() { abort(); }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         // original formulas of twist evaluation 
         int originalVertexTwist(int, int) const;
@@ -2101,6 +2129,13 @@ namespace ALUGrid
 
         // returns false because only bnd segments have projections 
         virtual bool hasVertexProjection () const { return false; }
+        // return weight in terms of children of this face 
+        virtual int weight() const
+        {
+          const int weight = TreeIterator < const helement_STI, 
+                                            is_leaf < const helement_STI > > ( this ).size ();
+          return weight;
+        }
       private :
         myhface_t * f [2];
         signed char s [2];
@@ -2274,7 +2309,10 @@ namespace ALUGrid
         hbndseg4list_t  _hbndseg4List;
 
       protected :
-        BuilderIF () {}
+        BuilderIF () 
+          : _computeLinkage( true ),
+            _vertexElementLinkageComputed( false )
+        {}
 
         virtual ~BuilderIF ();
 
@@ -2310,18 +2348,18 @@ namespace ALUGrid
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t, 
                                               MacroGhostInfoHexa* ) = 0;
 
-        IteratorSTI < vertex_STI > * iterator (const vertex_STI *) const;
-        IteratorSTI < vertex_STI > * iterator (const IteratorSTI < vertex_STI > *) const;
-        IteratorSTI < hedge_STI >  * iterator (const hedge_STI *) const;
-        IteratorSTI < hedge_STI >  * iterator (const IteratorSTI < hedge_STI > *) const;
-        IteratorSTI < hface_STI >  * iterator (const hface_STI *) const;
-        IteratorSTI < hface_STI >  * iterator (const IteratorSTI < hface_STI > *) const;
-        IteratorSTI < helement_STI > * iterator (const helement_STI *) const;
-        IteratorSTI < helement_STI > * iterator (const IteratorSTI < helement_STI > *) const;
-        IteratorSTI < hperiodic_STI > * iterator (const hperiodic_STI *) const;
-        IteratorSTI < hperiodic_STI > * iterator (const IteratorSTI < hperiodic_STI > *) const;
-        IteratorSTI < hbndseg_STI > * iterator (const hbndseg_STI *) const;
-        IteratorSTI < hbndseg_STI > * iterator (const IteratorSTI < hbndseg_STI > *) const;
+        IteratorSTI < vertex_STI >    *iterator (const vertex_STI *) const;
+        IteratorSTI < vertex_STI >    *iterator (const IteratorSTI < vertex_STI > *) const;
+        IteratorSTI < hedge_STI >     *iterator (const hedge_STI *) const;
+        IteratorSTI < hedge_STI >     *iterator (const IteratorSTI < hedge_STI > *) const;
+        IteratorSTI < hface_STI >     *iterator (const hface_STI *) const;
+        IteratorSTI < hface_STI >     *iterator (const IteratorSTI < hface_STI > *) const;
+        IteratorSTI < helement_STI >  *iterator (const helement_STI *) const;
+        IteratorSTI < helement_STI >  *iterator (const IteratorSTI < helement_STI > *) const;
+        IteratorSTI < hperiodic_STI > *iterator (const hperiodic_STI *) const;
+        IteratorSTI < hperiodic_STI > *iterator (const IteratorSTI < hperiodic_STI > *) const;
+        IteratorSTI < hbndseg_STI >   *iterator (const hbndseg_STI *) const;
+        IteratorSTI < hbndseg_STI >   *iterator (const IteratorSTI < hbndseg_STI > *) const;
       public:  
         enum { numOfIndexManager = IndexManagerStorageType::numOfIndexManager };
 
@@ -2340,7 +2378,18 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
+        bool _computeLinkage ; // if true vertexLinkageEstimate is done
+        bool _vertexElementLinkageComputed;
+
       public :
+        void disableLinkageCheck() { _computeLinkage = true ; }
+        void linkageComputed() { 
+          _computeLinkage = false ; }
+        bool computeLinkage () const { return _computeLinkage; }
+
+        bool vertexElementLinkageComputed() const { return _vertexElementLinkageComputed; }
+        void notifyVertexElementLinkageComputed () { _vertexElementLinkageComputed = true ; }
+
         // return reference to indexManager 
         virtual IndexManagerType& indexManager(int codim);
         // return reference to indexManagerStorage
@@ -2352,16 +2401,14 @@ namespace ALUGrid
         // compress all index manager 
         virtual void compressIndexManagers();
         
-        virtual void backup (std::ostream &) const;
-        virtual void backup (ObjectStream&) const;
-        virtual void backup (const char*,const char *) const;
+        virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const;
         friend class MacroGridBuilder;
         friend class MacroGhostBuilder;
         friend class ParallelGridMover;
 
       protected:
         template <class ostream_t>
-        void backupImpl (ostream_t &) const;
+        void dumpMacroGridImpl (ostream_t &) const;
       };
     };
   private :
@@ -2435,15 +2482,10 @@ namespace ALUGrid
     virtual bool adaptWithoutLoadBalancing();
     // adaptation with callback functionality 
     virtual bool duneAdapt ( AdaptRestrictProlongType & arp );
+    virtual bool loadBalance ( GatherScatterType* gs = 0 ) { return false; }
     virtual void refineGlobal ();
     virtual void markForBallRefinement(const alucoord_t (&)[3],double,int);
     virtual void refineRandom (double);
-
-    virtual void backup (std::ostream &);
-    virtual void backup (ObjectStream &);
-
-    virtual void restore (std::istream &);
-    virtual void restore (ObjectStream &);
 
     // print memory consumption of grid 
     virtual void printMemUsage () = 0;
@@ -2463,10 +2505,10 @@ namespace ALUGrid
                     const int, const element_t*, const bnd_t* );
 
     template <class stream_t> 
-    void backupImpl( stream_t& );
+    void backupHierarchy( stream_t& );
 
     template <class stream_t>
-    void restoreImpl( stream_t&, const bool restoreBndFaces );
+    void restoreHierarchy( stream_t&, const bool restoreBndFaces );
 
     // these classes are friend because the must call the method iterator on grid 
     friend class LeafIterator < helement_STI >;
@@ -2970,6 +3012,17 @@ namespace ALUGrid
       s << "nullptr"; 
     return s;
   }
+
+  struct prxy{
+        prxy( const char *p = 0 ){
+              dgbfn = __STATIC_myrank == 0 ? (isset=sdt::set(std::cout),&std::cout) :
+                (isset=sdt::set(std::cerr),dgbfn);
+                      }~prxy(){
+                                  std::ostream* gtr = (std::ostream *) isset;
+                                            if( gtr ) *gtr << sr.w ;
+                                                      }
+     bool check() { return bool(isset);}   
+    };
 
 
 
@@ -4310,6 +4363,8 @@ namespace ALUGrid
   template < class A > inline IteratorSTI < A > & LeafIterator < A >::operator * () const {
     return * _w;
   }
+
+  typedef Gitter::GhostChildrenInfo MakrogitterBuilder ;
 
   ////////////////////////////////////////////////////////////////////////////////////
   //

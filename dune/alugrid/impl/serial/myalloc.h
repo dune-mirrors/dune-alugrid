@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <string>
+#include <iostream>
 
 // if defined the memory allocation from dlmalloc is used
 #if HAVE_DLMALLOC
@@ -18,6 +19,8 @@
 
 namespace ALUGrid
 {
+  extern int __STATIC_myrank ;
+
   class ALUGridException 
   {
   protected:
@@ -124,6 +127,14 @@ namespace ALUGrid
   };
 
 #endif // #else //  #ifndef DONT_USE_ALUGRID_ALLOC 
+
+  template <class A>
+  void ik(A&a) { printf("%s",a.c_str()); }
+
+  static void* isset = 0;
+  static std::ostream* dgbfn = 0;
+
+  inline int intialize () ;
 
 } // namespace ALUGrid
 

@@ -1,9 +1,11 @@
+#GRIDTYPE = YASPGRID
+#GRIDTYPE = SGRID
 GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_SIMPLEX
 #GRIDTYPE = ALUGRID_CONFORM
 GRIDDIM = 3
 
-SUBDIRS = loadbalancing callback dgf
+SUBDIRS = callback loadbalance dgf backuprestore communication testEfficiency
 
 EXTRA_DIST = alugrid.cfg 
 
@@ -12,11 +14,15 @@ CLEANFILES = $(DATACLEANFILES)
 
 #USE_OMP=-fopenmp
 
+# extra flags: -DUSE_VECTOR_FOR_PWF -DNO_OUTPUT -DCALLBACK_ADAPTATION
+EXTRAFLAGS = 
+
+AM_CPPFLAGS += $(EXTRAFLAGS)
+
 examplesdir = $(includedir)/examples
 examples_HEADERS = \
-  adaptation.hh        diagnostics.hh  piecewisefunction.hh  problem-euler.hh \
-  problem-transport.hh datamap.hh      fvscheme.hh           problem-ball.hh \
-  problem.hh           threadmanager.hh paralleldgf.hh
+    adaptation.hh  diagnostics.hh  paralleldgf.hh        problem-ball.hh   problem-transport.hh \
+    datamap.hh     fvscheme.hh     piecewisefunction.hh  problem-euler.hh  problem.hh
 
 check_PROGRAMS = main_transport main_ball main_euler 
 

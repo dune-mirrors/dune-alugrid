@@ -157,6 +157,27 @@ namespace Dune
     boundaryId.second = -1; // some default
     boundaryIds_.push_back( boundaryId );
   }
+  template< class GridImp >
+  void ALU2dGridFactory< GridImp >
+    ::insertProcessBorder ( const std::vector< unsigned int >& vertices )
+  {
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
+    boundaryProjections_[ faceId ] = 0;
+
+    std::pair< FaceType, int > boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+      boundaryId.first[ i ] = vertices[ i ];
+    boundaryId.second = -222; 
+    boundaryIds_.push_back( boundaryId );
+  }
 
 
   template< class GridImp >

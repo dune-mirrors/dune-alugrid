@@ -1,6 +1,3 @@
-// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=8 sw=2 sts=2:
-
 #ifndef DUNE_ALU2DGRID_FACTORY_HH
 #define DUNE_ALU2DGRID_FACTORY_HH
 
@@ -129,26 +126,25 @@ namespace Dune
      *  \note The order of the vertices must coincide with the vertex order in
      *        the corresponding DUNE reference element.
      *
-     *  \param[in]  geometry    GeometryType of the boundary element
-     *  \param[in]  faceVertices vertices of the boundary element
-     *  \param[in]  id          boundary identifier of the boundary element,
-     *                          the default value is 0 (invalid boundary id)
+     *  \param[in]  geometry      GeometryType of the boundary element
+     *  \param[in]  faceVertices  vertices of the boundary element
+     *  \param[in]  boundaryId    boundary identifier of the boundary element,
+     *                            the default value is 1
      */
     virtual void
-    insertBoundary ( const GeometryType &geometry,
-                     const std::vector< unsigned int > &faceVertices,
-                     const int id );
+    insertBoundary ( const GeometryType &geometry, const std::vector< unsigned int > &faceVertices, int id = 1 );
 
     /** \brief mark a face as boundary (and assign a boundary id)
      *
-     *  \param[in]  element  index of the element, the face belongs to
-     *  \param[in]  face     local number of the face within the element
-     *  \param[in]  id       boundary id to assign to the face
+     *  \param[in]  element     index of the element, the face belongs to
+     *  \param[in]  face        local number of the face within the element
+     *  \param[in]  boundaryId  boundary id to assign to the face,
+     *                          the default value is 1
      */
-    virtual void insertBoundary ( const int element, const int face, const int id );
+    virtual void insertBoundary ( int element, int face, int boundaryIdd = 1 );
 
     // for testing parallel GridFactory
-    void insertProcessBorder ( const int element, const int face )
+    void insertProcessBorder ( int element, int face )
     {
       insertBoundary( element, face, 222 );
     }
@@ -172,6 +168,8 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< unsigned int >& vertices ) ;
+    virtual void
+    insertProcessBorder ( const std::vector< unsigned int >& vertices ) ;
 
     /** \brief insert a shaped boundary segment into the macro grid
      *

@@ -14,7 +14,7 @@ namespace ALUGrid
   // readBinary
   // ----------
 
-  void readBinary ( std::istream &stream, void *data, std::size_t size, BinaryFormat format )
+  void readBinary ( std::istream &stream, void *data, uint64_t size, BinaryFormat format )
   {
     if( format == rawBinary )
       stream.read( static_cast< char * >( data ), size );
@@ -57,9 +57,14 @@ namespace ALUGrid
         }
       }
 
+
       // return additional bytes in buffer by seeking
       if( stream )
-        stream.seekg( -zinfo.avail_in, std::ios_base::cur );
+      {
+        std::istream::streampos pos = stream.tellg();
+        pos -= zinfo.avail_in ; 
+        stream.seekg( pos );
+      }
 
       // finalize inflate algorithm
       inflateEnd( &zinfo );
@@ -81,7 +86,7 @@ namespace ALUGrid
   // writeBinary
   // -----------
 
-  void writeBinary ( std::ostream &stream, const void *data, std::size_t size, BinaryFormat format )
+  void writeBinary ( std::ostream &stream, const void *data, uint64_t size, BinaryFormat format )
   {
     if( format == rawBinary )
       stream.write( static_cast< const char * >( data ), size );

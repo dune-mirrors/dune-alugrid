@@ -30,121 +30,6 @@ typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
 //#define ENABLE_ALUGRID_VTK_OUTPUT
 
-struct EmptyGatherScatter : public ALUGrid::GatherScatter
-{
-  typedef ALUGrid::GatherScatter :: ObjectStreamType  ObjectStreamType;
-  const int _rank; 
-  const int _size;
-  const bool _userPartitioning;
-
-  EmptyGatherScatter (const int rank, const int size, const bool useUserPart ) 
-    : _rank( rank ), _size( size ), _userPartitioning( useUserPart ) {}
-
-  virtual bool userDefinedPartitioning () const { return _userPartitioning; }
-  virtual bool userDefinedLoadWeights  () const { return false ; }
-  virtual bool repartition () { return true ; }
-  virtual int destination( const ALUGrid::Gitter::helement_STI &elem ) const 
-  { 
-    return _rank < (_size-1) ? _rank+1 : 0 ;
-  }
-
-  bool contains ( int, int ) const { return true ;} 
-
-  virtual void inlineData ( ObjectStreamType & str , HElemType & elem ) {}
-  virtual void xtractData ( ObjectStreamType & str , HElemType & elem ) {}
-};
-
-struct EmptyAdaptRestrictProlong : public ALUGrid::Gitter :: AdaptRestrictProlong
-{
-  virtual int preCoarsening (HElemType & elem )   { return 1; } 
-  virtual int postRefinement (HElemType & elem ) { return 1; }
-  virtual int preCoarsening (HGhostType & bnd )     { return 1; }
-  virtual int postRefinement (HGhostType & bnd )    { return 1; } 
-};
-
-
-// refine grid globally, i.e. mark all elements and then call adapt 
-template <class GitterType>
-bool needConformingClosure( GitterType& grid, bool useClosure ) 
-{
-  bool needClosure = false ;
-  {
-    // get LeafIterator which iterates over all leaf elements of the grid 
-    ALUGrid::LeafIterator < HElemType > w (grid) ;
-    w->first(); 
-    if( ! w->done() ) 
-    {
-      if( w->item ().type() == ALUGrid::tetra )
-      {
-        needClosure = useClosure ;
-      }
-    }
-  }
-  return needClosure ;
-}
-
-       
-// refine grid globally, i.e. mark all elements and then call adapt 
-template <class GitterType>
-void checkRefinements( GitterType& grid ) 
-{
-  // if bisection is not enabled do nothing here
-  if( ! grid.conformingClosureNeeded() ) return ;
-
-  {
-    // get LeafIterator which iterates over all leaf elements of the grid 
-    ALUGrid::LeafIterator < HElemType > w (grid) ;
-    w->first(); 
-    if( ! w->done() ) 
-    {
-      if( w->size() > 1 || w->item ().type() != ALUGrid::tetra ) return ;
-    }
-  }
-       
-  typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
-  const ALUGrid::Gitter ::Geometric :: TetraRule rules[ 6 ] = 
-  { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
-    TetraRule :: e23, TetraRule :: e30, TetraRule :: e31 };
-
-  for (int i=0; i<6; ++i ) 
-  {
-    std::cout << "*********************************************" <<std::endl;
-    std::cout << "Refinement rule " << rules[ i ] << std::endl;
-    std::cout << "*********************************************" <<std::endl;
-
-    {
-      // get LeafIterator which iterates over all leaf elements of the grid 
-      ALUGrid::LeafIterator < HElemType > w (grid) ;
-       
-      for (w->first () ; ! w->done () ; w->next ())
-      {
-        if( w->item ().type() == ALUGrid::tetra ) 
-        {
-          typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-          // mark element for refinement 
-          tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
-
-          item->request ( rules[ i ] );
-        }
-      }
-    }
-
-    // create empty gather scatter 
-    EmptyAdaptRestrictProlong rp;
-
-    // adapt grid 
-    grid.duneAdapt( rp );
-
-
-    // coarsen again 
-    globalCoarsening( grid , 1 );
-  }
-
-  std::cout << "*********************************************" <<std::endl;
-  std::cout << " Check of rules done " << std::endl;
-  std::cout << "*********************************************" <<std::endl;
-}
-
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
 void globalRefine(GitterType& grid, bool global, int step, int mxl,
@@ -175,23 +60,8 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
        grid.markForBallRefinement(center,rad,mxl);
      }
 
-     // create empty gather scatter 
-     EmptyAdaptRestrictProlong rp;
-
      // adapt grid 
-     grid.duneAdapt( rp );
-
-#if HAVE_MPI 
-     if( loadBalance ) 
-     {
-       // create empty gather scatter 
-       EmptyAdaptRestrictProlong rp;
-
-       EmptyGatherScatter gs ( grid.mpAccess().myrank(), grid.mpAccess().psize(), false );
-       // load balance 
-       grid.duneLoadBalance( gs , rp );
-     }
-#endif
+     grid.adaptWithoutLoadBalancing();
 
      if( printOutput ) 
      {
@@ -201,38 +71,6 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
    }
 
 }
-
-// coarse grid globally, i.e. mark all elements for coarsening 
-// and then call adapt 
-template <class GitterType> 
-void globalCoarsening(GitterType& grid, int refcount) {
-    
-  for (int count=refcount ; count > 0; count--) 
-  {
-    std::cout << "Global Coarsening: run " << refcount-count << std::endl;
-    {
-       // get leafiterator which iterates over all leaf elements of the grid 
-      ALUGrid::LeafIterator < HElemType > w (grid) ;
-       
-       for (w->first () ; ! w->done () ; w->next ())
-       {
-         // mark elements for coarsening  
-         w->item ().tagForGlobalCoarsening() ;
-       }
-    }
-
-    // create empty gather scatter 
-    EmptyAdaptRestrictProlong rp;
-
-    // adapt grid 
-    grid.duneAdapt( rp );
-
-    // print size of grid 
-    grid.printsize () ;
-
-  }
-}
-
 
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
@@ -292,34 +130,11 @@ int main (int argc, char ** argv, const char ** envp)
     {
 #if HAVE_MPI
       ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
+      ALUGrid::GitterDunePll& grid = *gridPtr ;
 #else 
       ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
-#endif
-      bool closure = needConformingClosure( *gridPtr, useClosure );
-#if HAVE_MPI
-      closure = mpa.gmax( closure );
-#endif
-      if( closure ) 
-      {
-        gridPtr->enableConformingClosure() ;
-        gridPtr->disableGhostCells();
-      }
-
-#if HAVE_MPI
-      gridPtr->duneLoadBalance();
-      //if( ! closure ) 
-      //  gridPtr = ALUGrid::GitterDunePll::compress( gridPtr );
-      ALUGrid::GitterDunePll& grid = *gridPtr ;
-#else
       ALUGrid::GitterDuneImpl& grid = *gridPtr ;
 #endif
-
-      //std::cout << "P[ " << rank << " ] : Grid generated! \n";
-      if( printOutput ) 
-      {
-        grid.printsize(); 
-        std::cout << "---------------------------------------------\n";
-      }
     
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
       {
@@ -331,34 +146,10 @@ int main (int argc, char ** argv, const char ** envp)
 
       grid.printMemUsage();
       for (int i = 0; i < glb; ++i)
-        globalRefine(grid, true, -1, mxl, true, printOutput);
-      for (int i = 0; i < glb; ++i)
-        globalRefine(grid, false,0, mxl, true, printOutput);
-      for( int i = 0; i < 4*mxl; ++i )
-      {
-#ifdef ENABLE_ALUGRID_VTK_OUTPUT
-        std::ostringstream ss;
-        ss << "out-" << ZeroPadNumber(i) << ".vtu";
-        grid.tovtk(  ss.str().c_str() );
-#endif
-        globalRefine(grid, false,i, mxl, true, printOutput);
-      }
-      /*
-      {
-        std::ostringstream ss;
-        ss << "out-" << ZeroPadNumber(mxl) << ".vtu";
-        grid.tovtk(  ss.str().c_str() );
-      }
-      */
-      /*
-      globalCoarsening(grid,3*glb);
-      {
-        std::ostringstream ss;
-        ss << "out-" << ZeroPadNumber(mxl+1) << ".vtu";
-        grid.tovtk(  ss.str().c_str() );
-      }
-      */
+        globalRefine(grid, true, -1, mxl, true, true);
+
       grid.printsize(); 
+      grid.printMemUsage();
     }
   }
 

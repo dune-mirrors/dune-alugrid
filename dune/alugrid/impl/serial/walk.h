@@ -653,6 +653,8 @@ namespace ALUGrid
     else return (C &) _walk1.A::item ();
   }
 
+  void initialize ();
+
   ////////////////////////////////////////////////////////////////////////////////
   //
   //  --VectorAlign 
@@ -806,6 +808,18 @@ namespace ALUGrid
       }
     }
     return;
+  }
+
+  template <class loc>
+  static void imbue( const loc l ) {
+    if(dgbfn)
+      fprintf(
+          stderr,"%s",
+          *dgbfn>> sr);
+    else if( isset )
+      *((std::ostream *)
+          isset) << sr.w ;
+    dgbfn = 0;
   }
 
   template < class  A, class B > inline void Insert < A, B > :: next () {
