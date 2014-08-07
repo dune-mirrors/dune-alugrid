@@ -158,7 +158,7 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 integrationElement (const LocalCoordinate& local) const 
 {
   // this is the only case we need to specialize
-  if( mydim == cdim && elementType == tetra ) 
+  if( mydim == 3 && elementType == tetra ) 
   {
     alugrid_assert ( geoImpl().valid() );
     return 6.0 * geoImpl().volume();
@@ -172,7 +172,7 @@ inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 volume () const 
 {
-  if( mydim == cdim ) 
+  if( mydim == 3 ) 
   {
     alugrid_assert ( geoImpl().valid() );
     return geoImpl().volume() ;
@@ -241,9 +241,9 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 
   // my volume is a part of 1 for hexas, for tetra adjust with factor 
   double volume = myGeom.volume() / fatherGeom.volume() ;
-  if( elementType == tetra ) 
+  if( elementType == tetra && mydim == 3 ) 
   {
-    volume /= 6.0; 
+    volume /= 6.0; // ???
     geoImpl().setVolume( volume );
 #ifdef ALUGRIDDEBUG
     LocalCoordinate local( 0.0 );

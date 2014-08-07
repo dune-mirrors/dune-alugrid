@@ -124,7 +124,7 @@ namespace Dune
       { 
         c[0] = p[0];
         c[1] = p[1];
-        if( cdim > 2 ) 
+        if( cdim == 3 ) 
           c[2] = p[2];
       }
 
@@ -157,6 +157,27 @@ namespace Dune
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
       } 
+
+      // update geometry in father coordinates (default impl)
+      template <class GeometryImp>
+      inline void updateInFather(const GeometryImp &fatherGeom ,
+                                 const GeometryImp &myGeom)
+      {
+        // compute the local coordinates in father refelem
+        for(int i=0; i < myGeom.corners() ; ++i)
+        {
+          // calculate coordinate 
+          coord_[i] = fatherGeom.local( myGeom.corner( i ) );
+
+          // to avoid rounding errors
+          for(int j=0; j<cdim; ++j)
+          {
+            if ( coord_[i][j] < 1e-16) coord_[i][j] = 0.0;
+          }
+        }
+
+        status_ = updated ;
+      }
 
       // set status to invalid 
       void invalidate () { status_ = invalid ; }
@@ -330,14 +351,14 @@ namespace Dune
     //
     ///////////////////////////////////////////////////////////////
 
-    // geom impl for cube faces (quadrilaterals)
+    // geom impl for quadrilaterals (also hexa faces)
     template <int dummy>
     class GeometryImpl<dummy, 2, hexa> 
-      : public GeometryImplBase< 2, 4, BilinearSurfaceMapping > 
+      : public GeometryImplBase< 2, 4, BilinearMapping< cdim > > 
     {
     protected:  
       // dim = 2, corners = 4 
-      typedef GeometryImplBase< 2, 4, BilinearSurfaceMapping > BaseType;
+      typedef GeometryImplBase< 2, 4, BilinearMapping< cdim > > BaseType;
 
       using BaseType :: corners_ ;
       using BaseType :: copy ;
