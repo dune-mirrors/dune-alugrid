@@ -1,6 +1,3 @@
-// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=8 sw=2 sts=2:
-
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
@@ -48,6 +45,7 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
+      typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
     };
 
     typedef unsigned int VertexId;
@@ -60,9 +58,9 @@ namespace Dune
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
   private:
-    dune_static_assert ( (elementType == tetra || elementType == hexa),
-                        "ALU3dGridFactory supports only grids containing "
-                        "tetrahedrons or hexahedrons exclusively." );
+    static_assert ( (elementType == tetra || elementType == hexa),
+                    "ALU3dGridFactory supports only grids containing "
+                    "tetrahedrons or hexahedrons exclusively." );
 
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
 
@@ -79,7 +77,7 @@ namespace Dune
 
     struct FaceLess;
 
-    typedef std::vector< std::pair< VertexType, size_t > > VertexVector;
+    typedef std::vector< std::pair< VertexType, VertexId > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::pair< FaceType, int > BndPair ;
     typedef std::map< FaceType,  int > BoundaryIdMap;
@@ -130,8 +128,12 @@ namespace Dune
      */
     virtual void insertVertex ( const VertexType &pos );
 
-    // for testing parallel GridFactory
-    VertexId insertVertex ( const VertexType &pos, const size_t globalId );
+    /** \brief insert a vertex into the coarse grid including the vertex's globally unique id  
+     *  
+     *  \param[in]  pos       position of the vertex
+     *  \param[in]  globalId  globally unique id for vertex 
+     */
+    void insertVertex ( const VertexType &pos, const VertexId globalId );
 
     /** \brief insert an element into the coarse grid
      * 
@@ -150,25 +152,27 @@ namespace Dune
      *  \note The order of the vertices must coincide with the vertex order in
      *        the corresponding DUNE reference element.
      *
-     *  \param[in]  geometry    GeometryType of the boundary element
-     *  \param[in]  faceVertices vertices of the boundary element
-     *  \param[in]  id          boundary identifier of the boundary element,
-     *                          the default value is 0 (invalid boundary id)
+     *  \param[in]  geometry      GeometryType of the boundary element
+     *  \param[in]  faceVertices  vertices of the boundary element
+     *  \param[in]  boundaryId    boundary identifier of the boundary element,
+     *                            the default value is 1
      */
-    virtual void insertBoundary ( const GeometryType &geometry,
-                     const std::vector< VertexId > &faceVertices,
-                     const int id );
+
+    virtual void
+    insertBoundary ( const GeometryType &geometry, const std::vector< VertexId > &faceVertices, int boundaryId = 1 );
+
 
     /** \brief mark a face as boundary (and assign a boundary id)
      *
-     *  \param[in]  element  index of the element, the face belongs to
-     *  \param[in]  face     local number of the face within the element
-     *  \param[in]  id       boundary id to assign to the face
+     *  \param[in]  element     index of the element, the face belongs to
+     *  \param[in]  face        local number of the face within the element
+     *  \param[in]  boundaryId  boundary id to assign to the face,
+     *                          the default value is 1
      */
-    virtual void insertBoundary ( const int element, const int face, const int id );
+    virtual void insertBoundary ( int element, int face, int boundaryId = 1 );
 
     // for testing parallel GridFactory
-    void insertProcessBorder ( const int element, const int face )
+    void insertProcessBorder ( int element, int face )
     {
       insertBoundary( element, face, ALU3DSPACE ProcessorBoundary_t );
     }
@@ -192,6 +196,9 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< VertexId >& vertices ) ;
+
+    virtual void 
+    insertProcessBorder ( const std::vector< VertexId >& vertices );
 
     /** \brief insert a shaped boundary segment into the macro grid
      *
@@ -242,13 +249,31 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundarySegmentIndex();
+      std::vector< unsigned int > vertices;
+      const typename Codim< 0 >::EntityPointer inPtr = intersection.inside();
+      const typename Codim< 0 >::Entity &in = *inPtr;
+      const Dune::ReferenceElement< double, dimension > &refElem = 
+          Dune::ReferenceElements< double, dimension >::general( in.type() );
+      int faceNr = intersection.indexInInside();
+      const int vxSize = refElem.size( faceNr, 1, dimension );
+      for (int i=0;i<vxSize;++i)
+      {
+        int vxIdx = refElem.subEntity( faceNr, 1 , i , dimension);
+        vertices.push_back( insertionIndex( *(in.template subEntity<dimension>(vxIdx) ) ) );
+      }
+      FaceType faceId;
+      copyAndSort( vertices, faceId );
+      typename BoundaryIdMap::const_iterator pos = insertionOrder_.find( faceId );
+      if( pos != insertionOrder_.end() )
+        return pos->second;
+      else
+        return std::numeric_limits<unsigned int>::max();
     }
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundary() &&
-        ( insertionIndex(intersection) < numFacesInserted_ );
+      return intersection.boundary() && 
+             (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
   private:
@@ -280,7 +305,7 @@ namespace Dune
 
     VertexVector vertices_;
     ElementVector elements_;
-    BoundaryIdMap boundaryIds_;
+    BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
     const DuneBoundaryProjectionType* globalProjection_ ; 
     BoundaryProjectionMap boundaryProjections_;
@@ -414,6 +439,7 @@ namespace Dune
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
+    foundGlobalIndex_( false ),
     communicator_( communicator )
   {}
 
@@ -449,15 +475,14 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
 
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-    //  DUNE_THROW( NotImplemented, "insertBoundarySegment with a single argument" );
 
     boundaryProjections_[ faceId ] = 0;
 
@@ -469,6 +494,30 @@ namespace Dune
     }
     boundaryId.second = 1;
     boundaryIds_.insert( boundaryId );
+
+    insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
+  }
+
+  template< class ALUGrid >
+  inline void ALU3dGridFactory< ALUGrid > ::
+  insertProcessBorder ( const std::vector< unsigned int >& vertices )
+  {
+    if( vertices.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
+
+    boundaryProjections_[ faceId ] = 0;
+
+    BndPair boundaryId;
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+      boundaryId.first[ j ] = vertices[ i ];
+    }
+    boundaryId.second = ALU3DSPACE ProcessorBoundary_t ;
+    boundaryIds_.insert( boundaryId );
   }
 
   template< class ALUGrid >
@@ -476,11 +525,11 @@ namespace Dune
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<3,3> >& boundarySegment )
   {
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+    FaceType faceId;
+    copyAndSort( vertices, faceId );
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
@@ -528,6 +577,8 @@ namespace Dune
     }
     boundaryId.second = 1;
     boundaryIds_.insert( boundaryId );
+
+    insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }
 
 

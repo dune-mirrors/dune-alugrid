@@ -157,14 +157,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelbegin();
+      return Grid::getRealImplementation( entity ).ilevelbegin();
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().ilevelend();
+      return Grid::getRealImplementation( entity ).ilevelend();
     }
 
     /** \brief obtain collective communication object */
@@ -194,24 +194,44 @@ namespace Dune
       return grid().communicate( data, iftype, dir, level_ );
     }
 
-    //** extra methods for load balancing */
-    int
-    master ( const typename Codim< 0 > :: Entity &entity ) const
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // extra interface methods for load balancing
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
+    /** \brief return master rank for entities with partitionType != InteriorEntity */
+    int master ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return entity.impl().master();
-    }
-    int
-    macroId ( const typename Codim< 0 > :: Entity &entity ) const
-    {
-      return entity.impl().macroId();
-    }
-    int
-    weight ( const IntersectionIterator &intersectionIterator ) const // should perhaps be intersection but that class a default is used...
-    {
-      return intersectionIterator.impl().weight();
+      return Grid::getRealImplementation( entity ).master();
     }
 
-  private:
+    /** \brief return unique id of macro entity for usage with graph partitioning software */
+    int macroId ( const typename Codim< 0 > :: Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).macroId();
+    }
+
+    /** \brief return weight associated with the given macro entity */
+    int weight ( const typename Codim< 0 > :: Entity &entity ) const
+    {
+      return Grid::getRealImplementation( entity ).weight();
+    }
+
+    /** \brief return weight associated with the macro intersection, 
+               i.e. the graph edge between the two neighboring entities */
+    int weight ( const Intersection &intersection ) const
+    {
+      return Grid::getRealImplementation( intersection ).weight();
+    }
+
+    DUNE_DEPRECATED 
+    int weight ( const IntersectionIterator &intersectionIterator ) const // should perhaps be intersection but that class a default is used...
+    {
+      return weight( *intersectionIterator );
+    }
+
+  protected:
     const Grid *grid_;
     const int level_;
   };

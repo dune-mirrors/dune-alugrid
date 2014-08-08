@@ -1,4 +1,4 @@
-check_PROGRAMS = sizes backuprestore
+EXTRA_PROGRAMS = adapt backuprestore sizes
 
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
@@ -26,14 +26,8 @@ ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/parallel/gitter_tetra_top_pll.cc
 
 sizes_SOURCES = sizes.cc $(ALUSOURCES) 
-sizes_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -Wfatal-errors -DALUGRIDDEBUG
-sizes_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-sizes_LDADD = ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS)
-
+adapt_SOURCES = adapt.cc $(ALUSOURCES) 
 backuprestore_SOURCES = backuprestore.cc $(ALUSOURCES) 
-backuprestore_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) -Wfatal-errors -DALUGRIDDEBUG
-backuprestore_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-backuprestore_LDADD = ${ZOLTAN_LIBS} ${PARMETIS_LIBS} ${METIS_LIB} $(DUNEMPILIBS)
 
 include $(top_srcdir)/am/global-rules
 

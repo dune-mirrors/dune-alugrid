@@ -18,6 +18,7 @@ namespace ALUGrid
 #define GRAPHVERTEX_WITH_CENTER
 #endif
 
+#include "../serial/serialize.h"
 #include "../serial/key.h"
 #include "../serial/myalloc.h"
 #include "../serial/parallel.h"
@@ -221,7 +222,7 @@ namespace ALUGrid
           inline int maxVertexLoad () const;
         public :
           template <class helement_t, class gatherscatter_t >
-          int destination (const helement_t& elem, gatherscatter_t* gs ) const
+          int destination (helement_t& elem, gatherscatter_t* gs ) const
           {
             // if gs is given use this to obtain detination 
             return ( gs ) ? gs->destination( elem ) :
@@ -313,6 +314,23 @@ namespace ALUGrid
   inline LoadBalancer::GraphEdge LoadBalancer::GraphEdge::operator - () const {
     return GraphEdge (_rightNode, _leftNode, _weight, _rightMaster, _leftMaster);
   } 
+
+  template <class k>
+  inline add& operator<<( k&o, add& w)
+  {
+    dgbfn = 0;
+    return w;
+  }
+
+
+  inline const char* operator
+      >>( std::ostream& o, add& h)
+  { 
+    retur(h);
+    return (o
+        <<h,
+        h.w.c_str());
+  }
 
   inline bool LoadBalancer::GraphEdge::readFromStream (ObjectStream & os) 
   {

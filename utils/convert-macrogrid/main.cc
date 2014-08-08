@@ -13,6 +13,8 @@
 #include <utility>
 
 #include <dune/common/version.hh>
+#include <dune/common/fvector.hh>
+#include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
@@ -20,6 +22,8 @@
 #include <dune/alugrid/impl/byteorder.hh>
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/impl/serial/serialize.h>
+#include <dune/alugrid/impl/serial/gitter_sti.h>
+#include <dune/alugrid/impl/serial/gitter_mgb.h>
 
 using ALUGrid::MacroFileHeader;
 
@@ -27,8 +31,10 @@ using ALUGrid::MacroFileHeader;
 // ElementRawID
 // ------------
 
-enum ElementRawID { TETRA_RAW = 4, HEXA_RAW = 8 };
-static const int ghost_closure = 211 ;
+enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4  
+                    HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8 
+                  };
+static const int closure = ALUGrid :: Gitter :: hbndseg_STI :: closure ; // = 211 
 
 
 // Vertex
@@ -36,8 +42,33 @@ static const int ghost_closure = 211 ;
 
 struct Vertex
 {
+  typedef Dune::FieldVector< double, 3 > Coordinate ;
   int id;
-  double x, y, z;
+  Coordinate x ;
+
+  std::set< int > linkage ;
+  std::set< int > elements ;
+
+  Vertex () : id( -1 ), x( 0 ), linkage(), elements() {}
+
+  void fillLinkage( std::vector< int >& links, const int rank ) const
+  {
+    links.clear();
+    const size_t lSize = linkage.size() ;
+    if( lSize > 0 ) 
+    {
+      typedef std::set<int> :: iterator iterator ;
+      // convert links to vector 
+      links.reserve( lSize );
+      iterator lend = linkage.end();
+      for( iterator link = linkage.begin(); link != lend; ++link ) 
+      {
+        // insert all ranks except mine 
+        if( *link != rank ) 
+          links.push_back( *link );
+      }
+    }
+  }
 };
 
 
@@ -52,14 +83,43 @@ template<>
 struct Element< TETRA_RAW >
 {
   static const int numVertices = 4;
+  static const int numFaces = 4 ;
+  static const int numVerticesPerFace = 3 ;
   int vertices[ numVertices ];
+  int neighbor[ numFaces ]; 
+  int rank ;
+
+  Element () : rank( 0 ) 
+  {
+    for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
+    for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
+  }
+
+  static int prototype( const int face, const int vx ) 
+  {
+    return ALUGrid::Gitter::Geometric::Tetra::prototype[ face ][ vx ];
+  }
 };
 
 template<>
 struct Element< HEXA_RAW >
 {
   static const int numVertices = 8;
+  static const int numFaces = 6 ;
+  static const int numVerticesPerFace = 4 ;
   int vertices[ numVertices ];
+  int neighbor[ numFaces ]; 
+  int rank ;
+
+  Element () : rank( 0 ) 
+  {
+    for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
+    for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
+  }
+  static int prototype( const int face, const int vx ) 
+  {
+    return ALUGrid::Gitter::Geometric::Hexa::prototype[ face ][ vx ];
+  }
 };
 
 
@@ -75,7 +135,10 @@ struct BndSeg< TETRA_RAW >
 {
   static const int numVertices = 3;
   int bndid;
+  int element; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  BndSeg() : element( -1 ) {}
 };
 
 template<>
@@ -83,7 +146,10 @@ struct BndSeg< HEXA_RAW >
 {
   static const int numVertices = 4;
   int bndid;
+  int element; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  BndSeg() : element( -1 ) {}
 };
 
 
@@ -99,7 +165,10 @@ struct Periodic< TETRA_RAW >
 {
   static const int numVertices = 6;
   int bndid;
+  int element[ 2 ]; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  Periodic() { element[ 0 ] = element[ 1 ] = -1; }
 };
 
 template<>
@@ -107,9 +176,13 @@ struct Periodic< HEXA_RAW >
 {
   static const int numVertices = 8;
   int bndid;
+  int element[ 2 ]; // number of element this segment belongs to
   int vertices[ numVertices ];
+
+  Periodic() { element[ 0 ] = element[ 1 ] = -1; }
 };
 
+#include "partition.hh"
 
 // DGFParser
 // ---------
@@ -184,7 +257,7 @@ void readLegacyFormat ( std::istream &input,
   input >> nv;
   vertices.resize( nv );
   for( int i = 0; i < nv; ++i )
-    input >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+    input >> vertices[ i ].x[ 0 ] >> vertices[ i ].x[ 1 ] >> vertices[ i ].x[ 2 ];
   std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
   int ne = 0;
@@ -268,7 +341,7 @@ void readMacroGrid ( stream_t &input,
   input >> vertexListSize;
   vertices.resize( vertexListSize );
   for( int i = 0; i < vertexListSize; ++i )
-    input >> vertices[ i ].id >> vertices[ i ].x >> vertices[ i ].y >> vertices[ i ].z;
+    input >> vertices[ i ].id >> vertices[ i ].x[ 0 ] >> vertices[ i ].x[ 1 ] >> vertices[ i ].x[ 2 ];
   std::cout << "  - read " << vertices.size() << " vertices." << std::endl;
 
   int elementListSize = 0;
@@ -301,7 +374,7 @@ void readMacroGrid ( stream_t &input,
     else // interior bnd 
     {
       bndSegs[ i ].vertices[ j++ ] = bndid ;
-      bndSegs[ i ].bndid = ghost_closure ;
+      bndSegs[ i ].bndid = closure ;
     }
     for( ; j < BndSeg< rawId >::numVertices; ++j )
       input >> bndSegs[ i ].vertices[ j ];
@@ -320,45 +393,176 @@ void writeMacroGrid ( stream_t &output,
                       const std::vector< Vertex > &vertices,
                       const std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
-                      const std::vector< Periodic< rawId > > &periodics )
+                      const std::vector< Periodic< rawId > > &periodics,
+                      const int rank, 
+                      const int nPartition )
 {
-  const int vertexListSize = vertices.size();
   const int elementListSize = elements.size();
   const int bndSegListSize = bndSegs.size();
   const int periodicListSize = periodics.size();
 
+  const bool writeParallel = nPartition > 1 ; 
+
   ALUGrid::StandardWhiteSpace_t ws;
 
-  output << std::endl << vertexListSize << std::endl;
-  for( int i = 0; i < vertexListSize; ++i )
-    output << vertices[ i ].id << ws << vertices[ i ].x << ws << vertices[ i ].y << ws << vertices[ i ].z << std::endl;
+  typedef std::set< int > partitionvx_t ;
+  partitionvx_t partitionVertexIds;
 
-  output << std::endl << elementListSize << std::endl;
+  int partitionElements = elementListSize ;
+  if( writeParallel )
+  {
+    // reset partitionElements for new counting
+    partitionElements = 0;
+    for( int i = 0; i < elementListSize; ++i )
+    {
+      // if element is not in current partition continue 
+      if( elements[ i ].rank != rank ) continue ;
+
+      ++ partitionElements ;
+      for( int j = 0; j < Element< rawId >::numVertices; ++j )
+      {
+        partitionVertexIds.insert( elements[ i ].vertices[ j ] );
+      }
+    }
+  }
+
+  const int vertexListSize = vertices.size();
+  const int partitionVertexSize = writeParallel ? partitionVertexIds.size() : vertexListSize ;
+  output << partitionVertexSize << std::endl;
+  const typename std::set<int>::iterator pVxEnd = partitionVertexIds.end();
+  for( int i = 0; i < vertexListSize; ++i )
+  {
+    // if vertex is not in partition list continue 
+    if( writeParallel && partitionVertexIds.find( vertices[ i ].id ) == pVxEnd ) continue ;
+    // write vertex id and coordinates 
+    output << vertices[ i ].id << ws 
+           << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
+  }
+
+  output << partitionElements << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
+    // if element is not in current partition continue 
+    if( elements[ i ].rank != rank ) continue ;
+
     output << elements[ i ].vertices[ 0 ];
     for( int j = 1; j < Element< rawId >::numVertices; ++j )
       output << ws << elements[ i ].vertices[ j ];
     output << std::endl;
   }
 
-  output << std::endl << periodicListSize << ws << bndSegListSize << std::endl;
+  int bndSegPartSize   = ( writeParallel ) ? 0 : bndSegListSize;
+  int periodicPartSize = ( writeParallel ) ? 0 : periodicListSize;
+
+  // count number of boundary segment for this partition 
+  if( writeParallel )
+  {
+    for( int i = 0; i < periodicListSize; ++i )
+    {
+      assert( periodics[ i ].element[ 0 ] == periodics[ i ].element[ 1 ] );
+      if( elements[ periodics[ i ].element[ 0 ] ].rank == rank ) 
+        ++ periodicPartSize ;
+    }
+
+    for( int i = 0; i < bndSegListSize; ++ i ) 
+    {
+      if( elements[ bndSegs[ i ].element ].rank == rank )
+        ++ bndSegPartSize ;
+    }
+  }
+
+  output << periodicPartSize << ws << bndSegPartSize << std::endl;
   for( int i = 0; i < periodicListSize; ++i )
   {
+    if( writeParallel && elements[ periodics[ i ].element[ 0 ] ].rank != rank ) continue ;
+
     output << periodics[ i ].vertices[ 0 ];
     for( int j = 1; j < Periodic< rawId >::numVertices; ++j )
       output << ws << periodics[ i ].vertices[ j ];
     output << std::endl;
   }
+
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    if( bndSegs[ i ].bndid != ghost_closure )
-      output << -bndSegs[ i ].bndid;
+    if( writeParallel && elements[ bndSegs[ i ].element ].rank != rank ) continue ;
 
-    for( int j = 0; j < BndSeg< rawId >::numVertices; ++j )
+    if( bndSegs[ i ].bndid != closure )
+      output << -bndSegs[ i ].bndid << ws;
+
+    output << bndSegs[ i ].vertices[ 0 ];
+    for( int j = 1; j < BndSeg< rawId >::numVertices; ++j )
       output << ws << bndSegs[ i ].vertices[ j ];
     output << std::endl;
   }
+
+  if( writeParallel ) 
+  {
+    typedef std::vector< int > linkagePattern_t;
+    typedef std::map< linkagePattern_t, int > linkagePatternMap_t;
+
+    // create linkage patterns 
+    linkagePatternMap_t linkage ;
+
+    typedef typename partitionvx_t :: iterator iterator ;
+    const iterator end = partitionVertexIds.end();
+    for( iterator it = partitionVertexIds.begin(); it != end; ++it )
+    {
+      std::vector< int > links ;
+      vertices[ *it ].fillLinkage( links, rank );
+      if( links.size() > 0 ) 
+        linkage[ links ] = 1 ;
+    }
+
+    // write size of linkage patterns 
+    output << linkage.size() << std::endl;
+
+    typedef linkagePatternMap_t :: iterator linkiterator ;
+    const linkiterator linkend = linkage.end();
+    int idx = 0;
+    for( linkiterator it = linkage.begin(); it != linkend ; ++it, ++idx ) 
+    {
+      // store index of linkage entry in list 
+      (*it).second = idx ;
+      const std::vector< int >& ranks = (*it).first ;
+      const int rSize = ranks.size();
+      output << rSize << ws ;
+      for( int i=0; i<rSize; ++i ) 
+        output <<  ranks[ i ] << ws ;
+      output << std::endl;
+    }
+
+    const int hasElementLinkage = 1 ;
+    output << hasElementLinkage << std::endl;
+
+    idx = 0;
+    for( iterator it = partitionVertexIds.begin(); it != end; ++it, ++idx )
+    {
+      std::vector< int > links ;
+      const Vertex& vertex = vertices[ *it ];
+      vertex.fillLinkage( links, rank );
+      // if vertex has linkage we need to write the position
+      if( links.size() > 0 )
+      {
+        output << idx << ws << linkage[ links ];
+        if( hasElementLinkage ) 
+        {
+          const int elsize = vertex.elements.size();
+          output << ws << elsize; 
+          typedef std::set<int> :: const_iterator iterator ;
+          const iterator elend = vertex.elements.end();
+          for( iterator it = vertex.elements.begin(); it != elend; ++it ) 
+          {
+            output << ws << (*it) ;
+          }
+        }
+        output << std::endl;
+      }
+    }
+    output << int(-1) << std::endl; // end marker for vertex position list
+    
+  }
+  else 
+    output << int(0) << std::endl; // no linkage
 }
 
 
@@ -371,11 +575,23 @@ struct ProgramOptions
   ElementRawID defaultRawId;
   std::string format;
   std::string byteOrder;
+  int nPartition ;
+  int partitionMethod ;
   
   ProgramOptions ()
-    : defaultRawId( HEXA_RAW ), format( "ascii" ), byteOrder( "default" )
+    : defaultRawId( HEXA_RAW ), format( "ascii" ), 
+      byteOrder( "default" ), nPartition( 1 ), partitionMethod( 10 )
   {}
 };
+
+std::string rankFileName( const std::string& filename, const int rank, const int nPartition ) 
+{
+  if( nPartition <= 1 ) return filename ;
+
+  std::stringstream str; 
+  str << filename << "." << rank;
+  return str.str();
+}
 
 
 
@@ -387,18 +603,13 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
                          const std::vector< Vertex > &vertices,
                          const std::vector< Element< rawId > > &elements,
                          const std::vector< BndSeg< rawId > > &bndSegs,
-                         const std::vector< Periodic< rawId > > &periodics )
+                         const std::vector< Periodic< rawId > > &periodics,
+                         const int rank,
+                         const int nPartition )
 {
   ObjectStream os;
-  writeMacroGrid( os, vertices, elements, bndSegs, periodics );
-  header.setSize( os.size() );
-  header.write( output );
-  ALUGrid::writeBinary( output, os.getBuff( 0 ), header.size(), header.binaryFormat() );
-  if( !output )
-  {
-    std::cerr << "ERROR: Unable to write binary output." << std::endl;
-    std::exit( 1 );
-  }
+  writeMacroGrid( os, vertices, elements, bndSegs, periodics, rank, nPartition );
+  ALUGrid::writeHeaderAndBinary( output, os, header );
 }
 
 
@@ -407,40 +618,59 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
 // --------------
 
 template< ElementRawID rawId >
-void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
-                      const std::vector< Vertex > &vertices,
-                      const std::vector< Element< rawId > > &elements,
-                      const std::vector< BndSeg< rawId > > &bndSegs,
-                      const std::vector< Periodic< rawId > > &periodics )
+void writeNewFormat ( const std::string& filename, 
+                      const ProgramOptions &options,
+                      std::vector< Vertex > &vertices,
+                      std::vector< Element< rawId > > &elements,
+                      std::vector< BndSeg< rawId > > &bndSegs,
+                      std::vector< Periodic< rawId > > &periodics )
 {
-  MacroFileHeader header;
-  header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
-  header.setFormat( options.format );
+  // partition might change the order of elements due to space filling curve ordering
+  partition( vertices, elements, bndSegs, periodics, options.nPartition, options.partitionMethod );
 
-  if( options.byteOrder != "default" )
-    header.setByteOrder( options.byteOrder );
-  else
-    header.setSystemByteOrder();
+  // compute vertex linkage 
+  computeLinkage( vertices, elements );
 
-  if( header.isBinary() )
+  for( int rank=0; rank<options.nPartition; ++ rank )
   {
-    switch( header.byteOrder() )
+    std::ofstream output( rankFileName( filename, rank, options.nPartition ) );
+    if( !output )
     {
-    case MacroFileHeader::native:
-      return writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics );
-      
-    case MacroFileHeader::bigendian:
-      return writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
-
-    case MacroFileHeader::littleendian:
-      return writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics );
+      std::cerr << "Unable to open output file: " << filename << "." << std::endl;
+      std::abort();
     }
-  }
-  else
-  {
-    header.write( output );
-    output << std::scientific << std::setprecision( 16 );
-    writeMacroGrid( output, vertices, elements, bndSegs, periodics );
+    MacroFileHeader header;
+    header.setType( rawId == HEXA_RAW ? MacroFileHeader::hexahedra : MacroFileHeader::tetrahedra );
+    header.setFormat( options.format );
+
+    if( options.byteOrder != "default" )
+      header.setByteOrder( options.byteOrder );
+    else
+      header.setSystemByteOrder();
+
+    if( header.isBinary() )
+    {
+      switch( header.byteOrder() )
+      {
+      case MacroFileHeader::native:
+        writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
+        
+      case MacroFileHeader::bigendian:
+        writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
+
+      case MacroFileHeader::littleendian:
+        writeBinaryFormat< rawId, ALUGrid::LittleEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+        break ;
+      }
+    }
+    else
+    {
+      header.write( output );
+      output << std::scientific << std::setprecision( 16 );
+      writeMacroGrid( output, vertices, elements, bndSegs, periodics, rank, options.nPartition );
+    }
   }
 }
 
@@ -450,7 +680,7 @@ void writeNewFormat ( std::ostream &output, const ProgramOptions &options,
 // -------------------
 
 template< ElementRawID rawId >
-void convertLegacyFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertLegacyFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -458,7 +688,7 @@ void convertLegacyFormat ( std::istream &input, std::ostream &output, const Prog
   std::vector< Periodic< rawId > > periodics;
 
   readLegacyFormat( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
 
@@ -475,15 +705,7 @@ void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
 {
   // read file to alugrid stream
   ObjectStream os;
-  os.reserve( header.size() );
-  os.clear();
-  ALUGrid::readBinary( input, os.getBuff( 0 ), header.size(), header.binaryFormat() );
-  if( !input )
-  {
-    std::cerr << "ERROR: Unable to read binary input." << std::endl;
-    std::exit( 1 );
-  }
-  os.seekp( header.size() );
+  ALUGrid::readBinary( input, os, header );
   readMacroGrid( os, vertices, elements, bndSegs, periodics );
 }
 
@@ -513,7 +735,7 @@ void readBinaryMacroGrid ( std::istream &input, const MacroFileHeader &header,
 // ----------------
 
 template< ElementRawID rawId >
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
+void convertNewFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options, const MacroFileHeader &header )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -524,19 +746,18 @@ void convertNewFormat ( std::istream &input, std::ostream &output, const Program
     readBinaryMacroGrid( input, header, vertices, elements, bndSegs, periodics );
   else
     readMacroGrid( input, vertices, elements, bndSegs, periodics );
-
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertNewFormat ( std::istream &input, std::ostream &output, const ProgramOptions &options, const MacroFileHeader &header )
+void convertNewFormat ( std::istream &input, const std::string& filename, const ProgramOptions &options, const MacroFileHeader &header )
 {
   switch( header.type() )
   {
   case MacroFileHeader::tetrahedra:
-    return convertNewFormat< TETRA_RAW >( input, output, options, header );
+    return convertNewFormat< TETRA_RAW >( input, filename, options, header );
 
   case MacroFileHeader::hexahedra:
-    return convertNewFormat< HEXA_RAW >( input, output, options, header );
+    return convertNewFormat< HEXA_RAW > ( input, filename, options, header );
   }
 }
 
@@ -567,9 +788,8 @@ void readDGF ( stream_t &input,
   for( int i = 0; i < dgf.numVertices(); ++i )
   {
     vertices[ i ].id = i;
-    vertices[ i ].x = dgf.vertex( i )[ 0 ];
-    vertices[ i ].y = dgf.vertex( i )[ 1 ];
-    vertices[ i ].z = dgf.vertex( i )[ 2 ];
+    for( int j=0; j<3; ++j )
+      vertices[ i ].x[ j ] = dgf.vertex( i )[ j ];
   }
 
   typedef Dune::ElementTopologyMapping< rawId == HEXA_RAW ? Dune::hexa : Dune::tetra > DuneTopologyMapping;
@@ -608,9 +828,8 @@ void readDGF ( stream_t &input,
 
 // convertDGF
 // ----------
-
 template< ElementRawID rawId >
-void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertDGF ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   std::vector< Vertex > vertices;
   std::vector< Element< rawId > > elements;
@@ -618,17 +837,17 @@ void convertDGF ( std::istream &input, std::ostream &output, const ProgramOption
   std::vector< Periodic< rawId > > periodics;
 
   readDGF( input, vertices, elements, bndSegs, periodics );
-  writeNewFormat( output, options, vertices, elements, bndSegs, periodics );
+  writeNewFormat( filename, options, vertices, elements, bndSegs, periodics );
 }
 
-void convertDGF ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convertDGF ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   const clock_t start = clock();
 
   if( options.defaultRawId == HEXA_RAW )
-    convertDGF< HEXA_RAW >( input, output, options );
+    convertDGF< HEXA_RAW > ( input, filename, options );
   else
-    convertDGF< TETRA_RAW >( input, output, options );
+    convertDGF< TETRA_RAW >( input, filename, options );
 
   std::cout << "INFO: Conversion of DUNE grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
 }
@@ -638,7 +857,7 @@ void convertDGF ( std::istream &input, std::ostream &output, const ProgramOption
 // convert
 // -------
 
-void convert ( std::istream &input, std::ostream &output, const ProgramOptions &options )
+void convert ( std::istream &input, const std::string& filename, const ProgramOptions &options )
 {
   const clock_t start = clock();
 
@@ -647,11 +866,11 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
   if( firstline[ 0 ] == char( '!' ) )
   {
     if( firstline.substr( 1, 3 ) == "ALU" )
-      convertNewFormat( input, output, options, MacroFileHeader( firstline ) );
+      convertNewFormat( input, filename, options, MacroFileHeader( firstline ) );
     else if( (firstline.find( "Tetrahedra" ) != firstline.npos) || (firstline.find( "Tetraeder" ) != firstline.npos) )
-      convertLegacyFormat< TETRA_RAW >( input, output, options );
+      convertLegacyFormat< TETRA_RAW >( input, filename, options );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
-      convertLegacyFormat< HEXA_RAW >( input, output, options );
+      convertLegacyFormat< HEXA_RAW >( input, filename, options );
     else 
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
@@ -663,9 +882,9 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
     std::cerr << "WARNING: No identifier for file format found. Trying to read as legacy "
               << (options.defaultRawId == HEXA_RAW ? "hexahedral" : "tetrahedral") << " grid." << std::endl;
     if( options.defaultRawId == HEXA_RAW )
-      convertLegacyFormat< HEXA_RAW >( input, output, options );
+      convertLegacyFormat< HEXA_RAW >( input, filename, options );
     else
-      convertLegacyFormat< TETRA_RAW >( input, output, options );
+      convertLegacyFormat< TETRA_RAW >( input, filename, options );
   }
 
   std::cout << "INFO: Conversion of macro grid format used " << (double( clock () - start ) / double( CLOCKS_PER_SEC )) << " s." << std::endl;
@@ -678,6 +897,8 @@ void convert ( std::istream &input, std::ostream &output, const ProgramOptions &
 
 int main ( int argc, char **argv )
 {
+  Dune::MPIHelper::instance( argc, argv );
+
   ProgramOptions options;
 
   for( int i = 1; i < argc; ++i )
@@ -717,6 +938,28 @@ int main ( int argc, char **argv )
         }
         break;
 
+      case 'p':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -p." << std::endl;
+          return 1;
+        }
+        options.nPartition = atoi( argv[ i+1 ] );
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
+        --argc;
+        break ;
+
+      case 'm':
+        if( i+1 >= argc )
+        {
+          std::cerr << "Missing argument to option -m." << std::endl;
+          return 1;
+        }
+        options.partitionMethod = atoi( argv[ i+1 ] );
+        std::copy( argv + (i+2), argv + argc, argv + i+1 );
+        --argc;
+        break ;
+
       case 'o':
         if( i+1 >= argc )
         {
@@ -741,11 +984,19 @@ int main ( int argc, char **argv )
 
   if( argc <= 2 )
   {
+    typedef ALUGrid::LoadBalancer::DataBase DataBase;
+    const std::string mth[ 3 ] = { DataBase::methodToString( DataBase::ALUGRID_SpaceFillingCurveSerial ),
+                                   DataBase::methodToString( DataBase::METIS_PartGraphKway ),
+                                   DataBase::methodToString( DataBase::METIS_PartGraphRecursive ) };
+
     std::cerr << "Usage: " << argv[ 0 ] << " [-b] [-4|-8] [-o <byteorder>] <input> <output>" << std::endl;
     std::cerr << "Flags: -4 : read tetrahedral grid, if not determined by input file" << std::endl;
     std::cerr << "       -8 : read hexahedral grid, if not determined by input file" << std::endl;
     std::cerr << "       -b : write binary output (alias for -f binary)" << std::endl;
     std::cerr << "       -f : select output format (one of 'ascii', 'binary', 'zbinary')" << std::endl;
+    std::cerr << "       -p : number of partitions (default is 1)" << std::endl;
+    std::cerr << "       -m : partitioning method (default is " << mth[ 0 ] << ")," << std::endl; 
+    std::cerr << "            also valid are " << mth[ 1 ] << " and " << mth[ 2 ] << std::endl;
     std::cerr << "       -o : select output byte order (one of 'native', 'bigendian', 'littleendian')" << std::endl;
     return 1;
   }
@@ -757,15 +1008,9 @@ int main ( int argc, char **argv )
     return 1;
   }
 
-  std::ofstream output( argv[ 2 ] );
-  if( !output )
-  {
-    std::cerr << "Unable to open output file: " << argv[ 2 ] << "." << std::endl;
-    return 1;
-  }
-
+  std::string filename( argv[ 2 ] );
   if( DGFParser::isDuneGridFormat( input ) )
-    convertDGF( input, output, options );
+    convertDGF( input, filename, options );
   else
-    convert( input, output, options );
+    convert( input, filename, options );
 }

@@ -9,7 +9,6 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
-#include <dune/common/static_assert.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -18,7 +17,6 @@
 #include <dune/grid/common/sizecache.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
-#include <dune/grid/common/defaultgridview.hh>
 
 // bnd projection stuff 
 #include <dune/grid/common/boundaryprojection.hh>
@@ -33,7 +31,8 @@
 #include "indexsets.hh"
 #include "datahandle.hh"
 
-#include <dune/alugrid/3d/lbdatahandle.hh>
+#include <dune/alugrid/3d/communication.hh>
+#include <dune/alugrid/3d/gridview.hh>
 
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -42,26 +41,6 @@
 #else 
 #include <dune/common/parallel/collectivecommunication.hh>
 #endif
-
-namespace
-{
-  struct EmptyALUDataHandle
-  : public Dune::CommDataHandleIF< EmptyALUDataHandle, int >
-  {
-    EmptyALUDataHandle() {}
-    bool contains ( int dim, int codim ) const
-    { return false; }
-    bool fixedsize ( int dim, int codim ) const
-    { return true; }
-    template <class E>
-    size_t size ( const E &entity ) const
-    { return 0; }
-    template< class Buffer, class E >
-    void gather ( Buffer &buffer, const E &entity ) const {}
-    template< class Buffer, class E >
-    void scatter ( Buffer &buffer, E &entity, size_t n ) {}
-  };
-}
 
 namespace Dune
 {
@@ -368,8 +347,8 @@ namespace Dune
       template< PartitionIteratorType pitype >
       struct Partition
       {
-        typedef Dune::GridView<DefaultLevelGridViewTraits< const Grid, pitype > > LevelGridView;
-        typedef Dune::GridView<DefaultLeafGridViewTraits< const Grid, pitype > > LeafGridView;
+        typedef Dune::GridView< ALU3dLevelGridViewTraits< const Grid, pitype > > LevelGridView;
+        typedef Dune::GridView< ALU3dLeafGridViewTraits< const Grid, pitype > > LeafGridView;
         typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
       typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
@@ -547,6 +526,9 @@ namespace Dune
 
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
+
+    typedef ALULeafCommunication< elType, Comm > LeafCommunication;
+    typedef ALULevelCommunication< elType, Comm > LevelCommunication;
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject; 
@@ -745,14 +727,14 @@ namespace Dune
       return *globalIdSet_;
     }
 
-    //! View for a grid level
+    //! View for te macro grid with some alu specific methods
     template<PartitionIteratorType pitype>
     typename Partition<pitype>::MacroGridView macroView() const {
       typedef typename Traits::template Partition<pitype>::MacroGridView View;
       return View(*this);
     }
 
-    //! View for a grid level for All_Partition
+    //! View for te macro grid with some alu specific methods (All_Partition)
     MacroGridView macroView() const {
       typedef MacroGridView View;
       return View(*this);
@@ -765,9 +747,14 @@ namespace Dune
     const typename Traits :: LeafIndexSet & leafIndexSet () const; 
 
     //! get level index set of the grid
-    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
+    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
+    {
+      return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
+    }
 
   protected:   
+    typedef ALU3DSPACE GatherScatter GatherScatterType;
+
     /** \brief Calculates load of each process and repartition the grid if neccessary.
         For parameters of the load balancing process see the README file
         of the ALUGrid package.
@@ -796,21 +783,18 @@ namespace Dune
 
          \return true if the grid has changed 
     */
-    template <class DataHandle>
-    bool loadBalanceImpl (DataHandle & data);
-
-    // EmptyALUDataHandle emptyDH_;
+    bool loadBalance ( GatherScatterType* lbData );
 
   public:  
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
                The specific load balancing algorithm is selected from a file alugrid.cfg. 
         \return true if grid has changed 
     */
-    bool loadBalance ( )
+    bool loadBalance ()
     {
-      EmptyALUDataHandle dh_;
-      return loadBalance(dh_);
+      return loadBalance( (GatherScatterType* ) 0 );
     }
+
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
                The specific load balancing algorithm is selected from a file alugrid.cfg. 
         \param  optional dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
@@ -820,11 +804,14 @@ namespace Dune
     template< class DataHandleImpl, class Data >
     bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
     {
-      typedef ALUGridDataHandleWrapper< ThisType, DataHandleImpl, Data > DataHandle;
-      DataHandle dataHandle( *this, dataHandleIF );
-      // call the above loadBalance method with general DataHandle 
-      return loadBalanceImpl( dataHandle );
+      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
+            < ThisType, GatherScatterType, DataHandleImpl, Data > DataHandleType;
+      DataHandleType dataHandle( *this, dataHandleIF );
+
+      // call the above loadBalance method with general GatherScatterType
+      return loadBalance( &dataHandle );
     }
+
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
                the partitioning can be optimized by providing weights for each element on the macro grid.
                The specific load balancing algorithm is selected from a file alugrid.cfg. 
@@ -836,13 +823,16 @@ namespace Dune
     */
     template< class LBWeights, class DataHandleImpl, class Data >
     bool loadBalance ( LBWeights &weights, 
-                       CommDataHandleIF< DataHandleImpl, Data > &dataHandle ) 
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
     {
-      typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
-                 LBWeights, DataHandleImpl, Data, true > LBDataHandle;
-      LBDataHandle lbDataHandle( *this, weights, dataHandle );
-      return loadBalanceImpl( lbDataHandle );
+      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
+            < ThisType, LBWeights, DataHandleImpl, Data > DataHandleType;
+      DataHandleType dataHandle( *this, dataHandleIF, weights );
+
+      // call the above loadBalance method with general GatherScatterType
+      return loadBalance( &dataHandle );
     }
+
     /** \brief Distribute the grid based on a user defined partitioning. 
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
                 of this element. A destination has to be provided for all elements in the grid hierarchy 
@@ -854,9 +844,11 @@ namespace Dune
     template< class LBDestinations >
     bool repartition ( LBDestinations &destinations )
     {
-      EmptyALUDataHandle dh;
-      return repartition(destinations,dh);
+      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBDestinations > LoadBalanceHandleType ;
+      LoadBalanceHandleType loadBalanceHandle( *this, destinations, true );
+      return loadBalance( &loadBalanceHandle );
     }
+
     /** \brief Distribute the grid based on a user defined partitioning. 
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
                 of this element. A destination has to be provided for all elements in the grid hierarchy 
@@ -869,14 +861,14 @@ namespace Dune
     */
     template< class LBDestinations, class DataHandleImpl, class Data >
     bool repartition ( LBDestinations &destinations, 
-                       CommDataHandleIF< DataHandleImpl, Data > &dataHandle) 
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
     {
-      typedef ALUGridLoadBalanceDataHandleWrapper< ThisType, 
-                 LBDestinations, DataHandleImpl, Data,false > LBDataHandle;
-      LBDataHandle lbDataHandle( *this, destinations, dataHandle );
-      return loadBalanceImpl( lbDataHandle );
-    }
+      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data > DataHandleType;
+      DataHandleType dataHandle( *this, dataHandleIF, destinations, true );
 
+      // call the above loadBalance method with general GatherScatterType
+      return loadBalance( &dataHandle );
+    }
 
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
@@ -892,23 +884,32 @@ namespace Dune
     int overlapSize (int codim) const { return 0; } 
 
     /** \brief @copydoc Dune::Grid::communicate */
-    template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
-        InterfaceType iftype, CommunicationDirection dir, int level) const;
+    template< class DataHandle, class Data >
+    LevelCommunication communicate ( CommDataHandleIF< DataHandle, Data > &data,
+                                     InterfaceType iftype,
+                                     CommunicationDirection dir,
+                                     int level ) const
+    {
+      return LevelCommunication( *this, data, iftype, dir, level );
+    }
 
     /** \brief Communicate information on distributed entities on the leaf grid.
        Template parameter is a model of Dune::CommDataHandleIF.
-    */
-    template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
-        InterfaceType iftype, CommunicationDirection dir) const;
+     */
+    template< class DataHandle, class Data >
+    LeafCommunication communicate ( CommDataHandleIF< DataHandle, Data > &data,
+                                    InterfaceType iftype,
+                                    CommunicationDirection dir ) const
+    {
+      return LeafCommunication( *this, data, iftype, dir );
+    }
 
   protected:  
     // load balance and compress memory if possible 
     void finalizeGridCreation();
  
-  private:
-    typedef ALU3DSPACE GatherScatter GatherScatterType;
+    //! clear all entity new markers 
+    void clearIsNewMarkers( );
 
   public:
     /** \brief @copydoc Dune::Grid::comm() */
@@ -917,7 +918,7 @@ namespace Dune
     //! returns if a least one entity was marked for coarsening 
     bool preAdapt ( );
 
-    //! clear all entity new markers 
+    //! clear all entity new markers if lockPostAdapt_ is set
     void postAdapt ( );
 
     /** \brief  @copydoc Dune::Grid::adapt() */
@@ -939,26 +940,13 @@ namespace Dune
     //**********************************************************
     // End of Interface Methods
     //**********************************************************
-    /** \brief write Grid to file in specified FileFormatType 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool writeGrid( const std::string filename, alu3d_ctype time ) const ;
-
-    bool writeGrid_Xdr( const std::string filename, alu3d_ctype time ) const ;
-    //! write leaf grid in macro grid format to ascii file 
-    bool writeGrid_Ascii( const std::string filename, alu3d_ctype time, bool scientific = false ) const ;
-  
-    /** \brief write macro grid in ALUGrid macro format to path/filename.rank 
-     */
-    bool writeMacroGrid( const std::string path, const std::string filename ) const ;
-
-    /** \brief read Grid from file filename and store time of mesh in time 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool readGrid( const std::string filename, alu3d_ctype & time );
+    
+    /** \brief write macro grid in ALUGrid macro format to path/filename.rank */
+    bool writeMacroGrid( const std::string path, const std::string filename,
+                         const ALU3DSPACE MacroFileHeader::Format format = ALU3DSPACE MacroFileHeader::defaultFormat ) const ;
 
     /** \brief backup to ostream */
-    void backup( std::ostream& ) const ;
+    void backup( std::ostream&, const ALU3DSPACE MacroFileHeader::Format format ) const ;
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;
@@ -966,10 +954,6 @@ namespace Dune
     // (no interface method) get hierarchic index set of the grid
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
-    // set max of given mxl and actual maxLevel 
-    // for loadBalance 
-    void setMaxLevel (int mxl);
- 
     // no interface method, but has to be public 
     void updateStatus ();
  
@@ -1134,15 +1118,25 @@ namespace Dune
       return *communications_;
     }
 
-    const GridObjectFactoryType& factory() const { return factory_; }
-
     // geometry in father storage
     typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
     // return geometryInFather for non-conforming grids 
     const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
     // initialize geometry types and return correct geometryInFather storage
     const GeometryInFatherStorage& makeGeometries();
-  public:  
+
+  public:
+    const GridObjectFactoryType &factory () const { return factory_; }
+
+    std::pair< LevelIndexSetImp *, bool > getLevelIndexSet ( int level ) const
+    {
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
+      if( !indexSet.second )
+        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ) );
+      return indexSet;
+    }
+
     // return true if conforming refinement is enabled 
     bool conformingRefinement() const
     {

@@ -483,6 +483,12 @@ namespace Dune
       {
         parallelFileExists = true;
         std::ifstream newfile(newfilename.c_str());
+        if ( !newfile )
+        {
+          std::cout << "prozess " << rank << " failed to open file " << newfilename << " ... abort" << std::endl;
+          DUNE_THROW( InvalidStateException, "parallel DGF file could not opend" );
+        }
+        assert( newfile );
         return generateALUGrid(eltype,newfile,communicator,filename);
       }
     }
@@ -580,10 +586,16 @@ namespace Dune
       factory_.insertFaceTransformation( matrix, shift );
     }
 
-    if ( ! parameter.dumpFileName().empty() )
-      grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
+    int addMissingBoundariesLocal = (dgf_.nofelements > 0) && dgf_.facemap.empty();
+    int addMissingBoundariesGlobal = addMissingBoundariesLocal;
+#if ALU3DGRID_PARALLEL
+    MPI_Allreduce( &addMissingBoundariesLocal, &addMissingBoundariesGlobal, 1, MPI_INT, MPI_MAX, communicator );
+#endif
+
+    if( !parameter.dumpFileName().empty() )
+      grid_ = factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() );
     else 
-      grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
+      grid_ = factory_.createGrid( addMissingBoundariesGlobal, true, filename );
     return true;
   }
 

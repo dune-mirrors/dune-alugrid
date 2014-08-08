@@ -4,8 +4,6 @@
 #include <iostream>
 #include <vector>
 
-#include <dune/common/static_assert.hh>
-
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
 
@@ -16,6 +14,7 @@
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/grid/common/defaultgridview.hh>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/alugrid/common/objectfactory.hh>
@@ -203,8 +202,8 @@ namespace Dune
     typedef ALU2dGrid< dim, dimworld, eltype > ThisType; 
     typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
 
-    dune_static_assert ( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
-    dune_static_assert ( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
+    static_assert ( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
+    static_assert ( dimworld == 2 || dimworld == 3, "ALU2dGrid only implemented for world dim 2 or 3." );
 
   public:
     static const ALU2DSPACE ElementType elementType = eltype;
@@ -670,21 +669,8 @@ namespace Dune
       return leafMarker_;
     }
     
-    /** \brief write Grid to file in specified FileFormatType 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool writeGrid( const std::string filename, alu2d_ctype time ) const ;
-
-    bool writeGrid_Xdr( const std::string filename, alu2d_ctype time ) const ;
-    bool writeGrid_Ascii( const std::string filename, alu2d_ctype time ) const ;
-  
-    /** \brief read Grid from file filename and store time of mesh in time 
-     */
-    template <GrapeIOFileFormatType ftype>
-    bool readGrid( const std::string filename, alu2d_ctype & time );
-
     /** \brief backup to ostream */
-    void backup( std::ostream& ) const ;
+    void backup( std::ostream&, const ALU3DSPACE MacroFileHeader::Format format  ) const ;
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;

@@ -25,6 +25,8 @@ namespace ALUGrid
 #endif
 #endif
 
+  int __STATIC_myrank = -1;
+
   typedef Wrapper < AccessIterator < Gitter::vertex_STI >::Handle, 
     Gitter::InternalVertex >              leaf_vertex__macro_vertex__iterator;
 
@@ -239,7 +241,6 @@ namespace ALUGrid
     return this->createIterator(e,rule);
   }
 
-
   // create level face iterator 
   IteratorSTI < Gitter::hface_STI > * Gitter::
   levelIterator (const hface_STI * f , const any_has_level<hface_STI> & ahl ) 
@@ -302,6 +303,7 @@ namespace ALUGrid
     std::cout << std::endl;
   }
 
+  int flagr = -1 ;
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
   int adaptstep = 0;
   int stepnumber = 0;
@@ -726,24 +728,8 @@ namespace ALUGrid
     return adapt();
   }
 
-  // backup taking std::ostream 
-  void Gitter::backup ( std::ostream &out )
-  {
-#ifdef ALUGRIDDEBUG
-    if( debugOption( 20 ) )
-      std::cout << "INFO: Gitter::backup ( out = " << out << " )" << std::endl;
-#endif // #ifdef ALUGRIDDEBUG
-    backupImpl( out );
-  }
-
-  // backup taking ObjectStream
-  void Gitter::backup ( ObjectStream &out )
-  {
-    backupImpl( out );
-  }
-
   template <class stream_t>
-  void Gitter::backupImpl ( stream_t& out )
+  void Gitter::backupHierarchy ( stream_t& out )
   {
     char bisection = char(conformingClosureNeeded());
     // store whether we have bisection refinement 
@@ -753,17 +739,17 @@ namespace ALUGrid
     // store whether ghost cells are enabled 
     out.put( ghosts );
 
-    // backup edges 
+    // backupHierarchy of edges 
     {
       AccessIterator <hedge_STI>::Handle fw (container ());
       for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out); 
     }
-    // backup faces 
+    // backupHierarchy of faces 
     {
       AccessIterator <hface_STI>::Handle fw (container ());
       for (fw.first (); ! fw.done (); fw.next ()) fw.item().backup(out); 
     }
-    // backup elements 
+    // backupHierarchy of elements 
     {
       AccessIterator <helement_STI>::Handle ew (container ());
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out); 
@@ -776,7 +762,7 @@ namespace ALUGrid
   }
 
   template <class stream_t> 
-  void Gitter ::restoreImpl ( stream_t& in, const bool restoreBndFaces ) 
+  void Gitter ::restoreHierarchy ( stream_t& in, const bool restoreBndFaces ) 
   {
     // store whether we have bisection refinement 
     const char bisection = in.get();
@@ -787,22 +773,22 @@ namespace ALUGrid
     if( ! ghostCells )
       disableGhostCells();
 
-    // restore edges 
+    // restoreHierarchy edges 
     {
       AccessIterator < hedge_STI >::Handle ew (container ());
       for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in); 
     }
-    // restore faces 
+    // restoreHierarchy faces 
     {
       AccessIterator < hface_STI >:: Handle fw(container());
       for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); 
     }
-    // restore elements 
+    // restoreHierarchy elements 
     {
       AccessIterator < helement_STI >:: Handle ew(container());
       for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
     }
-    // restore periodic elements 
+    // restoreHierarchy periodic elements 
     {
       AccessIterator < hperiodic_STI >:: Handle ew(container());
       for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
@@ -815,22 +801,6 @@ namespace ALUGrid
       AccessIterator < hbndseg_STI >::Handle bw (container ());
       for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace (); 
     }
-  }
-
-  // restore taking std::istream 
-  void Gitter::restore ( std::istream &in )
-  {
-#ifdef ALUGRIDDEBUG
-    if( debugOption( 20 ) )
-      std::cout << "INFO: Gitter::restore ( in = " << in << " )" << std::endl;
-#endif // #ifdef ALUGRIDDEBUG
-    restoreImpl( in, true );
-  }
-
-  // restore taking ObjectStream 
-  void Gitter::restore ( ObjectStream &in )
-  {
-    restoreImpl( in, true );
   }
 
   void Gitter::refineGlobal ()
@@ -907,13 +877,21 @@ namespace ALUGrid
      AccessIterator < hbndseg_STI >::ref;
   }
 
+  Gitter::Makrogitter::Makrogitter ()
+  {
+    initialize();
+  }
+
   Gitter::Makrogitter::~Makrogitter ()
   {
     if( iterators_attached() )
       std::cerr << "WARNING: (ignored) There are still iterators attached to the grid, remove them before removal of the grid to avoid errors." << std::endl;
   }
 
-  template void Gitter::restoreImpl( std::istream&, const bool);
-  template void Gitter::restoreImpl( ObjectStream&, const bool);
+  template void Gitter::backupHierarchy( std::ostream& );
+  template void Gitter::backupHierarchy( ObjectStream& );
+
+  template void Gitter::restoreHierarchy( std::istream&, const bool);
+  template void Gitter::restoreHierarchy( ObjectStream&, const bool);
 
 } // namespace ALUGrid

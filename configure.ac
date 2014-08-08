@@ -1,15 +1,14 @@
 AC_PREREQ(2.50)
 DUNE_AC_INIT
-#AM_INIT_AUTOMAKE([foreign 1.5])
 AC_CONFIG_SRCDIR([dune/alugrid/grid.hh])
 AM_CONFIG_HEADER([config.h])
 
 
 DUNE_CHECK_ALL
 
-AC_SUBST(AM_CPPFLAGS, "\${DUNE_CPPFLAGS} \${ALUGRID_CPPFLAGS} \${ZOLTAN_CPPFLAGS} \${PARMETIS_CPPFLAGS} \${METIS_INCLUDE}" )
-AC_SUBST(AM_LDFLAGS, "\${DUNE_LDFLAGS} \${ZOLTAN_LDFLAGS} \${ALUGRID_LDFLAGS} \${PARMETIS_LDFLAGS} \${METIS_LDFLAGS} " )
-AC_SUBST([LDADD], "\$(top_builddir)/lib/libdunealugrid.la \${ALUGRID_LIBS} \${ZOLTAN_LIBS} \${DUNE_LIBS} \${PARMETIS_LIBS} \${METIS_LIB} ")
+AC_SUBST(AM_CPPFLAGS, "\${DUNE_CPPFLAGS} -I\$(top_srcdir) \${ALUGRID_CPPFLAGS} \${SIONLIB_CPPFLAGS} \${ZOLTAN_CPPFLAGS} \${PARMETIS_CPPFLAGS} \${METIS_INCLUDE} \${ZLIB_CPPFLAGS}" )
+AC_SUBST(AM_LDFLAGS, "\${DUNE_LDFLAGS} \${SIONLIB_LDFLAGS} \${ZOLTAN_LDFLAGS} \${ALUGRID_LDFLAGS} \${PARMETIS_LDFLAGS} \${METIS_LDFLAGS} \${ZLIB_LDFLAGS}" )
+AC_SUBST([LDADD], "\$(top_builddir)/lib/libdunealugrid.la \${ALUGRID_LIBS} \${SIONLIB_LIBS} \${ZOLTAN_LIBS} \${DUNE_LIBS} \${PARMETIS_LIBS} \${METIS_LIB} \${ZLIB_LIBS}")
 
 # generate Makefiles
 AC_CONFIG_FILES([
@@ -30,9 +29,12 @@ AC_CONFIG_FILES([
   lib/Makefile
   m4/Makefile
   examples/Makefile
-  examples/callback/Makefile
   examples/dgf/Makefile
-  examples/loadbalancing/Makefile
+  examples/backuprestore/Makefile
+  examples/callback/Makefile
+  examples/loadbalance/Makefile
+  examples/communication/Makefile
+  examples/testEfficiency/Makefile
   utils/Makefile
   utils/convert-macrogrid/Makefile
   dune-alugrid.pc

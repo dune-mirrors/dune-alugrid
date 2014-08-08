@@ -1,6 +1,3 @@
-// -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
-// vi: set et ts=8 sw=2 sts=2:
-
 #ifndef DUNE_ALU3DGRIDITERATOR_HH
 #define DUNE_ALU3DGRIDITERATOR_HH
 
@@ -221,6 +218,12 @@ public:
   //! return current face 
   const GEOFaceType& getItem() const { return connector_.face(); }
 
+  //! return communication weight
+  int weight() const 
+  {
+    return this->getItem().weight();
+  }
+
 protected:
   // set interator to end iterator 
   void done () ;
@@ -377,12 +380,6 @@ public:
     // otherwise its true 
     return connector_.conformingRefinement() ? 
       BaseType :: conforming() : true ;
-  }
-
-  //! return communication weight (only available on macro iterator)
-  double weight() const 
-  {
-    return this->getItem().weight();
   }
 
 private:  

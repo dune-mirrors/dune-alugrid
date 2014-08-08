@@ -131,8 +131,6 @@ public:
         dgfFileName << path << "/dgf/cube_hc_4096.dgf";
       else if( problem_ == 23 )
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-      else if( problem_ == 24 )
-        dgfFileName << path << "/dgf/cube_hc_262144.dgf";
       else if( problem_ == 25 )
         dgfFileName << path << "/dgf/sb3d_" << mpiSize << ".dgf";
       else 
@@ -362,14 +360,12 @@ struct EulerModel
     case 11:
     case 12:
     case 13: 
-    case 14:  
       problem_ = new EulerProblemFFS< dimDomain >( problem );
       break;
     case 2:
     case 21:
     case 22:
     case 23:
-    case 24:
     case 25:
       problem_ = new EulerProblemShockBubble< dimDomain >( problem );
       break;
@@ -424,15 +420,14 @@ struct EulerModel
   // enum { Inflow = 1 , Outflow = 2, Reflection = 3 }; 
 
   /** \copydoc TransportProblem::boundaryFlux */
-  double boundaryFlux ( const int bndId, 
-                        const DomainType &normal, 
+  double boundaryFlux ( const DomainType &normal, 
                         const double time,
                         const DomainType &xGlobal,
                         const RangeType& uLeft,
                         RangeType &flux ) const
   {
     RangeType uRight;
-    boundaryValue(bndId,normal,time,xGlobal,uLeft,uRight);
+    boundaryValue(normal,time,xGlobal,uLeft,uRight);
     return numericalFlux(normal,time,xGlobal,uLeft,uRight,flux);
   }
 
@@ -446,23 +441,21 @@ struct EulerModel
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const int bndId, 
-                             const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal, 
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
   {
     RangeType uRight;
-    boundaryValue(bndId,normal,time,xGlobal,uLeft,uRight);
+    boundaryValue(normal,time,xGlobal,uLeft,uRight);
     return indicator( normal,time,xGlobal, uLeft, uRight );
   }
 
 private:
   /** \brief the boundary flux inserts a ghost cell value into the
    *         numerical flux - this function computes these values for the
-   *         different boundary types determined by bndId */
-  void boundaryValue( const int bndId, 
-                      const DomainType &normal, 
+   *         different boundary types */
+  void boundaryValue( const DomainType &normal, 
                       const double time,
                       const DomainType &xGlobal,
                       const RangeType& uLeft,

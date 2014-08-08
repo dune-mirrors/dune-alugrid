@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include <dune/alugrid/impl/macrofileheader.hh>
 #include "../serial/gitter_impl.h"
 #include "../serial/lock.h"
 
@@ -80,20 +81,12 @@ namespace ALUGrid
     void restoreIndices (istream_t & in );
    
     // write status of grid for ostream 
-    void backup ( std::ostream &out ) { backupImpl( out ); }
-    // write status of grid for ObjectStream
-    void backup ( ObjectStream& out ) { backupImpl( out ); }
+    virtual void backup ( std::ostream &out, const MacroFileHeader::Format format = MacroFileHeader::defaultFormat );
 
     // read status of grid istream
-    void restore ( std::istream &in ) { restoreImpl( in ); }
-    // read status of grid ObjectStream
-    void restore ( ObjectStream &in ) { restoreImpl( in ); }
-  protected:
-    template <class stream_t> 
-    void backupImpl( stream_t& out );
-        
-    template <class stream_t> 
-    void restoreImpl( stream_t& in );
+    virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
+  protected:  
+    void restoreImpl( std::istream &in, const bool restoreBndFaces );
   };
 
   class GitterDuneImpl : public GitterBasisImpl , public GitterDuneBasis 
@@ -168,6 +161,76 @@ namespace ALUGrid
   //    #    #   ##  #          #    #   ##  #
   //    #    #    #  ######     #    #    #  ######
   //
+
+  // backup routing of all grid implementations 
+  inline void GitterDuneBasis::backup ( std::ostream &out, const MacroFileHeader::Format format )
+  {
+    // backp macro grid 
+    MacroFileHeader header = container ().dumpMacroGrid ( out, format );
+
+    // flag for zbinary format
+    const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;
+    out.put( zbinaryFlag );
+
+    if( zbinaryFlag )
+    {
+      alugrid_assert( zlibCompressed == header.binaryFormat() );
+
+      ObjectStream data;
+      // backup hierarchy
+      Gitter :: backupHierarchy ( data );
+      // write data to stream
+      writeBinary( out, data );
+
+      // reset stream before we use it again
+      data.reset();
+      // backup hierarchy
+      backupIndices ( data );
+      // write data to stream
+      writeBinary( out, data );
+    }
+    else 
+    {
+      // backup hierarchy 
+      Gitter :: backupHierarchy ( out );
+      // backup indices 
+      backupIndices ( out );
+    }
+  }
+
+  // restore for serial grid, parallel version = serial + ghosts treatment 
+  inline void GitterDuneBasis::restoreImpl ( std::istream &in, const bool restoreBndFaces )
+  {
+    // NOTE: macro grid is created during grid creation
+
+    // get zbinary flag tpo check whether stored format was zbinary or binary
+    const char zbinaryFlag = in.get();
+
+    // in case compressed binary was found uncompress here
+    if( zbinaryFlag ) 
+    {
+      ObjectStream data ;
+      // read binary data 
+      readBinary( in, data );
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( data, restoreBndFaces );
+
+      // reset stream before we use it again
+      data.reset();
+      // read binary data 
+      readBinary( in, data );
+      // restore indices 
+      restoreIndices ( data );
+    }
+    else 
+    {
+      // restore hierarchy 
+      Gitter :: restoreHierarchy ( in, restoreBndFaces );
+
+      // restore indices 
+      restoreIndices (in);
+    }
+  }
 
   template <class ostream_t> 
   inline void GitterDuneBasis::backupIndices (ostream_t & out)
@@ -283,30 +346,6 @@ namespace ALUGrid
     }
     else
       std::cerr << "WARNING (ignored): indices (id = " << indices << ") not read in GitterDuneBasis::restoreIndices." << std::endl;
-  }
-
-  // wird von Dune verwendet 
-  template <class stream_t>
-  inline void GitterDuneBasis::backupImpl ( stream_t &out )
-  {
-    // backup macro grid 
-    container ().backup ( out );
-    // backup hierarchy 
-    Gitter :: backup ( out );
-    // backup indices 
-    backupIndices ( out );
-  }
-
-  // wird von Dune verwendet 
-  template <class stream_t>
-  inline void GitterDuneBasis::restoreImpl ( stream_t &in )
-  {
-    // macro grid is created during grid creation
-    // restore hierarchy 
-    Gitter :: restore (in);
-
-    // restore indices 
-    restoreIndices (in);
   }
 
   template < class A > inline PureElementAccessIterator < A >::

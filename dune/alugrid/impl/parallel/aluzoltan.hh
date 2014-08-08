@@ -8,10 +8,50 @@
 
 #include "mpAccess_MPI.h"
 
+// Warning: Zoltan defines HAVE_MPI and HAVE_PARMETIS itself. However, their definition will
+//          not match ours. The following complicated preprocessor code tries
+//          to cope with this problem.
+
 #if HAVE_ZOLTAN 
-#define ZOLTAN_CONFIG_H_INCLUDED
+
+// if DUNE was built with MPI
+#if HAVE_MPI
+// undefine our definition of HAVE_MPI before including zoltan_cpp.h
+#undef HAVE_MPI
+#define HAVE_MPI_WAS_UNDEFED_HERE
+#endif
+
+#if HAVE_PARMETIS
+#undef HAVE_PARMETIS 
+#define HAVE_PARMETIS_WAS_UNDEFED_HERE
+#endif
+
+// include Zoltan's C++ header
 #include <zoltan_cpp.h>
-#endif 
+
+// undefine any definition of HAVE_MPI made by Zoltan
+#ifdef HAVE_MPI
+#undef HAVE_MPI
+#endif // #ifdef HAVE_MPI
+
+// undefine any definition of HAVE_PARMETIS made by Zoltan
+#ifdef HAVE_PARMETIS
+#undef HAVE_PARMETIS
+#endif
+
+#ifdef HAVE_MPI_WAS_UNDEFED_HERE 
+// redefine our definition of HAVE_MPI if it was undef'd before
+#define HAVE_MPI ENABLE_MPI
+#undef HAVE_MPI_WAS_UNDEFED_HERE
+#endif // #ifdef HAVE_MPI_WAS_UNDEFED_HERE
+
+#ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE 
+// redefine our definition of HAVE_PARMETIS if it was undef'd before
+#define HAVE_PARMETIS ENABLE_PARMETIS
+#undef HAVE_PARMETIS_WAS_UNDEFED_HERE 
+#endif // #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
+
+#endif // #if HAVE_ZOLTAN
 
 namespace ALUGridZoltan
 {
@@ -223,12 +263,12 @@ namespace ALUGridZoltan
                                  const double givenTolerance,
                                  const bool verbose )
   {
-#if HAVE_ZOLTAN 
+#if HAVE_ZOLTAN && HAVE_MPI
     ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
     if( mpaMPI == 0 )
     {
       std::cerr << "ERROR: wrong mpAccess object, couldn't convert to MpAccessMPI!! in: " << __FILE__ << " line : " << __LINE__ << std::endl;
-      abort();
+      std::abort();
     }
 
     // get communincator (see mpAccess_MPI.cc
@@ -270,10 +310,10 @@ namespace ALUGridZoltan
       // zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","MAX");
       // zz->Set_Param( "GRAPH_BUILD_TYPE","FAST_NO_DUP");
-#ifdef HAVE_PARMETIS
+#if HAVE_PARMETIS
       if (method == PARMETIS)
         zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");
-#elif  HAVE_SCOTCH
+#elif HAVE_SCOTCH
       zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
       zz->Set_Param( "CHECK_GRAPH", "0"); 
@@ -380,9 +420,9 @@ namespace ALUGridZoltan
     return (changes > 0);
 #else 
     std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
-    exit(1);
+    std::abort();
     return false ;
-#endif // #if HAVE_ZOLTAN
+#endif // #if HAVE_ZOLTAN && HAVE_MPI
   } // CALL_Zoltan_LB_Partition 
 
 } // namespace ALUGridZoltan
