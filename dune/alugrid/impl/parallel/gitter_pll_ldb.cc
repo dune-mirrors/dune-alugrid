@@ -1015,35 +1015,38 @@ namespace ALUGrid
 
   std::string LoadBalancer::DataBase::methodToString (method m) 
   {
+    std::stringstream partNumber ;
+    partNumber << "(" << int(m) << ")";
+
     switch (m) {
       case NONE :
-        return "no dynamic load balancing";
+        return std::string("no dynamic load balancing "+partNumber.str());
       case COLLECT :
-        return "COLLECT";
+        return std::string("COLLECT"+partNumber.str());
       case ALUGRID_SpaceFillingCurve:
-        return "ALUGRID_SpaceFillingCurve";
+        return std::string("ALUGRID_SpaceFillingCurve"+partNumber.str());
       case ALUGRID_SpaceFillingCurveLinkage:
-        return "ALUGRID_SpaceFillingCurveLinkage";
+        return std::string("ALUGRID_SpaceFillingCurveLinkage"+partNumber.str());
       case ALUGRID_SpaceFillingCurveSerial:
-        return "ALUGRID_SpaceFillingCurveSerial";
+        return std::string("ALUGRID_SpaceFillingCurveSerial"+partNumber.str());
       case ALUGRID_SpaceFillingCurveSerialLinkage:
-        return "ALUGRID_SpaceFillingCurveSerialLinkage";
+        return std::string("ALUGRID_SpaceFillingCurveSerialLinkage"+partNumber.str());
       case METIS_PartGraphKway :
-        return "METIS_PartGraphKway";
+        return std::string("METIS_PartGraphKway"+partNumber.str());
       //case METIS_PartGraphKwayLinkage :
       //  return "METIS_PartGraphKwayLinkage";
       case METIS_PartGraphRecursive :
-        return "METIS_PartGraphRecursive";
+        return std::string("METIS_PartGraphRecursive"+partNumber.str());
       //case METIS_PartGraphRecursiveLinkage :
       //  return "METIS_PartGraphRecursiveLinkage";
       case ZOLTAN_LB_HSFC :
-        return "ZOLTAN_LB_HSFC";
+        return std::string("ZOLTAN_LB_HSFC"+partNumber.str());
       case ZOLTAN_LB_GraphPartitioning:
-        return "ZOLTAN_LB_GraphPartitioning";
+        return std::string("ZOLTAN_LB_GraphPartitioning"+partNumber.str());
       case ZOLTAN_LB_PARMETIS:
-        return "ZOLTAN_LB_PARMETIS";
+        return std::string("ZOLTAN_LB_PARMETIS"+partNumber.str());
       default :
-        return "unknown";
+        return std::string("unknown"+partNumber.str());
     }
     return "";
   }

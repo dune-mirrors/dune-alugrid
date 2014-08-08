@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include <fstream>
+#include <utility>
 
 #include "../serial/gatherscatter.hh"
 #include "gitter_dune_pll_impl.h"
@@ -31,25 +32,6 @@ namespace ALUGrid
     const bool refined = this->adaptWithoutLoadBalancing();
     this->removeAdaptRestrictProlongOp ();
     return refined;
-  }
-
-  bool GitterDunePll::duneLoadBalance () 
-  {
-    return loadBalancerGridChangesNotify ( ( GatherScatterType* ) 0 );
-  }
-
-  // returns true if grid was repartitioned 
-  bool GitterDunePll::duneLoadBalance (GatherScatterType & gs, AdaptRestrictProlongType & arp) 
-  {
-    // set restriction/prolongation operator 
-    this->setAdaptRestrictProlongOp(arp);
-
-    // do load balancing 
-    const bool repartion = loadBalancerGridChangesNotify ( &gs );
-
-    // remove restriction/prolongation operator 
-    this->removeAdaptRestrictProlongOp ();
-    return repartion;
   }
 
   std::pair< IteratorSTI < GitterPll::vertex_STI > *, IteratorSTI < GitterPll::vertex_STI > *> 
@@ -952,102 +934,193 @@ namespace ALUGrid
     mpAccess ().exchangeSymmetric ( data );     
   } 
 
-  ////////////////////////////////////////////////////////
-  //
-  // communicate data
-  // 
-  ////////////////////////////////////////////////////////
-  void GitterDunePll::doCommunication ( 
-               GatherScatterType & vertexData , 
-               GatherScatterType & edgeData,  
-               GatherScatterType & faceData ,
-               GatherScatterType & elementData, 
-               const CommunicationType commType ) 
+
+
+  // GitterDunePll::InteriorGhostCommunication::DataHandle
+  // -----------------------------------------------------
+
+  struct GitterDunePll::Communication::DataHandle
+    : public MpAccessLocal::NonBlockingExchange::DataHandleIF
   {
-    const int nl = mpAccess ().nlinks ();
+    DataHandle ( GitterDunePll &grid,
+                 GatherScatter &vertexGatherScatter, GatherScatter &edgeGatherScatter, GatherScatter &faceGatherScatter, GatherScatter &elementGatherScatter,
+                 GitterDunePll::CommunicationType commType )
+      : grid_( grid ),
+        vertexGatherScatter_( vertexGatherScatter ),
+        edgeGatherScatter_( edgeGatherScatter ),
+        faceGatherScatter_( faceGatherScatter ),
+        elementGatherScatter_( elementGatherScatter ),
+        haveHigherCodimData_( vertexGatherScatter.contains( 3, 3 ) || edgeGatherScatter.contains( 3, 2 ) || faceGatherScatter.contains( 3, 1 ) ),
+        packInterior_( (commType == GitterDunePll::All_All_Comm) || (commType == GitterDunePll::Interior_Ghost_Comm) ),
+        packGhosts_( (commType == GitterDunePll::All_All_Comm) || (commType == GitterDunePll::Ghost_Interior_Comm) )
+    {}
 
-    const bool containsVertices = vertexData.contains(3,3);
-    const bool containsEdges    = edgeData.contains(3,2);
-    const bool containsFaces    = faceData.contains(3,1);
-    const bool containsElements = elementData.contains(3,0);
+  private:
+    DataHandle ( const DataHandle & );
 
-    const bool haveHigherCodimData = containsVertices || 
-      containsEdges ||  
-      containsFaces;
-
-    const bool containsSomeThing = containsElements || haveHigherCodimData;
-
-    if(!containsSomeThing) 
+  public:
+    void pack ( int link, ObjectStream &os )
     {
-      std::cerr << "WARNING: communication called with empty data set, all contains methods returned false! \n";
+      os.clear();
+
+      typedef Gitter::hface_STI hface_STI;
+      const hface_STI *determType = 0;  // only for type determination
+      std::pair< IteratorSTI< hface_STI > *, IteratorSTI< hface_STI > * > iterpair = grid_.borderIteratorTT( determType, link );
+
+      if( haveHigherCodimData_ || packGhosts_ )
+      {
+        // write all data belong to interior of master faces
+        grid_.sendInteriorGhostAllData( os, iterpair.first, vertexGatherScatter_, edgeGatherScatter_, faceGatherScatter_, elementGatherScatter_, packInterior_, packGhosts_ );
+
+        // write all data belong to interior of slave faces
+        grid_.sendInteriorGhostAllData( os, iterpair.second, vertexGatherScatter_, edgeGatherScatter_, faceGatherScatter_, elementGatherScatter_, packInterior_, packGhosts_ );
+      }
+      else
+      {
+        // write all data belong to interior of master faces
+        grid_.sendInteriorGhostElementData( os, iterpair.first, elementGatherScatter_ );
+
+        // write all data belong to interior of slave faces
+        grid_.sendInteriorGhostElementData( os, iterpair.second, elementGatherScatter_ );
+      }
+
+      delete iterpair.first;
+      delete iterpair.second;
+    }
+
+    void unpack ( int link, ObjectStream &os )
+    {
+      typedef Gitter::hface_STI hface_STI;
+      const hface_STI *determType = 0;  // only for type determination
+      std::pair< IteratorSTI< hface_STI > *, IteratorSTI< hface_STI > * > iterpair = grid_.borderIteratorTT( determType, link );
+
+      if( haveHigherCodimData_ || packGhosts_ )
+      {
+        // first unpack slave data, because this has been pack from master first, see above
+        grid_.unpackInteriorGhostAllData( os, iterpair.second, vertexGatherScatter_, edgeGatherScatter_, faceGatherScatter_, elementGatherScatter_ );
+
+        // now unpack data sended from slaves to master
+        grid_.unpackInteriorGhostAllData( os, iterpair.first, vertexGatherScatter_, edgeGatherScatter_, faceGatherScatter_, elementGatherScatter_ );
+      }
+      else
+      {
+        // first unpack slave data, because this has been pack from master first, see above
+        grid_.unpackInteriorGhostElementData( os, iterpair.second, elementGatherScatter_ );
+
+        // now unpack data sended from slaves to master
+        grid_.unpackInteriorGhostElementData( os, iterpair.first, elementGatherScatter_ );
+      }
+
+      delete iterpair.first;
+      delete iterpair.second;
+    }
+
+  protected:
+    GitterDunePll &grid_;
+    GatherScatter &vertexGatherScatter_;
+    GatherScatter &edgeGatherScatter_;
+    GatherScatter &faceGatherScatter_;
+    GatherScatter &elementGatherScatter_;
+    bool haveHigherCodimData_, packInterior_, packGhosts_;
+  };
+
+
+  GitterDunePll::Communication
+    ::Communication ( GitterDunePll &grid,
+                      GatherScatter &vertexGatherScatter, GatherScatter &edgeGatherScatter, GatherScatter &faceGatherScatter, GatherScatter &elementGatherScatter,
+                      GitterDunePll::CommunicationType commType )
+    : exchange_( 0 ),
+      sendOS_( grid.mpAccess().sendLinks() )
+  {
+    const bool containsVertices = vertexGatherScatter.contains( 3, 3 );
+    const bool containsEdges = edgeGatherScatter.contains( 3, 2 );
+    const bool containsFaces = faceGatherScatter.contains( 3, 1 );
+    const bool containsElements = elementGatherScatter.contains( 3, 0 );
+
+    const bool haveHigherCodimData = (containsVertices || containsEdges || containsFaces);
+
+    if( !(containsElements || haveHigherCodimData) )
+    {
+      std::cerr << "WARNING: communication called with empty data set, all contains methods returned false!" << std::endl;
       return;
     }
-     
+
     alugrid_assert ((debugOption (5) && containsVertices) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsVertices)=true " << std::endl, 1) : 1);
     alugrid_assert ((debugOption (5) && containsEdges)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsEdges)=true " << std::endl, 1) : 1);
     alugrid_assert ((debugOption (5) && containsFaces)    ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsFaces)=true " << std::endl, 1) : 1);
     alugrid_assert ((debugOption (5) && containsElements) ? (std::cout << "**INFO GitterDunePll::doCommunication (): (containsElements)=true " << std::endl, 1) : 1);
-     
-    // create vector of message buffers 
-    // this vector is created here, that the buffer is allocated only once 
-    std::vector< ObjectStream > vec (nl);
-   
-    // if data on entities of higer codim exists
-    // then communication if more complicated 
-    if ( haveHigherCodimData )
+
+    // if data on entities of higer codim exists, communication is more complicated
+    if( haveHigherCodimData )
+      grid.doBorderBorderComm( sendOS_, vertexGatherScatter, edgeGatherScatter, faceGatherScatter );
+
+    // this communication only makes sense if ghost cells are present
+    if( (commType != Border_Border_Comm) && grid.ghostCellsEnabled() )
     {
-      doBorderBorderComm( vec, vertexData, edgeData, faceData );
+      dataHandle_.reset( new DataHandle( grid, vertexGatherScatter, edgeGatherScatter, faceGatherScatter, elementGatherScatter, commType ) );
+      exchange_ = grid.mpAccess().nonBlockingExchange();
+      exchange_->send( sendOS_, *dataHandle_ );
     }
+  }
 
-    // this communication only makes sense if ghost cells are present 
-    const bool ghostCellsAvailable = ghostCellsEnabled ();
 
-    if( (commType != Border_Border_Comm) && ghostCellsAvailable ) // otherwise only border border 
+  GitterDunePll::Communication::Communication ( Communication &&other )
+    : dataHandle_( std::move( other.dataHandle_ ) ),
+      exchange_( other.exchange_ ),
+      sendOS_( std::move( other.sendOS_ ) )
+  {
+    other.exchange_ = 0;
+  }
+
+
+
+  GitterDunePll::Communication &GitterDunePll::Communication::operator= ( Communication &&other )
+  {
+    wait();
+    dataHandle_ = std::move( other.dataHandle_ );
+    exchange_ = other.exchange_;
+    other.exchange_ = 0;
+    sendOS_ = std::move( other.sendOS_ );
+    return *this;
+  }
+
+
+  void GitterDunePll::Communication::wait ()
+  {
+    if( pending() )
     {
-      doInteriorGhostComm( vec, vertexData, edgeData, faceData, elementData , commType ); 
+      exchange_->receive( *dataHandle_ );
+      delete exchange_;
+      exchange_ = 0;
     }
-
-    return;
   }
 
-  // border border comm 
-  void GitterDunePll::borderBorderCommunication ( 
-               GatherScatterType & vertexData , 
-               GatherScatterType & edgeData,  
-               GatherScatterType & faceData ,
-               GatherScatterType & elementData )
+  
+  // border border comm
+  void GitterDunePll::borderBorderCommunication ( GatherScatter &vertexData, GatherScatter &edgeData, GatherScatter &faceData, GatherScatter &elementData )
   {
-    doCommunication(vertexData,edgeData,faceData,elementData,Border_Border_Comm);
+    Communication( *this, vertexData, edgeData, faceData, elementData, Border_Border_Comm );
   }
 
-  // interior ghost comm 
-  void GitterDunePll::interiorGhostCommunication ( 
-               GatherScatterType & vertexData , 
-               GatherScatterType & edgeData,  
-               GatherScatterType & faceData ,
-               GatherScatterType & elementData )
+  // interior ghost comm
+  GitterDunePll::Communication
+  GitterDunePll::interiorGhostCommunication ( GatherScatter &vertexData, GatherScatter &edgeData, GatherScatter &faceData, GatherScatter &elementData )
   {
-    doCommunication(vertexData,edgeData,faceData,elementData,Interior_Ghost_Comm);
+    return Communication( *this, vertexData, edgeData, faceData, elementData, Interior_Ghost_Comm );
   }
 
-  // ghost to interior comm 
-  void GitterDunePll::ghostInteriorCommunication ( 
-               GatherScatterType & vertexData , 
-               GatherScatterType & edgeData,  
-               GatherScatterType & faceData ,
-               GatherScatterType & elementData )
+  // ghost to interior comm
+  GitterDunePll::Communication
+  GitterDunePll::ghostInteriorCommunication ( GatherScatter &vertexData, GatherScatter &edgeData, GatherScatter &faceData, GatherScatter &elementData )
   {
-    doCommunication(vertexData,edgeData,faceData,elementData,Ghost_Interior_Comm);
+    return Communication( *this, vertexData, edgeData, faceData, elementData, Ghost_Interior_Comm );
   }
 
-  // all all comm 
-  void GitterDunePll::allAllCommunication ( 
-               GatherScatterType & vertexData , 
-               GatherScatterType & edgeData,  
-               GatherScatterType & faceData ,
-               GatherScatterType & elementData )
+  // all all comm
+  GitterDunePll::Communication
+  GitterDunePll::allAllCommunication ( GatherScatter &vertexData, GatherScatter &edgeData, GatherScatter &faceData, GatherScatter &elementData )
   {
-    doCommunication(vertexData,edgeData,faceData,elementData,All_All_Comm);
+    return Communication( *this, vertexData, edgeData, faceData, elementData, All_All_Comm );
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -1199,25 +1272,13 @@ namespace ALUGrid
     } 
   }
 
-  void GitterDunePll::restore ( std::istream &in ) 
-  {
-    restoreImpl( in );
-  }
-
-  void GitterDunePll::restore ( ObjectStream& in )
-  {
-    restoreImpl( in );
-  }
-
-  template <class stream_t>
-  void GitterDunePll::restoreImpl ( stream_t &in ) 
+  void GitterDunePll::restore ( std::istream &in )
   {
     // false means that bnd faces are not restored 
-    Gitter :: restoreImpl( in, false );
-
     // restore indices before ghosts are created 
     // otherwise indices of ghosts will be wrong 
-    this->restoreIndices (in);
+    // this is both done in this method
+    GitterDuneBasis::restoreImpl( in, false );
    
 #ifdef ALUGRIDDEBUG 
     const int maxIndexBefore = this->indexManager(BuilderIF::IM_Elements).getMaxIndex();

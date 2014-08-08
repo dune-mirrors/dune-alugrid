@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU2DGRIDGEOMETRY_HH
 #define DUNE_ALU2DGRIDGEOMETRY_HH
 
+#include <dune/common/version.hh>
+
 #include <dune/grid/common/grid.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
@@ -759,6 +761,19 @@ namespace Dune
     // implementation of the coordinates and mapping 
     GeometryImplType* geoImpl_;
   };
+
+#if ! DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+  namespace FacadeOptions
+  {
+    //! geometry can be stored as an object
+    template< int mydim, int cdim, class GridImp >
+    struct StoreGeometryReference< mydim, cdim, GridImp, ALU2dGridGeometry >
+    {
+      //! Whether to store by reference.
+      static const bool v = false;
+    };
+  }
+#endif
 
 } // namespace Dune
 

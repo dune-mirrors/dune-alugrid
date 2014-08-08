@@ -3,6 +3,6 @@ impl_HEADERS = binaryio.hh byteorder.hh indexstack.h macrofileheader.hh projectv
 
 SUBDIRS = serial parallel duneinterface 2d test
 
-EXTRA_DIST = binaryio.cc macrofileheader.cc starmpi.c
+EXTRA_DIST = binaryio.cc macrofileheader.cc
 
 include $(top_srcdir)/am/global-rules

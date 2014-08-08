@@ -359,10 +359,8 @@ namespace Dune
     template< PartitionIteratorType pitype >
     struct Partition
     {
-      typedef Dune::GridView< DefaultLevelGridViewTraits< const This, pitype > >
-        LevelGridView;
-      typedef Dune::GridView< DefaultLeafGridViewTraits< const This, pitype > >
-        LeafGridView;
+      typedef Dune::GridView< ALU3dLevelGridViewTraits< const This, pitype > > LevelGridView;
+      typedef Dune::GridView< ALU3dLeafGridViewTraits< const This, pitype > > LeafGridView;
     };
 
     typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;

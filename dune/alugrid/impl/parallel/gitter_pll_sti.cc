@@ -14,7 +14,7 @@
 namespace ALUGrid
 {
 
-  int __STATIC_myrank = -1;
+  extern int __STATIC_myrank ;
   int __STATIC_turn   = -1;
   int __STATIC_phase  = -1;
 
@@ -308,6 +308,7 @@ namespace ALUGrid
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
             _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os ); 
         }
+        _repeat |= retur();
       } 
       catch (Parallel::AccessPllException) 
       {
@@ -1359,10 +1360,9 @@ namespace ALUGrid
   double ldbTimerU2 = 0.0;
   double ldbTimerU3 = 0.0;
   double ldbTimerU4 = 0.0;
-  double ldbTimerU5 = 0.0;
 
-  // --loadBalance 
-  bool GitterPll::loadBalancerGridChangesNotify ( GatherScatterType* gs ) 
+  // --loadBalance ( gs can be a pointer to NULL)
+  bool GitterPll::loadBalance( GatherScatterType* gs ) 
   {
     int lap1 = clock ();
 
@@ -1403,67 +1403,28 @@ namespace ALUGrid
 
         lap3 = clock();
 
+        // calls identification and exchangeDynamicState 
         if( storeLinkage ) 
-        {
-          // if vertex linkage to element has not been computed, do it now then
-          if( ! _vertexLinkageComputed ) 
-          {
-            containerPll ().identification (mpAccess (), true, storeLinkage );
-            _vertexLinkageComputed = true ;
-          }
-
-          // set vertex linkage
-          setVertexLinkage( db );
-        }
+          doNotifyMacroGridChanges( &db );
+        else 
+          doNotifyMacroGridChanges();
 
         lap4 = clock();
-
-        // calls identification and exchangeDynamicState 
-        doNotifyMacroGridChanges ( ! storeLinkage );
       }
     }
-
-    int lap5 = clock ();
 
     float u2 = (float)(lap2 - lap1)/(float)(CLOCKS_PER_SEC); // check partitioning
     float u3 = (float)(lap3 - lap2)/(float)(CLOCKS_PER_SEC); // repartition macro grid
     float u4 = (float)(lap4 - lap3)/(float)(CLOCKS_PER_SEC); // identification 
-    float u5 = (float)(lap5 - lap4)/(float)(CLOCKS_PER_SEC); // notify macro grid changes
 
     ldbTimerU2 += u2 ;
     ldbTimerU3 += u3 ;
     ldbTimerU4 += u4 ;
-    ldbTimerU5 += u5 ;
 
     // store element cut information for later use (parallel sfc only)
     db.storeElementCuts( _elementCuts );
 
     return repartition;
-  }
-
-  void GitterPll::setVertexLinkage( LoadBalancer::DataBase& db ) 
-  {
-    if( _vertexLinkageComputed ) 
-    {
-      const int me = mpAccess().myrank(); 
-
-      // compute missing element destinations 
-      // containerPll().computeElementDestinations( mpAccess(), db );
-
-      // clear linkage pattern map since it is newly build here
-      containerPll().clearLinkagePattern();
-
-      // vertex linkage compute object (gitter_pll_mgb.h)
-      VertexLinkage vxLinkage( me, db, _vertexLinkageComputed );
-
-      AccessIterator < vertex_STI >::Handle w ( containerPll () );
-      // set ldb vertex indices to all elements 
-      for (w.first (); ! w.done (); w.next () ) 
-      {
-        // compute vertex linkage for given vertex (clear linkage in any case)
-        vxLinkage.compute( w.item() );
-      }
-    }
   }
 
   void GitterPll::loadBalancerMacroGridChangesNotify () 
@@ -1534,17 +1495,15 @@ namespace ALUGrid
     if( ! _ldbVerticesComputed ) 
       computeGraphVertexIndices ();
 
-    doNotifyMacroGridChanges( true );
+    doNotifyMacroGridChanges();
   }
 
-  void GitterPll::doNotifyMacroGridChanges ( bool computeVertexLinkage ) 
+  void GitterPll::doNotifyMacroGridChanges ( LoadBalancer::DataBase* db ) 
   {
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::notifyMacroGridChanges () " << std::endl, 1) : 1 );
     Gitter::notifyMacroGridChanges ();
 
-    containerPll ().identification (mpAccess (), computeVertexLinkage, storeLinkageInVertices() );
-    if( computeVertexLinkage ) 
-      _vertexLinkageComputed = true ; 
+    containerPll ().identification (mpAccess (), db, storeLinkageInVertices() );
 
     loadBalancerMacroGridChangesNotify ();
     exchangeDynamicState ();
@@ -1557,14 +1516,13 @@ namespace ALUGrid
       _ldbUnder (0.0), 
       _ldbMethod (LoadBalancer::DataBase::NONE),
       _refineLoops( 0 ), 
-      _ldbVerticesComputed( false ),
-      _vertexLinkageComputed( false )
+      _ldbVerticesComputed( false )
   {
     if( mpa.myrank() == 0 ) 
     {
       // set default values 
       _ldbOver = 1.2;
-      // default partitioning whcih does not require external packages 
+      // default partitioning which does not require external packages 
       _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurve;
 
       std::ifstream in( "alugrid.cfg" );
@@ -1603,6 +1561,9 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
     mpa.barrier();
 #endif
+
+    // set static rank info
+    __STATIC_myrank = mpa.myrank();
   }
 
 } // namespace ALUGrid

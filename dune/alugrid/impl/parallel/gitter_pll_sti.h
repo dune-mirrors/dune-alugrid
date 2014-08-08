@@ -186,7 +186,7 @@ namespace ALUGrid
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const hface_STI *, int);
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > iteratorTT (const std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > * > &, int);
       virtual inline int iterators_attached () const;
-      virtual void identification (MpAccessLocal &, const bool, const bool );
+      virtual void identification (MpAccessLocal &, LoadBalancer::DataBase* , const bool );
       virtual void fullIntegrityCheck (MpAccessLocal &);
     }; // end MacroGitterPll 
 
@@ -240,13 +240,12 @@ namespace ALUGrid
 
     protected:   
       void computeGraphVertexIndices();
-      void doNotifyMacroGridChanges ( bool );
+      void doNotifyMacroGridChanges ( LoadBalancer::DataBase* db = 0 );
     public:  
       virtual void repartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
-      void setVertexLinkage( LoadBalancer::DataBase & );
       
       virtual bool checkPartitioning(LoadBalancer::DataBase &, GatherScatterType* );
-      virtual bool loadBalancerGridChangesNotify ( GatherScatterType* );
+      virtual bool loadBalance ( GatherScatterType* gs = 0 );
       virtual void loadBalancerMacroGridChangesNotify ();
       virtual void notifyMacroGridChanges ();
       
@@ -301,7 +300,6 @@ namespace ALUGrid
    
       int  _refineLoops;
       bool _ldbVerticesComputed;
-      bool _vertexLinkageComputed; 
   };
 
   template < class A > class LeafIteratorTT 

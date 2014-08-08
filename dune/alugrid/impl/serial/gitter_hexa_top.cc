@@ -848,24 +848,28 @@ namespace ALUGrid
   }
 
   template< class A >
-  void HexaTop< A >::backup ( std::ostream &os ) const
+  int HexaTop< A >::backup ( std::ostream &os ) const
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
-  template< class A > void HexaTop < A >::backup (ObjectStream& os) const 
+  template< class A > int HexaTop < A >::backup (ObjectStream& os) const 
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A > template<class OutStream_t>
-  void HexaTop < A >::doBackup (OutStream_t& os) const 
+  int HexaTop < A >::doBackup (OutStream_t& os) const 
   {
     os.put ((char) getrule ());
-    {for (const inneredge_t * e = innerHedge (); e; e = e->next ()) e->backup (os); }
-    {for (const innerface_t * f = innerHface (); f; f = f->next ()) f->backup (os); }
-    {for (const innerhexa_t * c = dwnPtr(); c; c = c->next ()) c->backup (os); }
-    return;
+    for (const inneredge_t * e = innerHedge (); e; e = e->next ()) e->backup (os);
+    for (const innerface_t * f = innerHface (); f; f = f->next ()) f->backup (os);
+    int sons = 1 ;
+    for (const innerhexa_t * c = dwnPtr(); c; c = c->next () )
+    {
+      sons += c->backup (os); 
+    }
+    return sons;
   }
 
   template< class A > 
@@ -1163,23 +1167,23 @@ namespace ALUGrid
   }
 
   template< class A >
-  void Periodic4Top< A >::backup ( std::ostream &os ) const
+  int Periodic4Top< A >::backup ( std::ostream &os ) const
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A >
-  void Periodic4Top< A >::backup (ObjectStream& os) const 
+  int Periodic4Top< A >::backup (ObjectStream& os) const 
   {
-    doBackup( os );
+    return doBackup( os );
   }
 
   template< class A > template<class OutStream_t>
-  void Periodic4Top < A >::doBackup (OutStream_t& os) const 
+  int Periodic4Top < A >::doBackup (OutStream_t& os) const 
   {
     os.put ((char) getrule ());
     {for (const innerperiodic4_t * c = down (); c; c = c->next ()) c->backup (os); }
-    return;
+    return 0;
   }
 
   template< class A >

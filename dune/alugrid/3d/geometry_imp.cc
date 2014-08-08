@@ -348,7 +348,7 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
 
   enum { numVertices = ElementTopo::numVerticesPerFace };
   // for all vertices of this face get rotatedIndex 
-  int rotatedALUIndex[ numVertices ];
+  int rotatedALUIndex[ 4 ]; 
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist

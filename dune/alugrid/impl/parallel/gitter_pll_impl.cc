@@ -165,36 +165,33 @@ namespace ALUGrid
     {
       os.writeObject( _elements[ i ] );
     }
-
-    inlineData (os);
     return true ; 
   }
 
   template < class A >
-  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool i) 
+  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool isNew) 
   {
     int elSize;
     os.readObject( elSize );
-    if( _elements.inactive() ) 
+    if( elSize > 0 ) 
     {
-      std::vector< int > elements( elSize ) ;
-      for( int el=0; el<elSize; ++el )
+      if( _elements.inactive() )
       {
-        os.readObject( elements[ el ] );
+        std::vector< int > elements( elSize ) ;
+        for( int el=0; el<elSize; ++el )
+        {
+          os.readObject( elements[ el ] );
+        }
+        _elements.insertElementLinkage( elements );
       }
-      _elements.insertElementLinkage( elements );
-    }
-    else 
-    {
-      alugrid_assert( elSize == _elements.size() );
-      // advance buffer by elsize * sizeof( int ) bytes 
-      os.removeObject( elSize * sizeof( int ) );
-    }
+      else 
+      {
+        alugrid_assert( elSize == _elements.size() );
+        // advance buffer by elsize * sizeof( int ) bytes 
+        os.removeObject( elSize * sizeof( int ) );
+      }
+    } // end elSize > 0
 
-    if (i) 
-    {
-      xtractData (os);
-    }
     return;
   }
 
@@ -285,8 +282,6 @@ namespace ALUGrid
     // pack refinement information 
     myhedge ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
-    
-    inlineData ( os );
     return true ;
   }
 
@@ -304,9 +299,6 @@ namespace ALUGrid
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // remove data if have any 
-      xtractData (os);
     }
     else 
     {
@@ -582,10 +574,6 @@ namespace ALUGrid
     
       this->myhface ().backup ( os );
       os.put( ObjectStream::ENDOFSTREAM );
-
-      // inline internal data if has any 
-      inlineData ( os );
-
     }
     catch( ObjectStream::OutOfMemoryException )
     {
@@ -639,9 +627,6 @@ namespace ALUGrid
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-
-      // restore internal data if have any 
-      xtractData (os);
     }
     else 
     {
@@ -1057,17 +1042,14 @@ namespace ALUGrid
     alugrid_assert ( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
     // pack refinement information 
-    mytetra ().backup ( os );
+    const int estimatedElements = mytetra ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
 
-    // pack internal data if has any 
-    inlineData ( os );
-    
     // if gather scatter was passed 
     if( gs ) 
     {
       // pack Dune data 
-      gs->inlineData( os , mytetra() );
+      gs->inlineData( os , mytetra(), estimatedElements );
     }
 
     // unset erasable flag
@@ -1181,9 +1163,6 @@ namespace ALUGrid
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // restore internal data if have any 
-      xtractData (os);
       
       // unpack dune data if present, pointer can be zero 
       if( gatherScatter ) 
@@ -1343,9 +1322,6 @@ namespace ALUGrid
     myperiodic ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
 
-    // pack internal data if has any 
-    inlineData ( os );
-
     // allow erasure 
     unset( flagLock );
     return true;
@@ -1375,9 +1351,6 @@ namespace ALUGrid
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // unpack internal data if has any 
-      xtractData( os );
     }
     else 
     {
@@ -1524,9 +1497,6 @@ namespace ALUGrid
     myperiodic ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
     
-    // pack internal data if has any 
-    inlineData ( os );
-
     // allow erase
     unset( flagLock );
     return true;
@@ -1555,9 +1525,6 @@ namespace ALUGrid
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // unpack internal data if has any 
-      xtractData (os);
     }
     else 
     {
@@ -1771,17 +1738,14 @@ namespace ALUGrid
     // make sure ENDOFSTREAM is not a valid refinement rule 
     alugrid_assert ( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
     
-    // backup refinement information 
-    myhexa(). backup ( os );
+    // backup refinement information (1 char per element)
+    const int estimatedElements = myhexa(). backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
     
-    // pack internal data if has any 
-    inlineData ( os );
-
     if( gs ) 
     {
       // pack Dune data 
-      gs->inlineData( os , myhexa() );
+      gs->inlineData( os , myhexa(), estimatedElements );
     }
 
     //allow erase
@@ -1910,9 +1874,6 @@ namespace ALUGrid
         abort();
       }
       
-      // unpack internal data if has any 
-      xtractData (os);
-
       // unpack dune data if present, pointer can be zero 
       if( gatherScatter ) 
         gatherScatter->xtractData( os , myhexa() );

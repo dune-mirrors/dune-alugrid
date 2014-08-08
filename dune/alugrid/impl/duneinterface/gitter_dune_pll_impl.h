@@ -2,6 +2,8 @@
 #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED
 #define GITTER_DUNE_PLL_IMPL_H_INCLUDED
 
+#include <memory>
+
 #include "gitter_dune_impl.h"
  
 #include "../parallel/gitter_pll_impl.h"
@@ -35,6 +37,8 @@ namespace ALUGrid
     typedef std::vector< BufferType > DataBufferType;
 
   public:
+    class Communication;
+
     typedef Gitter::Geometric Geometric;
     typedef GitterDuneImpl::Objects  Objects;
 
@@ -81,9 +85,6 @@ namespace ALUGrid
     // postRefinement, no loadBalancing done   
     bool duneAdapt (AdaptRestrictProlongType & arp);
 
-    bool duneLoadBalance (); // call loadBalancer 
-    bool duneLoadBalance (GatherScatterType & , AdaptRestrictProlongType & arp ); // call loadBalancer a
-
   public:  
 
     // communication of border data 
@@ -94,21 +95,21 @@ namespace ALUGrid
            GatherScatterType & elementData );
 
     // communication of border data 
-    void interiorGhostCommunication (
+    Communication interiorGhostCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
     // communication of border data 
-    void ghostInteriorCommunication (
+    Communication ghostInteriorCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
     // communication of border data 
-    void allAllCommunication (
+    Communication allAllCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
@@ -134,13 +135,8 @@ namespace ALUGrid
     // restore grid from std::istream, needed to be overloaded 
     // because before restoring follow faces, index manager has to be
     // restored 
-    virtual void restore(std::istream & in); 
-    virtual void restore(ObjectStream & in);
+    void restore(std::istream & in); 
 
-  protected:   
-    template <class stream_t>
-    void restoreImpl( stream_t& );  
-   
   public:  
 
     // write grid to vtk file 
@@ -182,14 +178,6 @@ namespace ALUGrid
     // the index managers maxIndex  
     void checkGhostIndices();
     
-    // communication of data 
-    void doCommunication(
-           GatherScatterType & vertexData ,
-           GatherScatterType & edgeData,
-           GatherScatterType & faceData ,
-           GatherScatterType & elementData ,
-           const CommunicationType commType);
-
     // message tag for communication 
     enum { transmittedData = 1 , noData = 0 };
 
@@ -281,6 +269,38 @@ namespace ALUGrid
     
     std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> leafBorderIteratorTT  (const hface_STI  *, int);
     std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> levelBorderIteratorTT (const hface_STI  *, int link , int level);
+  };
+
+
+
+  // GitterDunePll::Communication
+  // ----------------------------
+
+  class GitterDunePll::Communication
+  {
+    struct DataHandle;
+
+  public:
+    Communication () : exchange_( 0 ) {}
+
+    Communication ( GitterDunePll &grid,
+                    GatherScatter &vertexGatherScatter, GatherScatter &edgeGatherScatter, GatherScatter &faceGatherScatter, GatherScatter &elementGatherScatter,
+                    GitterDunePll::CommunicationType commType );
+
+    Communication ( Communication &&other );
+
+    ~Communication () { wait(); }
+
+    Communication &operator= ( Communication &&other );
+
+    bool pending () const { return bool( exchange_ ); }
+
+    void wait ();
+
+  private:
+    std::unique_ptr< MpAccessLocal::NonBlockingExchange::DataHandleIF > dataHandle_;
+    MpAccessLocal::NonBlockingExchange *exchange_;
+    std::vector< ObjectStream > sendOS_;
   };
 
 } // namespace ALUGrid

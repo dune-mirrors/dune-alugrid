@@ -14,8 +14,8 @@
 namespace ALUGrid
 {
 
-  ParallelGridMover::ParallelGridMover ( BuilderIF &b, VertexLinkage& vxLinkage )
-    : MacroGridBuilder( b, false ), _vxLinkage( vxLinkage )
+  ParallelGridMover::ParallelGridMover ( BuilderIF &b )
+    : MacroGridBuilder( b, false ) 
   {
     // lock MyAlloc so that objects are not freed  
     // because we want to reuse them  
@@ -553,7 +553,6 @@ namespace ALUGrid
         {
           alugrid_assert ( vertex->ref >= 2);
           // compute vertex linkage 
-          // _vxLinkage.compute( *vertex ); 
           _vertexList.push_back ( vertex );
           ++i;
         }
@@ -593,10 +592,6 @@ namespace ALUGrid
     os.readObject (z);
     std::pair< VertexGeo *, bool > p = InsertUniqueVertex (x,y,z,id);
     p.first->unpackSelf (os,p.second);
-
-    // compute vertex linkage if enabled and vertex is new 
-    //if( Gitter :: storeLinkageInVertices && p.second ) 
-    //  _vxLinkage.compute( *p.first );
   }
 
   void ParallelGridMover::unpackHedge1 (ObjectStream & os) {
@@ -966,7 +961,6 @@ namespace ALUGrid
     MpAccessLocal&      _mpa;
     ParallelGridMover*  _pgm;
     GatherScatterType*  _gs; 
-    VertexLinkage _vxLinkage ;
 
     UnpackLBData( const UnpackLBData& );
   public:
@@ -974,14 +968,13 @@ namespace ALUGrid
     UnpackLBData( GitterPll::MacroGitterPll& containerPll, 
                   MpAccessLocal& mpa,
                   GatherScatterType* gs,
-                  LoadBalancer::DataBase& db, 
-                  const bool vertexLinkageComputed ) 
+                  LoadBalancer::DataBase& db ) 
       : _containerPll( containerPll ),
         _mpa( mpa ), 
         _pgm( 0 ),
-        _gs( gs ),
-        _vxLinkage( _mpa.myrank(), db, vertexLinkageComputed )
-    {}
+        _gs( gs )
+    {
+    }
 
     // destructor deleting parallel macro grid mover
     ~UnpackLBData() 
@@ -997,12 +990,12 @@ namespace ALUGrid
 
     // work that can be done between send and receive, 
     // such as the construction of the ParallelGridMover 
-    void meantimeWork () 
+    void localComputation () 
     {
       // create ParallelGridMover when all data was packed, otherwise the link packing
       // will fail since this will modify the macro grid, since the 
       // parallel macro grid mover clears the lists of macro elements 
-      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll, _vxLinkage );
+      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
 
       // clear linkage patterns 
       // _containerPll.clearLinkagePattern();
@@ -1058,16 +1051,39 @@ namespace ALUGrid
     {
       typedef LoadBalancer::DataBase::ldb_connect_set_t  ldb_connect_set_t;
       ldb_connect_set_t connect;
-      const ldb_connect_set_t* connectScan = &connect;
+      const ldb_connect_set_t* connectScan = 0;
 
       // setup connection set in case if user defined partitioning 
-      if( userDefinedPartitioning ) 
+      // when exportRanks are not available 
+      if( userDefinedPartitioning )
       {
-        // attach all elements to their new destinations 
-        AccessIterator < helement_STI >::Handle w (containerPll ());
-        for (w.first (); ! w.done (); w.next ()) 
+        // compute destination rank set if not specified by the user
+        if( ! gatherScatter->exportRanks( connect ) ) 
         {
-          connect.insert( gatherScatter->destination( w.item() ) );
+          AccessIterator < helement_STI >::Handle w (containerPll ());
+          for (w.first (); ! w.done (); w.next ()) 
+          {
+            const int dest = gatherScatter->destination( w.item() );
+            connect.insert( ALUGrid::MpAccessLocal::sendRank( dest ) );
+          }
+        }
+
+        ldb_connect_set_t import; 
+        const bool importedRanks = gatherScatter->importRanks( import );
+        // make sure the return value is the same on all cores
+        alugrid_assert( mpa.gmax( importedRanks ) == importedRanks );
+        if( importedRanks )
+        {
+          typedef ldb_connect_set_t :: iterator iterator ;
+          const iterator end = import.end(); 
+          // mark ranks numbers as receive ranks  
+          for( iterator it = import.begin(); it != end; ++it )
+          {
+            connect.insert( ALUGrid::MpAccessLocal::recvRank( *it ) );
+          }
+
+          // set pointer because we can now use setup of linkage without communication
+          connectScan = &connect ;
         }
       }
       else // take connections from db in default version
@@ -1076,18 +1092,19 @@ namespace ALUGrid
       // remove old linkage 
       mpa.removeLinkage ();
 
-      if( userDefinedPartitioning ) 
-      {
-        // set new linkage depending on connectivity 
-        // needs a global communication 
-        mpa.insertRequestSymmetricGlobalComm( *connectScan );
-      }
-      else 
+      // if connectScan is set we can setup linkage without communication 
+      if( connectScan )
       {
         // set new linkage depending on connectivity, 
         // here the linkage could be non-symmetric since send and receive procs are not
         // necessarily the same 
         mpa.insertRequestNonSymmetric( *connectScan );
+      }
+      else
+      {
+        // set new linkage depending on connectivity 
+        // needs a global communication 
+        mpa.insertRequestSymmetricGlobalComm( connect );
       }
 
       // get my rank number 
@@ -1170,12 +1187,16 @@ namespace ALUGrid
         AccessIterator < hface_STI >::Handle w (containerPll ());
         for (w.first (); ! w.done (); w.next ()) w.item().packAll( osv );
       }
+
+      // check if load balance handle also has user data 
+      GatherScatterType* userData = ( gatherScatter && gatherScatter->hasUserData() ) ? gatherScatter : 0 ;
+
       // pack elements 
       {
         AccessIterator < helement_STI >::Handle w (containerPll ());
-        if( gatherScatter ) 
+        if( userData ) 
         {
-          GatherScatterType& gs = *gatherScatter ;
+          GatherScatterType& gs = *userData ;
           for (w.first (); ! w.done (); w.next ()) w.item().dunePackAll( osv, gs );
         }
         else 
@@ -1193,21 +1214,13 @@ namespace ALUGrid
 
       lap2 = clock ();
       
-      // add ld ranks to linkage
-      //for( int l=0; l<mpa.sendLinks(); ++ l ) currentLinkage.insert( mpa.sendDest()[ l ] );
-      //for( int l=0; l<mpa.recvLinks(); ++ l ) currentLinkage.insert( mpa.recvSource()[ l ] );
-
       {
         // data handle  
-        UnpackLBData data( containerPll (), mpa, gatherScatter, db, _vertexLinkageComputed );
+        UnpackLBData data( containerPll (), mpa, userData, db );
 
         // pack, exchange, and unpack data 
         mpa.exchange ( osv, data );
       }
-
-      // set broader linkage for identification process 
-      //mpa.removeLinkage();
-      //mpa.insertRequestSymmetric( currentLinkage );
 
       lap3 = clock ();
 #ifdef ALUGRIDDEBUG

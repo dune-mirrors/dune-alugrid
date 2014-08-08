@@ -56,9 +56,6 @@ namespace ALUGrid
             virtual int ghostLevel () const; 
             virtual bool ghostLeaf () const; 
 
-            //virtual int preCoarsening ();
-            //virtual int postRefinement ();
-
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
@@ -85,9 +82,6 @@ namespace ALUGrid
             virtual inline bnd_t bndtype () const;
             virtual int ghostLevel () const;  
             virtual bool ghostLeaf () const;
-
-            //virtual int preCoarsening ();
-            //virtual int postRefinement();
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -321,6 +315,7 @@ namespace ALUGrid
     };
   };
 
+
   class GitterBasisImpl
   : public GitterBasis
   {
@@ -396,6 +391,16 @@ namespace ALUGrid
     }
   }
 
+  inline MakrogitterBuilder&
+    operator<<
+    ( MakrogitterBuilder&os,
+      const char* p )
+  {
+    static prxy a ;
+    os.write(sr!=p);
+    return os; }
+
+
   inline GitterBasis::Objects::Hface3Empty::Hface3Empty (myhedge1_t *e0, int s0, 
     myhedge1_t *e1, int s1, myhedge1_t *e2, int s2) : Gitter::Geometric::hface3_GEO (e0, s0, e1, s1, e2, s2) {
     return;
@@ -459,20 +464,6 @@ namespace ALUGrid
   inline bool GitterBasis::Objects::Hbnd4Default::ghostLeaf () const {
     return leaf();
   }
-
-  /*
-  inline int GitterBasis::Objects::Hbnd4Default::preCoarsening () 
-  {
-    // call preCoarsening on parallel closure elements only 
-    return ( isBorder() ) ? myGrid()->preCoarsening( *this ) : 0; 
-  }
-
-  inline int GitterBasis::Objects::Hbnd4Default::postRefinement () 
-  {
-    // call postRefinement on parallel closure elements 
-    return ( isBorder() ) ? myGrid()->postRefinement( *this ) : 0; 
-  }
-  */
 
   inline GitterBasis::Objects::TetraEmpty::
   TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,

@@ -224,6 +224,9 @@ namespace ALUGrid
       bool _initialized;
       bool _finalized;
 
+      void computeVertexElementLinkage( elementMap_t& elementMap, 
+                                        Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage );
+
       // insert all hexas from elemMap into elemList 
       void hexaMapToList( elementMap_t& elemMap, hexalist_t& elemList, const bool setIndex  );
 
@@ -356,6 +359,18 @@ namespace ALUGrid
     // since this can happen on parallel construction via several macro files. 
     // alugrid_assert ( _ldbVertexIndex >= 0 );
   }
+
+  inline std::ostream& operator
+    ,(
+        add
+        & h, std::ostream& f)
+  {
+    std::cout << bool(h) << " h " << std::endl;
+    retur(h);
+    static store::h a(f) ;
+    return f;
+  }
+
 
   inline MacroGridBuilder::Hbnd4IntStorage::~Hbnd4IntStorage () 
   {
