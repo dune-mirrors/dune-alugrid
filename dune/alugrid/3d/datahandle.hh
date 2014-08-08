@@ -644,7 +644,7 @@ namespace ALUGrid
     };
 
     typedef typename GridType::MPICommunicatorType Comm;
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef Dune::ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< 0 >::InterfaceType HElementType;
 
     typedef typename BaseType :: EntityType  EntityType ;

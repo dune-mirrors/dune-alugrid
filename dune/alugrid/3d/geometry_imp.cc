@@ -317,19 +317,14 @@ buildGeom(const IMPLElementType& item)
     }
     else if( mydim == 2 ) // triangle
     {
-      const double* points[3] = {0,0,0};
-      for( int i=0, vx=0; i<3; ++i, ++vx )
-      {
-        // we assume that the global number of the artificial vertex is 0
-        if( item.myvertex(vx)->getIndex() == 0 ) ++ vx;
-        points[ i ] = &item.myvertex(vx)->Point() ;
-      }
       // update geo impl (drop vertex 0)
-      geoImpl().update( points[ 0 ], points[ 1 ], points[ 2 ] );
+      geoImpl().update( item.myvertex(1)->Point(),
+                        item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point() );
     }
   }
 
-  if( mydim == 3 ) 
+  if( mydim == actualDim ) 
   {
     // get volume of element 
     geoImpl().setVolume( item.volume() );
@@ -359,22 +354,42 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
     rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
+    //drop aluindex zero 
+    if (elementType == tetra && mydim == 2 && rotatedALUIndex[i] == 0 ) --i;
   }
 
   if( elementType == hexa )
   {
-    // update geometry implementation 
-    geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+    if( mydim  == 2 ) //quadrilateral
+    { 
+      // update geometry implementation 
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
                       face.myvertex(rotatedALUIndex[1])->Point(),
                       face.myvertex(rotatedALUIndex[2])->Point(),
                       face.myvertex(rotatedALUIndex[3])->Point() );
+    }
+    else if ( mydim == 1) //edge
+    {
+      //update geometry implementation
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+                        face.myvertex( rotatedALUIndex[1])->Point() );
+    }
   }
   else if ( elementType == tetra )
   {
-    // update geometry implementation 
-    geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+    if ( mydim == 2)  //triangle
+    {
+      // update geometry implementation 
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
                       face.myvertex(rotatedALUIndex[1])->Point(),
                       face.myvertex(rotatedALUIndex[2])->Point());
+    }
+    else if ( mydim == 1 )  //edge
+    {
+      //update geometry implementation
+      geoImpl().update( face.myvertex( rotatedALUIndex[0])->Point(),
+                        face.myvertex( rotatedALUIndex[1])->Point()   );
+    }
   }
 
   return true;
@@ -409,17 +424,38 @@ buildGeom(const coord_t& p0,
   return true;
 }
 
+
+// --buildFaceGeom for edges
+template <int mydim, int cdim, class GridImp>
+template <class coord_t>
+inline bool 
+ALU3dGridGeometry<mydim, cdim, GridImp >::
+buildGeom(const coord_t& p0, 
+          const coord_t& p1)
+{         
+  // update geometry implementation 
+  geoImpl().update( p0, p1 );
+  return true;
+}
+
+
 template <int mydim, int cdim, class GridImp> // for faces
 inline bool 
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const FaceCoordinatesType& coords) 
 {
-  if ( elementType == hexa ) 
-    return buildGeom( coords[0], coords[1], coords[2], coords[3] );  
+  if ( elementType == hexa )
+    if ( mydim == 2) 
+      return buildGeom( coords[0], coords[1], coords[2], coords[3] );  
+    else if ( mydim == 1 ) 
+      return buildGeom ( coords[0], coords[1] );
   else 
   {
     alugrid_assert ( elementType == tetra );
-    return buildGeom( coords[0], coords[1], coords[2] );
+    if (mydim == 2 )  
+      return buildGeom( coords[0], coords[1], coords[2] );
+    else if ( mydim == 1 ) 
+      return buildGeom ( coords[1], coords[2]);
   }
 }
 
@@ -429,9 +465,25 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HEdgeType & item, int twist, int) 
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
-  // update geometry implementation 
-  geoImpl().update( edge.myvertex((twist)  %2)->Point(),
-                    edge.myvertex((1+twist)%2)->Point() );
+  int i = 1;
+  //only needs specialization for 
+  if (elementType == hexa) 
+  {
+    //needs specialization what i to take - preferrably the on with an even global index
+  }
+  
+  
+  if (mydim == 1) // edge
+  {
+     // update geometry implementation 
+    geoImpl().update( edge.myvertex((twist)  %2)->Point(),
+                      edge.myvertex((1+twist)%2)->Point() );
+  }
+  else if ( mydim == 0) // point
+  {
+    // update geometry implementation 
+    geoImpl().update( edge.myvertex(i)->Point() );
+  }
   return true;
 }
 

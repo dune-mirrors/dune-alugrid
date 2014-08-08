@@ -61,7 +61,7 @@ void checkCapabilities(const Grid& grid)
     false ;
 #endif
    //static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel, 
-                   "isParallel is not set correctly"); 
+    //               "isParallel is not set correctly"); 
 
    static const bool reallyCanCommunicate = 
 #if ALU3DGRID_PARALLEL
