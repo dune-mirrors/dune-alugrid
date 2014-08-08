@@ -651,20 +651,22 @@ namespace Dune
     public GeometryDefaultImplementation<mydim, cdim, GridImp, ALU3dGridGeometry> 
   {
     static const ALU3dGridElementType elementType = GridImp::elementType;
+    static const int actualDim = GridImp::actualDimension;
+    static const int actualDimw = GridImp::actualDimensionWorld;
 
     typedef typename GridImp::MPICommunicatorType Comm;
 
     friend class ALU3dGridIntersectionIterator<GridImp>;
 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOFaceType     GEOFaceType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOEdgeType     GEOEdgeType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOVertexType   GEOVertexType;
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::GEOFaceType     GEOFaceType;
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::GEOEdgeType     GEOEdgeType;
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::GEOVertexType   GEOVertexType;
 
     // interface types 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HFaceType   HFaceType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HEdgeType   HEdgeType; 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::VertexType  VertexType; 
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::HFaceType   HFaceType;
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::HEdgeType   HEdgeType; 
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elementType, Comm >::VertexType  VertexType; 
 
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
@@ -765,6 +767,11 @@ namespace Dune
     bool buildGeom(const coord_t& p0,
                    const coord_t& p1,
                    const coord_t& p2);
+                   
+    // this method is used by the intersection iterator 
+    template <class coord_t>
+    bool buildGeom(const coord_t& p0,
+                   const coord_t& p1); 
 
     //! build geometry of local coordinates relative to father 
     template <class GeometryType>

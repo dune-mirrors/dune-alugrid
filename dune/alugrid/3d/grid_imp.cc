@@ -483,7 +483,7 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
     
     typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
+    typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::IMPLElementType IMPLElementType;  
     
     for (w.first () ; ! w.done () ; w.next ())
     {
@@ -516,7 +516,7 @@ namespace Dune
   // post process grid  
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< elType, Comm >::postAdapt ()
+  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::postAdapt ()
   {
     if( lockPostAdapt_ )
     { 
@@ -551,7 +551,7 @@ namespace Dune
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   alu_inline 
-  void ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  void ALU3dGrid< actualDim, actualDimw, elType, Comm >::
   backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
     // backup grid to given stream 

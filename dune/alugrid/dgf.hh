@@ -671,8 +671,13 @@ namespace Dune
     for( int n = 0; n < dgf_.nofelements; ++n )
     {
       if(eltype == simplex){
-        for(int i=0;i<3;++i){dgf_.elements[n][i]+=1;}
         dgf_.elements[n].resize(4,0);
+        for(int j=2; j>-1; --j)
+        {
+          dgf_.elements[n][j]+=1;
+          dgf_.elements[n][j+1]=dgf_.elements[n][j]; 
+        }
+        dgf_.elements[n][0]=0;
       }
 
       factory_.insertElement( elementType, dgf_.elements[n] );

@@ -527,8 +527,8 @@ namespace Dune
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
-    typedef ALULeafCommunication< elType, Comm > LeafCommunication;
-    typedef ALULevelCommunication< elType, Comm > LevelCommunication;
+    typedef ALULeafCommunication< actualDim, actualDimw, elType, Comm > LeafCommunication;
+    typedef ALULevelCommunication< actualDim, actualDimw, elType, Comm > LevelCommunication;
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject; 
