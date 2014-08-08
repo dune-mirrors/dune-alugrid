@@ -317,10 +317,15 @@ buildGeom(const IMPLElementType& item)
     }
     else if( mydim == 2 ) // triangle
     {
+      const double* points[3] = {0,0,0};
+      for( int i=0, vx=0; i<3; ++i, ++vx )
+      {
+        // we assume that the global number of the artificial vertex is 0
+        if( item.myvertex(vx)->ident() == 0 ) ++ vx;
+        points[ i ] = &item.myvertex(vx)->Point() ;
+      }
       // update geo impl (drop vertex 0)
-      geoImpl().update( item.myvertex(1)->Point(),
-                        item.myvertex(2)->Point(),
-                        item.myvertex(3)->Point() );
+      geoImpl().update( points[ 0 ], points[ 1 ], points[ 2 ] );
     }
   }
 
