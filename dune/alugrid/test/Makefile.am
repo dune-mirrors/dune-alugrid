@@ -1,12 +1,14 @@
 SUBDIRS = dgf
 
-check_PROGRAMS = test-alugrid
-TESTS = test-alugrid
+check_PROGRAMS = test-alugrid test-geometries
+TESTS = test-alugrid test-geometries
+
+AM_CPPFLAGS += $(DUNEMPICPPFLAGS)
+AM_LDFLAGS += $(DUNEMPILDFLAGS)
+LDADD += $(DUNEMPILIBS)
 
 test_alugrid_SOURCES = test-alugrid.cc
-test_alugrid_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS)
-test_alugrid_LDFLAGS = $(AM_LDFLAGS) $(DUNEMPILDFLAGS)
-test_alugrid_LDADD = $(LDADD) $(DUNEMPILIBS)
+test_geometries_SOURCES = test-geometries.cc
 
 CLEANFILES = dgfparser.log
 
