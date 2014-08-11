@@ -654,17 +654,19 @@ namespace Dune
 
     typedef typename GridImp::MPICommunicatorType Comm;
 
-    friend class ALU3dGridIntersectionIterator<GridImp>;
+    //friend class ALU3dGridIntersectionIterator<GridImp>;
+    typedef ALU3dImplTraits< GridImp::dimension, GridImp::dimensionworld, 
+                  elementType, Comm > ALU3dImplTraitsType ;
 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::IMPLElementType IMPLElementType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOFaceType     GEOFaceType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOEdgeType     GEOEdgeType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::GEOVertexType   GEOVertexType;
+    typedef typename ALU3dImplTraitsType::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraitsType::GEOFaceType     GEOFaceType;
+    typedef typename ALU3dImplTraitsType::GEOEdgeType     GEOEdgeType;
+    typedef typename ALU3dImplTraitsType::GEOVertexType   GEOVertexType;
 
     // interface types 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HFaceType   HFaceType;
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::HEdgeType   HEdgeType; 
-    typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, elementType, Comm >::VertexType  VertexType; 
+    typedef typename ALU3dImplTraitsType::HFaceType   HFaceType;
+    typedef typename ALU3dImplTraitsType::HEdgeType   HEdgeType; 
+    typedef typename ALU3dImplTraitsType::VertexType  VertexType; 
 
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
