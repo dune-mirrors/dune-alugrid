@@ -11,6 +11,7 @@
 
 // include serial part of ALUGrid 
 #include <dune/alugrid/common/declaration.hh>
+#include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
 #include <dune/alugrid/3d/geometry.hh>
 
@@ -46,10 +47,9 @@ void checkGeom( HElemType* item )
   typedef GridImp< dim, dimworld, eltype > Grid ;
   typedef Dune :: ALU3dGridGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
   typedef typename GeometryImpl :: IMPLElementType IMPLElementType ;
-  const IMPLElementType* elem = dynamic_cast<IMPLElementType *> (item);
+  const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
 
   GeometryImpl geometry ; 
-  std::cout << "Try to build geom" << std::endl;
   geometry.buildGeom( elem );
 
   geometry.print( std::cout );
@@ -68,12 +68,12 @@ void checkGeometries( Gitter& grid )
     if( item->type() == ALUGrid::tetra )
     {
       checkGeom< Dune::simplex, 2 >( item );
-      //checkGeom< Dune::simplex, 3 >( item );
+      checkGeom< Dune::simplex, 3 >( item );
     }
     else 
     {
       checkGeom< Dune::cube, 2 >( item );
-      //checkGeom< Dune::cube, 3 >( w->item() );
+      checkGeom< Dune::cube, 3 >( item );
     }
   }
 

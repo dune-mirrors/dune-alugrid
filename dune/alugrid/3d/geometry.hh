@@ -123,9 +123,11 @@ namespace Dune
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
       { 
+        // we have either 2d or 3d vectors
+        alugrid_assert( cdim > 1 );
         c[0] = p[0];
         c[1] = p[1];
-        if( cdim == 3 ) 
+        if( cdim > 2 ) 
           c[2] = p[2];
       }
 
@@ -164,6 +166,9 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
       {
+        // this version is only for the 2d elements 
+        alugrid_assert( dim == 2 );
+
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
@@ -651,8 +656,6 @@ namespace Dune
     public GeometryDefaultImplementation<mydim, cdim, GridImp, ALU3dGridGeometry> 
   {
     static const ALU3dGridElementType elementType = GridImp::elementType;
-    static const int actualDim = GridImp::actualDimension;
-    static const int actualDimw = GridImp::actualDimensionWorld;
 
     typedef typename GridImp::MPICommunicatorType Comm;
 
