@@ -363,7 +363,7 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
     rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
     //drop aluindex zero 
-    if (elementType == tetra && mydim == 2 && rotatedALUIndex[i] == 0 ) --i;
+    if (elementType == tetra && mydim == 1 && rotatedALUIndex[i] == 0 ) --i;
   }
 
   if( elementType == hexa )
@@ -441,6 +441,7 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const coord_t& p0, 
           const coord_t& p1)
 {         
+  alugrid_assert (mydim == 1 );
   // update geometry implementation 
   geoImpl().update( p0, p1 );
   return true;
@@ -453,17 +454,19 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const FaceCoordinatesType& coords) 
 {
   if ( elementType == hexa )
+  {
     if ( mydim == 2) 
       return buildGeom( coords[0], coords[1], coords[2], coords[3] );  
-    else if ( mydim == 1 ) 
-      return buildGeom ( coords[0], coords[1] );
+ //   else if ( mydim == 1 ) 
+   //   return buildGeom ( coords[0], coords[1] );
+  }
   else 
   {
     alugrid_assert ( elementType == tetra );
     if (mydim == 2 )  
       return buildGeom( coords[0], coords[1], coords[2] );
-    else if ( mydim == 1 ) 
-      return buildGeom ( coords[1], coords[2]);
+//    else if ( mydim == 1 ) 
+  //    return buildGeom ( coords[1], coords[2] );
   }
 }
 
@@ -477,7 +480,7 @@ buildGeom(const HEdgeType & item, int twist, int)
   //only needs specialization for 
   if (elementType == hexa) 
   {
-    //needs specialization what i to take - preferrably the on with an even global index
+    //needs specialization what index i to take - preferrably the one with an even global index
   }
   
   
