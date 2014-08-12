@@ -11,7 +11,7 @@ namespace Dune {
 
 template <int mydim, int cdim, class GridImp>
 inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
-ALU3dGridGeometry() 
+ALU3dGridGeometry()
 {
   getObject();
 }
@@ -219,12 +219,12 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 print (std::ostream& ss) const 
 {
   const char* charElType = (elementType == tetra) ? "tetra" : "hexa";
-  ss << "ALU3dGridGeometry<" << mydim << "," << cdim << ", " << charElType << "> = {\n";
-  for(int i=0; i<corners(); i++)
-    {
-      ss << " corner " << i << " ";
-      ss << "{" << corner(i) << "}"; ss << std::endl;
-    }
+  ss << "ALU3dGridGeometry<" << mydim << ", " << cdim << ", " << charElType << "> = {\n";
+  for(int i=0; i<corners(); ++i)
+  {
+    ss << " corner " << i << " ";
+    ss << "{" << corner(i) << "}"; ss << std::endl;
+  }
   ss << "} \n";
 }
 
@@ -316,15 +316,6 @@ buildGeom(const IMPLElementType& item)
     }
     else if( mydim == 2 ) // triangle
     {
-/*
-      const double* points[3] = {0,0,0};
-      for( int i=0, vx=0; i<3; ++i, ++vx )
-      {
-        // we assume that the global number of the artificial vertex is 0
-        if( item.myvertex(vx)->getIndex() == 0 ) ++ vx;
-        points[ i ] = &item.myvertex(vx)->Point()[0] ;
-      }
-*/
       // update geo impl (drop vertex 0)
       geoImpl().update( item.myvertex(1)->Point(),
                         item.myvertex(2)->Point(),
@@ -332,7 +323,7 @@ buildGeom(const IMPLElementType& item)
     }
   }
 
-  if( mydim == actualDim ) 
+  if( mydim == 3 ) 
   {
     // get volume of element 
     geoImpl().setVolume( item.volume() );
