@@ -79,7 +79,7 @@ void checkGeometries( Gitter& grid )
 int main (int argc, char ** argv, const char ** envp) 
 {
 #if HAVE_MPI
-  Dune :: MPIHelper& mpi = Dune :: MPIHelper :: instance(&argc,&argv);
+  Dune :: MPIHelper& mpi = Dune :: MPIHelper :: instance(argc,argv);
 #endif
   const char* filename = 0 ;
   if (argc < 2) 
