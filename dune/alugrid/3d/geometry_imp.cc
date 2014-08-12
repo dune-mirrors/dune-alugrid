@@ -321,7 +321,7 @@ buildGeom(const IMPLElementType& item)
       {
         // we assume that the global number of the artificial vertex is 0
         if( item.myvertex(vx)->getIndex() == 0 ) ++ vx;
-        points[ i ] = &item.myvertex(vx)->Point() ;
+        points[ i ] = &item.myvertex(vx)->Point()[0] ;
       }
       // update geo impl (drop vertex 0)
       geoImpl().update( points[ 0 ], points[ 1 ], points[ 2 ] );
