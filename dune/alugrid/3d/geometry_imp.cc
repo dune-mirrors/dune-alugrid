@@ -3,7 +3,6 @@
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
-#include "grid.hh"
 #include "mappings.hh"
 #include "geometry.hh"
 
@@ -224,7 +223,7 @@ print (std::ostream& ss) const
   for(int i=0; i<corners(); i++)
     {
       ss << " corner " << i << " ";
-      ss << "{" << ((*this)[i]) << "}"; ss << std::endl;
+      ss << "{" << corner(i) << "}"; ss << std::endl;
     }
   ss << "} \n";
 }

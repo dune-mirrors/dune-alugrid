@@ -272,23 +272,23 @@ namespace Dune
   // ALU3dGridFamily
   // ---------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dimG, int dimW, ALU3dGridElementType elType, class Comm >
   struct ALU3dGridFamily
   {
-    typedef ALU3dGrid< actualDim, actualDimw, elType, Comm > GridImp;
-    typedef ALU3dGridFamily< actualDim, actualDimw, elType, Comm > GridFamily;
+    static const int dim = dimG;
+    static const int dimworld = dimW;
 
-    static const int dim = 3;
-    static const int dimworld = 3;
+    typedef ALU3dGrid< dim, dimworld, elType, Comm > GridImp;
+    typedef ALU3dGridFamily< dim, dimworld, elType, Comm > GridFamily;
 
     //! Type of the local id set 
-    typedef ALU3dGridLocalIdSet< actualDim, actualDimw, elType, Comm > LocalIdSetImp;
+    typedef ALU3dGridLocalIdSet< dim, dimworld, elType, Comm > LocalIdSetImp;
 
     //! Type of the global id set
-    typedef typename ALU3dGridCommunications< actualDim, actualDimw, elType, Comm >::GlobalIdSet GlobalIdSetImp;
+    typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::GlobalIdSet GlobalIdSetImp;
     
     //! type of ALU3dGrids global id
-    typedef typename ALU3dGridCommunications< actualDim, actualDimw, elType, Comm >::GlobalId GlobalIdType;
+    typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::GlobalId GlobalIdType;
 
     //! type of ALU3dGrids local id 
     typedef int LocalIdType;
