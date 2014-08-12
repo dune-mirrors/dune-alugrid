@@ -24,18 +24,19 @@ typedef ALUGrid::Gitter::hedge_STI     HEdgeType;    // Interface Element
 typedef ALUGrid::Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
+// fake class for Geometry Implementation
 template <int dim, int dimworld, Dune::ALU3dGridElementType eltype >
 struct GridImp 
 {
   static const Dune::ALU3dGridElementType elementType = eltype;
-  typedef Dune :: ALUGridNoComm MPICommunicatorType ;
+  typedef Dune :: ALUGridNoComm     MPICommunicatorType ;
   static const int dimension      = dim ;
   static const int dimensionworld = dimworld ;
-  typedef Dune :: alu3d_ctype ctype ;
+  typedef Dune :: alu3d_ctype       ctype ;
 };
 
 template < Dune::ALUGridElementType type, int dim > 
-void checkGeom( HElemType& elem ) 
+void checkGeom( HElemType* item ) 
 {
   static const int cd = 0 ;
   static const int dimworld = dim ; // change appropriately 
@@ -44,8 +45,11 @@ void checkGeom( HElemType& elem )
 
   typedef GridImp< dim, dimworld, eltype > Grid ;
   typedef Dune :: ALU3dGridGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
+  typedef typename GeometryImpl :: IMPLElementType IMPLElementType ;
+  const IMPLElementType* elem = dynamic_cast<IMPLElementType *> (item);
 
   GeometryImpl geometry ; 
+  std::cout << "Try to build geom" << std::endl;
   geometry.buildGeom( elem );
 
   geometry.print( std::cout );
@@ -54,22 +58,22 @@ void checkGeom( HElemType& elem )
 template <class Gitter> 
 void checkGeometries( Gitter& grid ) 
 {
-
   // get LeafIterator which iterates over all leaf elements of the grid 
   ALUGrid::LeafIterator < HElemType > w (grid) ;
 
   for (w->first () ; ! w->done () ; w->next ())
   {
+    HElemType* item =  &w->item ();
     // mark element for refinement 
-    if( w->item ().type() == ALUGrid::tetra )
+    if( item->type() == ALUGrid::tetra )
     {
-      checkGeom< Dune::simplex, 2 >( w->item() );
-      checkGeom< Dune::simplex, 3 >( w->item() );
+      checkGeom< Dune::simplex, 2 >( item );
+      //checkGeom< Dune::simplex, 3 >( item );
     }
     else 
     {
-      checkGeom< Dune::cube, 2 >( w->item() );
-      checkGeom< Dune::cube, 3 >( w->item() );
+      checkGeom< Dune::cube, 2 >( item );
+      //checkGeom< Dune::cube, 3 >( w->item() );
     }
   }
 
@@ -109,13 +113,13 @@ int main (int argc, char ** argv, const char ** envp)
     }
 
     {
-#if HAVE_MPI
-      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
-      ALUGrid::GitterDunePll& grid = *gridPtr ;
-#else 
+//#if HAVE_MPI
+//      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
+//      ALUGrid::GitterDunePll& grid = *gridPtr ;
+//#else 
       ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
       ALUGrid::GitterDuneImpl& grid = *gridPtr ;
-#endif
+//#endif
 
       checkGeometries( grid );
     
