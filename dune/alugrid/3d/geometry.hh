@@ -660,6 +660,7 @@ namespace Dune
     typedef ALU3dImplTraits< GridImp::dimension, GridImp::dimensionworld, 
                   elementType, Comm > ALU3dImplTraitsType ;
 
+  public:  
     typedef typename ALU3dImplTraitsType::IMPLElementType IMPLElementType;
     typedef typename ALU3dImplTraitsType::GEOFaceType     GEOFaceType;
     typedef typename ALU3dImplTraitsType::GEOEdgeType     GEOEdgeType;
