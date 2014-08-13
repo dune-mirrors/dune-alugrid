@@ -354,7 +354,7 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i - k ] = FaceTopo::twist(localALUIndex, twist);
+    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
   }
 
   if( elementType == hexa )
