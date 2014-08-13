@@ -363,15 +363,15 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     { 
       // update geometry implementation 
       geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
-                      face.myvertex(rotatedALUIndex[1])->Point(),
-                      face.myvertex(rotatedALUIndex[2])->Point(),
-                      face.myvertex(rotatedALUIndex[3])->Point() );
+                        face.myvertex(rotatedALUIndex[1])->Point(),
+                        face.myvertex(rotatedALUIndex[2])->Point(),
+                        face.myvertex(rotatedALUIndex[3])->Point() );
     }
     else if ( mydim == 1) //edge
     {
       //update geometry implementation
       geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
-                        face.myvertex( rotatedALUIndex[1])->Point() );
+                        face.myvertex(rotatedALUIndex[1])->Point() );
     }
   }
   else if ( elementType == tetra )
@@ -380,14 +380,14 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     {
       // update geometry implementation 
       geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
-                      face.myvertex(rotatedALUIndex[1])->Point(),
-                      face.myvertex(rotatedALUIndex[2])->Point());
+                        face.myvertex(rotatedALUIndex[1])->Point(),
+                        face.myvertex(rotatedALUIndex[2])->Point());
     }
     else if ( mydim == 1 )  //edge
     {
       //update geometry implementation
       geoImpl().update( face.myvertex( rotatedALUIndex[0])->Point(),
-                        face.myvertex( rotatedALUIndex[1])->Point()   );
+                        face.myvertex( rotatedALUIndex[1])->Point() );
     }
   }
 
