@@ -176,7 +176,7 @@ volume () const
     alugrid_assert ( geoImpl().valid() );
     return geoImpl().volume() ;
   }
-  else if ( mydim == cdim - 1 && elementType == tetra )
+  else if ( mydim == 2 && elementType == tetra )
   {
     enum { factor = Factorial<mydim>::factorial };
     // local vector does not affect the result 
@@ -471,7 +471,7 @@ buildGeom(const HEdgeType & item, int twist, int)
   //only needs specialization for 
   if (elementType == hexa) 
   {
-    //needs specialization what index i to take - preferrably the one with an even global index
+    //TODO specialization what index i to take - preferrably the one with an even global index
   }
   
   

@@ -44,6 +44,7 @@ void checkGeom( HElemType* item )
   typedef Dune :: ALU3dGridGeometry< Grid::dimension, Grid::dimensionworld, const Grid > GeometryImpl;
   typedef typename GeometryImpl :: IMPLElementType IMPLElementType ;
   typedef typename GeometryImpl :: GEOFaceType     GEOFaceType;
+  typedef typename GeometryImpl :: GEOEdgeType     GEOEdgeType;
   typedef typename GeometryImpl :: GEOVertexType     GEOVertexType;
   const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
 
@@ -66,12 +67,22 @@ void checkGeom( HElemType* item )
   }
 
   // check edges 
+  const int nEdges = 6;
   if( Grid::dimension > 2 ) 
   {
-    // TODO: implement
+    for( int i=0; i<nEdges; ++i )
+    {
+      typedef Dune :: ALU3dGridGeometry< Grid::dimension-2, Grid::dimensionworld, const Grid > EdgeGeometry;
+      EdgeGeometry edgeGeom;
+      const GEOEdgeType* edge = elem.myhedge( i );
+      edgeGeom.buildGeom( *edge, elem.twist( i ), i );
+      // perform geometry check
+      checkGeometry( edgeGeom );
+      edgeGeom.print( std::cout );
+    }
   }
 
-  const int nVerts = 3;
+  const int nVerts = 4;
   for( int i=0; i<nVerts; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
