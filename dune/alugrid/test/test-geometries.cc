@@ -49,13 +49,14 @@ void checkGeom( HElemType* item )
   geometry.buildGeom( elem );
   geometry.print( std::cout );
 
-  const int nFaces = 3;
+  const int nFaces = 4;
   for( int i=0; i<nFaces; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
     FaceGeometry faceGeom;
     const GEOFaceType* face = elem.myhface( i );
     faceGeom.buildGeom( *face, elem.twist( i ), i );
+    std::cout << "FACE: " << i << std::endl;
     faceGeom.print( std::cout );
   }
 
@@ -77,11 +78,12 @@ void checkGeometries( Gitter& grid )
 {
   // get LeafIterator which iterates over all leaf elements of the grid 
   ALUGrid::LeafIterator < HElemType > w (grid) ;
-
+  int numberofelement = 0;
   for (w->first () ; ! w->done () ; w->next ())
   {
     HElemType* item =  &w->item ();
     // mark element for refinement 
+    std::cout<< "ELEMENT: " << numberofelement << std::endl;   
     if( item->type() == ALUGrid::tetra )
     {
       checkGeom< GridImp< 2, 2, Dune::tetra > >( item );
@@ -94,6 +96,7 @@ void checkGeometries( Gitter& grid )
       //checkGeom< GridImp< 2, 3, Dune::hexa > >( item );
       checkGeom< GridImp< 3, 3, Dune::hexa > >( item );
     }
+    ++numberofelement;
   }
 
 }
