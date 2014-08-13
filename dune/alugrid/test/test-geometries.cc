@@ -15,6 +15,8 @@
 #include <dune/alugrid/3d/alu3dinclude.hh>
 #include <dune/alugrid/3d/geometry.hh>
 
+#include <dune/geometry/test/checkgeometry.hh>
+
 #if HAVE_MPI
 #warning RUNNING PARALLEL VERSION
 #endif
@@ -47,6 +49,8 @@ void checkGeom( HElemType* item )
 
   GeometryImpl geometry ; 
   geometry.buildGeom( elem );
+  // perform geometry check
+  checkGeometry( geometry );
   geometry.print( std::cout );
 
   const int nFaces = 3;
@@ -56,7 +60,15 @@ void checkGeom( HElemType* item )
     FaceGeometry faceGeom;
     const GEOFaceType* face = elem.myhface( i );
     faceGeom.buildGeom( *face, elem.twist( i ), i );
+    // perform geometry check
+    checkGeometry( faceGeom );
     faceGeom.print( std::cout );
+  }
+
+  // check edges 
+  if( Grid::dimension > 2 ) 
+  {
+    // TODO: implement
   }
 
   const int nVerts = 3;
@@ -66,6 +78,8 @@ void checkGeom( HElemType* item )
     PointGeometry point ;
     const GEOVertexType* vertex = static_cast<const GEOVertexType*> (elem.myvertex( i ));
     point.buildGeom( *vertex,0,0 );
+    // perform geometry check
+    checkGeometry( point );
     point.print( std::cout );
   }
 }
