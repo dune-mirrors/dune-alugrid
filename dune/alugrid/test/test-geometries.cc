@@ -36,23 +36,40 @@ struct GridImp
   typedef Dune :: alu3d_ctype       ctype ;
 };
 
-template < Dune::ALUGridElementType type, int dim > 
+template < class Grid > 
 void checkGeom( HElemType* item ) 
 {
-  static const int cd = 0 ;
-  static const int dimworld = dim ; // change appropriately 
-  static const Dune::ALU3dGridElementType eltype = ( type == Dune :: simplex  ) 
-    ? Dune::tetra : Dune::hexa ;
-
-  typedef GridImp< dim, dimworld, eltype > Grid ;
-  typedef Dune :: ALU3dGridGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
+  typedef Dune :: ALU3dGridGeometry< Grid::dimension, Grid::dimensionworld, const Grid > GeometryImpl;
   typedef typename GeometryImpl :: IMPLElementType IMPLElementType ;
+  typedef typename GeometryImpl :: GEOFaceType     GEOFaceType;
+  typedef typename GeometryImpl :: GEOVertexType     GEOVertexType;
   const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
 
   GeometryImpl geometry ; 
   geometry.buildGeom( elem );
-
   geometry.print( std::cout );
+
+  const int nFaces = 3;
+  for( int i=0; i<nFaces; ++i )
+  {
+    typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
+    FaceGeometry faceGeom;
+    const GEOFaceType* face = elem.myhface( i );
+    faceGeom.buildGeom( *face, elem.twist( i ), i );
+    faceGeom.print( std::cout );
+  }
+
+  /*
+  const int nVerts = 3;
+  for( int i=0; i<nVerts; ++i )
+  {
+    typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
+    PointGeometry point ;
+    const GEOVertexType* vertex = static_cast<const GEOVertexType*> (elem.myvertex( i ));
+    point.buildGeom( *vertex );
+    point.print( std::cout );
+  }
+  */
 }
 
 template <class Gitter> 
@@ -67,13 +84,15 @@ void checkGeometries( Gitter& grid )
     // mark element for refinement 
     if( item->type() == ALUGrid::tetra )
     {
-      checkGeom< Dune::simplex, 2 >( item );
-      checkGeom< Dune::simplex, 3 >( item );
+      checkGeom< GridImp< 2, 2, Dune::tetra > >( item );
+      //checkGeom< GridImp< 2, 3, Dune::tetra > >( item );
+      checkGeom< GridImp< 3, 3, Dune::tetra > >( item );
     }
     else 
     {
-      checkGeom< Dune::cube, 2 >( item );
-      checkGeom< Dune::cube, 3 >( item );
+      checkGeom< GridImp< 2, 2, Dune::hexa > >( item );
+      //checkGeom< GridImp< 2, 3, Dune::hexa > >( item );
+      checkGeom< GridImp< 3, 3, Dune::hexa > >( item );
     }
   }
 

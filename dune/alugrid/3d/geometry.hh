@@ -161,6 +161,13 @@ namespace Dune
         DUNE_THROW(InvalidStateException,"This method should not be called!");
       } 
 
+      template <class CoordPtrType>
+      void update(const CoordPtrType&, 
+                  const CoordPtrType& ) const 
+      {
+        DUNE_THROW(InvalidStateException,"This method should not be called!");
+      } 
+
       // update geometry in father coordinates (default impl)
       template <class GeometryImp>
       inline void updateInFather(const GeometryImp &fatherGeom ,
