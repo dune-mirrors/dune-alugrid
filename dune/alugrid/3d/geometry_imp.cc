@@ -338,6 +338,7 @@ inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HFaceType & item, int twist, int duneFace ) 
 {
+  
   // get geo face 
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
@@ -348,13 +349,12 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   enum { numVertices = ElementTopo::numVerticesPerFace };
   // for all vertices of this face get rotatedIndex 
   int rotatedALUIndex[ 4 ]; 
+
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
-    //drop aluindex zero 
-    if (elementType == tetra && mydim == 1 && rotatedALUIndex[i] == 0 ) --i;
+    rotatedALUIndex[ i - k ] = FaceTopo::twist(localALUIndex, twist);
   }
 
   if( elementType == hexa )
@@ -385,9 +385,9 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     }
     else if ( mydim == 1 )  //edge
     {
-      //update geometry implementation
-      geoImpl().update( face.myvertex( rotatedALUIndex[0])->Point(),
-                        face.myvertex( rotatedALUIndex[1])->Point() );
+      //update geometry implementation (drop index 0)
+      geoImpl().update( face.myvertex( rotatedALUIndex[1])->Point(),
+                        face.myvertex( rotatedALUIndex[2])->Point() );
     }
   }
 
