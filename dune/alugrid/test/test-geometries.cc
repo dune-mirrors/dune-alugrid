@@ -59,17 +59,15 @@ void checkGeom( HElemType* item )
     faceGeom.print( std::cout );
   }
 
-  /*
   const int nVerts = 3;
   for( int i=0; i<nVerts; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
     PointGeometry point ;
     const GEOVertexType* vertex = static_cast<const GEOVertexType*> (elem.myvertex( i ));
-    point.buildGeom( *vertex );
+    point.buildGeom( *vertex,0,0 );
     point.print( std::cout );
   }
-  */
 }
 
 template <class Gitter> 
