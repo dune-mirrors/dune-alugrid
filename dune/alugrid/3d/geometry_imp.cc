@@ -349,12 +349,14 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   enum { numVertices = ElementTopo::numVerticesPerFace };
   // for all vertices of this face get rotatedIndex 
   int rotatedALUIndex[ 4 ]; 
-
+  int k = 0;
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
+    rotatedALUIndex[ i - k ] = FaceTopo::twist(localALUIndex, twist);
+    //drop vertices for hexa with local index 1 or 2
+    if (elementType == hexa && mydim == 1 && (rotatedALUIndex[i - k] == 1 || rotatedALUIndex[i - k] == 2)){++k;}
   }
 
   if( elementType == hexa )
@@ -467,13 +469,7 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HEdgeType & item, int twist, int) 
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
-  int i = 1;
-  //only needs specialization for 
-  if (elementType == hexa) 
-  {
-    //TODO specialization what index i to take - preferrably the one with an even global index
-  }
-  
+ 
   
   if (mydim == 1) // edge
   {
@@ -483,8 +479,16 @@ buildGeom(const HEdgeType & item, int twist, int)
   }
   else if ( mydim == 0) // point
   {
-    // update geometry implementation 
-    geoImpl().update( edge.myvertex(i)->Point() );
+    if (elementType == hexa)
+    {
+      // update geometry implementation (drop vertex 1 as it has higher global index)
+      geoImpl().update( edge.myvertex(0)->Point() );
+    }
+    else if ( elementType == tetra)
+    {
+      // update geometry implementation (drop vertex 0)
+      geoImpl().update( edge.myvertex(1)->Point() );
+    }
   }
   return true;
 }
