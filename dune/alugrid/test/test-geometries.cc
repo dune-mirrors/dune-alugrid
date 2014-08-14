@@ -176,6 +176,8 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
       mgb.InsertUniqueTetra( element, (el % 2) );
     }
   }
+
+  // TODO insert boundary faces 
 }
 
 // exmaple on read grid, refine global and print again 
