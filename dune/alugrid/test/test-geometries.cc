@@ -66,7 +66,7 @@ void checkGeom( HElemType* item )
   checkGeometry( geometry );
   geometry.print( std::cout );
 
-  const int nFaces = 6;
+  const int nFaces = 4;
   for( int i=0; i<nFaces; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
@@ -96,7 +96,7 @@ void checkGeom( HElemType* item )
     }
   }*/
 
-  const int nVerts = 8;
+  const int nVerts = 4;
   for( int i=0; i<nVerts; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
