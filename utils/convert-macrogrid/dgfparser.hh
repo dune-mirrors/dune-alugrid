@@ -45,6 +45,8 @@ public:
   const std::vector< unsigned int > &element ( int i ) const { return Base::elements[ i ]; }
 
   const facemap_t &facemap () const { return Base::facemap; }
+
+  bool isCubeGrid() const { return Base::element == DGFParser::Cube; }
 };
 
 #endif
