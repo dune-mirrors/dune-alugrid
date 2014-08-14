@@ -54,18 +54,20 @@ void checkGeom( HElemType* item )
   checkGeometry( geometry );
   geometry.print( std::cout );
 
-  const int nFaces = 4;
+  const int nFaces = 6;
   for( int i=0; i<nFaces; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
     FaceGeometry faceGeom;
     const GEOFaceType* face = elem.myhface( i );
     faceGeom.buildGeom( *face, elem.twist( i ), i );
+    std::cout << "FACE: " << i << std::endl;
     // perform geometry check
     checkGeometry( faceGeom );
     faceGeom.print( std::cout );
   }
 
+  /*
   // check edges 
   const int nEdges = 6;
   if( Grid::dimension > 2 ) 
@@ -80,9 +82,9 @@ void checkGeom( HElemType* item )
       checkGeometry( edgeGeom );
       edgeGeom.print( std::cout );
     }
-  }
+  }*/
 
-  const int nVerts = 4;
+  const int nVerts = 8;
   for( int i=0; i<nVerts; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
