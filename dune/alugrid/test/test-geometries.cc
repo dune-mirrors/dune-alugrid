@@ -6,6 +6,7 @@
 //***********************************************************************
 #include <config.h>
 #include <iostream>
+#include <fstream>
 
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -15,7 +16,14 @@
 #include <dune/alugrid/3d/alu3dinclude.hh>
 #include <dune/alugrid/3d/geometry.hh>
 
+#include <dune/grid/io/file/dgfparser/parser.hh>
+
 #include <dune/geometry/test/checkgeometry.hh>
+
+// DGFParser
+// ---------
+#include "../../../utils/convert-macrogrid/dgfparser.hh"
+
 
 #if HAVE_MPI
 #warning RUNNING PARALLEL VERSION
@@ -125,13 +133,59 @@ void checkGeometries( Gitter& grid )
 
 }
 
+void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid ) 
+{
+  double extraPoint[ 3] = {3,3,3};
+
+  ALUGrid::Gitter::Geometric::BuilderIF* builder =
+   dynamic_cast< ALUGrid::Gitter::Geometric::BuilderIF* >( &grid->container() );
+
+  ALUGrid :: MacroGridBuilder mgb ( *builder, (ALUGrid::ProjectVertex *) 0);
+
+  mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], -1 );
+
+  const int nVx = dgf.numVertices();
+  for( int i=0; i<nVx; ++i ) 
+    mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], dgf.vertex( i )[2], i );
+
+  const size_t elemSize = dgf.numElements();
+  for( size_t el = 0; el<elemSize; ++el )
+  {
+    if( dgf.isCubeGrid() )
+    {
+      typedef Dune::ElementTopologyMapping< Dune::hexa > ElementTopologyMappingType;
+      int element[ 8 ];
+      for( unsigned int i = 0; i < 8; ++i )
+      {
+        const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+        element[ j ] = dgf.element( el )[ i ];
+      }
+      mgb.InsertUniqueHexa( element );
+    }
+    else 
+    {
+      typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
+      int element[ 4 ];
+      element[ 0 ] = -1;
+      for( unsigned int i = 1; i < 4; ++i )
+      {
+        const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+        element[ j ] = dgf.element( el )[ i ];
+      }
+      mgb.InsertUniqueTetra( element, (el % 2) );
+    }
+  }
+}
+
 // exmaple on read grid, refine global and print again 
 int main (int argc, char ** argv, const char ** envp) 
 {
 #if HAVE_MPI
-  Dune :: MPIHelper& mpi = Dune :: MPIHelper :: instance(argc,argv);
+  //Dune :: MPIHelper& mpi = 
+  Dune :: MPIHelper :: instance(argc,argv);
 #endif
-  const char* filename = 0 ;
+  std::string filename;
+
   if (argc < 2) 
   {
     filename = "reference.tetra";
@@ -142,41 +196,31 @@ int main (int argc, char ** argv, const char ** envp)
     filename = argv[ 1 ];
   }
 
+
+  ALUGrid::GitterDuneImpl* gridPtr = 0;
+  std::ifstream input( filename );
+  if( DGFParser::isDuneGridFormat( input ) )
   {
-    int rank = 0;
-#if HAVE_MPI
-    ALUGrid::MpAccessMPI mpa (MPI_COMM_WORLD);
-    rank = mpa.myrank();
-#endif
+    DGFParser dgf( Dune::simplex, 2, 2 ); 
+    gridPtr = new ALUGrid::GitterDuneImpl();
+    insertGrid( dgf, gridPtr );
+  }
+  else 
+  {
+    gridPtr = new ALUGrid::GitterDuneImpl(filename.c_str());
+  }
+  alugrid_assert( gridPtr );
 
-    std::string macroname( filename );
+  ALUGrid::GitterDuneImpl& grid = *gridPtr ;
 
-    if( rank == 0 ) 
-    {
-      std::cout << "\n-----------------------------------------------\n";
-      std::cout << "read macro grid from < " << macroname << " > !" << std::endl;
-      std::cout << "-----------------------------------------------\n";
-    }
+  checkGeometries( grid );
 
-    {
-//#if HAVE_MPI
-//      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
-//      ALUGrid::GitterDunePll& grid = *gridPtr ;
-//#else 
-      ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
-      ALUGrid::GitterDuneImpl& grid = *gridPtr ;
-//#endif
-
-      checkGeometries( grid );
-    
-      const bool output = false ;
-      if( output )
-      {
-        std::ostringstream ss;
-        ss << macroname << ".vtu";
-        grid.tovtk(  ss.str().c_str() );
-      }
-    }
+  const bool output = true ;
+  if( output )
+  {
+    std::ostringstream ss;
+    ss << filename << ".vtu";
+    grid.tovtk(  ss.str().c_str() );
   }
 
   return 0;
