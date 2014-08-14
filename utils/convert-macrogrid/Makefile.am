@@ -1,7 +1,7 @@
 EXTRA_PROGRAMS = convert
 
 convertdir = $(includedir)/utils/convert-macrogrid
-convert_HEADERS = partition.hh
+convert_HEADERS = partition.hh dgfparser.hh
 
 convert_SOURCES = main.cc
 

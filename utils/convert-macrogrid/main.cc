@@ -183,46 +183,7 @@ struct Periodic< HEXA_RAW >
 };
 
 #include "partition.hh"
-
-// DGFParser
-// ---------
-
-class DGFParser
-  : public Dune::DuneGridFormatParser
-{
-  typedef Dune::DuneGridFormatParser Base;
-
-public:
-  typedef Base::facemap_t facemap_t;
-
-  DGFParser ( ElementRawID rawId )
-    : Base( 0, 1 )
-  {
-    Base::element = (rawId == HEXA_RAW ? DGFParser::Cube : DGFParser::Simplex);
-    Base::dimgrid = 3;
-    Base::dimw = 3;
-  }
-
-  static bool isDuneGridFormat ( std::istream &input )
-  {
-    const std::streampos pos = input.tellg();
-    const bool isDGF = Base::isDuneGridFormat( input );
-    input.clear();
-    input.seekg( pos );
-    return isDGF;
-  }
-
-  void setOrientation ( int use1, int use2 ) { Base::setOrientation( use1, use2 ); }
-
-  int numVertices () const { return Base::nofvtx; }
-  const std::vector< double > &vertex ( int i ) const { return Base::vtx[ i ]; }
-
-  int numElements () const { return this->nofelements; }
-  const std::vector< unsigned int > &element ( int i ) const { return Base::elements[ i ]; }
-
-  const facemap_t &facemap () const { return Base::facemap; }
-};
-
+#include "dgfparser.hh"
 
 
 // readLegacyFormat
@@ -773,7 +734,7 @@ void readDGF ( stream_t &input,
                std::vector< BndSeg< rawId > > &bndSegs,
                std::vector< Periodic< rawId > > &periodics )
 {
-  DGFParser dgf( rawId );
+  DGFParser dgf( rawId == HEXA_RAW ? Dune::cube : Dune::simplex );
 
   if( !dgf.readDuneGrid( input, 3, 3 ) )
   {
