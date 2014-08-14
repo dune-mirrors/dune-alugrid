@@ -145,11 +145,11 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
 
   ALUGrid :: MacroGridBuilder mgb ( *builder, (ALUGrid::ProjectVertex *) 0);
 
+  mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], 0 );
+
   const int nVx = dgf.numVertices();
   for( int i=0; i<nVx; ++i ) 
-    mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], dgf.vertex( i )[2], i );
-
-  mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], nVx );
+    mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, i+1 );
 
   const size_t elemSize = dgf.numElements();
   for( size_t el = 0; el<elemSize; ++el )
@@ -169,11 +169,11 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
     {
       typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
       int element[ 4 ];
-      element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = nVx; // the fake vertex 
+      element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex 
       for( unsigned int i = 1; i < 4; ++i )
       {
         const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-        element[ j ] = dgf.element( el )[ i-1 ];
+        element[ j ] = dgf.element( el )[ i-1 ]+1;
       }
       mgb.InsertUniqueTetra( element, (el % 2) );
     }
