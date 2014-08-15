@@ -65,7 +65,7 @@ void checkGeom( HElemType* item )
   // perform geometry check
   checkGeometry( geometry );
   geometry.print( std::cout );
-
+/*
   const int nFaces = 4;
   for( int i=0; i<nFaces; ++i )
   {
@@ -79,7 +79,7 @@ void checkGeom( HElemType* item )
     faceGeom.print( std::cout );
   }
 
-  /*
+  
   // check edges 
   const int nEdges = 6;
   if( Grid::dimension > 2 ) 
@@ -94,7 +94,7 @@ void checkGeom( HElemType* item )
       checkGeometry( edgeGeom );
       edgeGeom.print( std::cout );
     }
-  }*/
+  }
 
   const int nVerts = 4;
   for( int i=0; i<nVerts; ++i )
@@ -106,7 +106,7 @@ void checkGeom( HElemType* item )
     // perform geometry check
     checkGeometry( point );
     point.print( std::cout );
-  }
+  }*/
 }
 
 template <class Gitter> 
@@ -169,12 +169,13 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
     {
       typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
       int element[ 4 ];
-      element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex 
-      for( unsigned int i = 1; i < 4; ++i )
-      {
-        const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-        element[ j ] = dgf.element( el )[ i-1 ]+1;
-      }
+      //element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex 
+      //const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+      element[ 0 ] = 0;
+      element[ 1 ] = dgf.element( el )[ 0 ]+1;
+      element[ 3 ] = dgf.element( el )[ 1 ]+1;
+      element[ 2 ] = dgf.element( el )[ 2 ]+1;
+      
       mgb.InsertUniqueTetra( element, (el % 2) );
     }
   }
@@ -225,7 +226,7 @@ int main (int argc, char ** argv, const char ** envp)
 
   checkGeometries( grid );
 
-  const bool output = true ;
+  const bool output = false ;
   if( output )
   {
     std::ostringstream ss;
