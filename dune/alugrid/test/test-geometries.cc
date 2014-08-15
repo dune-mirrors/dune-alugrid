@@ -66,7 +66,7 @@ void checkGeom( HElemType* item )
   checkGeometry( geometry );
   geometry.print( std::cout );
 /*
-  const int nFaces = 4;
+  const int nFaces = (Grid::elementType == Dune::tetra) ? 4 : 6;
   for( int i=0; i<nFaces; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
@@ -96,7 +96,7 @@ void checkGeom( HElemType* item )
     }
   }
 
-  const int nVerts = 4;
+  const int nVerts = (Grid::elementType == Dune::tetra) ? 4 : 8;
   for( int i=0; i<nVerts; ++i )
   {
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
@@ -144,25 +144,38 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
    dynamic_cast< ALUGrid::Gitter::Geometric::BuilderIF* >( &grid->container() );
 
   ALUGrid :: MacroGridBuilder mgb ( *builder, (ALUGrid::ProjectVertex *) 0);
-
-  mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], 0 );
+  if( !dgf.isCubeGrid() )
+    mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], 0 );
 
   const int nVx = dgf.numVertices();
   for( int i=0; i<nVx; ++i ) 
-    mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, i+1 );
+  {
+    if( !dgf.isCubeGrid() )
+      mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, i+1 );
+    else if( dgf.isCubeGrid() )
+    {
+      mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, 2*i );
+      mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 1, 2*i+1);
+    }
+  }
 
   const size_t elemSize = dgf.numElements();
   for( size_t el = 0; el<elemSize; ++el )
   {
     if( dgf.isCubeGrid() )
     {
-      typedef Dune::ElementTopologyMapping< Dune::hexa > ElementTopologyMappingType;
+      //typedef Dune::ElementTopologyMapping< Dune::hexa > ElementTopologyMappingType;
       int element[ 8 ];
-      for( unsigned int i = 0; i < 8; ++i )
-      {
-        const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-        element[ j ] = dgf.element( el )[ i ];
-      }
+      //  const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+        element[ 0 ] = 2*dgf.element( el )[ 0 ];
+        element[ 1 ] = 2*dgf.element( el )[ 1 ];
+        element[ 2 ] = 2*dgf.element( el )[ 3 ];
+        element[ 3 ] = 2*dgf.element( el )[ 2 ];
+        element[ 4 ] = 2*dgf.element( el )[ 0 ]+1;
+        element[ 5 ] = 2*dgf.element( el )[ 1 ]+1;
+        element[ 6 ] = 2*dgf.element( el )[ 3 ]+1;
+        element[ 7 ] = 2*dgf.element( el )[ 2 ]+1;
+        
       mgb.InsertUniqueHexa( element );
     }
     else 
@@ -207,7 +220,7 @@ int main (int argc, char ** argv, const char ** envp)
   std::ifstream input( filename );
   if( DGFParser::isDuneGridFormat( input ) )
   {
-    DGFParser dgf( Dune::simplex, 2, 2 ); 
+    DGFParser dgf( Dune::cube, 2, 2 ); 
     if( !dgf.readDuneGrid( input, 2, 2 ) )
     {
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
