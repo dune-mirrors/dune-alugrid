@@ -65,7 +65,7 @@ void checkGeom( HElemType* item )
   // perform geometry check
   checkGeometry( geometry );
   geometry.print( std::cout );
-/*
+
   const int nFaces = (Grid::elementType == Dune::tetra) ? 4 : 6;
   for( int i=0; i<nFaces; ++i )
   {
@@ -79,7 +79,7 @@ void checkGeom( HElemType* item )
     faceGeom.print( std::cout );
   }
 
-  
+  /*
   // check edges 
   const int nEdges = 6;
   if( Grid::dimension > 2 ) 
@@ -94,7 +94,7 @@ void checkGeom( HElemType* item )
       checkGeometry( edgeGeom );
       edgeGeom.print( std::cout );
     }
-  }
+  }*/
 
   const int nVerts = (Grid::elementType == Dune::tetra) ? 4 : 8;
   for( int i=0; i<nVerts; ++i )
@@ -106,7 +106,7 @@ void checkGeom( HElemType* item )
     // perform geometry check
     checkGeometry( point );
     point.print( std::cout );
-  }*/
+  }
 }
 
 template <class Gitter> 
@@ -152,7 +152,7 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
   {
     if( !dgf.isCubeGrid() )
       mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, i+1 );
-    else if( dgf.isCubeGrid() )
+    else
     {
       mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, 2*i );
       mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 1, 2*i+1);
@@ -180,7 +180,7 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
     }
     else 
     {
-      typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
+     // typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
       int element[ 4 ];
       //element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex 
       //const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
@@ -220,7 +220,7 @@ int main (int argc, char ** argv, const char ** envp)
   std::ifstream input( filename );
   if( DGFParser::isDuneGridFormat( input ) )
   {
-    DGFParser dgf( Dune::cube, 2, 2 ); 
+    DGFParser dgf( Dune::simplex, 2, 2 ); 
     if( !dgf.readDuneGrid( input, 2, 2 ) )
     {
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
