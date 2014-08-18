@@ -39,7 +39,7 @@ namespace Dune
   template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
   class ALU3dGridFaceInfo
   {
-    typedef ALU3dImplTraits< actualDim, actualDimw, type, Comm >  ImplTraits;
+    typedef ALU3dImplTraits< type, Comm >  ImplTraits;
     //- private typedefs
     typedef typename ImplTraits::HasFaceType HasFaceType;
   public:

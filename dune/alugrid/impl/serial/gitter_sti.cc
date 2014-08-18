@@ -455,7 +455,7 @@ namespace ALUGrid
     {
       for (w->first (); ! w->done (); w->next ())
       {
-              element_t* item = ((element_t *) &w->item ());
+        element_t* item = ((element_t *) &w->item ());
         // store vertices 
         for (int i=0; i < elementVertices; ++i )
         {
@@ -482,7 +482,7 @@ namespace ALUGrid
       for (w->first (); ! w->done (); w->next ())
       {
         element_t* item = ((element_t *) &w->item ());
-              // vtuFile << item->getIndex() << " ";
+        // vtuFile << item->getIndex() << " ";
         bool ok = true;
         const int nFaces = item->nFaces();
         for (int k=0; k < nFaces; ++k )
@@ -520,7 +520,7 @@ namespace ALUGrid
       {
         for (wbnd->first (); ! wbnd->done (); wbnd->next ())
         {
-                bndseg* item = ((bndseg *) &wbnd->item ());
+          bndseg* item = ((bndseg *) &wbnd->item ());
           bool ok = true;
           ok &= item->myhface(0)->nb.front().first->isRealObject();
           ok &= item->myhface(0)->nb.rear().first->isRealObject();
@@ -585,21 +585,21 @@ namespace ALUGrid
       for (w->first (); ! w->done (); w->next ())
       {
         element_t* item = ((element_t *) &w->item ());
-              for (int i=0; i<elementVertices; ++i)
-              {
-                vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
-              }
+        for (int i=0; i<elementVertices; ++i)
+        {
+          vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
+        }
       }
 
       if (showbnd)
       {
         for (wbnd->first (); ! wbnd->done (); wbnd->next ())
         {
-                bndseg* item = ((bndseg *) &wbnd->item ());
-                for (int i=0; i<nFaceVertices; ++i)
-                {
-                  vtuFile << " " << vertexList[ item->myvertex(0,i)->getIndex() ].first;
-                }
+          bndseg* item = ((bndseg *) &wbnd->item ());
+          for (int i=0; i<nFaceVertices; ++i)
+          {
+            vtuFile << " " << vertexList[ item->myvertex(0,i)->getIndex() ].first;
+          }
         }
       }
 
@@ -607,11 +607,11 @@ namespace ALUGrid
       {
         for (wface->first (); ! wface->done (); wface->next ())
         {
-                myhface_t* item = ((myhface_t *) &wface->item ());
-                for (int i=0; i<nFaceVertices; ++i)
-                {
-                  vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
-                }
+          myhface_t* item = ((myhface_t *) &wface->item ());
+          for (int i=0; i<nFaceVertices; ++i)
+          {
+            vtuFile << " " << vertexList[ item->myvertex(i)->getIndex() ].first;
+          }
         }
       }
       vtuFile << std::endl;
@@ -623,15 +623,15 @@ namespace ALUGrid
 
       for( int i = 0; i < nCells; ++i )
       {
-              vtuFile << " " << (i+1)* elementVertices;
+        vtuFile << " " << (i+1)* elementVertices;
       }
       for( int i = 0; i < nBnd; ++i )
       {
-              vtuFile << " " << nCells* elementVertices + (i+1)* nFaceVertices;
+        vtuFile << " " << nCells* elementVertices + (i+1)* nFaceVertices;
       }
       for( int i = 0; i < nFaces; ++i )
       {
-              vtuFile << " " << nCells*elementVertices + nBnd*nFaceVertices + (i+1)*nFaceVertices;
+        vtuFile << " " << nCells*elementVertices + nBnd*nFaceVertices + (i+1)*nFaceVertices;
       }
       vtuFile << std::endl;
 
@@ -645,17 +645,17 @@ namespace ALUGrid
       const int elemId = ( elementVertices == 4 ) ? 10 : 12;
       for( int i = 0; i < nCells; ++i )
       {
-              vtuFile << " " << elemId; 
+        vtuFile << " " << elemId; 
       }
       // 5 for triangle, 9 for quadrilateral 
       const int faceId = ( nFaceVertices == 3 ) ? 5 : 9;
       for( int i = 0; i < nBnd; ++i )
       {
-              vtuFile << " " << faceId; 
+        vtuFile << " " << faceId; 
       }
       for( int i = 0; i < nFaces; ++i )
       {
-              vtuFile << " " << faceId; 
+        vtuFile << " " << faceId; 
       }
       vtuFile << std::endl;
 

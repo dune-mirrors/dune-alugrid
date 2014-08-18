@@ -410,7 +410,7 @@ inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() con
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
+inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTriangleBndType& bnd, int index) const 
 {
@@ -418,7 +418,7 @@ getFace(const GEOTriangleBndType& bnd, int index) const
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
+inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOQuadBndType& bnd, int index) const 
 {
@@ -426,7 +426,7 @@ getFace(const GEOQuadBndType& bnd, int index) const
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
+inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);
@@ -434,7 +434,7 @@ getFace(const GEOTetraElementType& elem, int index) const {
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
+inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOHexaElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);

@@ -25,12 +25,12 @@ protected:
 
   friend class ALU3dGridEntity<codim,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
+  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<codim>::ImplementationType ImplementationType;
   typedef typename ImplTraits::template Codim<codim>::InterfaceType      HElementType;
-  typedef typename ImplTraits::template Codim<codim>::EntitySeedType      KeyType ;
+  typedef typename ImplTraits::template Codim<codim>::EntitySeedType     KeyType ;
 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
   typedef typename ImplTraits::HBndSegType HBndSegType;
@@ -216,9 +216,9 @@ public ALU3dGridEntitySeedBase<cd,GridImp>
 
   friend class ALU3dGridEntity<cd,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
+  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
   typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
 
@@ -330,9 +330,9 @@ protected:
 
   friend class ALU3dGridEntity<cd,dim,GridImp>;
   friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
+  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
   typedef typename ImplTraits::template Codim<cd>::InterfaceType      HElementType;
 

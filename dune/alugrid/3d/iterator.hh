@@ -57,7 +57,7 @@ class ALU3dGridIntersectionIterator
     
   typedef typename GridImp::MPICommunicatorType Comm;
 
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
 
   typedef typename ImplTraits::HElementType  HElementType ;
   typedef typename ImplTraits::HBndSegType   HBndSegType; 
@@ -67,17 +67,17 @@ class ALU3dGridIntersectionIterator
   typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
-  typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, Comm >::GEOElementType GEOTetraElementType;
-  typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, Comm >::GEOElementType GEOHexaElementType;
-  typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, Comm >::BNDFaceType GEOTriangleBndType; 
-  typedef typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, Comm >::BNDFaceType GEOQuadBndType; 
+  typedef typename ALU3dImplTraits< tetra, Comm >::GEOElementType GEOTetraElementType;
+  typedef typename ALU3dImplTraits< tetra, Comm >::BNDFaceType    GEOTriangleBndType; 
+  typedef typename ALU3dImplTraits< hexa,  Comm >::GEOElementType GEOHexaElementType;
+  typedef typename ALU3dImplTraits< hexa,  Comm >::BNDFaceType    GEOQuadBndType; 
 
-  typedef ALU3dGridFaceInfo< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > FaceInfoType;
+  typedef ALU3dGridFaceInfo< dim, dimworld, GridImp::elementType, Comm > FaceInfoType;
 
   typedef typename conditional<
     tetra == GridImp::elementType,
-    ALU3dGridGeometricFaceInfoTetra< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm >,
-    ALU3dGridGeometricFaceInfoHexa< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm > >::type GeometryInfoType;
+    ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
+    ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
       
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
@@ -252,18 +252,18 @@ protected:
   void buildLocalGeometries() const;
   
   // get the face corresponding to the index
-  const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, Comm >::GEOFaceType *
+  const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
   getFace ( const GEOTriangleBndType &bnd, int index ) const;
 
   // get the face corresponding to the index
-  const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, Comm >::GEOFaceType *
+  const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType *
   getFace ( const GEOQuadBndType &bnd, int index ) const;
 
   // get the face corresponding to the index
-  const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, tetra, Comm >::GEOFaceType *
+  const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
   getFace ( const GEOTetraElementType &elem, int index ) const;
 
-  const typename ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, hexa, Comm >::GEOFaceType *
+  const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType *
   getFace ( const GEOHexaElementType &elem, int index ) const;
 
   //! structure containing the topological and geometrical information about
@@ -300,7 +300,7 @@ public ALU3dGridIntersectionIterator<GridImp>
     
   typedef typename GridImp::MPICommunicatorType Comm;
   
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
 
   typedef typename ImplTraits::HElementType  HElementType ;
   typedef typename ImplTraits::GEOElementType GEOElementType;
@@ -309,12 +309,12 @@ public ALU3dGridIntersectionIterator<GridImp>
   typedef typename ImplTraits::NeighbourPairType NeighbourPairType;
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
-  typedef ALU3dGridFaceInfo<GridImp::actualDimension, GridImp::actualDimensionWorld,  GridImp::elementType, Comm > FaceInfoType;
+  typedef ALU3dGridFaceInfo< dim, dimworld,  GridImp::elementType, Comm > FaceInfoType;
 
   typedef typename conditional<
     tetra == GridImp::elementType,
-    ALU3dGridGeometricFaceInfoTetra< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm >,
-    ALU3dGridGeometricFaceInfoHexa< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm > >::type GeometryInfoType;
+    ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
+    ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
       
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
@@ -519,7 +519,7 @@ class ALU3dGridLevelIterator
   friend class ALU3dGridEntity<2,dim,GridImp>;
   friend class ALU3dGridEntity<1,dim,GridImp>;
   friend class ALU3dGridEntity<0,dim,GridImp>;
-  friend class ALU3dGrid< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >;
+  friend class ALU3dGrid< dim, dimworld, GridImp::elementType, Comm >;
 
   friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< cd, pitype, Comm > >;
 
@@ -668,7 +668,7 @@ class ALU3dGridHierarchicIterator
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
-  typedef ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm > ImplTraits;
+  typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::HElementType HElementType;
   typedef typename ImplTraits::HBndSegType HBndSegType;
 
