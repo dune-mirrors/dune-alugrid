@@ -863,22 +863,12 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 1, Comm >::ElType ItemType;
-
-    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, Dune::tetra, Comm >::GEOElementType &el, int i )
-    {
-      return el.myhface3( i );
-    }
-   
-    static ItemType *getItemFromEl ( typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld,  Dune::hexa, Comm >::GEOElementType &el, int i )
-    {
-      return el.myhface4( i );
-    }
     
     static ItemType *getItem ( HElementType &el, int i )
     {
-      return getItemFromEl( static_cast< GEOElementType & >( el ), i );
+      return el.myhface( i );
     }
     
     static int numItems () 
@@ -896,7 +886,7 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 2, Comm >::ElType ItemType;
 
     static ItemType *getItem ( HElementType &el, int i )
@@ -919,7 +909,7 @@ namespace ALUGrid
     typedef typename GridImp::MPICommunicatorType Comm;
 
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
-    typedef typename Dune::ALU3dImplTraits<  GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
+    typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 3, Comm >::ElType ItemType;
 
     static ItemType *getItem ( HElementType &el, int i )
@@ -953,7 +943,7 @@ namespace ALUGrid
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
     struct SelectVector< actualDim, actualDimw, elType, 1 > 
     {
-      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw,  elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
 
       static const std::vector< int > &getNotOnItemVector ( int face )
       {
@@ -964,7 +954,7 @@ namespace ALUGrid
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
     struct SelectVector< actualDim, actualDimw, elType, 2 >
     {
-      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw, elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector( int face )
       {
         return GEOElementType::edgesNotOnFace( face );
@@ -974,7 +964,7 @@ namespace ALUGrid
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
     struct SelectVector< actualDim, actualDimw, elType, 3 > 
     {
-      typedef typename Dune::ALU3dImplTraits< actualDim, actualDimw, elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
+      typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector ( int face )
       {
         return GEOElementType::verticesNotOnFace( face );
@@ -1424,7 +1414,7 @@ namespace ALUGrid
       
       for( iter.first(); ! iter.done(); iter.next() )
       {
-        typedef typename Dune::ALU3dImplTraits< GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, Comm >::GEOElementType GEOElementType;
+        typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
         enum { numEdges = Dune::EntityCount< GridImp::elementType >::numEdges };
         
         GEOElementType *elem = 0;

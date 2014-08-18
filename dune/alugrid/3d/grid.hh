@@ -81,7 +81,7 @@ namespace Dune
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild> 
   class ALULocalGeometryStorage;
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   struct ALU3dGridCommHelper;
 
 
@@ -90,10 +90,10 @@ namespace Dune
   // -----------------------------
 
 #if ALU3DGRID_PARALLEL
-  template<int actualDim, int actualDimw,  ALU3dGridElementType elType, class Comm = ALUGridMPIComm >
+  template<int dim, int dimworld,  ALU3dGridElementType elType, class Comm = ALUGridMPIComm >
   class ALU3dGrid;
 #else // #if ALU3DGRID_PARALLEL
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm = ALUGridNoComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm = ALUGridNoComm >
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
@@ -143,15 +143,15 @@ namespace Dune
   };
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   struct ALU3dGridCommunications;
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< actualDim, actualDimw, elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase 
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase 
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridLocalIdSet< actualDim, actualDimw, elType, ALUGridNoComm > GlobalIdSet;
+    typedef ALU3dGridLocalIdSet< dim, dimworld, elType, ALUGridNoComm > GlobalIdSet;
     typedef int GlobalId;
 
     typedef ALU3DSPACE GitterDuneImpl GitterImplType;
@@ -200,12 +200,12 @@ namespace Dune
   };
 
 #if ALU3DGRID_PARALLEL
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< actualDim, actualDimw, elType, ALUGridMPIComm > : public ALU3dGridCommunicationsBase
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridMPIComm > : public ALU3dGridCommunicationsBase
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridGlobalIdSet< actualDim, actualDimw, elType, ALUGridMPIComm > GlobalIdSet;
+    typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
     typedef ALUGridId< ALUMacroKey > GlobalId;
 
     typedef ALU3DSPACE GitterDunePll GitterImplType;
@@ -365,7 +365,7 @@ namespace Dune
       typedef IdSet< Grid, GlobalIdSetImp, GlobalIdType > GlobalIdSet;
 
       //! Type of the communication class 
-      typedef typename ALU3dGridCommunications< actualDim, actualDimw, elType, Comm >::CollectiveCommunication CollectiveCommunication;
+      typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::CollectiveCommunication CollectiveCommunication;
     }; // struct Traits
 
     //! Type of the level index set implementation
@@ -405,24 +405,24 @@ namespace Dune
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
      @author Robert Kloefkorn 
   */
-  template< int actualDim, int actualDimw,  ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
   class ALU3dGrid
-  : public GridDefaultImplementation< 3, 3, alu3d_ctype, 
-                                      ALU3dGridFamily< actualDim, actualDimw, elType, Comm > >,
+  : public GridDefaultImplementation< dim, dimworld, alu3d_ctype, 
+                                      ALU3dGridFamily< dim, dimworld, elType, Comm > >,
     public HasObjectStream,
     public HasHierarchicIndexSet
   {
-    typedef ALU3dGrid< actualDim, actualDimw, elType, Comm > ThisType; 
-    typedef GridDefaultImplementation< 3, 3, alu3d_ctype, ALU3dGridFamily< actualDim, actualDimw, elType, Comm > > BaseType;
+    typedef ALU3dGrid< dim, dimworld, elType, Comm > ThisType; 
+    typedef GridDefaultImplementation< dim, dimworld, alu3d_ctype, ALU3dGridFamily< dim, dimworld, elType, Comm > > BaseType;
 
     // for compatibility: MyType := ThisType
     typedef ThisType MyType;
 
     // friend declarations
-    friend class ALU3dGridEntity< 0, 3, const ThisType>;
-    friend class ALU3dGridEntity< 1, 3, const ThisType>;
-    friend class ALU3dGridEntity< 2, 3, const ThisType>;
-    friend class ALU3dGridEntity< 3, 3, const ThisType>;
+    friend class ALU3dGridEntity< 0, dimworld, const ThisType>;
+    friend class ALU3dGridEntity< 1, dimworld, const ThisType>;
+    friend class ALU3dGridEntity< 2, dimworld, const ThisType>;
+    friend class ALU3dGridEntity< 3, dimworld, const ThisType>;
 
     friend class ALU3dGridIntersectionIterator< ThisType >;
 
@@ -439,9 +439,9 @@ namespace Dune
     friend class ALU3dGridIntersectionIterator< const ThisType >;
     friend class ALU3dGridHierarchicIterator< const ThisType >;
 
-    friend class ALU3dGridHierarchicIndexSet< actualDim, actualDimw, elType, Comm >;
-    friend class ALU3dGridGlobalIdSet< actualDim, actualDimw, elType, Comm >;
-    friend class ALU3dGridLocalIdSet< actualDim, actualDimw, elType, Comm >;
+    friend class ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm >;
+    friend class ALU3dGridGlobalIdSet< dim, dimworld, elType, Comm >;
+    friend class ALU3dGridLocalIdSet< dim, dimworld, elType, Comm >;
 
     friend class Conversion< ThisType, HasObjectStream >;
     friend class Conversion< const ThisType, HasObjectStream >;
@@ -449,7 +449,7 @@ namespace Dune
     friend class Conversion< ThisType, HasHierarchicIndexSet >;
     friend class Conversion< const ThisType, HasHierarchicIndexSet >;
 
-    friend struct ALU3dGridCommHelper< actualDim, actualDimw, elType, Comm >;
+    friend struct ALU3dGridCommHelper< dim, dimworld, elType, Comm >;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:    
@@ -472,17 +472,15 @@ namespace Dune
     enum { refineStepsForHalf = 1 };
     
     static const ALU3dGridElementType elementType = elType;
-    static const int actualDimension = actualDim;
-    static const int actualDimensionWorld = actualDimw;
     
     typedef typename ALU3DSPACE GatherScatterType::ObjectStreamType ObjectStreamType;
     typedef ObjectStreamType  InStreamType ;
     typedef ObjectStreamType  OutStreamType ;
 
-    typedef ALU3dGridFamily< actualDim, actualDimw, elType, Comm > GridFamily;
+    typedef ALU3dGridFamily< dim, dimworld, elType, Comm > GridFamily;
     typedef typename GridFamily::Traits Traits;
 
-    static const int dimension = BaseType::dimension;
+    static const int dimension =      BaseType::dimension;
     static const int dimensionworld = BaseType::dimensionworld;
 
   protected:
@@ -507,7 +505,7 @@ namespace Dune
     typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
 
     //! Type of the hierarchic index set
-    typedef ALU3dGridHierarchicIndexSet< actualDim, actualDimw, elType, Comm > HierarchicIndexSet;
+    typedef ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm > HierarchicIndexSet;
     
     //! Type of the level index set, needed by data handle 
     typedef typename GridFamily::LevelIndexSetImp LevelIndexSetImp; 
@@ -528,8 +526,8 @@ namespace Dune
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
 
-    typedef ALULeafCommunication< actualDim, actualDimw, elType, Comm > LeafCommunication;
-    typedef ALULevelCommunication< actualDim, actualDimw, elType, Comm > LevelCommunication;
+    typedef ALULeafCommunication< dim, dimworld, elType, Comm > LeafCommunication;
+    typedef ALULevelCommunication< dim, dimworld, elType, Comm > LevelCommunication;
 
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject; 
@@ -563,7 +561,7 @@ namespace Dune
     
     typedef ALU3dGridHierarchicIterator< const ThisType > HierarchicIteratorImp;
       
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::GitterImplType GitterImplType;
+    typedef typename ALU3dImplTraits< elType, Comm >::GitterImplType GitterImplType;
 
     //! max number of levels 
     enum { 
@@ -585,7 +583,7 @@ namespace Dune
   public:
     typedef Comm MPICommunicatorType;
 
-    typedef ALU3dGridCommunications< actualDim, actualDimw, elType, Comm > Communications;
+    typedef ALU3dGridCommunications< dim, dimworld, elType, Comm > Communications;
 
   protected:
     typedef ALU3dGridVertexList< Comm > VertexListType; 
@@ -1036,7 +1034,7 @@ namespace Dune
       return leafVertexList_;
     }
 
-    int getLevelOfLeafVertex ( const typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::VertexType &vertex ) const
+    int getLevelOfLeafVertex ( const typename ALU3dImplTraits< elType, Comm >::VertexType &vertex ) const
     {
       alugrid_assert ( leafVertexList_.up2Date() );
       return leafVertexList_.getLevel(vertex);
@@ -1239,26 +1237,26 @@ namespace Dune
   namespace Capabilities
   {
 
-    template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm, int cdim >
-    struct hasEntity< Dune::ALU3dGrid< actualDim, actualDimw, elType, Comm >, cdim >
+    template< int dim, int dimworld, ALU3dGridElementType elType, class Comm, int cdim >
+    struct hasEntity< Dune::ALU3dGrid< dim, dimworld, elType, Comm >, cdim >
     {
       static const bool v = true;
     };
     
-    template< int actualDim, int actualDimw,  ALU3dGridElementType elType, class Comm >
-    struct isParallel< ALU3dGrid< actualDim, actualDimw, elType, Comm > >
+    template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
+    struct isParallel< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
       static const bool v = true;
     };
 
-    template< int actualDim, int actualDimw,  ALU3dGridElementType elType, class Comm >
-    struct isLevelwiseConforming< ALU3dGrid< actualDim, actualDimw, elType, Comm > >
+    template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
+    struct isLevelwiseConforming< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
       static const bool v = true;
     };
   
-    template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-    struct hasBackupRestoreFacilities< ALU3dGrid< actualDim, actualDimw, elType, Comm > >
+    template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+    struct hasBackupRestoreFacilities< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
       static const bool v = true;
     };

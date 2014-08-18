@@ -24,7 +24,7 @@ namespace Dune
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
-  template< int actualDim, int actualDimw, ALU3dGridElementType, class >
+  template< int dim, int dimworld, ALU3dGridElementType, class >
   class ALU3dGrid;
   class BilinearSurfaceMapping;
   class TrilinearMapping;
@@ -667,8 +667,7 @@ namespace Dune
     typedef typename GridImp::MPICommunicatorType Comm;
 
     //friend class ALU3dGridIntersectionIterator<GridImp>;
-    typedef ALU3dImplTraits< GridImp::dimension, GridImp::dimensionworld, 
-                  elementType, Comm > ALU3dImplTraitsType ;
+    typedef ALU3dImplTraits< elementType, Comm > ALU3dImplTraitsType ;
 
   public:  
     typedef typename ALU3dImplTraitsType::IMPLElementType IMPLElementType;

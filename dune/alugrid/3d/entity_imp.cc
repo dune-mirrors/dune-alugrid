@@ -266,7 +266,7 @@ namespace Dune {
       case 0: 
         return this->getIndex();
       case 1: 
-        return (ALU3dGridFaceGetter< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm >::getFace( *item_, i ))->getIndex();
+        return (ALU3dGridFaceGetter< Comm >::getFace( *item_, i ))->getIndex();
       case 2: 
         return item_->myhedge1( ElemTopo::dune2aluEdge( i ) )->getIndex();
       case 3: 
@@ -292,7 +292,7 @@ namespace Dune {
     entity (const FactoryType& factory,
             const int level, 
             const EntityType & entity, 
-            const typename ALU3dImplTraits<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
             int i) 
     {
       return ALU3dGridEntityPointer<0, GridImp>( entity );
@@ -311,7 +311,7 @@ namespace Dune {
     entity (const FactoryType& factory,
             const int level, 
             const EntityType & en, 
-            const typename ALU3dImplTraits<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
             int duneFace)
     {
       int aluFace = Topo::dune2aluFace(duneFace);
@@ -319,7 +319,7 @@ namespace Dune {
         ALU3dGridEntityPointer<1,GridImp>
             (factory,
              level,
-             *(ALU3dGridFaceGetter< GridImp::actualDimension, GridImp::actualDimensionWorld, typename GridImp::MPICommunicatorType >::getFace(item, duneFace)), // getFace already constains dune2aluFace 
+             *(ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace(item, duneFace)), // getFace already constains dune2aluFace 
              item.twist(aluFace), 
              duneFace // we need the duneFace number here for the buildGeom method 
             );
@@ -341,7 +341,7 @@ namespace Dune {
     entity (const FactoryType& factory, 
             const int level, 
             const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
             int i)
     {
       // get reference element 
@@ -354,7 +354,7 @@ namespace Dune {
       int v = en.template getSubIndex<dim> (localNum);
      
       // get the hedge object 
-      const typename ALU3dImplTraits<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
+      const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
         edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
 
       int vx = edge.myvertex(0)->getIndex();
@@ -377,7 +377,7 @@ namespace Dune {
     entity (const FactoryType& factory, 
             const int level, 
             const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
             int i)
     {
       return ALU3dGridEntityPointer<3,GridImp> 
@@ -486,7 +486,7 @@ namespace Dune {
     alugrid_assert ( item_ );
     for(int i=0; i<numFaces; ++i) 
     {
-      const GEOFaceType &face = *ALU3dGridFaceGetter< GridImp::actualDimension, GridImp::actualDimensionWorld, Comm >::getFace( *item_, i );
+      const GEOFaceType &face = *ALU3dGridFaceGetter< Comm >::getFace( *item_, i );
      
       // don't count internal boundaries as boundary 
       if( face.isBorder() ) continue ;

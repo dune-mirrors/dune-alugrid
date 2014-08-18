@@ -8,6 +8,10 @@
 #include "alu3dinclude.hh" 
 #include "iterator.hh" 
 
+#ifndef alu_inline 
+#define alu_inline inline
+#endif
+
 namespace Dune {
 
 /*************************************************************************

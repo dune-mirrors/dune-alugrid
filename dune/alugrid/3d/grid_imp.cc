@@ -52,7 +52,7 @@ namespace Dune
     typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIteratorType;
     typedef typename ElementLevelIteratorType :: val_t val_t;
     
-    typedef ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, elType, Comm > ImplTraits;
+    typedef ALU3dImplTraits< elType, Comm > ImplTraits;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::VertexType VertexType;
 
@@ -122,7 +122,7 @@ namespace Dune
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, Dune::All_Partition, Comm > ElementIteratorType;
     typedef typename ElementIteratorType :: val_t val_t;
     
-    typedef ALU3dImplTraits< GridType::actualDimension, GridType::actualDimensionWorld, elType, Comm > ImplTraits;
+    typedef ALU3dImplTraits< elType, Comm > ImplTraits;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::VertexType VertexType; 
 
@@ -316,7 +316,7 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
     
     typedef typename IteratorType :: val_t val_t ; 
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::IMPLElementType IMPLElementType;  
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
     
     for (w.first () ; ! w.done () ; w.next ())
     {
@@ -483,7 +483,7 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
     
     typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::IMPLElementType IMPLElementType;  
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
     
     for (w.first () ; ! w.done () ; w.next ())
     {
@@ -631,7 +631,7 @@ namespace Dune
   alu_inline 
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::checkMacroGrid ()
   {
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, elType, Comm >::HElementType HElementType;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
     typedef ALU3DSPACE PureElementLeafIterator< HElementType > IteratorType;
     IteratorType w( this->myGrid()  ); 
     for (w->first () ; ! w->done () ; w->next ())

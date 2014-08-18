@@ -390,7 +390,7 @@ namespace Dune {
   {
   public:  
     typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, tetra, Comm >::HfaceRuleType RefinementRuleType;
+    typedef typename ALU3dImplTraits< tetra, Comm >::HfaceRuleType RefinementRuleType;
     
     NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
     : rule_( rule ), nChild_( nChild )
@@ -423,7 +423,7 @@ namespace Dune {
   {
   public:  
     typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
-    typedef typename ALU3dImplTraits< actualDim, actualDimw, hexa, Comm >::HfaceRuleType RefinementRuleType;
+    typedef typename ALU3dImplTraits< hexa, Comm >::HfaceRuleType RefinementRuleType;
 
     NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
     : rule_( rule ), nChild_( nChild )
