@@ -356,7 +356,7 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
     rotatedALUIndex[ i - k ] = FaceTopo::twist(localALUIndex, twist);
     //drop vertices for hexa with local index 1 or 2
-    if (elementType == hexa && mydim == 1 && (rotatedALUIndex[i - k] == 1 || rotatedALUIndex[i - k] == 2)){++k;}
+   // if (elementType == hexa && mydim == 1 && (rotatedALUIndex[i - k] == 1 || rotatedALUIndex[i - k] == 2)){++k;}
   }
 
   if( elementType == hexa )
@@ -372,8 +372,8 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     else if ( mydim == 1) //edge
     {
       //update geometry implementation
-      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
-                        face.myvertex(rotatedALUIndex[1])->Point() );
+      geoImpl().update( face.myvertex(0)->Point(),
+                        face.myvertex(3)->Point() );
     }
   }
   else if ( elementType == tetra )
