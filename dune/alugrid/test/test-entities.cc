@@ -13,9 +13,7 @@
 // include serial part of ALUGrid 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/alugrid_assert.hh>
-#include <dune/alugrid/3d/alu3dinclude.hh>
-#include <dune/alugrid/3d/geometry.hh>
-#include <dune/alugrid/3d/entity.hh>
+#include <dune/alugrid/3d/grid.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
 
@@ -38,17 +36,6 @@ typedef ALUGrid::Gitter::hedge_STI     HEdgeType;    // Interface Element
 typedef ALUGrid::Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
-
-// fake class for Geometry Implementation
-template <int dim, int dimworld, Dune::ALU3dGridElementType eltype >
-struct GridImp 
-{
-  static const Dune::ALU3dGridElementType elementType = eltype;
-  typedef Dune :: ALUGridNoComm     MPICommunicatorType ;
-  static const int dimension      = dim ;
-  static const int dimensionworld = dimworld ;
-  typedef Dune :: alu3d_ctype       ctype ;
-};
 
 template < class Grid > 
 void checkGeom( HElemType* item ) 
@@ -109,6 +96,27 @@ void checkGeom( HElemType* item )
   }
 }
 
+template < class Grid > 
+void checkEntity( HElemType* item ) 
+{
+  // call geometry check
+  checkGeom< Grid >( item );
+
+  typedef Dune :: ALU3dGridEntity< 0, Grid::dim, const Grid > EntityImpl;
+  typedef typename EntityImpl :: IMPLElementType  IMPLElementType ;
+  const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
+
+  EntityImpl entity ; 
+  entity.setElement( elem );
+
+  checkGeometry( entity.geometry() );
+
+  const int faces = entity.subEntities( 1 );
+  for( int i=0; i<faces; ++i ) 
+    checkGeometry( entity.template subEntity<1>( i )->geometry() ); 
+
+}
+
 template <class Gitter> 
 void checkGeometries( Gitter& grid ) 
 {
@@ -122,15 +130,26 @@ void checkGeometries( Gitter& grid )
     std::cout<< "ELEMENT: " << numberofelement << std::endl;   
     if( item->type() == ALUGrid::tetra )
     {
-      checkGeom< GridImp< 2, 2, Dune::tetra > >( item );
-      //checkGeom< GridImp< 2, 3, Dune::tetra > >( item );
-      checkGeom< GridImp< 3, 3, Dune::tetra > >( item );
+      {
+        typedef Dune::ALU3dGridFamily< 2, 2, Dune::tetra, Dune::ALUGridNoComm > Grid ;
+        checkEntity< Grid >( item );
+      }
+        //checkEntity< GridImp< 2, 3, Dune::tetra > >( item );
+      {
+        typedef Dune::ALU3dGridFamily< 3, 3, Dune::tetra, Dune::ALUGridNoComm > Grid ;
+        checkEntity< Grid >( item );
+      }
     }
     else 
     {
-      checkGeom< GridImp< 2, 2, Dune::hexa > >( item );
-      //checkGeom< GridImp< 2, 3, Dune::hexa > >( item );
-      checkGeom< GridImp< 3, 3, Dune::hexa > >( item );
+      {
+        typedef Dune::ALU3dGridFamily< 2, 2, Dune::hexa, Dune::ALUGridNoComm > Grid ;
+        checkEntity< Grid >( item );
+      }
+      {
+        typedef Dune::ALU3dGridFamily< 3, 3, Dune::hexa, Dune::ALUGridNoComm > Grid ;
+        checkEntity< Grid >( item );
+      }
     }
     ++numberofelement;
   }
@@ -160,7 +179,7 @@ int main (int argc, char ** argv, const char ** envp)
   std::ifstream input( filename );
   if( DGFParser::isDuneGridFormat( input ) )
   {
-    DGFParser dgf( Dune::cube, 2, 2 ); 
+    DGFParser dgf( Dune::simplex, 2, 2 ); 
     if( !dgf.readDuneGrid( input, 2, 2 ) )
     {
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
