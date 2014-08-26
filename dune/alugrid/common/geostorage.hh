@@ -36,7 +36,28 @@ namespace Dune
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE triangle >
     {
       template <class Storage> 
-      static void createGeometries(Storage& storage, 
+      static void createGeometries(Storage& storage,
+                                   const GeometryType& type,
+                                   const bool nonConform )
+      {
+        if( nonConform )
+        {
+          typedef ALUGrid< 2, dimworld, simplex, nonconforming, ALUGridNoComm > Grid;
+          storage.template createGeometries< Grid > (type);
+        }
+        else
+        {
+          typedef ALUGrid< 2, dimworld, simplex, conforming, ALUGridNoComm > Grid;
+          storage.template createGeometries< Grid > (type);
+        }
+      }
+    };
+
+    template <int dummy, int dimworld>
+    struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE tetra >
+    {
+      template <class Storage>
+      static void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
       {
@@ -53,11 +74,11 @@ namespace Dune
       }
     };
 
-    template <int dummy> 
+    template <int dummy>
     struct CreateGeometries<dummy, 3, 3, ALU3DSPACE tetra >
     {
-      template <class Storage> 
-      static void createGeometries(Storage& storage, 
+      template <class Storage>
+      static void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
       {
@@ -77,8 +98,24 @@ namespace Dune
       }
     };
 
-    template <int dummy, int dimworld> 
+    template <int dummy, int dimworld>
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE quadrilateral >
+    {
+      template <class Storage>
+      static void createGeometries(Storage& storage,
+                                   const GeometryType& type,
+                                   const bool nonConform )
+      {
+        alugrid_assert ( nonConform ) ;
+        {
+          typedef ALUGrid< 2, dimworld, cube, nonconforming, ALUGridNoComm > Grid;
+          storage.template createGeometries< Grid > (type);
+        }
+      }
+    };
+
+    template <int dummy, int dimworld> 
+    struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE hexa >
     {
       template <class Storage> 
       static void createGeometries(Storage& storage, 
@@ -93,11 +130,11 @@ namespace Dune
       }
     };
 
-    template <int dummy> 
+    template <int dummy>
     struct CreateGeometries<dummy, 3, 3, ALU3DSPACE hexa >
     {
-      template <class Storage> 
-      static void createGeometries(Storage& storage, 
+      template <class Storage>
+      static void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
       {

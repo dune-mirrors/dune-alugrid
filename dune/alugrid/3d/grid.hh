@@ -589,6 +589,7 @@ namespace Dune
     typedef ALU3dGridVertexList< Comm > VertexListType; 
     typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType; 
 
+  public:  
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile 
     ALU3dGrid ( const std::string &macroTriangFilename,
@@ -597,7 +598,6 @@ namespace Dune
                 const DuneBoundaryProjectionVector *bndVec,
                 const ALUGridRefinementType refinementType );
 
-  public:  
     //! \brief Desctructor 
     virtual ~ALU3dGrid();
 
