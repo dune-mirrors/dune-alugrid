@@ -1035,7 +1035,7 @@ namespace ALUGrid
         ++count;
       }
 
-      const int numItems = SelectVector<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType,codim>::getNotOnItemVector(0).size(); 
+      const int numItems = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::getNotOnItemVector(0).size(); 
       const int maxSize = numItems * count;
 
       ghList.getItemList().reserve(maxSize);
@@ -1046,7 +1046,7 @@ namespace ALUGrid
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
-        const std::vector<int> & notOnFace = SelectVector<GridImp::actualDimension, GridImp::actualDimensionWorld, GridImp::elementType,codim>::
+        const std::vector<int> & notOnFace = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::
                                           getNotOnItemVector(ghPair.second); 
         for(int i=0; i<numItems; ++i) 
         {
