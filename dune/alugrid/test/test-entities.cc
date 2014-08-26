@@ -13,6 +13,7 @@
 // include serial part of ALUGrid 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/alugrid_assert.hh>
+#include <dune/alugrid/common/objectfactory.hh>
 #include <dune/alugrid/3d/grid.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
@@ -100,13 +101,17 @@ template < class Grid >
 void checkEntity( HElemType* item ) 
 {
   // call geometry check
-  checkGeom< Grid >( item );
+  // checkGeom< Grid >( item );
 
-  typedef Dune :: ALU3dGridEntity< 0, Grid::dim, const Grid > EntityImpl;
+  typedef Dune :: ALU3dGridEntity< 0, Grid::dimension, const Grid > EntityImpl;
   typedef typename EntityImpl :: IMPLElementType  IMPLElementType ;
   const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
+  Dune::ALUGridNoComm comm;
 
-  EntityImpl entity ; 
+  std::string name;
+  Grid grid( name, Dune::ALUGridNoComm(), nullptr, nullptr, Dune::nonconforming );
+
+  EntityImpl entity( grid.factory(), item->level() ); 
   entity.setElement( elem );
 
   checkGeometry( entity.geometry() );
@@ -131,23 +136,22 @@ void checkGeometries( Gitter& grid )
     if( item->type() == ALUGrid::tetra )
     {
       {
-        typedef Dune::ALU3dGridFamily< 2, 2, Dune::tetra, Dune::ALUGridNoComm > Grid ;
+        typedef Dune::ALU3dGrid< 2, 2, Dune::tetra, Dune::ALUGridNoComm > Grid ;
         checkEntity< Grid >( item );
       }
-        //checkEntity< GridImp< 2, 3, Dune::tetra > >( item );
       {
-        typedef Dune::ALU3dGridFamily< 3, 3, Dune::tetra, Dune::ALUGridNoComm > Grid ;
+        typedef Dune::ALU3dGrid< 3, 3, Dune::tetra, Dune::ALUGridNoComm > Grid ;
         checkEntity< Grid >( item );
       }
     }
     else 
     {
       {
-        typedef Dune::ALU3dGridFamily< 2, 2, Dune::hexa, Dune::ALUGridNoComm > Grid ;
+        typedef Dune::ALU3dGrid< 2, 2, Dune::hexa, Dune::ALUGridNoComm > Grid ;
         checkEntity< Grid >( item );
       }
       {
-        typedef Dune::ALU3dGridFamily< 3, 3, Dune::hexa, Dune::ALUGridNoComm > Grid ;
+        typedef Dune::ALU3dGrid< 3, 3, Dune::hexa, Dune::ALUGridNoComm > Grid ;
         checkEntity< Grid >( item );
       }
     }
