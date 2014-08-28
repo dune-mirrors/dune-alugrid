@@ -160,7 +160,7 @@ int main (int argc, char ** argv, const char ** envp)
   std::ifstream input( filename );
   if( DGFParser::isDuneGridFormat( input ) )
   {
-    DGFParser dgf( Dune::cube, 2, 2 ); 
+    DGFParser dgf( Dune::simplex, 2, 2 ); 
     if( !dgf.readDuneGrid( input, 2, 2 ) )
     {
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
