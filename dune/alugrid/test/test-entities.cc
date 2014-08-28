@@ -119,6 +119,11 @@ void checkEntity( HElemType* item )
   const int faces = entity.subEntities( 1 );
   for( int i=0; i<faces; ++i ) 
     checkGeometry( entity.template subEntity<1>( i )->geometry() ); 
+    
+  const int vertices = entity.subEntities( 2 );
+  for( int i=0; i<vertices; ++i ) 
+    checkGeometry( entity.template subEntity<2>( i )->geometry() ); 
+  
 
 }
 
