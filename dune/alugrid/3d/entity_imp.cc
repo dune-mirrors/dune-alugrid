@@ -217,7 +217,7 @@ namespace Dune {
     static int subIndex(const IMPLElemType &elem, int i)
     {
       // is specialised for each element type and uses 
-      // the dune2aluFace mapping 
+      // the dune2aluFace mapping and also is specialised for dim 2
       return (getFace(elem,i))->getIndex();
     }
   };
@@ -231,8 +231,27 @@ namespace Dune {
     // return subIndex of given edge 
     static int subIndex(const IMPLElemType &elem, int i)
     {
-      // get hedge1 corresponding to dune reference element and return number 
-      return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+      if(GridImp::dimension == 3)
+      {
+        // get hedge1 corresponding to dune reference element and return number 
+        return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+      }
+      else
+      {
+        if (type == hexa)
+        {
+          //fortunately the edges and vertices indices coincide
+          // get hedge1 corresponding to dune reference element and return number 
+          return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+        }
+        else if (type == tetra)
+        {
+          // We want edges 0,1,3
+          if (i == 2) i=3;
+          // get hedge1 corresponding to dune reference element and return number 
+          return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+        }
+      }
     }
   };
 
@@ -268,7 +287,27 @@ namespace Dune {
       case 1: 
         return (ALU3dGridFaceGetter< Comm >::getFace( *item_, i ))->getIndex();
       case 2: 
-        return item_->myhedge1( ElemTopo::dune2aluEdge( i ) )->getIndex();
+          if(GridImp::dimension == 3)
+          {
+            // get hedge1 corresponding to dune reference element and return number 
+            return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+          }
+          else
+          {
+            if (type == hexa)
+            {
+              //fortunately the edges and vertices indices coincide
+              // get hedge1 corresponding to dune reference element and return number 
+              return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+            }
+            else if (type == tetra)
+            {
+              // We want edges 0,1,3
+              if (i == 2) i=3;
+              // get hedge1 corresponding to dune reference element and return number 
+              return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+            }
+          }
       case 3: 
         return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
       default :
