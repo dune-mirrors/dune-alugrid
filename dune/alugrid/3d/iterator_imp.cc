@@ -430,8 +430,6 @@ inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorT
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);
-  //if Griddim is two, throw out first face (in dune numbering)
-  if (GridImp::dimension == 2) index+=1;
   return elem.myhface3(ElementTopo::dune2aluFace(index));
 }
 
@@ -440,8 +438,6 @@ inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorTy
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOHexaElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);
-  //if griddim is 2, throw out first two faces (in DUNE numbering)
-  if(GridImp::dimension == 2) index += 2;
   return elem.myhface4(ElementTopo::dune2aluFace(index));
 }
 
