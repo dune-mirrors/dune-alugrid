@@ -195,12 +195,12 @@ namespace Dune {
 
   //********* begin method subIndex ********************
   // partial specialisation of subIndex 
-  template <class IMPLElemType, ALU3dGridElementType type, int codim> 
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, int codim> 
   struct IndexWrapper {};
 
   // specialisation for vertices
-  template <class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<IMPLElemType, type, 3>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
+  struct IndexWrapper<dim, IMPLElemType, type, 3>
   {
     typedef ElementTopologyMapping<type> ElemTopo;
 
@@ -211,8 +211,8 @@ namespace Dune {
   };
 
   // specialisation for faces
-  template <class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<IMPLElemType, type , 1>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
+  struct IndexWrapper<dim, IMPLElemType, type , 1>
   {
     static int subIndex(const IMPLElemType &elem, int i)
     {
@@ -223,20 +223,20 @@ namespace Dune {
   };
 
   // specialisation for edges 
-  template <class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<IMPLElemType, type, 2>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
+  struct IndexWrapper<dim, IMPLElemType, type, 2>
   {
     typedef ElementTopologyMapping<type> ElemTopo;
     
     // return subIndex of given edge 
     static int subIndex(const IMPLElemType &elem, int i)
     {
-      if(GridImp::dimension == 3)
+      if(dim == 3)
       {
         // get hedge1 corresponding to dune reference element and return number 
         return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
       }
-      else
+      else if (dim == 2)
       {
         if (type == hexa)
         {
@@ -256,8 +256,8 @@ namespace Dune {
   };
 
   // specialisation for elements
-  template <class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<IMPLElemType, type, 0>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
+  struct IndexWrapper<dim, IMPLElemType, type, 0>
   {
     static int subIndex(const IMPLElemType &elem, int i) {
       // just return the elements index 
@@ -271,7 +271,7 @@ namespace Dune {
   {
     alugrid_assert (item_ != 0);
     typedef typename  ImplTraits::IMPLElementType IMPLElType;
-    return IndexWrapper<IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
+    return IndexWrapper<GridImp::dimension, IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
   }
 
   template<int dim, class GridImp>
@@ -290,23 +290,17 @@ namespace Dune {
           if(GridImp::dimension == 3)
           {
             // get hedge1 corresponding to dune reference element and return number 
-            return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+            return item_->myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
           }
           else
           {
-            if (type == hexa)
+            if (GridImp:: elementType == tetra)
             {
-              //fortunately the edges and vertices indices coincide
-              // get hedge1 corresponding to dune reference element and return number 
-              return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
-            }
-            else if (type == tetra)
-            {
-              // We want edges 0,1,3
+              // We want edges 0,1,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
               if (i == 2) i=3;
-              // get hedge1 corresponding to dune reference element and return number 
-              return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
             }
+            // get hedge1 corresponding to dune reference element and return number 
+            return item_->myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
           }
       case 3: 
         return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
