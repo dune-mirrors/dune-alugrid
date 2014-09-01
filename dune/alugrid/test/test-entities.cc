@@ -97,6 +97,19 @@ void checkGeom( HElemType* item )
   }
 }
 
+template < class GeometryType >
+void printGeometry(const GeometryType geo)
+{
+  std::cout << "{\n";
+  for(int i=0; i<geo.corners(); ++i)
+  {
+    std::cout << " corner " << i << " ";
+    std::cout << "{" << geo.corner(i) << "}"; 
+    std::cout << std::endl;
+  }
+  std::cout << "} \n";
+}
+
 template < class Grid > 
 void checkEntity( HElemType* item ) 
 {
@@ -115,15 +128,23 @@ void checkEntity( HElemType* item )
   entity.setElement( elem );
 
   checkGeometry( entity.geometry() );
+  printGeometry( entity.geometry() );
 
   const int faces = entity.subEntities( 1 );
   for( int i=0; i<faces; ++i ) 
-    checkGeometry( entity.template subEntity<1>( i )->geometry() ); 
+    {
+      std::cout << "Face: " << i << std::endl;
+      checkGeometry( entity.template subEntity<1>( i )->geometry() ); 
+      printGeometry( entity.template subEntity<1>( i )->geometry() );
+    }
     
   const int vertices = entity.subEntities( 2 );
   for( int i=0; i<vertices; ++i ) 
-    checkGeometry( entity.template subEntity<2>( i )->geometry() ); 
-  
+    {
+      std::cout << "Vertex: " << i << std::endl;
+      checkGeometry( entity.template subEntity<2>( i )->geometry() ); 
+      printGeometry( entity.template subEntity<2>( i )->geometry() ); 
+    }
 
 }
 
