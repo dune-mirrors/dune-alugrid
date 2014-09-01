@@ -217,7 +217,7 @@ namespace Dune {
     static int subIndex(const IMPLElemType &elem, int i)
     {
       // is specialised for each element type and uses 
-      // the dune2aluFace mapping and also is specialised for dim 2
+      // the dune2aluFace mapping and also specialised for dim 2
       return (getFace(elem,i))->getIndex();
     }
   };
@@ -383,24 +383,41 @@ namespace Dune {
             const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
             int i)
     {
-      // get reference element 
-      const ReferenceElementType & refElem = factory.grid().referenceElement();
+      if(GridImp :: dimension == 3)
+      {
+        // get reference element 
+        const ReferenceElementType & refElem = factory.grid().referenceElement();
 
-      // get first local vertex number of edge i 
-      int localNum = refElem.subEntity(i,2,0,dim);
-      
-      // get number of first vertex on edge  
-      int v = en.template getSubIndex<dim> (localNum);
-     
-      // get the hedge object 
-      const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
-        edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
+        // get first local vertex number of edge i 
+        int localNum = refElem.subEntity(i,2,0,dim);
+        
+        // get number of first vertex on edge  
+        int v = en.template getSubIndex<dim> (localNum);
+       
+        // get the hedge object 
+        const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
+          edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
 
-      int vx = edge.myvertex(0)->getIndex();
+        int vx = edge.myvertex(0)->getIndex();
 
-      // check whether vertex numbers are equal, otherwise twist is 1 
-      int twst = (v != vx) ? 1 : 0;
-      return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, twst );
+        // check whether vertex numbers are equal, otherwise twist is 1 
+        int twst = (v != vx) ? 1 : 0;
+        return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, twst );
+      }
+      else if(GridImp::dimension == 2)
+      {
+        if (GridImp::elementType == tetra)
+        {
+          // we want edges 0,1,3 (in DUNE numbering) for tetra and 0,1,2,3 for hexa
+          if (i == 2) i+=1;
+        }
+        // get the hedge object 
+        const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
+          edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
+          
+         //twist is zero, as it is only a vertex 
+        return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, 0 );
+      }   
     }
   };
 
