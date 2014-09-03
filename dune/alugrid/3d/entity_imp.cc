@@ -195,12 +195,12 @@ namespace Dune {
 
   //********* begin method subIndex ********************
   // partial specialisation of subIndex 
-  template <int dim, class IMPLElemType, ALU3dGridElementType type, int codim> 
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, class Comm, int codim> 
   struct IndexWrapper {};
 
   // specialisation for vertices
-  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<dim, IMPLElemType, type, 3>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, class Comm> 
+  struct IndexWrapper<dim, IMPLElemType, type, Comm, 3>
   {
     typedef ElementTopologyMapping<type> ElemTopo;
 
@@ -211,20 +211,20 @@ namespace Dune {
   };
 
   // specialisation for faces
-  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<dim, IMPLElemType, type , 1>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, class Comm> 
+  struct IndexWrapper<dim, IMPLElemType, type , Comm, 1>
   {
     static int subIndex(const IMPLElemType &elem, int i)
     {
       // is specialised for each element type and uses 
       // the dune2aluFace mapping and also specialised for dim 2
-      return (getFace(elem,i))->getIndex();
+      return (ALU3dGridFaceGetter< Comm >::getFace(elem,i))->getIndex();
     }
   };
 
   // specialisation for edges 
-  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<dim, IMPLElemType, type, 2>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, class Comm> 
+  struct IndexWrapper<dim, IMPLElemType, type, Comm, 2>
   {
     typedef ElementTopologyMapping<type> ElemTopo;
     
@@ -256,8 +256,8 @@ namespace Dune {
   };
 
   // specialisation for elements
-  template <int dim, class IMPLElemType, ALU3dGridElementType type> 
-  struct IndexWrapper<dim, IMPLElemType, type, 0>
+  template <int dim, class IMPLElemType, ALU3dGridElementType type, class Comm> 
+  struct IndexWrapper<dim, IMPLElemType, type, Comm, 0>
   {
     static int subIndex(const IMPLElemType &elem, int i) {
       // just return the elements index 
@@ -271,7 +271,7 @@ namespace Dune {
   {
     alugrid_assert (item_ != 0);
     typedef typename  ImplTraits::IMPLElementType IMPLElType;
-    return IndexWrapper<GridImp::dimension, IMPLElType,GridImp::elementType,cc>::subIndex ( *item_, i);
+    return IndexWrapper<GridImp::dimension, IMPLElType,GridImp::elementType, typename GridImp::MPICommunicatorType, cc>::subIndex ( *item_, i);
   }
 
   template<int dim, class GridImp>
