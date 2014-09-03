@@ -28,9 +28,9 @@ protected:
   friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<codim>::ImplementationType ImplementationType;
-  typedef typename ImplTraits::template Codim<codim>::InterfaceType      HElementType;
-  typedef typename ImplTraits::template Codim<codim>::EntitySeedType     KeyType ;
+  typedef typename ImplTraits::template Codim<dim, codim>::ImplementationType ImplementationType;
+  typedef typename ImplTraits::template Codim<dim, codim>::InterfaceType      HElementType;
+  typedef typename ImplTraits::template Codim<dim, codim>::EntitySeedType     KeyType ;
 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
   typedef typename ImplTraits::HBndSegType HBndSegType;
@@ -219,8 +219,8 @@ public ALU3dGridEntitySeedBase<cd,GridImp>
   friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
-  typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
+  typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ImplementationType;
+  typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType HElementType;
 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
   typedef ALU3dGridEntity<cd,dim,GridImp> ALU3dGridEntityType;
@@ -333,8 +333,8 @@ protected:
   friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<cd>::ImplementationType ImplementationType;
-  typedef typename ImplTraits::template Codim<cd>::InterfaceType      HElementType;
+  typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ImplementationType;
+  typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType      HElementType;
 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
   typedef typename ImplTraits::HBndSegType HBndSegType;

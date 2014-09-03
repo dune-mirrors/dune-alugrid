@@ -85,8 +85,8 @@ public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<cd>::InterfaceType      HItemType;
-  typedef typename ImplTraits::template Codim<cd>::ImplementationType ItemType;
+  typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType      HItemType;
+  typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ItemType;
   typedef typename ImplTraits::VertexType   VertexType; 
   typedef typename ImplTraits::HBndSegType  HBndSegType; 
 
@@ -207,7 +207,7 @@ public:
   typedef typename GridImp::MPICommunicatorType Comm;
 
   typedef ALU3dImplTraits< elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<0>::InterfaceType     HElementType;
+  typedef typename ImplTraits::template Codim<dim, 0>::InterfaceType     HElementType;
 
   typedef typename ImplTraits::GEOElementType  GEOElementType;
   typedef typename ImplTraits::BNDFaceType  BNDFaceType;
@@ -501,7 +501,7 @@ class ALU3dGridEntityPointerBase
   friend class ALU3dGrid < GridImp::dimension, GridImp::dimensionworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<codim>::InterfaceType HElementType;
+  typedef typename ImplTraits::template Codim<dim, codim>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType  HBndSegType; 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
@@ -626,7 +626,7 @@ protected:
   friend class ALU3dGrid < GridImp::dimension, GridImp::dimensionworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
+  typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType HBndSegType; 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
@@ -720,7 +720,7 @@ protected:
   friend class ALU3dGrid < GridImp::dimension, GridImp::dimensionworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
-  typedef typename ImplTraits::template Codim<cd>::InterfaceType HElementType;
+  typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType HElementType;
 
   typedef typename ImplTraits::HBndSegType HBndSegType; 
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
