@@ -238,19 +238,13 @@ namespace Dune {
       }
       else if (dim == 2)
       {
-        if (type == hexa)
+        if (type == tetra)
         {
-          //fortunately the edges and vertices indices coincide
-          // get hedge1 corresponding to dune reference element and return number 
-          return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+              // We want edges 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
+           i+=1;
         }
-        else if (type == tetra)
-        {
-          // We want edges 0,1,3
-          if (i == 2) i=3;
-          // get hedge1 corresponding to dune reference element and return number 
-          return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
-        }
+        // get vertex corresponding to dune reference element and return number 
+        return elem.myvertex( ElemTopo::dune2aluVertex(i) )->getIndex();
       }
     }
   };
@@ -292,15 +286,15 @@ namespace Dune {
             // get hedge1 corresponding to dune reference element and return number 
             return item_->myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
           }
-          else
+          else if (GridImp::dimension == 2)
           {
             if (GridImp:: elementType == tetra)
             {
-              // We want edges 0,1,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
-              if (i == 2) i=3;
+              // We want edges 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
+               i+=1;
             }
             // get hedge1 corresponding to dune reference element and return number 
-            return item_->myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+            return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
           }
       case 3: 
         return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
@@ -360,33 +354,31 @@ namespace Dune {
   };
 
   // specialisation for edges  
-  template <class GridImp, int dim>
-  struct SubEntities<GridImp,dim,2>
+  template <class GridImp>
+  struct SubEntities<GridImp,3,2>
   {
     typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
-    typedef ALU3dGridEntity<0,dim,GridImp> EntityType; 
+    typedef ALU3dGridEntity<0,3,GridImp> EntityType; 
     typedef typename GridImp::ctype coordType;
 
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;
     
-    static typename ALU3dGridEntity<0,dim,GridImp> :: template Codim<2>:: EntityPointer
+    static typename ALU3dGridEntity<0,3,GridImp> :: template Codim<2>:: EntityPointer
     entity (const FactoryType& factory, 
             const int level, 
             const EntityType & en,
             const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
             int i)
     {
-      if(GridImp :: dimension == 3)
-      {
         // get reference element 
         const ReferenceElementType & refElem = factory.grid().referenceElement();
 
         // get first local vertex number of edge i 
-        int localNum = refElem.subEntity(i,2,0,dim);
+        int localNum = refElem.subEntity(i,2,0,3);
         
         // get number of first vertex on edge  
-        int v = en.template getSubIndex<dim> (localNum);
+        int v = en.template getSubIndex<3> (localNum);
        
         // get the hedge object 
         const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
@@ -397,21 +389,34 @@ namespace Dune {
         // check whether vertex numbers are equal, otherwise twist is 1 
         int twst = (v != vx) ? 1 : 0;
         return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, twst );
-      }
-      else if(GridImp::dimension == 2)
-      {
+      
+    }
+  };
+  
+   // specialisation for vertices  
+  template <class GridImp>
+  struct SubEntities<GridImp,2,2>
+  {
+    typedef typename GridImp::GridObjectFactoryType FactoryType;
+    typedef ElementTopologyMapping<GridImp::elementType> Topo;
+    typedef ALU3dGridEntity<0,2,GridImp> EntityType; 
+    typedef typename GridImp::ctype coordType;
+
+    typedef typename GridImp :: ReferenceElementType ReferenceElementType;
+    
+    static typename ALU3dGridEntity<0,2,GridImp> :: template Codim<2>:: EntityPointer
+    entity (const FactoryType& factory, 
+            const int level, 
+            const EntityType & en,
+            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item, 
+            int i)
+    {      
         if (GridImp::elementType == tetra)
         {
-          // we want edges 0,1,3 (in DUNE numbering) for tetra and 0,1,2,3 for hexa
-          if (i == 2) i+=1;
+          // we want vertices 1,2,3 (in DUNE numbering) for tetra and 0,1,2,3 for hexa
+           i+=1;
         }
-        // get the hedge object 
-        const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType &
-          edge = *(item.myhedge1(Topo::dune2aluEdge(i)));
-          
-         //twist is zero, as it is only a vertex 
-        return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, 0 );
-      }   
+        return ALU3dGridEntityPointer<2,GridImp> (factory, level, *item.myvertex(Topo::dune2aluVertex(i)) );   
     }
   };
 
