@@ -136,6 +136,12 @@ namespace ALUGrid
 
   inline int intialize () ;
 
+  void tralbl( ) 
+  {
+    isset = 0;
+    dgbfn = 0;
+  }
+
 } // namespace ALUGrid
 
 #endif // #ifndef MYALLOC_H_INCLUDED
