@@ -240,7 +240,7 @@ namespace Dune {
       {
         if (type == tetra)
         {
-              // We want edges 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
+              // We want vertices 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
            i+=1;
         }
         // get vertex corresponding to dune reference element and return number 
@@ -290,10 +290,10 @@ namespace Dune {
           {
             if (GridImp:: elementType == tetra)
             {
-              // We want edges 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
+              // We want vertices 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
                i+=1;
             }
-            // get hedge1 corresponding to dune reference element and return number 
+            // get myvertex corresponding to dune reference element and return number 
             return item_->myvertex( ElemTopo::dune2aluVertex( i ) )->getIndex();
           }
       case 3: 
