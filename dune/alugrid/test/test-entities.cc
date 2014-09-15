@@ -123,13 +123,15 @@ void checkEntity( HElemType* item )
 
   std::string name;
   Grid grid( name, Dune::ALUGridNoComm(), nullptr, nullptr, Dune::nonconforming );
+  
+  const int dim = Grid::dimension;
 
   EntityImpl entity( grid.factory(), item->level() ); 
   entity.setElement( elem );
 
   checkGeometry( entity.geometry() );
- // printGeometry( entity.geometry() );
-/*
+  printGeometry( entity.geometry() );
+
   const int faces = entity.subEntities( 1 );
   for( int i=0; i<faces; ++i ) 
     {
@@ -139,18 +141,17 @@ void checkEntity( HElemType* item )
       std::cout << "face index: " << entity.template getSubIndex<1>( i ) << std::endl;
       //std::cout << "face index: " << entity.subIndex( i, 1) << std::endl; 
     }
-   */
-    
-  const int vertices = entity.subEntities( 2 );
-  for( int i=0; i<vertices; ++i ) 
+
+
+  const int realVertices = entity.subEntities( dim );
+    for( int i=0; i<realVertices; ++i ) 
     {
       std::cout << "SubVertex: " << i << std::endl;
-      checkGeometry( entity.template subEntity<2>( i )->geometry() ); 
-      printGeometry( entity.template subEntity<2>( i )->geometry() ); 
-      std::cout << "vertex index: " << entity.template getSubIndex<2>( i ) << std::endl;
+      checkGeometry( entity.template subEntity<dim>( i )->geometry() ); 
+      printGeometry( entity.template subEntity<dim>( i )->geometry() ); 
+      std::cout << "vertex index: " << entity.template getSubIndex<dim>( i ) << std::endl;
       //std::cout << "vertex index: " << entity.subIndex( i, 2) << std::endl; 
     }
-   
 }
 
 template <class Gitter> 
