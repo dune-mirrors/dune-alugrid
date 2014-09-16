@@ -661,6 +661,11 @@ namespace Dune
       for( int i = 0; i < dimworld; ++i )
         pos[ i ] = dgf_.vtx[ n ][ i ];
       factory_.insertVertex( pos );  
+      if(eltype == cube)
+       {
+        pos[ 2 ] += 1.;
+        factory_.insertVertex( pos );  
+       }
     }
 
     GeometryType elementType( (eltype == simplex) ? 
@@ -678,6 +683,15 @@ namespace Dune
           dgf_.elements[n][j+1]=dgf_.elements[n][j]; 
         }
         dgf_.elements[n][0]=0;
+      }
+      else if (eltype == cube)
+      {
+        dgf_.elements[n].resize(8,0);
+        for(int k=0; k< 4; ++k)
+        {
+          dgf_.elements[n][k] *=2;
+          dgf_.elements[n][k+4] = dgf_.elements[n][k]+1;
+        }
       }
 
       factory_.insertElement( elementType, dgf_.elements[n] );
