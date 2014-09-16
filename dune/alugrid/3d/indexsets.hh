@@ -668,7 +668,7 @@ namespace Dune {
 
     template <int cd> 
     IdType createId(const typename ImplTraitsType::
-        template Codim<cd>::InterfaceType & item , const IdType & creatorId , int nChild )
+        template Codim<dim, cd>::InterfaceType & item , const IdType & creatorId , int nChild )
     {
       alugrid_assert ( creatorId.isValid() );
        
