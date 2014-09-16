@@ -33,8 +33,8 @@ namespace Dune
 
     static const ALU3dGridElementType elementType = Grid::elementType;
 
-    static const unsigned int dimension = Grid::dimension == 2 ?  3 : Grid::dimension;
-    static const unsigned int dimensionworld =  Grid::dimension == 2 ? 3 : Grid::dimensionworld;
+    static const unsigned int dimension = Grid::dimension;
+    static const unsigned int dimensionworld = Grid::dimensionworld;
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
