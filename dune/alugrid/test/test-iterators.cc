@@ -103,12 +103,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   std::cout << std::endl << std::endl;
 }
 
-template <class GridType> 
-void checkALUParallel(GridType & grid, int gref, int mxl = 3) 
-{
-
-}
-
 
 int main (int argc , char **argv) {
   

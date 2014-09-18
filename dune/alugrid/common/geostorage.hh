@@ -197,7 +197,7 @@ namespace Dune
     template < class Grid >
     void createGeometries(const GeometryType& type) 
     {
-    /*
+    
       static bool firstCall = true ;
       if( firstCall ) 
       {
@@ -272,7 +272,7 @@ namespace Dune
         // delete grid 
         delete gridPtr;
       }
-      */
+      
     }
 
     // create local geometry
