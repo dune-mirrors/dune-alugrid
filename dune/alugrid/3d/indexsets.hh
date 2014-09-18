@@ -788,10 +788,12 @@ namespace Dune {
     // build ids for all children of this edge 
     void buildEdgeIds(const HEdgeType & edge, const IdType & fatherId , int inneredge)
     {
+    /*
       enum { codim = 2 };
       ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge); 
       const IdType & edgeId = ids_[codim][edge.getIndex()];
       buildInteriorEdgeIds(edge,edgeId);
+    */    
     }
     
     void buildInteriorEdgeIds(const HEdgeType & edge, const IdType & edgeId)

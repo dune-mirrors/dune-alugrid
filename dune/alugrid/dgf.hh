@@ -618,11 +618,11 @@ namespace Dune
                        const std::string &filename )
   {
   
-    const int dimgrid = 3;
-    const int dimworld = 3 ; 
+    const int dimgrid = G::dimension;
+    const int dimworld = G::dimensionworld ; 
     dgf_.element = (eltype == simplex) ? 
         DuneGridFormatParser::Simplex : DuneGridFormatParser::Cube ;
-    dgf_.dimgrid = dimgrid-1;
+    dgf_.dimgrid = dimgrid;
     dgf_.dimw = dimworld;
 
     const bool isDGF = dgf_.isDuneGridFormat( file );

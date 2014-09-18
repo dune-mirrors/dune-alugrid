@@ -39,7 +39,7 @@ namespace Dune
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
     //! \brief type of boundary projection class 
-    typedef DuneBoundaryProjection< 3 >  DuneBoundaryProjectionType;
+    typedef DuneBoundaryProjection< dimension >  DuneBoundaryProjectionType;
 
     template< int codim >
     struct Codim
