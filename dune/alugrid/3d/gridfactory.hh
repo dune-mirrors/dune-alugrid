@@ -33,8 +33,8 @@ namespace Dune
 
     static const ALU3dGridElementType elementType = Grid::elementType;
 
-    static const unsigned int dimension = 3;
-    static const unsigned int dimensionworld = 3;
+    static const unsigned int dimension = Grid::dimension;
+    static const unsigned int dimensionworld = Grid::dimensionworld;
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
@@ -127,13 +127,6 @@ namespace Dune
      *  \param[in]  pos  position of the vertex
      */
     virtual void insertVertex ( const VertexType &pos );
-    
-    
-    // to fulfill the Gridfactoryinterface for 2dcase
-    virtual void insertVertex ( const FieldVector <ctype, 2> &pos )
-    {
-      DUNE_THROW(GridError, "This method should not be called");
-    }
 
     /** \brief insert a vertex into the coarse grid including the vertex's globally unique id  
      *  
@@ -245,11 +238,6 @@ namespace Dune
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
-    {
-      return Grid::getRealImplementation( entity ).getIndex();
-    }
-    virtual unsigned int
-    insertionIndex ( const typename Codim< 2 >::Entity &entity ) const
     {
       return Grid::getRealImplementation( entity ).getIndex();
     }

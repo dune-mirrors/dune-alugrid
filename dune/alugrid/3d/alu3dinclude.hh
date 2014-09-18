@@ -215,16 +215,6 @@ namespace Dune
     typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
-  
-  template< ALU3dGridElementType elType, class Comm >
-  struct ALU3dCodimImplTraits< elType, Comm, 2, 3 >
-  {
-    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
-
-    typedef typename GitterType::vertex_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::VertexGeo ImplementationType;
-  };
 
   template< ALU3dGridElementType elType, class Comm >
   struct ALU3dCodimImplTraits< elType, Comm, 3, 3 >

@@ -647,25 +647,12 @@ namespace Dune
       DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
 
-   //insert additional (3d)-vertices - 
-   //a single one for all triangles
-   // one for each quadrilateral vertex
-    if(eltype == simplex){
-      FieldVector<double, dimworld> pos(1.);
-      factory_.insertVertex( pos );
-    }
-
     for( int n = 0; n < dgf_.nofvtx; ++n )
     { 
       FieldVector< double, dimworld > pos;
       for( int i = 0; i < dimworld; ++i )
         pos[ i ] = dgf_.vtx[ n ][ i ];
       factory_.insertVertex( pos );  
-      if(eltype == cube)
-       {
-        pos[ 2 ] += 1.;
-        factory_.insertVertex( pos );  
-       }
     }
 
     GeometryType elementType( (eltype == simplex) ? 
@@ -675,24 +662,7 @@ namespace Dune
     const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
     for( int n = 0; n < dgf_.nofelements; ++n )
     {
-      if(eltype == simplex){
-        dgf_.elements[n].resize(4,0);
-        for(int j=2; j>-1; --j)
-        {
-          dgf_.elements[n][j]+=1;
-          dgf_.elements[n][j+1]=dgf_.elements[n][j]; 
-        }
-        dgf_.elements[n][0]=0;
-      }
-      else if (eltype == cube)
-      {
-        dgf_.elements[n].resize(8,0);
-        for(int k=0; k< 4; ++k)
-        {
-          dgf_.elements[n][k] *=2;
-          dgf_.elements[n][k+4] = dgf_.elements[n][k]+1;
-        }
-      }
+      
 
       factory_.insertElement( elementType, dgf_.elements[n] );
       for( int face = 0; face <nFaces; ++face )
