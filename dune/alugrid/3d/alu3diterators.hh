@@ -868,7 +868,7 @@ namespace ALUGrid
     
     static ItemType *getItem ( HElementType &el, int i )
     {
-      return el.myhface( i );
+      return static_cast< GEOElementType & >( el ).myhface( i );
     }
     
     static int numItems () 

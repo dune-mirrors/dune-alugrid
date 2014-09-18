@@ -643,7 +643,7 @@ namespace Dune
 
   //  factory_.setTolerance( parameter.tolerance() );
 
-    if( !dgf_.readDuneGrid( file, dimgrid-1, dimworld ) )
+    if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
       DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
 
