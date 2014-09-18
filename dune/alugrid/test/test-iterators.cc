@@ -2,8 +2,6 @@
 
 #include <config.h>
 
-// #define NO_2D
- #define NO_3D
 
 #include <iostream>
 #include <sstream>
@@ -18,11 +16,11 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include <dune/grid/test/gridcheck.cc>
+//#include <dune/grid/test/gridcheck.cc>
 
-#include <dune/grid/test/checkgeometryinfather.cc>
-#include <dune/grid/test/checkintersectionit.cc>
-#include <dune/grid/test/checkcommunicate.cc>
+//#include <dune/grid/test/checkgeometryinfather.cc>
+//#include <dune/grid/test/checkintersectionit.cc>
+//#include <dune/grid/test/checkcommunicate.cc>
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
@@ -154,7 +152,7 @@ int main (int argc , char **argv) {
 
     // extra-environment to check destruction
     {
-      factorEpsilon = 5.e+5;
+
       // check empty grid
 
      
