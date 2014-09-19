@@ -185,6 +185,7 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
+        std::cout << "got here!" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
 
         //CircleBoundaryProjection<2> bndPrj;
