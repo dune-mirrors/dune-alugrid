@@ -59,12 +59,14 @@ namespace Dune
                        const std::vector< VertexId > &vertices )
   {
     assertGeometryType( geometry );
-    if( geometry.dim() != dimension )
-      DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
+    
+      if( geometry.dim() != dimension )
+        DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
                              "into a 3-dimensional ALUGrid." );
-    if( vertices.size() != numCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
-
+    if(dimension == 3){
+      if( vertices.size() != numCorners )
+        DUNE_THROW( GridError, "Wrong number of vertices." );
+    }
     elements_.push_back( vertices );
   }
 
@@ -403,11 +405,52 @@ namespace Dune
 
       // now start inserting grid 
       const int vxSize = vertices_.size(); 
+
+      //for tetra and 2d insert now additional vertex (with global id = 0)
+      if(dimension == 2 && elementType == tetra )
+      {
+        if(dimensionworld == 3)
+        {
+          const VertexType &vertex = {0., 0., 1.};
+          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], 0 );
+        }
+        else if (dimensionworld == 2)
+        {
+          const VertexType &vertex = {0., 0.};
+          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., 0 );
+        }
+      }
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
-        // insert vertex 
         const VertexType &vertex = position( vxIdx );
-        mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
+        if(dimension == 3)
+        {
+          // insert vertex 
+          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
+        }
+        else if (dimension ==2 && elementType == tetra)
+        {
+          if(dimensionworld == 3)
+            // insert vertex with id +1 
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx )+1 );
+          else if (dimensionworld == 2 )
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx )+1 );
+        }
+        else if (dimension == 2 && elementType == hexa)
+        {
+          if(dimensionworld == 3)
+          {
+            // insert vertex with even id and fake vertex with odd id
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ],    2*globalId( vxIdx ) );
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ]+1., 2*globalId( vxIdx )+1 );
+          }
+          else if(dimensionworld == 2)
+          {
+            // insert vertex with even id and fake vertex with odd id
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., 2*globalId( vxIdx ) );
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., 2*globalId( vxIdx )+1 );         
+          }
+        }
       }
 
       const size_t elemSize = elements_.size();
@@ -417,20 +460,44 @@ namespace Dune
         if( elementType == hexa )
         {
           int element[ 8 ];
-          for( unsigned int i = 0; i < 8; ++i )
+          if(dimension == 3)
           {
-            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            for( unsigned int i = 0; i < 8; ++i )
+            {
+              const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+              element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            }
           }
+          else if (dimension == 2)
+          {
+            element[ 0 ] = 2* globalId( elements_[ elemIndex ][ 0 ]);
+            element[ 1 ] = 2* globalId( elements_[ elemIndex ][ 1 ]);
+            element[ 2 ] = 2* globalId( elements_[ elemIndex ][ 3 ]);
+            element[ 3 ] = 2* globalId( elements_[ elemIndex ][ 2 ]);
+            element[ 4 ] = 2* globalId( elements_[ elemIndex ][ 0 ])+1;
+            element[ 5 ] = 2* globalId( elements_[ elemIndex ][ 1 ])+1;
+            element[ 6 ] = 2* globalId( elements_[ elemIndex ][ 3 ])+1;
+            element[ 7 ] = 2* globalId( elements_[ elemIndex ][ 2 ])+1;
+          }        
           mgb.InsertUniqueHexa( element );
         }
         else if( elementType == tetra )
         {
           int element[ 4 ];
-          for( unsigned int i = 0; i < 4; ++i )
+          if(dimension == 3)
           {
-            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            for( unsigned int i = 0; i < 4; ++i )
+            {
+              const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+              element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            }
+          }
+          else if (dimension == 2)
+          {
+             element[ 0 ] = 0;
+             element[ 1 ] = globalId( elements_[ elemIndex ][ 0 ])+1;
+             element[ 3 ] = globalId( elements_[ elemIndex ][ 1 ])+1;
+             element[ 2 ] = globalId( elements_[ elemIndex ][ 2 ])+1;
           }
           mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
@@ -465,6 +532,7 @@ namespace Dune
         else 
           DUNE_THROW( GridError, "Invalid element type");
       }
+
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
@@ -541,45 +609,48 @@ namespace Dune
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
-    const typename ElementVector::iterator elementEnd = elements_.end();
-    for( typename ElementVector::iterator elementIt = elements_.begin();
-         elementIt != elementEnd; ++elementIt )
+    if(dimension == 3)
     {
-      ElementType &element = *elementIt;
-
-      const VertexType &p0 = position( element[ 0 ] );
-      VertexType p1, p2, p3;
-
-      if( elementType == tetra )
+      const typename ElementVector::iterator elementEnd = elements_.end();
+      for( typename ElementVector::iterator elementIt = elements_.begin();
+           elementIt != elementEnd; ++elementIt )
       {
-        p1 = position( element[ 1 ] );
-        p2 = position( element[ 2 ] );
-        p3 = position( element[ 3 ] );
-      }
-      else
-      {
-        p1 = position( element[ 1 ] );
-        p2 = position( element[ 2 ] );
-        p3 = position( element[ 4 ] );
-      }
-      p1 -= p0; p2 -= p0; p3 -= p0;
+        ElementType &element = *elementIt;
 
-      VertexType n;
-      n[ 0 ] = p1[ 1 ] * p2[ 2 ] - p2[ 1 ] * p1[ 2 ];
-      n[ 1 ] = p1[ 2 ] * p2[ 0 ] - p2[ 2 ] * p1[ 0 ];
-      n[ 2 ] = p1[ 0 ] * p2[ 1 ] - p2[ 0 ] * p1[ 1 ];
+        const VertexType &p0 = position( element[ 0 ] );
+        VertexType p1, p2, p3;
 
-      if( n * p3 > 0 )
-        continue;
+        if( elementType == tetra )
+        {
+          p1 = position( element[ 1 ] );
+          p2 = position( element[ 2 ] );
+          p3 = position( element[ 3 ] );
+        }
+        else
+        {
+          p1 = position( element[ 1 ] );
+          p2 = position( element[ 2 ] );
+          p3 = position( element[ 4 ] );
+        }
+        p1 -= p0; p2 -= p0; p3 -= p0;
 
-      if( elementType == hexa )
-      {
-        for( int i = 0; i < 4; ++i )
-          std::swap( element[ i ], element[ i+4 ] );
-      }
-      else
-        std::swap( element[ 2 ], element[ 3 ] );
-    } // end of loop over all elements
+        VertexType n;
+        n[ 0 ] = p1[ 1 ] * p2[ 2 ] - p2[ 1 ] * p1[ 2 ];
+        n[ 1 ] = p1[ 2 ] * p2[ 0 ] - p2[ 2 ] * p1[ 0 ];
+        n[ 2 ] = p1[ 0 ] * p2[ 1 ] - p2[ 0 ] * p1[ 1 ];
+
+        if( n * p3 > 0 )
+          continue;
+
+        if( elementType == hexa )
+        {
+          for( int i = 0; i < 4; ++i )
+            std::swap( element[ i ], element[ i+4 ] );
+        }
+        else
+          std::swap( element[ 2 ], element[ 3 ] );
+      } // end of loop over all elements
+    } // end if dimension == 3
   }
 
 
