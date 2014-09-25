@@ -244,7 +244,19 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).getIndex();
+      if(dimension == 3)
+        return Grid::getRealImplementation( entity ).getIndex();
+      else if(dimension == 2)
+      {
+        if(elementType == hexa)
+        {
+          return Grid::getRealImplementation( entity ).getIndex()/2;
+        }
+        else if(elementType == tetra)
+        {
+          return Grid::getRealImplementation( entity ).getIndex() - 1;
+        }
+      }
     }
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
