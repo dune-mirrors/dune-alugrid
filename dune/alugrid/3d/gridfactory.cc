@@ -106,9 +106,9 @@ namespace Dune
      std::vector< VertexId > element (vertices);
       if( elementType == hexa)
       {
-        element.resize(8,0.);
         std::transform(element.begin(), element.end(), element.begin(),
                std::bind1st(std::multiplies<VertexId>(),2));
+        element.resize(8,0);
         for (unsigned int i = 0; i < 4; ++i)
         {
           element[i+4] = element[i]+1;
@@ -117,9 +117,9 @@ namespace Dune
       else if ( elementType == tetra )
       {
         element.resize(4,0);
-        element[3] = element[2];
-        element[2] = element[1];
-        element[1] = element[0];
+        element[3] = element[1]+1;
+        element[2] = element[2]+1;
+        element[1] = element[0]+1;
         element[0] = 0;                
       }
       elements_.push_back(element);
