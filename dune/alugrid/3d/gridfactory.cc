@@ -38,9 +38,24 @@ namespace Dune
   {
     if( ! allowGridGeneration_ )
       DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
+      
 
+    //add additional vertex to list for 2d tetra
+    if(dimension == 2 && elementType == tetra && vertices_.size() == 0)
+      vertices_.push_back( std::make_pair(VertexType(1.), 0 ) );
+    
+    //add original vertex
     vertices_.push_back( std::make_pair( pos, vertices_.size() ) );
- }
+    
+    //add additional vertex each time a 2d hexa vertex is added
+    if(dimension == 2 && elementType == hexa)
+    {
+      VertexType pos1 (pos);
+      if(dimensionworld == 3) pos1[2]+=1.;
+  
+      vertices_.push_back( std::make_pair( pos1, vertices_.size() ) );     
+    }
+}
 
 
   template< class ALUGrid >
@@ -48,7 +63,25 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const VertexId globalId )
   {
     foundGlobalIndex_ = true ;
-    vertices_.push_back( std::make_pair( pos, globalId ) );
+    if(dimension == 3)
+      vertices_.push_back( std::make_pair( pos, globalId ) );
+    else if (dimension == 2)
+    {
+      if (elementType == tetra)
+      { 
+        if(vertices_.size() == 0)
+          vertices_.push_back( std::make_pair(VertexType(1.), 0 ) );
+        vertices_.push_back( std::make_pair( pos, globalId +1 ) );       
+      }
+      else if(elementType == hexa)
+      {
+            vertices_.push_back( std::make_pair( pos, 2*globalId ) );
+            VertexType pos1 (pos);
+            if(dimensionworld == 3) 
+              pos1[2]+=1.;      
+            vertices_.push_back( std::make_pair( pos1, 2*globalId+1 ) );     
+      }
+    }
   }
 
   
@@ -66,8 +99,31 @@ namespace Dune
     if(dimension == 3){
       if( vertices.size() != numCorners )
         DUNE_THROW( GridError, "Wrong number of vertices." );
+      elements_.push_back( vertices );\
     }
-    elements_.push_back( vertices );
+    else if (dimension == 2)
+    {
+     std::vector< VertexId > element (vertices);
+      if( elementType == hexa)
+      {
+        element.resize(8,0.);
+        std::transform(element.begin(), element.end(), element.begin(),
+               std::bind1st(std::multiplies<VertexId>(),2));
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+          element[i+4] = element[i]+1;
+        }
+      }
+      else if ( elementType == tetra )
+      {
+        element.resize(4,0);
+        element[3] = element[2];
+        element[2] = element[1];
+        element[1] = element[0];
+        element[0] = 0;                
+      }
+      elements_.push_back(element);
+    }
   }
 
 
@@ -406,50 +462,27 @@ namespace Dune
       // now start inserting grid 
       const int vxSize = vertices_.size(); 
 
-      //for tetra and 2d insert now additional vertex (with global id = 0)
-      if(dimension == 2 && elementType == tetra )
-      {
-        if(dimensionworld == 3)
-        {
-          const VertexType &vertex = {0., 0., 1.};
-          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], 0 );
-        }
-        else if (dimensionworld == 2)
-        {
-          const VertexType &vertex = {0., 0.};
-          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., 0 );
-        }
-      }
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
         const VertexType &vertex = position( vxIdx );
-        if(dimension == 3)
+        if(dimensionworld == 3)
         {
           // insert vertex 
           mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
         }
-        else if (dimension ==2 && elementType == tetra)
+        else if (dimensionworld == 2 && elementType == hexa)
         {
-          if(dimensionworld == 3)
-            // insert vertex with id +1 
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx )+1 );
-          else if (dimensionworld == 2 )
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx )+1 );
+          if(globalId (vxIdx) % 2 == 0 )
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );         
+          else
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );                    
         }
-        else if (dimension == 2 && elementType == hexa)
+        else if (dimensionworld == 2 && elementType ==tetra)
         {
-          if(dimensionworld == 3)
-          {
-            // insert vertex with even id and fake vertex with odd id
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ],    2*globalId( vxIdx ) );
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ]+1., 2*globalId( vxIdx )+1 );
-          }
-          else if(dimensionworld == 2)
-          {
-            // insert vertex with even id and fake vertex with odd id
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., 2*globalId( vxIdx ) );
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., 2*globalId( vxIdx )+1 );         
-          }
+          if(globalId(vxIdx) == 0)
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );                    
+          else 
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );                               
         }
       }
 
@@ -460,44 +493,20 @@ namespace Dune
         if( elementType == hexa )
         {
           int element[ 8 ];
-          if(dimension == 3)
+          for( unsigned int i = 0; i < 8; ++i )
           {
-            for( unsigned int i = 0; i < 8; ++i )
-            {
-              const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-              element[ j ] = globalId( elements_[ elemIndex ][ i ] );
-            }
-          }
-          else if (dimension == 2)
-          {
-            element[ 0 ] = 2* globalId( elements_[ elemIndex ][ 0 ]);
-            element[ 1 ] = 2* globalId( elements_[ elemIndex ][ 1 ]);
-            element[ 2 ] = 2* globalId( elements_[ elemIndex ][ 3 ]);
-            element[ 3 ] = 2* globalId( elements_[ elemIndex ][ 2 ]);
-            element[ 4 ] = 2* globalId( elements_[ elemIndex ][ 0 ])+1;
-            element[ 5 ] = 2* globalId( elements_[ elemIndex ][ 1 ])+1;
-            element[ 6 ] = 2* globalId( elements_[ elemIndex ][ 3 ])+1;
-            element[ 7 ] = 2* globalId( elements_[ elemIndex ][ 2 ])+1;
-          }        
+            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+          }       
           mgb.InsertUniqueHexa( element );
         }
         else if( elementType == tetra )
         {
           int element[ 4 ];
-          if(dimension == 3)
+          for( unsigned int i = 0; i < 4; ++i )
           {
-            for( unsigned int i = 0; i < 4; ++i )
-            {
-              const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-              element[ j ] = globalId( elements_[ elemIndex ][ i ] );
-            }
-          }
-          else if (dimension == 2)
-          {
-             element[ 0 ] = 0;
-             element[ 1 ] = globalId( elements_[ elemIndex ][ 0 ])+1;
-             element[ 3 ] = globalId( elements_[ elemIndex ][ 1 ])+1;
-             element[ 2 ] = globalId( elements_[ elemIndex ][ 2 ])+1;
+            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
+            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
           mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
@@ -593,6 +602,7 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
+    ElementType temp (element);
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     const int falu = ElementTopologyMappingType :: generic2aluFace( f );
     for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -878,6 +888,7 @@ namespace Dune
     const FaceIterator faceEnd = faceMap.end();
     for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
       reinsertBoundary( faceMap, faceIt, defaultId );
+
   }
 
 #if COMPILE_ALUGRID_LIB
