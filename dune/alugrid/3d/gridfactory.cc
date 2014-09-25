@@ -55,7 +55,7 @@ namespace Dune
   
       vertices_.push_back( std::make_pair( pos1, vertices_.size() ) );     
     }
-}
+  } 
 
 
   template< class ALUGrid >
@@ -144,10 +144,37 @@ namespace Dune
       DUNE_THROW( GridError, "Wrong number of vertices." );
 
     BndPair boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    if(dimension == 3)
+    { 
+      for( unsigned int i = 0; i < numFaceCorners; ++i )
+      {
+        const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+        boundaryId.first[ j ] = vertices[ i ];
+      }
+    }
+    else if(dimension == 2)
     {
-      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-      boundaryId.first[ j ] = vertices[ i ];
+      std::vector<VertexId> face(vertices);
+      if(elementType == tetra)
+      {
+        face.resize(3,0);
+        face[2] = face[1]+1;
+        face[1] = face[0]+1;
+        face[0] = 0;
+      }
+      else if(elementType == hexa)
+      {
+        face.resize(4,0);
+        face[0] *=2;
+        face[1] *=2;
+        face[3] = face[1];
+        face[1] = face[0]+1;
+        face[2] = face[3]+1;       
+      }
+      for (unsigned int i = 0; i < face.size(); ++i)
+      {
+        boundaryId.first[ i ] = face[ i ];       
+      }
     }
 
     boundaryId.second = id;
@@ -164,7 +191,10 @@ namespace Dune
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
     BndPair boundaryId;
-    generateFace( elements_[ element ], face, boundaryId.first );
+    if (dimension == 2 && elementType == tetra) 
+      generateFace( elements_[ element ], face+1, boundaryId.first );
+    else
+      generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.insert( boundaryId );
   }
