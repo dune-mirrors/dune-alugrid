@@ -1,4 +1,4 @@
-serialdir = dune/alugrid/impl/serial
+serialdir = $(includedir)/dune/alugrid/impl/serial
 serial_HEADERS = gatherscatter.hh ghost_elements.h ghost_info.h \
 		 gitter_hexa_top.h gitter_impl.h gitter_mgb.h gitter_sti.h \
 		 gitter_tetra_top.h iterator_sti.h key.h lock.h mapp_cube_3d.h \
