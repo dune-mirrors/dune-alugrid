@@ -31,7 +31,18 @@
 #define USE_PARALLEL_TEST 1
 #endif
 
-
+template < class GeometryType >
+void printGeometry(const GeometryType geo)
+{
+  std::cout << "{\n";
+  for(int i=0; i<geo.corners(); ++i)
+  {
+    std::cout << " corner " << i << " ";
+    std::cout << "{" << geo.corner(i) << "}"; 
+    std::cout << std::endl;
+  }
+  std::cout << "} \n";
+}
 
 
 
@@ -45,12 +56,17 @@ void checkIteratorCodim(GridType & grid)
   typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
   typedef typename GridType:: ctype ctype;
 
+  std::cout << "CODIM: " << codim << std::endl << std::endl;
+  int cnt = 0;
   /** Loop only over the interior elements, not over ghost elements. */
   const IteratorInteriorBorder endIterator = grid.template leafend< codim, Dune::InteriorBorder_Partition >();
   for( IteratorInteriorBorder iter = grid.template leafbegin< codim, Dune::InteriorBorder_Partition >(); iter != endIterator; ++iter )
   {
     /** Provide geometry type of element. */
     const Geometry& geo = iter->geometry();
+    std::cout << "Number: " << cnt << std::endl;
+    
+    printGeometry(geo);
     if( geo.corners() > 1 ) 
     {
       Dune::FieldVector<ctype, GridType::dimension> 
@@ -61,7 +77,10 @@ void checkIteratorCodim(GridType & grid)
         assert ( diff.two_norm() > 1e-8 );
       }
     }
+    cnt++;
   }
+  
+  std::cout << std::endl << std::endl;
 }
 
 template <class GridType>
@@ -153,6 +172,7 @@ int main (int argc , char **argv) {
     // extra-environment to check destruction
     {
 
+
       // check empty grid
 
      
@@ -163,7 +183,7 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr(filename);
-                std::cout << "Begin Cube test" << std::endl;
+        std::cout << "Begin Cube test" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -186,7 +206,7 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
-                std::cout << "begin simplex test" << std::endl;
+        std::cout << "begin simplex test nonconforming" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -208,7 +228,7 @@ int main (int argc , char **argv) {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
-
+        std::cout << "begin simplex test conforming" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
         
         //CircleBoundaryProjection<2> bndPrj;

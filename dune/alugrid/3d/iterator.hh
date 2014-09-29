@@ -477,7 +477,7 @@ protected:
     else
       it.updateGhostPointer( *item.second );
   }
-
+ 
   // increment iterator 
   template <class GridImp, class IteratorImp>
   void incrementIterator(const GridImp & grid, IteratorImp & it, int level) 
@@ -485,16 +485,67 @@ protected:
     // if iter_ is zero, then end iterator 
     InternalIteratorType & iter = it.internalIterator();
 
-    iter.next();
-
-    if(iter.done())
-    {
-      it.removeIter();
-      return ;
-    }
-
-    setItem(grid,it,iter,level);
+    do{
+      iter.next();
+    
+    
+      if(iter.done())
+      {
+        it.removeIter();
+        return ;
+      }
+          
+    }while(!validItem(grid,it,iter));
+    
+    setItem(grid,it,iter,level);    
     return ;
+  }
+  
+private:
+  
+  // in 2d check if item is valid 
+  template <class GridImp, class IteratorImp>
+  bool validItem (const GridImp & grid, IteratorImp & it, InternalIteratorType & iter)
+  {
+    if(GridImp::dimension == 3) return true;
+    else if (GridImp::dimension == 2)
+    {
+      enum { codim = IteratorImp :: codimension };
+      if(codim == 0) return true;
+      else 
+      {
+        typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, codim>::ImplementationType Interface;
+        val_t & item = iter.item();
+        alugrid_assert ( item.first || item.second ); 
+        if( item.first )
+         const Interface & elem = static_cast<const Interface &> (item.first); 
+        else if( item.second )
+         const Interface & elem = static_cast<const Interface &> (item.second->getGhost().first); 
+        if(GridImp::elementType == tetra)
+        {
+          if(codim == 1) //face of tetra - valid if first corner has index zero
+          {
+            return (elem.myvertex(0)->getIndex() == 0);
+          }
+          else if(codim == 2) //vertex of tetra - valid if not index zero
+          {
+            return (elem.myvertex(0)->getIndex() != 0);
+          }
+        }
+        else if (GridImp::elementType == hexa)
+        {
+          if(codim == 1)//face of hexa - valid if sum of first two vertex indices is odd
+          {
+            return ((elem.myvertex(0)->getIndex() + elem.myvertex(1)->getIndex()) % 2);
+          }
+          else if(codim == 2) //vertex of hexa - valid if even
+          {
+            return !(elem.myvertex(0)->getIndex() % 2);
+          }
+        }
+      }
+    }
+    return false;
   }
 };
 
@@ -508,7 +559,7 @@ protected:
 template<int cd, PartitionIteratorType pitype, class GridImp>
 class ALU3dGridLevelIterator
 : public ALU3dGridEntityPointer< cd, GridImp >,
-  public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? cd+1 : cd, pitype, typename GridImp::MPICommunicatorType > >
+  public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, typename GridImp::MPICommunicatorType > >
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
@@ -521,7 +572,7 @@ class ALU3dGridLevelIterator
   friend class ALU3dGridEntity<0,dim,GridImp>;
   friend class ALU3dGrid< dim, dimworld, GridImp::elementType, Comm >;
 
-  friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? cd+1 : cd, pitype, Comm > >;
+  friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > >;
 
 public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
@@ -532,9 +583,9 @@ public:
   //! typedef of my type 
   typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ThisType;
   // the wrapper for the original iterator of the ALU3dGrid  
-  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? cd+1 : cd, pitype, Comm > IteratorType; 
+  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > IteratorType; 
   typedef IteratorType InternalIteratorType; 
-  typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? cd+1 : cd, Comm >::val_t val_t;
+  typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, Comm >::val_t val_t;
  
   //! Constructor for begin iterator 
   ALU3dGridLevelIterator(const FactoryType& factory, int level, bool);
