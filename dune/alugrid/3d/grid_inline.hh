@@ -41,7 +41,7 @@ namespace Dune
     , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
-    , nonConformingGeoInFatherStorage_( makeGeometries() )
+    //, nonConformingGeoInFatherStorage_( makeGeometries() )
   {
     // check macro grid file for keyword 
     checkMacroGridFile( macroTriangFilename );
@@ -59,6 +59,7 @@ namespace Dune
   } // end constructor
 
 
+  /*
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   const typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::GeometryInFatherStorage& 
   ALU3dGrid< actualDim, actualDimw, elType, Comm >::makeGeometries()
@@ -88,6 +89,7 @@ namespace Dune
     // true == non-conforming 
     return GeometryInFatherStorage :: storage( geomTypes_[ 0 ][ 0 ], true );
   }
+  */
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
