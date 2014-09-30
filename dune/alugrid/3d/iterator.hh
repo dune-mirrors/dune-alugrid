@@ -451,6 +451,16 @@ protected:
   {
     InternalIteratorType & iter = it.internalIterator();
     iter.first(); 
+    ValidItem<IteratorImp::codimension, GridImp> validate;
+    while(!validate(grid,iter))
+    {
+      iter.next();      
+      if(iter.done())
+      {
+        it.removeIter();
+        return ;
+      }
+    }
     if( ! iter.done() )
     {
       alugrid_assert ( iter.size() > 0 );
@@ -484,7 +494,7 @@ protected:
   {
     // if iter_ is zero, then end iterator 
     InternalIteratorType & iter = it.internalIterator();
-
+    ValidItem<IteratorImp::codimension, GridImp> validate;
     do{
       iter.next();
     
@@ -495,7 +505,7 @@ protected:
         return ;
       }
           
-    }while(!validItem(grid,it,iter));
+    }while(!(validate(grid,iter) ) );
     
     setItem(grid,it,iter,level);    
     return ;
@@ -504,49 +514,77 @@ protected:
 private:
   
   // in 2d check if item is valid 
-  template <class GridImp, class IteratorImp>
-  bool validItem (const GridImp & grid, IteratorImp & it, InternalIteratorType & iter)
+  template <int codim, class GridImp>
+  struct ValidItem 
   {
-    if(GridImp::dimension == 3) return true;
-    else if (GridImp::dimension == 2)
+    bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
-      enum { codim = IteratorImp :: codimension };
-      if(codim == 0) return true;
-      else 
-      {
-        typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, codim>::ImplementationType Interface;
-        val_t & item = iter.item();
-        alugrid_assert ( item.first || item.second ); 
-        if( item.first )
-         const Interface & elem = static_cast<const Interface &> (item.first); 
-        else if( item.second )
-         const Interface & elem = static_cast<const Interface &> (item.second->getGhost().first); 
-        if(GridImp::elementType == tetra)
-        {
-          if(codim == 1) //face of tetra - valid if first corner has index zero
-          {
-            return (elem.myvertex(0)->getIndex() == 0);
-          }
-          else if(codim == 2) //vertex of tetra - valid if not index zero
-          {
-            return (elem.myvertex(0)->getIndex() != 0);
-          }
-        }
-        else if (GridImp::elementType == hexa)
-        {
-          if(codim == 1)//face of hexa - valid if sum of first two vertex indices is odd
-          {
-            return ((elem.myvertex(0)->getIndex() + elem.myvertex(1)->getIndex()) % 2);
-          }
-          else if(codim == 2) //vertex of hexa - valid if even
-          {
-            return !(elem.myvertex(0)->getIndex() % 2);
-          }
-        }
-      }
+      return true;
     }
-    return false;
-  }
+  };
+
+  template <class GridImp>
+  struct ValidItem<1, GridImp> 
+  {
+    bool operator()(const GridImp & grid, InternalIteratorType & iter)
+    {
+      if(GridImp::dimension ==3 ) return true;
+      else if (GridImp::dimension == 2)
+      {
+          typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 1>::ImplementationType GEOElementType;
+          val_t & item = iter.item();
+          alugrid_assert ( item.first || item.second ); 
+          GEOElementType * elem  = 0;
+          if( item.first )
+              elem = dynamic_cast<GEOElementType *> (item.first); 
+          else if( item.second )
+              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first); 
+          if(GridImp::elementType == tetra)
+          {
+             //face of tetra - valid if first corner has index zero          
+              return (elem->myvertex(0)->getIndex() == 0);
+          }
+          else if (GridImp::elementType == hexa)
+          {
+           //face of hexa - valid if sum of first two vertex indices is odd          
+            return ((elem->myvertex(0)->getIndex() + elem->myvertex(1)->getIndex()) % 2);
+          }
+       }
+       return false;
+     }
+  };
+  
+  
+  template <class GridImp>
+  struct ValidItem<2, GridImp> 
+  {
+    bool operator()(const GridImp & grid, InternalIteratorType & iter)
+    {
+      if(GridImp::dimension ==3 ) return true;
+      else if (GridImp::dimension == 2)
+      {
+          typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 2>::ImplementationType GEOElementType;
+          val_t & item = iter.item();
+          alugrid_assert ( item.first || item.second ); 
+          GEOElementType * elem  = 0;
+          if( item.first )
+              elem = dynamic_cast<GEOElementType *> (item.first); 
+          else if( item.second )
+              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first); 
+          if(GridImp::elementType == tetra)
+          {
+             //vertex of tetra - valid if not index zero         
+              return (elem->getIndex() != 0) ;        
+          }
+          else if (GridImp::elementType == hexa)
+          {
+             //vertex of hexa - valid if even          
+              return !(elem->getIndex() % 2);          
+          }
+        }
+      return false;
+    }
+  };
 };
 
 //**********************************************************************
