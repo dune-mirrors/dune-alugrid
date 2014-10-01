@@ -486,6 +486,26 @@ namespace Dune
   ALU3dGridGeometricFaceInfoTetra(const ALU3dGridGeometricFaceInfoTetra& orig) 
   : Base( orig ), normalUp2Date_( orig.normalUp2Date_ )
   {}
+  
+  template< int dimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< 2, dimw, Comm >::
+  ALU3dGridGeometricFaceInfoTetra(const ConnectorType& connector) 
+  : Base( connector ), normalUp2Date_( false )
+  {}
+
+  template<  int dimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoTetra< 2, dimw, Comm >::
+  resetFaceGeom() 
+  { 
+    Base::resetFaceGeom();
+    normalUp2Date_ = false;
+  }
+
+  template<  int dimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< 2, dimw, Comm >::
+  ALU3dGridGeometricFaceInfoTetra(const ALU3dGridGeometricFaceInfoTetra& orig) 
+  : Base( orig ), normalUp2Date_( orig.normalUp2Date_ )
+  {}
 
   template< int dim, int dimw, class Comm >
   template <class GeometryImp> 
@@ -498,13 +518,27 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
     
-
-      if(dim == 3)
-        geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
                        face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,  
                        face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
-      else if(dim == 2)
-        geo.buildGeom( face.myvertex(1)->Point() , 
+
+      this->generatedGlobal_ = true ;
+    }
+  }
+  
+  template< int dimw, class Comm >
+  template <class GeometryImp> 
+  inline void
+  ALU3dGridGeometricFaceInfoTetra< 2, dimw, Comm >::
+  buildGlobalGeom(GeometryImp& geo) const 
+  {
+    if (! this->generatedGlobal_) 
+    {
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+    
+
+      geo.buildGeom( face.myvertex(1)->Point() , 
                        face.myvertex(2)->Point() );
 
       this->generatedGlobal_ = true ;
@@ -570,6 +604,54 @@ namespace Dune
 
     return outerNormal_;
   }
+  
+  template<  int dimw, class Comm >
+  inline FieldVector<alu3d_ctype, dimw> &
+  ALU3dGridGeometricFaceInfoTetra< 2, dimw, Comm >::
+  outerNormal(const FieldVector<alu3d_ctype, 1>& local) const 
+  {
+    // if geomInfo was not reseted then normal is still correct 
+    if(!normalUp2Date_)
+    {
+    
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
+      const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
+
+      // change sign if face normal points into inner element
+      // factor is 1.0 to get integration outer normal and not volume outer normal 
+      const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0; 
+
+      
+      if(dimw == 3)
+      {
+        //make a cross product of normal of the entity with the face
+        const GEOElementType & inner = this->connector_.innerEntity();
+        const alu3d_ctype (&_q0)[3] = inner.myvertex(1)->Point();
+        const alu3d_ctype (&_q1)[3] = inner.myvertex(2)->Point();
+        const alu3d_ctype (&_q2)[3] = inner.myvertex(3)->Point();
+          
+        NormalType normal;
+        normal[0] = (_q1[1]-_q0[1]) *(_q2[2]-_q1[2]) - (_q2[1]-_q1[1]) *(_q1[2]-_q0[2]);
+        normal[1] = (_q1[2]-_q0[2]) *(_q2[0]-_q1[0]) - (_q2[2]-_q1[2]) *(_q1[0]-_q0[0]);
+        normal[2] = (_q1[0]-_q0[0]) *(_q2[1]-_q1[1]) - (_q2[0]-_q1[0]) *(_q1[1]-_q0[1]);          
+         
+        outerNormal_[0] = factor * (normal[1]*(_p2[2]-_p1[2])-normal[2]*(_p2[1]-_p1[1]));
+        outerNormal_[1] = factor * (normal[2]*(_p2[0]-_p1[0])-normal[0]*(_p2[2]-_p1[2]));
+        outerNormal_[2] = factor * (normal[0]*(_p2[1]-_p1[1])-normal[1]*(_p2[0]-_p1[0]));
+      }
+      else if(dimw == 2)
+      {
+        outerNormal_[0] = factor * (_p1[1]-_p2[1]);
+        outerNormal_[1] = factor * (_p2[0]-_p1[0]);   
+      }
+      
+      normalUp2Date_ = true;
+    } // end if mapp ...
+
+    return outerNormal_;
+  }
 
   //-sepcialisation for and hexa 
   template< int dim, int dimw, class Comm >
@@ -594,6 +676,31 @@ namespace Dune
   : Base( orig )
     , mappingGlobal_(orig.mappingGlobal_)
     , mappingGlobalUp2Date_(orig.mappingGlobalUp2Date_) 
+  {}
+  
+  //-sepcialisation for 2d and hexa 
+  template<  int dimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
+  ALU3dGridGeometricFaceInfoHexa(const ConnectorType& connector) 
+  : Base( connector )
+    , mappingGlobal_()
+    , normalUp2Date_(false) 
+  {}
+
+  template<  int dimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
+  resetFaceGeom() 
+  { 
+    Base::resetFaceGeom();
+    normalUp2Date_ = false;
+  }
+
+  template<  int dimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
+  ALU3dGridGeometricFaceInfoHexa(const ALU3dGridGeometricFaceInfoHexa& orig) 
+  : Base( orig )
+    , mappingGlobal_(orig.mappingGlobal_)
+    , normalUp2Date_(orig.normalUp2Date_) 
   {}
 
   template< int dim, int dimw, class Comm >
@@ -656,8 +763,9 @@ namespace Dune
     // end if
     return outerNormal_;
   }
-
- template< int dimw, class Comm >
+  
+  //partielle spezialisierung
+  template< int dimw, class Comm >
   inline FieldVector<alu3d_ctype, dimw> &
   ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
   outerNormal(const FieldVector<alu3d_ctype, 1>& local) const 
@@ -666,14 +774,12 @@ namespace Dune
     
     // if geomInfo was not reseted then normal is still correct 
     if(!normalUp2Date_)
-    {
-    
+    {    
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
       //we only need points 0 and 3 as they are the true vertices
       const alu3d_ctype (&_p1)[3] = face.myvertex(0)->Point();
       const alu3d_ctype (&_p2)[3] = face.myvertex(3)->Point();
-
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal 
