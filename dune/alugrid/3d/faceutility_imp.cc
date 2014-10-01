@@ -713,15 +713,28 @@ namespace Dune
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
-     
 
-      if(dim == 3)
-        geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(2))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(3))->Point() );
-      else if(dim == 2)
-        geo.buildGeom( face.myvertex(0)->Point() , 
+                          
+      this->generatedGlobal_ = true ;
+    }
+  }
+  
+  template<  int dimw, class Comm >
+  template <class GeometryImp> 
+  inline void
+  ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
+  buildGlobalGeom(GeometryImp& geo) const 
+  {
+    if (! this->generatedGlobal_) 
+    {
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+     
+      geo.buildGeom( face.myvertex(0)->Point() , 
                        face.myvertex(3)->Point() );
                                
       this->generatedGlobal_ = true ;
@@ -764,14 +777,13 @@ namespace Dune
     return outerNormal_;
   }
   
-  //partielle spezialisierung
+  //spezialisierung for 2d
   template< int dimw, class Comm >
   inline FieldVector<alu3d_ctype, dimw> &
   ALU3dGridGeometricFaceInfoHexa< 2, dimw, Comm >::
   outerNormal(const FieldVector<alu3d_ctype, 1>& local) const 
   {
-    
-    
+        
     // if geomInfo was not reseted then normal is still correct 
     if(!normalUp2Date_)
     {    
@@ -891,7 +903,7 @@ namespace Dune
     for (int i = 0; i < numVerticesPerFace; ++i) 
     {
       int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i); 
-      result[i] = refElem.position(duneVertexIndex, 3);
+      result[i] = refElem.position(duneVertexIndex, dim);
     }
   }
 } //end namespace Dune

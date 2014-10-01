@@ -207,7 +207,7 @@ namespace Dune
     typedef  LinearMapping<dimw, 1> SurfaceMappingType;
     typedef typename ALU3dGridFaceInfo< 2, dimw, tetra, Comm >::GEOFaceType GEOFaceType;
 
-    static const int numVerticesPerFace = EntityCount< tetra >::numVerticesPerFace;
+    static const int numVerticesPerFace = 2;
 
     typedef FieldMatrix< alu3d_ctype, numVerticesPerFace, dimw > CoordinateType;
 
@@ -239,7 +239,7 @@ namespace Dune
     typedef LinearMapping<dimw, 1> SurfaceMappingType;
     typedef typename ALU3dGridFaceInfo< 2, dimw, hexa, Comm >::GEOFaceType GEOFaceType;
 
-    static const int numVerticesPerFace = EntityCount< hexa >::numVerticesPerFace;
+    static const int numVerticesPerFace = 2;
 
     typedef FieldMatrix< alu3d_ctype, numVerticesPerFace, dimw > CoordinateType;
 
@@ -280,7 +280,7 @@ namespace Dune
 
     enum SideIdentifier { INNER, OUTER };
     enum { dimworld = dimw }; // ALU is a pure 3d grid - not anymore
-    enum { numVerticesPerFace = 
+    enum { numVerticesPerFace = (dim==2) ? 2 :
            EntityCount<type>::numVerticesPerFace };
 
     //- public typedefs
