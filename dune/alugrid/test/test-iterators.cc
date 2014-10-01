@@ -19,7 +19,7 @@
 //#include <dune/grid/test/gridcheck.cc>
 
 //#include <dune/grid/test/checkgeometryinfather.cc>
-//#include <dune/grid/test/checkintersectionit.cc>
+#include <dune/grid/test/checkintersectionit.cc>
 //#include <dune/grid/test/checkcommunicate.cc>
 //#include "checktwists.cc"
 
@@ -93,6 +93,7 @@ void checkIterators( GridType& grid )
 }
 
 
+
 template <class GridView>
 void writeFile( const GridView& gridView )
 {
@@ -116,6 +117,9 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   // check iterators  
   checkIterators( grid );
+  
+  std::cout << "  CHECKING: Macro-intersections" << std::endl;
+  checkIntersectionIterator(grid, true);
 
   std::cout << std::endl << std::endl;
 }
