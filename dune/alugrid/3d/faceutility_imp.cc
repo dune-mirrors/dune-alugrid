@@ -692,5 +692,258 @@ namespace Dune
       result[i] = refElem.position(duneVertexIndex, 3);
     }
   }
+  
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  ALU3dGridGeometricFaceInfoBase(const ConnectorType& connector) :
+    connector_(connector),
+    coordsSelfLocal_(-1.0),
+    coordsNeighborLocal_(-1.0),
+    generatedGlobal_(false),
+    generatedLocal_(false)
+  {}
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline void 
+  ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  resetFaceGeom() 
+  { 
+    generatedGlobal_ = false;
+    generatedLocal_  = false;
+  }
+
+  template< int actualDimw, ALU3dGridElementType type, class Comm >
+  inline ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  ALU3dGridGeometricFaceInfoBase ( const ALU3dGridGeometricFaceInfoBase &orig )
+  : connector_(orig.connector_),
+    coordsSelfLocal_(orig.coordsSelfLocal_),
+    coordsNeighborLocal_(orig.coordsNeighborLocal_),
+    generatedGlobal_(orig.generatedGlobal_),
+    generatedLocal_(orig.generatedLocal_)
+  {}
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::CoordinateType& 
+  ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::intersectionSelfLocal() const {
+    generateLocalGeometries();
+    alugrid_assert (generatedLocal_);
+    return coordsSelfLocal_;
+  }
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline const typename ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::CoordinateType& 
+  ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::intersectionNeighborLocal() const {
+    alugrid_assert (!connector_.outerBoundary());
+    generateLocalGeometries();
+    alugrid_assert (generatedLocal_);
+    return coordsNeighborLocal_;
+  }
+
+
+  //sepcialisation for tetra and hexa
+  template< int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< 2, actualDimw, Comm >::
+  ALU3dGridGeometricFaceInfoTetra(const ConnectorType& connector) 
+  : Base( connector ), normalUp2Date_( false )
+  {}
+
+  template<  int actualDimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoTetra< 2, actualDimw, Comm >::
+  resetFaceGeom() 
+  { 
+    Base::resetFaceGeom();
+    normalUp2Date_ = false;
+  }
+
+  template<  int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoTetra< 2, actualDimw, Comm >::
+  ALU3dGridGeometricFaceInfoTetra(const ALU3dGridGeometricFaceInfoTetra& orig) 
+  : Base( orig ), normalUp2Date_( orig.normalUp2Date_ )
+  {}
+
+  template<  int actualDimw, class Comm >
+  template <class GeometryImp> 
+  inline void
+  ALU3dGridGeometricFaceInfoTetra< 2, actualDimw, Comm >::
+  buildGlobalGeom(GeometryImp& geo) const 
+  {
+    //TODO
+    if (! this->generatedGlobal_) 
+    {
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+    
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,  
+                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
+
+      this->generatedGlobal_ = true ;
+    }
+  }
+
+  template< int actualDimw, class Comm >
+  inline FieldVector<alu3d_ctype, actualDimw> &
+  ALU3dGridGeometricFaceInfoTetra< 2, actualDimw, Comm >::
+  outerNormal(const FieldVector<alu3d_ctype, 1>& local) const 
+  {
+  
+     //TODO
+    // if geomInfo was not reseted then normal is still correct 
+    if(!normalUp2Date_)
+    {
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+      const alu3d_ctype (&_p0)[3] = face.myvertex(0)->Point();
+      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
+      const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
+
+      // change sign if face normal points into inner element
+      // factor is 1.0 to get integration outer normal and not volume outer normal 
+      const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0; 
+
+      // see mapp_tetra_3d.h for this piece of code 
+      outerNormal_[0] = factor * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2]));
+      outerNormal_[1] = factor * ((_p1[2]-_p0[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p0[0]));
+      outerNormal_[2] = factor * ((_p1[0]-_p0[0]) *(_p2[1]-_p1[1]) - (_p2[0]-_p1[0]) *(_p1[1]-_p0[1]));
+
+      normalUp2Date_ = true;
+    } // end if mapp ...
+
+    return outerNormal_;
+  }
+
+  //-sepcialisation for and hexa 
+  template<  int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< 2, actualDimw, Comm >::
+  ALU3dGridGeometricFaceInfoHexa(const ConnectorType& connector) 
+  : Base( connector )
+    , mappingGlobal_()
+    , mappingGlobalUp2Date_(false) 
+  {}
+
+  template< int actualDimw, class Comm >
+  inline void ALU3dGridGeometricFaceInfoHexa< 2, actualDimw, Comm >::
+  resetFaceGeom() 
+  { 
+    Base::resetFaceGeom();
+    mappingGlobalUp2Date_ = false;
+  }
+
+  template<  int actualDimw, class Comm >
+  inline ALU3dGridGeometricFaceInfoHexa< 2, actualDimw, Comm >::
+  ALU3dGridGeometricFaceInfoHexa(const ALU3dGridGeometricFaceInfoHexa& orig) 
+  : Base( orig )
+    , mappingGlobal_(orig.mappingGlobal_)
+    , mappingGlobalUp2Date_(orig.mappingGlobalUp2Date_) 
+  {}
+
+  template<  int actualDimw, class Comm >
+  template <class GeometryImp> 
+  inline void
+  ALU3dGridGeometricFaceInfoHexa< 2, actualDimw, Comm >::
+  buildGlobalGeom(GeometryImp& geo) const 
+  {
+    //TODO
+    if (! this->generatedGlobal_) 
+    {
+      // calculate the normal
+      const GEOFaceType & face = this->connector_.face();
+      
+      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() ,
+                     face.myvertex(FaceTopo::dune2aluVertex(3))->Point() );
+      this->generatedGlobal_ = true ;
+    }
+  }
+
+  template<  int actualDimw, class Comm >
+  inline FieldVector<alu3d_ctype, actualDimw> &
+  ALU3dGridGeometricFaceInfoHexa< 2, actualDimw, Comm >::
+  outerNormal(const FieldVector<alu3d_ctype, 1>& local) const 
+  {
+
+      const GEOFaceType & face = connector_.face();
+     //TODO
+
+    // end if
+    return outerNormal_;
+  }
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  generateLocalGeometries() const 
+  {
+    if (!generatedLocal_) {
+      // Get the coordinates of the face in the reference element of the
+      // adjoining inner and outer elements and initialise the respective 
+      // geometries
+      switch (connector_.conformanceState()) 
+      {
+      case (ConnectorType::CONFORMING) :
+        referenceElementCoordinatesRefined(INNER, coordsSelfLocal_);
+        // generate outer local geometry only when not at boundary
+        // * in the parallel case, this needs to be altered for the ghost cells
+        if (!connector_.outerBoundary()) {
+          referenceElementCoordinatesRefined(OUTER, coordsNeighborLocal_);
+        } // end if
+        break;
+      case (ConnectorType::REFINED_INNER) :
+        referenceElementCoordinatesRefined(INNER, coordsSelfLocal_);
+        referenceElementCoordinatesUnrefined(OUTER, coordsNeighborLocal_);
+        break;
+      case (ConnectorType::REFINED_OUTER) :
+        referenceElementCoordinatesUnrefined(INNER, coordsSelfLocal_);
+        referenceElementCoordinatesRefined(OUTER, coordsNeighborLocal_);
+        break;
+      default :
+        std::cerr << "ERROR: Wrong conformanceState in generateLocalGeometries! in: " << __FILE__ << " line: " << __LINE__<< std::endl;
+        alugrid_assert (false);
+        exit(1);
+      } // end switch
+
+      generatedLocal_ = true;
+    } // end if
+  }
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline int ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  globalVertexIndex(const int duneFaceIndex, 
+                    const int aluFaceTwist,
+                    const int duneFaceVertexIndex) const 
+  {
+    const int localALUIndex = 
+      FaceTopo::dune2aluVertex(duneFaceVertexIndex, 
+                               aluFaceTwist);
+
+    // get local ALU vertex number on the element's face
+    const int localDuneIndex = ElementTopo::
+        alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
+                           localALUIndex);
+
+    return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 3);
+  }
+
+
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  inline void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >::
+  referenceElementCoordinatesRefined(SideIdentifier side, 
+                                     CoordinateType& result) const 
+  {
+    // this is a dune face index
+    const int faceIndex = 
+      (side == INNER ? 
+       ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()) :
+       ElementTopo::alu2duneFace(connector_.outerALUFaceIndex()));
+    const int faceTwist = 
+      (side == INNER ?
+       connector_.innerTwist() :
+       connector_.outerTwist());
+
+    const ReferenceElementType& refElem = getReferenceElement();
+
+   //TODO
+   result = CoordinateType(0.);
+  }
 } //end namespace Dune
 #endif

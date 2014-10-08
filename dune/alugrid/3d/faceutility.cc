@@ -98,6 +98,14 @@ namespace Dune
 
     delete referenceElementMapping;
   }
+  
+  template<  int actualDimw, ALU3dGridElementType type, class Comm >
+  void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >
+    ::referenceElementCoordinatesUnrefined ( SideIdentifier side, CoordinateType &result ) const
+  {
+    //TODO
+    result = CoordinateType(0.);
+  }
 
 
 
