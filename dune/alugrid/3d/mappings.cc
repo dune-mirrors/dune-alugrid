@@ -277,24 +277,6 @@ namespace Dune
                  << nChild_ << ")");      
     } // end switch
   }
-  
-  template<int dimw, ALU3dGridElementType type, class Comm >
-  CoordinateType NonConformingFaceMapping<2, dimw, type, Comm>
-    ::child2parent ( const CoordinateType &childCoordinates) const
-   {
-      CoordinateType parentCoordinates;
-      switch(nChild_){
-        case 0:
-            parentCoordinates[0] = 0.5*childCoordinates[0];
-          break;
-        case 1:
-            parentCoordinates[0] = 0.5*childCoordinates[0]+0.5;
-          break;
-        default:
-          DUNE_THROW(RangeError, "Only 2 children on a face in 2d (val = " 
-                 << nChild_ << ")");    
-      }
-   }
 
 
 

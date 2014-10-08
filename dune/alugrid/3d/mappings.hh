@@ -20,7 +20,7 @@ namespace Dune {
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
 
-  template<int dim, int dimw, ALU3dGridElementType, class >
+  template<int actualDim, int actualDimw, ALU3dGridElementType, class >
   class ALU3dGrid;
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
@@ -381,31 +381,12 @@ namespace Dune {
 
   //! General form of non-conforming face mapping
   //! This class is empty and needs to be specialised
-  template< int dim, int dimw, ALU3dGridElementType type, class Comm >
+  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
   class NonConformingFaceMapping;
-  
-  template<int dimw, ALU3dGridElementType type, class Comm >
-  class NonConformingFaceMapping<2, dimw, type, Comm>
-  {
-  public:
-    typedef FieldVector<alu3d_ctype, 1> CoordinateType;  
-    typedef typename ALU3dImplTraits< type, Comm >::HfaceRuleType RefinementRuleType;
-
-    
-    NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
-    : rule_( rule ), nChild_( nChild )
-    {}
-        
-    CoordinateType child2parent ( const CoordinateType & childCoordinates) const;
-    
-  private:
-    RefinementRuleType rule_;
-    int nChild_;
-  };
 
   //! Non-conforming face mappings for tetrahedra
-  template<  class Comm >
-  class NonConformingFaceMapping< 3, 3, tetra, Comm > 
+  template< int actualDim, int actualDimw, class Comm >
+  class NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm > 
   {
   public:  
     typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
@@ -437,8 +418,8 @@ namespace Dune {
   };
 
   //! Non-conforming face mappings for hexahedra
-  template<  class Comm >
-  class NonConformingFaceMapping< 3, 3, hexa, Comm >
+  template< int actualDim, int actualDimw, class Comm >
+  class NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
   {
   public:  
     typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
