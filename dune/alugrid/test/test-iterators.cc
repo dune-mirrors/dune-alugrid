@@ -93,7 +93,6 @@ void checkIterators( GridType& grid )
 }
 
 
-
 template <class GridView>
 void writeFile( const GridView& gridView )
 {
@@ -117,9 +116,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   // check iterators  
   checkIterators( grid );
-  
-  std::cout << "  CHECKING: Macro-intersections" << std::endl;
-  checkIntersectionIterator(grid, true);
+  checkIntersectionIterator(grid);
 
   std::cout << std::endl << std::endl;
 }
