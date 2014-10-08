@@ -287,7 +287,7 @@ namespace Dune
     typedef FieldVector<alu3d_ctype, dimw> NormalType;
     typedef FieldMatrix<alu3d_ctype, 
                         numVerticesPerFace,
-                        dimworld> CoordinateType;
+                        dim> CoordinateType;
 
     typedef typename ALU3dGridFaceInfo< dim, dimw, type, Comm >::GEOFaceType GEOFaceType;
 

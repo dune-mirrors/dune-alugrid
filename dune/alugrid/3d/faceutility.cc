@@ -54,7 +54,7 @@ namespace Dune
   typename ALU3dGridSurfaceMappingFactory< 2, dimw, tetra, Comm >::SurfaceMappingType *
   ALU3dGridSurfaceMappingFactory< 2, dimw, tetra, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
   {
-    SurfaceMappingType map;
+   static  SurfaceMappingType map;
     map.buildMapping( coords[0], coords[1] );
     return &map;
   }
@@ -64,7 +64,7 @@ namespace Dune
   typename ALU3dGridSurfaceMappingFactory< 2, dimw, hexa, Comm >::SurfaceMappingType *
   ALU3dGridSurfaceMappingFactory< 2, dimw, hexa, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
   {
-    SurfaceMappingType map;
+    static SurfaceMappingType map;
     map.buildMapping( coords[0], coords[1] );
     return &map;
   }
@@ -74,8 +74,18 @@ namespace Dune
   typename ALU3dGridSurfaceMappingFactory< 2, dimw, tetra, Comm >::SurfaceMappingType *
   ALU3dGridSurfaceMappingFactory< 2, dimw, tetra, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
   {
-    SurfaceMappingType map;
-    map.buildMapping( face.myvertex(1)->Point(), face.myvertex(2)->Point() );
+    FieldVector<alu3d_ctype, dimw> coords1,coords2;
+    coords1[0] = face.myvertex(1)->Point()[0];
+    coords1[1] = face.myvertex(1)->Point()[1];
+    coords2[0] = face.myvertex(2)->Point()[0];   
+    coords2[1] = face.myvertex(2)->Point()[1];
+    if(dimw ==3 )
+    {
+      coords1[2] = face.myvertex(1)->Point()[2];
+      coords2[2] = face.myvertex(2)->Point()[2];        
+    }             
+    static SurfaceMappingType map;
+    map.buildMapping( coords1, coords2 );
     return &map;
   }
 
@@ -86,8 +96,18 @@ namespace Dune
   {
     // this is the new implementation using FieldVector 
     // see mappings.hh 
-    SurfaceMappingType map;
-    map.buildMapping( face.myvertex( 0 )->Point(),  face.myvertex( 3 )->Point() );
+    FieldVector<alu3d_ctype, dimw> coords1,coords2;
+    coords1[0] = face.myvertex(0)->Point()[0];
+    coords1[1] = face.myvertex(0)->Point()[1];
+    coords2[0] = face.myvertex(3)->Point()[0];   
+    coords2[1] = face.myvertex(3)->Point()[1];
+    if(dimw ==3 )
+    {
+      coords1[2] = face.myvertex(0)->Point()[2];
+      coords2[2] = face.myvertex(3)->Point()[2];        
+    }             
+    static SurfaceMappingType map;
+    map.buildMapping( coords1, coords2 );
     return &map;
   }
 
@@ -96,9 +116,9 @@ namespace Dune
   // Helper Functions
   // ----------------
 
-  template< int dimw, int mydim, int m, int n >
+  template<  int m, int n >
   inline void
-  alu3dMap2World ( const LinearMapping< dimw, mydim > &mapping,
+  alu3dMap2World ( const LinearMapping< n, m > &mapping,
                    const FieldVector< alu3d_ctype, m > &x,
                    FieldVector< alu3d_ctype, n > &y )
   {
@@ -130,25 +150,27 @@ namespace Dune
   void ALU3dGridGeometricFaceInfoBase< dim, dimw, type, Comm >
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, CoordinateType &result ) const
   {
-    // get the parent's face coordinates on the reference element (Dune reference element)
-    CoordinateType cornerCoords;
-    referenceElementCoordinatesRefined ( side, cornerCoords );
+  
+      // get the parent's face coordinates on the reference element (Dune reference element)
+      CoordinateType cornerCoords;
+      referenceElementCoordinatesRefined ( side, cornerCoords );
 
-    typename Base::SurfaceMappingType *referenceElementMapping = Base::buildSurfaceMapping( cornerCoords );
+      typename Base::SurfaceMappingType *referenceElementMapping = Base::buildSurfaceMapping( cornerCoords );
 
-    NonConformingMappingType faceMapper( connector_.face().parentRule(), connector_.face().nChild() );
+      NonConformingMappingType faceMapper( connector_.face().parentRule(), connector_.face().nChild() );
 
-    const ReferenceFaceType& refFace = getReferenceFace();
-    // do the mappings
-    const int numCorners = refFace.size( dim-1 );
-    for( int i = 0; i < numCorners; ++i )
-    {
-      const FieldVector< alu3d_ctype, dim-1 > &childLocal = refFace.position( i, dim-1 );
-      alu3dMap2World( *referenceElementMapping, faceMapper.child2parent( childLocal ), result[ i ] );
-    }
+      const ReferenceFaceType& refFace = getReferenceFace();
+      // do the mappings
+      const int numCorners = refFace.size( dim-1 );
+      for( int i = 0; i < numCorners; ++i )
+      {
+        const FieldVector< alu3d_ctype, dim-1 > &childLocal = refFace.position( i, dim-1 );
+        alu3dMap2World( *referenceElementMapping, faceMapper.child2parent( childLocal ), result[ i ] );
+      }
 
-    delete referenceElementMapping;
+      delete referenceElementMapping;
   }
+  
 
 
 
