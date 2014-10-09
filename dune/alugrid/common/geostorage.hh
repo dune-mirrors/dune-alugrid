@@ -1,6 +1,8 @@
 #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
+#include <dune/common/exceptions.hh>
+
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
@@ -109,7 +111,6 @@ namespace Dune
       }
     };
 
-  public:  
     // create empty storage
     ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
     : count_( 0 ), initialized_( false )
@@ -129,8 +130,9 @@ namespace Dune
       geoms_.fill( (GeometryImpl *) 0 );
     }
 
+  public:  
     //! initialize local geometries 
-    void initialize( const GeometryType type, const bool nonConform )
+    bool initialize( const GeometryType type, const bool nonConform )
     {
       if( ! initialized_ ) 
       {
@@ -142,7 +144,9 @@ namespace Dune
         // refine once and the store the father - child relations 
         CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
           ::createGeometries(*this, type, nonConform);
+        return true;
       }
+      return false;
     }
 
     // check if geometry has been created
@@ -267,9 +271,13 @@ namespace Dune
       {
         // create static variable on heap
         static ThisType simplexGeoms; 
-        // initialize (only done once)
-        simplexGeoms.initialize( type, nonConforming );
-        alugrid_assert ( type == simplexGeoms[ 0 ].type() );
+        // initialize (only done once), note that this is called recursively during initialize
+        // so only check geoms when they were actually really created
+        if( simplexGeoms.initialize( type, nonConforming ) )
+        {
+          if( type != simplexGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
         return simplexGeoms ;
       }
       else 
@@ -279,9 +287,13 @@ namespace Dune
 
         // create static variable on heap
         static ThisType cubeGeoms;
-        // initialize (only done once)
-        cubeGeoms.initialize( type, nonConforming );
-        alugrid_assert ( type == cubeGeoms[ 0 ].type() );
+        // initialize (only done once), note that this is called recursively during initialize
+        // so only check geoms when they were actually really created
+        if( cubeGeoms.initialize( type, nonConforming ) )
+        {
+          if( type != cubeGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
         return cubeGeoms ;
       }
     }
