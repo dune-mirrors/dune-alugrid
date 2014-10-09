@@ -345,13 +345,17 @@ namespace ALUGrid
     vertexelementlinkage_t _vxElemLinkage;
 
     GitterPll::MacroGitterPll& _containerPll ;
+
+    const int  _me;
     const bool _storeLinkageInVertices;
   public: 
-    UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll, 
+    UnpackVertexLinkage( GitterPll::MacroGitterPll& containerPll,
+                         const int me,
                          const bool storeLinkageInVertices )
       : _vxmap(),
         _vxElemLinkage(),
         _containerPll( containerPll ),
+        _me( me ),
         _storeLinkageInVertices( storeLinkageInVertices )
     {
       // compute vertex linkage locally 
@@ -494,7 +498,7 @@ namespace ALUGrid
     {
       ObjectStream os;
       // data handle 
-      UnpackVertexLinkage data( *this, storeLinkageInVertices );
+      UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
 
       // pack data 
       data.pack( me, os );
@@ -532,7 +536,7 @@ namespace ALUGrid
     // my data stream 
     ObjectStream os;
     // data handle 
-    UnpackVertexLinkage data( *this, storeLinkageInVertices );
+    UnpackVertexLinkage data( *this, me, storeLinkageInVertices );
 
     // pack my data 
     data.pack( me, os );
