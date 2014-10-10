@@ -115,7 +115,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
   // check iterators  
-  checkIterators( grid );
+  //checkIterators( grid );
   checkIntersectionIterator(grid);
 
   std::cout << std::endl << std::endl;

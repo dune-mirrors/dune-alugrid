@@ -428,14 +428,17 @@ namespace Dune
     typedef ReferenceElement<alu3d_ctype, 1> ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
-    enum { dimworld = actualDimw }; // ALU is a pure 3d grid
-    enum { numVerticesPerFace = 2 };
+    enum { dimworld = actualDimw }; 
+    enum { numVerticesPerFace = 2 }; // A face in 2d is an edge
 
     //- public typedefs
     typedef FieldVector<alu3d_ctype, dimworld> NormalType;
     typedef FieldMatrix<alu3d_ctype, 
                         numVerticesPerFace,
                         dimworld> CoordinateType;
+     typedef FieldMatrix<alu3d_ctype, 
+                        numVerticesPerFace,
+                        2> LocalCoordinateType;
 
     typedef typename ALU3dGridFaceInfo< 2, actualDimw, type, Comm >::GEOFaceType GEOFaceType;
 
@@ -450,8 +453,8 @@ namespace Dune
     void resetFaceGeom();
 
     //- functions
-    const CoordinateType& intersectionSelfLocal() const;
-    const CoordinateType& intersectionNeighborLocal() const;
+    const LocalCoordinateType& intersectionSelfLocal() const;
+    const LocalCoordinateType& intersectionNeighborLocal() const;
 
   private:
     //- forbidden methods
@@ -466,16 +469,16 @@ namespace Dune
                           const int duneFaceVertexIndex) const;
 
     void referenceElementCoordinatesRefined(SideIdentifier side, 
-                                            CoordinateType& result) const;
+                                            LocalCoordinateType& result) const;
     void referenceElementCoordinatesUnrefined(SideIdentifier side,
-                                              CoordinateType& result) const;
+                                              LocalCoordinateType& result) const;
   
   protected:
     //- private data
     const ConnectorType& connector_; 
     
-    mutable CoordinateType coordsSelfLocal_;
-    mutable CoordinateType coordsNeighborLocal_;
+    mutable LocalCoordinateType coordsSelfLocal_;
+    mutable LocalCoordinateType coordsNeighborLocal_;
 
     mutable bool generatedGlobal_;
     mutable bool generatedLocal_;
@@ -552,7 +555,7 @@ namespace Dune
     typedef FieldVector<alu3d_ctype, actualDimw> NormalType;
     typedef typename Base::FaceTopo FaceTopo;
     typedef typename ALU3dGridFaceInfo< 2, actualDimw, hexa, Comm >::GEOFaceType GEOFaceType;
-    typedef SurfaceNormalCalculator SurfaceMappingType;
+
 
     typedef ALU3dGridFaceInfo< 2, actualDimw, hexa, Comm > ConnectorType;
 
@@ -579,12 +582,9 @@ namespace Dune
   private:
     //- private data 
     mutable NormalType outerNormal_;
-  
-    // surface mapping for calculating the outer normal 
-    mutable SurfaceMappingType mappingGlobal_;
-
+ 
     // false if surface mapping needs a update 
-    mutable bool mappingGlobalUp2Date_; 
+    mutable bool normalUp2Date_; 
   };
   
 

@@ -101,10 +101,10 @@ namespace Dune
   
   template<  int actualDimw, ALU3dGridElementType type, class Comm >
   void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >
-    ::referenceElementCoordinatesUnrefined ( SideIdentifier side, CoordinateType &result ) const
+    ::referenceElementCoordinatesUnrefined ( SideIdentifier side, LocalCoordinateType &result ) const
   {
-    //TODO
-    result = CoordinateType(0.);
+    //TODO use connector.face.nChild and (maybe twist)    referenceElementCoordinatesRefined ( side, cornerCoords )
+    result = LocalCoordinateType(0.);
   }
 
 

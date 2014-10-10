@@ -459,7 +459,7 @@ buildGeom(const FaceCoordinatesType& coords)
     if (mydim == 2 )  
       return buildGeom( coords[0], coords[1], coords[2] );
     else if ( mydim == 1 ) 
-      return buildGeom ( coords[1], coords[2] );
+      return buildGeom ( coords[0], coords[1] );
   }
 }
 

@@ -90,6 +90,7 @@ template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: 
 setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel) 
 {
+
   // get correct face number 
   index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
 
@@ -112,6 +113,7 @@ template <class EntityType>
 inline void ALU3dGridIntersectionIterator<GridImp> :: 
 first (const EntityType & en, int wLevel) 
 {
+
   if( ! en.isLeaf() && en.level()>0) 
   { 
     done();

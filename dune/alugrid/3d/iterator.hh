@@ -82,10 +82,10 @@ class ALU3dGridIntersectionIterator
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 
-  enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
+  enum { numFaces = (dim==3) ? EntityCount<GridImp::elementType>::numFaces : (GridImp::elementType==tetra ? 3 : 4) };
   enum { numVerticesPerFace = 
-         EntityCount<GridImp::elementType>::numVerticesPerFace };
-  enum { numVertices = EntityCount<GridImp::elementType>::numVertices };
+         GeometryInfoType::numVerticesPerFace };
+  enum { numVertices = (dim==3) ? EntityCount<GridImp::elementType>::numVertices  : (GridImp::elementType==tetra ? 3 : 4)};
 
   typedef ALU3dGridIntersectionIterator<GridImp> ThisType;
   
@@ -319,10 +319,10 @@ public ALU3dGridIntersectionIterator<GridImp>
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 
-  enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
+  enum { numFaces = (dim==3) ? EntityCount<GridImp::elementType>::numFaces : (GridImp::elementType==tetra ? 3 : 4) };
   enum { numVerticesPerFace = 
-         EntityCount<GridImp::elementType>::numVerticesPerFace };
-  enum { numVertices = EntityCount<GridImp::elementType>::numVertices };
+         GeometryInfoType::numVerticesPerFace };
+  enum { numVertices = (dim==3) ? EntityCount<GridImp::elementType>::numVertices  : (GridImp::elementType==tetra ? 3 : 4)};
 
   typedef ALU3dGridIntersectionIterator<GridImp>      BaseType;
   typedef ALU3dGridLevelIntersectionIterator<GridImp> ThisType;
