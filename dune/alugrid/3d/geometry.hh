@@ -713,7 +713,7 @@ namespace Dune
 
     // type of coordinate matrix for faces 
     typedef FieldMatrix<ctype, 
-            EntityCount< elementType > :: numVerticesPerFace , 3> FaceCoordinatesType;
+            GridImp::dimension == 3 ? EntityCount< elementType > :: numVerticesPerFace : 2 , cdim> FaceCoordinatesType;
 
     //! for makeRefGeometry == true a Geometry with the coordinates of the 
     //! reference element is made 
