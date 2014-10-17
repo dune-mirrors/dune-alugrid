@@ -799,19 +799,30 @@ namespace Dune
       // factor is 1.0 to get integration outer normal and not volume outer normal 
       const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0; 
 
-      //TODO
+      //TODO: check this
       if(actualDimw == 2)
       {
-        // see mapp_tetra_3d.h for this piece of code 
-        outerNormal_[0] = factor * ((_p1[1]-_p2[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p2[2]));
-        outerNormal_[1] = factor * ((_p1[2]-_p2[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p2[0]));
+        // we want the outer normal orhtogonal to the intersection and  with length of the intersection
+        outerNormal_[0] = factor * (_p2[1]-_p1[1]);
+        outerNormal_[1] = factor * (_p1[0]-_p2[0]);
       }
       else if(actualDimw == 3)
       {
-        // see mapp_tetra_3d.h for this piece of code 
-        outerNormal_[0] = factor * ((_p1[1]-_p2[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p2[2]));
-        outerNormal_[1] = factor * ((_p1[2]-_p2[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p2[0]));
-        outerNormal_[2] = factor * ((_p1[0]-_p2[0]) *(_p2[1]-_p1[1]) - (_p2[0]-_p1[0]) *(_p1[1]-_p2[1])); 
+        //we want the outer normal orhtogonal to the intersection and to the normal of the inner element,  with length of the intersection
+        const GEOElementType & innerElement = this->connector_.innerEntity();
+        const alu3d_ctype (&_q1)[3] = face.myvertex(1)->Point();
+        const alu3d_ctype (&_q2)[3] = face.myvertex(2)->Point();
+        const alu3d_ctype (&_q3)[3] = face.myvertex(3)->Point();  
+         alu3d_ctype (normal)[3];      
+        
+        
+        normal[0] = (_q2[1] - _q3[1]) * (_q1[2] - _q2[2]) - (_q2[2] - _q3[2]) * (_q1[1] - _q2[1]) ;
+        normal[1] = (_q2[2] - _q3[2]) * (_q1[0] - _q2[0]) - (_q2[0] - _q3[0]) * (_q1[2] - _q2[2]) ;
+        normal[2] = (_q2[0] - _q3[0]) * (_q1[1] - _q2[1]) - (_q2[1] - _q3[1]) * (_q1[0] - _q2[0]) ; 
+        
+        outerNormal_[0] = factor * (normal[1] * (_p1[2] - _p2[2]) - normal[2] * (_p1[1] - _p2[1]) );
+        outerNormal_[1] = factor * (normal[2] * (_p1[0] - _p2[0]) - normal[0] * (_p1[2] - _p2[2]) );
+        outerNormal_[2] = factor * (normal[0] * (_p1[1] - _p2[1]) - normal[1] * (_p1[0] - _p2[0]) ); 
       }
 
       normalUp2Date_ = true;
@@ -878,19 +889,34 @@ namespace Dune
       // factor is 1.0 to get integration outer normal and not volume outer normal 
       const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0; 
 
-      //TODO
+      
       if(actualDimw == 2)
       {
-        // see mapp_tetra_3d.h for this piece of code 
-        outerNormal_[0] = factor * ((_p3[1]-_p0[1]) *(_p3[2]-_p3[2]) - (_p3[1]-_p3[1]) *(_p3[2]-_p0[2]));
-        outerNormal_[1] = factor * ((_p3[2]-_p0[2]) *(_p3[0]-_p3[0]) - (_p3[2]-_p3[2]) *(_p3[0]-_p0[0]));
+        // we want the length of the intersection and orthogonal to it
+        outerNormal_[0] = factor * (_p3[1] - _p0[1]);
+        outerNormal_[1] = factor * (_p0[0] - _p3[0]);
       }
+      //TODO: check
       else if(actualDimw == 3)
       {
-        // see mapp_tetra_3d.h for this piece of code 
-        outerNormal_[0] = factor * ((_p3[1]-_p0[1]) *(_p3[2]-_p3[2]) - (_p3[1]-_p3[1]) *(_p3[2]-_p0[2]));
-        outerNormal_[1] = factor * ((_p3[2]-_p0[2]) *(_p3[0]-_p3[0]) - (_p3[2]-_p3[2]) *(_p3[0]-_p0[0]));
-        outerNormal_[2] = factor * ((_p3[0]-_p0[0]) *(_p3[1]-_p3[1]) - (_p3[0]-_p3[0]) *(_p3[1]-_p0[1])); 
+        typedef typename ALU3dGrid<2, actualDimw, hexa, Comm>::template Codim<1>::LocalGeometry LocalGeometry;
+        typedef Dune :: ALU3dGridGeometry< 2, actualDimw, ALU3dGrid<2, actualDimw, hexa, Comm> > GeometryImpl;
+        this->generateLocalGeometries();
+        const GEOElementType &inner = this->connector_.innerEntity();
+
+             
+       const ReferenceElement< alu3d_ctype, 2 > &refElement = 
+        ReferenceElements< alu3d_ctype, 2 >::cube();
+        typename LocalGeometry::GlobalCoordinate xInside = this->intersectionSelfLocal()[0];
+        xInside *= local[0];
+        xInside.axpy(1-local[0] , this->intersectionSelfLocal()[1]);
+        typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( ElementTopologyMapping<hexa>::alu2duneFace(this->connector_.innerALUFaceIndex()) );
+        
+        GeometryImpl geo ;
+        geo.buildGeom(inner.myvertex(0)->Point(),inner.myvertex(1)->Point(),inner.myvertex(2)->Point(),inner.myvertex(3)->Point());
+        geo.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal_ );
+        outerNormal_ *= geo.integrationElement( xInside );
+        
       }
        
       normalUp2Date_ = true;

@@ -460,10 +460,13 @@ namespace Dune
     //- forbidden methods
     const ALU3dGridGeometricFaceInfoBase &operator=(const ALU3dGridGeometricFaceInfoBase &);
   
+  protected:
+    //- protected methods
+    void generateLocalGeometries() const;
+   
   private:
     //- private methods
-    void generateLocalGeometries() const;
-  
+ 
     int globalVertexIndex(const int duneFaceIndex, 
                           const int faceTwist,
                           const int duneFaceVertexIndex) const;
@@ -511,7 +514,7 @@ namespace Dune
     typedef FieldVector<alu3d_ctype, actualDimw> NormalType;
     typedef typename Base::FaceTopo FaceTopo;
     typedef typename ALU3dGridFaceInfo< 2, actualDimw, tetra, Comm >::GEOFaceType GEOFaceType;
-
+    typedef typename ALU3dGridFaceInfo< 2, actualDimw, tetra, Comm >::GEOElementType GEOElementType;
     typedef ALU3dGridFaceInfo< 2, actualDimw, tetra, Comm > ConnectorType;
 
     //- constructors and destructors
@@ -555,7 +558,7 @@ namespace Dune
     typedef FieldVector<alu3d_ctype, actualDimw> NormalType;
     typedef typename Base::FaceTopo FaceTopo;
     typedef typename ALU3dGridFaceInfo< 2, actualDimw, hexa, Comm >::GEOFaceType GEOFaceType;
-
+    typedef typename ALU3dGridFaceInfo< 2, actualDimw, hexa, Comm >::GEOElementType GEOElementType;
 
     typedef ALU3dGridFaceInfo< 2, actualDimw, hexa, Comm > ConnectorType;
 
