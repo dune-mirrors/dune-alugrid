@@ -3,6 +3,11 @@
 
 #include <cassert>
 
+#ifndef NDEBUG
+#define ALUGRIDDEBUG
+#define alugrid_assert(EX) assert(EX)
+#endif
+/*
 #ifndef ALUGRIDDEBUG
 # define alugrid_assert(EX) (static_cast<void>(0))
 #else
@@ -11,6 +16,7 @@
 #endif
 # define alugrid_assert(EX) assert(EX)
 #endif
+*/
 
 #endif // ALUGRID_ASSERT_HH
 
