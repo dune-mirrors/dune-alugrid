@@ -5,6 +5,8 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
+#define DISABLE_ZOLTAN_HSFC_ORDERING
+
 // to disable Zoltans HSFC ordering of the macro elements define 
 // DISABLE_ZOLTAN_HSFC_ORDERING on the command line
 #if HAVE_ZOLTAN && HAVE_MPI 
