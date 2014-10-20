@@ -166,8 +166,7 @@ namespace Dune
       {
         face.resize(4,0);
         face[0] *=2;
-        face[1] *=2;
-        face[3] = face[1];
+        face[3] = 2*face[1];
         face[1] = face[0]+1;
         face[2] = face[3]+1;       
       }
