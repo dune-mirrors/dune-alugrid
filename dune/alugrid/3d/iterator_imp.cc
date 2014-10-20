@@ -194,7 +194,6 @@ equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
 template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
 {
-  std::cout << "trying to increment" << std::endl;
   // leaf increment 
   alugrid_assert (item_);
 
