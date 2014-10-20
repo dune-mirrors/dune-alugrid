@@ -648,8 +648,6 @@ namespace Dune
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
-    if(dimension == 3)
-    {
       const typename ElementVector::iterator elementEnd = elements_.end();
       for( typename ElementVector::iterator elementIt = elements_.begin();
            elementIt != elementEnd; ++elementIt )
@@ -689,7 +687,6 @@ namespace Dune
         else
           std::swap( element[ 2 ], element[ 3 ] );
       } // end of loop over all elements
-    } // end if dimension == 3
   }
 
 
