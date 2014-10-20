@@ -975,10 +975,11 @@ namespace Dune
         alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
                            localALUIndex);
 
-  std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
-  std::cout << "localALUIndex: " << localALUIndex << std::endl;
-  std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
-  std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
+    std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
+    std::cout << "localALUIndex: " << localALUIndex << std::endl;
+    std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
+    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
+    assert( localDuneIndex == 0 || localDuneIndex == 1 );
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
   }
 
