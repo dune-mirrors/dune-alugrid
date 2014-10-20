@@ -6,6 +6,8 @@
 #ifndef NDEBUG
 #define ALUGRIDDEBUG
 #define alugrid_assert(EX) assert(EX)
+#else
+#define alugrid_assert(EX) (static_cast<void>(0))
 #endif
 /*
 #ifndef ALUGRIDDEBUG
