@@ -156,7 +156,6 @@ namespace Dune
         else
           outerTwist_ = outerEntity().twist( outerFaceNumber_ );
       }
-
       if ( bnd ) // the boundary case 
       {
         alugrid_assert ( bnd );
@@ -198,7 +197,7 @@ namespace Dune
           bndId_ = boundaryFace().bndtype();
         }
       }
-    }
+    } // if outerElement_->isboundary
     else 
     {
       // get outer twist 
@@ -979,7 +978,7 @@ namespace Dune
   std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
   std::cout << "localALUIndex: " << localALUIndex << std::endl;
   std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
-std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
+  std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
   }
 

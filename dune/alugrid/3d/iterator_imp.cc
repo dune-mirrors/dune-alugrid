@@ -194,6 +194,7 @@ equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
 template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
 {
+  std::cout << "trying to increment" << std::endl;
   // leaf increment 
   alugrid_assert (item_);
 
@@ -432,6 +433,9 @@ inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorT
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);
+ // std::cout << "index: " << index << std::endl;
+ // std::cout << "alu index: " << ElementTopo::dune2aluFace(index) << std::endl;
+ // std::cout << "numFaces: " << numFaces << std::endl;
   return elem.myhface3(ElementTopo::dune2aluFace(index));
 }
 
@@ -581,6 +585,7 @@ assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 template<class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment () 
 {
+
   // level increment 
   alugrid_assert ( item_ );
 
@@ -613,6 +618,7 @@ template <class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace) 
 {
+
   alugrid_assert ( item_->level() == innerLevel_ );
   levelNeighbor_ = (newFace.level() == innerLevel_); 
   connector_.updateFaceInfo(newFace, innerLevel_,
