@@ -631,7 +631,6 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
-    ElementType temp (element);
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     const int falu = ElementTopologyMappingType :: generic2aluFace( f );
     for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -681,8 +680,10 @@ namespace Dune
 
         if( elementType == hexa )
         {
-          for( int i = 0; i < 4; ++i )
-            std::swap( element[ i ], element[ i+4 ] );
+        //  for( int i = 0; i < 4; ++i )
+        //    std::swap( element[ i ], element[ i+4 ] );
+          std::swap( element[ 5 ], element[ 6 ] );          
+          std::swap( element[ 1 ], element[ 2 ] );          
         }
         else
           std::swap( element[ 2 ], element[ 3 ] );

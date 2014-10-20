@@ -892,8 +892,8 @@ namespace Dune
       if(actualDimw == 2)
       {
         // we want the length of the intersection and orthogonal to it
-        outerNormal_[0] = factor * (_p3[1] - _p0[1]);
-        outerNormal_[1] = factor * (_p0[0] - _p3[0]);
+        outerNormal_[0] = factor * (_p0[1] - _p3[1]);
+        outerNormal_[1] = factor * (_p3[0] - _p0[0]);
       }
       //TODO: check
       else if(actualDimw == 3)
@@ -966,16 +966,21 @@ namespace Dune
                     const int aluFaceTwist,
                     const int duneFaceVertexIndex) const 
   {
-    const int localALUIndex = 
+  
+
+  
+    const  int localALUIndex = 
       FaceTopo::dune2aluVertex(duneFaceVertexIndex, 
                                aluFaceTwist);
-
+                               
     // get local ALU vertex number on the element's face
     const int localDuneIndex = ElementTopo::
         alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
                            localALUIndex);
-
-    std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
+                           
+    std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
+    std::cout << "aluFaceTwist: " << aluFaceTwist << std::endl;
+    std::cout << "duneFaceVertexIndex: " << duneFaceVertexIndex << std::endl;
     std::cout << "localALUIndex: " << localALUIndex << std::endl;
     std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
     std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
