@@ -968,22 +968,24 @@ namespace Dune
   {
   
 
-  
+    //we want vertices 1,2 of the real 3d DUNE face
     const  int localALUIndex = 
-      FaceTopo::dune2aluVertex(duneFaceVertexIndex, 
+      FaceTopo::dune2aluVertex(type == tetra ? duneFaceVertexIndex + 1 : duneFaceVertexIndex, 
                                aluFaceTwist);
                                
-    // get local ALU vertex number on the element's face
-    const int localDuneIndex = ElementTopo::
-        alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
-                           localALUIndex);
+    // get local ALU vertex number on the element's face - for tetra map  1,2 of real 3d face back to 0,1 by subtracting 1
+    const int localDuneIndex = (type == tetra) ? 
+                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) - 1 
+                             :
+                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) 
+                             ;
                            
-    std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
+ /*   std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
     std::cout << "aluFaceTwist: " << aluFaceTwist << std::endl;
     std::cout << "duneFaceVertexIndex: " << duneFaceVertexIndex << std::endl;
     std::cout << "localALUIndex: " << localALUIndex << std::endl;
     std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
-    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
+    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl; */
     assert( localDuneIndex == 0 || localDuneIndex == 1 );
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
   }
