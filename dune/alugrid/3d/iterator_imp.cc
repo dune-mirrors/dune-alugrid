@@ -131,7 +131,9 @@ first (const EntityType & en, int wLevel)
   {
     // for the 2d version numFaces is smaller then the actual 
     // stored nFaces of the element
-    alugrid_assert ( numFaces <= en.getItem().nFaces() );
+    alugrid_assert ( dim == 3 ?
+                    (numFaces == en.getItem().nFaces()) :
+                    (numFaces  < en.getItem().nFaces())  );
     setFirstItem(en.getItem(), wLevel);
   }
 }
@@ -527,7 +529,9 @@ first (const EntityType & en, int wLevel)
   {
     // for the 2d version numFaces is smaller then the actual 
     // stored nFaces of the element
-    alugrid_assert ( numFaces <= en.getItem().nFaces() );
+    alugrid_assert ( dim == 3 ?
+                    (numFaces == en.getItem().nFaces()) :
+                    (numFaces  < en.getItem().nFaces())  );
     setFirstItem(en.getItem(), wLevel);
   }
 }
