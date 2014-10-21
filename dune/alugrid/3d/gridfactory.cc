@@ -34,52 +34,52 @@ namespace Dune
   
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexType &pos )
+  void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexInputType &pos )
   {
-    if( ! allowGridGeneration_ )
-      DUNE_THROW( GridError, "ALU3dGridFactory allows insertion only for rank 0." );
-      
-
-    //add additional vertex to list for 2d tetra
-    if(dimension == 2 && elementType == tetra && vertices_.size() == 0)
-      vertices_.push_back( std::make_pair(VertexType(1.), 0 ) );
-    
-    //add original vertex
-    vertices_.push_back( std::make_pair( pos, vertices_.size() ) );
-    
-    //add additional vertex each time a 2d hexa vertex is added
-    if(dimension == 2 && elementType == hexa)
-    {
-      VertexType pos1 (pos);
-      if(dimensionworld == 3) pos1[2]+=1.;
-  
-      vertices_.push_back( std::make_pair( pos1, vertices_.size() ) );     
-    }
+    doInsertVertex( pos, vertices_.size() );
   } 
 
 
   template< class ALUGrid >
   alu_inline 
-  void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexType &pos, const VertexId globalId )
+  void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexInputType &coord, const VertexId globalId )
   {
-    foundGlobalIndex_ = true ;
+    // mark that vertices with global id have been inserted
+    foundGlobalIndex_ = true;
+    doInsertVertex( coord, globalId );
+  }
+
+  template< class ALUGrid >
+  alu_inline 
+  void ALU3dGridFactory< ALUGrid >::doInsertVertex ( const VertexInputType &coord, const VertexId globalId )
+  {
+    VertexType pos ( 0 );
+    // copy coordinates since input vertex might only have 2 coordinates
+    const int size = coord.size();
+    for( int i=0; i<size; ++i )
+      pos[ i ] = coord[ i ];
+
+    // nothing to do for 3d
     if(dimension == 3)
+    {
       vertices_.push_back( std::make_pair( pos, globalId ) );
+    }
     else if (dimension == 2)
     {
-      if (elementType == tetra)
+      if( elementType == tetra )
       { 
         if(vertices_.size() == 0)
-          vertices_.push_back( std::make_pair(VertexType(1.), 0 ) );
-        vertices_.push_back( std::make_pair( pos, globalId +1 ) );       
+          vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
+
+        vertices_.push_back( std::make_pair( pos, globalId+1 ) );
       }
       else if(elementType == hexa)
       {
-            vertices_.push_back( std::make_pair( pos, 2*globalId ) );
-            VertexType pos1 (pos);
-            if(dimensionworld == 3) 
-              pos1[2]+=1.;      
-            vertices_.push_back( std::make_pair( pos1, 2*globalId+1 ) );     
+        vertices_.push_back( std::make_pair( pos, 2*globalId ) );
+        VertexType pos1 (pos);
+        if(dimensionworld == 3)
+          pos1[2] += 1.0 ;
+        vertices_.push_back( std::make_pair( pos1, 2*globalId+1 ) );
       }
     }
   }
@@ -93,34 +93,36 @@ namespace Dune
   {
     assertGeometryType( geometry );
     
-      if( geometry.dim() != dimension )
-        DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
+    if( geometry.dim() != dimension )
+      DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
                              "into a 3-dimensional ALUGrid." );
     if(dimension == 3){
       if( vertices.size() != numCorners )
         DUNE_THROW( GridError, "Wrong number of vertices." );
-      elements_.push_back( vertices );\
+      elements_.push_back( vertices );
     }
     else if (dimension == 2)
     {
-     std::vector< VertexId > element (vertices);
+      std::vector< VertexId > element;
       if( elementType == hexa)
       {
-        std::transform(element.begin(), element.end(), element.begin(),
-               std::bind1st(std::multiplies<VertexId>(),2));
-        element.resize(8,0);
-        for (unsigned int i = 0; i < 4; ++i)
+        element.resize( 8 );
+        for (int i = 0; i < 4; ++i)
         {
-          element[i+4] = element[i]+1;
+          // multiply original number with 2
+          element[ i ]    = vertices[ i ] * 2;
+          element[ i+4 ]  = element [ i ] + 1;
         }
       }
       else if ( elementType == tetra )
       {
-        element.resize(4,0);
-        element[3] = element[1]+1;
-        element[2] = element[2]+1;
-        element[1] = element[0]+1;
+        element.resize( 4 );
+
+        // construct element following the DUNE reference tetrahedron
         element[0] = 0;                
+        element[1] = vertices[ 0 ] + 1;
+        element[2] = vertices[ 2 ] + 1;
+        element[3] = vertices[ 1 ] + 1;
       }
       elements_.push_back(element);
     }
@@ -154,23 +156,22 @@ namespace Dune
     }
     else if(dimension == 2)
     {
-      std::vector<VertexId> face(vertices);
+      VertexId face[ 4 ];
       if(elementType == tetra)
       {
-        face.resize(3,0);
         face[2] = face[1]+1;
         face[1] = face[0]+1;
         face[0] = 0;
       }
       else if(elementType == hexa)
       {
-        face.resize(4,0);
         face[0] *=2;
         face[3] = 2*face[1];
         face[1] = face[0]+1;
         face[2] = face[3]+1;       
       }
-      for (unsigned int i = 0; i < face.size(); ++i)
+      const int nFace = elementType == hexa ? 4 : 3;
+      for (int i = 0; i < nFace; ++i)
       {
         boundaryId.first[ i ] = face[ i ];       
       }
@@ -186,14 +187,27 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::insertBoundary ( const int element, const int face, const int id )
   {
+    abort();
+    if( (element < 0) || (element >= (int)elements_.size()) )
+      DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
+
+    int newFace = face;
+    if (dimension == 2 && elementType == tetra) 
+      ++newFace;
+
+    doInsertBoundary( element, newFace, id );
+  }
+
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+    ::doInsertBoundary ( const int element, const int face, const int id )
+  {
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
     BndPair boundaryId;
-    if (dimension == 2 && elementType == tetra) 
-      generateFace( elements_[ element ], face+1, boundaryId.first );
-    else
-      generateFace( elements_[ element ], face, boundaryId.first );
+    generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.insert( boundaryId );
   }
@@ -698,6 +712,7 @@ namespace Dune
                       const FaceType &key1, const FaceType &key2,
                       const int defaultId )
   {
+    /*
     WorldVector w = transformation.evaluate( position( key1[ 0 ] ) );
     int org = -1;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -739,6 +754,7 @@ namespace Dune
 
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
+    */
     return true;
   }
 
@@ -784,7 +800,7 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id )
   {
-    insertBoundary( pos->second.first, pos->second.second, id );
+    doInsertBoundary( pos->second.first, pos->second.second, id );
   }
 
 
