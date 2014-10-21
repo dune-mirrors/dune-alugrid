@@ -190,10 +190,7 @@ namespace Dune
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
     BndPair boundaryId;
-    if (dimension == 2 && elementType == tetra) 
-      generateFace( elements_[ element ], face+1, boundaryId.first );
-    else
-      generateFace( elements_[ element ], face, boundaryId.first );
+    generateFace( elements_[ element ], face, boundaryId.first );
     boundaryId.second = id;
     boundaryIds_.insert( boundaryId );
   }
