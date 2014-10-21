@@ -187,7 +187,6 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::insertBoundary ( const int element, const int face, const int id )
   {
-    abort();
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
 
