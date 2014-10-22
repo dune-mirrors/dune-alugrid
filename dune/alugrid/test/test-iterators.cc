@@ -24,6 +24,7 @@
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/alugrid/dgf.hh> 
 
@@ -96,15 +97,18 @@ void checkIterators( GridType& grid )
 template <class GridView>
 void writeFile( const GridView& gridView )
 {
-  Dune::DGFWriter< GridView > writer( gridView );
-  writer.write( "dump.dgf" );
+  //Dune::DGFWriter< GridView > writer( gridView );
+  //writer.write( "dump.dgf" );
+
+  Dune::VTKWriter< GridView > vtk( gridView );
+  vtk.write( "dump" );
 }
 
 template <class GridType> 
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
 {
 
-  //writeFile( grid.leafGridView() );
+  writeFile( grid.leafGridView() );
 
   if( display )
   {
