@@ -104,7 +104,25 @@ namespace Dune
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, LocalCoordinateType &result ) const
   {
     //TODO use connector.face.nChild and (maybe twist)    referenceElementCoordinatesRefined ( side, cornerCoords )
-    result = LocalCoordinateType(0.);
+    
+    // get the parent's face coordinates on the reference element (Dune reference element)
+    LocalCoordinateType cornerCoords;
+    referenceElementCoordinatesRefined ( side, cornerCoords );
+    
+    if(connector_.face().nChild() == 0){
+      result[0] = cornerCoords[0];
+      result[1] =  ( cornerCoords[1] + cornerCoords[0] );
+      result[1] *=0.5;
+    }
+    else if(connector_.face().nChild() == 1)
+    {
+      result[0] = ( cornerCoords[1] + cornerCoords[0] );
+      result[0] *= 0.5;
+      result[1] = cornerCoords[1];     
+    }
+    else
+      std::cerr << "Trying to access more than two children on one face" << std::endl;
+    
   }
 
 
