@@ -512,8 +512,8 @@ void checkIntersectionIterator ( const GridViewType &view,
                   << ", outside index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
         assert( false );
       }
-      //TODO indexset checken
-/*
+      
+
       const typename GridType::LocalIdSet &localIdSet = view.grid().localIdSet();
       if( localIdSet.subId( *eIt, indexInInside, 1 ) != localIdSet.subId( outside, indexInOutside, 1 ) )
       {
@@ -523,7 +523,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                   << ", outside id = " << localIdSet.subId( outside, indexInOutside, 1 ) << std::endl;
         assert( false );
       }
-
+/*   //TODO indexset checken
       const typename GridType::GlobalIdSet &globalIdSet = view.grid().globalIdSet();
       if( globalIdSet.subId( *eIt, indexInInside, 1 ) != globalIdSet.subId( outside, indexInOutside, 1 ) )
       {

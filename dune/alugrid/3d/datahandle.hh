@@ -24,6 +24,7 @@ namespace ALUGrid
   : public GatherScatter
   {
   protected:  
+    enum {dim = GridType::dimension};
     const GridType & grid_;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -33,8 +34,8 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
     
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
 
     EntityType  & entity_;
     RealEntityType & realEntity_;
@@ -140,6 +141,7 @@ namespace ALUGrid
   {
   protected:  
     enum { codim = 0 };
+    enum { dim = GridType::dimension};
     const GridType & grid_;
     typedef typename GridType::template Codim<0>::Entity       EntityType;
     typedef typename GridType::EntityObject                    MakeableEntityType ;
@@ -148,13 +150,13 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType ImplElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
     
-    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
+    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
     
-    typedef typename ImplTraits::template Codim< codim >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< codim >::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< dim, codim >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dim, codim >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 
@@ -288,13 +290,13 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
     
-    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
+    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
     
-    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 
@@ -355,6 +357,7 @@ namespace ALUGrid
   class GatherScatterLevelData 
   : public GatherScatterBaseImpl<GridType,DataCollectorType,codim> 
   {
+    enum {dim = GridType::dimension};
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -364,13 +367,13 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
     
-    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
+    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
     
-    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 
@@ -411,6 +414,7 @@ namespace ALUGrid
   : public GatherScatterBaseImpl<GridType,DataCollectorType,0> 
   {
     enum { codim = 0 };
+    enum {dim  = GridType:: dimension};
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -420,13 +424,13 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< codim >::ImplementationType IMPLElementType;
-    typedef typename ImplTraits::template Codim< codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
     
-    typedef typename ImplTraits::template Codim< 1 >::InterfaceType HFaceType;
+    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
     
-    typedef typename ImplTraits::template Codim< 0 >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< 0 >::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 

@@ -3,7 +3,7 @@
 #include <config.h>
 
 // #define NO_2D
- #define NO_3D
+// #define NO_3D
 
 #include <iostream>
 #include <sstream>
