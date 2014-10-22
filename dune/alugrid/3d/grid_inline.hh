@@ -41,7 +41,7 @@ namespace Dune
     , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
-    //, nonConformingGeoInFatherStorage_( makeGeometries() )
+    , nonConformingGeoInFatherStorage_( makeGeometries() )
   {
     // check macro grid file for keyword 
     checkMacroGridFile( macroTriangFilename );
@@ -59,7 +59,6 @@ namespace Dune
   } // end constructor
 
 
-  /*
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   const typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::GeometryInFatherStorage& 
   ALU3dGrid< actualDim, actualDimw, elType, Comm >::makeGeometries()
@@ -80,16 +79,15 @@ namespace Dune
     }
 
     // initialize static storage variables 
-    ALU3dGridGeometry< 0, 3, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< 1, 3, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< 2, 3, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< 3, 3, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 0, dimension, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 1, dimension, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< 2, dimension, const ThisType> :: geoProvider();
+    ALU3dGridGeometry< dimension, dimension, const ThisType> :: geoProvider();
 
     // return non-conforming geometryInFather storage
     // true == non-conforming 
     return GeometryInFatherStorage :: storage( geomTypes_[ 0 ][ 0 ], true );
   }
-  */
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >

@@ -167,7 +167,7 @@ namespace Dune
     }
 
     //! initialize local geometries 
-    void initialize( const GeometryType type, const bool nonConform )
+    bool initialize( const GeometryType type, const bool nonConform )
     {
       if( ! initialized_ ) 
       {
@@ -179,7 +179,9 @@ namespace Dune
         // refine once and the store the father - child relations 
         CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
           ::createGeometries(*this, type, nonConform);
+        return true;
       }
+      return false;
     }
 
     // check if geometry has been created
@@ -307,8 +309,11 @@ namespace Dune
         // create static variable on heap
         static ThisType simplexGeoms; 
         // initialize (only done once)
-        simplexGeoms.initialize( type, nonConforming );
-        alugrid_assert ( type == simplexGeoms[ 0 ].type() );
+        if( simplexGeoms.initialize( type, nonConforming ) )
+        {
+          if( type != simplexGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
         return simplexGeoms ;
       }
       else 
@@ -319,8 +324,11 @@ namespace Dune
         // create static variable on heap
         static ThisType cubeGeoms;
         // initialize (only done once)
-        cubeGeoms.initialize( type, nonConforming );
-        alugrid_assert ( type == cubeGeoms[ 0 ].type() );
+        if( cubeGeoms.initialize( type, nonConforming ) ) 
+        {
+          if( type != cubeGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
         return cubeGeoms ;
       }
     }
