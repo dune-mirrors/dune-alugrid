@@ -732,8 +732,8 @@ namespace Dune
     }
 
     // communicate unidentified boundaries and find process borders)
-    typedef MPIHelper::MPICommunicator MPICommunicator;
-    CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+    // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
+    CollectiveCommunication< MPICommunicatorType > comm( communicator_ );
 
     int numBoundariesMine = faceMap.size();
     std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
@@ -764,8 +764,9 @@ namespace Dune
     std::vector< std::vector< int > > boundariesEach;
 
 #if HAVE_MPI
-    // collect data from all processes 
-    boundariesEach = ALU3DSPACE MpAccessMPI( comm ).gcollect( boundariesMine );
+    // collect data from all processes (use MPI_COMM_WORLD here) since in this case the
+    // grid must be parallel if we reaced this point
+    boundariesEach = ALU3DSPACE MpAccessMPI( Dune::MPIHelper::getCommunicator() ).gcollect( boundariesMine );
 #else
     boundariesEach.resize( comm.size() );
 #endif
