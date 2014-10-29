@@ -18,7 +18,9 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include <dune/grid/test/gridcheck.cc>
+//#include <dune/grid/test/gridcheck.cc>
+#include "gridcheck.cc"
+
 
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
