@@ -400,6 +400,7 @@ template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
 {
 
+  mxl = 0;
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType(); 
@@ -454,7 +455,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   }
 
   // check also non-conform grids 
-  makeNonConfGrid(grid,0,1);
+  // makeNonConfGrid(grid,0,1);
 
   // check iterators  
   checkIterators( grid );
@@ -639,7 +640,8 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex ) 
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        //std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         checkCapabilities< false >( *gridPtr );
@@ -663,7 +665,8 @@ int main (int argc , char **argv) {
       if( testALU2dConform ) 
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        //std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        std::string filename( "./dgf/cube-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
         checkCapabilities< true >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
