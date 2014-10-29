@@ -1132,7 +1132,7 @@ namespace Dune
       assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
       std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
       if( !indexSet.second )
-        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ) );
+        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level );
       return indexSet;
     }
 
