@@ -245,7 +245,8 @@ int main (int argc, char ** argv, const char ** envp)
   const char* filename = 0 ;
   if (argc < 2) 
   {
-    filename = "../macrogrids/reference.tetra";
+    //filename = "../macrogrids/reference.tetra";
+    filename = "./grids/hexa.test.converted";
     mxl = 1;
     glb = 1;
     std::cout << "usage: "<< argv[0] << " <macro grid> <opt: maxlevel> <opt: global refinement>\n";
@@ -267,14 +268,14 @@ int main (int argc, char ** argv, const char ** envp)
     if (argc < 3)
     {
       if( rank == 0 ) 
-        std::cout << "Default level = "<< mxl << " choosen! \n";
+        std::cout << "Default level = "<< mxl << " chosen! \n";
     }
     else 
       mxl = atoi(argv[2]);
     if (argc < 4)
     {
       if( rank == 0 ) 
-        std::cout << "Default global refinement = "<< glb << " choosen! \n";
+        std::cout << "Default global refinement = "<< glb << " chosen! \n";
     }
     else 
       glb = atoi(argv[3]);
