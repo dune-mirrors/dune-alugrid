@@ -180,13 +180,13 @@ namespace ALUGrid
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
     alugrid_assert (ev1 && ev3 );
     
-    inneredge_t * e0 = new inneredge_t (l, ev0, ev2);
+    inneredge_t * e0 = new inneredge_t (l, ev1, ev3);
     alugrid_assert ( e0 );
     
     //TODO: Make this right!
     
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, e3, 1, this->subedge(3,1), twist(3), 0);
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), e1, 0, e0, 1, 1);
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, this->myhedge(1), 1, this->subedge(3,1), twist(3), 0);
+    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), this->myhedge(1), 0, e0, 1, 1);
 
     alugrid_assert (f0 && f1);  
     f0->append(f1);
@@ -831,20 +831,21 @@ namespace ALUGrid
     alugrid_assert (_inner == 0 );  
 
     //the only subvertices we need are from the top and bottom face
-    myvertex_t * fv0 = myhface4 (0)->subvertex (0);
-    myvertex_t * fv1 = myhface4 (1)->subvertex (0);
+    myvertex_t * fv4 = myhface4 (4)->subvertex (0);
+    myvertex_t * fv5 = myhface4 (5)->subvertex (0);
     alugrid_assert ( fv4 && fv5);
 
     inneredge_t * e0 = new inneredge_t (l, fv5, fv4);
 
     alugrid_assert ( e0 );
 
- // we just need for inner Faces
+ // we just need four inner Faces 
+ // always the inner edge + the subedge of top and bottom  + one hedge
  // TODO: get the right faces
-    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1);
-    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1);
-    innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 );
-    innerface_t * f3 = new innerface_t (l, e5, 0, e4, 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 );
+    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e0, 0, this->myhedge(0), 1, this->subedge (5, 4), 1);
+    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e0, 0, this->myhedge(0), 1);
+    innerface_t * f2 = new innerface_t (l, e0, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, this->myhedge(0), 0 );
+    innerface_t * f3 = new innerface_t (l, e0, 0, this->myhedge(0), 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 );
    
 
     alugrid_assert (f0 && f1 && f2 && f3 );
@@ -874,10 +875,10 @@ namespace ALUGrid
 
     //4 inner hexas
     // TODO: get the right hexas
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f4, 0, f8, -4, subface (5, 0), twist (5) , this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f9, -4, f4, -1, this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f9, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f5, -1        , this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f8, 0, f5, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f1, 0, f2, -4, subface (5, 0), twist (5) , this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f2, -4, f3, -1, this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f3, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f1, -1        , this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f0, 0, f1, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume);
    
 
     alugrid_assert (h0 && h1 && h2 && h3 );
@@ -1299,7 +1300,7 @@ namespace ALUGrid
     innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
     innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,3), twist (1), this, 1);
     
-    alugrid_assert (p0 && p1 && p2 && p3);
+    alugrid_assert (p0 && p1 );
     p0->append(p1);
 
     _dwn = p0;

@@ -269,6 +269,7 @@ namespace ALUGrid
       inline myhedge_t * subedge (int,int);
       inline const myhedge_t * subedge (int,int) const;
       void splitISO4 ();
+      void splitISO2 ();
     public:
       // for index get/free, when refinement is done 
       IndexManagerType & indexManager() { 
@@ -339,6 +340,7 @@ namespace ALUGrid
       typedef typename A::bnd_t         bnd_t;
       
       void splitISO4 ();
+      void splitISO2 ();
       bool refineLikeElement (balrule_t);
 
       using A::bndNotifyBalance;
@@ -413,6 +415,7 @@ namespace ALUGrid
       myrule_t _rule, _req;
 
       void splitISO8 ();
+      void splitISO4 ();
     protected:
       // for HexaTop, when refinement is done 
       IndexManagerType & indexManager() { 
@@ -522,6 +525,7 @@ namespace ALUGrid
       myrule_t _rule;
     private :
       void splitISO4 ();
+      void splitISO2 ();
     protected :
       myhedge_t * subedge (int,int);
       const myhedge_t * subedge (int,int) const;
