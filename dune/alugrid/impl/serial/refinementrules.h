@@ -69,7 +69,7 @@ namespace ALUGrid
     {
       enum rule_enum { crs=-1, nosplit=1, 
                        e01=2, e12=3, e20=4, e23=5, e30=6, e31=7, 
-                       iso8=8, bisect=9
+                       iso8=8, bisect=9, iso4_2d = 14
                      };
       typedef signed char rule_t;
 
@@ -88,7 +88,7 @@ namespace ALUGrid
       
     struct HexaRule
     {
-      enum rule_enum { crs = -1, nosplit = 1, iso8=8 };
+      enum rule_enum { crs = -1, nosplit = 1, iso8=8, iso4_2d = 14 };
       typedef signed char rule_t;
 
       explicit HexaRule ( const rule_t & );
