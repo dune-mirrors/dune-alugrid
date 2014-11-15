@@ -33,7 +33,7 @@ namespace Dune
 
     static const ALU3dGridElementType elementType = Grid::elementType;
 
-    static const unsigned int dimension = Grid::dimension;
+    static const unsigned int dimension      = Grid::dimension;
     static const unsigned int dimensionworld = Grid::dimensionworld;
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
@@ -71,7 +71,12 @@ namespace Dune
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
-    typedef FieldVector< ctype, dimensionworld > VertexType;
+    // type of vertex coordinates put into the factory
+    typedef FieldVector< ctype, dimensionworld > VertexInputType;
+
+    // type of vertex coordinates stored inside the factory
+    typedef FieldVector< ctype, 3 > VertexType;
+
     typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
 
@@ -126,14 +131,14 @@ namespace Dune
      *  
      *  \param[in]  pos  position of the vertex
      */
-    virtual void insertVertex ( const VertexType &pos );
+    virtual void insertVertex ( const VertexInputType &pos );
 
     /** \brief insert a vertex into the coarse grid including the vertex's globally unique id  
      *  
      *  \param[in]  pos       position of the vertex
      *  \param[in]  globalId  globally unique id for vertex 
      */
-    void insertVertex ( const VertexType &pos, const VertexId globalId );
+    void insertVertex ( const VertexInputType &pos, const VertexId globalId );
 
     /** \brief insert an element into the coarse grid
      * 
@@ -289,6 +294,9 @@ namespace Dune
     }
 
   private:
+    void doInsertVertex ( const VertexInputType &pos, const VertexId globalId );
+    void doInsertBoundary ( int element, int face, int boundaryId );
+
     size_t globalId ( const VertexId &id ) const
     {
       alugrid_assert ( id < vertices_.size() );

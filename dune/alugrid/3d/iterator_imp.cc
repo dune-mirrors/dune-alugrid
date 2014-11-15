@@ -129,7 +129,11 @@ first (const EntityType & en, int wLevel)
   }
   else 
   {
-    alugrid_assert ( numFaces == en.getItem().nFaces() );
+    // for the 2d version numFaces is smaller then the actual 
+    // stored nFaces of the element
+    alugrid_assert ( dim == 3 ?
+                    (numFaces == en.getItem().nFaces()) :
+                    (numFaces  < en.getItem().nFaces())  );
     setFirstItem(en.getItem(), wLevel);
   }
 }
@@ -432,6 +436,9 @@ inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorT
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const {
   alugrid_assert (index >= 0 && index < numFaces);
+ // std::cout << "index: " << index << std::endl;
+ // std::cout << "alu index: " << ElementTopo::dune2aluFace(index) << std::endl;
+ // std::cout << "numFaces: " << numFaces << std::endl;
   return elem.myhface3(ElementTopo::dune2aluFace(index));
 }
 
@@ -520,7 +527,11 @@ first (const EntityType & en, int wLevel)
   }
   else 
   {
-    alugrid_assert ( numFaces == en.getItem().nFaces() );
+    // for the 2d version numFaces is smaller then the actual 
+    // stored nFaces of the element
+    alugrid_assert ( dim == 3 ?
+                    (numFaces == en.getItem().nFaces()) :
+                    (numFaces  < en.getItem().nFaces())  );
     setFirstItem(en.getItem(), wLevel);
   }
 }
@@ -581,6 +592,7 @@ assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 template<class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment () 
 {
+
   // level increment 
   alugrid_assert ( item_ );
 
@@ -613,6 +625,7 @@ template <class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace) 
 {
+
   alugrid_assert ( item_->level() == innerLevel_ );
   levelNeighbor_ = (newFace.level() == innerLevel_); 
   connector_.updateFaceInfo(newFace, innerLevel_,

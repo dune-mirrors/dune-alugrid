@@ -156,7 +156,6 @@ namespace Dune
         else
           outerTwist_ = outerEntity().twist( outerFaceNumber_ );
       }
-
       if ( bnd ) // the boundary case 
       {
         alugrid_assert ( bnd );
@@ -198,7 +197,7 @@ namespace Dune
           bndId_ = boundaryFace().bndtype();
         }
       }
-    }
+    } // if outerElement_->isboundary
     else 
     {
       // get outer twist 
@@ -893,8 +892,8 @@ namespace Dune
       if(actualDimw == 2)
       {
         // we want the length of the intersection and orthogonal to it
-        outerNormal_[0] = factor * (_p3[1] - _p0[1]);
-        outerNormal_[1] = factor * (_p0[0] - _p3[0]);
+        outerNormal_[0] = factor * (_p0[1] - _p3[1]);
+        outerNormal_[1] = factor * (_p3[0] - _p0[0]);
       }
       //TODO: check
       else if(actualDimw == 3)
@@ -967,19 +966,27 @@ namespace Dune
                     const int aluFaceTwist,
                     const int duneFaceVertexIndex) const 
   {
-    const int localALUIndex = 
-      FaceTopo::dune2aluVertex(duneFaceVertexIndex, 
+  
+
+    //we want vertices 1,2 of the real 3d DUNE face
+    const  int localALUIndex = 
+      FaceTopo::dune2aluVertex(type == tetra ? duneFaceVertexIndex + 1 : duneFaceVertexIndex, 
                                aluFaceTwist);
-
-    // get local ALU vertex number on the element's face
-    const int localDuneIndex = ElementTopo::
-        alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
-                           localALUIndex);
-
-  std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
-  std::cout << "localALUIndex: " << localALUIndex << std::endl;
-  std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
-std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl;
+                               
+    // get local ALU vertex number on the element's face - for tetra map  1,2 of real 3d face back to 0,1 by subtracting 1
+    const int localDuneIndex = (type == tetra) ? 
+                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) - 1 
+                             :
+                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) 
+                             ;
+                           
+ /*   std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
+    std::cout << "aluFaceTwist: " << aluFaceTwist << std::endl;
+    std::cout << "duneFaceVertexIndex: " << duneFaceVertexIndex << std::endl;
+    std::cout << "localALUIndex: " << localALUIndex << std::endl;
+    std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
+    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl; */
+    assert( localDuneIndex == 0 || localDuneIndex == 1 );
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
   }
 
