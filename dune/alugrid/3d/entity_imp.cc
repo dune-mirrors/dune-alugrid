@@ -538,7 +538,7 @@ namespace Dune {
     // on ghost elements return false 
     if( isGhost() ) return false; 
     
-    enum { numFaces = EntityCount<GridImp::elementType>::numFaces };
+    enum { numFaces = dim == 3 ? EntityCount<GridImp::elementType>::numFaces : (elementType == tetra ? 3 : 4) };
     typedef typename ImplTraits::HasFaceType HasFaceType;
     typedef typename ImplTraits::GEOFaceType GEOFaceType;
 

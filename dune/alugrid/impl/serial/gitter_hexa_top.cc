@@ -162,6 +162,43 @@ namespace ALUGrid
     _rule = myrule_t::iso4;
     return;
   }
+  
+  //splitISO2 splits faces between edges 03 and 12 
+  //   1|-------|-------|2
+  //    |       |       |
+  //    |       |       |
+  //    |       |       |
+  //   0|_______|_______|3
+  //
+  // so we just need to add two inner faces - no inner edges or inner vertices
+  
+  template< class A >  void Hface4Top < A >::splitISO2 () {
+    int l = 1 + level ();
+    alugrid_assert ( _inner == 0 );
+    
+    myvertex_t * ev1 = myhedge(1)->subvertex (0);
+    myvertex_t * ev3 = myhedge(3)->subvertex (0);
+    alugrid_assert (ev1 && ev3 );
+    
+    inneredge_t * e0 = new inneredge_t (l, ev1, ev3);
+    alugrid_assert ( e0 );
+    
+    //TODO: Make this right!
+    
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, this->myhedge(1), 1, this->subedge(3,1), twist(3), 0);
+    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), this->myhedge(1), 0, e0, 1, 1);
+
+    alugrid_assert (f0 && f1);  
+    f0->append(f1);
+    // inner edge 
+    _inner->store( e0 );
+    // down pointer 
+    _inner->store( f0 );
+    _rule = myrule_t::iso2;
+    return;
+  }
+  
+  
 
   template< class A > void Hface4Top < A >::refineImmediate (myrule_t r) {
     if (r != getrule ()) {
@@ -174,6 +211,13 @@ namespace ALUGrid
         myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2)));
         myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (3)));
         splitISO4 ();
+        break;
+        case myrule_t::iso2 :
+        // important - refine 3 first, as this gives you the even global index on the "real" 2d site
+        myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (3)));
+        myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1)));
+        //TODO Assert that global index of new vertices are correctly even and odd
+        splitISO2 ();
         break;
       default :
         std::cerr << "ERROR (fatal): Invalid refinement rule [" << r << "]" << std::endl;
@@ -221,6 +265,26 @@ namespace ALUGrid
             } 
             else 
               alugrid_assert ( getrule() == myrule_t::iso4 );
+          }
+          return a;
+        }
+        //TODO: check this - it might be wrong
+       case myrule_t::iso2:
+        {
+          const bool a = (twist < 0) 
+                  ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+                  : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
+          if( a ) 
+          {  
+            if( getrule() == myrule_t::nosplit )
+            {
+              refineImmediate( r );
+              // assign my neighbor info to child faces for initialization
+              for( innerface_t *f = dwnPtr(); f; f = f->next() )
+                f->nb.assign( this->nb ); 
+            } 
+            else 
+              alugrid_assert ( getrule() == myrule_t::iso2 );
           }
           return a;
         }
@@ -321,6 +385,30 @@ namespace ALUGrid
     return;
   }
 
+  //split ISO2 is only necessary for the 2d faked grid  
+  template< class A >  void Hbnd4Top < A >::splitISO2 () {
+    int l = 1 + level ();
+    alugrid_assert (_dwn == 0);
+
+    // refine ghost element and fill ghost info 
+    typedef typename Gitter::GhostChildrenInfo GhostChildrenInfo; 
+    GhostChildrenInfo ghostInfo;
+    // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h  
+    // ghostInfo should do the right thing if invoked with ISO4 of hexaTop
+    // TODO: Check that
+    this->splitGhost( ghostInfo );
+
+    //TODO: subface is probably wrong here....
+    innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0));
+    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1));
+
+    alugrid_assert (b0 && b1 );
+    b0->append(b1);
+    _dwn = b0;
+    return;
+  }
+
+
   template< class A >  bool Hbnd4Top < A >::refineBalance (balrule_t r, int b) 
   {
     // Die Methode refineBalance () f"uhrt auf dem Randabschluss entweder
@@ -354,6 +442,17 @@ namespace ALUGrid
         myhface4 (0)->refineImmediate (r);
         // refine myself 
         splitISO4 ();
+      } 
+      else if(r == myrule_t::iso2) 
+      {
+        // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
+        // sich selbst, weil die Anforderung durch die Fl"ache kam, und
+        // dahinter keine Balancierung stattfinden muss.
+      
+        // refine face 
+        myhface4 (0)->refineImmediate (r);
+        // refine myself 
+        splitISO2 ();
       } 
       else 
       {
@@ -421,6 +520,19 @@ namespace ALUGrid
           this->postRefinement ();
 
           return true;
+          
+        case balrule_t::iso2 :
+          if (! myhface4 (0)->refine(balrule_t (balrule_t::iso2).rotate (twist (0)), twist (0))) return false;
+
+          // call refinement method 
+          splitISO2 ();
+
+          // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+          // Template-Arguments eine Methode aufzurufen, um eventuelle
+          // Operationen auf dem verfeinerten Randst"uck aufzurufen.
+          this->postRefinement ();
+
+          return true;
 
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << r << "]." << std::endl;
@@ -446,6 +558,10 @@ namespace ALUGrid
       case myrule_t::iso4:
         splitISO4 ();
         break;
+      
+      case myrule_t::iso2:
+        splitISO2 ();
+        break;  
 
       default:
         std::cerr << "ERROR (fatal): Cannot apply refinement rule " << r << " on boundary segment." << std::endl;
@@ -706,6 +822,83 @@ namespace ALUGrid
     this->detachleafs();
     return;
   }
+  
+  //splitISO4 for the fake 2d grid
+  template< class A > void HexaTop < A >::splitISO4 () 
+  {
+    int l = 1 + this->level ();
+
+    alugrid_assert (_inner == 0 );  
+
+    //the only subvertices we need are from the top and bottom face
+    myvertex_t * fv4 = myhface4 (4)->subvertex (0);
+    myvertex_t * fv5 = myhface4 (5)->subvertex (0);
+    alugrid_assert ( fv4 && fv5);
+
+    inneredge_t * e0 = new inneredge_t (l, fv5, fv4);
+
+    alugrid_assert ( e0 );
+
+ // we just need four inner Faces 
+ // always the inner edge + the subedge of top and bottom  + one hedge
+ // TODO: get the right faces
+    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e0, 0, this->myhedge(0), 1, this->subedge (5, 4), 1);
+    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e0, 0, this->myhedge(0), 1);
+    innerface_t * f2 = new innerface_t (l, e0, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, this->myhedge(0), 0 );
+    innerface_t * f3 = new innerface_t (l, e0, 0, this->myhedge(0), 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 );
+   
+
+    alugrid_assert (f0 && f1 && f2 && f3 );
+    f0->append(f1);
+    f1->append(f2);
+    f2->append(f3);
+
+
+    // calculate child volume which is volume divided by 4 
+    double childVolume = 0.25 * _volume;
+
+    // only check for affine faces 
+    // for other it does not matter 
+    if( this->affineGeometry() ) 
+    {
+      // if vertex projection is available
+      // then set affine to false to invoke volume calculation  
+      for( int i=0; i<6; ++i) 
+      {
+        if( this->myneighbour( i ).first->hasVertexProjection() )
+        {
+          this->setNonAffineGeometry();
+          break;
+        }
+      }
+    }
+
+    //4 inner hexas
+    // TODO: get the right hexas
+    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), twist (0), f0, 0, subface (2, 0), twist (2), f1, 0, f2, -4, subface (5, 0), twist (5) , this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f2, -4, f3, -1, this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f3, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f1, -1        , this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f0, 0, f1, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume);
+   
+
+    alugrid_assert (h0 && h1 && h2 && h3 );
+    h0->append(h1);
+    h1->append(h2);
+    h2->append(h3);
+
+
+    // inner edge 
+    _inner->store( e0 );
+    // inne face 
+    _inner->store( f0 );
+    // down ptr 
+    _inner->store( h0 );
+    _rule = myrule_t::iso8;
+    this->detachleafs();
+    return;
+  }
+
+  
 
   template< class A > void HexaTop < A >::refineImmediate (myrule_t r) 
   {
@@ -726,6 +919,18 @@ namespace ALUGrid
         splitISO8();
       }
       break;
+      
+    case myrule_t::iso4_2d :
+      {
+        typedef typename myhface4_t::myrule_t myhface4rule_t;
+        //TODO: check the right indices
+        for( int i = 0; i < 2; ++i)
+          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));        
+        for( int i = 2; i < 6; ++i )
+          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso2).rotate (twist (i)));
+        splitISO4();
+      }
+      break;  
 
     default:
       std::cerr << "ERROR (fatal): Forced refinement using rule " << r << " not possible." << std::endl;
@@ -759,6 +964,19 @@ namespace ALUGrid
             refineImmediate( r );
             return true;
           }
+          
+        case myrule_t::iso4_2d:
+          {
+            typedef typename myhface4_t::myrule_t myhface4rule_t;
+            for( int i = 0; i < 2; ++i )
+              if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso4 ).rotate( twist( i ) ), twist( i ) ) )
+                return false;
+            for( int i = 2; i < 6; ++i )
+              if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso2 ).rotate( twist( i ) ), twist( i ) ) )
+                return false;
+            refineImmediate( r );
+            return true;
+          }  
 
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << getrule() << "]." << std::endl;
@@ -770,15 +988,33 @@ namespace ALUGrid
   }
 
   template< class A > bool HexaTop < A >::refineBalance (balrule_t r, int fce) {
-    alugrid_assert (r == balrule_t::iso4);
+    alugrid_assert (r == balrule_t::iso4 || r == balrule_t::iso2 );
     if (getrule () == myrule_t::nosplit) {
       if (! myhface4 (fce)->leaf ()) {
-        for (int i = 0; i < 6; i ++)
-          if (i != fce)
-            if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4).rotate (twist (i)), twist (i))) 
-        return false;
-        _req = myrule_t::nosplit;
-        refineImmediate (myrule_t::iso8);
+        switch( r )
+        { 
+        case balrule_t::iso4:  
+          for (int i = 0; i < 6; i ++)
+            if (i != fce)
+              if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4).rotate (twist (i)), twist (i))) 
+                return false;
+          _req = myrule_t::nosplit;
+          refineImmediate (myrule_t::iso8);
+        case balrule_t::iso2:
+          for( int i = 0; i < 2; ++i)
+            if (i != fce)
+              if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4).rotate (twist (i)), twist (i))) 
+                return false;
+          for (int i = 2; i < 6; i ++)
+            if (i != fce)
+              if (!myhface4 (i)->refine (balrule_t (balrule_t::iso2).rotate (twist (i)), twist (i))) 
+                return false;
+          _req = myrule_t::nosplit;
+          refineImmediate (myrule_t::iso4_2d);
+        default:
+          std::cerr << "WARNING (ignored): Invalid refinement rule [" << getrule() << "]." << std::endl;
+          return false;
+        }
       }
     }
     return true;
@@ -1052,6 +1288,25 @@ namespace ALUGrid
     _rule = myrule_t::iso4;
     return;
   }
+  
+  
+  template< class A > void Periodic4Top < A >::splitISO2 () 
+  {  
+    alugrid_assert (_dwn == 0);
+    
+    //TODO: get the right faces here
+
+    const int l = 1 + this->level ();
+    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,3), twist (1), this, 1);
+    
+    alugrid_assert (p0 && p1 );
+    p0->append(p1);
+
+    _dwn = p0;
+    _rule = myrule_t::iso4;
+    return;
+  }
 
   template< class A > void Periodic4Top < A >::refineImmediate (myrule_t r) {
 
@@ -1074,6 +1329,20 @@ namespace ALUGrid
         myhface4 (1)->refineImmediate (myhface4rule_t (r).rotate (twist (1)));
         splitISO4 ();
         break;
+        
+      case myrule_t::iso2 :
+      
+    // Das refineImmediate (..) auf allen Fl"achen wird vom periodic4::refine (..)
+    // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
+    // "uberall hface4::refine (..) true geliefert hat, wohl aber z.B. von
+    // restore () oder abgeleiteten Funktionen, die eine direkte Verfeinerung
+    // erzwingen m"ussen und d"urfen.
+      
+        typedef typename myhface4_t::myrule_t myhface4rule_t;
+        myhface4 (0)->refineImmediate (myhface4rule_t (r).rotate (twist (0)));
+        myhface4 (1)->refineImmediate (myhface4rule_t (r).rotate (twist (1)));
+        splitISO2 ();
+        break;
       default:
         std::cerr << "ERROR (fatal): Forced refinement using rule " << r << " not possible." << std::endl;
         abort();
@@ -1085,7 +1354,7 @@ namespace ALUGrid
 
   template< class A > bool Periodic4Top < A >::refineBalance ( balrule_t r, int fce )
   {
-    if( r != balrule_t::iso4 )
+    if( r != balrule_t::iso4 || r != balrule_t::iso2 )
     {
       std::cerr << "WARNING (ignored): Something is wrong in Periodic4Top < A >::refineBalance." << std::endl;
      
@@ -1218,6 +1487,13 @@ namespace ALUGrid
                 f.subface( j )->nb.complete( f.nb );
               break;
             }
+            
+          case balrule_t::iso2:
+            {
+              for( int j = 0; j < 2; ++j )
+                f.subface( j )->nb.complete( f.nb );
+              break;
+            }  
 
           default:
             std::cerr << "ERROR (fatal): Trying to restore using unknown refinement rule [" << r << "]." << std::endl;

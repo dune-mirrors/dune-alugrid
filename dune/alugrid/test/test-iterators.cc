@@ -19,11 +19,12 @@
 //#include <dune/grid/test/gridcheck.cc>
 
 //#include <dune/grid/test/checkgeometryinfather.cc>
-#include <dune/grid/test/checkintersectionit.cc>
+#include "checkintersectionit.cc"
 //#include <dune/grid/test/checkcommunicate.cc>
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/alugrid/dgf.hh> 
 
@@ -96,15 +97,18 @@ void checkIterators( GridType& grid )
 template <class GridView>
 void writeFile( const GridView& gridView )
 {
-  Dune::DGFWriter< GridView > writer( gridView );
-  writer.write( "dump.dgf" );
+  //Dune::DGFWriter< GridView > writer( gridView );
+  //writer.write( "dump.dgf" );
+
+  Dune::VTKWriter< GridView > vtk( gridView );
+  vtk.write( "dump" );
 }
 
 template <class GridType> 
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
 {
 
-  //writeFile( grid.leafGridView() );
+  writeFile( grid.leafGridView() );
 
   if( display )
   {
@@ -204,7 +208,8 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex ) 
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        //std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         std::cout << "begin simplex test nonconforming" << std::endl;

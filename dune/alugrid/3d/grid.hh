@@ -205,8 +205,11 @@ namespace Dune
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
-    typedef ALUGridId< ALUMacroKey > GlobalId;
+    typedef ALU3dGridLocalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
+    typedef int GlobalId;
+
+    //typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
+    //typedef ALUGridId< ALUMacroKey > GlobalId;
 
     typedef ALU3DSPACE GitterDunePll GitterImplType;
 
@@ -1120,9 +1123,9 @@ namespace Dune
     // geometry in father storage
     typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
     // return geometryInFather for non-conforming grids 
-    //const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
+    const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
     // initialize geometry types and return correct geometryInFather storage
-    //const GeometryInFatherStorage& makeGeometries();
+    const GeometryInFatherStorage& makeGeometries();
 
   public:
     const GridObjectFactoryType &factory () const { return factory_; }
@@ -1132,7 +1135,7 @@ namespace Dune
       assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
       std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
       if( !indexSet.second )
-        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ) );
+        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level );
       return indexSet;
     }
 
@@ -1226,7 +1229,7 @@ namespace Dune
     const ALUGridRefinementType refinementType_ ;
 
     // local geometry storage for geometries in father 
-    //const GeometryInFatherStorage& nonConformingGeoInFatherStorage_ ;
+    const GeometryInFatherStorage& nonConformingGeoInFatherStorage_ ;
   }; // end class ALU3dGrid
 
 

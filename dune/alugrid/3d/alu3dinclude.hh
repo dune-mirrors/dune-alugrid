@@ -235,6 +235,57 @@ namespace Dune
     typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
+  
+    //Refinement rules in general
+  template< class MarkRuleType, ALU3dGridElementType elType, int dim>
+  struct ALU3dRefinementTraits 
+  {};
+  
+  //Refinement rules for 3d tetra
+  template< class MarkRuleType >
+  struct ALU3dRefinementTraits < MarkRuleType, tetra, 3 >
+  {
+     // refinement and coarsening enum
+    enum { bisect_element_t  = MarkRuleType::bisect  };
+    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { coarse_element_t  = MarkRuleType::crs     };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+  };
+  
+  //Refinement rules for 3d hexa
+  template< class MarkRuleType >
+  struct ALU3dRefinementTraits < MarkRuleType, hexa, 3 >
+  {
+     // refinement and coarsening enum
+    enum { bisect_element_t  = MarkRuleType::iso8    };
+    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { coarse_element_t  = MarkRuleType::crs     };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+  };
+  
+  
+  //Refinement rules for 2d tetra
+  template< class MarkRuleType>
+  struct ALU3dRefinementTraits < MarkRuleType, tetra, 2 >
+  {
+     // refinement and coarsening enum
+    enum { bisect_element_t  = MarkRuleType::bisect  };
+    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { coarse_element_t  = MarkRuleType::crs     };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+  };
+  
+    //Refinement rules for 2d hexa
+  template< class MarkRuleType>
+  struct ALU3dRefinementTraits < MarkRuleType, hexa, 2 >
+  {
+     // refinement and coarsening enum
+    enum { bisect_element_t  = MarkRuleType::iso8    };
+    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { coarse_element_t  = MarkRuleType::crs     };
+    enum { nosplit_element_t = MarkRuleType::nosplit };
+  };
+
 
 
 
@@ -263,11 +314,10 @@ namespace Dune
 
     typedef typename GitterType::Geometric::TetraRule MarkRuleType;
 
-    // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::bisect  };
-    enum { refine_element_t  = MarkRuleType::iso8    };
-    enum { coarse_element_t  = MarkRuleType::crs     };
-    enum { nosplit_element_t = MarkRuleType::nosplit };
+    template < int dim >
+    struct RefinementRules
+    : public ALU3dRefinementTraits<MarkRuleType, tetra, dim>
+    {};
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
     typedef std::pair< HasFaceType *, int > NeighbourPairType;
@@ -304,11 +354,10 @@ namespace Dune
 
     typedef typename GitterType::Geometric::HexaRule MarkRuleType;
 
-    // refinement and coarsening enum
-    enum { refine_element_t  = MarkRuleType::iso8 };
-    enum { bisect_element_t  = MarkRuleType::iso8 };
-    enum { coarse_element_t  = MarkRuleType::crs };
-    enum { nosplit_element_t = MarkRuleType::nosplit };
+    template < int dim >
+    struct RefinementRules
+    : public ALU3dRefinementTraits<MarkRuleType, hexa, dim>
+    {};
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
     typedef std::pair< HasFaceType *, int > NeighbourPairType;

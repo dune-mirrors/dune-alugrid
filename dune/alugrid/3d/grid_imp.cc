@@ -243,8 +243,13 @@ namespace Dune
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   size_t ALU3dGrid< actualDim, actualDimw, elType, Comm >::numBoundarySegments () const
-  {
-    return myGrid().numMacroBndSegments();
+  { 
+    if (actualDim == 3)
+      return myGrid().numMacroBndSegments();
+    else if(elType == tetra)
+      return myGrid().numMacroBndSegments() - size(0);
+    else if (elType == hexa)
+      return myGrid().numMacroBndSegments() - 2*size(0);
   }
 
 
