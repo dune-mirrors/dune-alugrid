@@ -174,9 +174,11 @@ void checkRefinements( GitterType& grid )
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
     const TetraRule rules[ 8 ] = 
-    { TetraRule::iso8, TetraRule::iso4_2d, 
+    { TetraRule::iso8, 
       TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
-      TetraRule :: e23, TetraRule :: e30, TetraRule :: e31 };
+      TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
+      TetraRule::iso4_2d, 
+    };
 
     for (int i=0; i<8; ++i ) 
     {
