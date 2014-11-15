@@ -1,4 +1,4 @@
-EXTRA_PROGRAMS = adapt backuprestore sizes
+EXTRA_PROGRAMS = adapt backuprestore sizes checkrefinement
 
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
@@ -27,6 +27,7 @@ ALUSOURCES = \
 
 sizes_SOURCES = sizes.cc $(ALUSOURCES) 
 adapt_SOURCES = adapt.cc $(ALUSOURCES) 
+checkrefinement_SOURCES = checkrefinement.cc $(ALUSOURCES) 
 backuprestore_SOURCES = backuprestore.cc $(ALUSOURCES) 
 
 include $(top_srcdir)/am/global-rules
