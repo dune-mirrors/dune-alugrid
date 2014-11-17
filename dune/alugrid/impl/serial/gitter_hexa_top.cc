@@ -1185,6 +1185,130 @@ namespace ALUGrid
     }
     return;
   }
+  
+  //Methods for checkhexa
+  
+  template< class A >  int 
+  HexaTop < A >::vertexTwist( const int twst, const int vx ) const 
+  {
+    return (twst< 0) ?   (9 - vx + twst) % 4 : (vx + twst) % 4;
+  }
+
+  template< class A > int 
+  HexaTop < A >::calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const 
+  {
+    const int faceIndices[ 3 ] = { subFace->myvertex( 0 )->getIndex(),
+                                   subFace->myvertex( 1 )->getIndex(),
+                                   subFace->myvertex( 2 )->getIndex() };
+
+    for(int twst = -4; twst<4; ++twst ) 
+    {
+      // search for vx 1 
+      if( vxIndex == faceIndices[ vertexTwist(twst, 1) ] )
+      {
+        return twst;
+      }
+    }
+
+    std::cout << "Valid twist not found!!!" << std::endl;
+    return 0;
+    // we should not get here 
+    alugrid_assert ( false );
+    abort();
+    return -5;
+  }
+
+  template< class A > int 
+  HexaTop < A >::calculateFace3Twist( const int (&vx)[3], const myhface4_t* subFace, const int thirdVx ) const 
+  {
+    //std::cout << "check v0 = " << vx[0] << " v1 = " << vx[1] << std::endl;
+
+    const int faceIndices[ 4 ] = { subFace->myvertex( 0 )->getIndex(),
+                                   subFace->myvertex( 1 )->getIndex(),
+                                   subFace->myvertex( 2 )->getIndex(),
+                                   subFace->myvertex( 3 )->getIndex() };
+    //std::cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << std::endl;
+
+    for(int twst = -4; twst<4; ++twst ) 
+    {
+      // if vx0 and vx1 match we are done 
+      if( vx[ 0 ] == faceIndices[ vertexTwist(twst, 0) ] && 
+          vx[ 1 ] == faceIndices[ vertexTwist(twst, 1 ) ] &&
+          vx[ 2 ] == faceIndices[ vertexTwist(twst, thirdVx) ])
+      {
+        return twst;
+      }
+    }
+
+    std::cout << "Valid twist not found!!!" << std::endl;
+    return 0;
+
+    // we should not get here 
+    alugrid_assert ( false );
+    abort();
+    return -5;
+  }
+
+  
+  
+  
+   // --checkTetra
+  template< class A > bool 
+  HexaTop < A >::checkHexa( const innerhexa_t *hexa, const int nChild ) const 
+  {
+    // make sure face twists are ok 
+    bool twistOk = true ;
+
+    std::set< int > verticesFound;
+    alugrid_assert ( hexa->nChild() == nChild );
+
+    const bool isGhost = hexa->isGhost();
+    for(int fce=0; fce<6; ++fce ) 
+    {
+      for(int i=0; i<4; ++i ) 
+      {
+        verticesFound.insert( hexa->myvertex( fce, i )->getIndex() ); 
+      }
+
+      for(int i=0; i<4; ++i ) 
+      {
+        verticesFound.insert( hexa->myvertex( fce, i )->getIndex() ); 
+        // use proto type to check face twists 
+        if( hexa->myvertex( Gitter::Geometric::Hexa::prototype[ fce ][ i ] ) 
+              != hexa->myvertex( fce, i ) )
+        {
+          const int vx0 = Gitter::Geometric::Hexa::prototype[ fce ][ 0 ] ;
+          const int vx1 = Gitter::Geometric::Hexa::prototype[ fce ][ 1 ] ;
+          const int vx2 = Gitter::Geometric::Hexa::prototype[ fce ][ 2 ] ;  
+
+          const int vx[3] = { hexa->myvertex( vx0 )->getIndex(),
+                              hexa->myvertex( vx1 )->getIndex(),
+                              hexa->myvertex( vx2 )->getIndex()
+                            };
+
+          int twst = calculateFace3Twist( vx, hexa->myhface4( fce ), 2 ); 
+          std::cout << "Twist is wrong, it should be " << twst << std::endl;
+          twistOk = false ;
+          continue ;
+        }
+      }
+
+      if( ! isGhost && ! hexa->myneighbour( fce ).first->isRealObject()  ) 
+      {
+        std::cout << "Neighbour(type="<<hexa->isInterior() << ") " << fce << " of Tetra " << hexa->getIndex()  << " is wrong " << std::endl;
+        std::cout << "Check face " << hexa->myhface4( fce )->getIndex() << std::endl;
+      }
+      // make sure neighbor is something meaningful 
+      //alugrid_assert ( tetra->myneighbour( fce ).first->isRealObject() );
+    }
+    
+    // make sure we have only 8 different vertices 
+    alugrid_assert ( verticesFound.size() == 8 );
+
+    return twistOk;
+  }
+  
+  
   // ######                                                          #       #######
   // #     #  ######  #####      #     ####   #####      #     ####  #    #     #
   // #     #  #       #    #     #    #    #  #    #     #    #    # #    #     #

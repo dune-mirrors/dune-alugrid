@@ -416,6 +416,7 @@ namespace ALUGrid
 
       void splitISO8 ();
       void splitISO4 ();
+
     protected:
       // for HexaTop, when refinement is done 
       IndexManagerType & indexManager() { 
@@ -476,6 +477,11 @@ namespace ALUGrid
 
       int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
+      
+      int  vertexTwist ( const int twst, const int vx ) const  ;
+      int calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const ;
+      int calculateFace3Twist( const int (&vx)[3], const myhface4_t* subFace, const int thirdVx ) const ;
+      bool checkHexa( const innerhexa_t* hexa, const int  ) const;  
     protected:
       // non-virtual methods of down and innerVertex 
       innerhexa_t* dwnPtr();
