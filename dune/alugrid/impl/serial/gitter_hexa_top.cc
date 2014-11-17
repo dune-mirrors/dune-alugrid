@@ -163,14 +163,15 @@ namespace ALUGrid
     return;
   }
   
-  //splitISO2 splits faces between edges 03 and 12 
+  //splitISO2 splits edges 03 and 12 
+  //            1   
   //   1|-------|-------|2
   //    |       |       |
-  //    |       |       |
+  //   0|   0   |   1   |2
   //    |       |       |
   //   0|_______|_______|3
-  //
-  // so we just need to add two inner faces - no inner edges or inner vertices
+  //            3
+  // so we just need to add two inner faces - one inner edges - no inner vertices
   
   template< class A >  void Hface4Top < A >::splitISO2 () {
     int l = 1 + level ();
@@ -184,9 +185,9 @@ namespace ALUGrid
     alugrid_assert ( e0 );
     
     //TODO: Make this right!
-    
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), twist(0), e0, 0, this->myhedge(1), 1, this->subedge(3,1), twist(3), 0);
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), twist(0), this->subedge(1,0), twist(1), this->myhedge(1), 0, e0, 1, 1);
+    // level, edge,twist x 4, nChild
+    innerface_t * f0 = new innerface_t (l, this->myhedge(0), twist(0), this->subedge(1,0), twist(1), e0, 1, this->subedge(3,1), twist(3), 0);
+    innerface_t * f1 = new innerface_t (l, e0, 0, this->subedge(1,1), twist(1), this->myhedge(2), 0, this->subedge(3,0), twist(3), 1);
 
     alugrid_assert (f0 && f1);  
     f0->append(f1);
@@ -216,7 +217,8 @@ namespace ALUGrid
         // important - refine 3 first, as this gives you the even global index on the "real" 2d site
         myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (3)));
         myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1)));
-        //TODO Assert that global index of new vertices are correctly even and odd
+        // Assert that global index of new vertices are correctly even and odd
+        alugrid_assert(myhedge(3)->subvertex(0)->getIndex()%2 == 0 && myhedge(1)->subvertex(0)->getIndex()%2 == 1);
         splitISO2 ();
         break;
       default :
@@ -398,7 +400,7 @@ namespace ALUGrid
     // TODO: Check that
     this->splitGhost( ghostInfo );
 
-    //TODO: subface is probably wrong here....
+    //TODO: subface is maybe wrong....
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this, ghostInfo.child(0), ghostInfo.face(0));
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1));
 
@@ -682,6 +684,7 @@ namespace ALUGrid
     return;
   }
 
+  //TODO:check subedge routine for iso4_2d
   template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) {
     return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge ((8 - j + twist (i)) % 4) : 
       myhface4 (i)->myhedge ((j + twist (i)) % 4)) : 
@@ -695,17 +698,25 @@ namespace ALUGrid
     ((twist (i) < 0) ? myhface4 (i)->subedge ((12 - j + twist (i)) % 4) : 
     myhface4 (i)->subedge ((j + twist (i)) % 4));
   }
-      
+  
+  //TODO: check subface routine for iso4_2d
   template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) {
-    return (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4) ? 
+    return ( myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 || 
+      (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 && i >= 4)  ) ? 
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+    (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
+    myhface4(i)->subface( (twist(i) + j) %2) :
     (abort (), (myhface4_t *)0);
   }
-      
+
+  //TODO: check subface routine  for iso4_2d      
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
-    return (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4) ? 
-      myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
-      (abort (), (const myhface4_t *)0);
+    return (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 || 
+      (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 && i >= 4)  ) ? 
+    myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+    (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
+    myhface4(i)->subface((twist(i) + j) %2) :
+    (abort (), (myhface4_t *)0);
   }
 
   template< class A > void HexaTop < A >::splitISO8 () 
@@ -879,7 +890,16 @@ namespace ALUGrid
     innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f2, -4, f3, -1, this, 1, childVolume);
     innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0,f3, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f1, -1        , this, 2, childVolume);
     innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f0, 0, f1, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)    , this, 3, childVolume);
-   
+
+
+    std::cout << "New hexa " << h0 << std::endl;
+    alugrid_assert ( checkHexa( h0, 0 ) );   
+    std::cout << "New hexa " << h1 << std::endl;
+    alugrid_assert ( checkHexa( h1, 0 ) ); 
+    std::cout << "New hexa " << h2 << std::endl;
+    alugrid_assert ( checkHexa( h2, 0 ) ); 
+    std::cout << "New hexa " << h3 << std::endl;
+    alugrid_assert ( checkHexa( h3, 0 ) );  
 
     alugrid_assert (h0 && h1 && h2 && h3 );
     h0->append(h1);
@@ -1201,7 +1221,7 @@ namespace ALUGrid
                                    subFace->myvertex( 1 )->getIndex(),
                                    subFace->myvertex( 2 )->getIndex() };
 
-    for(int twst = -4; twst<4; ++twst ) 
+    for(int twst = -4; twst<3; ++twst ) 
     {
       // search for vx 1 
       if( vxIndex == faceIndices[ vertexTwist(twst, 1) ] )
@@ -1229,7 +1249,7 @@ namespace ALUGrid
                                    subFace->myvertex( 3 )->getIndex() };
     //std::cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << std::endl;
 
-    for(int twst = -4; twst<4; ++twst ) 
+    for(int twst = -4; twst<3; ++twst ) 
     {
       // if vx0 and vx1 match we are done 
       if( vx[ 0 ] == faceIndices[ vertexTwist(twst, 0) ] && 
@@ -1422,7 +1442,7 @@ namespace ALUGrid
 
     const int l = 1 + this->level ();
     innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,3), twist (1), this, 1);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,1), twist (1), this, 1);
     
     alugrid_assert (p0 && p1 );
     p0->append(p1);
