@@ -57,6 +57,11 @@ namespace ALUGrid
                         double x, double y, 
                         double z, innervertex_t& vx )
     {}
+    
+    InnerVertexStorage( )
+    {
+      std::cerr << "This method should not be called" << std::endl;
+    }
 
     // do nothing here  
     void store()  {}
@@ -66,8 +71,8 @@ namespace ALUGrid
     const innervertex_t* cv() const { return 0; }
   };
 
-  template < class Impl > 
-  class InnerEdgeStorage : public InnerVertexStorage< Impl >
+  template < class Impl, bool hasVertex > 
+  class InnerEdgeStorage : public InnerVertexStorage< Impl, hasVertex >
   {
   protected:
     typedef InnerVertexStorage< Impl, hasVertex >    base_t;
@@ -97,8 +102,8 @@ namespace ALUGrid
     const inneredge_t* ed() const { return _ed;}
   };
 
-  template < class Impl  > 
-  class InnerFaceStorage : public InnerEdgeStorage< Impl >
+  template < class Impl, bool hasVertex  > 
+  class InnerFaceStorage : public InnerEdgeStorage< Impl, hasVertex >
   {
   protected:
     typedef InnerEdgeStorage< Impl , hasVertex >      base_t;
@@ -190,7 +195,7 @@ namespace ALUGrid
       typedef typename A::innervertex_t innervertex_t;
       typedef typename A::myvertex_t    myvertex_t;
       typedef typename A::myrule_t      myrule_t;
-      typedef InnerStorage < InnerVertexStorage< inneredge_t > > inner_t;
+      typedef InnerStorage < InnerVertexStorage< inneredge_t, true > > inner_t;
     protected :
       inneredge_t * _bbb;  // 8 
       inner_t * _inner;    // 8 
@@ -262,7 +267,7 @@ namespace ALUGrid
       typedef typename A::myrule_t           myrule_t;
       
       //for iso2 we do not get an inner Vertex 
-      typedef InnerStorage < InnerEdgeStorage< innerface_t  > > inner_t;
+      typedef InnerStorage < InnerEdgeStorage< innerface_t , true > > inner_t;
 
     private :
       innerface_t * _bbb; // 8 
@@ -408,7 +413,7 @@ namespace ALUGrid
       typedef typename A::myvertex_t  myvertex_t;
       typedef typename A::myrule_t  myrule_t;
       typedef typename A::balrule_t   balrule_t;
-      typedef InnerStorage < InnerFaceStorage< innerhexa_t  > > inner_t;
+      typedef InnerStorage < InnerFaceStorage< innerhexa_t , true > > inner_t;
 
     protected:  
       inline void refineImmediate (myrule_t);
