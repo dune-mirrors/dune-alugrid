@@ -9,7 +9,6 @@
 
 namespace ALUGrid
 {
-/*
   template< class Impl , bool hasVertex > 
   class InnerVertexStorage
   : public MyAlloc 
@@ -21,26 +20,31 @@ namespace ALUGrid
     typedef typename Impl::innervertex_t innervertex_t;
     typedef void* inneredge_t;
     typedef void* innerface_t;
-    innervertex_t _cv;
+    innervertex_t* _cv;
   public:  
     InnerVertexStorage( int level, 
                         double x, double y, 
                         double z, innervertex_t& vx )
-      : _cv( level, x, y, z, vx ) 
+      : _cv( new innervertex_t(level, x, y, z, vx) ) 
     {}
     
+    InnerVertexStorage()
+      : _cv( 0 )
+    {}
+
+    // destructor 
+    ~InnerVertexStorage() { delete _cv; _cv = 0; }
 
     // vertex methods 
-    innervertex_t* cv() { return &_cv;}
-    const innervertex_t* cv() const { return &_cv;}
+    innervertex_t* cv()             { return _cv; }
+    const innervertex_t* cv() const { return _cv; }
 
     // do nothing here  
     void store()  {}
   };
-*/
 
   template < class Impl > 
-  class InnerVertexStorage : public MyAlloc 
+  class InnerVertexStorage< Impl, false > : public MyAlloc 
   {
     InnerVertexStorage( const InnerVertexStorage& );
   protected:
@@ -48,22 +52,18 @@ namespace ALUGrid
     typedef typename Impl::innervertex_t innervertex_t;
     typedef void* inneredge_t;
     typedef void* innerface_t;
-    innervertex_t _cv;
   public:  
     InnerVertexStorage( int level, 
                         double x, double y, 
                         double z, innervertex_t& vx )
-     : _cv( level, x, y, z, vx ) 
     {}
-
-    InnerVertexStorage( _cv() ) {} 
 
     // do nothing here  
     void store()  {}
 
     // vertex methods 
-    innervertex_t* cv() { return &_cv;}
-    const innervertex_t* cv() const { return &_cv;}
+    innervertex_t* cv()             { return 0; }
+    const innervertex_t* cv() const { return 0; }
   };
 
   template < class Impl > 
