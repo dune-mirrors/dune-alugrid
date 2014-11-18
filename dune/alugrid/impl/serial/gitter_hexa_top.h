@@ -492,7 +492,7 @@ namespace ALUGrid
       
       int  vertexTwist ( const int twst, const int vx ) const  ;
       int calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const ;
-      int calculateFace3Twist( const int (&vx)[3], const myhface4_t* subFace, const int thirdVx ) const ;
+      int calculateFace3Twist( const int (&vx)[4], const myhface4_t* subFace, const int thirdVx ) const ;
       bool checkHexa( const innerhexa_t* hexa, const int  ) const;  
     protected:
       // non-virtual methods of down and innerVertex 
