@@ -156,7 +156,7 @@ void checkRefinements( GitterType& grid )
           // mark element for refinement 
           hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
 
-          item->request ( rules[ i ] );
+          item->request ( rules[ 1 ] );
         }
       }
 
