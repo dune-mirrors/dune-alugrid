@@ -177,25 +177,39 @@ namespace ALUGrid
     int l = 1 + level ();
     alugrid_assert ( _inner == 0 );
     
+         
     myvertex_t * ev1 = myhedge(1)->subvertex (0);
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
     alugrid_assert (ev1 && ev3 );
     
-    inneredge_t * e0 = new inneredge_t (l, ev1, ev3);
+    inneredge_t * e0 = new inneredge_t (l, ev3, ev1);
     alugrid_assert ( e0 );
     
-    //TODO: Make this right!
+    //create new InnerStorage with 0 pointer as down pointer
+    _inner = new inner_t( 0 , e0);
+    alugrid_assert(_inner);
+
+    
+    std::cout << this << std::endl;
+    
+
     // level, edge,twist x 4, nChild
     innerface_t * f0 = new innerface_t (l, this->myhedge(0), twist(0), this->subedge(1,0), twist(1), e0, 1, this->subedge(3,1), twist(3), 0);
-    innerface_t * f1 = new innerface_t (l, e0, 0, this->subedge(1,1), twist(1), this->myhedge(2), 0, this->subedge(3,0), twist(3), 1);
+
+    std::cout << f0 << std::endl;
+
+    innerface_t * f1 = new innerface_t (l, e0, 0, this->subedge(1,1), twist(1), this->myhedge(2), 1, this->subedge(3,0), twist(3), 1);
+
+    std::cout << f1 << std::endl;
 
     alugrid_assert (f0 && f1);  
     f0->append(f1);
-    // inner edge 
-    _inner->store( e0 );
+
+  
     // down pointer 
     _inner->store( f0 );
     _rule = myrule_t::iso2;
+   
     return;
   }
   
@@ -214,11 +228,11 @@ namespace ALUGrid
         splitISO4 ();
         break;
         case myrule_t::iso2 :
-        // important - refine 3 first, as this gives you the even global index on the "real" 2d site
+        // refine such that global indices of new vertices are sequential  
         myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (3)));
         myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1)));
-        // Assert that global index of new vertices are correctly even and odd
-        alugrid_assert(myhedge(3)->subvertex(0)->getIndex()%2 == 0 && myhedge(1)->subvertex(0)->getIndex()%2 == 1);
+        //  Assert that global index of new vertices are sequential
+        alugrid_assert(myhedge(3)->subvertex(0)->getIndex()%2 == 0 && myhedge(1)->subvertex(0)->getIndex()-myhedge(3)->subvertex(0)->getIndex() == 1);
         splitISO2 ();
         break;
       default :
@@ -943,11 +957,11 @@ namespace ALUGrid
     case myrule_t::iso4_2d :
       {
         typedef typename myhface4_t::myrule_t myhface4rule_t;
-        //TODO: check the right indices
-        for( int i = 0; i < 2; ++i)
-          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));        
+        //TODO: check the right indices     
         for( int i = 2; i < 6; ++i )
           myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso2).rotate (twist (i)));
+        for( int i = 0; i < 2; ++i)
+          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));     
         splitISO4();
       }
       break;  

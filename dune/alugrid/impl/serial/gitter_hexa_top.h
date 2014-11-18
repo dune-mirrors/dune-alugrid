@@ -9,7 +9,7 @@
 
 namespace ALUGrid
 {
-
+/*
   template< class Impl , bool hasVertex > 
   class InnerVertexStorage
   : public MyAlloc 
@@ -28,6 +28,7 @@ namespace ALUGrid
                         double z, innervertex_t& vx )
       : _cv( level, x, y, z, vx ) 
     {}
+    
 
     // vertex methods 
     innervertex_t* cv() { return &_cv;}
@@ -36,33 +37,37 @@ namespace ALUGrid
     // do nothing here  
     void store()  {}
   };
-
+*/
 
   template < class Impl > 
-  class InnerVertexStorage< Impl , false > : public MyAlloc 
+  class InnerVertexStorage : public MyAlloc 
   {
     InnerVertexStorage( const InnerVertexStorage& );
   protected:
     typedef Impl                           down_t;
     typedef typename Impl::innervertex_t innervertex_t;
+    typedef void* inneredge_t;
+    typedef void* innerface_t;
+    innervertex_t _cv;
   public:  
     InnerVertexStorage( int level, 
                         double x, double y, 
                         double z, innervertex_t& vx )
+     : _cv( level, x, y, z, vx ) 
     {}
 
-    InnerVertexStorage( ) {} 
+    InnerVertexStorage( _cv() ) {} 
 
     // do nothing here  
     void store()  {}
 
     // vertex methods 
-    innervertex_t* cv() { return 0;}
-    const innervertex_t* cv() const { return 0;}
+    innervertex_t* cv() { return &_cv;}
+    const innervertex_t* cv() const { return &_cv;}
   };
 
-  template < class Impl, bool hasVertex > 
-  class InnerEdgeStorage : public InnerVertexStorage< Impl, hasVertex >
+  template < class Impl > 
+  class InnerEdgeStorage : public InnerVertexStorage< Impl >
   {
   protected:
     typedef InnerVertexStorage< Impl, hasVertex >    base_t;
@@ -92,8 +97,8 @@ namespace ALUGrid
     const inneredge_t* ed() const { return _ed;}
   };
 
-  template < class Impl , bool hasVertex > 
-  class InnerFaceStorage : public InnerEdgeStorage< Impl , hasVertex >
+  template < class Impl  > 
+  class InnerFaceStorage : public InnerEdgeStorage< Impl >
   {
   protected:
     typedef InnerEdgeStorage< Impl , hasVertex >      base_t;
@@ -185,7 +190,7 @@ namespace ALUGrid
       typedef typename A::innervertex_t innervertex_t;
       typedef typename A::myvertex_t    myvertex_t;
       typedef typename A::myrule_t      myrule_t;
-      typedef InnerStorage < InnerVertexStorage< inneredge_t , true > > inner_t;
+      typedef InnerStorage < InnerVertexStorage< inneredge_t > > inner_t;
     protected :
       inneredge_t * _bbb;  // 8 
       inner_t * _inner;    // 8 
@@ -255,7 +260,9 @@ namespace ALUGrid
       typedef typename A::myhedge_t         myhedge_t;
       typedef typename A::myvertex_t         myvertex_t;
       typedef typename A::myrule_t           myrule_t;
-      typedef InnerStorage < InnerEdgeStorage< innerface_t , true > > inner_t;
+      
+      //for iso2 we do not get an inner Vertex 
+      typedef InnerStorage < InnerEdgeStorage< innerface_t  > > inner_t;
 
     private :
       innerface_t * _bbb; // 8 
@@ -401,7 +408,7 @@ namespace ALUGrid
       typedef typename A::myvertex_t  myvertex_t;
       typedef typename A::myrule_t  myrule_t;
       typedef typename A::balrule_t   balrule_t;
-      typedef InnerStorage < InnerFaceStorage< innerhexa_t , true > > inner_t;
+      typedef InnerStorage < InnerFaceStorage< innerhexa_t  > > inner_t;
 
     protected:  
       inline void refineImmediate (myrule_t);
