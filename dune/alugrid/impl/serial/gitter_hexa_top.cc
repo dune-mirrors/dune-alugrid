@@ -681,6 +681,7 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
+     std::cout << "volume: " << _volume << " calculatedVolume: " << calculatedVolume << std::endl;
    // alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 
@@ -719,7 +720,7 @@ namespace ALUGrid
       (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 && i >= 4)  ) ? 
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
     (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
-    myhface4(i)->subface( (twist(i) + j) %2) :
+    myhface4(i)->subface(j) :
     (abort (), (myhface4_t *)0);
   }
 
@@ -729,7 +730,7 @@ namespace ALUGrid
       (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4 && i >= 4)  ) ? 
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
     (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
-    myhface4(i)->subface((twist(i) + j) %2) :
+    myhface4(i)->subface(j) :
     (abort (), (myhface4_t *)0);
   }
 
@@ -914,22 +915,24 @@ namespace ALUGrid
 
     //4 inner hexas
     // TODO: get the right hexas
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), 0, subface(1,0), -1, subface (5, 0), -1, f3, -1, f0, 3, subface (2, 0), 0,    this, 0, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), -1, subface(1,0), 0, subface (2, 0), -1, f0, -1, f3, 3,  subface (5, 0), 0,  this, 0, childVolume);
     std::cout << "New  " << h0 << std::endl;
     if( checkHexa( h0, 0 ) ) std::cout << "hexa 0 ok!"<< std::endl;
     
-    std::cout << subface (0, 0) << subface(1,0) << subface (2, 0) << subface(5,0) << f0 << f3 <<std::endl;           
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist (0), f1, 0, subface (2, 1), twist (2), subface (3, 0), twist (3), f2, -4, f3, -1, this, 1, childVolume);
+
+    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), -1, subface(1,1), 0, subface (2, 1), -1, subface (3, 0), -1,  f1, -1, f0, 0, this, 1, childVolume);
     std::cout << "New  " << h1 << std::endl;
-    if( checkHexa( h1, 0 ) ) std::cout << "hexa 1 ok!"<< std::endl;
+    if( checkHexa( h1, 1 ) ) std::cout << "hexa 1 ok!"<< std::endl;
     
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), f2, 0, f3, 0, subface (3, 1), twist (3), subface (4, 0), twist (4), f1, -1 , this, 2, childVolume);
+
+    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), subface(1,2), 0, f1, 3, subface (3, 1), twist (3), subface (4, 0), twist (4), f2, -2 , this, 2, childVolume);
     std::cout << "New  " << h2 << std::endl;    
-    if( checkHexa( h2, 0 ) ) std::cout << "hexa 2 ok!"<< std::endl;
-    
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), f3, 0, f0, 0, f1, 0, subface(4, 1), twist (4), subface(5, 3), twist (5)  , this, 3, childVolume);
+    if( checkHexa( h2, 2 ) ) std::cout << "hexa 2 ok!"<< std::endl;
+ 
+     std::cout << subface (0, 1) << subface(1,3) << subface (4, 1) << subface(5,1) << f2 << f3 <<std::endl;                  
+    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), subface(1,3), 0, f3, -1, f2, 3, subface (4, 1), -1, subface(5,1), 0,   this, 3, childVolume);
     std::cout << "New  " << h3 << std::endl;
-    if( checkHexa( h3, 0 ) ) std::cout << "hexa 3 ok!"<< std::endl;
+    if( checkHexa( h3, 3 ) ) std::cout << "hexa 3 ok!"<< std::endl;
 
     alugrid_assert (h0 && h1 && h2 && h3 );
     h0->append(h1);
@@ -1281,7 +1284,8 @@ namespace ALUGrid
     {
       // if vx0 and vx1 match we are done 
       if( vx[ 0 ] == faceIndices[ vertexTwist(twst, 0 ) ] && 
-          vx[ 1 ] == faceIndices[ vertexTwist(twst, 1 ) ] )
+          vx[ 1 ] == faceIndices[ vertexTwist(twst, 1 ) ] &&
+          vx[ 2 ] == faceIndices[ vertexTwist(twst, 2 ) ] )
       {
         return twst;
       }
