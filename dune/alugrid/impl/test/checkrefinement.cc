@@ -120,7 +120,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
        
 // refine grid globally, i.e. mark all elements and then call adapt 
 template <class GitterType>
-void checkRefinements( GitterType& grid ) 
+void checkRefinements( GitterType& grid, int n ) 
 {
   // if bisection is not enabled do nothing here
   bool isHexa = false ;
@@ -148,6 +148,12 @@ void checkRefinements( GitterType& grid )
       // get LeafIterator which iterates over all leaf elements of the grid 
       ALUGrid::LeafIterator < HElemType > w (grid) ;
        
+
+      // create empty gather scatter 
+      EmptyAdaptRestrictProlong rp;
+
+      for(int j = 0; j<n ; ++j){
+      
       for (w->first () ; ! w->done () ; w->next ())
       {
         if( w->item ().type() == ALUGrid::hexa ) 
@@ -156,18 +162,20 @@ void checkRefinements( GitterType& grid )
           // mark element for refinement 
           hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
 
-          item->request ( rules[ 1 ] );
+          item->request ( rules[ i ] );
         }
       }
 
-      // create empty gather scatter 
-      EmptyAdaptRestrictProlong rp;
-
       // adapt grid 
       grid.duneAdapt( rp );
+      
+      // print size of grid 
+      grid.printsize () ;
+     
+     }
 
       // coarsen again 
-      globalCoarsening( grid , 1 );
+      globalCoarsening( grid , n );
     }
   }
   else // tetra
@@ -190,7 +198,14 @@ void checkRefinements( GitterType& grid )
         // get LeafIterator which iterates over all leaf elements of the grid 
         ALUGrid::LeafIterator < HElemType > w (grid) ;
          
-        for (w->first () ; ! w->done () ; w->next ())
+
+
+      // create empty gather scatter 
+      EmptyAdaptRestrictProlong rp;
+      
+      for(int j=0; j<n ; ++j){
+      
+      for (w->first () ; ! w->done () ; w->next ())
         {
           if( w->item ().type() == ALUGrid::tetra ) 
           {
@@ -203,14 +218,16 @@ void checkRefinements( GitterType& grid )
         }
       }
 
-      // create empty gather scatter 
-      EmptyAdaptRestrictProlong rp;
-
       // adapt grid 
       grid.duneAdapt( rp );
 
+      // print size of grid 
+      grid.printsize () ;
+      
+      }
+      
       // coarsen again 
-      globalCoarsening( grid , 1 );
+      globalCoarsening( grid , n );
     } // end for
   }
 
@@ -290,7 +307,7 @@ int main (int argc, char ** argv, const char ** envp)
         gridPtr->disableGhostCells();
       }
 
-      checkRefinements( *gridPtr );
+      checkRefinements( *gridPtr , 1);
     }
   }
 
