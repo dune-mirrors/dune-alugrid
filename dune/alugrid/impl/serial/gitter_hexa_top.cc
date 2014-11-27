@@ -229,8 +229,6 @@ namespace ALUGrid
         myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (3)));
         myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1)));
         //  Assert that global index of new vertices are sequential - 
-        //TODO: see if necessary
-        //alugrid_assert(myhedge(3)->subvertex(0)->getIndex()%2 == 0 && myhedge(1)->subvertex(0)->getIndex()-myhedge(3)->subvertex(0)->getIndex() == -1);
         splitISO2 ();
         break;
       default :
@@ -265,6 +263,7 @@ namespace ALUGrid
       {
       case myrule_t::iso4:
         {
+
           const bool a = (twist < 0) 
                   ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                   : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
@@ -285,9 +284,11 @@ namespace ALUGrid
         //TODO: check this - it might be wrong
        case myrule_t::iso2:
         {
+
           const bool a = (twist < 0) 
                   ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                   : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
+
           if( a ) 
           {  
             if( getrule() == myrule_t::nosplit )
@@ -390,6 +391,7 @@ namespace ALUGrid
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), twist (0), this, ghostInfo.child(1), ghostInfo.face(1));
     innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), twist (0), this, ghostInfo.child(2), ghostInfo.face(2));
     innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), twist (0), this, ghostInfo.child(3), ghostInfo.face(3));
+    
 
     alugrid_assert (b0 && b1 && b2 && b3);
     b0->append(b1);
@@ -399,7 +401,7 @@ namespace ALUGrid
     return;
   }
 
-  //split ISO2 is only necessary for the 2d faked grid  
+  //split ISO2 is only necessary for the 2d fake grid  
   template< class A >  void Hbnd4Top < A >::splitISO2 () {
     int l = 1 + level ();
     alugrid_assert (_dwn == 0);
@@ -441,7 +443,7 @@ namespace ALUGrid
       // weitere Rekursion aussieht. Dazu muss auf dem Niveau der Klasse
       // des Template-Arguments die Methode bndNotifyBalance () "uber-
       // schrieben werden. Die Defaultmethode liefert immer 'true'.
-      
+
       return false;
     } 
     else 
@@ -525,6 +527,7 @@ namespace ALUGrid
         case balrule_t::iso4 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
 
+                  std::cout << "calling splitIso4 in refine like element" << std::endl;
           // call refinement method 
           splitISO4 ();
 
@@ -537,7 +540,7 @@ namespace ALUGrid
           
         case balrule_t::iso2 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso2).rotate (twist (0)), twist (0))) return false;
-
+        std::cout << "calling splitIso2 in refine like element" << std::endl;
           // call refinement method 
           splitISO2 ();
 
@@ -917,9 +920,9 @@ namespace ALUGrid
 
     
     if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl;
- if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;    
-     if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;
-     if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
+    if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;    
+    if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;
+    if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
    
    
     alugrid_assert (h0 && h1 && h2 && h3 );
@@ -932,7 +935,7 @@ namespace ALUGrid
     _inner->store( f0 );
     // down ptr 
     _inner->store( h0 );
-    _rule = myrule_t::iso8;
+    _rule = myrule_t::iso4_2d;
     this->detachleafs();
     return;
   }
@@ -963,6 +966,7 @@ namespace ALUGrid
       {
         typedef typename myhface4_t::myrule_t myhface4rule_t;
         //first we need to refine the side faces to get the top and bottom indices
+        //for(int i = 0 ; i < 6; ++i) std::cout << myhface4(i)  ;
         for( int i = 2; i < 6; ++i )
           myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso2).rotate (twist (i)));
         for( int i = 0; i < 2; ++i)
@@ -1338,9 +1342,14 @@ namespace ALUGrid
       {
         std::cout << "Neighbour(type="<<hexa->isInterior() << ") " << fce << " of Hexa " << hexa->getIndex()  << " is wrong " << std::endl;
         std::cout << "Check face " << hexa->myhface4( fce )->getIndex() << std::endl;
+        std::cout << hexa->myhface4( fce ) ;
       }
+      //if( fce > 1)
+       // if( hexa->myhface(fce)->myvertex(1)->Point()[2] != 1 && hexa->myhface(fce)->myvertex(2)->Point()[2])
+       // std::cout << "Local face: " << fce << "of Hexa" << hexa->getIndex() << hexa->myhface(fce) << "is not fake 2d" << std::endl;
       // make sure neighbor is something meaningful 
       //alugrid_assert ( tetra->myneighbour( fce ).first->isRealObject() );
+      
     }
     
     // make sure we have only 8 different vertices 

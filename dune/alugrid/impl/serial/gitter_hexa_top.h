@@ -632,6 +632,7 @@ namespace ALUGrid
     _lvl (l), 
     _child( 0 )
   {
+    //std::cout << a << b << std::endl;
     alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );  
     return;
@@ -671,7 +672,7 @@ namespace ALUGrid
       sum += (diff * diff );
     }
     sum = std::sqrt( sum );
-    //std::cout << sum << " sum " << endl;
+    //std::cout << sum << " sum " << std::endl;
     return  sum > 1e-8;
   }
 

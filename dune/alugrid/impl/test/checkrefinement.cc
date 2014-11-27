@@ -13,6 +13,7 @@
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
+
 //using namespace ALUGrid;
 //using namespace std;
 
@@ -27,6 +28,7 @@ typedef ALUGrid::Gitter::hbndseg       HGhostType;
 #if HAVE_MPI
 #warning RUNNING PARALLEL VERSION
 #endif
+
 
 //#define ENABLE_ALUGRID_VTK_OUTPUT
 
@@ -162,7 +164,7 @@ void checkRefinements( GitterType& grid, int n )
           // mark element for refinement 
           hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
 
-          item->request ( rules[ i ] );
+          item->request ( rules[ 1 ] );
         }
       }
 
@@ -307,7 +309,7 @@ int main (int argc, char ** argv, const char ** envp)
         gridPtr->disableGhostCells();
       }
 
-      checkRefinements( *gridPtr , 1);
+      checkRefinements( *gridPtr , 3);
     }
   }
 
