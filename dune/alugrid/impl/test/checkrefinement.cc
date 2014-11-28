@@ -183,14 +183,15 @@ void checkRefinements( GitterType& grid, int n )
   else // tetra
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
-    const TetraRule rules[ 8 ] = 
+    const TetraRule rules[ 9 ] = 
     { TetraRule::iso8, 
       TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
       TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
-      TetraRule::iso4_2d, 
+  //    TetraRule::iso4_2d, 
+      TetraRule :: bisect, TetraRule :: bisect2d
     };
 
-    for (int i=0; i<8; ++i ) 
+    for (int i=0; i<9; ++i ) 
     {
       std::cout << "*********************************************" <<std::endl;
       std::cout << "Refinement rule " << rules[ i ] << std::endl;
@@ -199,7 +200,8 @@ void checkRefinements( GitterType& grid, int n )
       {
         // get LeafIterator which iterates over all leaf elements of the grid 
         ALUGrid::LeafIterator < HElemType > w (grid) ;
-         
+        
+        if (rules[ i ] == TetraRule::bisect || rules[ i ] == TetraRule::bisect2d) grid.enableConformingClosure(); 
 
 
       // create empty gather scatter 
@@ -218,14 +220,14 @@ void checkRefinements( GitterType& grid, int n )
             item->request ( rules[ i ] );
           }
         }
-      }
+     
 
       // adapt grid 
       grid.duneAdapt( rp );
 
       // print size of grid 
       grid.printsize () ;
-      
+       }
       }
       
       // coarsen again 
@@ -309,7 +311,7 @@ int main (int argc, char ** argv, const char ** envp)
         gridPtr->disableGhostCells();
       }
 
-      checkRefinements( *gridPtr , 3);
+      checkRefinements( *gridPtr , 5);
     }
   }
 

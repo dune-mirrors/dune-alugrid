@@ -421,6 +421,9 @@ namespace ALUGrid
       // sets the new _vxMap for this tetra 
       void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int );
 
+      void enable2dbisection()  { bisect2d_ = true; }
+      bool use2dbisection() { return bisect2d_ ; }
+      
     private :
       innertetra_t * _bbb, * _up; 
       inner_t * _inner;
@@ -433,6 +436,8 @@ namespace ALUGrid
 
       // true if bisection after Stevenson is used, otherwise ALBERTA refinement 
       enum { stevensonRefinement_ = false };
+      bool bisect2d_ = false;
+
       
     private :
       bool checkRule( const myrule_t rule ) const
@@ -494,19 +499,21 @@ namespace ALUGrid
   #endif
       }
 
-      myrule_t suggestRule () const 
+      myrule_t suggestRule ()  
       {
         // Stevenson refinement: edge 0--3
         // ALBERTA refinement:   edge 0--1
-        enum { vxSecond = stevensonRefinement_ ? 3 : 1 };
+        // 2d refinement: edge 1--2
+        int  vxFirst = bisect2d_ ? 1 : 0 ;
+        int  vxSecond = stevensonRefinement_ ? 3 : (bisect2d_ ? 2 : 1) ;
         static const myrule_t rules [ 4 ][ 4 ] = {
           { myrule_t :: crs , myrule_t :: e01, myrule_t :: e20, myrule_t :: e30 },
           { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
           { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
           { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
         };
-        alugrid_assert ( int(_vxMap[ 0 ]) != int(_vxMap[ vxSecond ]) );
-        return rules[ int(_vxMap[ 0 ]) ][ int(_vxMap[ vxSecond ]) ]; 
+        alugrid_assert ( int(_vxMap[ vxFirst ]) != int(_vxMap[ vxSecond ]) );
+        return rules[ int(_vxMap[ vxFirst ]) ][ int(_vxMap[ vxSecond ]) ]; 
       }
 
       inline IndexManagerType & indexManager() { 
@@ -1115,6 +1122,18 @@ namespace ALUGrid
       alugrid_assert ( this->myGrid()->conformingClosureNeeded() );
 
       // we always split edge 0 and 3 following 
+      // the idea of Stevenson, Nochetto, Veser, Siebert 
+      // suggestRule returns the correct splitting edge 
+      // according to ALUGrid's rules 
+      _req = suggestRule();
+    }
+    else if( r == myrule_t :: bisect2d )
+    {
+      // this can only be used when conforming closure is enabled 
+      alugrid_assert ( this->myGrid()->conformingClosureNeeded() );
+      
+      bisect2d_ =true;
+      // here we fall back to the 2d code following 
       // the idea of Stevenson, Nochetto, Veser, Siebert 
       // suggestRule returns the correct splitting edge 
       // according to ALUGrid's rules 

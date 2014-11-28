@@ -375,9 +375,16 @@ namespace ALUGrid
         case myrule_t::e20 :
         case myrule_t::iso4 :
         {
+        
+
+
           typedef typename A::face3Neighbour::neighbour_t neighbour_t ;
           // get face neighbour 
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+          neighbour_t self = ( twist < 0 ) ?  this->nb.rear()   : this->nb.front () ;        
+          
+          // TODO:get bisect2d_ of inner neighbour and set on outer    
+          //if ( neigh.first->isRealObject() && self.first->use2dbisection() ) neigh.first->enable2dbisection();
           // check refineBalance 
           bool a = neigh.first->refineBalance (r, neigh.second);
 
@@ -1582,8 +1589,18 @@ namespace ALUGrid
                                    innerface_t* newFace,  
                                    const int newVx0, const int newVx1 ) 
   {
-    // vertex 0 is always containd in child 0, and not in child 1
-    myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
+    
+    
+     // vertex 0 is always containd in child 0, and not in child 1
+     myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
+    //for 2dbisection vx0 stays vx0 (and thus 0) in all children
+    // we use the ALBERTA 2d algorithm with the map ALU (or vxMap) 1,2,3 to ALBERTA 0,1,2
+    if(bisect2d_)
+    {
+      // vertex 1 is always containd in child 0, and not in child 1
+      vx0 = this->myvertex( _vxMap[ 1 ] );
+    }
+
     bool found = false ;
     for( int i=0; i<4; ++i ) 
     {
@@ -1593,10 +1610,13 @@ namespace ALUGrid
         break ;
       }
     }
+    
 
     // if vx0 was not found in child 0 we have to swap the children 
     innertetra_t* t0 = ( found ) ? h0 : h1;
     innertetra_t* t1 = ( found ) ? h1 : h0;
+
+    //TODO: check the vxMap for the 2d refinement
 
     if( stevensonRefinement_ ) 
     {
@@ -1616,6 +1636,24 @@ namespace ALUGrid
       const char fce3 = ( elementType () == 0 ) ? 1 : 0;
       t1->_vxMap[ 2 ] = _vxMap[ 1 + fce3 ]; // for type 0   2 else 1 
       t1->_vxMap[ 3 ] = _vxMap[ 2 - fce3 ]; // for type 0   1 else 2 
+    }
+    else if (bisect2d_)
+    {
+      ///////////////////////////////////////////////////
+      //  Bisection 2d refinement, always refine edge 1--2
+      ///////////////////////////////////////////////////
+
+      // set vertex mapping (child 0)
+      t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+      t0->_vxMap[ 1 ] = _vxMap[ 2 ];
+      t0->_vxMap[ 2 ] = _vxMap[ 3 ];
+      t0->_vxMap[ 3 ] = _vxMap[ 1 ];
+
+      // set vertex mapping (child 1)
+      t1->_vxMap[ 0 ] = _vxMap[ 0 ]; 
+      t1->_vxMap[ 1 ] = _vxMap[ 3 ];
+      t1->_vxMap[ 2 ] = _vxMap[ 1 ]; 
+      t1->_vxMap[ 3 ] = _vxMap[ 2 ]; 
     }
     else 
     {
@@ -1666,14 +1704,14 @@ namespace ALUGrid
     }
 #endif
 
-    //std::cout << "New tetra " << h0 << std::endl;
-    // alugrid_assert ( checkTetra( h0, 0 ) );
+    std::cout << "New tetra " << h0 << std::endl;
+     alugrid_assert ( checkTetra( h0, 0 ) );
 
-    //std::cout << "New tetra " << h1 << std::endl;
-    // alugrid_assert ( checkTetra( h1, 1 ) );
+   std::cout << "New tetra " << h1 << std::endl;
+     alugrid_assert ( checkTetra( h1, 1 ) );
 
-    //std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
-    //std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
+    std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
+    std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
 
     // append h1 to h0 
     h0->append( h1 );
@@ -1757,6 +1795,7 @@ namespace ALUGrid
     alugrid_assert ( tetra->nChild() == nChild );
 
     const bool isGhost = tetra->isGhost();
+    std::cout << tetra->myvertex(0)->getIndex() << std::endl;
     for(int fce=0; fce<4; ++fce ) 
     {
       for(int i=0; i<3; ++i ) 
@@ -1784,6 +1823,8 @@ namespace ALUGrid
           continue ;
         }
       }
+      
+     std::cout << tetra->myhface( fce )->myvertex(0)->getIndex() << std::endl;
 
       if( ! isGhost && ! tetra->myneighbour( fce ).first->isRealObject()  ) 
       {
@@ -1951,6 +1992,13 @@ namespace ALUGrid
       // given by suggestRule 
       BisectionInfo::splitEdge( this, suggestRule() );
     }
+    else if( r == myrule_t::bisect2d )
+    {
+      alugrid_assert(bisect2d_);
+      // call refinement with appropriate rule 
+      // given by suggestRule 
+      BisectionInfo::splitEdge( this, suggestRule() );
+    }
     else 
     {
       // it is assured that r is one out of e01 ... e32 
@@ -1979,6 +2027,7 @@ namespace ALUGrid
           case myrule_t::crs :
           case myrule_t::nosplit :
             return true ;
+         // case myrule_t::iso4_2d :
           case myrule_t::iso8 :
             {
               for (int i = 0 ; i < 4 ; ++i )
@@ -2037,7 +2086,8 @@ namespace ALUGrid
         {
           _req = myrule_t::nosplit ;
           if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
-          refineImmediate ( myrule_t::bisect ) ;
+           if (bisect2d_) refineImmediate(myrule_t::bisect2d);
+           else refineImmediate ( myrule_t::bisect ) ;
         }
       }
     }

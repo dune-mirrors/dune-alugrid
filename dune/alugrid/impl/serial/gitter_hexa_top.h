@@ -10,7 +10,7 @@
 namespace ALUGrid
 {
   template< class Impl , bool hasVertex > 
-  class InnerVertexStorage
+  class InnerVertexStorage 
   : public MyAlloc 
   {
     InnerVertexStorage ( const InnerVertexStorage & );
@@ -56,12 +56,12 @@ namespace ALUGrid
     InnerVertexStorage( int level, 
                         double x, double y, 
                         double z, innervertex_t& vx )
-    {}
+    {
+        std::cerr << "This method should not be called" << std::endl;  
+    }
     
     InnerVertexStorage( )
-    {
-      std::cerr << "This method should not be called" << std::endl;
-    }
+    {    }
 
     // do nothing here  
     void store()  {}

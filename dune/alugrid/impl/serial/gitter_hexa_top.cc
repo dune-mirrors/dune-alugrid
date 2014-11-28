@@ -919,10 +919,10 @@ namespace ALUGrid
 
 
     
-    if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl;
-    if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;    
-    if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;
-    if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
+    //if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl;
+   // if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;    
+   // if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;
+  //  if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
    
    
     alugrid_assert (h0 && h1 && h2 && h3 );
