@@ -499,7 +499,7 @@ namespace ALUGrid
   #endif
       }
 
-      myrule_t suggestRule ()  
+      myrule_t suggestRule ()  const 
       {
         // Stevenson refinement: edge 0--3
         // ALBERTA refinement:   edge 0--1
