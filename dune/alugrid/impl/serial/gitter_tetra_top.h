@@ -320,7 +320,7 @@ namespace ALUGrid
             {
               if( face->myhedge( j )->myvertex( twist ) == vx0  && 
                   face->myhedge( j )->myvertex( 1-twist ) == vx1  ) 
-              {
+              {              
                 return rules[ j ];
               }
             }
@@ -338,8 +338,13 @@ namespace ALUGrid
           {
             myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-            const face3rule_t faceRule = calculateRule( face, 
+            face3rule_t faceRule = calculateRule( face, 
                 tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
+            
+            if( tetra->use2dbisection() && faceRule == face3rule_t :: e12) {
+              faceRule = face3rule_t :: e12_2d;
+            } 
+             
             // check refinement of faces 
             if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false;
           }
@@ -354,8 +359,12 @@ namespace ALUGrid
           {
             myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-            const face3rule_t faceRule = calculateRule( face, 
+            face3rule_t faceRule = calculateRule( face, 
                 tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
+
+            if( tetra->use2dbisection() && faceRule == face3rule_t :: e12) {
+              faceRule = face3rule_t :: e12_2d;
+            } 
 
             face->refineImmediate ( faceRule );
           }
