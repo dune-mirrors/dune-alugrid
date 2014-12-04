@@ -33,7 +33,7 @@ namespace ALUGrid
       
     struct Hface3Rule
     {
-      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=5, undefined=-2 };
+      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=5, e12_2d = 6, undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface3Rule ( const rule_t & );
@@ -186,7 +186,7 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: Hface3Rule :: isValid (const rule_t& r) {
-    return r == nosplit || r == iso4 || r == e01 || r == e12 || r == e20 ;
+    return r == nosplit || r == iso4 || r == e01 || r == e12 || r == e20 || r == e12_2d ;
   }
 
   inline bool RefinementRules :: Hface3Rule :: isValid () const {
@@ -215,6 +215,13 @@ namespace ALUGrid
         newr = retRule[ t + 3 ];
         break ;
       }
+    case e12_2d :
+     {
+        //cout << "e12_2d: my twist is " << t << endl;
+        static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // copied from e12
+        newr = retRule[ t + 3 ];
+        break ;
+      }  
     case e20 :
       {
         //cout << "e20: my twist is " << t << endl;
@@ -245,6 +252,8 @@ namespace ALUGrid
         return out << "e20";
       case RefinementRules :: Hface3Rule :: iso4:
         return out << "iso4";
+      case RefinementRules :: Hface3Rule :: e12_2d:
+        return out << "e12_2d";        
       case RefinementRules :: Hface3Rule :: undefined:
         return out << "undefined";
       default:
