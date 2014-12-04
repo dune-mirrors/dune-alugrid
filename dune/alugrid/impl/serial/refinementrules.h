@@ -33,7 +33,7 @@ namespace ALUGrid
       
     struct Hface3Rule
     {
-      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=5, e12_2d = 6, undefined=-2 };
+      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4,  e12_2d = 5, iso4=6, undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface3Rule ( const rule_t & );
@@ -44,7 +44,7 @@ namespace ALUGrid
       inline Hface3Rule rotate (int) const ;
 
       // return true if rule is one of the bisection rules 
-      bool bisection () const { return (_r >= e01) && (_r <= e20); }   
+      bool bisection () const { return (_r >= e01) && (_r <= e12_2d); }   
     private :
       rule_t _r ;
     } ;
