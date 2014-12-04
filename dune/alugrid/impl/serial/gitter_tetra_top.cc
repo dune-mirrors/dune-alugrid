@@ -383,8 +383,7 @@ namespace ALUGrid
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
           neighbour_t self = ( twist < 0 ) ?  this->nb.rear()   : this->nb.front () ;        
           
-          // TODO:get bisect2d_ of inner neighbour and set on outer    
-          //if ( neigh.first->isRealObject() && self.first->use2dbisection() ) neigh.first->enable2dbisection();
+        
           // check refineBalance 
           bool a = neigh.first->refineBalance (r, neigh.second);
 
@@ -1595,7 +1594,7 @@ namespace ALUGrid
      myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
     //for 2dbisection vx0 stays vx0 (and thus 0) in all children
     // we use the ALBERTA 2d algorithm with the map ALU (or vxMap) 1,2,3 to ALBERTA 0,1,2
-    if(bisect2d_)
+    if(_tetraRule ==  myrule_t :: bisect2d)
     {
       // vertex 1 is always containd in child 0, and not in child 1
       vx0 = this->myvertex( _vxMap[ 1 ] );
@@ -1637,7 +1636,7 @@ namespace ALUGrid
       t1->_vxMap[ 2 ] = _vxMap[ 1 + fce3 ]; // for type 0   2 else 1 
       t1->_vxMap[ 3 ] = _vxMap[ 2 - fce3 ]; // for type 0   1 else 2 
     }
-    else if (bisect2d_)
+    else if ( _tetraRule ==  myrule_t :: bisect2d)
     {
       ///////////////////////////////////////////////////
       //  Bisection 2d refinement, always refine edge 1--2
@@ -1994,7 +1993,7 @@ namespace ALUGrid
     }
     else if( r == myrule_t::bisect2d )
     {
-      alugrid_assert(bisect2d_);
+      alugrid_assert(_tetraRule ==  myrule_t :: bisect2d);
       // call refinement with appropriate rule 
       // given by suggestRule 
       BisectionInfo::splitEdge( this, suggestRule() );
@@ -2086,8 +2085,7 @@ namespace ALUGrid
         {
           _req = myrule_t::nosplit ;
           if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
-           if (bisect2d_) refineImmediate(myrule_t::bisect2d);
-           else refineImmediate ( myrule_t::bisect ) ;
+            refineImmediate(_tetraRule);
         }
       }
     }
