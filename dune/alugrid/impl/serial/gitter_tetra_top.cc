@@ -1600,7 +1600,7 @@ namespace ALUGrid
                                    const int newVx0, const int newVx1 ) 
   {
     
-    
+
      // vertex 0 is always containd in child 0, and not in child 1
      myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
     //for 2dbisection vx0 stays vx0 (and thus 0) in all children
@@ -1720,6 +1720,12 @@ namespace ALUGrid
    std::cout << "New tetra " << h1 << std::endl;
      alugrid_assert ( checkTetra( h1, 1 ) );
 
+    if(use2dbisection())
+    {
+      h0->enable2dbisection();
+      h1->enable2dbisection();
+    }
+
     std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
     std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
 
@@ -1805,7 +1811,6 @@ namespace ALUGrid
     alugrid_assert ( tetra->nChild() == nChild );
 
     const bool isGhost = tetra->isGhost();
-    std::cout << tetra->myvertex(0)->getIndex() << std::endl;
     for(int fce=0; fce<4; ++fce ) 
     {
       for(int i=0; i<3; ++i ) 
@@ -1834,7 +1839,6 @@ namespace ALUGrid
         }
       }
       
-     std::cout << tetra->myhface( fce )->myvertex(0)->getIndex() << std::endl;
 
       if( ! isGhost && ! tetra->myneighbour( fce ).first->isRealObject()  ) 
       {
@@ -2013,6 +2017,7 @@ namespace ALUGrid
     {
       // it is assured that r is one out of e01 ... e32 
       // call refinement directly 
+      std::cout << "call without suggestrule" << std::endl;
       BisectionInfo::splitEdge( this, r );
     }
 
@@ -2050,6 +2055,7 @@ namespace ALUGrid
           case myrule_t::e23 :
           case myrule_t::e30 :
           case myrule_t::e31 :
+                    std::cout << "Refine Faces called with tetra rule " << r << std::endl;
             if( ! BisectionInfo::refineFaces( this, r ) ) return false ;
             break ;
           default :
@@ -2061,7 +2067,7 @@ namespace ALUGrid
         
         // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
         // untersucht werden und dann erst das Element danach verfeinert werden.
-        
+        std::cout << "Refine Immediate called with rule " << r << std::endl;
         refineImmediate (r) ;
         return true ;
       }
@@ -2095,7 +2101,8 @@ namespace ALUGrid
         if (! myhface (fce)->leaf ()) 
         {
           _req = myrule_t::nosplit ;
-          if(r == balrule_t :: e12_2d) _tetraRule = myrule_t :: bisect2d ;
+          
+          if(r == balrule_t :: e12_2d) { std::cout << "enabling 2d on neighbor" << std::endl; enable2dbisection();} 
           if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
             refineImmediate(_tetraRule);
         }
