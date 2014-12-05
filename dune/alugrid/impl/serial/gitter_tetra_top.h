@@ -222,6 +222,7 @@ namespace ALUGrid
       using A :: myvertex;
       using A :: myGrid;
       using A :: nEdges;
+      using A :: nFaces;
       using A :: myhedge;
 
       typedef TetraTop < A >    innertetra_t ;
@@ -383,8 +384,24 @@ namespace ALUGrid
       virtual bool markForConformingClosure () 
       {
         alugrid_assert ( myGrid()->conformingClosureNeeded() );
+        // check if any of the faces is refined in a bisect2d fashion
+        alugrid_assert( nFaces() == 4 );
+        //for the 2d case we only need to check the faces 1-3
+        for(int f = 0; f < 4; ++f)
+        {
+          if( myhface(f) -> down() )
+          {
+            if(myhface( f )->getrule() == face3rule_t :: e12_2d)
+            {
+              _tetraRule = myrule_t::bisect2d;
+            }
+            request(_tetraRule);
+            return true;
+          }        
+        }
+        // for the real 3d case we also need to check edges
         // if an edge exits, that has children, we also have to refine this tetra 
-        alugrid_assert ( nEdges() == 6 );
+        alugrid_assert ( nEdges() == 6 );        
         for (int e=0; e < 6; ++e)
         {
           if( myhedge( e )->down() )

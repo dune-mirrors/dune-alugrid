@@ -134,7 +134,7 @@ void checkRefinements( GitterType& grid, int n )
     w->first(); 
     if( ! w->done() ) 
     {
-      if( w->size() > 1 || w->item ().type() != ALUGrid::tetra ) 
+      if(  w->item ().type() != ALUGrid::tetra ) 
       {
         isHexa = true; 
       }
@@ -185,15 +185,15 @@ void checkRefinements( GitterType& grid, int n )
   else // tetra
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
-    const TetraRule rules[ 8 ] = 
+    const TetraRule rules[ 2 ] = 
     { //TetraRule::iso8, 
-      TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
-      TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
+     // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
+     // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
   //    TetraRule::iso4_2d, 
       TetraRule :: bisect, TetraRule :: bisect2d
     };
 
-    for (int i=0; i<8; ++i ) 
+    for (int i=0; i<2; ++i ) 
     {
       std::cout << "*********************************************" <<std::endl;
       std::cout << "Refinement rule " << rules[ i ] << std::endl;
@@ -224,9 +224,9 @@ void checkRefinements( GitterType& grid, int n )
             // mark element for refinement 
             tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
-          // if(rand() % 100 > 50){ //do some random refinement to simulate adaptive behavior
+           if(rand() % 100 > 50){ //do some random refinement to simulate adaptive behavior
            
-           if(cnt < 1){++cnt; //just refine first element
+           //if(cnt < 1){++cnt; //just refine first element
               item->request ( rules[ i ] );
             }
           }
@@ -242,7 +242,7 @@ void checkRefinements( GitterType& grid, int n )
       }
       
       // coarsen again 
-      globalCoarsening( grid , n );
+      globalCoarsening( grid , 2*n );
     } // end for
   }
 

@@ -818,7 +818,7 @@ namespace ALUGrid
 
     // _up wird im Constructor uebergeben
     this->setIndex( indexManager().getIndex() );
-
+    std::cout << this;
     // initial mapping is has to be adjusted according 
     // to the make-6 algorithm 
     // NOTE: the _vxMap numbers only affect the bisection refinement
@@ -1655,15 +1655,15 @@ namespace ALUGrid
 
       // set vertex mapping (child 0)
       t0->_vxMap[ 0 ] = _vxMap[ 0 ]; 
-      t0->_vxMap[ 1 ] = _vxMap[ 2 ];
-      t0->_vxMap[ 2 ] = _vxMap[ 3 ];
-      t0->_vxMap[ 3 ] = _vxMap[ 1 ];
+      t0->_vxMap[ 1 ] = _vxMap[ 3 ];
+      t0->_vxMap[ 2 ] = _vxMap[ 1 ];
+      t0->_vxMap[ 3 ] = _vxMap[ 2 ];
 
       // set vertex mapping (child 1)
       t1->_vxMap[ 0 ] = _vxMap[ 0 ]; 
-      t1->_vxMap[ 1 ] = _vxMap[ 3 ];
-      t1->_vxMap[ 2 ] = _vxMap[ 1 ]; 
-      t1->_vxMap[ 3 ] = _vxMap[ 2 ]; 
+      t1->_vxMap[ 1 ] = _vxMap[ 2 ];
+      t1->_vxMap[ 2 ] = _vxMap[ 3 ]; 
+      t1->_vxMap[ 3 ] = _vxMap[ 1 ]; 
     }
     else 
     {
@@ -2017,7 +2017,6 @@ namespace ALUGrid
     {
       // it is assured that r is one out of e01 ... e32 
       // call refinement directly 
-      std::cout << "call without suggestrule" << std::endl;
       BisectionInfo::splitEdge( this, r );
     }
 
@@ -2067,7 +2066,6 @@ namespace ALUGrid
         
         // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
         // untersucht werden und dann erst das Element danach verfeinert werden.
-        std::cout << "Refine Immediate called with rule " << r << std::endl;
         refineImmediate (r) ;
         return true ;
       }
