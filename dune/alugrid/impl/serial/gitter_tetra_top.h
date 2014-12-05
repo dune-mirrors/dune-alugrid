@@ -344,6 +344,8 @@ namespace ALUGrid
             if( tetra->use2dbisection() && faceRule == face3rule_t :: e12) {
               faceRule = face3rule_t :: e12_2d;
             } 
+            
+           // std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
              
             // check refinement of faces 
             if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false;
@@ -387,7 +389,7 @@ namespace ALUGrid
         {
           if( myhedge( e )->down() )
           {
-            request ( myrule_t :: bisect );
+            request ( _tetraRule );
             return true;
           }
         }

@@ -9,6 +9,8 @@
 //***********************************************************************
 #include <config.h>
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
 // include serial part of ALUGrid 
 #include <dune/alugrid/3d/alu3dinclude.hh>
@@ -183,15 +185,15 @@ void checkRefinements( GitterType& grid, int n )
   else // tetra
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
-    const TetraRule rules[ 9 ] = 
-    { TetraRule::iso8, 
+    const TetraRule rules[ 8 ] = 
+    { //TetraRule::iso8, 
       TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
       TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
   //    TetraRule::iso4_2d, 
       TetraRule :: bisect, TetraRule :: bisect2d
     };
 
-    for (int i=0; i<9; ++i ) 
+    for (int i=0; i<8; ++i ) 
     {
       std::cout << "*********************************************" <<std::endl;
       std::cout << "Refinement rule " << rules[ i ] << std::endl;
@@ -207,7 +209,12 @@ void checkRefinements( GitterType& grid, int n )
       // create empty gather scatter 
       EmptyAdaptRestrictProlong rp;
       
+      //initialize random seed
+      srand(time(NULL));
+
+
       for(int j=0; j<n ; ++j){
+         int cnt =0;  
       
       for (w->first () ; ! w->done () ; w->next ())
         {
@@ -217,7 +224,11 @@ void checkRefinements( GitterType& grid, int n )
             // mark element for refinement 
             tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
-            item->request ( rules[ i ] );
+          // if(rand() % 100 > 50){ //do some random refinement to simulate adaptive behavior
+           
+           if(cnt < 1){++cnt; //just refine first element
+              item->request ( rules[ i ] );
+            }
           }
         }
      
@@ -311,6 +322,7 @@ int main (int argc, char ** argv, const char ** envp)
         gridPtr->disableGhostCells();
       }
 
+     
       checkRefinements( *gridPtr , 5);
     }
   }
