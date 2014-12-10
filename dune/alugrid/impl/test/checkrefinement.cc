@@ -323,7 +323,7 @@ int main (int argc, char ** argv, const char ** envp)
       }
 
      
-      checkRefinements( *gridPtr , 1);
+      checkRefinements( *gridPtr , 5);
     }
   }
 
