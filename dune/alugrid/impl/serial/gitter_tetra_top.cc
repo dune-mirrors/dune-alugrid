@@ -1972,7 +1972,7 @@ namespace ALUGrid
     const double childVolume = calculateChildVolume( 0.25 * _volume );
     
    // std::cout << "Building inner Tetras: " << std::endl;
-    //TODO:  add some twist < 0 check for for face 0 of tetra 3 with the right consequences!
+    //TODO:  check the twist < 0 check for for face 0 of tetra 3 with the right consequences!
     //it needs and extra check because it is "upside down" in the new face and cannot just be oriented as before
   //  for(int  i = 0; i<4 ; ++i )
    //   std::cout << "( 0, " << i <<  ")" << subface (0,i);
@@ -1988,9 +1988,9 @@ namespace ALUGrid
     innertetra_t * h2 = new innertetra_t (l, subface(0, 2), twist(0),subface(1, 0), twist(1), f1, -1, subface(3, 1), twist(3),  this, 2 , childVolume) ;
     std::cout << h2;
     checkTetra(h2,2);
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0), f1, 0, f2, 0, f0, 0, this, 3 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0) < 0 ? twist(0)%3-1 : twist(0), f1, 0, f2, 0, f0, 0, this, 3 , childVolume) ;
     std::cout << h3;
-    checkTetra(h3,3);
+    alugrid_assert(checkTetra(h3,3));
    
 
    
