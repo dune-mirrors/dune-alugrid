@@ -337,10 +337,17 @@ namespace ALUGrid
           myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2))) ;
           split_e20 () ;
           break ;
+        //the e12_2d rule does always the same as e12, and additionaly sets _rule to e12_2d  
         case myrule_t::e12_2d :
           myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
           split_e12 () ;
           _rule = myrule_t::e12_2d ;
+          break ;          
+        //the iso2_2d rule does always the same as e12, and additionaly _rule to iso2_2d
+        case myrule_t::iso2_2d :
+          myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
+          split_e12 () ;
+          _rule = myrule_t::iso2_2d ;
           break ;          
         case myrule_t::iso4 :
           myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (0))) ;
@@ -379,6 +386,7 @@ namespace ALUGrid
         case myrule_t::e12 :
         case myrule_t::e20 :
         case myrule_t::e12_2d :
+        case myrule_t::iso2_2d :
         case myrule_t::iso4 :
         {
         
@@ -630,6 +638,12 @@ namespace ALUGrid
       else if( r.bisection() ) 
       {
         split_bisection () ;
+      }
+      //refine iso2_2d 
+      else if( r == myrule_t::iso2_2d )
+      { 
+        //iso2_2d is just e12 plus additional _rule set
+        split_bisection () ;
       } 
       else 
       {
@@ -692,12 +706,14 @@ namespace ALUGrid
         case balrule_t::e01 :
         case balrule_t::e12 :
         case balrule_t::e20 :
+        //as iso2_2d is just a split into two elements, we can use the split_bisection method on the boundary
+        case balrule_t::iso2_2d :
         case balrule_t::e12_2d :
           //std::cout << "refLikeEl: e01 " << std::endl;
           // if (!myhface (0)->refine (balrule_t (balrule_t::e01).rotate (twist (0)), twist (0))) return false ;
           if (!myhface (0)->refine (r, twist (0))) return false ;
           split_bisection() ;
-          break;
+          break;          
         case balrule_t::iso4 :
           //if (!myhface (0)->refine (balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false ;
           if (!myhface (0)->refine (r, twist (0))) return false ;
@@ -732,6 +748,8 @@ namespace ALUGrid
         case myrule_t::e12 :
         case myrule_t::e20 :
         case myrule_t::e12_2d :
+        //iso2_2d is basically e12
+        case myrule_t::iso2_2d :
           split_bisection();
           break ;
         case myrule_t::iso4 :
@@ -894,6 +912,8 @@ namespace ALUGrid
     case myhface_t::myrule_t::e01 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
+    //iso2_2d and e12_2d are basically e12 
+    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12_2d :
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
@@ -1043,6 +1063,8 @@ namespace ALUGrid
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       alugrid_assert ( false );
       return 0;
+    //iso2_2d and e12_2d are basically the same  
+    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12_2d :      
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
@@ -1833,7 +1855,7 @@ namespace ALUGrid
                             };
 
           int twst = calculateFace3Twist( vx, tetra->myhface( fce ), 1 ); 
-          std::cout << "Twist is wrong, it should be " << twst << std::endl;
+          std::cout << "Twist of face " << fce << " is wrong, it should be " << twst << std::endl;
           twistOk = false ;
           continue ;
         }
@@ -1912,6 +1934,78 @@ namespace ALUGrid
     this->detachleafs();
     return ;
   }
+  
+  /* This method is used to split a tetraeder into four smaller tetrahedrons
+  *  
+  * The local vertex 0 is kept vertex 0 on all children and the face 0 opposite
+  * of to vertex 0 is divided according to the iso4 rule. 
+  *
+  * We get 3 inner Faces, no inner Edges and no inner vertices.
+  *
+  * As before the faces and edges already have been refined.
+  */
+  template< class A >  void TetraTop < A >::
+  splitIso4_2d () 
+  {
+    alugrid_assert ( _inner == 0 );
+    const int l = 1 + this->level () ; 
+
+
+   // std::cout << "Building inner Faces: " << std::endl;
+   // for(int i = 0; i < 3; ++ i)
+  //    std::cout << "( 0, "<< i << ") " << subedge(0,i);
+  //  for (int i = 1 ; i <4 ; ++ i)
+  //   std::cout << "( " << i << ", 0) " << subedge(i,0);
+    innerface_t * f0 = new innerface_t (l, subedge (2, 0), 1, subedge (0, 2), ((twist(0)>=0)?1:0), subedge (3, 0), 0) ;
+  //  std::cout << "f0: "<< f0 ;
+    innerface_t * f1 = new innerface_t (l, subedge (3, 0), 1, subedge (0, 1), ((twist(0)>=0)?1:0), subedge (1, 0), 0) ;
+  //  std::cout << "f1: " << f1 ;    
+    innerface_t * f2 = new innerface_t (l, subedge (1, 0), 1, subedge (0, 0), ((twist(0)>=0)?1:0), subedge (2, 0), 0) ;
+   // std::cout << "f2: " <<f2 ;
+  
+    alugrid_assert (f0 && f1 && f2 ) ;
+    f0->append(f1) ;
+    f1->append(f2) ;
+
+
+    // we divide by 4 means we divide the volume by 4
+    const double childVolume = calculateChildVolume( 0.25 * _volume );
+    
+   // std::cout << "Building inner Tetras: " << std::endl;
+    //TODO:  add some twist < 0 check for for face 0 of tetra 3 with the right consequences!
+    //it needs and extra check because it is "upside down" in the new face and cannot just be oriented as before
+  //  for(int  i = 0; i<4 ; ++i )
+   //   std::cout << "( 0, " << i <<  ")" << subface (0,i);
+    //for(int i = 1; i <4 ; ++i)
+    //  std::cout << "(" << i <<  ", 0)" << subface (i,0 ) << "( " << i <<  ", 1)" << subface (i,1);  
+    // pointer `this' is the pointer to the father element 
+    innertetra_t * h0 = new innertetra_t (l, subface(0, 0), twist(0), f0, -1, subface(2, 1), twist(2), subface(3, 0), twist(3), this, 0 , childVolume) ;
+    std::cout << h0 ;
+    checkTetra(h0,0);
+    innertetra_t * h1 = new innertetra_t (l, subface(0, 1), twist(0), subface(1, 1), twist(1), subface(2, 0), twist(2), f2, -1, this, 1 , childVolume) ;
+    std::cout << h1 ;
+    checkTetra(h1,1);
+    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), twist(0),subface(1, 0), twist(1), f1, -1, subface(3, 1), twist(3),  this, 2 , childVolume) ;
+    std::cout << h2;
+    checkTetra(h2,2);
+    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0), f1, 0, f2, 0, f0, 0, this, 3 , childVolume) ;
+    std::cout << h3;
+    checkTetra(h3,3);
+   
+
+   
+    alugrid_assert (h0 && h1 && h2 && h3 ) ;
+    h0->append(h1) ;
+    h1->append(h2) ;
+    h2->append(h3) ;
+
+    _inner = new inner_t( h0, f0 ); 
+    alugrid_assert ( _inner );
+    _rule = myrule_t::iso4_2d ;
+    
+    this->detachleafs();
+    return ;
+  }  
 
   template< class A > TetraTop < A >::
   BisectionInfo::BisectionInfo ( myrule_t r ) : _caller( 0 )
@@ -2000,6 +2094,16 @@ namespace ALUGrid
       }
       splitISO8 () ;
     }
+    else if( r == myrule_t::iso4_2d )
+    {
+      //analogously to iso8, but the faces 1,2,3 have to use iso2_2d
+      {
+          myhface (0)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso4).rotate (twist (0))) ;         
+        for (int i = 1 ; i < 4 ; ++i)
+          myhface (i)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso2_2d).rotate (twist (i))) ; 
+      }
+      splitIso4_2d () ;
+    }
     else if( r == myrule_t::bisect )
     {
       // call refinement with appropriate rule 
@@ -2041,7 +2145,14 @@ namespace ALUGrid
           case myrule_t::crs :
           case myrule_t::nosplit :
             return true ;
-         // case myrule_t::iso4_2d :
+          //for iso4_2d we refine faces 1,2,3 with iso2_2d and 0 with iso4   
+          case myrule_t::iso4_2d :
+            { 
+              if (!myhface (0)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (0)), twist (0))) return false ;             
+              for (int i = 1 ; i < 4 ; ++i )
+                if (!myhface (i)->refine (face3rule_t (face3rule_t::iso2_2d).rotate (twist (i)), twist (i))) return false ; 
+            }
+            break ;
           case myrule_t::iso8 :
             {
               for (int i = 0 ; i < 4 ; ++i )
@@ -2092,6 +2203,20 @@ namespace ALUGrid
           _req = myrule_t::nosplit ;
           refineImmediate (myrule_t::iso8) ;
         }
+      }
+      else if( r == balrule_t::iso2_2d)
+      { 
+         if( fce != 0)
+            if ( ! myhface (0)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (0)), twist (0)) ) 
+                return false ;         
+         for (int i = 1 ; i < 4 ; ++i)
+          {  
+            if (i != fce)
+              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) ) 
+                return false ;
+          }
+          _req = myrule_t::nosplit ;
+          refineImmediate (myrule_t::iso4_2d) ;
       }
       else 
       {
@@ -2313,7 +2438,9 @@ namespace ALUGrid
             case balrule_t::e01 :
             case balrule_t::e12 :
             case balrule_t::e20 :
+            //e12_2d and iso2_2d are essentially e12 
             case balrule_t::e12_2d :
+            case balrule_t::iso2_2d :
               { for (int j = 0 ; j < 2 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
               break ;
             case balrule_t::iso4 :
@@ -2364,6 +2491,8 @@ namespace ALUGrid
       case myhface_t::myrule_t::e01 :
       case myhface_t::myrule_t::e12 :
       case myhface_t::myrule_t::e20 :
+      //e12_2d and iso2_2d are essentially e12_2d
+      case myhface_t::myrule_t::iso2_2d :
       case myhface_t::myrule_t::e12_2d :      
         alugrid_assert ( j == 0 );
         return myhface (i)->subedge (0) ;
@@ -2392,6 +2521,8 @@ namespace ALUGrid
         return myhface(i)->subface(!j) ;
         std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
         return 0;
+    //e12_2d and iso2_2d are essentially e12    
+    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12_2d :
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
@@ -2477,6 +2608,8 @@ namespace ALUGrid
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
+      //iso2_2d and e12_2d are e12
+      case myrule_t::iso2_2d :
       case myrule_t::e12_2d :
              
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
