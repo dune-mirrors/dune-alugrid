@@ -836,7 +836,6 @@ namespace ALUGrid
 
     // _up wird im Constructor uebergeben
     this->setIndex( indexManager().getIndex() );
-    std::cout << this;
     // initial mapping is has to be adjusted according 
     // to the make-6 algorithm 
     // NOTE: the _vxMap numbers only affect the bisection refinement
@@ -1648,7 +1647,7 @@ namespace ALUGrid
     innertetra_t* t0 = ( found ) ? h0 : h1;
     innertetra_t* t1 = ( found ) ? h1 : h0;
 
-    //TODO: check the vxMap for the 2d refinement
+
 
     if( stevensonRefinement_ ) 
     {
@@ -1669,6 +1668,7 @@ namespace ALUGrid
       t1->_vxMap[ 2 ] = _vxMap[ 1 + fce3 ]; // for type 0   2 else 1 
       t1->_vxMap[ 3 ] = _vxMap[ 2 - fce3 ]; // for type 0   1 else 2 
     }
+    // the vxMap for the 2d refinement    
     else if ( _tetraRule ==  myrule_t :: bisect2d)
     {
       ///////////////////////////////////////////////////
@@ -1951,16 +1951,18 @@ namespace ALUGrid
     const int l = 1 + this->level () ; 
 
 
-   // std::cout << "Building inner Faces: " << std::endl;
+#ifdef ALUGRIDDEBUG
    // for(int i = 0; i < 3; ++ i)
   //    std::cout << "( 0, "<< i << ") " << subedge(0,i);
   //  for (int i = 1 ; i <4 ; ++ i)
   //   std::cout << "( " << i << ", 0) " << subedge(i,0);
+#endif
+  
     innerface_t * f0 = new innerface_t (l, subedge (2, 0), 1, subedge (0, 2), ((twist(0)>=0)?1:0), subedge (3, 0), 0) ;
-  //  std::cout << "f0: "<< f0 ;
-    innerface_t * f1 = new innerface_t (l, subedge (3, 0), 1, subedge (0, 1), ((twist(0)>=0)?1:0), subedge (1, 0), 0) ;
-  //  std::cout << "f1: " << f1 ;    
-    innerface_t * f2 = new innerface_t (l, subedge (1, 0), 1, subedge (0, 0), ((twist(0)>=0)?1:0), subedge (2, 0), 0) ;
+    innerface_t * f1 = new innerface_t (l, subedge (1, 0), 1, subedge (0, 0), ((twist(0)>=0)?1:0), subedge (2, 0), 0) ;     
+    innerface_t * f2 = new innerface_t (l, subedge (3, 0), 1, subedge (0, 1), ((twist(0)>=0)?1:0), subedge (1, 0), 0) ;
+  //  std::cout << "f1: " << f1 ;      
+  //  std::cout << "f0: "<< f0 ;    
    // std::cout << "f2: " <<f2 ;
   
     alugrid_assert (f0 && f1 && f2 ) ;
@@ -1971,27 +1973,34 @@ namespace ALUGrid
     // we divide by 4 means we divide the volume by 4
     const double childVolume = calculateChildVolume( 0.25 * _volume );
     
-   // std::cout << "Building inner Tetras: " << std::endl;
-    //TODO:  check the twist < 0 check for for face 0 of tetra 3 with the right consequences!
-    //it needs and extra check because it is "upside down" in the new face and cannot just be oriented as before
+ 
+  
+#ifdef ALUGRIDDEBUG  
   //  for(int  i = 0; i<4 ; ++i )
    //   std::cout << "( 0, " << i <<  ")" << subface (0,i);
     //for(int i = 1; i <4 ; ++i)
     //  std::cout << "(" << i <<  ", 0)" << subface (i,0 ) << "( " << i <<  ", 1)" << subface (i,1);  
+#endif    
+
+    // the twist < 0 for subface 3 of face 0 is needed
+    // because it is "upside down" in the old face and cannot just be oriented as before
+    
     // pointer `this' is the pointer to the father element 
     innertetra_t * h0 = new innertetra_t (l, subface(0, 0), twist(0), f0, -1, subface(2, 1), twist(2), subface(3, 0), twist(3), this, 0 , childVolume) ;
-    std::cout << h0 ;
-    checkTetra(h0,0);
-    innertetra_t * h1 = new innertetra_t (l, subface(0, 1), twist(0), subface(1, 1), twist(1), subface(2, 0), twist(2), f2, -1, this, 1 , childVolume) ;
-    std::cout << h1 ;
-    checkTetra(h1,1);
-    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), twist(0),subface(1, 0), twist(1), f1, -1, subface(3, 1), twist(3),  this, 2 , childVolume) ;
-    std::cout << h2;
+    innertetra_t * h1 = new innertetra_t (l, subface(0, 1), twist(0), subface(1, 1), twist(1), subface(2, 0), twist(2), f1, -1, this, 1 , childVolume) ;
+    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), twist(0), subface(1, 0), twist(1), f2, -1, subface(3, 1), twist(3), this, 2 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0) < 0 ? twist(0)%3-1 : twist(0), f2, 0, f1, 0, f0, 0, this, 3 , childVolume) ;
+    
+#ifdef ALUGRIDDEBUG
+   // std::cout << h0 ;
+    checkTetra(h0,0);    
+   // std::cout << h1 ;
+    checkTetra(h1,1);    
+   // std::cout << h2;
     checkTetra(h2,2);
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0) < 0 ? twist(0)%3-1 : twist(0), f1, 0, f2, 0, f0, 0, this, 3 , childVolume) ;
-    std::cout << h3;
+   // std::cout << h3;
     alugrid_assert(checkTetra(h3,3));
-   
+#endif
 
    
     alugrid_assert (h0 && h1 && h2 && h3 ) ;
@@ -2150,6 +2159,7 @@ namespace ALUGrid
             { 
               if (!myhface (0)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (0)), twist (0))) return false ;             
               for (int i = 1 ; i < 4 ; ++i )
+                //rotate should do nothing on iso2_2d
                 if (!myhface (i)->refine (face3rule_t (face3rule_t::iso2_2d).rotate (twist (i)), twist (i))) return false ; 
             }
             break ;
@@ -2165,7 +2175,6 @@ namespace ALUGrid
           case myrule_t::e23 :
           case myrule_t::e30 :
           case myrule_t::e31 :
-                    std::cout << "Refine Faces called with tetra rule " << r << std::endl;
             if( ! BisectionInfo::refineFaces( this, r ) ) return false ;
             break ;
           default :
@@ -2206,17 +2215,21 @@ namespace ALUGrid
       }
       else if( r == balrule_t::iso2_2d)
       { 
+       // if face is a leaf face 
+        if (! myhface (fce)->leaf ()) 
+        {
          if( fce != 0)
             if ( ! myhface (0)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (0)), twist (0)) ) 
                 return false ;         
          for (int i = 1 ; i < 4 ; ++i)
           {  
             if (i != fce)
-              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) ) 
+              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso2_2d ).rotate (twist (i)), twist (i)) ) 
                 return false ;
           }
           _req = myrule_t::nosplit ;
           refineImmediate (myrule_t::iso4_2d) ;
+        }
       }
       else 
       {
