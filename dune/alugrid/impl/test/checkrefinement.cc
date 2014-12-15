@@ -190,7 +190,8 @@ void checkRefinements( GitterType& grid, int n )
      // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
       TetraRule::iso4_2d, 
-    //  TetraRule :: bisect, TetraRule :: bisect2d
+      //TetraRule :: bisect, 
+      //TetraRule :: bisect2d
     };
 
     for (int i=0; i<1; ++i ) 
@@ -218,6 +219,7 @@ void checkRefinements( GitterType& grid, int n )
       
       for (w->first () ; ! w->done () ; w->next ())
         {
+        ++cnt;
           if( w->item ().type() == ALUGrid::tetra ) 
           {
             typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
@@ -226,9 +228,9 @@ void checkRefinements( GitterType& grid, int n )
 
            //if(rand() % 100 > 50){ //do some random refinement to simulate adaptive behavior
            
-           //if(cnt < 1){++cnt; //just refine first element
+           if(cnt < 3){ //always refine the first  elements
               item->request ( rules[ i ] );
-           // }
+            }
           }
         }
      
@@ -241,7 +243,7 @@ void checkRefinements( GitterType& grid, int n )
        }
       }
       
-      // coarsen again 
+      // coarsen again - to be on the safe side because of conforming Closure take 2 times refinement steps
       globalCoarsening( grid , 2*n );
     } // end for
   }
@@ -323,7 +325,7 @@ int main (int argc, char ** argv, const char ** envp)
       }
 
      
-      checkRefinements( *gridPtr , 5);
+      checkRefinements( *gridPtr , 3);
     }
   }
 

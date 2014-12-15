@@ -215,19 +215,22 @@ namespace ALUGrid
         newr = retRule[ t + 3 ];
         break ;
       }
-    //e12_2d and iso2_2d are essentially e12  
+    //twist on faces of e12_2d should be -1 or 0, so it should return itself - otherwise throw error
     case e12_2d :
      {
         //cout << "e12_2d: my twist is " << t << endl;
-        static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // copied from e12
+        static const rule_t retRule [ 6 ] = { e20, e01, e12_2d, e12_2d, e01, e20 }; // copied from e12
         newr = retRule[ t + 3 ];
+        alugrid_assert (newr == e12_2d);
         break ;
       }  
+    //twist on faces of iso_2d should be -1 or 0, so it should return itself - otherwise throw error      
     case iso2_2d :
      {
         //cout << "iso2_2d: my twist is " << t << endl;
-        static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // copied from e12
+        static const rule_t retRule [ 6 ] = { e20, e01, iso2_2d, iso2_2d, e01, e20 }; // copied from e12
         newr = retRule[ t + 3 ];
+        alugrid_assert (newr == iso2_2d);        
         break ;
       }    
     case e20 :
@@ -261,7 +264,9 @@ namespace ALUGrid
       case RefinementRules :: Hface3Rule :: iso4:
         return out << "iso4";
       case RefinementRules :: Hface3Rule :: e12_2d:
-        return out << "e12_2d";        
+        return out << "e12_2d";    
+      case RefinementRules :: Hface3Rule :: iso2_2d:
+        return out << "iso2_2d";             
       case RefinementRules :: Hface3Rule :: undefined:
         return out << "undefined";
       default:
