@@ -77,7 +77,6 @@ namespace Dune
       {
         vertices_.push_back( std::make_pair( pos, 2*globalId ) );
         VertexType pos1 (pos);
-        if(dimensionworld == 3)
           pos1[2] += 1.0 ;
         vertices_.push_back( std::make_pair( pos1, 2*globalId+1 ) );
       }
@@ -690,6 +689,8 @@ namespace Dune
 
         if( n * p3 > 0 )
           continue;
+        
+        
 
         if( elementType == hexa )
         {

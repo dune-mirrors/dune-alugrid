@@ -624,9 +624,16 @@ namespace ALUGrid
     if( ! trMap.affine() ) 
       this->setNonAffineGeometry(); 
 
+#ifdef ALUGRIDDEBUG 
+      // make sure determinant is ok 
+      alucoord_t point[3] = { 0.0, 0.0, 0.0 };
+      alugrid_assert ( trMap.det( point ) > 0 );
+#endif
+
     alugrid_assert ( this->level() == l );
     
     this->setIndex( indexManager().getIndex() );   
+    
     return;
   }
 
@@ -721,7 +728,7 @@ namespace ALUGrid
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
     (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
     ((twist(i) < 0) ?  myhface4(i)->subface((j+1)%2): 
-    myhface4(i)->subface(j%2) ):
+    myhface4(i)->subface(j) ):
     (abort (), (myhface4_t *)0);
   }
 
@@ -731,7 +738,7 @@ namespace ALUGrid
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
     (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
     ((twist(i) < 0) ?  myhface4(i)->subface((j+1)%2): 
-    myhface4(i)->subface(j%2) ):
+    myhface4(i)->subface(j) ):
     (abort (), (myhface4_t *)0);
   }
 
@@ -916,13 +923,13 @@ namespace ALUGrid
     innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), twist(0), subface(1,1), twist(1), subface (2, 0), twist(2), subface (3, 1), twist(3),  f1, -1, f0, 0, this, 1, childVolume);
     innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), subface(1,2), twist(1), f1, 3, subface (3, 0), twist (3), subface (4, 1), twist (4), f2, -2 , this, 2, childVolume);
     innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), subface(1,3), twist(1), f3, -1, f2, 3, subface (4, 0), twist(4), subface(5,1), twist(5),   this, 3, childVolume);
-
-
     
-    //if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl;
-   // if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;    
-   // if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;
-  //  if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
+  // if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl; 
+   // if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;
+  //if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;    
+   //if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
+   
+     
    
    
     alugrid_assert (h0 && h1 && h2 && h3 );

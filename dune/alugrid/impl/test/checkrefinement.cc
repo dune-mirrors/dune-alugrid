@@ -149,6 +149,11 @@ void checkRefinements( GitterType& grid, int n )
 
     for( int i=0; i<2; ++i )
     {
+    
+    std::cout << "*********************************************" <<std::endl;
+      std::cout << "Refinement rule " << rules[ i ] << std::endl;
+      std::cout << "*********************************************" <<std::endl;
+
       // get LeafIterator which iterates over all leaf elements of the grid 
       ALUGrid::LeafIterator < HElemType > w (grid) ;
        
@@ -166,7 +171,7 @@ void checkRefinements( GitterType& grid, int n )
           // mark element for refinement 
           hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
 
-          item->request ( rules[ 1 ] );
+          item->request ( rules[ i ] );
         }
       }
 
