@@ -400,7 +400,7 @@ template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
 {
 
-  mxl = 0;
+  //mxl = 0;
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType(); 

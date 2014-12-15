@@ -7,7 +7,7 @@ AM_CPPFLAGS += $(DUNEMPICPPFLAGS)
 AM_LDFLAGS += $(DUNEMPILDFLAGS)
 LDADD += $(DUNEMPILIBS)
 
-test_alugrid_SOURCES = test-alugrid.cc
+test_alugrid_SOURCES = test-alugrid.cc 
 test_geometries_SOURCES = test-geometries.cc
 test_entities_SOURCES = test-entities.cc
 test_iterators_SOURCES = test-iterators.cc

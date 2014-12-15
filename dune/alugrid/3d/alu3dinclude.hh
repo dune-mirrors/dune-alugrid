@@ -269,8 +269,8 @@ namespace Dune
   struct ALU3dRefinementTraits < MarkRuleType, tetra, 2 >
   {
      // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::bisect  };
-    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { bisect_element_t  = MarkRuleType::bisect2d};
+    enum { refine_element_t  = MarkRuleType::iso4_2d };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
@@ -280,8 +280,8 @@ namespace Dune
   struct ALU3dRefinementTraits < MarkRuleType, hexa, 2 >
   {
      // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::iso8    };
-    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { bisect_element_t  = MarkRuleType::iso4_2d };
+    enum { refine_element_t  = MarkRuleType::iso4_2d };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
