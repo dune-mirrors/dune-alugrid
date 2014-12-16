@@ -138,6 +138,9 @@ namespace ALUGrid
     
     // the iterator 
     IteratorType it_;
+    
+    //the grid dimension
+    const int dim_;
 
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
@@ -147,12 +150,13 @@ namespace ALUGrid
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : it_( grid.myGrid(), StopRule_t(level) ),
-      elem_( (ElType *)0, (HBndSegType*)0 )
+      elem_( (ElType *)0, (HBndSegType*)0 ), 
+      dim_(GridImp::dimension)
     {}
     
     // copy constructor 
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : it_( org.it_ ), elem_(org.elem_) 
+      : it_( org.it_ ), elem_(org.elem_), dim_(org.dim_)
     {}
 
     int size  ()    { return it_->size(); }
@@ -183,6 +187,7 @@ namespace ALUGrid
     
     mutable int count_;
     const int size_;
+    const int dim_;
 
   public:
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
@@ -194,7 +199,8 @@ namespace ALUGrid
     : vxList_ ( grid.getVertexList( level ) ),
       count_( 0 ),
       size_( vxList_.size() ),
-      elem_( (ElType *)0, (HBndSegType *)0 )
+      elem_( (ElType *)0, (HBndSegType *)0 ),
+      dim_(GridImp::dimension)
     {
       alugrid_assert ( vxList_.up2Date() );
     }
@@ -202,7 +208,7 @@ namespace ALUGrid
     // copy constructor 
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_) 
-      , elem_(org.elem_) 
+      , elem_(org.elem_) , dim_(org.dim_)
     {
     }
 
@@ -305,7 +311,10 @@ namespace ALUGrid
 
     // the face iterator 
     IteratorType it_;
-
+    
+    //the grid dimension
+    const int dim_;
+  
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
   private:
@@ -315,12 +324,13 @@ namespace ALUGrid
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
     : it_( grid.myGrid(), StopRule_t() ),
-      elem_( (ElType *)0, (HBndSegType *)0 )
+      elem_( (ElType *)0, (HBndSegType *)0 ), 
+      dim_(GridImp::dimension)
     {}
 
     // constructor copying iterator 
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_) {}
+      : it_( org.it_ ), elem_(org.elem_), dim_(org.dim_) {}
 
     ~ALU3dGridLeafIteratorWrapper ()
     {
@@ -398,6 +408,7 @@ namespace ALUGrid
     
     mutable int count_;
     const int size_;
+    const int dim_;
 
   public:
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
@@ -410,6 +421,7 @@ namespace ALUGrid
     : vxList_( grid.getLeafVertexList() ),
       count_( 0 ),
       size_( vxList_.size() ),
+      dim_(GridImp::dimension),
       elem_( (ElType *)0, (HBndSegType *)0 ),
       rule_()
     {
@@ -422,6 +434,7 @@ namespace ALUGrid
       , count_(org.count_) , size_(org.size_) 
       , elem_(org.elem_) 
       , rule_()
+      , dim_(org.dim_)
     {
     }
 

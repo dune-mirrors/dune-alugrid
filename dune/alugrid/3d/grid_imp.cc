@@ -32,12 +32,14 @@ namespace Dune
   {
     // iterates over grid elements of given level and adds all vertices to
     // given list  
+
     enum { codim = 3 };
 
     VertexListType & vxList = vertexList_;
-
+    
+    //we need Codim 3 instead of Codim dim because the ALUGrid IndexManager is called
     unsigned int vxsize = grid.hierarchicIndexSet().size(codim); 
-    if( vxList.size() < vxsize ) vxList.reserve(vxsize); 
+    if( vxList.size() < vxsize ) vxList.reserve(vxsize);      
     std::vector<int> visited_(vxsize);
     
     for(unsigned int i=0; i<vxsize; i++) 
@@ -47,7 +49,26 @@ namespace Dune
 
     vxList.resize(0);
     
+    std::vector< bool > & validList = validateList_;
+    
+    if( validList.capacity() < vxsize) validList.reserve(vxsize);
+    validList.resize(vxsize);
+
+    //set all values to true 
+    for(size_t i=0; i<vxsize; ++i)   
+       validList[i] = true;
+    
+    
+    
     const ALU3dGridElementType elType = GridType:: elementType;
+    const int dim = GridType:: dimension;
+
+    //for the 2d tetra case set the index 0 of the validList to false
+    //index 0 is the one global vertex, that we ignore
+    if( elType == tetra && dim == 2 )
+    {
+      validList[0] = false;
+    }     
 
     typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIteratorType;
     typedef typename ElementLevelIteratorType :: val_t val_t;
@@ -82,6 +103,8 @@ namespace Dune
         if( vx->isGhost() ) continue;
 
         const int idx = vx->getIndex(); 
+        //in the 2d hexa case items are only valid, if the local index is below 4
+        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;        
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);
@@ -106,6 +129,8 @@ namespace Dune
     enum { codim = 3 };
 
     VertexListType & vxList = vertexList_;
+    
+    //we need Codim 3 instead of Codim dim because the ALUGrid IndexManager is called    
     size_t vxsize = grid.hierarchicIndexSet().size(codim);
     if( vxList.capacity() < vxsize) vxList.reserve(vxsize);
     vxList.resize(vxsize);
@@ -116,8 +141,25 @@ namespace Dune
       vx.first  = 0;
       vx.second = -1;
     }
+    
+ 
+    std::vector< bool > & validList = validateList_; 
+    
+    if( validList.capacity() < vxsize) validList.reserve(vxsize);
+    validList.resize(vxsize);
+
+    //set all values to true
+    for(size_t i=0; i<vxsize; ++i)   
+      validList[i] = true;              
 
     const ALU3dGridElementType elType = GridType:: elementType;
+    const int dim = GridType:: dimension;
+
+    //for the 2d tetra case set the index 0 of the validList to false
+    if(elType == tetra && dim == 2)
+    {
+      validList[0] = false;
+    } 
 
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, Dune::All_Partition, Comm > ElementIteratorType;
     typedef typename ElementIteratorType :: val_t val_t;
@@ -156,6 +198,8 @@ namespace Dune
 
         const int idx = vx->getIndex(); 
         ItemType & vxpair = vxList[idx];
+        //in the 2d hexa case items are only valid, if the local index is below 4
+        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;
         if( vxpair.first == 0 )
         {
           vxpair.first  = vx; 
