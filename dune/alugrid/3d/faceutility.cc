@@ -109,12 +109,14 @@ namespace Dune
     LocalCoordinateType cornerCoords;
     referenceElementCoordinatesRefined ( side, cornerCoords );
     
-    if(connector_.face().nChild() == 0){
+    const int twist = connector_.innerTwist();
+    
+    if(connector_.face().nChild() == (twist < 0 ? 1 : 0)){
       result[0] = cornerCoords[0];
       result[1] =  ( cornerCoords[1] + cornerCoords[0] );
       result[1] *=0.5;
     }
-    else if(connector_.face().nChild() == 1)
+    else if(connector_.face().nChild() == (twist < 0 ? 0 : 1))
     {
       result[0] = ( cornerCoords[1] + cornerCoords[0] );
       result[0] *= 0.5;

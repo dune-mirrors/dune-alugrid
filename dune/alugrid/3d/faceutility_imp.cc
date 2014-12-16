@@ -864,9 +864,9 @@ namespace Dune
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
-      
+            
       geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(3))->Point() );
+                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() );
       this->generatedGlobal_ = true ;
     }
   }
@@ -886,7 +886,7 @@ namespace Dune
       
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal 
-      const double factor = (this->connector_.innerTwist() < 0) ? 1.0 : -1.0; 
+      const double factor = (this->connector_.innerTwist() < 0) ? -1.0 : 1.0; 
 
       
       if(actualDimw == 2)
@@ -968,24 +968,24 @@ namespace Dune
   {
   
 
-    //we want vertices 1,2 of the real 3d DUNE face
+    //we want vertices 1,2 of the real 3d DUNE face for tetras and 0,1 for hexas
     const  int localALUIndex = 
       FaceTopo::dune2aluVertex(type == tetra ? duneFaceVertexIndex + 1 : duneFaceVertexIndex, 
                                aluFaceTwist);
                                
-    // get local ALU vertex number on the element's face - for tetra map  1,2 of real 3d face back to 0,1 by subtracting 1
+    // get local DUNE vertex number on the element's face - for tetra map  1,2 of real 3d face back to 0,1 by subtracting 1
     const int localDuneIndex = (type == tetra) ? 
                              ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) - 1 
                              :
                              ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) 
                              ;
                            
- /*   std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
+   /* std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;                     
     std::cout << "aluFaceTwist: " << aluFaceTwist << std::endl;
     std::cout << "duneFaceVertexIndex: " << duneFaceVertexIndex << std::endl;
     std::cout << "localALUIndex: " << localALUIndex << std::endl;
     std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
-    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl; */
+    std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl << std::endl; */
     assert( localDuneIndex == 0 || localDuneIndex == 1 );
     return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
   }
