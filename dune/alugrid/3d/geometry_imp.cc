@@ -349,16 +349,13 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   enum { numVertices = ElementTopo::numVerticesPerFace };
   // for all vertices of this face get rotatedIndex 
   int rotatedALUIndex[ 4 ]; 
-  int k = 0;
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i - k ] = FaceTopo::twist(localALUIndex, twist);
-    //drop vertices for hexa with local index 1 or 2
-   // if (elementType == hexa && mydim == 1 && (rotatedALUIndex[i - k] == 1 || rotatedALUIndex[i - k] == 2)){++k;}
+    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
   }
-
+  
   if( elementType == hexa )
   {
     if( mydim  == 2 ) //quadrilateral
@@ -372,8 +369,8 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
     else if ( mydim == 1) //edge
     {
       //update geometry implementation
-      geoImpl().update( face.myvertex(0)->Point(),
-                        face.myvertex(3)->Point() );
+      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
+                        face.myvertex(rotatedALUIndex[1])->Point() );
     }
   }
   else if ( elementType == tetra )
