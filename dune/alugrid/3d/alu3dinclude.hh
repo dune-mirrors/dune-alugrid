@@ -410,6 +410,8 @@ namespace Dune
     
   private:
     bool up2Date_;
+     //careful: due to the setupVxList structure the ordering of vertexList_ and validateList_ differ in the level Case    
+     //for validateList_ we want the ALUGrid Index as ordering, as we want to use it for faces
     VertexListType vertexList_;
     std::vector< bool > validateList_;
   };
