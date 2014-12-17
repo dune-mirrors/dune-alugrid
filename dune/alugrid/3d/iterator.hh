@@ -546,8 +546,10 @@ private:
           }
           else if (GridImp::elementType == hexa)
           {
-           //face of hexa - valid if sum of first two vertex indices is odd          
-            return ((elem->myvertex(0)->getIndex() + elem->myvertex(1)->getIndex()) % 2);
+            
+            ALU3dGridLeafVertexList< typename GridImp::MPICommunicatorType > & vxList = grid.getLeafVertexList();
+           //face of hexa - valid if the vx 0 is valid and vx 1  is not valid       
+            return (vxList.isValid(elem->myvertex(0)->getIndex()) && !vxList.isValid(elem->myvertex(1)->getIndex())) ;
           }
        }
        return false;
@@ -561,6 +563,10 @@ private:
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
       return true;
+      
+      //The check whether vertices are valid is done in alu3diterators.hh 
+      // see class ALU3dGridLevelIteratorWrapper<3 , ... > and ALU3dGridLeafIteratorWrapper <3, ...>
+      
     /*  if(GridImp::dimension ==3 ) return true;
       else if (GridImp::dimension == 2)
       {
