@@ -103,8 +103,8 @@ namespace Dune
         if( vx->isGhost() ) continue;
 
         const int idx = vx->getIndex(); 
-        //in the 2d hexa case items are only valid, if the local index is below 4
-        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;        
+        //in the 2d hexa case items are only valid, if the local ALU index is below 4
+        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;  
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);

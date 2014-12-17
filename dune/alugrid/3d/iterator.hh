@@ -560,7 +560,8 @@ private:
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
-      if(GridImp::dimension ==3 ) return true;
+      return true;
+    /*  if(GridImp::dimension ==3 ) return true;
       else if (GridImp::dimension == 2)
       {
           typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 2>::ImplementationType GEOElementType;
@@ -582,7 +583,7 @@ private:
               return !(elem->getIndex() % 2);          
           }
         }
-      return false;
+      return false;*/
     }
   };
 };
