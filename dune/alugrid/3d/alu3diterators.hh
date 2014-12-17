@@ -139,8 +139,6 @@ namespace ALUGrid
     // the iterator 
     IteratorType it_;
     
-    //the grid dimension
-    const int dim_;
 
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
@@ -150,13 +148,12 @@ namespace ALUGrid
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : it_( grid.myGrid(), StopRule_t(level) ),
-      elem_( (ElType *)0, (HBndSegType*)0 ), 
-      dim_(GridImp::dimension)
+      elem_( (ElType *)0, (HBndSegType*)0 )
     {}
     
     // copy constructor 
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : it_( org.it_ ), elem_(org.elem_), dim_(org.dim_)
+      : it_( org.it_ ), elem_(org.elem_)
     {}
 
     int size  ()    { return it_->size(); }
@@ -169,19 +166,6 @@ namespace ALUGrid
       elem_.first  = & it_->item(); 
       return elem_; 
     }
- /* private:
-    bool isValid()
-    {
-      //for 3d all faces are valid
-      if(dim_ == 3) return true;
-      //we assume that elem_ is no ghost - already checked for elem_.first
-      alugrid_assert(elem_.first);
-      //cast to VertexGeo to get access to the index
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;    
-      GEOVertexType * vx = static_cast<GEOVertexType *> (elem_.first);
-      int idx = vx->getIndex();
-      return vxList_.isValid(idx);
-    }    */
   };
 
   // the vertex level iterator, little bit different to the others 
@@ -354,10 +338,7 @@ namespace ALUGrid
     typedef GridIterator< ElType, StopRule_t > IteratorType;
 
     // the face iterator 
-    IteratorType it_;
-    
-    //the grid dimension
-    const int dim_;
+    IteratorType it_;   
   
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
@@ -368,21 +349,20 @@ namespace ALUGrid
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
     : it_( grid.myGrid(), StopRule_t() ),
-      elem_( (ElType *)0, (HBndSegType *)0 ), 
-      dim_(GridImp::dimension)
+      elem_( (ElType *)0, (HBndSegType *)0 )
     {}
 
     // constructor copying iterator 
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_), dim_(org.dim_) {}
+      : it_( org.it_ ), elem_(org.elem_){}
 
     ~ALU3dGridLeafIteratorWrapper ()
     {
     }
 
     int size  ()    { return it_->size(); }
-    void next ()    { it_->next(); }
-    void first()    { it_->first(); }
+    void next ()    { it_->next();  }
+    void first()    { it_->first();  }
     int done () const     { return it_->done(); }
     val_t & item () const 
     { 
@@ -390,19 +370,7 @@ namespace ALUGrid
       elem_.first  = & it_->item(); 
       return elem_; 
     }
- /* private:
-    bool isValid()
-    {
-      //for 3d all faces are valid
-      if(dim_ == 3) return true;
-      //we assume that elem_ is no ghost - already checked for elem_.first
-      alugrid_assert(elem_.first);
-      //cast to VertexGeo to get access to the index
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;    
-      GEOVertexType * vx = static_cast<GEOVertexType *> (elem_.first);
-      int idx = vx->getIndex();
-      return vxList_.isValid(idx);
-    }*/
+ 
   };
 
   template< PartitionIteratorType pitype, class Comm >
