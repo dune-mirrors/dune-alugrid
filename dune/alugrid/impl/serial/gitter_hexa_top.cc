@@ -707,7 +707,7 @@ namespace ALUGrid
     return;
   }
 
-  //for iso4_2d we do not use the subedge routine, but access the edges directly
+  //for iso4_2d we  use the subedge routine for the faces 0,1
   template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) {
     return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge ((8 - j + twist (i)) % 4) : 
       myhface4 (i)->myhedge ((j + twist (i)) % 4)) : 
@@ -879,18 +879,34 @@ namespace ALUGrid
 
 
 
+  //  innerface_t * f8 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->subedge (1, 7), 0, e0, 0, this->subedge (0, 4), 1 );
+ //   innerface_t * f5 = new innerface_t (l, this->myhface4(4)->subedge(0), 0, this->subedge (1, 6), 0, e0, 0, this->subedge (0, 5), 1 ); 
+ //   innerface_t * f9 = new innerface_t (l, this->myhface4(3)->subedge(0), 0, this->subedge (1, 5), 0, e0, 0, this->subedge (0, 6), 1 ); 
+  //  innerface_t * f4 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge (1, 4), 0, e0, 0, this->subedge (0, 7), 1 );
+    
+  //  std::cout << f8 << f5 << f9 << f4 ;
+
+   // innerface_t * f6 = new innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 );
+ //   innerface_t * f7 = new innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 );
+
+
+   // innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 );
+   // innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
+
+
+
  // we just need four inner Faces 
  // always the inner edge + the subedge of top and bottom  + one hedge
     // inner face 0 at face 2
-    innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->myhface4(1)->subedge(0), 0, e0, 0, this->myhface4(0)->subedge(0), 1);
+    innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge(1,4), 0, e0, 0, this->subedge(0,7), 1);
     // inner face 1 at face 3
-    innerface_t * f1 = new innerface_t (l, this->myhface4(3)->subedge(0), 0, this->myhface4(1)->subedge(1), 0, e0, 0, this->myhface4(0)->subedge(1), 1);
+    innerface_t * f1 = new innerface_t (l, this->myhface4(3)->subedge(0), 0, this->subedge(1,5), 0, e0, 0, this->subedge(0,6), 1);
     //inner face 2 at face 4
-    innerface_t * f2 = new innerface_t (l, this->myhface4(4)->subedge(0), 0, this->myhface4(1)->subedge(2), 0, e0, 0, this->myhface4(0)->subedge(2), 1);
+    innerface_t * f2 = new innerface_t (l, this->myhface4(4)->subedge(0), 0, this->subedge(1,6), 0, e0, 0, this->subedge(0,5), 1);
     // inner face 3 at face 5
-    innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->myhface4(1)->subedge(3), 0, e0, 0, this->myhface4(0)->subedge(3), 1);
+    innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->subedge(1,7), 0, e0, 0, this->subedge(0,4), 1);
 
-    //std::cout << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 << std::endl;
+    //std::cout << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
 
     alugrid_assert (f0 && f1 && f2 && f3 );
     f0->append(f1);
@@ -924,10 +940,11 @@ namespace ALUGrid
     innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), subface(1,2), twist(1), f1, 3, subface (3, 0), twist (3), subface (4, 1), twist (4), f2, -2 , this, 2, childVolume);
     innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), subface(1,3), twist(1), f3, -1, f2, 3, subface (4, 0), twist(4), subface(5,1), twist(5),   this, 3, childVolume);
     
-  // if(checkHexa( h0, 0 )) std::cout << "hexa 0 ok!" << std::endl; 
-   // if(checkHexa( h1, 1 )) std::cout << "hexa 1 ok!" << std::endl;
-  //if(checkHexa( h2, 2 )) std::cout << "hexa 2 ok!" << std::endl;    
-   //if(checkHexa( h3, 3 )) std::cout << "hexa 3 ok!" << std::endl;
+   
+   if(!checkHexa( h0, 0 )) std::cout << "0: " << h0 << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+   if(!checkHexa( h1, 1 )) std::cout << "1: " <<  h1<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+   if(!checkHexa( h2, 2 )) std::cout << "2: " << h2<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+   if(!checkHexa( h3, 3 )) std::cout << "3: " << h3<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
    
      
    
@@ -1360,7 +1377,7 @@ namespace ALUGrid
     }
     
     // make sure we have only 8 different vertices 
-    alugrid_assert ( verticesFound.size() == 8 );
+  //  alugrid_assert ( verticesFound.size() == 8 );
 
     return twistOk;
   }

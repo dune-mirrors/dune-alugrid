@@ -864,6 +864,9 @@ namespace Dune
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
+      
+     // std::cout << FaceTopo::dune2aluVertex(0) << FaceTopo::dune2aluVertex(1) << std::endl;
+      // std::cout << &face ;     
             
       geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
                      face.myvertex(FaceTopo::dune2aluVertex(1))->Point() );

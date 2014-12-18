@@ -200,7 +200,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
         std::cerr << " | " << insideGeometry.corner( i );
       std::cerr << std::endl;
 
-      assert( false );
+     // assert( false );
     }
   }
 

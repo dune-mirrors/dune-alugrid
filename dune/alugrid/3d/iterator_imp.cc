@@ -375,6 +375,7 @@ inline typename ALU3dGridIntersectionIterator< GridImp >::Geometry
 ALU3dGridIntersectionIterator< GridImp >::geometry () const
 {
   geoProvider_.buildGlobalGeom( intersectionGlobal_ );
+  //intersectionGlobal_.print(std::cout);
   return Geometry( intersectionGlobal_ );
 }
 
