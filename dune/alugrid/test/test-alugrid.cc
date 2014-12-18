@@ -24,6 +24,7 @@
 
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
+//#include "checkintersectionit.cc"
 #include <dune/grid/test/checkcommunicate.cc>
 //#include "checktwists.cc"
 
