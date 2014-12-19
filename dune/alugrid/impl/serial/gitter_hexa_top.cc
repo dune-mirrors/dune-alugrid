@@ -879,24 +879,12 @@ namespace ALUGrid
 
 
 
-  //  innerface_t * f8 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->subedge (1, 7), 0, e0, 0, this->subedge (0, 4), 1 );
- //   innerface_t * f5 = new innerface_t (l, this->myhface4(4)->subedge(0), 0, this->subedge (1, 6), 0, e0, 0, this->subedge (0, 5), 1 ); 
- //   innerface_t * f9 = new innerface_t (l, this->myhface4(3)->subedge(0), 0, this->subedge (1, 5), 0, e0, 0, this->subedge (0, 6), 1 ); 
-  //  innerface_t * f4 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge (1, 4), 0, e0, 0, this->subedge (0, 7), 1 );
-    
-  //  std::cout << f8 << f5 << f9 << f4 ;
-
-   // innerface_t * f6 = new innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 );
- //   innerface_t * f7 = new innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 );
-
-
-   // innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 );
-   // innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
 
 
 
  // we just need four inner Faces 
- // always the inner edge + the subedge of top and bottom  + one hedge
+ // always the inner edge + the subedge of top and bottom  + one subedge of a side face
+// the top face is rotated in the other direction as the bottom face, so we need the subedges in the descending order.
     // inner face 0 at face 2
     innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge(1,4), 0, e0, 0, this->subedge(0,7), 1);
     // inner face 1 at face 3
