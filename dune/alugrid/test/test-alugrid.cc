@@ -36,11 +36,12 @@
 #define USE_PARALLEL_TEST 1
 #endif
 
-template<>
-struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >
+template<int dim, int dimw>
+struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimw, Dune::simplex, Dune::conforming > >
 {
   static const bool v = false;
 };
+
 
 template <bool leafconform, class Grid> 
 void checkCapabilities(const Grid& grid) 

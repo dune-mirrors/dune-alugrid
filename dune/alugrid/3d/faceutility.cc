@@ -119,7 +119,6 @@ namespace Dune
        connector_.innerTwist() :
        connector_.outerTwist());
     
-    std::cout << "happy ever after..." << faceTwist<< std::endl;
     
     if(connector_.face().nChild() == (faceTwist < 0 ? 1 : 0)){
       result[0] = cornerCoords[0];

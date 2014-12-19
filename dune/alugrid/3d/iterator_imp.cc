@@ -113,7 +113,6 @@ template <class EntityType>
 inline void ALU3dGridIntersectionIterator<GridImp> :: 
 first (const EntityType & en, int wLevel) 
 {
-
   if( ! en.isLeaf() && en.level()>0) 
   { 
     done();

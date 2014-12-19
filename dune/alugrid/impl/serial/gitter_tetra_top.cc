@@ -1736,11 +1736,11 @@ namespace ALUGrid
     }
 #endif
 
-    std::cout << "New tetra " << h0 << std::endl;
-     alugrid_assert ( checkTetra( h0, 0 ) );
+  //  std::cout << "New tetra " << h0 << std::endl;
+  //   alugrid_assert ( checkTetra( h0, 0 ) );
 
-   std::cout << "New tetra " << h1 << std::endl;
-     alugrid_assert ( checkTetra( h1, 1 ) );
+ //  std::cout << "New tetra " << h1 << std::endl;
+ //    alugrid_assert ( checkTetra( h1, 1 ) );
 
     if(use2dbisection())
     {
@@ -1748,8 +1748,8 @@ namespace ALUGrid
       h1->enable2dbisection();
     }
 
-    std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
-    std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
+  //  std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
+  //  std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
 
     // append h1 to h0 
     h0->append( h1 );
