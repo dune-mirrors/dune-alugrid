@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modifications for Dune Interface
+// (c) Robert Kloefkorn 2004 - 2005
 #include <config.h>
 
 #include <fstream>
@@ -9,7 +9,7 @@
 #include "../serial/gatherscatter.hh"
 #include "../serial/mapp_cube_3d.h"
 #include "../serial/mapp_tetra_3d.h"
-  
+
 #include "gitter_pll_ldb.h"
 #include "gitter_pll_impl.h"
 #include "gitter_hexa_top_pll.h"
@@ -24,16 +24,16 @@ namespace ALUGrid
   template < class A >
   VertexPllBaseX< A >::VertexPllBaseX (double x, double y, double z, int i, IndexManagerStorageType& ims )
     : A( x, y, z, i, ims ),
-      _lpn (), 
+      _lpn (),
       _moveTo ( 0 )
   {
     doClearLinkage();
   }
 
   template < class A >
-  VertexPllBaseX< A >::~VertexPllBaseX () 
+  VertexPllBaseX< A >::~VertexPllBaseX ()
   {
-    // make sure _moveTo was already deleted 
+    // make sure _moveTo was already deleted
     alugrid_assert ( _moveTo == 0 );
   }
 
@@ -44,19 +44,19 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::checkAndAddLinkage( const int rank ) 
+  void VertexPllBaseX< A >::checkAndAddLinkage( const int rank )
   {
     const std::vector< int >& lp = ((*_lpn).first);
     const std::vector< int >::const_iterator lpEnd = lp.end();
-    // if rank is not contained in the linkage, add it 
-    if( std::find( lp.begin(), lpEnd, rank ) == lpEnd ) 
+    // if rank is not contained in the linkage, add it
+    if( std::find( lp.begin(), lpEnd, rank ) == lpEnd )
     {
       const size_t lpSize = lp.size() ;
       std::vector< int > newLinkage( lpSize+1 );
-      // copy content 
+      // copy content
       std::copy( lp.begin(), lpEnd, newLinkage.begin() );
       newLinkage[ lpSize ] = rank ;
-      setLinkage( newLinkage );      
+      setLinkage( newLinkage );
     }
   }
 
@@ -67,9 +67,9 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::doClearLinkage() 
+  void VertexPllBaseX< A >::doClearLinkage()
   {
-    // set iterator to empty linkage 
+    // set iterator to empty linkage
     linkagePatternMap_t& _map = linkagePatterns();
     typename linkagePatternMap_t::iterator pos = _map.find ( nullPattern );
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( nullPattern, int(0) )).first;
@@ -77,13 +77,13 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::clearLinkage() 
+  void VertexPllBaseX< A >::clearLinkage()
   {
     doClearLinkage();
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage ) 
+  bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage )
   {
     std::vector< int > lp ( newLinkage );
     std::sort( lp.begin(), lp.end() );
@@ -91,7 +91,7 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::setLinkageSorted ( const std::vector< int >& slp ) 
+  bool VertexPllBaseX< A >::setLinkageSorted ( const std::vector< int >& slp )
   {
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
@@ -102,15 +102,15 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::unattach2 (int i) 
+  void VertexPllBaseX< A >::unattach2 (int i)
   {
     alugrid_assert ( _moveTo );
-    typename moveto_t::iterator pos = _moveTo->find( i ); 
+    typename moveto_t::iterator pos = _moveTo->find( i );
     alugrid_assert ( pos != _moveTo->end ());
-    if ( (-- (*pos).second ) == 0 ) 
+    if ( (-- (*pos).second ) == 0 )
     {
       _moveTo->erase ( pos );
-      if( _moveTo->empty() ) 
+      if( _moveTo->empty() )
       {
         delete _moveTo;
         _moveTo = 0;
@@ -120,27 +120,27 @@ namespace ALUGrid
   }
 
   template < class A >
-  void VertexPllBaseX< A >::attach2 (int i) 
+  void VertexPllBaseX< A >::attach2 (int i)
   {
-    // create moveTo if not already existent 
+    // create moveTo if not already existent
     if( ! _moveTo ) _moveTo = new moveto_t ();
 
-    typename moveto_t::iterator pos = _moveTo->find( i ); 
+    typename moveto_t::iterator pos = _moveTo->find( i );
     if( pos == _moveTo->end() )
       _moveTo->insert (std::pair< const int, int > (i,1));
-    else 
+    else
       ++ (*pos).second;
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::packAll (std::vector< ObjectStream > & osv) 
+  bool VertexPllBaseX< A >::packAll (std::vector< ObjectStream > & osv)
   {
     bool action (false);
-    if( _moveTo ) 
+    if( _moveTo )
     {
       typedef typename moveto_t::const_iterator  const_iterator;
-      const const_iterator iEnd =  _moveTo->end (); 
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      const const_iterator iEnd =  _moveTo->end ();
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i)
       {
         const int link = (*i).first;
         action = doPackLink( link, osv[ link ] );
@@ -150,7 +150,7 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool VertexPllBaseX< A >::doPackLink ( const int link, ObjectStream& os ) 
+  bool VertexPllBaseX< A >::doPackLink ( const int link, ObjectStream& os )
   {
     os.writeObject (VERTEX);
     os.writeObject (myvertex ().ident ());
@@ -161,19 +161,19 @@ namespace ALUGrid
 
     const int elSize = _elements.inactive() ? 0 : _elements.size();
     os.writeObject( elSize );
-    for( int i=0; i<elSize; ++ i ) 
+    for( int i=0; i<elSize; ++ i )
     {
       os.writeObject( _elements[ i ] );
     }
-    return true ; 
+    return true ;
   }
 
   template < class A >
-  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool isNew) 
+  void VertexPllBaseX< A >::unpackSelf (ObjectStream & os, bool isNew)
   {
     int elSize;
     os.readObject( elSize );
-    if( elSize > 0 ) 
+    if( elSize > 0 )
     {
       if( _elements.inactive() )
       {
@@ -184,10 +184,10 @@ namespace ALUGrid
         }
         _elements.insertElementLinkage( elements );
       }
-      else 
+      else
       {
         alugrid_assert( elSize == _elements.size() );
-        // advance buffer by elsize * sizeof( int ) bytes 
+        // advance buffer by elsize * sizeof( int ) bytes
         os.removeObject( elSize * sizeof( int ) );
       }
     } // end elSize > 0
@@ -199,7 +199,7 @@ namespace ALUGrid
   // --EdgePllBaseXMacro
   /////////////////////////////////////////////////////////////////
   template < class A >
-  std::vector< int > EdgePllBaseXMacro< A >::estimateLinkage () const 
+  std::vector< int > EdgePllBaseXMacro< A >::estimateLinkage () const
   {
     std::vector< int > est;
     const std::vector< int > l0 ( myhedge ().myvertex(0)->estimateLinkage () );
@@ -209,21 +209,21 @@ namespace ALUGrid
   }
 
   template < class A >
-  LinkedObject::Identifier EdgePllBaseXMacro< A >::getIdentifier () const 
+  LinkedObject::Identifier EdgePllBaseXMacro< A >::getIdentifier () const
   {
     return LinkedObject::Identifier (myhedge ().myvertex (0)->ident (), myhedge ().myvertex (1)->ident ());
   }
 
   template < class A >
-  void EdgePllBaseXMacro< A >::unattach2 (int i) 
+  void EdgePllBaseXMacro< A >::unattach2 (int i)
   {
     alugrid_assert ( _moveTo );
-    typename moveto_t::iterator pos = _moveTo->find( i ); 
+    typename moveto_t::iterator pos = _moveTo->find( i );
     alugrid_assert ( pos != _moveTo->end ());
-    if ( (-- (*pos).second ) == 0 ) 
+    if ( (-- (*pos).second ) == 0 )
     {
       _moveTo->erase ( pos );
-      if( _moveTo->empty() ) 
+      if( _moveTo->empty() )
       {
         delete _moveTo;
         _moveTo = 0;
@@ -235,15 +235,15 @@ namespace ALUGrid
   }
 
   template < class A >
-  void EdgePllBaseXMacro< A >::attach2 (int i) 
+  void EdgePllBaseXMacro< A >::attach2 (int i)
   {
-    // create moveTo if not already existent 
+    // create moveTo if not already existent
     if( ! _moveTo ) _moveTo = new moveto_t ();
 
-    typename moveto_t::iterator pos = _moveTo->find( i ); 
+    typename moveto_t::iterator pos = _moveTo->find( i );
     if( pos == _moveTo->end() )
       _moveTo->insert (std::pair< const int, int > (i,1));
-    else 
+    else
       ++ (*pos).second;
 
     myhedge ().myvertex (0)->attach2 (i);
@@ -252,14 +252,14 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool EdgePllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv) 
+  bool EdgePllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv)
   {
     bool action (false);
-    if( _moveTo ) 
+    if( _moveTo )
     {
       typedef typename moveto_t::const_iterator const_iterator;
       const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i)
       {
         const int link = (*i).first;
         alugrid_assert ((osv.begin () + link) < osv.end ());
@@ -270,47 +270,47 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool EdgePllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os ) 
+  bool EdgePllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os )
   {
     os.writeObject (EDGE1);
     os.writeObject (myhedge ().myvertex (0)->ident ());
     os.writeObject (myhedge ().myvertex (1)->ident ());
-    
-    // make sure ENDOFSTREAM is not a valid refinement rule 
+
+    // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myhedge_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
-    // pack refinement information 
+    // pack refinement information
     myhedge ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
     return true ;
   }
 
   template < class A >
-  void EdgePllBaseXMacro< A >::unpackSelf (ObjectStream & os, bool i) 
+  void EdgePllBaseXMacro< A >::unpackSelf (ObjectStream & os, bool i)
   {
-    if (i) 
+    if (i)
     {
       myhedge ().restore ( os );
-      
+
       // stream should be at position ENDOFSTREAM now
-      char c = os.get(); 
+      char c = os.get();
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
     }
-    else 
+    else
     {
-      try 
+      try
       {
-        char c = os.get(); 
-        // read stream until ENDOFSTREAM 
-        while ( c != ObjectStream::ENDOFSTREAM ) 
+        char c = os.get();
+        // read stream until ENDOFSTREAM
+        while ( c != ObjectStream::ENDOFSTREAM )
         {
           os.read(c);
         }
-      } 
+      }
       catch( ObjectStream::EOFException )
       {
         std::cerr << "ERROR (fatal): EdgePllBaseXMacro< A >::unpackSelf EOF encountered." << std::endl;
@@ -320,22 +320,22 @@ namespace ALUGrid
     return;
   }
 
-  // Template Instantiation 
+  // Template Instantiation
   template class EdgePllBaseXMacro< GitterBasisPll::ObjectsPll::hedge1_IMPL >;
 
-  // #######   
-  // #         #####   #####  ###### 
-  // #        #     # #       # 
+  // #######
+  // #         #####   #####  ######
+  // #        #     # #       #
   // #####    ####### #       ######
-  // #        #     # #       #  
-  // #        #     # #       #    
+  // #        #     # #       #
+  // #        #     # #       #
   // #        #     #  #####  ######
 
-  // constructor for hface3 
+  // constructor for hface3
   template <> FacePllBaseXMacro<GitterBasisPll::ObjectsPll::hface3_IMPL>::
   FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
                     myhedge_t * e2, int s2)
-   : GitterBasisPll::ObjectsPll::hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo( 0 ) 
+   : GitterBasisPll::ObjectsPll::hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo( 0 )
   {
   }
 
@@ -343,23 +343,23 @@ namespace ALUGrid
   template <> FacePllBaseXMacro<GitterBasisPll::ObjectsPll::hface4_IMPL>::
   FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
                     myhedge_t * e2, int s2, myhedge_t * e3, int s3)
-   : GitterBasisPll::ObjectsPll::hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo( 0 ) 
+   : GitterBasisPll::ObjectsPll::hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo( 0 )
   {
   }
 
-  // destructor 
-  template < class A > FacePllBaseXMacro < A >::~FacePllBaseXMacro() 
+  // destructor
+  template < class A > FacePllBaseXMacro < A >::~FacePllBaseXMacro()
   {
     alugrid_assert ( _moveTo == 0 );
   }
 
-  template < class A > std::vector< int > FacePllBaseXMacro < A >::estimateLinkage () const 
+  template < class A > std::vector< int > FacePllBaseXMacro < A >::estimateLinkage () const
   {
     // Diese Methode sch"atzt den Verbindungsstern der Grobgitterfl"ache,
     // indem sie die Schnittmenge der Verbindungssterne der anliegenden
     // Grobgitterknoten bildet. Je besser die Sch"atzung, desto schneller
     // arbeitet das Identifikationsmodul. Falls keine Sch"atzung m"oglich
-    // ist, kann man auch einfach aller log. Teilgiternummern in einem 
+    // ist, kann man auch einfach aller log. Teilgiternummern in einem
     // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
     std::vector< int > t1, t2, est;
@@ -382,18 +382,18 @@ namespace ALUGrid
     // Fl"ache folgen und auch f"ur Fl"achen mit mehr als drei Knoten korrekt
     // (d.h. gleiche Fl"ache in versch. Teilgittern -> gleicher Schl"ussel) sind.
 
-    return LinkedObject::Identifier (this->myhface ().myvertex (0)->ident (), 
+    return LinkedObject::Identifier (this->myhface ().myvertex (0)->ident (),
         this->myhface ().myvertex (1)->ident (), this->myhface ().myvertex (2)->ident ());
   }
 
-  template < class A > 
-  bool FacePllBaseXMacro < A >::ldbUpdateGraphEdge (LoadBalancer::DataBase & db, const bool serialPartitioner ) 
+  template < class A >
+  bool FacePllBaseXMacro < A >::ldbUpdateGraphEdge (LoadBalancer::DataBase & db, const bool serialPartitioner )
   {
     // Diese Methode erzeugt eine Kante im Graphen f"ur die Berechnung
     // der Neupartitionierung, der sie das Gewicht der Anzahl aller feinsten
     // Fl"achen "uber der verwalteten Grobgitterfl"ache gibt.
     typedef typename myhface_t::myconnect_t myconnect_t;
-    
+
     const myconnect_t * mycon1 = this->myhface().nb.front().first;
     const myconnect_t * mycon2 = this->myhface().nb.rear ().first;
 
@@ -402,64 +402,64 @@ namespace ALUGrid
 
     if(mycon1 && mycon2)
     {
-      // get graph vertex number of the adjacent elements 
+      // get graph vertex number of the adjacent elements
       int ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
       int ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
       int master1 = mycon1->accessPllX ().master ();
       int master2 = mycon2->accessPllX ().master ();
 
       // only insert graph edge on the rank where the smaller vertex number is interior
-      // and this we only need to do for serial partitioners 
-      if( serialPartitioner ) 
+      // and this we only need to do for serial partitioners
+      if( serialPartitioner )
       {
-        if( ldbVx1 < ldbVx2 ) 
+        if( ldbVx1 < ldbVx2 )
         {
           if ( mycon1->isboundary() ) return periodicBnd;
         }
-        else 
+        else
         {
           if ( mycon2->isboundary() ) return periodicBnd;
         }
       }
 
-      if( mycon1->isperiodic() ) 
+      if( mycon1->isperiodic() )
       {
-        alugrid_assert ( ! mycon2->isperiodic() ); 
+        alugrid_assert ( ! mycon2->isperiodic() );
         ldbVx1 = mycon1->otherLdbVertexIndex( myhface().getIndex() );
         ldbVx2 = mycon2->accessPllX ().ldbVertexIndex ();
         periodicBnd = true;
       }
 
-      if( mycon2->isperiodic() ) 
+      if( mycon2->isperiodic() )
       {
-        alugrid_assert ( ! mycon1->isperiodic() ); 
+        alugrid_assert ( ! mycon1->isperiodic() );
         ldbVx1 = mycon1->accessPllX ().ldbVertexIndex ();
         ldbVx2 = mycon2->otherLdbVertexIndex( myhface().getIndex() );
         periodicBnd = true;
       }
-      
-      // count leaf faces for this macro face 
-      const int weight =  TreeIterator < typename Gitter::hface_STI, 
+
+      // count leaf faces for this macro face
+      const int weight =  TreeIterator < typename Gitter::hface_STI,
                                          is_leaf < Gitter::hface_STI > > ( myhface () ).size ();
       alugrid_assert ( weight>=0 );
 
-      // if we have a periodic situation 
-      if( periodicBnd ) 
+      // if we have a periodic situation
+      if( periodicBnd )
       {
         // if one of them is periodic, increase factor
-        // this should reduce cutting of edges between 
-        // periodic and normal elements 
-      
+        // this should reduce cutting of edges between
+        // periodic and normal elements
+
         alugrid_assert ( mycon1->isperiodic() || mycon2->isperiodic() );
         alugrid_assert ( ldbVx1 >= 0 && ldbVx2 >= 0 );
-        // increase the edge weight for periodic connections 
-        // TODO: make weight factor (here 4) dynamically adjustable 
+        // increase the edge weight for periodic connections
+        // TODO: make weight factor (here 4) dynamically adjustable
         db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight*4,
               master1, master2 ) );
       }
       else
       {
-        // the default graph edge 
+        // the default graph edge
         db.edgeUpdate ( LoadBalancer::GraphEdge ( ldbVx1, ldbVx2, weight,
               master1, master2 ) );
       }
@@ -467,9 +467,9 @@ namespace ALUGrid
     return periodicBnd;
   }
 
-  template < class A > void FacePllBaseXMacro < A >::unattach2 (int i) 
+  template < class A > void FacePllBaseXMacro < A >::unattach2 (int i)
   {
-    if( _moveTo ) 
+    if( _moveTo )
     {
       // Diese Methode bindet die Fl"ache von einer Zuweisung zu einem neuen
       // Teilgitter ab. D.h. der Eintrag in der Zuweisungsliste wird gel"oscht,
@@ -478,10 +478,10 @@ namespace ALUGrid
 
       if( pos == _moveTo->end () ) return;
 
-      if ( (--(*pos).second) == 0) 
+      if ( (--(*pos).second) == 0)
       {
         _moveTo->erase ( pos );
-        if( _moveTo->empty() ) 
+        if( _moveTo->empty() )
         {
           delete _moveTo;
           _moveTo = 0;
@@ -495,25 +495,25 @@ namespace ALUGrid
     }
   }
 
-  template < class A > void FacePllBaseXMacro < A >::attach2 (int i) 
+  template < class A > void FacePllBaseXMacro < A >::attach2 (int i)
   {
-    // create moveTo if not already existent 
+    // create moveTo if not already existent
     if ( ! _moveTo ) _moveTo = new moveto_t ();
 
     typename moveto_t::iterator pos = _moveTo->find( i );
-    if( pos == _moveTo->end() ) 
+    if( pos == _moveTo->end() )
       _moveTo->insert (std::pair< const int, int > (i,1));
-    else   
+    else
       ++ (*pos).second;
 
     {
-      for (int j = 0; j < A::polygonlength; ++j ) 
+      for (int j = 0; j < A::polygonlength; ++j )
         this->myhface ().myhedge (j)->attach2 (i);
     }
-    return;  
+    return;
   }
 
-  template < class A > bool FacePllBaseXMacro < A >::packAll (std::vector< ObjectStream > & osv) 
+  template < class A > bool FacePllBaseXMacro < A >::packAll (std::vector< ObjectStream > & osv)
   {
 
     // Die Methode packAll () verpackt die Fl"ache auf alle Datenstr"ome,
@@ -522,11 +522,11 @@ namespace ALUGrid
     // "uber.
 
     bool action = false;
-    if( _moveTo ) 
+    if( _moveTo )
     {
       typedef typename moveto_t::const_iterator const_iterator;
       const const_iterator iEnd =  _moveTo->end ();
-      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i) 
+      for (const_iterator i = _moveTo->begin (); i != iEnd; ++i)
       {
         const int link = (*i).first;
         alugrid_assert ((osv.begin () + link) < osv.end ());
@@ -536,28 +536,28 @@ namespace ALUGrid
     return action;
   }
 
-  template < class A > bool 
-  FacePllBaseXMacro < A >::doPackLink ( const int link, ObjectStream & os ) 
+  template < class A > bool
+  FacePllBaseXMacro < A >::doPackLink ( const int link, ObjectStream & os )
   {
     const bool ghostCellsEnabled = myhface().myvertex( 0 )->myGrid()->ghostCellsEnabled();
 
-    if (A::polygonlength == 4) 
+    if (A::polygonlength == 4)
     {
       os.writeObject (MacroGridMoverIF::FACE4);
     }
-    else if (A::polygonlength == 3) 
+    else if (A::polygonlength == 3)
     {
       os.writeObject (MacroGridMoverIF::FACE3);
     }
-    else 
+    else
     {
-      // something wrong 
+      // something wrong
       alugrid_assert (false);
       abort ();
     }
-    
+
     {
-      // write vertex idents 
+      // write vertex idents
       for (int k = 0; k < A::polygonlength; ++ k)
       {
         os.writeObject (this->myhface ().myvertex (k)->ident ());
@@ -565,13 +565,13 @@ namespace ALUGrid
     }
 
     try {
-    
+
       // Sicherheitshalber testen, ob das ENDOFSTREAM Tag nicht auch
       // mit einer Verfeinerungsregel identisch ist - sonst gibt's
       // nachher beim Auspacken nur garbage.
-    
+
       alugrid_assert (! myhface_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-    
+
       this->myhface ().backup ( os );
       os.put( ObjectStream::ENDOFSTREAM );
     }
@@ -588,10 +588,10 @@ namespace ALUGrid
       // Elemente daraufhin untersucht werden, ob sie sich nicht
       // als Randelemente dorthin schreiben sollen - das tun sie
       // aber selbst.
-    
+
       this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
       this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
-    } 
+    }
     catch( Parallel::AccessPllException )
     {
       std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
@@ -601,7 +601,7 @@ namespace ALUGrid
   }
 
   //- --unpackSelf
-  template < class A > void FacePllBaseXMacro < A >::unpackSelf (ObjectStream & os, bool i) 
+  template < class A > void FacePllBaseXMacro < A >::unpackSelf (ObjectStream & os, bool i)
   {
 
     // Die Methode wird eine Fl"ache aus dem Datenstrom rekonstruieren,
@@ -612,13 +612,13 @@ namespace ALUGrid
     // einen bestehenden Fl"achenbaum durch die Lastverschiebung neue
     // Daten aufgebracht werden - dies ist dann hier zu realisieren.
 
-    if (i) 
+    if (i)
     {
       // Sobald der Stringstream mit den 'byte' Verfeinerungsregeln
       // voll ist, kann mit dem normalen restore der ganze Fl"achen-
       // baum wieder hochgezogen werden. Analog zur Wiederherstellung
       // aus einer Datei.
-      
+
       this->myhface ().restore ( os );
 
       char c = os.get();
@@ -628,15 +628,15 @@ namespace ALUGrid
         abort();
       }
     }
-    else 
+    else
     {
-      try 
+      try
       {
-        char c = os.get(); 
-        // read stream until ENDOFSTREAM 
+        char c = os.get();
+        // read stream until ENDOFSTREAM
         while( c != ObjectStream::ENDOFSTREAM )
           os.read( c );
-      } 
+      }
       catch( ObjectStream::EOFException )
       {
         std::cerr << "ERROR (fatal): FacePllBaseXMacro < A >::unpackSelf EOF encountered." << std::endl;
@@ -645,7 +645,7 @@ namespace ALUGrid
     }
   }
 
-  // Template Instantiation 
+  // Template Instantiation
   template class FacePllBaseXMacro < GitterBasisPll::ObjectsPll::hface3_IMPL >;
   template class FacePllBaseXMacro < GitterBasisPll::ObjectsPll::hface4_IMPL >;
 
@@ -654,7 +654,7 @@ namespace ALUGrid
   //  --BndsegPllBaseXMacroClosure
   //
   //////////////////////////////////////////////////////////////////////
-  template < class A > void BndsegPllBaseXClosure < A >::getRefinementRequest (ObjectStream & os) 
+  template < class A > void BndsegPllBaseXClosure < A >::getRefinementRequest (ObjectStream & os)
   {
     typename balrule_t::rule_t rule = _rul;
     os.put( char(rule) );
@@ -670,10 +670,10 @@ namespace ALUGrid
     // Iteration des parallelen refine ().
 
     signed char ru;
-    try 
+    try
     {
       ru = os.get();
-    } 
+    }
     catch( ObjectStream::EOFException )
     {
       std::cerr << "ERROR (fatal): EOF encountered in BndsegPllBaseXClosure::setRefinementRequest( ... )" << std::endl;
@@ -681,29 +681,29 @@ namespace ALUGrid
     }
     balrule_t rule ( ru ) ;
     // std::cout << "setRefinementRequest: " << rule << std::endl;
-    if (rule == balrule_t::nosplit) 
+    if (rule == balrule_t::nosplit)
     {
       return false;
-    } 
-    else 
+    }
+    else
     {
-      if (myhbnd ().getrule () == rule ) 
+      if (myhbnd ().getrule () == rule )
       {
         return false;
-      } 
-      else 
+      }
+      else
       {
-        if (myhbnd ().refineLikeElement ( rule )) 
+        if (myhbnd ().refineLikeElement ( rule ))
         {
           // Verfeinerung erfolgreich
           return true;
-        } 
-        else 
+        }
+        else
         {
           // Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
           // f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
           // sollte die Situation im isotropen Fall nicht auftreten.
-        
+
           std::cerr << "ERROR (fatal): Refinement inhibited on inner boundary." << std::endl;
           abort();
         }
@@ -713,28 +713,28 @@ namespace ALUGrid
   }
 
   template < class A > void BndsegPllBaseXClosure < A >::
-  writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const 
+  writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const
   {
     gs.sendData( os, myhbnd() );
     return;
   }
 
   template < class A > void BndsegPllBaseXClosure < A >::
-  readDynamicState (ObjectStream & os, GatherScatterType & gs ) 
+  readDynamicState (ObjectStream & os, GatherScatterType & gs )
   {
     gs.recvData( os , myhbnd () );
     return;
   }
 
   template < class A > void BndsegPllBaseXClosure < A >::
-  readDynamicState (ObjectStream & os, int) 
+  readDynamicState (ObjectStream & os, int)
   {
-    try 
+    try
     {
-      // read the real level of ghost 
+      // read the real level of ghost
       alugrid_assert (myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1);
       const bool wasLeaf = this->ghostLeaf();
-     
+
       // read level and leaf of interior element on other side
       // this changes the state of this leaf or not leaf
       unsigned char ghLvl = 0;
@@ -745,8 +745,8 @@ namespace ALUGrid
 
       const bool nowLeaf = this->ghostLeaf();
 
-      // if leaf state has changed the attach or detach 
-      if (! wasLeaf && nowLeaf) 
+      // if leaf state has changed the attach or detach
+      if (! wasLeaf && nowLeaf)
       {
         myhbnd().attachleafs();
       }
@@ -754,13 +754,13 @@ namespace ALUGrid
       {
         myhbnd().detachleafs();
       }
-      
+
       alugrid_assert ( myhbnd().leafRefCount()==0 || myhbnd().leafRefCount()==1 );
       alugrid_assert ( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
       alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
-      
-    } 
-    catch (ObjectStream::EOFException) 
+
+    }
+    catch (ObjectStream::EOFException)
     {
       return;
       std::cerr << "ERROR (fatal): BndsegPllBaseXClosure < A >::readDynamicState EOF encountered." << std::endl;
@@ -768,16 +768,16 @@ namespace ALUGrid
     }
   }
 
-  template < class A > 
-  void BndsegPllBaseXMacroClosure < A > :: readStaticState( ObjectStream & os, int) 
+  template < class A >
+  void BndsegPllBaseXMacroClosure < A > :: readStaticState( ObjectStream & os, int)
   {
-    try 
+    try
     {
       os.readObject ( _ldbVertexIndex ) ;
       os.readObject ( _master );
       alugrid_assert ( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
-    } 
-    catch (ObjectStream :: EOFException) 
+    }
+    catch (ObjectStream :: EOFException)
     {
       std::cerr << "**ERROR (fatal): BndsegPllBaseXMacroClosure < A >::readStaticState EOF encountered." << std::endl ;
       abort () ;
@@ -787,14 +787,14 @@ namespace ALUGrid
   }
 
   template < class A > void BndsegPllBaseXMacroClosure < A >::
-  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
+  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const
   {
-    alugrid_assert (!fce); // fce should be 0, because we only have 1 face 
+    alugrid_assert (!fce); // fce should be 0, because we only have 1 face
     alugrid_assert (this->myhbnd ().bndtype () == Gitter::hbndseg::closure);
 
     if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3INT);
     else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4INT);
-    else 
+    else
     {
       std::cerr << "ERROR (fatal): Wrong face type in BndsegPllBaseXMacroClosure::packAsBnd." << std::endl;
       abort();
@@ -802,27 +802,27 @@ namespace ALUGrid
 
     os.writeObject ( this->myhbnd ().bndtype () );
 
-    // write unique graph vertex index 
+    // write unique graph vertex index
     os.writeObject ( _ldbVertexIndex );
     // os.writeObject ( _master );
     os.writeObject ( this->myhbnd().myvertex(0,0)->indexManagerStorage().myrank() );
-    
+
     {
-      for (int i = 0; i < myhface_t::polygonlength; ++i) 
-        os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ()); 
+      for (int i = 0; i < myhface_t::polygonlength; ++i)
+        os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ());
     }
 
     if(_ghInfo) // is stored ghost point exists
     {
-      os.writeObject ( MacroGridMoverIF::POINTTRANSMITTED ); 
-      // see ghost_info.h for implementation of this functions 
+      os.writeObject ( MacroGridMoverIF::POINTTRANSMITTED );
+      // see ghost_info.h for implementation of this functions
       _ghInfo->inlineGhostElement(os);
     }
-    else 
+    else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted 
+      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
-     
+
     return;
   }
 
@@ -834,10 +834,10 @@ namespace ALUGrid
     alugrid_assert ( _ghInfo );
   }
 
-  // template Instantiation 
+  // template Instantiation
   template class BndsegPllBaseXMacroClosure< GitterBasis::Objects::Hbnd4Default >;
   template class BndsegPllBaseXMacroClosure< GitterBasis::Objects::Hbnd3Default >;
-    
+
   // #######
   //    #     ######   #####  #####     ##
   //    #     #          #    #    #   #  #
@@ -846,20 +846,20 @@ namespace ALUGrid
   //    #     #          #    #   #   #    #
   //    #     ######     #    #    #  #    #
   template < class A >
-  void TetraPllXBase< A >::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+  void TetraPllXBase< A >::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const
   {
     gs.sendData( os , mytetra () );
     return;
   }
 
   template < class A >
-  void TetraPllXBase< A >::writeDynamicState (ObjectStream & os, int face) const 
+  void TetraPllXBase< A >::writeDynamicState (ObjectStream & os, int face) const
   {
     // write level to know the level of ghost on the other side
-    // write level and leaf for the ghost element 
-    // to determine leafEntity or not 
+    // write level and leaf for the ghost element
+    // to determine leafEntity or not
 
-    const unsigned char lvl = mytetra().level(); 
+    const unsigned char lvl = mytetra().level();
     os.write( lvl );
     os.put( char( mytetra().leaf() ) );
     return;
@@ -869,7 +869,7 @@ namespace ALUGrid
   TetraPllXBaseMacro< A >::
   TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                              myhface3_t *f2, int s2, myhface3_t *f3, int s3,
-                      int orientation ) 
+                      int orientation )
     : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
     , _moveTo ( -1 )
     , _ldbVertexIndex (-1)
@@ -879,19 +879,19 @@ namespace ALUGrid
   }
 
   template < class A >
-  TetraPllXBaseMacro< A >::~TetraPllXBaseMacro () 
+  TetraPllXBaseMacro< A >::~TetraPllXBaseMacro ()
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
       unattach2 ( _moveTo );
     }
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  void TetraPllXBaseMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const
   {
     LinearMapping::barycenter(
-        mytetra ().myvertex (0)->Point (), 
+        mytetra ().myvertex (0)->Point (),
         mytetra ().myvertex (1)->Point (),
         mytetra ().myvertex (2)->Point (),
         mytetra ().myvertex (3)->Point (),
@@ -899,14 +899,14 @@ namespace ALUGrid
   }
 
   template < class A >
-  int TetraPllXBaseMacro< A >::ldbVertexIndex () const 
+  int TetraPllXBaseMacro< A >::ldbVertexIndex () const
   {
     alugrid_assert ( _ldbVertexIndex >= 0 );
     return _ldbVertexIndex;
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
+  void TetraPllXBaseMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx )
   {
     //std::cout << "Set ldbVertex " << ldbVx << std::endl;
     _ldbVertexIndex = ldbVx;
@@ -914,37 +914,37 @@ namespace ALUGrid
 
   template < class A >
   void TetraPllXBaseMacro< A >::
-  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge ) 
+  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge )
   {
-    for( int i=0; i<4; ++i ) 
+    for( int i=0; i<4; ++i )
     {
-      // add my ldb vertex index to vertex's list of elements 
+      // add my ldb vertex index to vertex's list of elements
       vxElemLinkge[ mytetra().myvertex( i ) ].insert( _ldbVertexIndex );
     }
   }
 
   template < class A >
   bool TetraPllXBaseMacro< A >::
-  ldbUpdateGraphVertex (LoadBalancer::DataBase & db, GatherScatterType* gs ) 
+  ldbUpdateGraphVertex (LoadBalancer::DataBase & db, GatherScatterType* gs )
   {
-    // parameter for GraphVertex are: 
+    // parameter for GraphVertex are:
     // - macro vertex index
-    // - number of elementes below macro element 
+    // - number of elementes below macro element
     // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
-    // get macro element weight 
-    // if gs is not null, then use the weight provided by gs 
-    // otherwise count number of leaf elements  
-    const int weight = ( gs ) ? gs->loadWeight( mytetra() ) : 
+    // get macro element weight
+    // if gs is not null, then use the weight provided by gs
+    // otherwise count number of leaf elements
+    const int weight = ( gs ) ? gs->loadWeight( mytetra() ) :
                                 TreeIteratorType( mytetra () ).size ();
-     
+
     db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::unattach2 (int i) 
+  void TetraPllXBaseMacro< A >::unattach2 (int i)
   {
     alugrid_assert ( i >= 0 );
     mytetra ().myhface3 (0)->unattach2 (i);
@@ -952,7 +952,7 @@ namespace ALUGrid
     mytetra ().myhface3 (2)->unattach2 (i);
     mytetra ().myhface3 (3)->unattach2 (i);
 
-    // reset move to 
+    // reset move to
     _moveTo = -1;
 
     // unset erasable flag
@@ -960,38 +960,38 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::attachElement2 (const int destination, const int face) 
+  void TetraPllXBaseMacro< A >::attachElement2 (const int destination, const int face)
   {
     alugrid_assert ( destination >= 0 );
 
-    // attach the element 
+    // attach the element
     attach2( destination );
 
-    // make sure we to correct destination 
+    // make sure we to correct destination
     alugrid_assert ( _moveTo == destination );
 
-    // check all neighbours 
-    // face is the face this method was called from 
+    // check all neighbours
+    // face is the face this method was called from
     for( int f=0; f<4; ++f )
     {
       if( face == f ) continue;
 
       // attach also periodic neighbours
-      // this method only affects periodic neighbours 
+      // this method only affects periodic neighbours
       myneighbour( f ).first->attachPeriodic( destination );
     }
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::attach2 (int i) 
+  void TetraPllXBaseMacro< A >::attach2 (int i)
   {
-    // don't attach elements twice 
-    if( _moveTo == -1 ) 
+    // don't attach elements twice
+    if( _moveTo == -1 )
     {
-      // set my destination 
+      // set my destination
       _moveTo = i;
-      
-      // also move all faces to the same process 
+
+      // also move all faces to the same process
       mytetra ().myhface3 (0)->attach2 (i);
       mytetra ().myhface3 (1)->attach2 (i);
       mytetra ().myhface3 (2)->attach2 (i);
@@ -1000,7 +1000,7 @@ namespace ALUGrid
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
+  void TetraPllXBaseMacro< A > :: writeStaticState (ObjectStream & os, int face ) const
   {
     alugrid_assert ( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
@@ -1008,16 +1008,16 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool TetraPllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv) 
+  bool TetraPllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv)
   {
     return doPackAll( osv, (GatherScatterType * ) 0 );
   }
 
   template < class A >
   bool TetraPllXBaseMacro< A >::doPackAll (std::vector< ObjectStream > & osv,
-                                           GatherScatterType* gs) 
+                                           GatherScatterType* gs)
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
       alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
       return doPackLink( _moveTo, osv[ _moveTo ], gs );
@@ -1027,7 +1027,7 @@ namespace ALUGrid
 
   template < class A >
   bool TetraPllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os,
-                                          GatherScatterType* gs) 
+                                          GatherScatterType* gs)
   {
     os.writeObject (TETRA);
     os.writeObject (_ldbVertexIndex);
@@ -1038,17 +1038,17 @@ namespace ALUGrid
     int orientation = mytetra ().orientation();
     os.writeObject ( orientation );
 
-    // make sure ENDOFSTREAM is not a valid refinement rule 
+    // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-    
-    // pack refinement information 
+
+    // pack refinement information
     const int estimatedElements = mytetra ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
 
-    // if gather scatter was passed 
-    if( gs ) 
+    // if gather scatter was passed
+    if( gs )
     {
-      // pack Dune data 
+      // pack Dune data
       gs->inlineData( os , mytetra(), estimatedElements );
     }
 
@@ -1059,36 +1059,36 @@ namespace ALUGrid
 
   template < class A >
   bool TetraPllXBaseMacro< A >::dunePackAll (std::vector< ObjectStream > & osv,
-                                             GatherScatterType & gs) 
+                                             GatherScatterType & gs)
   {
     return doPackAll( osv, &gs );
   }
 
   template < class A >
-  void TetraPllXBaseMacro< A >::packAsBndNow (int fce, ObjectStream & os, const bool packGhost ) const 
+  void TetraPllXBaseMacro< A >::packAsBndNow (int fce, ObjectStream & os, const bool packGhost ) const
   {
     os.writeObject (HBND3INT);
     os.writeObject ( Gitter::hbndseg::closure );
     alugrid_assert ( _ldbVertexIndex >= 0 );
-    os.writeObject ( _ldbVertexIndex ); // write unique graph vertex index 
+    os.writeObject ( _ldbVertexIndex ); // write unique graph vertex index
     os.writeObject ( master() );
     os.writeObject ( mytetra ().myvertex (fce,0)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
-    
-    // see method unpackHbnd3Int 
-    if( packGhost ) 
+
+    // see method unpackHbnd3Int
+    if( packGhost )
     {
       alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
-      int writePoint = MacroGridMoverIF::POINTTRANSMITTED; // point is transmitted 
-      os.writeObject ( writePoint ); // write point info  
+      int writePoint = MacroGridMoverIF::POINTTRANSMITTED; // point is transmitted
+      os.writeObject ( writePoint ); // write point info
 
-      // know which face is the internal bnd 
+      // know which face is the internal bnd
       os.writeObject (fce);
 
-      // write the vertices of the tetra 
-      for(int k=0; k<4; ++k) 
+      // write the vertices of the tetra
+      for(int k=0; k<4; ++k)
       {
         int vx = mytetra ().myvertex (k)->ident ();
         os.writeObject ( vx );
@@ -1098,36 +1098,36 @@ namespace ALUGrid
         const Gitter::Geometric::VertexGeo * vertex = mytetra().myvertex(fce);
         alugrid_assert ( vertex );
 
-        // know identifier of transmitted point 
+        // know identifier of transmitted point
         os.writeObject ( vertex->ident ());
 
-        // store the missing point to form a tetra 
+        // store the missing point to form a tetra
         const alucoord_t (&p)[3] = vertex->Point();
         os.writeObject ( p[0] );
         os.writeObject ( p[1] );
         os.writeObject ( p[2] );
       }
     }
-    else 
+    else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted 
+      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
   }
 
-  // packs macro element as internal bnd for other proc 
+  // packs macro element as internal bnd for other proc
   template < class A >
-  void TetraPllXBaseMacro< A >::packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
+  void TetraPllXBaseMacro< A >::packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const
   {
-    if( _moveTo != who ) 
+    if( _moveTo != who )
     {
-      // write data to stream 
-      packAsBndNow(fce, os, ghostCellsEnabled); 
+      // write data to stream
+      packAsBndNow(fce, os, ghostCellsEnabled);
     }
   }
 
-  // packs macro element as internal bnd for other proc 
+  // packs macro element as internal bnd for other proc
   template < class A >
-  void TetraPllXBaseMacro< A >::packAsGhost(ObjectStream & os, int fce) const 
+  void TetraPllXBaseMacro< A >::packAsGhost(ObjectStream & os, int fce) const
   {
     alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
     packAsBndNow(fce,os, true);
@@ -1152,26 +1152,26 @@ namespace ALUGrid
   doUnpackSelf (ObjectStream & os, const bool i, GatherScatterType* gatherScatter )
   {
     alugrid_assert (i);
-    if (i) 
+    if (i)
     {
-      // restore refinement information 
+      // restore refinement information
       mytetra ().restore (os);
 
-      char c = os.get(); 
+      char c = os.get();
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // unpack dune data if present, pointer can be zero 
-      if( gatherScatter ) 
+
+      // unpack dune data if present, pointer can be zero
+      if( gatherScatter )
       {
-        // unpack Dune data 
+        // unpack Dune data
         gatherScatter->xtractData( os , mytetra() );
       }
     }
-    else 
+    else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
       abort();
@@ -1179,13 +1179,13 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool TetraPllXBaseMacro< A >::erasable () const 
+  bool TetraPllXBaseMacro< A >::erasable () const
   {
-    // return true if tetra is not locked 
+    // return true if tetra is not locked
     return ! isSet( flagLock );
   }
 
-  // template instantiation 
+  // template instantiation
   template class TetraPllXBase< GitterBasisPll::ObjectsPll::TetraEmpty >;
   template class TetraPllXBaseMacro< GitterBasisPll::ObjectsPll::tetra_IMPL >;
 
@@ -1197,8 +1197,8 @@ namespace ALUGrid
   // #        #       #   #      #    #    #  #    #     #    #    # #     #
   // #        ######  #    #     #     ####   #####      #     ####   #####
 
-  template < class A > 
-  void Periodic3PllXBase< A >::writeDynamicState (ObjectStream & os, int) const 
+  template < class A >
+  void Periodic3PllXBase< A >::writeDynamicState (ObjectStream & os, int) const
   {
   }
 
@@ -1212,23 +1212,23 @@ namespace ALUGrid
     set( flagLock );
   }
 
-  template < class A > 
-  Periodic3PllXBaseMacro< A >::~Periodic3PllXBaseMacro () 
+  template < class A >
+  Periodic3PllXBaseMacro< A >::~Periodic3PllXBaseMacro ()
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
       unattach2 ( _moveTo );
     }
   }
 
   template < class A >
-  void Periodic3PllXBaseMacro< A >::unattach2 (int i) 
+  void Periodic3PllXBaseMacro< A >::unattach2 (int i)
   {
     alugrid_assert ( i>= 0 );
     myperiodic ().myhface3 (0)->unattach2 (i);
     myperiodic ().myhface3 (1)->unattach2 (i);
     _moveTo = -1;
-    // unset erasable flag 
+    // unset erasable flag
     set( flagLock );
   }
 
@@ -1261,18 +1261,18 @@ namespace ALUGrid
   }
 
   template < class A >
-  void Periodic3PllXBaseMacro< A >::attach2 (int i) 
+  void Periodic3PllXBaseMacro< A >::attach2 (int i)
   {
-    if( _moveTo == -1 ) 
+    if( _moveTo == -1 )
     {
-      // store new destination 
-      _moveTo = i; 
+      // store new destination
+      _moveTo = i;
 
       myperiodic ().myhface3 (0)->attach2 (i);
       myperiodic ().myhface3 (1)->attach2 (i);
 
-      // attach both neighbours to the same process 
-      for(int n=0; n<2; ++n ) 
+      // attach both neighbours to the same process
+      for(int n=0; n<2; ++n )
       {
         typename A::myneighbour_t nb = this->myneighbour( n );
         nb.first->attachElement2( i, nb.second );
@@ -1281,10 +1281,10 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool Periodic3PllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv) 
+  bool Periodic3PllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv)
   {
-    if( _moveTo >= 0 ) 
-    { 
+    if( _moveTo >= 0 )
+    {
       alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
@@ -1294,7 +1294,7 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool Periodic3PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
+  bool Periodic3PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os )
   {
     if( _moveTo != link ) return false;
 
@@ -1303,7 +1303,7 @@ namespace ALUGrid
 
     os.writeObject (PERIODIC3);
 
-    // write boundary id 
+    // write boundary id
     const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
     os.writeObject ( bnd[ 0 ] );
     os.writeObject ( bnd[ 1 ] );
@@ -1314,37 +1314,37 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (3)->ident ());
     os.writeObject (myperiodic ().myvertex (4)->ident ());
     os.writeObject (myperiodic ().myvertex (5)->ident ());
-    
-    // make sure ENDOFSTREAM is not a valid refinement rule 
+
+    // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-    
-    // pack refinement information 
+
+    // pack refinement information
     myperiodic ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
 
-    // allow erasure 
+    // allow erasure
     unset( flagLock );
     return true;
   }
 
   template < class A >
   void Periodic3PllXBaseMacro< A >::
-  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
+  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const
   {
-    // we require that periodic element are never packed as boundary 
-    // since they are on the same process as their faces 
+    // we require that periodic element are never packed as boundary
+    // since they are on the same process as their faces
     alugrid_assert ( _moveTo == who );
   }
 
   template < class A >
-  void Periodic3PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i) 
+  void Periodic3PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i)
   {
     alugrid_assert (i);
 
-    if (i) 
+    if (i)
     {
       myperiodic ().restore ( os );
-      
+
       char c = os.get();
       if( c != ObjectStream::ENDOFSTREAM )
       {
@@ -1352,7 +1352,7 @@ namespace ALUGrid
         abort();
       }
     }
-    else 
+    else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
       abort();
@@ -1368,14 +1368,14 @@ namespace ALUGrid
   // #        #       #   #      #    #    #  #    #     #    #    #      #
   // #        ######  #    #     #     ####   #####      #     ####       #
 
-  template < class A > 
-  void Periodic4PllXBase< A >::writeDynamicState (ObjectStream & os, int) const 
+  template < class A >
+  void Periodic4PllXBase< A >::writeDynamicState (ObjectStream & os, int) const
   {
   }
 
-  template < class A > 
+  template < class A >
   Periodic4PllXBaseMacro< A >::
-  Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] ) 
+  Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
     : A(level, f0, s0, f1, s1, bt )
     , _moveTo ( -1 )
   {
@@ -1383,17 +1383,17 @@ namespace ALUGrid
     set( flagLock );
   }
 
-  template < class A > 
-  Periodic4PllXBaseMacro< A >::~Periodic4PllXBaseMacro () 
+  template < class A >
+  Periodic4PllXBaseMacro< A >::~Periodic4PllXBaseMacro ()
   {
-    if ( _moveTo >= 0 ) 
+    if ( _moveTo >= 0 )
     {
       unattach2( _moveTo );
     }
   }
 
-  template < class A > 
-  void Periodic4PllXBaseMacro< A >::unattach2 (int i) 
+  template < class A >
+  void Periodic4PllXBaseMacro< A >::unattach2 (int i)
   {
     alugrid_assert (i >= 0 );
     _moveTo = -1;
@@ -1428,20 +1428,20 @@ namespace ALUGrid
     attach2( destination );
   }
 
-  template < class A > 
-  void Periodic4PllXBaseMacro< A >::attach2 (int i) 
+  template < class A >
+  void Periodic4PllXBaseMacro< A >::attach2 (int i)
   {
-    if( _moveTo == -1 ) 
+    if( _moveTo == -1 )
     {
       //std::cout << "Attach periodic element to " << i << std::endl;
-      // store my destination 
+      // store my destination
       _moveTo = i;
 
       myperiodic ().myhface4 (0)->attach2 (i);
       myperiodic ().myhface4 (1)->attach2 (i);
 
-      // attach both neighbours to the same process 
-      for(int n=0; n<2; ++n ) 
+      // attach both neighbours to the same process
+      for(int n=0; n<2; ++n )
       {
         typename A::myneighbour_t nb = this->myneighbour( n );
         nb.first->attachElement2( i, nb.second );
@@ -1451,12 +1451,12 @@ namespace ALUGrid
     //std::cout << "Don't attach periodic element to " << i << " " << _moveTo <<std::endl;
   }
 
-  template < class A > 
-  bool Periodic4PllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv) 
+  template < class A >
+  bool Periodic4PllXBaseMacro< A >::packAll (std::vector< ObjectStream > & osv)
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
-      // make sure the connected elements are moved to the same proc  
+      // make sure the connected elements are moved to the same proc
       alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
       alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
 
@@ -1466,17 +1466,17 @@ namespace ALUGrid
     return false ;
   }
 
-  template < class A > 
-  bool Periodic4PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os ) 
+  template < class A >
+  bool Periodic4PllXBaseMacro< A >::doPackLink( const int link, ObjectStream& os )
   {
     if( _moveTo != link ) return false;
 
     alugrid_assert ( myneighbour( 0 ).first->moveTo() == _moveTo );
     alugrid_assert ( myneighbour( 1 ).first->moveTo() == _moveTo );
-    
+
     os.writeObject (PERIODIC4);
 
-    // write boundary id 
+    // write boundary id
     const int bnd[ 2 ] = { int( this->bndtype( 0 ) ), int( this->bndtype( 1 ) ) };
     os.writeObject ( bnd[ 0 ] );
     os.writeObject ( bnd[ 1 ] );
@@ -1490,35 +1490,35 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (6)->ident ());
     os.writeObject (myperiodic ().myvertex (7)->ident ());
 
-    // make sure ENDOFSTREAM is not a valid refinement rule 
+    // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-    
-    // pack refinement information 
+
+    // pack refinement information
     myperiodic ().backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
-    
+
     // allow erase
     unset( flagLock );
     return true;
   }
 
-  template < class A > 
+  template < class A >
   void Periodic4PllXBaseMacro< A >::
-  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
+  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const
   {
-    // we require that periodic element are never packed as boundary 
-    // since they are on the same process as their faces 
+    // we require that periodic element are never packed as boundary
+    // since they are on the same process as their faces
     // alugrid_assert ( _moveTo[ 0 ].first == who );
   }
 
-  template < class A > 
-  void Periodic4PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i) 
+  template < class A >
+  void Periodic4PllXBaseMacro< A >::unpackSelf (ObjectStream & os, bool i)
   {
     alugrid_assert (i);
-    if (i) 
+    if (i)
     {
       myperiodic ().restore (os);
-      
+
       char c = os.get();
       if( c != ObjectStream::ENDOFSTREAM )
       {
@@ -1526,16 +1526,16 @@ namespace ALUGrid
         abort();
       }
     }
-    else 
+    else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
       abort();
     }
   }
 
-  template < class A > 
+  template < class A >
   bool Periodic4PllXBaseMacro< A >::erasable () const {
-    // return true if object can be erased 
+    // return true if object can be erased
     return ! isSet( flagLock );
   }
 
@@ -1548,17 +1548,17 @@ namespace ALUGrid
     // #     #  ######  #    #  #    #
 
   template < class A >
-  void HexaPllBaseX< A > ::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const 
+  void HexaPllBaseX< A > ::writeDynamicState (ObjectStream & os, GatherScatterType & gs) const
   {
     gs.sendData( os , myhexa () );
   }
 
   template < class A >
-  void HexaPllBaseX< A >::writeDynamicState (ObjectStream & os, int face) const 
+  void HexaPllBaseX< A >::writeDynamicState (ObjectStream & os, int face) const
   {
-    // write level and leaf for the ghost element 
-    // to determine leafEntity or not 
-    const unsigned char lvl = myhexa().level(); 
+    // write level and leaf for the ghost element
+    // to determine leafEntity or not
+    const unsigned char lvl = myhexa().level();
     os.write( lvl );
     os.put( char( myhexa().leaf() ) );
   }
@@ -1577,26 +1577,26 @@ namespace ALUGrid
   }
 
   template < class A >
-  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro () 
+  HexaPllBaseXMacro< A >::~HexaPllBaseXMacro ()
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
       unattach2( _moveTo );
     }
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const 
+  void HexaPllBaseXMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const
   {
-    // calculate bary center 
+    // calculate bary center
     TrilinearMapping::barycenter (
-        myhexa ().myvertex (0)->Point (), 
+        myhexa ().myvertex (0)->Point (),
         myhexa ().myvertex (1)->Point (),
-        myhexa ().myvertex (2)->Point (), 
-        myhexa ().myvertex (3)->Point (), 
+        myhexa ().myvertex (2)->Point (),
+        myhexa ().myvertex (3)->Point (),
         myhexa ().myvertex (4)->Point (),
-        myhexa ().myvertex (5)->Point (), 
-        myhexa ().myvertex (6)->Point (), 
+        myhexa ().myvertex (5)->Point (),
+        myhexa ().myvertex (6)->Point (),
         myhexa ().myvertex (7)->Point (),
         center );
   }
@@ -1608,43 +1608,43 @@ namespace ALUGrid
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
+  void HexaPllBaseXMacro< A >::setLoadBalanceVertexIndex ( const int ldbVx )
   {
     _ldbVertexIndex = ldbVx ;
   }
 
   template < class A >
   void HexaPllBaseXMacro< A >::
-  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge ) 
+  computeVertexLinkage( vertexelementlinkage_t& vxElemLinkge )
   {
-    for( int i=0; i<8; ++i ) 
+    for( int i=0; i<8; ++i )
     {
-      // add my ldb vertex index to vertex's list of elements 
+      // add my ldb vertex index to vertex's list of elements
       vxElemLinkge[ myhexa().myvertex( i ) ].insert( _ldbVertexIndex );
     }
   }
 
   template < class A >
-  bool HexaPllBaseXMacro< A >::ldbUpdateGraphVertex (LoadBalancer::DataBase & db, GatherScatter* gs ) 
+  bool HexaPllBaseXMacro< A >::ldbUpdateGraphVertex (LoadBalancer::DataBase & db, GatherScatter* gs )
   {
-    // parameter for GraphVertex are: 
+    // parameter for GraphVertex are:
     // - macro vertex index
-    // - number of elementes below macro element 
+    // - number of elementes below macro element
     // - pointer to this element in case bary center is needed (only if GRAPHVERTEX_WITH_CENTER defined)
     typedef TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI > >  TreeIteratorType;
 
-    // get macro element weight 
-    // if gs is not null, then use the weight provided by gs 
-    // otherwise count number of leaf elements  
-    const int weight = ( gs ) ? gs->loadWeight( myhexa() ) : 
+    // get macro element weight
+    // if gs is not null, then use the weight provided by gs
+    // otherwise count number of leaf elements
+    const int weight = ( gs ) ? gs->loadWeight( myhexa() ) :
                                 TreeIteratorType( myhexa() ).size ();
-     
+
     db.vertexUpdate ( LoadBalancer::GraphVertex (ldbVertexIndex (), weight, *this ) );
     return true;
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::unattach2 (int i) 
+  void HexaPllBaseXMacro< A >::unattach2 (int i)
   {
     alugrid_assert ( i >= 0 );
     myhexa ().myhface4 (0)->unattach2 (i);
@@ -1654,29 +1654,29 @@ namespace ALUGrid
     myhexa ().myhface4 (4)->unattach2 (i);
     myhexa ().myhface4 (5)->unattach2 (i);
 
-    // reset moveTo 
+    // reset moveTo
     _moveTo = -1;
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::attachElement2 (const int destination, const int face) 
+  void HexaPllBaseXMacro< A >::attachElement2 (const int destination, const int face)
   {
     attach2( destination );
-    // check all neighbours 
-    // face is the face this method was called from 
+    // check all neighbours
+    // face is the face this method was called from
     for( int f=0; f<6; ++f )
     {
       if( face == f ) continue;
 
       //std::cout << "Attach hexa neighbor to " << destination << "  " << _moveTo << std::endl;
       // attach also periodic neighbours
-      // this method only affects periodic neighbours 
+      // this method only affects periodic neighbours
       myneighbour( f ).first->attachPeriodic( destination );
     }
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const 
+  void HexaPllBaseXMacro< A > :: writeStaticState (ObjectStream & os, int face ) const
   {
     alugrid_assert ( ldbVertexIndex () >= 0 );
     os.writeObject (ldbVertexIndex ()) ;
@@ -1684,16 +1684,16 @@ namespace ALUGrid
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::attach2 (int i) 
+  void HexaPllBaseXMacro< A >::attach2 (int i)
   {
-    // don't attach elements twice 
-    if( _moveTo == -1 ) 
+    // don't attach elements twice
+    if( _moveTo == -1 )
     {
       //std::cout << "Attach hexa to " << i << std::endl;
-      // store new destination 
+      // store new destination
       _moveTo = i;
 
-      // also attach all my faces 
+      // also attach all my faces
       myhexa ().myhface4 (0)->attach2 (i);
       myhexa ().myhface4 (1)->attach2 (i);
       myhexa ().myhface4 (2)->attach2 (i);
@@ -1705,27 +1705,27 @@ namespace ALUGrid
     //std::cout << "Don't attach hexa to " << i << " " << _moveTo << std::endl;
   }
 
-  // pack all function for dune 
+  // pack all function for dune
   template < class A >
   bool HexaPllBaseXMacro< A >::doPackAll (std::vector< ObjectStream > & osv,
-                                          GatherScatterType* gs) 
+                                          GatherScatterType* gs)
   {
-    if( _moveTo >= 0 ) 
+    if( _moveTo >= 0 )
     {
       alugrid_assert ((osv.begin () + _moveTo) < osv.end ());
       return doPackLink( _moveTo, osv[ _moveTo ], gs );
     }
     return false;
   }
-      
-  // pack all function for dune 
+
+  // pack all function for dune
   template < class A >
   bool HexaPllBaseXMacro< A >::doPackLink ( const int link, ObjectStream& os,
-                                            GatherScatterType* gs) 
+                                            GatherScatterType* gs)
   {
     os.writeObject (HEXA);
     alugrid_assert ( _ldbVertexIndex >= 0 );
-    os.writeObject (_ldbVertexIndex ); 
+    os.writeObject (_ldbVertexIndex );
     os.writeObject (myhexa ().myvertex (0)->ident ());
     os.writeObject (myhexa ().myvertex (1)->ident ());
     os.writeObject (myhexa ().myvertex (2)->ident ());
@@ -1735,16 +1735,16 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (6)->ident ());
     os.writeObject (myhexa ().myvertex (7)->ident ());
 
-    // make sure ENDOFSTREAM is not a valid refinement rule 
+    // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
-    
+
     // backup refinement information (1 char per element)
     const int estimatedElements = myhexa(). backup ( os );
     os.put( ObjectStream::ENDOFSTREAM );
-    
-    if( gs ) 
+
+    if( gs )
     {
-      // pack Dune data 
+      // pack Dune data
       gs->inlineData( os , myhexa(), estimatedElements );
     }
 
@@ -1754,48 +1754,48 @@ namespace ALUGrid
   }
 
 
-  // packall without gather scatter 
+  // packall without gather scatter
   template < class A >
-  bool HexaPllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv) 
+  bool HexaPllBaseXMacro< A >::packAll (std::vector< ObjectStream > & osv)
   {
     return doPackAll( osv, ( GatherScatterType* ) 0 );
   }
 
-  // pack all function for dune 
+  // pack all function for dune
   template < class A >
   bool HexaPllBaseXMacro< A >::dunePackAll (std::vector< ObjectStream > & osv,
-                                            GatherScatterType & gs) 
+                                            GatherScatterType & gs)
   {
     return doPackAll( osv, &gs );
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::packAsBndNow(int fce, ObjectStream & os, const bool packGhost ) const 
+  void HexaPllBaseXMacro< A >::packAsBndNow(int fce, ObjectStream & os, const bool packGhost ) const
   {
     os.writeObject (HBND4INT);
     os.writeObject (Gitter::hbndseg::closure);
     alugrid_assert ( _ldbVertexIndex >= 0 );
-    os.writeObject (_ldbVertexIndex ); // write unique graph vertex index 
-    os.writeObject ( master() ); // write unique graph vertex index 
+    os.writeObject (_ldbVertexIndex ); // write unique graph vertex index
+    os.writeObject ( master() ); // write unique graph vertex index
 
-    // write the four identifiers of the hexa 
+    // write the four identifiers of the hexa
     os.writeObject (myhexa ().myvertex (fce,0)->ident ());
     os.writeObject (myhexa ().myvertex (fce,1)->ident ());
     os.writeObject (myhexa ().myvertex (fce,2)->ident ());
     os.writeObject (myhexa ().myvertex (fce,3)->ident ());
 
-    // see method unpackHbnd4Int 
+    // see method unpackHbnd4Int
     if( packGhost )
     {
       alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
-      int writePoint = MacroGridMoverIF::POINTTRANSMITTED; 
-      os.writeObject ( writePoint ); // 1 == points are transmitted 
+      int writePoint = MacroGridMoverIF::POINTTRANSMITTED;
+      os.writeObject ( writePoint ); // 1 == points are transmitted
 
-      // know which face is the internal bnd 
+      // know which face is the internal bnd
       os.writeObject (fce);
-     
-      for(int k=0; k<8; ++k) 
+
+      for(int k=0; k<8; ++k)
       {
         int vx = myhexa ().myvertex (k)->ident ();
         os.writeObject ( vx );
@@ -1804,7 +1804,7 @@ namespace ALUGrid
       int oppFace = Gitter::Geometric::Hexa::oppositeFace[fce];
       for(int vx=0; vx<4; ++vx)
       {
-        const Gitter::Geometric::VertexGeo * vertex = myhexa().myvertex(oppFace,vx); 
+        const Gitter::Geometric::VertexGeo * vertex = myhexa().myvertex(oppFace,vx);
         os.writeObject( vertex->ident() );
         const alucoord_t (&p)[3] = vertex->Point();
         os.writeObject ( p[0] );
@@ -1814,23 +1814,23 @@ namespace ALUGrid
     }
     else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted 
+      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
   }
 
   template < class A >
-  void HexaPllBaseXMacro< A >::packAsGhost(ObjectStream & os, int fce) const 
+  void HexaPllBaseXMacro< A >::packAsGhost(ObjectStream & os, int fce) const
   {
     alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
     packAsBndNow(fce, os, true );
   }
 
-  // packs macro element as internal bnd for other proc 
+  // packs macro element as internal bnd for other proc
   template < class A >
   void HexaPllBaseXMacro< A >::
-  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const 
+  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled) const
   {
-    if ( _moveTo != who ) 
+    if ( _moveTo != who )
     {
       packAsBndNow( fce, os, ghostCellsEnabled );
     }
@@ -1839,46 +1839,46 @@ namespace ALUGrid
 
   template < class A >
   void HexaPllBaseXMacro< A >::
-  unpackSelf (ObjectStream & os, 
-              const bool i ) 
+  unpackSelf (ObjectStream & os,
+              const bool i )
   {
     doUnpackSelf( os, i , ( GatherScatterType * ) 0 );
   }
 
   template < class A >
   void HexaPllBaseXMacro< A >::
-  duneUnpackSelf (ObjectStream & os, 
-                  const bool i, 
-                  GatherScatterType* gatherScatter ) 
+  duneUnpackSelf (ObjectStream & os,
+                  const bool i,
+                  GatherScatterType* gatherScatter )
   {
     doUnpackSelf( os, i, gatherScatter );
   }
 
   template < class A >
   void HexaPllBaseXMacro< A >::
-  doUnpackSelf (ObjectStream & os, 
-                const bool i, 
-                GatherScatterType* gatherScatter ) 
+  doUnpackSelf (ObjectStream & os,
+                const bool i,
+                GatherScatterType* gatherScatter )
   {
     alugrid_assert (i);
-    if (i) 
+    if (i)
     {
-      // unpack refinement data and restore 
+      // unpack refinement data and restore
       myhexa ().restore ( os );
 
-      // stream should now be at position ENDOFSTREAM 
+      // stream should now be at position ENDOFSTREAM
       char c = os.get();
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
         abort();
       }
-      
-      // unpack dune data if present, pointer can be zero 
-      if( gatherScatter ) 
+
+      // unpack dune data if present, pointer can be zero
+      if( gatherScatter )
         gatherScatter->xtractData( os , myhexa() );
     }
-    else 
+    else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
       abort();
@@ -1886,13 +1886,13 @@ namespace ALUGrid
   }
 
   template < class A >
-  bool HexaPllBaseXMacro< A >::erasable () const 
+  bool HexaPllBaseXMacro< A >::erasable () const
   {
-    // return true if object can be deleted 
+    // return true if object can be deleted
     return ! isSet( flagLock );
   }
 
-  // template instatiation 
+  // template instatiation
   template class HexaPllBaseX< GitterBasisPll::ObjectsPll::HexaEmpty >;
   template class HexaPllBaseXMacro< GitterBasisPll::ObjectsPll::hexa_IMPL >;
 
@@ -1903,7 +1903,7 @@ namespace ALUGrid
   ///////////////////////////////////////////////////////////
 
   std::pair< ElementPllXIF_t *, int > BndsegPllBaseX::accessOuterPllX (const std::pair< ElementPllXIF_t *, int > &, int f) {
-    alugrid_assert (!f);  
+    alugrid_assert (!f);
     return std::pair< ElementPllXIF_t *, int > (this,0);
   }
 
@@ -1921,41 +1921,43 @@ namespace ALUGrid
   }
 
   GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro::
-  Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2) 
+  Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2)
     : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
   {
-  } 
+  }
 
   GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro::
-  Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
-                       myhedge_t *e2, int s2, myhedge_t *e3, int s3) 
+  Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
+                       myhedge_t *e2, int s2, myhedge_t *e3, int s3)
     : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
   {
-  } 
+  }
 
   ////////////////////////////////////////////////////////////////
   //  --MacroGitterBasisPll
   ////////////////////////////////////////////////////////////////
-  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll ( GitterBasisPll * mygrid, std::istream &in )
-    : GitterPll::MacroGitterPll (), 
-      GitterBasis:: MacroGitterBasis (mygrid),
+  GitterBasisPll::MacroGitterBasisPll::
+  MacroGitterBasisPll ( const int dim, GitterBasisPll * mygrid, std::istream &in )
+    : GitterPll::MacroGitterPll (),
+      GitterBasis:: MacroGitterBasis (dim, mygrid),
       _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     macrogridBuilder (in );
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
   }
 
-  GitterBasisPll::MacroGitterBasisPll::MacroGitterBasisPll (GitterBasisPll * mygrid)
-   : GitterPll::MacroGitterPll () , 
-     GitterBasis::MacroGitterBasis (mygrid),
+  GitterBasisPll::MacroGitterBasisPll::
+  MacroGitterBasisPll (const int dim, GitterBasisPll * mygrid)
+   : GitterPll::MacroGitterPll () ,
+     GitterBasis::MacroGitterBasis (dim, mygrid),
      _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
   }
 
-  GitterBasisPll::MacroGitterBasisPll::~MacroGitterBasisPll () 
+  GitterBasisPll::MacroGitterBasisPll::~MacroGitterBasisPll ()
   {
-    try 
+    try
     {
       {
         AccessIterator < helement_STI >::Handle w (*this);
@@ -1970,34 +1972,34 @@ namespace ALUGrid
 
   void GitterBasisPll::MacroGitterBasisPll::clearLinkagePattern()
   {
-    // clear linkage pattern map 
+    // clear linkage pattern map
     _linkagePatterns.clear();
   }
 
   void GitterBasisPll::MacroGitterBasisPll::secondScan ( std::set< int >& s )
   {
-    // clear set 
+    // clear set
     s.clear();
 
     int n = 0;
     const linkagePatternMap_t::iterator pEnd = _linkagePatterns.end ();
-    for (linkagePatternMap_t::iterator p = _linkagePatterns.begin (); p != pEnd; ) 
+    for (linkagePatternMap_t::iterator p = _linkagePatterns.begin (); p != pEnd; )
     {
-      // if linkage exists 
-      if ((*p).second) 
+      // if linkage exists
+      if ((*p).second)
       {
         typedef std::vector< int >::const_iterator  const_iterator ;
         const const_iterator iEnd = (*p).first.end ();
-        // insert all links into set 
+        // insert all links into set
         for ( const_iterator i = (*p).first.begin (); i != iEnd; ++i )
         {
           s.insert( *i );
         }
-        // next pattern 
+        // next pattern
         ++p;
-      } 
+      }
       // else remove vertex from pattern list
-      else 
+      else
       {
         _linkagePatterns.erase ( p++ );
         ++n;
@@ -2012,75 +2014,75 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::VertexGeo * GitterBasisPll::MacroGitterBasisPll::
-  insert_ghostvx (double x, double y, double z, int i) 
+  insert_ghostvx (double x, double y, double z, int i)
   {
     return GitterBasis::MacroGitterBasis::insert_vertex (x,y,z,i);
   }
 
   Gitter::Geometric::hedge1_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hedge1 (VertexGeo *a, VertexGeo *b) 
+  insert_hedge1 (VertexGeo *a, VertexGeo *b)
   {
     return new ObjectsPll::Hedge1EmptyPllMacro (a,b);
   }
 
   Gitter::Geometric::hedge1_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hedge1_twist (VertexGeo *a, int aid,  VertexGeo *b , int bid ) 
+  insert_hedge1_twist (VertexGeo *a, int aid,  VertexGeo *b , int bid )
   {
-    if(aid < bid) 
+    if(aid < bid)
       return GitterBasis::MacroGitterBasis::insert_hedge1 (a,b);
-    else 
+    else
       return GitterBasis::MacroGitterBasis::insert_hedge1 (b,a);
-  } 
+  }
 
   Gitter::Geometric::hface4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) 
+  insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4])
   {
     return new ObjectsPll::Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3]);
   }
 
   Gitter::Geometric::hface3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) 
+  insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3])
   {
     return new ObjectsPll::Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2] );
   }
 
   Gitter::Geometric::hexa_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hexa (hface4_GEO *(&f)[6], int (&t)[6]) 
+  insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
   {
     return new ObjectsPll::HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5]);
   }
 
   Gitter::Geometric::tetra_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation ) 
+  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation )
   {
-    return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], orientation ); 
+    return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], orientation );
   }
 
   Gitter::Geometric::periodic3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2], 
-                    const Gitter::hbndseg_STI::bnd_t (&bt)[2] ) 
+  insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2],
+                    const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
     return new ObjectsPll::Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1], bt);
-  } 
+  }
 
   Gitter::Geometric::periodic4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2], 
-                    const Gitter::hbndseg_STI::bnd_t (&bt)[2] ) 
+  insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2],
+                    const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
     return new ObjectsPll::Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1], bt );
   }
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, int t, Gitter::hbndseg_STI::bnd_t b) 
+  insert_hbnd4 (hface4_GEO * f, int t, Gitter::hbndseg_STI::bnd_t b)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
-    if (b == Gitter::hbndseg_STI::closure) 
+    if (b == Gitter::hbndseg_STI::closure)
     {
-      // internal face always get dummy index manager      
-      return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+      // internal face always get dummy index manager
+      return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::macro_t (f,t, b, *this );
-    } 
-    else 
+    }
+    else
     {
       return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
     }
@@ -2089,87 +2091,87 @@ namespace ALUGrid
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd4 (hface4_GEO * f, int t,
-                Gitter::hbndseg_STI::bnd_t b, 
-                MacroGhostInfoHexa* ghInfo) 
-  { 
+                Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostInfoHexa* ghInfo)
+  {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
-    // if internal boundary create ghost 
-    if (b == Gitter::hbndseg_STI::closure ) 
+    // if internal boundary create ghost
+    if (b == Gitter::hbndseg_STI::closure )
     {
-      if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
         return insert_hbnd4( f, t, b );
 
       alugrid_assert ( ghInfo );
-      return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > , 
+      return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::
             macro_t (f,t, b, *this, ghInfo );
-    } 
-    else 
+    }
+    else
     {
-      return new Hbnd4PllExternal < Hbnd4DefaultType , 
+      return new Hbnd4PllExternal < Hbnd4DefaultType ,
           BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
     }
   }
 
-  // version with point 
+  // version with point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd3 (hface3_GEO * f, int t,
-                Gitter::hbndseg_STI::bnd_t b, 
-                MacroGhostInfoTetra * ghInfo) 
+                Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostInfoTetra * ghInfo)
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
-    if (b == Gitter::hbndseg_STI::closure) 
+    if (b == Gitter::hbndseg_STI::closure)
     {
-      if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() ) 
+      if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
         return insert_hbnd3( f, t, b );
 
       alugrid_assert ( ghInfo );
       // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
-      return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
+      return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::
                 macro_t (f,t, b, *this, ghInfo );
-    } 
-    else 
+    }
+    else
     {
-      return new Hbnd3PllExternal < Hbnd3DefaultType , 
+      return new Hbnd3PllExternal < Hbnd3DefaultType ,
           BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
     }
   }
 
-  // version without point 
+  // version without point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd3 (hface3_GEO * f, int t,
-                Gitter::hbndseg_STI::bnd_t b ) 
+                Gitter::hbndseg_STI::bnd_t b )
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
-    if (b == Gitter::hbndseg_STI::closure) 
+    if (b == Gitter::hbndseg_STI::closure)
     {
-      // here we have a ghost of the ghost, therefor we need the element index manager 
-      return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > , 
+      // here we have a ghost of the ghost, therefor we need the element index manager
+      return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::macro_t (f,t, b, *this );
-    } 
-    else 
+    }
+    else
     {
-      return new Hbnd3PllExternal < Hbnd3DefaultType , 
+      return new Hbnd3PllExternal < Hbnd3DefaultType ,
              BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
     }
   }
 
-  GitterBasisPll::GitterBasisPll (MpAccessLocal & mpa) 
-    : GitterPll(mpa), 
-      _mpaccess(mpa), _macrogitter (0) , _ppv( 0 ) 
+  GitterBasisPll::GitterBasisPll (const int dim, MpAccessLocal & mpa)
+    : GitterPll(mpa),
+      _mpaccess(mpa), _macrogitter (0) , _ppv( 0 )
   {
-    _macrogitter = new MacroGitterBasisPll (this);
+    _macrogitter = new MacroGitterBasisPll (dim, this);
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( const std::string &filename, MpAccessLocal & mpa, ProjectVertex* ppv ) 
+  GitterBasisPll::GitterBasisPll ( const int dim, const std::string &filename, MpAccessLocal & mpa, ProjectVertex* ppv )
   : GitterPll( mpa ),
     _mpaccess( mpa ),
     _macrogitter( 0 ),
-    _ppv( ppv ) 
+    _ppv( ppv )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll (const char * = \"" << filename << "\" ...)" << std::endl, 1) : 1);
 
@@ -2177,70 +2179,70 @@ namespace ALUGrid
     std::stringstream rank;
     rank << "." << myrank;
 
-    // if still no macrogitter, try old method 
-    if(!_macrogitter) 
+    // if still no macrogitter, try old method
+    if(!_macrogitter)
     {
       std::string extendedName ( filename );
       extendedName += rank.str();
 
       std::ifstream in( extendedName.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (this, in);
-      else 
+        _macrogitter = new MacroGitterBasisPll (dim, this, in);
+      else
       {
-        alugrid_assert (debugOption (5) ? 
-          ( std::cerr << "  GitterBasisPll::GitterBasisPll () file: " << extendedName 
+        alugrid_assert (debugOption (5) ?
+          ( std::cerr << "  GitterBasisPll::GitterBasisPll () file: " << extendedName
              << " cannot be read. Try " << filename << " instead. In " << __FILE__ << " line " << __LINE__ << std::endl, 1) : 1);
       }
     }
 
-    // only check this for higher ranks 
+    // only check this for higher ranks
     // we assume that filename already contains rank info
-    // if not empty grid is created 
+    // if not empty grid is created
     bool validFilename = true;
     if( ! _macrogitter && myrank > 0 )
     {
-      // search rank info in filename 
+      // search rank info in filename
       const int result = filename.rfind( rank.str() );
-      // if not found then filename is not valid 
-      // and empty grid should be created 
+      // if not found then filename is not valid
+      // and empty grid should be created
       if( result == -1 )
       {
         validFilename = false;
       }
     }
 
-    // read normal macro gitter if not created yet and 
-    // filename is valid for this rank  
-    if( ! _macrogitter && validFilename ) 
+    // read normal macro gitter if not created yet and
+    // filename is valid for this rank
+    if( ! _macrogitter && validFilename )
     {
       std::ifstream in( filename.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (this, in);
+        _macrogitter = new MacroGitterBasisPll (dim, this, in);
     }
-    
-    // create empty macro gitter 
-    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (this);
+
+    // create empty macro gitter
+    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this);
 
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( std::istream &in, MpAccessLocal &mpa, ProjectVertex *ppv )
-  : GitterPll( mpa ), 
-    _mpaccess( mpa ), 
+  GitterBasisPll::GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &mpa, ProjectVertex *ppv )
+  : GitterPll( mpa ),
+    _mpaccess( mpa ),
     _macrogitter( 0 ),
-    _ppv( ppv ) 
+    _ppv( ppv )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << in << "\" ...)" << std::endl, 1) : 1);
 
-    _macrogitter = new MacroGitterBasisPll (this, in);
+    _macrogitter = new MacroGitterBasisPll (dim, this, in);
     alugrid_assert ( _macrogitter );
     notifyMacroGridChanges ();
   }
 
-  GitterBasisPll::~GitterBasisPll () 
+  GitterBasisPll::~GitterBasisPll ()
   {
     delete _macrogitter;
   }
@@ -2250,35 +2252,35 @@ namespace ALUGrid
     const int psize  = _mpaccess.psize();
     const int myrank = _mpaccess.myrank();
 
-    for( int rank = 0; rank < psize; ++ rank ) 
+    for( int rank = 0; rank < psize; ++ rank )
     {
       _mpaccess.barrier();
       if( rank != myrank ) continue;
 
-      typedef GitterBasisPll::ObjectsPll::TetraEmptyPllMacro tetra_MACRO; 
-      typedef GitterBasisPll::ObjectsPll::HexaEmptyPllMacro  hexa_MACRO; 
-      typedef GitterBasisPll::ObjectsPll::hbndseg3_IMPL hbndseg3_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::hbndseg4_IMPL hbndseg4_IMPL; 
-      //typedef GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro hface3_IMPL; 
-      //typedef GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro hface4_IMPL; 
-      //typedef GitterBasisPll::ObjectsPll::Hedge1EmptyPllMacro hedge1_IMPL; 
-      //typedef GitterBasisPll::ObjectsPll::VertexPllImplMacro VertexMacro; 
-      typedef GitterBasisPll::ObjectsPll::tetra_IMPL tetra_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::hexa_IMPL  hexa_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::hbndseg3_IMPL hbndseg3_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::hbndseg4_IMPL hbndseg4_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::hface3_IMPL hface3_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro  hface3_MACRO; 
-      typedef GitterBasisPll::ObjectsPll::hface4_IMPL hface4_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro  hface4_MACRO; 
-      typedef GitterBasisPll::ObjectsPll::hedge1_IMPL hedge1_IMPL; 
-      typedef GitterBasisPll::ObjectsPll::Hedge1EmptyPllMacro  hedge1_MACRO; 
-      typedef GitterBasisPll::ObjectsPll::VertexPllImplMacro VertexMacro; 
-      typedef GitterBasis::DuneIndexProvider DuneIndexProvider; 
-      typedef GitterBasis::Objects::VertexEmptyMacro VertexEmptyMacro; 
-      typedef GitterBasis::Objects::VertexEmpty VertexEmpty; 
-      typedef Gitter::Geometric::VertexGeo VertexGeo; 
-      if( rank == 0 ) 
+      typedef GitterBasisPll::ObjectsPll::TetraEmptyPllMacro tetra_MACRO;
+      typedef GitterBasisPll::ObjectsPll::HexaEmptyPllMacro  hexa_MACRO;
+      typedef GitterBasisPll::ObjectsPll::hbndseg3_IMPL hbndseg3_IMPL;
+      typedef GitterBasisPll::ObjectsPll::hbndseg4_IMPL hbndseg4_IMPL;
+      //typedef GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro hface3_IMPL;
+      //typedef GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro hface4_IMPL;
+      //typedef GitterBasisPll::ObjectsPll::Hedge1EmptyPllMacro hedge1_IMPL;
+      //typedef GitterBasisPll::ObjectsPll::VertexPllImplMacro VertexMacro;
+      typedef GitterBasisPll::ObjectsPll::tetra_IMPL tetra_IMPL;
+      typedef GitterBasisPll::ObjectsPll::hexa_IMPL  hexa_IMPL;
+      typedef GitterBasisPll::ObjectsPll::hbndseg3_IMPL hbndseg3_IMPL;
+      typedef GitterBasisPll::ObjectsPll::hbndseg4_IMPL hbndseg4_IMPL;
+      typedef GitterBasisPll::ObjectsPll::hface3_IMPL hface3_IMPL;
+      typedef GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro  hface3_MACRO;
+      typedef GitterBasisPll::ObjectsPll::hface4_IMPL hface4_IMPL;
+      typedef GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro  hface4_MACRO;
+      typedef GitterBasisPll::ObjectsPll::hedge1_IMPL hedge1_IMPL;
+      typedef GitterBasisPll::ObjectsPll::Hedge1EmptyPllMacro  hedge1_MACRO;
+      typedef GitterBasisPll::ObjectsPll::VertexPllImplMacro VertexMacro;
+      typedef GitterBasis::DuneIndexProvider DuneIndexProvider;
+      typedef GitterBasis::Objects::VertexEmptyMacro VertexEmptyMacro;
+      typedef GitterBasis::Objects::VertexEmpty VertexEmpty;
+      typedef Gitter::Geometric::VertexGeo VertexGeo;
+      if( rank == 0 )
       {
         std::cout << "bool   = " << sizeof(bool) << std::endl;
         std::cout << "char   = " << sizeof(unsigned char) << std::endl;
@@ -2293,7 +2295,7 @@ namespace ALUGrid
         std::cout << "GraphVertex = " << sizeof(LoadBalancer::GraphVertex) << std::endl;
         std::cout << "GraphEdge   = " << sizeof(LoadBalancer::GraphEdge) << std::endl;
         std::cout << "Identifier  = " << sizeof(LinkedObject::Identifier) << std::endl << std::endl;
-        
+
         std::cout << "******** TETRA *************************8\n";
         std::cout << "Tetrasize  = " << sizeof(tetra_IMPL) << std::endl;
         std::cout << "TetraMacro = " << sizeof(tetra_MACRO) << std::endl;
@@ -2326,28 +2328,28 @@ namespace ALUGrid
 
       std::cout << "******** Number of Elements ************************8\n";
       {
-        size_t totalSize = 0; 
+        size_t totalSize = 0;
         bool simplex = false;
         {
           AccessIterator < helement_STI >::Handle iter (container ());
           int size = iter.size();
-          iter.first(); 
+          iter.first();
           if( !iter.done() )
           {
             if( iter.item().type() == tetra )
             {
               simplex = true;
               size *= sizeof(tetra_IMPL);
-            } 
+            }
             else
             {
               size *= sizeof(hexa_IMPL);
-            } 
-          } 
+            }
+          }
           totalSize += size;
           std::cout << "Macro elements: size = " << size/1024/1024 << " MB \n";
-        } 
-        
+        }
+
         {
           int size = AccessIterator < hbndseg_STI >::Handle (container ()).size();
           size *= (simplex) ?  sizeof(hbndseg3_IMPL) : sizeof(hbndseg4_IMPL);
@@ -2417,7 +2419,7 @@ namespace ALUGrid
 
         {
           size_t indexMem = 0;
-          for(int i=0; i<4; ++i) 
+          for(int i=0; i<4; ++i)
           {
             std::cout << "P[ " << _mpaccess.myrank() << " ] max index codim " << i << " = " << indexManager( i ).getMaxIndex() << std::endl;
             indexMem += indexManager( i ).getMaxIndex() * sizeof( int );
@@ -2428,7 +2430,7 @@ namespace ALUGrid
 
         size_t perElement = ( numElements > 0 ) ? allSize/numElements : 0;
         std::cout << "All leaf size : " << allSize/1024/1024 << " MB" << std::endl;
-        std::cout << "bytes per Element: " << perElement << std::endl; 
+        std::cout << "bytes per Element: " << perElement << std::endl;
         std::cout << "Estimated all size : " << (9*long(allSize) / 8 / 1024/1024) << " MB" << std::endl;
 
         size_t build = container().memUsage();

@@ -1,13 +1,13 @@
 // (c) bernhard schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modifications for Dune Interface
+// (c) Robert Kloefkorn 2004 - 2005
 #ifndef GITTER_PLL_IMPL_H_INCLUDED
 #define GITTER_PLL_IMPL_H_INCLUDED
 
 #include "../serial/myalloc.h"
 #include "../serial/gitter_impl.h"
 #include "../serial/walk.h"
-  
+
 #include "gitter_pll_sti.h"
 #include "gitter_pll_ldb.h"
 #include "../serial/ghost_elements.h"
@@ -19,13 +19,13 @@ namespace ALUGrid
   // Verbindungsmuster eingesetzt. Die Verbindungsmuster werden
   // nicht in jeder Parallelerweiterung gespeichert sondern in
   // einem zentralen Container im verteilten Grobgitter, dem
-  // 'linkagePatternMap' und mit Z"ahlung der Referenzen 
+  // 'linkagePatternMap' und mit Z"ahlung der Referenzen
   // verwaltet. Die Methode secondScan () l"oscht dann immer
   // wieder die unreferenzierten Verbindungsmuster aus dem
   // Container. Es gibt "ubrigens kein firstScan () mehr ...
 
-  template < class A > 
-  class VertexPllBaseX : public A 
+  template < class A >
+  class VertexPllBaseX : public A
   {
     protected :
       typedef A myvertex_t;
@@ -68,8 +68,8 @@ namespace ALUGrid
       ElementLinkage_t _elements ;
       typedef std::set< int > elementset_t ;
 
-    public:  
-      virtual bool insertLinkedElements( const elementset_t& elements ) 
+    public:
+      virtual bool insertLinkedElements( const elementset_t& elements )
       {
         return _elements.insertElementLinkage( elements );
       }
@@ -77,8 +77,8 @@ namespace ALUGrid
       const ElementLinkage_t& linkedElements() const { return _elements ; }
   };
 
-  template < class A > 
-  class EdgePllBaseX : public A 
+  template < class A >
+  class EdgePllBaseX : public A
   {
     protected :
       typedef A myhedge_t;
@@ -99,8 +99,8 @@ namespace ALUGrid
       virtual void unattach2 (int);
   };
 
-  template < class A > 
-  class EdgePllBaseXMacro : public A 
+  template < class A >
+  class EdgePllBaseXMacro : public A
   {
     public :
       typedef typename A::myhedge_t  myhedge_t;
@@ -126,13 +126,13 @@ namespace ALUGrid
       moveto_t*  _moveTo;
   };
 
-  template < class A > class FacePllBaseX : public A 
+  template < class A > class FacePllBaseX : public A
   {
     protected :
       typedef A myhface_t;
       typedef typename A::myconnect_t myconnect_t;
       typedef typename A::myhedge_t myhedge_t;
-        
+
     public :
       inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int);
       inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int);
@@ -148,28 +148,28 @@ namespace ALUGrid
       virtual std::pair< const ElementPllXIF_t *, int > accessInnerPllX () const;
   };
 
-  template < class A > class FacePllBaseXMacro : public A 
+  template < class A > class FacePllBaseXMacro : public A
   {
     public :
-      // some typedefs 
+      // some typedefs
       typedef typename A::myhface_t  myhface_t;
       typedef typename A::myhedge_t myhedge_t;
       typedef typename A::moveto_t   moveto_t;
 
-      // constructor for hface3 
+      // constructor for hface3
       inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
                                       myhedge_t * e2, int s2);
-      // constructor for hface4 
+      // constructor for hface4
       inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                                      myhedge_t * e2, int s2, myhedge_t * e3, int s3); 
+                                      myhedge_t * e2, int s2, myhedge_t * e3, int s3);
       // destructor only checking move-to
-      inline ~FacePllBaseXMacro (); 
+      inline ~FacePllBaseXMacro ();
 
       virtual std::vector< int > estimateLinkage () const;
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :
-      using A::myhface; 
+      using A::myhface;
       bool doPackLink (const int link, ObjectStream& os );
 
     public :
@@ -188,9 +188,9 @@ namespace ALUGrid
     public :
       typedef A mytetra_t;
       typedef typename A::myhface3_t myhface3_t;
-    protected:  
-      inline TetraPllXBase(myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
-                           myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+    protected:
+      inline TetraPllXBase(myhface3_t *f0, int s0, myhface3_t *f1, int s1,
+                           myhface3_t *f2, int s2, myhface3_t *f3, int s3)
           : A(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
 
       inline mytetra_t& mytetra() { return *this; }
@@ -198,7 +198,7 @@ namespace ALUGrid
     public :
       inline ~TetraPllXBase () {}
 
-      // method to get internal tetra located behind this parallel interface 
+      // method to get internal tetra located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
     public :
@@ -208,7 +208,7 @@ namespace ALUGrid
 
   template< class A >
   class TetraPllXBaseMacro
-  : public A 
+  : public A
   {
     public :
      ~TetraPllXBaseMacro ();
@@ -230,7 +230,7 @@ namespace ALUGrid
       typedef typename A::myneighbour_t myneighbour_t;
       typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
-      TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
+      TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                          myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
     public :
       virtual int ldbVertexIndex () const;
@@ -247,7 +247,7 @@ namespace ALUGrid
       virtual void unattach2 (int);
       virtual bool packAll (std::vector< ObjectStream > &);
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
-      // pack ghost information 
+      // pack ghost information
       virtual void packAsGhost(ObjectStream &,int) const;
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
@@ -259,11 +259,11 @@ namespace ALUGrid
       bool doPackAll (std::vector< ObjectStream > &, GatherScatterType * );
       void doUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       void packAsBndNow (int, ObjectStream &, const bool ) const;
-      
+
     private :
       // link number corresponding to rank where element is moved to
       int _moveTo;
-      // globally unique element number 
+      // globally unique element number
       int _ldbVertexIndex;
   };
 
@@ -275,8 +275,8 @@ namespace ALUGrid
   // #        #       #   #      #    #    #  #    #     #    #    # #     #
   // #        ######  #    #     #     ####   #####      #     ####   #####
 
-  template < class A > 
-  class Periodic3PllXBase : public A 
+  template < class A >
+  class Periodic3PllXBase : public A
   {
     public :
       typedef typename A::myhface3_t myhface3_t;
@@ -285,27 +285,27 @@ namespace ALUGrid
       using A::PERIODIC3;
       using A::HBND3INT;
 
-      Periodic3PllXBase( myhface3_t* f0,int s0, myhface3_t *f1,int s1) 
+      Periodic3PllXBase( myhface3_t* f0,int s0, myhface3_t *f1,int s1)
         : A( f0, s0, f1, s1 ) {}
 
       inline myperiodic_t & myperiodic () { return *this; }
       inline const myperiodic_t & myperiodic () const { return *this; }
 
-      // method to get internal periodic located behind this parallel interface 
+      // method to get internal periodic located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
     public :
       void writeDynamicState (ObjectStream &, int) const;
 
-      // access interior element and write data 
-      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
-      { 
+      // access interior element and write data
+      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const
+      {
         alugrid_assert ( false );
-        abort(); 
+        abort();
       }
   };
 
-  template < class A > 
-  class Periodic3PllXBaseMacro : public A  
+  template < class A >
+  class Periodic3PllXBaseMacro : public A
   {
     public :
       typedef typename A::myhface3_t myhface3_t;
@@ -322,7 +322,7 @@ namespace ALUGrid
       using A::unset;
       using A::set;
 
-      Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1, 
+      Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1,
                               const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
      ~Periodic3PllXBaseMacro ();
 
@@ -340,8 +340,8 @@ namespace ALUGrid
       virtual bool packAll (std::vector< ObjectStream > &);
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
-      virtual bool erasable () const 
-      { 
+      virtual bool erasable () const
+      {
         alugrid_assert ( ! isSet( flagLock ) == ( _moveTo >= 0 ) );
         return ! isSet( flagLock );
       }
@@ -357,7 +357,7 @@ namespace ALUGrid
   // #        #       #   #      #    #    #  #    #     #    #    #      #
   // #        ######  #    #     #     ####   #####      #     ####       #
 
-  template < class A > 
+  template < class A >
   class Periodic4PllXBase : public A {
     public :
       typedef typename A::myhface4_t myhface4_t;
@@ -366,27 +366,27 @@ namespace ALUGrid
       using A::PERIODIC4;
       using A::HBND4INT;
 
-      Periodic4PllXBase( myhface4_t* f0, int s0, myhface4_t *f1, int s1) 
+      Periodic4PllXBase( myhface4_t* f0, int s0, myhface4_t *f1, int s1)
         : A( f0, s0, f1, s1 ) {}
 
-    protected:  
+    protected:
       inline myperiodic_t & myperiodic () { return *this; }
       inline const myperiodic_t & myperiodic () const { return *this; }
     public :
       inline ~Periodic4PllXBase () {}
     public :
-      // method to get internal periodic located behind this parallel interface 
+      // method to get internal periodic located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
       void writeDynamicState (ObjectStream &, int) const;
-      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const 
-      { 
+      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const
+      {
         alugrid_assert ( false ); abort();
       }
   };
 
   template < class A >
-  class Periodic4PllXBaseMacro : public A  
+  class Periodic4PllXBaseMacro : public A
   {
     public :
       typedef typename A::myhface4_t    myhface4_t;
@@ -394,7 +394,7 @@ namespace ALUGrid
       typedef A myperiodic_t;
       typedef Gitter::hface_STI hface_STI;
 
-      Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1, 
+      Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1,
                               const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
       ~Periodic4PllXBaseMacro ();
 
@@ -408,7 +408,7 @@ namespace ALUGrid
       using A::set;
 
 
-    protected:  
+    protected:
       inline myperiodic_t & myperiodic () { return *this; }
       inline const myperiodic_t & myperiodic () const { return *this; }
       bool doPackLink (const int link, ObjectStream& os );
@@ -435,8 +435,8 @@ namespace ALUGrid
   // #     #  #        #  #   #    #
   // #     #  ######  #    #  #    #
 
-  template < class A > 
-  class HexaPllBaseX : public A 
+  template < class A >
+  class HexaPllBaseX : public A
   {
     protected :
       typedef typename A::myhface4_t myhface4_t;
@@ -451,13 +451,13 @@ namespace ALUGrid
     public :
       void writeDynamicState (ObjectStream &, int) const;
       void writeDynamicState (ObjectStream &, GatherScatterType &) const;
-   
-      // method to get internal hexa located behind this parallel interface 
+
+      // method to get internal hexa located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
   };
 
-  template < class A > 
-  class HexaPllBaseXMacro : public A 
+  template < class A >
+  class HexaPllBaseXMacro : public A
   {
     protected:
       using A::HEXA;
@@ -489,19 +489,19 @@ namespace ALUGrid
       virtual void setLoadBalanceVertexIndex ( const int );
       virtual bool ldbUpdateGraphVertex (LoadBalancer::DataBase &, GatherScatter* );
       virtual void computeVertexLinkage( vertexelementlinkage_t& ) ;
-    public:  
+    public:
       virtual void attachElement2 ( const int, const int );
       virtual void attach2 (int);
       virtual void unattach2 (int);
-      
+
       virtual bool packAll (std::vector< ObjectStream > &);
-      // pack ghost information 
+      // pack ghost information
       virtual void packAsGhost(ObjectStream &,int) const;
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
       virtual void unpackSelf (ObjectStream &, bool);
       virtual bool erasable () const;
 
-      // pack and unpack funtions for dune 
+      // pack and unpack funtions for dune
       virtual bool dunePackAll (std::vector< ObjectStream > &, GatherScatterType &);
       virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType* );
       virtual int moveTo () const { return _moveTo; }
@@ -514,11 +514,11 @@ namespace ALUGrid
     protected:
       // link number corresponding to rank where element is moved to
       int _moveTo;
-      // globally unique element number 
+      // globally unique element number
       int _ldbVertexIndex;
   };
 
-  class BndsegPllBaseX : public ElementPllXIF_t 
+  class BndsegPllBaseX : public ElementPllXIF_t
   {
     public :
       void writeDynamicState (ObjectStream &, int) const { abort (); }
@@ -539,8 +539,8 @@ namespace ALUGrid
     public :
       inline BndsegPllBaseXMacro (myhbnd_t &);
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
-      
-      // method to get internal bnd located behind this parallel interface 
+
+      // method to get internal bnd located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
 
     private :
@@ -562,7 +562,7 @@ namespace ALUGrid
       void readDynamicState (ObjectStream &, GatherScatterType &);
       void writeDynamicState (ObjectStream &, GatherScatterType &) const;
       using BndsegPllBaseX::writeDynamicState;
-      
+
       void getRefinementRequest (ObjectStream &);
       bool setRefinementRequest (ObjectStream &);
     public :
@@ -571,10 +571,10 @@ namespace ALUGrid
     public :
       virtual void notifyBalance (balrule_t,int);
       virtual bool lockedAgainstCoarsening () const;
-      
-      // method to get internal bnd located behind this parallel interface 
+
+      // method to get internal bnd located behind this parallel interface
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p);
-      
+
     private :
       myhbnd_t & _hbnd;
       int  _ghostLevel;
@@ -599,24 +599,24 @@ namespace ALUGrid
       inline BndsegPllBaseXMacroClosure (myhbnd_t &, const MacroGhostInfo_STI* );
     public :
       virtual int  ldbVertexIndex () const;
-      virtual int master () const 
-      { 
+      virtual int master () const
+      {
         // alugrid_assert ( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
-        return _master; 
+        return _master;
       }
       virtual void readStaticState (ObjectStream &, int) ;
       virtual void setLoadBalanceVertexIndex ( const int );
-      virtual void setMaster ( const int master ) { 
-        _master = master; 
+      virtual void setMaster ( const int master ) {
+        _master = master;
       }
     public :
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
-      
-      // unpack ghost information and insert ghost cell 
+
+      // unpack ghost information and insert ghost cell
       virtual void insertGhostCell(ObjectStream &,int);
 
     private :
-      const MacroGhostInfo_STI * _ghInfo; 
+      const MacroGhostInfo_STI * _ghInfo;
       int _ldbVertexIndex;
       int _master;
   };
@@ -633,10 +633,10 @@ namespace ALUGrid
       class VertexPllImplMacro : public VertexPllBaseX< VertexEmptyMacro >
       {
       public :
-        VertexPllImplMacro (double x, double y, double z, int i, IndexManagerStorageType& ims, linkagePatternMap_t & map) 
+        VertexPllImplMacro (double x, double y, double z, int i, IndexManagerStorageType& ims, linkagePatternMap_t & map)
           : VertexPllBaseX< VertexEmptyMacro >( x, y, z, i, ims )
         {
-          alugrid_assert ( &map == &ims.linkagePatterns() );   
+          alugrid_assert ( &map == &ims.linkagePatterns() );
         }
         virtual VertexPllXIF_t & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const VertexPllXIF_t & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
@@ -648,7 +648,7 @@ namespace ALUGrid
       class Hedge1EmptyPll : public EdgePllBaseX < Hedge1Empty >
       {
       public :
-        inline Hedge1EmptyPll (myvertex_t * a, myvertex_t * b) 
+        inline Hedge1EmptyPll (myvertex_t * a, myvertex_t * b)
           : EdgePllBaseX < Hedge1Empty > (a, b) {}
       };
       typedef Hedge1Top < Hedge1EmptyPll > hedge1_IMPL;
@@ -666,10 +666,10 @@ namespace ALUGrid
       class Hface3EmptyPll : public FacePllBaseX< Hface3Empty >
       {
       public :
-        // we need to change this typedef here 
+        // we need to change this typedef here
         typedef hedge1_IMPL inneredge_t;
 
-        // constructor 
+        // constructor
         inline Hface3EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, myhedge_t *e2, int s2)
           : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
       };
@@ -685,16 +685,16 @@ namespace ALUGrid
       class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
       {
       public :
-        // we need to change this typedef here 
+        // we need to change this typedef here
         typedef hedge1_IMPL inneredge_t;
 
-        // constructor 
-        inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, 
+        // constructor
+        inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
                                myhedge_t *e2, int s2, myhedge_t *e3, int s3)
-          : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {} 
+          : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {}
       };
       typedef Hface4Top < Hface4EmptyPll > hface4_IMPL;
-    
+
       class Hface4EmptyPllMacro : public FacePllBaseXMacro< hface4_IMPL >
       {
         typedef  FacePllBaseXMacro< hface4_IMPL > Base_t;
@@ -714,8 +714,8 @@ namespace ALUGrid
         typedef hface3_IMPL innerface_t;
         typedef TetraEmpty::balrule_t balrule_t;
       public :
-        inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
-                              myhface3_t *f2, int s2, myhface3_t *f3, int s3) 
+        inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
+                              myhface3_t *f2, int s2, myhface3_t *f3, int s3)
           : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
@@ -725,15 +725,15 @@ namespace ALUGrid
       class TetraEmptyPllMacro : public TetraPllXBaseMacro< tetra_IMPL >
       {
       public :
-        inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1, 
-                                   myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation) 
+        inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
+                                   myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation)
           : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, orientation) {} // 0 == level 0
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
       };
 
      /////////////////////////////////
-     // Periodic 3 
+     // Periodic 3
      /////////////////////////////////
      class Periodic3EmptyPll : public Periodic3PllXBase< Periodic3Empty >
      {
@@ -741,18 +741,18 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
         typedef hface3_IMPL innerface_t;
       public :
-        inline Periodic3EmptyPll (myhface3_t * f0, int s0, myhface3_t *f1, int s1 ) 
+        inline Periodic3EmptyPll (myhface3_t * f0, int s0, myhface3_t *f1, int s1 )
           : Periodic3PllXBase< Periodic3Empty >( f0, s0, f1, s1 ) {}
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
       };
       typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL;
-    
+
       class Periodic3EmptyPllMacro : public Periodic3PllXBaseMacro< periodic3_IMPL >
       {
       public :
-        Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1, 
-                                const Gitter:: hbndseg_STI::bnd_t (&bt)[2] ) 
+        Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1,
+                                const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1, bt ) {}
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
@@ -772,19 +772,19 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
         typedef hface4_IMPL innerface_t;
       public :
-        inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1) 
+        inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1)
           : Periodic4PllXBase< Periodic4Empty >( f0, s0, f1, s1 ) {}
 
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
       };
       typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL;
-    
+
       class Periodic4EmptyPllMacro : public Periodic4PllXBaseMacro< periodic4_IMPL >
       {
       public :
-        Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1, 
-                                const Gitter:: hbndseg_STI::bnd_t (&bt)[2] ) 
+        Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1,
+                                const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1, bt ) {}
 
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
@@ -820,8 +820,8 @@ namespace ALUGrid
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
       };
-    
-      // Die Randelemente des verteilten Gitters werden aus Templates 
+
+      // Die Randelemente des verteilten Gitters werden aus Templates
       // in 'gitter_hexa_top_pll.h' und 'gitter_tetra_top_pll.h' erzeugt
       // indem diese die Randelementklassen des sequentiellen Verfahrens
       // "ubernehmen und mit passenden Extendern anreichern.
@@ -838,20 +838,20 @@ namespace ALUGrid
           void clearLinkagePattern();
         protected :
           int iterators_attached () const;
-          
+
           virtual VertexGeo     * insert_vertex  (double,double,double,int);
           virtual VertexGeo     * insert_ghostvx (double,double,double,int);
-         
-          // insert hbnd_int without ghost hexa 
+
+          // insert hbnd_int without ghost hexa
           virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
-          // insert hbnd_int with ghost hexa 
+          // insert hbnd_int with ghost hexa
           virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
-          
+
           // normal insert hbnd3 version
           virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t);
-          // version that get point and create ghost macro 
+          // version that get point and create ghost macro
           virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
-          // version that created internal boundary on ghost elements 
+          // version that created internal boundary on ghost elements
           virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
           hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int );
           virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
@@ -864,10 +864,10 @@ namespace ALUGrid
 
           using GitterBasis::MacroGitterBasis::iterator;
         public :
-          MacroGitterBasisPll (GitterBasisPll *, std::istream & );
-          MacroGitterBasisPll (GitterBasisPll * );
+          MacroGitterBasisPll (const int, GitterBasisPll *, std::istream & );
+          MacroGitterBasisPll (const int, GitterBasisPll * );
          ~MacroGitterBasisPll ();
-      }; // end MacroGitterBasisPll 
+      }; // end MacroGitterBasisPll
 
     protected :
       MpAccessLocal & _mpaccess;
@@ -879,19 +879,19 @@ namespace ALUGrid
       virtual inline MpAccessLocal & mpAccess ();
       virtual inline const MpAccessLocal & mpAccess () const;
     protected :
-      GitterBasisPll (MpAccessLocal & );
+      GitterBasisPll (const int dim, MpAccessLocal & );
 
     public :
       virtual inline MacroGitterPll & containerPll ();
       virtual inline const MacroGitterPll & containerPll () const;
 
-      GitterBasisPll ( const std::string &, MpAccessLocal &, ProjectVertex* );
-      GitterBasisPll ( std::istream &in, MpAccessLocal &, ProjectVertex* );
+      GitterBasisPll ( const int dim, const std::string &, MpAccessLocal &, ProjectVertex* );
+      GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &, ProjectVertex* );
 
       virtual ~GitterBasisPll ();
 
       virtual ProjectVertex* vertexProjection() const { return _ppv; }
-      
+
       virtual void printMemUsage();
   };
 
@@ -910,7 +910,7 @@ namespace ALUGrid
   /////////////////////////////////////////////////////
   template < class A >
   inline EdgePllBaseX< A >::EdgePllBaseX( myvertex_t* a, myvertex_t *b )
-    : A( a, b ) 
+    : A( a, b )
   {
   }
 
@@ -932,14 +932,14 @@ namespace ALUGrid
 #endif
   }
 
-  template < class A > 
+  template < class A >
   inline bool EdgePllBaseX< A >::lockedAgainstCoarsening () const
   {
     return myhedge().isSet( myhedge_t::flagLock );
   }
 
   template < class A >
-  inline void EdgePllBaseX< A >::getRefinementRequest (ObjectStream & os) const 
+  inline void EdgePllBaseX< A >::getRefinementRequest (ObjectStream & os) const
   {
     os.put( char(myhedge ().getrule ()) );
     return;
@@ -950,14 +950,14 @@ namespace ALUGrid
     char i;
     try {
       i = os.get();
-    } 
+    }
     catch( ObjectStream::EOFException )
     {
       std::cerr << "ERROR (fatal): EdgePllBaseX< A >::setRefinementRequest EOF encountered." << std::endl;
       abort();
     }
     typedef typename myhedge_t::myrule_t  myrule_t;
-    return myrule_t (i) == myrule_t::nosplit ? 
+    return myrule_t (i) == myrule_t::nosplit ?
       false : (myhedge ().refineImmediate (myrule_t (i)), true);
   }
 
@@ -1003,16 +1003,16 @@ namespace ALUGrid
   //////////////////////////////////////////////////////////
   //  --FacePllBaseX
   //////////////////////////////////////////////////////////
-  template < class A > inline FacePllBaseX < A >::FacePllBaseX 
-      (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2) 
+  template < class A > inline FacePllBaseX < A >::FacePllBaseX
+      (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
     : A( e0, s0, e1, s1, e2, s2 )
   {
     return;
   }
 
   template < class A > inline FacePllBaseX < A >::
-  FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1, 
-                myhedge_t * e2, int s2, myhedge_t * e3, int s3 ) 
+  FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1,
+                myhedge_t * e2, int s2, myhedge_t * e3, int s3 )
     : A( e0, s0, e1, s1, e2, s2, e3, s3 )
   {
     return;
@@ -1035,7 +1035,7 @@ namespace ALUGrid
     return myhface ().nb.front ().first->accessPllX ().accessOuterPllX (std::pair< const ElementPllXIF_t *, int > (& myhface ().nb.rear ().first->accessPllX (), myhface ().nb.rear ().second), myhface ().nb.front ().second);
   }
 
-  template < class A > std::pair< ElementPllXIF_t *, int > FacePllBaseX < A >::accessInnerPllX () 
+  template < class A > std::pair< ElementPllXIF_t *, int > FacePllBaseX < A >::accessInnerPllX ()
   {
     typedef std::pair< myconnect_t * ,int > myconnectpair_t;
     myconnectpair_t front = myhface ().nb.front ();
@@ -1043,7 +1043,7 @@ namespace ALUGrid
     myconnectpair_t rear  = myhface ().nb.rear  ();
     alugrid_assert ( rear.first );
     return front.first->accessPllX ().accessInnerPllX (
-              std::pair< ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+              std::pair< ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second),
               front.second);
   }
 
@@ -1054,7 +1054,7 @@ namespace ALUGrid
     constmyconnectpair_t rear  = myhface ().nb.rear  ();
     alugrid_assert ( rear.first );
     return front.first->accessPllX ().accessInnerPllX (
-              std::pair< const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second), 
+              std::pair< const ElementPllXIF_t *, int > (& rear.first->accessPllX (), rear.second),
               front.second);
   }
 
@@ -1099,7 +1099,7 @@ namespace ALUGrid
   }
 
   template < class A > inline BndsegPllBaseXMacro < A >::
-  BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b) 
+  BndsegPllBaseXMacro (myhbnd_t & b) : _hbnd (b)
   {
   }
 
@@ -1112,7 +1112,7 @@ namespace ALUGrid
   }
 
   template < class A > void BndsegPllBaseXMacro < A >::
-  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const 
+  packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const
   {
     alugrid_assert (!fce);
     if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3EXT);
@@ -1120,8 +1120,8 @@ namespace ALUGrid
     else abort ();
     os.writeObject (myhbnd ().bndtype ());
     {
-      for (int i = 0; i < myhface_t::polygonlength; ++i) 
-        os.writeObject ( myhbnd ().myvertex (fce,i)->ident () ); 
+      for (int i = 0; i < myhface_t::polygonlength; ++i)
+        os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
     }
     return;
   }
@@ -1130,7 +1130,7 @@ namespace ALUGrid
   getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
   {
     p.first  = 0;
-    p.second = & myhbnd (); 
+    p.second = & myhbnd ();
     return;
   }
 
@@ -1138,12 +1138,12 @@ namespace ALUGrid
   getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p )
   {
     p.first  = 0;
-    p.second = & myhbnd (); 
+    p.second = & myhbnd ();
     return;
   }
 
-  template < class A > inline BndsegPllBaseXClosure < A >::BndsegPllBaseXClosure (myhbnd_t & b) 
-    : _hbnd (b), _ghostLevel (-1), _ghostLeaf( false ) 
+  template < class A > inline BndsegPllBaseXClosure < A >::BndsegPllBaseXClosure (myhbnd_t & b)
+    : _hbnd (b), _ghostLevel (-1), _ghostLeaf( false )
   {
     return;
   }
@@ -1187,7 +1187,7 @@ namespace ALUGrid
 
   template < class A > inline BndsegPllBaseXMacroClosure < A >::BndsegPllBaseXMacroClosure (myhbnd_t & b)
     : BndsegPllBaseXClosure < A > (b)
-    , _ghInfo (0) 
+    , _ghInfo (0)
     , _ldbVertexIndex (-2)
     , _master( -2 )
   {
@@ -1196,20 +1196,20 @@ namespace ALUGrid
   template < class A > inline BndsegPllBaseXMacroClosure < A >::
   BndsegPllBaseXMacroClosure (myhbnd_t & b, const MacroGhostInfo_STI* ghinfo)
     : BndsegPllBaseXClosure < A > (b)
-    , _ghInfo (ghinfo) 
+    , _ghInfo (ghinfo)
     , _ldbVertexIndex (-2)
     , _master( -2 )
   {
   }
 
-  template < class A > inline int BndsegPllBaseXMacroClosure < A >::ldbVertexIndex () const 
+  template < class A > inline int BndsegPllBaseXMacroClosure < A >::ldbVertexIndex () const
   {
     alugrid_assert ( _ldbVertexIndex != -2 );
     alugrid_assert ( _ldbVertexIndex >= 0 );
     return _ldbVertexIndex;
   }
 
-  template < class A > inline void BndsegPllBaseXMacroClosure < A >::setLoadBalanceVertexIndex ( const int ldbVx ) 
+  template < class A > inline void BndsegPllBaseXMacroClosure < A >::setLoadBalanceVertexIndex ( const int ldbVx )
   {
     alugrid_assert ( ldbVx >= 0 );
     _ldbVertexIndex = ldbVx;
