@@ -1,12 +1,12 @@
 // (c) Bernhard Schupp 1997 - 1998
-// modification for the dune interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modification for the dune interface
+// (c) Robert Kloefkorn 2004 - 2005
 #ifndef GITTER_IMPL_H_INCLUDED
 #define GITTER_IMPL_H_INCLUDED
 
 #include "gitter_sti.h"
 
-#include "mapp_tetra_3d.h"  
+#include "mapp_tetra_3d.h"
 
 #include "gitter_hexa_top.h"
 #include "gitter_tetra_top.h"
@@ -14,17 +14,17 @@
 namespace ALUGrid
 {
 
-  class MacroGhostInfo; 
+  class MacroGhostInfo;
 
   class GitterBasis
   : public virtual Gitter,
     public Gitter::Geometric
   {
   public:
-    class Objects 
+    class Objects
     {
       public :
-        class VertexEmpty : public VertexGeo 
+        class VertexEmpty : public VertexGeo
         {
           public :
             inline VertexEmpty (int, double, double, double,IndexManagerStorageType &ims);
@@ -42,25 +42,25 @@ namespace ALUGrid
             int _idn;
         };
 
-        class Hbnd3Default : public hbndseg3_GEO 
+        class Hbnd3Default : public hbndseg3_GEO
         {
           protected :
            inline Hbnd3Default (myhface3_t *, int);
            virtual ~Hbnd3Default () {}
-           //! return pointer to grid 
+           //! return pointer to grid
            Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
            const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg3_GEO::bnd_t bnd_t;
             virtual inline bnd_t bndtype () const;
-            virtual int ghostLevel () const; 
-            virtual bool ghostLeaf () const; 
+            virtual int ghostLevel () const;
+            virtual bool ghostLeaf () const;
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
-            { 
-              static ghostpair_STI p( (helement_STI *)0, -1); 
+            {
+              static ghostpair_STI p( (helement_STI *)0, -1);
               return p;
             }
 
@@ -69,25 +69,25 @@ namespace ALUGrid
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL;
 
-        class Hbnd4Default : public hbndseg4_GEO 
+        class Hbnd4Default : public hbndseg4_GEO
         {
           protected :
             inline Hbnd4Default (myhface4_t *, int);
             virtual ~Hbnd4Default () {}
-            //! return pointer to grid 
+            //! return pointer to grid
             Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
             const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
           public :
             typedef hbndseg4_GEO::bnd_t bnd_t;
             virtual inline bnd_t bndtype () const;
-            virtual int ghostLevel () const;  
+            virtual int ghostLevel () const;
             virtual bool ghostLeaf () const;
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
-            virtual const ghostpair_STI & getGhost () const 
-            { 
-              static ghostpair_STI p( (helement_STI *)0, -1); 
+            virtual const ghostpair_STI & getGhost () const
+            {
+              static ghostpair_STI p( (helement_STI *)0, -1);
               return p;
             }
 
@@ -102,7 +102,7 @@ namespace ALUGrid
             inline Hedge1Empty (myvertex_t *,myvertex_t *);
             ~Hedge1Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectInnerVertex(const ProjectVertexPair &pv); 
+           virtual inline void projectInnerVertex(const ProjectVertexPair &pv);
         };
 
         typedef Hedge1Top < Hedge1Empty > hedge1_IMPL;
@@ -114,12 +114,12 @@ namespace ALUGrid
             inline Hface3Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int);
            ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertexPair &pv); 
+           virtual inline void projectVertex(const ProjectVertexPair &pv);
         };
         typedef Hface3Top < Hface3Empty > hface3_IMPL;
-        
 
-        class Hface4Empty : public hface4_GEO 
+
+        class Hface4Empty : public hface4_GEO
         {
          protected :
            typedef VertexEmpty innervertex_t;
@@ -127,12 +127,12 @@ namespace ALUGrid
            inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int);
            ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertexPair &pv); 
+           virtual inline void projectVertex(const ProjectVertexPair &pv);
         };
         typedef Hface4Top < Hface4Empty > hface4_IMPL;
 
 
-      class TetraEmpty : public tetra_GEO 
+      class TetraEmpty : public tetra_GEO
       {
     protected :
         typedef hface3_IMPL innerface_t;
@@ -140,53 +140,53 @@ namespace ALUGrid
         typedef VertexEmpty innervertex_t;
         inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int);
 
-      public:  
+      public:
         ////////////////////////////////////////////////
-        // read of data 
+        // read of data
         ////////////////////////////////////////////////
         virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs , int borderFace );
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
 
         /////////////////////////////////////////
-        //  writing of data 
+        //  writing of data
         /////////////////////////////////////////
         virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
         virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
 
         /////////////////////////////////////////
-      protected:  
-        // declare this element and all parts leaf  
+      protected:
+        // declare this element and all parts leaf
         virtual void attachleafs();
-        
-        // this element is not leaf anymore 
+
+        // this element is not leaf anymore
         virtual void detachleafs();
 
         // check that all indices are within range of index manager
         virtual void resetGhostIndices();
-        
-      protected:     
+
+      protected:
         ~TetraEmpty () {}
-        
-        int preCoarsening  (); 
+
+        int preCoarsening  ();
         int postRefinement ();
 
-        //! return pointer to grid 
+        //! return pointer to grid
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
         const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
-      public: 
+      public:
         //ghost tetra gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr);
-        // return MPI rank of master which is always the same as myrank 
+        // return MPI rank of master which is always the same as myrank
         int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
-    
-    private:     
+
+    private:
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds();
-        
-        // for _myGrid     
-        friend class TetraTop < TetraEmpty >;     
+
+        // for _myGrid
+        friend class TetraTop < TetraEmpty >;
     };
     typedef TetraTop < TetraEmpty > tetra_IMPL;
 
@@ -201,10 +201,10 @@ namespace ALUGrid
 
         inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int);
         ~Periodic3Empty () {}
-        // do nothing here 
+        // do nothing here
         virtual void resetGhostIndices() {}
 
-      public:  
+      public:
     };
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL;
 
@@ -216,45 +216,45 @@ namespace ALUGrid
         typedef VertexEmpty innervertex_t;
         inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int);
         ~HexaEmpty () {}
-      
+
         // Neu: burriad 29.4.05
-        int preCoarsening(); 
+        int preCoarsening();
         int postRefinement();
 
-        //! return pointer to grid 
+        //! return pointer to grid
         Gitter * myGrid() { return myvertex(0)->myGrid(); }
         const Gitter * myGrid() const { return myvertex(0)->myGrid(); }
 
-      public: 
+      public:
         ////////////////////////////////////////////////
-        // read of data 
+        // read of data
         ////////////////////////////////////////////////
-        // scatter only on ghosts 
+        // scatter only on ghosts
         virtual void os2VertexData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        // scatter data on ghost edges  
+        // scatter data on ghost edges
         virtual void os2EdgeData(ObjectStream & os, GatherScatterType & gs, int borderFace );
-        // scatter data on ghost faces 
+        // scatter data on ghost faces
         virtual void os2FaceData(ObjectStream & os, GatherScatterType & gs, int borderFace );
 
         //////////////////////////////////////////
-        //  writing of data 
+        //  writing of data
         //////////////////////////////////////////
         virtual void VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace );
         virtual void EdgeData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
         virtual void FaceData2os(ObjectStream & os, GatherScatterType & gs, int borderFace);
 
-      protected:  
+      protected:
         virtual void attachleafs();
         virtual void detachleafs();
 
         // check that all indices are within range of index manager
         virtual void resetGhostIndices();
-        
+
         friend class HexaTop<HexaEmpty>;
       public:
         //ghost hexa gets indices of grid, to which it belongs actually
         virtual void setIndicesAndBndId (const hface_STI & f, int face_nr);
-        // return MPI rank of master which is always the same as myrank 
+        // return MPI rank of master which is always the same as myrank
         int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
 
       private:
@@ -264,7 +264,7 @@ namespace ALUGrid
       typedef HexaTop < HexaEmpty > hexa_IMPL;
 
 
-      class Periodic4Empty : public periodic4_GEO 
+      class Periodic4Empty : public periodic4_GEO
       {
       protected :
         typedef hface4_IMPL innerface_t;
@@ -274,11 +274,11 @@ namespace ALUGrid
 
         inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int);
         ~Periodic4Empty () {}
-       
-        // so nothing here 
+
+        // so nothing here
         virtual void resetGhostIndices() {}
 
-      public:  
+      public:
       };
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL;
     };
@@ -294,7 +294,7 @@ namespace ALUGrid
       virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]);
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t)      ;
-      // version with point , returns insert_hbnd3 here 
+      // version with point , returns insert_hbnd3 here
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
@@ -304,13 +304,13 @@ namespace ALUGrid
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);
       virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
     public :
-      // Gitter is a reference to our grid 
-      // constructors creating macro grids from streams 
-      MacroGitterBasis ( Gitter *, std::istream & );
+      // Gitter is a reference to our grid
+      // constructors creating macro grids from streams
+      MacroGitterBasis ( const int, Gitter *, std::istream & );
 
-      // constructor creating an empty macro grid 
-      MacroGitterBasis ( Gitter * );
-      
+      // constructor creating an empty macro grid
+      MacroGitterBasis ( const int, Gitter * );
+
       virtual ~MacroGitterBasis () {}
     };
   };
@@ -329,15 +329,15 @@ namespace ALUGrid
     IndexManagerStorageType& indexManagerStorage();
 
     std::size_t numMacroBndSegments() const;
-        
-    GitterBasisImpl ();
-    GitterBasisImpl ( std::istream &, ProjectVertex * );
-    GitterBasisImpl (const char *, ProjectVertex* );
+
+    explicit GitterBasisImpl ( const int );
+    GitterBasisImpl ( const int, std::istream &, ProjectVertex *);
+    GitterBasisImpl ( const int, const char *, ProjectVertex* );
     ~GitterBasisImpl ();
 
     virtual void printMemUsage ();
 
-    // return pointer to vertex projection 
+    // return pointer to vertex projection
     virtual ProjectVertex* vertexProjection() const;
   };
 
@@ -368,7 +368,7 @@ namespace ALUGrid
     return -1;
   }
 
-  inline GitterBasis::Objects::VertexEmptyMacro::VertexEmptyMacro (double x,double y,double z,int i, IndexManagerStorageType &ims) 
+  inline GitterBasis::Objects::VertexEmptyMacro::VertexEmptyMacro (double x,double y,double z,int i, IndexManagerStorageType &ims)
   : GitterBasis::Objects::VertexEmpty (0,x,y,z,ims), _idn (i)
   {
     return;
@@ -378,12 +378,12 @@ namespace ALUGrid
     return _idn;
   }
 
-  inline GitterBasis::Objects::Hedge1Empty::Hedge1Empty (myvertex_t * a, myvertex_t * b) 
+  inline GitterBasis::Objects::Hedge1Empty::Hedge1Empty (myvertex_t * a, myvertex_t * b)
     : Gitter::Geometric::hedge1_GEO (a,b) {
     return;
   }
 
-  inline void GitterBasis::Objects::Hedge1Empty::projectInnerVertex(const ProjectVertexPair &pv) 
+  inline void GitterBasis::Objects::Hedge1Empty::projectInnerVertex(const ProjectVertexPair &pv)
   {
     if (innerVertex()) {
       alugrid_assert (!leaf());
@@ -401,12 +401,12 @@ namespace ALUGrid
     return os; }
 
 
-  inline GitterBasis::Objects::Hface3Empty::Hface3Empty (myhedge1_t *e0, int s0, 
+  inline GitterBasis::Objects::Hface3Empty::Hface3Empty (myhedge1_t *e0, int s0,
     myhedge1_t *e1, int s1, myhedge1_t *e2, int s2) : Gitter::Geometric::hface3_GEO (e0, s0, e1, s1, e2, s2) {
     return;
   }
 
-  inline void GitterBasis::Objects::Hface3Empty::projectVertex(const ProjectVertexPair &pv) 
+  inline void GitterBasis::Objects::Hface3Empty::projectVertex(const ProjectVertexPair &pv)
   {
     alugrid_assert (!leaf());
     for (int e = 0; e < polygonlength; e++)
@@ -415,7 +415,7 @@ namespace ALUGrid
       innerVertex()->project(pv);
   }
 
-  inline GitterBasis::Objects::Hface4Empty::Hface4Empty (myhedge1_t *e0, int s0, 
+  inline GitterBasis::Objects::Hface4Empty::Hface4Empty (myhedge1_t *e0, int s0,
     myhedge1_t *e1, int s1, myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
     : Gitter::Geometric::hface4_GEO (e0, s0, e1, s1, e2, s2, e3, s3) {
     return;
@@ -429,7 +429,7 @@ namespace ALUGrid
   }
 
   inline GitterBasis::Objects::Hbnd3Default::
-  Hbnd3Default (myhface3_t * f, int i ) 
+  Hbnd3Default (myhface3_t * f, int i )
    : Gitter::Geometric::hbndseg3_GEO (f, i)
   {
     return;
@@ -447,7 +447,7 @@ namespace ALUGrid
     return leaf();
   }
 
-  inline GitterBasis::Objects::Hbnd4Default::Hbnd4Default (myhface4_t * f, int i) : 
+  inline GitterBasis::Objects::Hbnd4Default::Hbnd4Default (myhface4_t * f, int i) :
     Gitter::Geometric::hbndseg4_GEO (f, i)
   {
     return;
@@ -468,39 +468,39 @@ namespace ALUGrid
   inline GitterBasis::Objects::TetraEmpty::
   TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
               myhface3_t * f2, int t2, myhface3_t * f3, int t3) :
-    Gitter::Geometric::Tetra (f0, t0, f1, t1, f2, t2, f3, t3) 
+    Gitter::Geometric::Tetra (f0, t0, f1, t1, f2, t2, f3, t3)
   {
     attachleafs();
     return;
   }
 
-  // calles method on grid which return 0 for default impl 
-  inline int GitterBasis::Objects::TetraEmpty::preCoarsening () 
+  // calles method on grid which return 0 for default impl
+  inline int GitterBasis::Objects::TetraEmpty::preCoarsening ()
   {
-    // only call preCoarsening on non ghost elements 
+    // only call preCoarsening on non ghost elements
     return ((this->isGhost()) ? 0 : myGrid()->preCoarsening(*this));
   }
 
-  // calles method on grid which return 0 for default impl 
-  inline int GitterBasis::Objects::TetraEmpty::postRefinement () 
+  // calles method on grid which return 0 for default impl
+  inline int GitterBasis::Objects::TetraEmpty::postRefinement ()
   {
     // NOTE: this method is called after an element is refined removing the Refined Tag
-    // from the parent element - for bisection this is wrong since the parent has 
+    // from the parent element - for bisection this is wrong since the parent has
     // possibly also been generated in the same refinement cycle
 
-    // OLD: // reset refined tag of this element because no leaf anymore 
+    // OLD: // reset refined tag of this element because no leaf anymore
     // OLD: this->resetRefinedTag();
 
-    // only call postRefinement on non ghost elements 
+    // only call postRefinement on non ghost elements
     return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
   }
 
-  inline GitterBasis::Objects::Periodic3Empty::Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1) 
+  inline GitterBasis::Objects::Periodic3Empty::Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1)
     : Gitter::Geometric::Periodic3 (f0, t0, f1, t1) {
     return;
   }
 
-  inline GitterBasis::Objects::Periodic4Empty::Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1) 
+  inline GitterBasis::Objects::Periodic4Empty::Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1)
     : Gitter::Geometric::Periodic4 (f0, t0, f1, t1) {
     return;
   }
@@ -508,7 +508,7 @@ namespace ALUGrid
   // Neu: burriad 29.4.05
   inline GitterBasis::Objects::HexaEmpty::
   HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-             myhface4_t * f2, int t2, myhface4_t * f3, int t3, 
+             myhface4_t * f2, int t2, myhface4_t * f3, int t3,
              myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
     Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
   {
@@ -516,24 +516,24 @@ namespace ALUGrid
     return;
   }
 
-  inline int GitterBasis::Objects::HexaEmpty::preCoarsening() 
+  inline int GitterBasis::Objects::HexaEmpty::preCoarsening()
   {
-    // only call preCoarsening on non ghost elements 
+    // only call preCoarsening on non ghost elements
     return ((this->isGhost()) ? 0 : myGrid()->preCoarsening(*this));
   }
 
-  inline int GitterBasis::Objects::HexaEmpty::postRefinement() 
+  inline int GitterBasis::Objects::HexaEmpty::postRefinement()
   {
     // NOTE: this method is called after an element is refined removing the Refined Tag
-    // from the parent element - for bisection this is wrong since the parent has 
+    // from the parent element - for bisection this is wrong since the parent has
     // possibly also been generated in the same refinement cycle
-    // This is only a problem for bisection, i.e., on TetraEmpty but the reset method 
+    // This is only a problem for bisection, i.e., on TetraEmpty but the reset method
     // is also removed here for symmetry (and the reset is apparently not needed...)
 
-    // OLD: // reset refined tag of this element because no leaf anymore 
+    // OLD: // reset refined tag of this element because no leaf anymore
     // OLD: this->resetRefinedTag();
 
-    // only call postRefinement on non ghost elements 
+    // only call postRefinement on non ghost elements
     return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
   }
 
@@ -542,7 +542,7 @@ namespace ALUGrid
   //  --GitterBasisImpl
   //
   ////////////////////////////////////////////////////////////////
-  inline ProjectVertex*  GitterBasisImpl::vertexProjection() const 
+  inline ProjectVertex*  GitterBasisImpl::vertexProjection() const
   {
     return _ppv;
   }
@@ -552,17 +552,17 @@ namespace ALUGrid
   inline const Gitter::Makrogitter & GitterBasisImpl::container () const { return *_macrogitter; }
 
   inline IndexManagerType & GitterBasisImpl::indexManager ( int codim )
-  { 
+  {
     return _macrogitter->indexManager( codim );
   }
 
-  inline IndexManagerStorageType&  GitterBasisImpl::indexManagerStorage() 
+  inline IndexManagerStorageType&  GitterBasisImpl::indexManagerStorage()
   {
     return _macrogitter->indexManagerStorage();
   }
 
   inline std::size_t GitterBasisImpl::numMacroBndSegments() const
-  { 
+  {
     return _macrogitter->numMacroBndSegments();
   }
 
