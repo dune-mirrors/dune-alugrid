@@ -33,7 +33,7 @@ namespace ALUGrid
       
     struct Hface3Rule
     {
-      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4,  e12_2d = 5, iso4=6, iso2_2d=7, undefined=-2 };
+      enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=6, iso2_2d=7, undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface3Rule ( const rule_t & );
@@ -44,7 +44,7 @@ namespace ALUGrid
       inline Hface3Rule rotate (int) const ;
 
       // return true if rule is one of the bisection rules 
-      bool bisection () const { return (_r >= e01) && (_r <= e12_2d); }   
+      bool bisection () const { return (_r >= e01) && (_r <= e20); }   
     private :
       rule_t _r ;
     } ;
@@ -186,7 +186,7 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: Hface3Rule :: isValid (const rule_t& r) {
-    return r == nosplit || r == iso4 || r == e01 || r == e12 || r == e20 || r == e12_2d || r == iso2_2d;
+    return r == nosplit || r == iso4 || r == e01 || r == e12 || r == e20 || r == iso2_2d;
   }
 
   inline bool RefinementRules :: Hface3Rule :: isValid () const {
@@ -215,15 +215,6 @@ namespace ALUGrid
         newr = retRule[ t + 3 ];
         break ;
       }
-    //twist on faces of e12_2d should be -1 or 0, so it should return itself - otherwise throw error
-    case e12_2d :
-     {
-        //cout << "e12_2d: my twist is " << t << endl;
-        static const rule_t retRule [ 6 ] = { e20, e01, e12_2d, e12_2d, e01, e20 }; // copied from e12
-        newr = retRule[ t + 3 ];
-        alugrid_assert (newr == e12_2d);
-        break ;
-      }  
     //twist on faces of iso_2d should be -1 or 0, so it should return itself - otherwise throw error      
     case iso2_2d :
      {
@@ -263,8 +254,6 @@ namespace ALUGrid
         return out << "e20";
       case RefinementRules :: Hface3Rule :: iso4:
         return out << "iso4";
-      case RefinementRules :: Hface3Rule :: e12_2d:
-        return out << "e12_2d";    
       case RefinementRules :: Hface3Rule :: iso2_2d:
         return out << "iso2_2d";             
       case RefinementRules :: Hface3Rule :: undefined:
