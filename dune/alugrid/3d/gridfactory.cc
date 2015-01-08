@@ -189,9 +189,9 @@ namespace Dune
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
   
-  //  BndPair boundaryId;
- //   generateFace( elements_[ element ], newFace, boundaryId.first );
-  //  std::cout <<  "Element: [" << elements_[element][0] << ","<<elements_[element][1]<<"," << elements_[element][2] << "," << elements_[element][3] <<"] Face: " << newFace << " Boundary: " <<     boundaryId.first  << std::endl;
+    BndPair boundaryId;
+   generateFace( elements_[ element ], face, boundaryId.first );
+    std::cout <<  "Element: [" << elements_[element][0] << ","<<elements_[element][1]<<"," << elements_[element][2] << "," << elements_[element][3] <<"] Face: " << face << " Boundary: " <<     boundaryId.first  << std::endl;
     
     //in 2d the local face ids are correct, because we need the faces 0,1,2 in tetra and 0,1,2,3 for hexas
     //and that is exactly what we get form the 2d dgfparser.
@@ -364,10 +364,12 @@ namespace Dune
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
+
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
-    if( addMissingBoundaries || ! faceTransformations_.empty() )
+    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
       recreateBoundaryIds();
+      
 
     // if dump file should be written 
     if( allowGridGeneration_ && !temporary )
@@ -858,6 +860,7 @@ namespace Dune
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
+    
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
@@ -884,6 +887,7 @@ namespace Dune
     }
 
     const int numBoundariesMax = comm.max( numBoundariesMine );
+
 
     // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
     if( numBoundariesMax == 0 ) return ;
