@@ -108,7 +108,7 @@ namespace Dune
         element.resize( 8 );
         for (int i = 0; i < 4; ++i)
         {
-          // multiply original number with 2
+          // multiply original number with 2 to get the indices of the 2dvalid vertices
           element[ i ]    = vertices[ i ] * 2;
           element[ i+4 ]  = element [ i ] + 1;
         }
@@ -120,8 +120,8 @@ namespace Dune
         // construct element following the DUNE reference tetrahedron
         element[0] = 0;                
         element[1] = vertices[ 0 ] + 1;
-        element[2] = vertices[ 2 ] + 1;
-        element[3] = vertices[ 1 ] + 1;
+        element[2] = vertices[ 1 ] + 1;
+        element[3] = vertices[ 2 ] + 1;
       }
       elements_.push_back(element);
     }
@@ -158,14 +158,14 @@ namespace Dune
       VertexId face[ 4 ];
       if(elementType == tetra)
       {
-        face[2] = face[1]+1;
-        face[1] = face[0]+1;
+        face[2] = vertices[1]+1;
+        face[1] = vertices[0]+1;
         face[0] = 0;
       }
       else if(elementType == hexa)
       {
-        face[0] *=2;
-        face[3] = 2*face[1];
+        face[0] = 2*vertices[0];
+        face[3] = 2*vertices[1];
         face[1] = face[0]+1;
         face[2] = face[3]+1;       
       }
@@ -188,12 +188,15 @@ namespace Dune
   {
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
-
-    int newFace = face;
-    if (dimension == 2 && elementType == tetra) 
-      ++newFace;
-
-    doInsertBoundary( element, newFace, id );
+  
+  //  BndPair boundaryId;
+ //   generateFace( elements_[ element ], newFace, boundaryId.first );
+  //  std::cout <<  "Element: [" << elements_[element][0] << ","<<elements_[element][1]<<"," << elements_[element][2] << "," << elements_[element][3] <<"] Face: " << newFace << " Boundary: " <<     boundaryId.first  << std::endl;
+    
+    //in 2d the local face ids are correct, because we need the faces 0,1,2 in tetra and 0,1,2,3 for hexas
+    //and that is exactly what we get form the 2d dgfparser.
+    
+    doInsertBoundary( element, face, id );
   }
 
   template< class ALUGrid >
@@ -694,6 +697,7 @@ namespace Dune
 
         if( elementType == hexa )
         {
+        //we changed this,because for the 2d case it is important, that the valid vertices 0,1,2,3 remain the vertices 0,1,2,3
         //  for( int i = 0; i < 4; ++i )
         //    std::swap( element[ i ], element[ i+4 ] );
           std::swap( element[ 5 ], element[ 6 ] );          
