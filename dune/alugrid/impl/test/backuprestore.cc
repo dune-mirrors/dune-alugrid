@@ -1,10 +1,10 @@
 //***********************************************************************
 //
-//  Example program how to use ALUGrid. 
-//  Author: Robert Kloefkorn 
+//  Example program how to use ALUGrid.
+//  Author: Robert Kloefkorn
 //
-//  This little program read one of the macrogrids and generates a grid. 
-//  The  grid is refined and coarsend again. 
+//  This little program read one of the macrogrids and generates a grid.
+//  The  grid is refined and coarsend again.
 //
 //***********************************************************************
 
@@ -14,7 +14,7 @@
 
 #define ENABLE_ALUGRID_VTK_OUTPUT
 
-// include serial part of ALUGrid 
+// include serial part of ALUGrid
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
 typedef ALUGrid::Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
@@ -46,17 +46,17 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
 
   virtual bool containsItem(const helement_STI &elem ) const { return elem.isLeafEntity(); }
   virtual bool containsItem(const HGhostType & ghost) const { return ghost.isLeafEntity(); }
-  virtual bool containsInterior (const hface_STI  & face , ALUGrid::ElementPllXIF_t & elif) const 
-  { 
+  virtual bool containsInterior (const hface_STI  & face , ALUGrid::ElementPllXIF_t & elif) const
+  {
     return face.isInteriorLeaf();
   }
 
-  void computeBaryCenter( const helement_STI& elem, double (&center)[3] ) const 
+  void computeBaryCenter( const helement_STI& elem, double (&center)[3] ) const
   {
     if( elem.type() == ALUGrid::tetra )
     {
       typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-      // mark element for refinement 
+      // mark element for refinement
       tetra_IMPL& tetra = ((tetra_IMPL &) elem);
       ALUGrid::LinearMapping::
         barycenter(
@@ -66,10 +66,10 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
           tetra.myvertex (3)->Point (),
           center);
     }
-    else 
+    else
     {
       typedef typename GitterType :: Objects :: hexa_IMPL hexa_IMPL ;
-      // mark element for refinement 
+      // mark element for refinement
       hexa_IMPL& hexa = ((hexa_IMPL &) elem);
       ALUGrid::TrilinearMapping::
         barycenter(
@@ -85,21 +85,21 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
     }
   }
 
-  void writeBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const 
+  void writeBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const
   {
     double center[ 3 ] = { 0 };
     computeBaryCenter( elem, center );
-    for( int i=0; i<3; ++i ) 
+    for( int i=0; i<3; ++i )
       str.write( center[ i ] );
   }
 
-  void readBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const 
+  void readBaryCenter( ObjectStreamType & str, const helement_STI& elem ) const
   {
     double checkCenter[ 3 ] = { 0 };
     computeBaryCenter( elem, checkCenter );
     double center[ 3 ] = { 0 };
     double sum = 0 ;
-    for( int i=0; i<3; ++i ) 
+    for( int i=0; i<3; ++i )
     {
       str.read( center[ i ] );
       double diff = center[ i ] - checkCenter[ i ];
@@ -109,21 +109,21 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
     //std::cout << "Got   c = { " << center[ 0 ] << ", " << center[ 1 ] << ", " << center[ 2 ] << " }" << std::endl;
     //std::cout << "Check b = { " << checkCenter[ 0 ] << ", " << checkCenter[ 1 ] << ", " << checkCenter[ 2 ] << " }" << std::endl << std::endl;
 
-    if( sum > 1e-10 ) 
+    if( sum > 1e-10 )
     {
       std::cerr << "ERROR: barycenter do not match!!!" << std::endl;
     }
   }
 
-  virtual void sendData ( ObjectStreamType & str , const helement_STI  & elem ) 
+  virtual void sendData ( ObjectStreamType & str , const helement_STI  & elem )
   {
     writeBaryCenter( str, elem );
   }
 
-  virtual void recvData ( ObjectStreamType & str , hbndseg & ghost ) 
-  { 
+  virtual void recvData ( ObjectStreamType & str , hbndseg & ghost )
+  {
     helement_STI* elem = ghost.getGhost().first;
-    if( elem == 0 ) 
+    if( elem == 0 )
     {
       std::cerr << "ERROR: no ghost element found!!!" << std::endl;
       abort();
@@ -131,7 +131,7 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
     readBaryCenter( str, *elem );
   }
 
-  // only needed for backward communication 
+  // only needed for backward communication
   virtual void sendData ( ObjectStreamType & str , const hbndseg & elem ) { alugrid_assert (false); abort(); }
   virtual void recvData ( ObjectStreamType & str , helement_STI  & elem ) { alugrid_assert (false); abort(); }
 
@@ -145,92 +145,92 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
 #warning RUNNING PARALLEL VERSION
 #endif
 
-template <class GitterType, class element_t> 
-void checkElement( GitterType& grid, element_t& elem ) 
+template <class GitterType, class element_t>
+void checkElement( GitterType& grid, element_t& elem )
 {
   if( elem.type() == ALUGrid::tetra )
   {
     typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-    // mark element for refinement 
+    // mark element for refinement
     tetra_IMPL& item = ((tetra_IMPL &) elem);
 
-    for( int i=0; i<4; ++i ) 
+    for( int i=0; i<4; ++i )
     {
       assert( item.myneighbour( i ).first->isRealObject() );
     }
   }
-  else 
+  else
   {
     typedef typename GitterType :: Objects :: hexa_IMPL hexa_IMPL ;
-    // mark element for refinement 
+    // mark element for refinement
     hexa_IMPL& item = ((hexa_IMPL &) elem);
 
-    for( int i=0; i<6; ++i ) 
+    for( int i=0; i<6; ++i )
     {
       assert( item.myneighbour( i ).first->isRealObject() );
     }
   }
 }
 
-// refine grid globally, i.e. mark all elements and then call adapt 
+// refine grid globally, i.e. mark all elements and then call adapt
 template <class GitterType>
-void globalRefine(GitterType& grid, int refcount) 
+void globalRefine(GitterType& grid, int refcount)
 {
-   for (int count=refcount ; count > 0; count--) 
+   for (int count=refcount ; count > 0; count--)
    {
      std::cout << "Refine global: run " << refcount-count << std::endl;
      {
-        // get LeafIterator which iterates over all leaf elements of the grid 
+        // get LeafIterator which iterates over all leaf elements of the grid
        ALUGrid::LeafIterator < ALUGrid::Gitter::helement_STI > w (grid) ;
-        
+
         for (w->first () ; ! w->done () ; w->next ())
         {
-          // mark element for refinement 
+          // mark element for refinement
           w->item ().tagForGlobalRefinement ();
           checkElement( grid, w->item() );
         }
      }
 
-     // adapt grid 
+     // adapt grid
      grid.adaptWithoutLoadBalancing ();
 
-     // print size of grid 
+     // print size of grid
      grid.printsize () ;
    }
 
 }
 
-// coarse grid globally, i.e. mark all elements for coarsening 
-// and then call adapt 
-template <class GitterType> 
+// coarse grid globally, i.e. mark all elements for coarsening
+// and then call adapt
+template <class GitterType>
 void globalCoarsening(GitterType& grid, int refcount) {
-    
-  for (int count=refcount ; count > 0; count--) 
+
+  for (int count=refcount ; count > 0; count--)
   {
     std::cout << "Global Coarsening: run " << refcount-count << std::endl;
     {
-       // get LeafIterator which iterates over all leaf elements of the grid 
+       // get LeafIterator which iterates over all leaf elements of the grid
       ALUGrid::LeafIterator < ALUGrid::Gitter::helement_STI > w (grid) ;
-       
+
        for (w->first () ; ! w->done () ; w->next ())
        {
          checkElement( grid, w->item() );
-         // mark elements for coarsening  
+         // mark elements for coarsening
          w->item ().tagForGlobalCoarsening() ;
        }
     }
 
-    // adapt grid 
+    // adapt grid
     grid.adaptWithoutLoadBalancing ();
 
-    // print size of grid 
+    // print size of grid
     grid.printsize () ;
 
   }
 }
 
-// exmaple on read grid, refine global and print again 
-int main (int argc, char ** argv, const char ** envp) 
+// exmaple on read grid, refine global and print again
+int main (int argc, char ** argv, const char ** envp)
 {
   int rank = 0;
 #if HAVE_MPI
@@ -238,51 +238,53 @@ int main (int argc, char ** argv, const char ** envp)
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
 
-  int mxl = 0; 
+  int mxl = 0;
   const char* filename = 0 ;
-  if (argc < 2) 
+  if (argc < 2)
   {
     filename = "./grids/reference.tetra";
     mxl = 1;
     std::cout << "usage: "<< argv[0] << " <macro grid> <opt: level> \n";
   }
-  else 
+  else
     filename = argv[ 1 ];
 
   if (argc < 3)
     std::cout << "Default level = "<< mxl << " choosen! \n";
-  else 
+  else
     mxl = atoi(argv[2]);
 
   std::string macroname( filename );
 
-  if( rank == 0 ) 
+  if( rank == 0 )
   {
     std::cout << "\n-----------------------------------------------\n";
     std::cout << "read macro grid from < " << macroname << " > !" << std::endl;
     std::cout << "-----------------------------------------------\n";
   }
 
-  std::stringstream backupname ; 
+  std::stringstream backupname ;
   backupname << "file." << rank ;
   std::stringstream databuf;
+
+  const int dim = 3;
   {
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid(macroname.c_str(),a);
+    ALUGrid::GitterDunePll grid(dim, macroname.c_str(),a);
     grid.loadBalance() ;
 
     grid.tovtk( "out" );
-#else 
+#else
     std::ifstream infile( macroname.c_str());
-    ALUGrid::GitterDuneImpl grid1( infile );
+    ALUGrid::GitterDuneImpl grid1( dim, infile );
     infile.close();
 
     std::ifstream infile2( macroname.c_str());
-    ALUGrid::GitterDuneImpl grid2( infile2 );
+    ALUGrid::GitterDuneImpl grid2( dim, infile2 );
     infile2.close();
-    ALUGrid::GitterDuneImpl& grid = grid2; 
-   
+    ALUGrid::GitterDuneImpl& grid = grid2;
+
     std::cout << "Grid generated! \n";
     globalRefine(grid, mxl);
     std::cout << "---------------------------------------------\n";
@@ -297,19 +299,19 @@ int main (int argc, char ** argv, const char ** envp)
 
   {
     std::ifstream file( backupname.str().c_str() );
-    // read grid from file 
+    // read grid from file
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid( file, a);
-#else 
-    ALUGrid::GitterDuneImpl grid( file );
+    ALUGrid::GitterDunePll grid( dim, file, a);
+#else
+    ALUGrid::GitterDuneImpl grid( dim, file );
 #endif
     grid.printsize();
 
     grid.restore( file );
     file.close();
     //globalRefine(grid, mxl);
-    // adapt grid 
+    // adapt grid
     grid.backup( databuf );
 
     std::cout << "Grid restored!" << std::endl;
@@ -322,19 +324,19 @@ int main (int argc, char ** argv, const char ** envp)
   {
     std::cout << "Try to read stringbuf:" << std::endl;
     std::cout << "Data Buffer size: " << databuf.str().size() << std::endl;
-    // read grid from file 
+    // read grid from file
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid( databuf, a);
-#else 
-    ALUGrid::GitterDuneImpl grid( databuf );
+    ALUGrid::GitterDunePll grid( dim, databuf, a);
+#else
+    ALUGrid::GitterDuneImpl grid( dim, databuf );
 #endif
     grid.printsize();
     grid.restore( databuf );
 
     //grid.restore( file );
-    // adapt grid 
-    
+    // adapt grid
+
 #if HAVE_MPI
     ExchangeBaryCenter dataHandle ;
     grid.interiorGhostCommunication( dataHandle, dataHandle, dataHandle, dataHandle );
