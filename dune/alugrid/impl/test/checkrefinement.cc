@@ -196,7 +196,6 @@ void checkRefinements( GitterType& grid, int n )
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
       TetraRule::iso4_2d,
       cd .. TetraRule :: bisect,
-      //TetraRule :: bisect2d
     };
 
     for (int i=0; i<1; ++i )
@@ -209,7 +208,7 @@ void checkRefinements( GitterType& grid, int n )
         // get LeafIterator which iterates over all leaf elements of the grid
         ALUGrid::LeafIterator < HElemType > w (grid) ;
 
-        if (rules[ i ] == TetraRule::bisect || rules[ i ] == TetraRule::bisect2d) grid.enableConformingClosure();
+        if (rules[ i ] == TetraRule::bisect ) grid.enableConformingClosure();
 
 
       // create empty gather scatter

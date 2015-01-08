@@ -1131,7 +1131,7 @@ namespace ALUGrid
   {
     alugrid_assert (r.isValid ());
 
-    if( r == myrule_t :: bisect || r == myrule_t :: bisect2d)
+    if( r == myrule_t :: bisect )
     {
       // this can only be used when conforming closure is enabled
       alugrid_assert ( this->myGrid()->conformingClosureNeeded() );
