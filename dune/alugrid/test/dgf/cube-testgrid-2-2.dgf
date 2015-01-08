@@ -16,4 +16,7 @@ CUBE
 3 4 6 7
 8 7 5 4
 #
-
+#BOUNDARYSEGMENTS
+#1 0 1
+#
+#
