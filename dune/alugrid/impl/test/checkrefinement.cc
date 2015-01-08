@@ -195,7 +195,7 @@ void checkRefinements( GitterType& grid, int n )
      // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
       TetraRule::iso4_2d,
-      //TetraRule :: bisect,
+      cd .. TetraRule :: bisect,
       //TetraRule :: bisect2d
     };
 
