@@ -642,8 +642,8 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex ) 
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
-        //std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
-        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
+        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        //std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         checkCapabilities< false >( *gridPtr );
