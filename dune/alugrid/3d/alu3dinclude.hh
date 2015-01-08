@@ -270,7 +270,7 @@ namespace Dune
   {
      // refinement and coarsening enum
     enum { bisect_element_t  = MarkRuleType::bisect};
-    enum { refine_element_t  = MarkRuleType::iso4_2d };
+    enum { refine_element_t  = MarkRuleType::iso8 };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
