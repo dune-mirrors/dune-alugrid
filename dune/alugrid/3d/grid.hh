@@ -18,7 +18,7 @@
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
 
-// bnd projection stuff 
+// bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/alugrid/common/bndprojection.hh>
 #include <dune/alugrid/common/objectfactory.hh>
@@ -38,24 +38,24 @@
 
 #if ALU3DGRID_PARALLEL
 #include <dune/common/parallel/mpicollectivecommunication.hh>
-#else 
+#else
 #include <dune/common/parallel/collectivecommunication.hh>
 #endif
 
 namespace Dune
 {
   // Forward declarations
-  template<int cd, int dim, class GridImp> 
-  class ALU3dGridEntity;  
-  template<int cd, PartitionIteratorType pitype, class GridImp > 
+  template<int cd, int dim, class GridImp>
+  class ALU3dGridEntity;
+  template<int cd, PartitionIteratorType pitype, class GridImp >
   class ALU3dGridLevelIterator;
   template<int cd, class GridImp >
-  class ALU3dGridEntityPointerBase;  
+  class ALU3dGridEntityPointerBase;
   template<int cd, class GridImp >
-  class ALU3dGridEntitySeed;  
+  class ALU3dGridEntitySeed;
   template<int cd, class GridImp >
-  class ALU3dGridEntityPointer;  
-  template<int mydim, int coorddim, class GridImp>  
+  class ALU3dGridEntityPointer;
+  template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
   template<class GridImp>
   class ALU3dGridHierarchicIterator;
@@ -79,7 +79,7 @@ namespace Dune
   class ALUMemoryProvider;
   template< class >
   class ALU3dGridFactory;
-  template <class GridImp, class GeometryImp, int nChild> 
+  template <class GridImp, class GeometryImp, int nChild>
   class ALULocalGeometryStorage;
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   struct ALU3dGridCommHelper;
@@ -97,16 +97,16 @@ namespace Dune
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
-  template < class Comm > 
-  struct ALUGridBaseGrid< 3, 3, cube, Comm > 
+  template < class Comm >
+  struct ALUGridBaseGrid< 3, 3, cube, Comm >
   {
-    typedef ALU3dGrid< 3, 3, hexa, Comm >  BaseGrid ; 
+    typedef ALU3dGrid< 3, 3, hexa, Comm >  BaseGrid ;
   };
 
-  template < class Comm> 
-  struct ALUGridBaseGrid< 3, 3, simplex, Comm > 
+  template < class Comm>
+  struct ALUGridBaseGrid< 3, 3, simplex, Comm >
   {
-    typedef ALU3dGrid< 3, 3, tetra, Comm >  BaseGrid ; 
+    typedef ALU3dGrid< 3, 3, tetra, Comm >  BaseGrid ;
   };
 
   // Internal Forward Declarations
@@ -115,13 +115,13 @@ namespace Dune
   template < int dimw, class Comm >
   struct ALUGridBaseGrid< 2, dimw, cube, Comm >
   {
-    typedef ALU3dGrid< 2, dimw, hexa, Comm >  BaseGrid ; 
+    typedef ALU3dGrid< 2, dimw, hexa, Comm >  BaseGrid ;
   };
 
   template < int dimw, class Comm >
   struct ALUGridBaseGrid< 2, dimw, simplex, Comm >
   {
-    typedef ALU3dGrid< 2, dimw, tetra, Comm >  BaseGrid ; 
+    typedef ALU3dGrid< 2, dimw, tetra, Comm >  BaseGrid ;
   };
 
 
@@ -130,9 +130,9 @@ namespace Dune
   // -----------------------
   struct ALU3dGridCommunicationsBase
   {
-    template < class GitterImpl > 
-    void checkForConformingRefinement( GitterImpl* grid, 
-                                       const bool conformingRefinement ) 
+    template < class GitterImpl >
+    void checkForConformingRefinement( GitterImpl* grid,
+                                       const bool conformingRefinement )
     {
       if( grid && conformingRefinement )
       {
@@ -147,7 +147,7 @@ namespace Dune
   struct ALU3dGridCommunications;
 
   template< int dim, int dimworld, ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase 
+  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
@@ -162,12 +162,12 @@ namespace Dune
 
     int nlinks () const { return 0; }
 
-    GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection, 
+    GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = ( macroName.empty() ) ? 
-        new GitterImplType() : new GitterImplType ( macroName.c_str(), projection );
-      // check whether conforming refinement should be enabled 
+      GitterImplType* grid = ( macroName.empty() ) ?
+        new GitterImplType( dim ) : new GitterImplType ( dim, macroName.c_str(), projection );
+      // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
     }
@@ -175,8 +175,8 @@ namespace Dune
     GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType ( stream, projection );
-      // check whether conforming refinement should be enabled 
+      GitterImplType* grid = new GitterImplType ( dim, stream, projection );
+      // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
     }
@@ -187,9 +187,9 @@ namespace Dune
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
-      ALU3DSPACE Gitter::Geometric::BuilderIF* builder = 
+      ALU3DSPACE Gitter::Geometric::BuilderIF* builder =
         dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF* >( &grid.container() );
-      if( ! builder ) 
+      if( ! builder )
         DUNE_THROW(InvalidStateException,"dynamic_cast of ALUGrid builder failed");
       return *builder;
     }
@@ -224,8 +224,8 @@ namespace Dune
     GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType( macroName.c_str(), mpAccess_, projection );
-      // check whether conforming refinement should be enabled 
+      GitterImplType* grid = new GitterImplType( dim, macroName.c_str(), mpAccess_, projection );
+      // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid;
     }
@@ -233,8 +233,8 @@ namespace Dune
     GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType ( stream, mpAccess_, projection );
-      // check whether conforming refinement should be enabled 
+      GitterImplType* grid = new GitterImplType ( dim, stream, mpAccess_, projection );
+      // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
     }
@@ -250,20 +250,20 @@ namespace Dune
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
     {
-      ALU3DSPACE Gitter::Geometric::BuilderIF* builder = 
+      ALU3DSPACE Gitter::Geometric::BuilderIF* builder =
         dynamic_cast< ALU3DSPACE Gitter::Geometric::BuilderIF* >( &grid.containerPll() );
-      if( ! builder ) 
+      if( ! builder )
         DUNE_THROW(InvalidStateException,"dynamic_cast of ALUGrid builder failed");
       return *builder;
     }
 
     static void completeGrid ( GitterImplType &grid )
     {
-      // setup communication patterns 
+      // setup communication patterns
       grid.notifyMacroGridChanges();
-      // rebuild ghost cells 
+      // rebuild ghost cells
       grid.rebuildGhostCells();
-    } 
+    }
 
     CollectiveCommunication ccobj_;
     ALU3DSPACE MpAccessMPI mpAccess_;
@@ -284,16 +284,16 @@ namespace Dune
     typedef ALU3dGrid< dim, dimworld, elType, Comm > GridImp;
     typedef ALU3dGridFamily< dim, dimworld, elType, Comm > GridFamily;
 
-    //! Type of the local id set 
+    //! Type of the local id set
     typedef ALU3dGridLocalIdSet< dim, dimworld, elType, Comm > LocalIdSetImp;
 
     //! Type of the global id set
     typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::GlobalIdSet GlobalIdSetImp;
-    
+
     //! type of ALU3dGrids global id
     typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::GlobalId GlobalIdType;
 
-    //! type of ALU3dGrids local id 
+    //! type of ALU3dGrids local id
     typedef int LocalIdType;
 
     struct Traits
@@ -301,16 +301,16 @@ namespace Dune
       //! type of ALU3dGrids local id
       typedef typename GridFamily::LocalIdType LocalIdType;
 
-      //! type of ALU3dGrids global id 
+      //! type of ALU3dGrids global id
       typedef typename GridFamily::GlobalIdType GlobalIdType;
-      
+
       typedef typename GridFamily::GridImp Grid;
 
       typedef Dune::Intersection< const Grid, LeafIntersectionWrapper< const Grid > > LeafIntersection;
       typedef Dune::Intersection< const Grid, LevelIntersectionWrapper< const Grid > > LevelIntersection;
-      
+
       typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper< const Grid >, LeafIntersectionWrapper< const Grid > > IntersectionIterator;
-      
+
       typedef Dune::IntersectionIterator< const Grid, LeafIntersectionIteratorWrapper< const Grid >, LeafIntersectionWrapper< const Grid > > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator< const Grid, LevelIntersectionIteratorWrapper< const Grid >, LevelIntersectionWrapper< const Grid > > LevelIntersectionIterator;
 
@@ -331,7 +331,7 @@ namespace Dune
         typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;
 
         // minimal information to generate entities
-        typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ; 
+        typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
         typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
         typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
@@ -346,7 +346,7 @@ namespace Dune
         typedef typename Partition< All_Partition >::LevelIterator LevelIterator;
         typedef typename Partition< All_Partition >::LeafIterator LeafIterator;
       }; // struct Codim
-      
+
       template< PartitionIteratorType pitype >
       struct Partition
       {
@@ -357,25 +357,25 @@ namespace Dune
       typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
 
       //! Type of the level index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp; 
+      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
 
       //! Type of the leaf index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp; 
+      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp;
 
       typedef IndexSet< Grid, LevelIndexSetImp > LevelIndexSet;
       typedef IndexSet< Grid, LeafIndexSetImp > LeafIndexSet;
       typedef IdSet< Grid, LocalIdSetImp, LocalIdType > LocalIdSet;
       typedef IdSet< Grid, GlobalIdSetImp, GlobalIdType > GlobalIdSet;
 
-      //! Type of the communication class 
+      //! Type of the communication class
       typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::CollectiveCommunication CollectiveCommunication;
     }; // struct Traits
 
     //! Type of the level index set implementation
-    typedef typename Traits :: LevelIndexSetImp  LevelIndexSetImp; 
+    typedef typename Traits :: LevelIndexSetImp  LevelIndexSetImp;
 
     //! Type of the leaf index set implementation
-    typedef typename Traits :: LeafIndexSetImp   LeafIndexSetImp; 
+    typedef typename Traits :: LeafIndexSetImp   LeafIndexSetImp;
 
   }; // struct ALU3dGridFamily
 
@@ -388,17 +388,17 @@ namespace Dune
   //
   //**********************************************************************
 
-  /** 
+  /**
      \brief [<em> provides \ref Dune::Grid </em>]
      \brief 3D grid with support for hexahedrons and tetrahedrons.
      The ALU3dGrid implements the Dune GridInterface for 3d tetrahedral and
      hexahedral meshes. This grid can be locally adapted and used in parallel
-     computations using dynamic load balancing. 
+     computations using dynamic load balancing.
 
      @note
      Adaptive parallel grid supporting dynamic load balancing, written
      mainly by Bernard Schupp. This grid supports hexahedrons and tetrahedrons.
-  
+
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
      Two tools are available for partitioning :
@@ -406,16 +406,16 @@ namespace Dune
      \li ParMETIS ( http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview )
 
      For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
-     @author Robert Kloefkorn 
+     @author Robert Kloefkorn
   */
   template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
   class ALU3dGrid
-  : public GridDefaultImplementation< dim, dimworld, alu3d_ctype, 
+  : public GridDefaultImplementation< dim, dimworld, alu3d_ctype,
                                       ALU3dGridFamily< dim, dimworld, elType, Comm > >,
     public HasObjectStream,
     public HasHierarchicIndexSet
   {
-    typedef ALU3dGrid< dim, dimworld, elType, Comm > ThisType; 
+    typedef ALU3dGrid< dim, dimworld, elType, Comm > ThisType;
     typedef GridDefaultImplementation< dim, dimworld, alu3d_ctype, ALU3dGridFamily< dim, dimworld, elType, Comm > > BaseType;
 
     // for compatibility: MyType := ThisType
@@ -438,7 +438,7 @@ namespace Dune
     friend class ALU3dGridEntityPointer< 1, const ThisType >;
     friend class ALU3dGridEntityPointer< 2, const ThisType >;
     friend class ALU3dGridEntityPointer< 3, const ThisType >;
-  
+
     friend class ALU3dGridIntersectionIterator< const ThisType >;
     friend class ALU3dGridHierarchicIterator< const ThisType >;
 
@@ -455,7 +455,7 @@ namespace Dune
     friend struct ALU3dGridCommHelper< dim, dimworld, elType, Comm >;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
-  public:    
+  public:
     typedef ALU3dGridIntersectionIterator<const ThisType>
       IntersectionIteratorImp;
     typedef ALU3dGridIntersectionIterator<const ThisType>
@@ -473,9 +473,9 @@ namespace Dune
     //**********************************************************
   public:
     enum { refineStepsForHalf = 1 };
-    
+
     static const ALU3dGridElementType elementType = elType;
-    
+
     typedef typename ALU3DSPACE GatherScatterType::ObjectStreamType ObjectStreamType;
     typedef ObjectStreamType  InStreamType ;
     typedef ObjectStreamType  OutStreamType ;
@@ -490,7 +490,7 @@ namespace Dune
     typedef MakeableInterfaceObject< typename Traits::template Codim< 0 >::Geometry > GeometryObject;
     friend class ALULocalGeometryStorage< const ThisType, GeometryObject, 8 >;
 
-  public: 
+  public:
     /** \brief Types for GridView */
     template <PartitionIteratorType pitype>
     struct Partition
@@ -509,21 +509,21 @@ namespace Dune
 
     //! Type of the hierarchic index set
     typedef ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm > HierarchicIndexSet;
-    
-    //! Type of the level index set, needed by data handle 
-    typedef typename GridFamily::LevelIndexSetImp LevelIndexSetImp; 
-    //! Type of the leaf index set, needed by data handle 
-    typedef typename GridFamily::LeafIndexSetImp LeafIndexSetImp; 
 
-    //! reference element type 
+    //! Type of the level index set, needed by data handle
+    typedef typename GridFamily::LevelIndexSetImp LevelIndexSetImp;
+    //! Type of the leaf index set, needed by data handle
+    typedef typename GridFamily::LeafIndexSetImp LeafIndexSetImp;
+
+    //! reference element type
     typedef ReferenceElement< alu3d_ctype, dimension > ReferenceElementType;
 
-    //! \brief boundary projection type 
+    //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;
-    //! \brief boundary projection type 
+    //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
-    //! type of ALUGrid Vertex Projection Interface 
+    //! type of ALUGrid Vertex Projection Interface
     typedef ALU3DSPACE ProjectVertex ALUGridVertexProjectionType;
 
     //! type of collective communication object
@@ -533,53 +533,53 @@ namespace Dune
     typedef ALULevelCommunication< dim, dimworld, elType, Comm > LevelCommunication;
 
   public:
-    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject; 
-    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject; 
-    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject; 
-    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject; 
+    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject;
+    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject;
 
     typedef ALUGridObjectFactory< ThisType >  GridObjectFactoryType;
 
   protected:
     friend class ALUGridBoundaryProjection< ThisType, alu3d_ctype >;
-    // type of ALUGrid boundary projection wrapper 
+    // type of ALUGrid boundary projection wrapper
     typedef ALUGridBoundaryProjection< ThisType, alu3d_ctype > ALUGridBoundaryProjectionType;
 
-    //! Type of the local id set 
+    //! Type of the local id set
     typedef typename GridFamily::LocalIdSetImp LocalIdSetImp;
-    
+
     typedef typename GridFamily::GlobalIdSetImp GlobalIdSetImp;
 
-  public: 
-    //! Type of the global id set 
+  public:
+    //! Type of the global id set
     typedef typename Traits::GlobalIdSet GlobalIdSet;
-    
-    //! Type of the local id set 
+
+    //! Type of the local id set
     typedef typename Traits::LocalIdSet LocalIdSet;
 
-  protected: 
+  protected:
     typedef ALU3dGridLeafIterator< 0, All_Partition, const ThisType > LeafIteratorImp;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIteratorType;
     typedef typename Traits::template Codim< 0 >::LeafIterator LeafIterator;
-    
+
     typedef ALU3dGridHierarchicIterator< const ThisType > HierarchicIteratorImp;
-      
+
     typedef typename ALU3dImplTraits< elType, Comm >::GitterImplType GitterImplType;
 
-    //! max number of levels 
-    enum { 
+    //! max number of levels
+    enum {
       //! \brief maximal number of levels is 32
       MAXL = 32 };
 
-    //! element chunk for refinement 
-    enum { 
-      //! \brief normal default number of new elements for new adapt method 
+    //! element chunk for refinement
+    enum {
+      //! \brief normal default number of new elements for new adapt method
       newElementsChunk_ = 128 };
 
-    //! upper estimate on number of elements that could be created when a new element is created  
-    enum { 
-      /** \brief if one element is refined then it 
-          causes apporximately not more than 
+    //! upper estimate on number of elements that could be created when a new element is created
+    enum {
+      /** \brief if one element is refined then it
+          causes apporximately not more than
           this number of new elements  */
       refineEstimate_ = 8 };
 
@@ -589,26 +589,26 @@ namespace Dune
     typedef ALU3dGridCommunications< dim, dimworld, elType, Comm > Communications;
 
   protected:
-    typedef ALU3dGridVertexList< Comm > VertexListType; 
-    typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType; 
+    typedef ALU3dGridVertexList< Comm > VertexListType;
+    typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType;
 
-  public:  
+  public:
     //! Constructor which reads an ALU3dGrid Macro Triang file
-    //! or given GridFile 
+    //! or given GridFile
     ALU3dGrid ( const std::string &macroTriangFilename,
                 const MPICommunicatorType mpiComm,
                 const DuneBoundaryProjectionType *bndPrj,
                 const DuneBoundaryProjectionVector *bndVec,
                 const ALUGridRefinementType refinementType );
 
-    //! \brief Desctructor 
+    //! \brief Desctructor
     virtual ~ALU3dGrid();
 
-    //! \brief for grid identification 
-    static inline std::string name (); 
-   
+    //! \brief for grid identification
+    static inline std::string name ();
+
     /** \brief  Return maximum level defined in this grid. Levels are numbered
-        maxLevel with 0 the coarsest level.  
+        maxLevel with 0 the coarsest level.
       */
     int maxLevel() const;
 
@@ -616,25 +616,25 @@ namespace Dune
     template<int cd, PartitionIteratorType pitype>
     typename Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
     lbegin (int level) const;
-  
+
     //! one past the end on this level
     template<int cd, PartitionIteratorType pitype>
     typename Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
     lend (int level) const;
-  
+
     //! Iterator to first entity of given codim on level
     template<int cd>
     typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator 
+    template Partition<All_Partition>::LevelIterator
     lbegin (int level) const;
 
     //! one past the end on this level
     template<int cd>
     typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator 
+    template Partition<All_Partition>::LevelIterator
     lend (int level) const;
 
-  private:  
+  private:
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
@@ -698,8 +698,8 @@ namespace Dune
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
     createLeafIteratorEnd(int level) const;
-    
-  public:  
+
+  public:
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
 
@@ -721,7 +721,7 @@ namespace Dune
     // (no interface method) number of grid entities in the entire grid for given codim
     int hierSetSize (int cd) const;
 
-    //! get global id set of grid 
+    //! get global id set of grid
     const GlobalIdSet &globalIdSet () const
     {
       if( !globalIdSet_ )
@@ -742,11 +742,11 @@ namespace Dune
       return View(*this);
     }
 
-    //! get global id set of grid 
+    //! get global id set of grid
     const LocalIdSet & localIdSet () const { return localIdSet_; }
 
     //! get leaf index set of the grid
-    const typename Traits :: LeafIndexSet & leafIndexSet () const; 
+    const typename Traits :: LeafIndexSet & leafIndexSet () const;
 
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
@@ -754,7 +754,7 @@ namespace Dune
       return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
     }
 
-  protected:   
+  protected:
     typedef ALU3DSPACE GatherScatter GatherScatterType;
 
     /** \brief Calculates load of each process and repartition the grid if neccessary.
@@ -763,16 +763,16 @@ namespace Dune
        \param data the data handler class that must implement three methods:
           \code
           // calls data inline on macro element. From there the data of
-          // all children can be written to the message buffer. 
-          // MessageBufferImp implements the MessageBufferIF interface. 
+          // all children can be written to the message buffer.
+          // MessageBufferImp implements the MessageBufferIF interface.
           template<class MessageBufferImp>
           void inlineData ( MessageBufferImp& buff, Dune::Entity<0> & e);
-          
+
           // calls data xtract on macro element. From there the data of
-          // all children can be restored from the message buffer. 
+          // all children can be restored from the message buffer.
           // numChildren is the number of all children underneath the
-          // macro element e. 
-          // MessageBufferImp implements the MessageBufferIF interface. 
+          // macro element e.
+          // MessageBufferImp implements the MessageBufferIF interface.
           template<class MessageBufferImp>
           void xtractData ( MessageBufferImp& buff, Dune::Entity<0> & e, size_t numChildren );
 
@@ -781,30 +781,30 @@ namespace Dune
           // a data compression or other features. This method can be
           // empty if nothing should be done.
           void compress ();
-          \endcode 
+          \endcode
 
-         \return true if the grid has changed 
+         \return true if the grid has changed
     */
     bool loadBalance ( GatherScatterType* lbData );
 
-  public:  
-    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
-               The specific load balancing algorithm is selected from a file alugrid.cfg. 
-        \return true if grid has changed 
+  public:
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method.
+               The specific load balancing algorithm is selected from a file alugrid.cfg.
+        \return true if grid has changed
     */
     bool loadBalance ()
     {
       return loadBalance( (GatherScatterType* ) 0 );
     }
 
-    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method. 
-               The specific load balancing algorithm is selected from a file alugrid.cfg. 
-        \param  optional dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method.
+               The specific load balancing algorithm is selected from a file alugrid.cfg.
+        \param  optional dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include
                 user data during load balancing
-        \return true if grid has changed 
+        \return true if grid has changed
     */
     template< class DataHandleImpl, class Data >
-    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
+    bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
             < ThisType, GatherScatterType, DataHandleImpl, Data > DataHandleType;
@@ -816,16 +816,16 @@ namespace Dune
 
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
                the partitioning can be optimized by providing weights for each element on the macro grid.
-               The specific load balancing algorithm is selected from a file alugrid.cfg. 
-        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element 
+               The specific load balancing algorithm is selected from a file alugrid.cfg.
+        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element
                 which the includes in its internal loadbalancing process - for ALUGrid these are all macro elements.
-        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include
                 user data during load balancing
-        \return true if grid has changed 
+        \return true if grid has changed
     */
     template< class LBWeights, class DataHandleImpl, class Data >
-    bool loadBalance ( LBWeights &weights, 
-                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
+    bool loadBalance ( LBWeights &weights,
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
             < ThisType, LBWeights, DataHandleImpl, Data > DataHandleType;
@@ -835,13 +835,13 @@ namespace Dune
       return loadBalance( &dataHandle );
     }
 
-    /** \brief Distribute the grid based on a user defined partitioning. 
+    /** \brief Distribute the grid based on a user defined partitioning.
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
-                of this element. A destination has to be provided for all elements in the grid hierarchy 
-                but depending on the grid implementation it is possibly called on a subset only. 
+                of this element. A destination has to be provided for all elements in the grid hierarchy
+                but depending on the grid implementation it is possibly called on a subset only.
                 The elements for which the method is called will be moved to the new processor together
                 with all children. ALUGrid requires destinations for all macro elements.
-        \return true if grid has changed 
+        \return true if grid has changed
     */
     template< class LBDestinations >
     bool repartition ( LBDestinations &destinations )
@@ -851,19 +851,19 @@ namespace Dune
       return loadBalance( &loadBalanceHandle );
     }
 
-    /** \brief Distribute the grid based on a user defined partitioning. 
+    /** \brief Distribute the grid based on a user defined partitioning.
         \param  destinations class with int operator()(const Entity<0>&) returning the new owner process
-                of this element. A destination has to be provided for all elements in the grid hierarchy 
-                but depending on the grid implementation it is possibly called on a subset only. 
+                of this element. A destination has to be provided for all elements in the grid hierarchy
+                but depending on the grid implementation it is possibly called on a subset only.
                 The elements for which the method is called will be moved to the new processor together
                 with all children. ALUGrid requires destinations for all macro elements.
-        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include 
+        \param  dataHandleIF data handle that implements the Dune::CommDataHandleIF interface to include
                 user data during load balancing
-        \return true if grid has changed 
+        \return true if grid has changed
     */
     template< class LBDestinations, class DataHandleImpl, class Data >
-    bool repartition ( LBDestinations &destinations, 
-                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF ) 
+    bool repartition ( LBDestinations &destinations,
+                       CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data > DataHandleType;
       DataHandleType dataHandle( *this, dataHandleIF, destinations, true );
@@ -874,16 +874,16 @@ namespace Dune
 
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
-    int ghostSize (int level, int codim) const; 
+    int ghostSize (int level, int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
-    int overlapSize (int level, int codim) const { return 0; } 
+    int overlapSize (int level, int codim) const { return 0; }
 
     /** \brief ghostSize is one for codim 0 and zero otherwise for this grid  */
     int ghostSize (int codim) const;
 
     /** \brief overlapSize is zero for this grid  */
-    int overlapSize (int codim) const { return 0; } 
+    int overlapSize (int codim) const { return 0; }
 
     /** \brief @copydoc Dune::Grid::communicate */
     template< class DataHandle, class Data >
@@ -906,18 +906,18 @@ namespace Dune
       return LeafCommunication( *this, data, iftype, dir );
     }
 
-  protected:  
-    // load balance and compress memory if possible 
+  protected:
+    // load balance and compress memory if possible
     void finalizeGridCreation();
- 
-    //! clear all entity new markers 
+
+    //! clear all entity new markers
     void clearIsNewMarkers( );
 
   public:
     /** \brief @copydoc Dune::Grid::comm() */
     const CollectiveCommunication &comm () const { return communications().ccobj_; }
- 
-    //! returns if a least one entity was marked for coarsening 
+
+    //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
 
     //! clear all entity new markers if lockPostAdapt_ is set
@@ -926,14 +926,14 @@ namespace Dune
     /** \brief  @copydoc Dune::Grid::adapt() */
     bool adapt ();
 
-    /** \brief  @copydoc Dune::Grid::adapt() 
-        \param handle handler for restriction and prolongation operations 
-        which is a Model of the AdaptDataHandleInterface class. 
+    /** \brief  @copydoc Dune::Grid::adapt()
+        \param handle handler for restriction and prolongation operations
+        which is a Model of the AdaptDataHandleInterface class.
     */
     template< class GridImp, class DataHandle >
     bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
 
-    //! uses the interface, mark on entity and refineLocal 
+    //! uses the interface, mark on entity and refineLocal
     void globalRefine ( int refCount );
 
     template< class GridImp, class DataHandle >
@@ -942,7 +942,7 @@ namespace Dune
     //**********************************************************
     // End of Interface Methods
     //**********************************************************
-    
+
     /** \brief write macro grid in ALUGrid macro format to path/filename.rank */
     bool writeMacroGrid( const std::string path, const std::string filename,
                          const ALU3DSPACE MacroFileHeader::Format format = ALU3DSPACE MacroFileHeader::defaultFormat ) const ;
@@ -956,15 +956,15 @@ namespace Dune
     // (no interface method) get hierarchic index set of the grid
     const HierarchicIndexSet & hierarchicIndexSet () const { return hIndexSet_; }
 
-    // no interface method, but has to be public 
+    // no interface method, but has to be public
     void updateStatus ();
- 
+
     //! @copydoc Dune::Grid::mark
     bool mark( int refCount , const typename Traits::template Codim<0>::Entity & e);
-    
+
     //! @copydoc Dune::Grid::getMark
     int getMark( const typename Traits::template Codim<0>::Entity & e) const;
-    
+
   public:
     static MPICommunicatorType defaultCommunicator ()
     {
@@ -984,8 +984,8 @@ namespace Dune
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
-    
-    // return reference to org ALU3dGrid 
+
+    // return reference to org ALU3dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
     GitterImplType &myGrid () const;
@@ -1004,34 +1004,34 @@ namespace Dune
 
     ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }
 
-    // return appropriate ALUGrid builder 
+    // return appropriate ALUGrid builder
     virtual typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder () const
     {
       return Communications::getBuilder( myGrid() );
     }
 
-    // helper function for factory 
+    // helper function for factory
     virtual void completeGrid ()
     {
       Communications::completeGrid( myGrid() );
     }
-    
-    //! return reference to Dune reference element according to elType 
+
+    //! return reference to Dune reference element according to elType
     const ReferenceElementType & referenceElement() const { return referenceElement_; }
 
-    template < class EntitySeed > 
+    template < class EntitySeed >
     typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
-    entityPointer( const EntitySeed& seed ) const 
+    entityPointer( const EntitySeed& seed ) const
     {
       enum { codim = EntitySeed :: codimension };
       typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
       return ALUPointer( factory(), seed ) ;
     }
 
-    // number of links to other processors, for internal use only 
+    // number of links to other processors, for internal use only
     int nlinks () const { return communications().nlinks(); }
 
-    LeafVertexListType & getLeafVertexList() const 
+    LeafVertexListType & getLeafVertexList() const
     {
       if( !leafVertexList_.up2Date() ) leafVertexList_.setupVxList(*this);
       return leafVertexList_;
@@ -1042,23 +1042,23 @@ namespace Dune
       alugrid_assert ( leafVertexList_.up2Date() );
       return leafVertexList_.getLevel(vertex);
     }
-      
-    VertexListType & getVertexList(int level) const 
+
+    VertexListType & getVertexList(int level) const
     {
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
       VertexListType & vxList = vertexList_[level];
       if(!vxList.up2Date()) vxList.setupVxList(*this,level);
-      return vxList; 
+      return vxList;
     }
-    
+
     ALU3dGridItemListType & getGhostLeafList(int codim) const
     {
       alugrid_assert ( codim >= 1 );
       alugrid_assert ( codim <= 3 );
       return ghostLeafList_[codim-1];
     }
-    
+
     ALU3dGridItemListType & getGhostLevelList(int codim, int level) const
     {
       alugrid_assert ( codim >= 1 );
@@ -1068,44 +1068,44 @@ namespace Dune
       alugrid_assert ( level <= maxLevel() );
       return ghostLevelList_[codim-1][level];
     }
-    
-    ALU3dGridItemListType & getEdgeList(int level) const 
-    { 
+
+    ALU3dGridItemListType & getEdgeList(int level) const
+    {
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
-      return levelEdgeList_[level]; 
+      return levelEdgeList_[level];
     }
 
   protected:
-    //! Copy constructor should not be used  
+    //! Copy constructor should not be used
     ALU3dGrid( const ThisType & );
-  
+
     //! assignment operator should not be used
     const ThisType &operator= ( const ThisType & );
-  
-    //! reset size and global size, update Level- and LeafIndexSet, if they exist 
+
+    //! reset size and global size, update Level- and LeafIndexSet, if they exist
     void calcExtras();
-  
-    //! calculate maxlevel 
+
+    //! calculate maxlevel
     void calcMaxLevel();
-  
-    //! make grid walkthrough and calc global size 
+
+    //! make grid walkthrough and calc global size
     void recalcGlobalSize();
 
-    //! check whether macro grid format is of our type 
+    //! check whether macro grid format is of our type
     void checkMacroGridFile (const std::string filename);
 
-    //! check whether macro grid has the right element type 
+    //! check whether macro grid has the right element type
     void checkMacroGrid ();
 
-    //! return boudanry projection for given segment Id 
-    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const 
+    //! return boudanry projection for given segment Id
+    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
     {
-      if( bndPrj_ ) 
+      if( bndPrj_ )
       {
         return bndPrj_;
       }
-      else 
+      else
       {
         // pointer can be zero (which is emulates the identity mapping then)
         alugrid_assert ( bndVec_ );
@@ -1122,7 +1122,7 @@ namespace Dune
 
     // geometry in father storage
     typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
-    // return geometryInFather for non-conforming grids 
+    // return geometryInFather for non-conforming grids
     const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
     // initialize geometry types and return correct geometryInFather storage
     const GeometryInFatherStorage& makeGeometries();
@@ -1139,51 +1139,51 @@ namespace Dune
       return indexSet;
     }
 
-    // return true if conforming refinement is enabled 
+    // return true if conforming refinement is enabled
     bool conformingRefinement() const
     {
       return (refinementType_ == conforming) ;
     }
 
-    // return true if ghost cells are available 
+    // return true if ghost cells are available
     bool ghostCellsEnabled () const
     {
-      return myGrid().ghostCellsEnabled(); 
+      return myGrid().ghostCellsEnabled();
     }
 
-    //! return current thread number 
+    //! return current thread number
     static int thread () { return ALUMemoryProvider< int > :: thread(); }
 
-    //! return max number of threads  
+    //! return max number of threads
     static int maxThreads () { return ALUMemoryProvider< int > :: maxThreads(); }
   protected:
     /////////////////////////////////////////////////////////////////
     //
-    // Internal variables  
+    // Internal variables
     //
     /////////////////////////////////////////////////////////////////
 
-    // the real ALU grid 
+    // the real ALU grid
     mutable GitterImplType *mygrid_;
 
-    // max level of grid 
-    int maxlevel_; 
+    // max level of grid
+    int maxlevel_;
 
-    // count how much elements where marked 
+    // count how much elements where marked
     mutable int coarsenMarked_;
     mutable int refineMarked_;
 
-    // at the moment the number of different geom types is 1 
+    // at the moment the number of different geom types is 1
     enum { numberOfGeomTypes = 1 };
-    std::vector< std::vector<GeometryType> > geomTypes_; 
+    std::vector< std::vector<GeometryType> > geomTypes_;
 
-    // our hierarchic index set 
+    // our hierarchic index set
     HierarchicIndexSet hIndexSet_;
 
-    // out global id set 
-    mutable GlobalIdSetImp *globalIdSet_; 
+    // out global id set
+    mutable GlobalIdSetImp *globalIdSet_;
 
-    // out global id set 
+    // out global id set
     LocalIdSetImp localIdSet_;
 
     // the level index set ( default type )
@@ -1191,20 +1191,20 @@ namespace Dune
 
     // the leaf index set
     mutable LeafIndexSetImp * leafIndexSet_;
- 
-    // the reference element 
+
+    // the reference element
     const ReferenceElementType& referenceElement_;
 
-    mutable VertexListType vertexList_[MAXL];   
+    mutable VertexListType vertexList_[MAXL];
 
-    mutable ALU3dGridItemListType ghostLeafList_[ dimension ];   
-    mutable ALU3dGridItemListType ghostLevelList_[ dimension ][MAXL];   
-    
-    mutable ALU3dGridItemListType levelEdgeList_[MAXL];   
+    mutable ALU3dGridItemListType ghostLeafList_[ dimension ];
+    mutable ALU3dGridItemListType ghostLevelList_[ dimension ][MAXL];
+
+    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
 
     mutable LeafVertexListType leafVertexList_;
-    
-    // the type of our size cache 
+
+    // the type of our size cache
     typedef SizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
@@ -1213,27 +1213,27 @@ namespace Dune
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
 
-    // pointer to Dune boundary projection 
-    const DuneBoundaryProjectionType* bndPrj_; 
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionType* bndPrj_;
 
-    // pointer to Dune boundary projection 
-    const DuneBoundaryProjectionVector* bndVec_; 
+    // pointer to Dune boundary projection
+    const DuneBoundaryProjectionVector* bndVec_;
 
-    // boundary projection for vertices  
+    // boundary projection for vertices
     ALUGridBoundaryProjectionType* vertexProjection_ ;
 
-    // pointer to communications object 
+    // pointer to communications object
     Communications *communications_;
 
     // refinement type (nonconforming or conforming)
     const ALUGridRefinementType refinementType_ ;
 
-    // local geometry storage for geometries in father 
+    // local geometry storage for geometries in father
     const GeometryInFatherStorage& nonConformingGeoInFatherStorage_ ;
   }; // end class ALU3dGrid
 
 
-    bool checkMacroGrid ( ALU3dGridElementType elType , 
+    bool checkMacroGrid ( ALU3dGridElementType elType ,
                           const std::string filename );
     const char* elType2Name( ALU3dGridElementType elType );
 
@@ -1245,7 +1245,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-    
+
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isParallel< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
@@ -1257,7 +1257,7 @@ namespace Dune
     {
       static const bool v = true;
     };
-  
+
     template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
     struct hasBackupRestoreFacilities< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
@@ -1265,7 +1265,7 @@ namespace Dune
     };
 
   } // end namespace Capabilities
-  
+
 } // end namespace Dune
 
 #include "grid_inline.hh"

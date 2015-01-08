@@ -1,11 +1,11 @@
-// (c) Robert Kloefkorn 2004 -- 2005 
+// (c) Robert Kloefkorn 2004 -- 2005
 #ifndef GITTER_DUNE_PLL_IMPL_H_INCLUDED
 #define GITTER_DUNE_PLL_IMPL_H_INCLUDED
 
 #include <memory>
 
 #include "gitter_dune_impl.h"
- 
+
 #include "../parallel/gitter_pll_impl.h"
 #include "../parallel/gitter_pll_ldb.h"
 
@@ -17,21 +17,21 @@ namespace ALUGrid
   : public GitterBasisPll,
     public virtual GitterDuneBasis
   {
-   
-    virtual IteratorSTI < Gitter::helement_STI > * 
+
+    virtual IteratorSTI < Gitter::helement_STI > *
       leafIterator (const Gitter::helement_STI *);
-    virtual IteratorSTI < Gitter::helement_STI > * 
+    virtual IteratorSTI < Gitter::helement_STI > *
       leafIterator (const IteratorSTI < Gitter::helement_STI > *);
-    
+
     friend class PackUnpackInteriorGhostData ;
-  protected:  
+  protected:
     bool balanceGrid_;
 
     // enums for communication type
-    typedef enum { Border_Border_Comm , 
-                   Interior_Ghost_Comm , 
-                   Ghost_Interior_Comm , 
-                   All_All_Comm  } CommunicationType; 
+    typedef enum { Border_Border_Comm ,
+                   Interior_Ghost_Comm ,
+                   Ghost_Interior_Comm ,
+                   All_All_Comm  } CommunicationType;
 
     typedef SmallObjectStream BufferType;
     typedef std::vector< BufferType > DataBufferType;
@@ -43,121 +43,121 @@ namespace ALUGrid
     typedef GitterDuneImpl::Objects  Objects;
 
     // constructor taking filename containing the macro grid
-    GitterDunePll ( const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
-    : GitterBasisPll( filename, mp, ppv ),
+    GitterDunePll ( const int dim, const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+    : GitterBasisPll( dim, filename, mp, ppv ),
       balanceGrid_ ( false )
     {
 #ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank(); 
+      __STATIC_myrank = mp.myrank();
 #endif
-      // build ghost cells after the macro grid has been assembled 
+      // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
 
     // constructor taking std::istream containing the macro grid
-    GitterDunePll ( std::istream &in, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
-    : GitterBasisPll( in, mp, ppv ),
+    GitterDunePll ( const int dim, std::istream &in, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+    : GitterBasisPll( dim, in, mp, ppv ),
       balanceGrid_( false )
     {
 #ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank(); 
+      __STATIC_myrank = mp.myrank();
 #endif
-      // build ghost cells after the macro grid has been assembled 
+      // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
 
     // constructor creating empty grid
-    GitterDunePll (MpAccessLocal &mp) 
-      : GitterBasisPll ("", mp, 0) 
-      , balanceGrid_ (false) 
+    GitterDunePll (const int dim, MpAccessLocal &mp)
+      : GitterBasisPll (dim, "", mp, 0)
+      , balanceGrid_ (false)
     {
 #ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank(); 
+      __STATIC_myrank = mp.myrank();
 #endif
-      // build ghost cells after the macro grid has been assembled 
+      // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
 
-    // adapts and witout calling loadBalancer  
+    // adapts and witout calling loadBalancer
     bool adaptWithoutLoadBalancing () { return GitterPll::adapt (); }
 
     // adapts and calls preCoarsening and
-    // postRefinement, no loadBalancing done   
+    // postRefinement, no loadBalancing done
     bool duneAdapt (AdaptRestrictProlongType & arp);
 
-  public:  
+  public:
 
-    // communication of border data 
+    // communication of border data
     void borderBorderCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
-    // communication of border data 
+    // communication of border data
     Communication interiorGhostCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
-    // communication of border data 
+    // communication of border data
     Communication ghostInteriorCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
-    // communication of border data 
+    // communication of border data
     Communication allAllCommunication (
            GatherScatterType & vertexData ,
            GatherScatterType & edgeData,
            GatherScatterType & faceData ,
            GatherScatterType & elementData );
 
-    // return indexmanger 
+    // return indexmanger
     IndexManagerType & indexManager(int codim)
     {
       return containerPll().indexManager(codim);
     }
 
-    IndexManagerStorageType& indexManagerStorage() 
+    IndexManagerStorageType& indexManagerStorage()
     {
       return containerPll().indexManagerStorage();
     }
 
-    // return indexmanger 
-    size_t numMacroBndSegments () const 
+    // return indexmanger
+    size_t numMacroBndSegments () const
     {
       return containerPll().numMacroBndSegments();
     }
 
-    // restore grid from std::istream, needed to be overloaded 
+    // restore grid from std::istream, needed to be overloaded
     // because before restoring follow faces, index manager has to be
-    // restored 
-    void restore(std::istream & in); 
+    // restored
+    void restore(std::istream & in);
 
-  public:  
+  public:
 
-    // write grid to vtk file 
+    // write grid to vtk file
     void tovtk( const std::string &fn);
 
     // compress memory of given grid and return new object (holding equivalent information)
-    static GitterDunePll* compress( GitterDunePll* grd ) 
+    static GitterDunePll* compress( GitterDunePll* grd )
     {
       // only do the backup-restore thing if dlmalloc is enabled
-      if( MyAlloc :: ALUGridUsesDLMalloc ) 
+      if( MyAlloc :: ALUGridUsesDLMalloc )
       {
-        MpAccessLocal& mpa = grd->mpAccess (); 
-        // backup stream 
+        MpAccessLocal& mpa = grd->mpAccess ();
+        // backup stream
         std::stringstream backup;
-        // backup grid 
+        // backup grid
         grd->backup( backup );
         delete grd; grd = 0;
         // free allocated memory (only works if all grids are deleted at this point)
         MyAlloc::clearFreeMemory ();
-        // restore saved grid 
-        grd = new GitterDunePll( backup, mpa );
+        // restore saved grid
+        grd = new GitterDunePll( grd->dimension(), backup, mpa );
         alugrid_assert ( grd );
         grd->restore( backup );
 
@@ -170,50 +170,50 @@ namespace ALUGrid
     using GitterDuneBasis::restore;
     using GitterDuneBasis::backup;
 
-    // rebuild ghost cells by exchanging bounndary info on macro level 
+    // rebuild ghost cells by exchanging bounndary info on macro level
     void rebuildGhostCells();
-    
+
   private:
     // check that indices of ghost cells are within range of
-    // the index managers maxIndex  
+    // the index managers maxIndex
     void checkGhostIndices();
-    
-    // message tag for communication 
+
+    // message tag for communication
     enum { transmittedData = 1 , noData = 0 };
 
     template <class ObjectStreamType, class HItemType>
     void sendSlaves (ObjectStreamType & sendBuff,
         HItemType * determType,
-        GatherScatterType & dataHandle , const int link ); 
-      
+        GatherScatterType & dataHandle , const int link );
+
     template <class ObjectStreamType, class HItemType, class CommBuffMapType>
     void unpackOnMaster(ObjectStreamType & recvBuff,
         CommBuffMapType& commBufMap,
         HItemType * determType,
-        GatherScatterType & dataHandle , 
-        const int nl, const int link); 
-      
+        GatherScatterType & dataHandle ,
+        const int nl, const int link);
+
     template <class ObjectStreamType, class HItemType, class CommBuffMapType>
     void sendMaster(ObjectStreamType & sendBuff,
         CommBuffMapType& commBufMap,
         HItemType * determType,
-        GatherScatterType & dataHandle , 
-        const int nl, const int myLink); 
-      
+        GatherScatterType & dataHandle ,
+        const int nl, const int myLink);
+
     template <class ObjectStreamType, class HItemType>
     void unpackOnSlaves(ObjectStreamType & recvBuff,
         HItemType * determType,
-        GatherScatterType & dataHandle , 
-        const int nOtherLinks, const int myLink); 
+        GatherScatterType & dataHandle ,
+        const int nOtherLinks, const int myLink);
 
     void sendFaces (ObjectStream & sendBuff,
-        IteratorSTI < hface_STI > * iter, 
-        GatherScatterType & dataHandle ); 
-      
+        IteratorSTI < hface_STI > * iter,
+        GatherScatterType & dataHandle );
+
     void unpackFaces (ObjectStream & recvBuff,
-        IteratorSTI < hface_STI > * iter, 
-        GatherScatterType & dataHandle ); 
-      
+        IteratorSTI < hface_STI > * iter,
+        GatherScatterType & dataHandle );
+
     void sendInteriorGhostAllData (
       ObjectStream & sendBuff,
       IteratorSTI < hface_STI > * iter ,
@@ -221,14 +221,14 @@ namespace ALUGrid
       GatherScatterType & edgeData,
       GatherScatterType & faceData,
       GatherScatterType & elementData ,
-      const bool packInterior , 
+      const bool packInterior ,
       const bool packGhosts );
-   
+
     void sendInteriorGhostElementData (
       ObjectStream & sendBuff,
       IteratorSTI < hface_STI > * iter ,
       GatherScatterType & elementData);
-   
+
     void unpackInteriorGhostAllData (
       ObjectStream & recvBuff,
       IteratorSTI < hface_STI > * iter ,
@@ -236,20 +236,20 @@ namespace ALUGrid
       GatherScatterType & edgeData,
       GatherScatterType & faceData,
       GatherScatterType & elementData );
-      
+
     void unpackInteriorGhostElementData (
       ObjectStream & recvBuff,
       IteratorSTI < hface_STI > * iter ,
       GatherScatterType & elementData );
-      
-    // communication of data on border 
+
+    // communication of data on border
     void doBorderBorderComm (
         std::vector< ObjectStream > & osvec ,
         GatherScatterType & vertexData ,
         GatherScatterType & edgeData,
         GatherScatterType & faceData );
 
-    // communication of interior data 
+    // communication of interior data
     void doInteriorGhostComm(
       std::vector< ObjectStream > & osvec ,
       GatherScatterType & vertexData ,
@@ -258,15 +258,15 @@ namespace ALUGrid
       GatherScatterType & elementData ,
       const CommunicationType commType );
 
-    template <class HItemType, class CommMapType> 
-    DataBufferType& 
-    getCommunicationBuffer( HItemType&, CommMapType&, const int ); 
+    template <class HItemType, class CommMapType>
+    DataBufferType&
+    getCommunicationBuffer( HItemType&, CommMapType&, const int );
 
   public:
     std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> borderIteratorTT (const vertex_STI *, int);
     std::pair< IteratorSTI < hedge_STI  > *, IteratorSTI < hedge_STI  > *> borderIteratorTT (const hedge_STI  *, int);
     std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> borderIteratorTT  (const hface_STI  *, int);
-    
+
     std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> leafBorderIteratorTT  (const hface_STI  *, int);
     std::pair< IteratorSTI < hface_STI >  *, IteratorSTI < hface_STI  > *> levelBorderIteratorTT (const hface_STI  *, int link , int level);
   };
