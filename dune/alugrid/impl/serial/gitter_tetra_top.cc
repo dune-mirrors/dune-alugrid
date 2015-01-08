@@ -337,13 +337,14 @@ namespace ALUGrid
           myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2))) ;
           split_e20 () ;
           break ;
-        //the iso2_2d rule does always the same as e12, and additionaly _rule to iso2_2d
-        case myrule_t::iso2_2d :
-          myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
-          split_e12 () ;
-          _rule = myrule_t::iso2_2d ;
-          break ;
         case myrule_t::iso4 :
+          //iso4 on a 2d face is just e12 bisection + setting the rule to iso4
+          if(this->is2d()) {
+            myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
+            split_e12 () ;
+            _rule = myrule_t::iso4 ;
+            break ;
+          }
           myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (0))) ;
           myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (1))) ;
           myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2).rotate (twist (2))) ;
@@ -379,17 +380,12 @@ namespace ALUGrid
         case myrule_t::e01 :
         case myrule_t::e12 :
         case myrule_t::e20 :
-        case myrule_t::iso2_2d :
         case myrule_t::iso4 :
         {
-
-
-
           typedef typename A::face3Neighbour::neighbour_t neighbour_t ;
           // get face neighbour
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
           neighbour_t self = ( twist < 0 ) ?  this->nb.rear()   : this->nb.front () ;
-
 
           // check refineBalance
           bool a = neigh.first->refineBalance (r, neigh.second);
@@ -626,16 +622,12 @@ namespace ALUGrid
         // sich selbst, weil die Anforderung durch die Fl"ache kam, und
         // dahinter keine Balancierung stattfinden muss.
 
-        split_iso4 () ;
+        //on the 2d faces we just have a e12 bisection refinement 
+        if(this->is2d()) split_bisection();
+        else  split_iso4 () ;
       }
       else if( r.bisection() )
       {
-        split_bisection () ;
-      }
-      //refine iso2_2d
-      else if( r == myrule_t::iso2_2d )
-      {
-        //iso2_2d is just e12 plus additional _rule set
         split_bisection () ;
       }
       else
@@ -699,14 +691,18 @@ namespace ALUGrid
         case balrule_t::e01 :
         case balrule_t::e12 :
         case balrule_t::e20 :
-        //as iso2_2d is just a split into two elements, we can use the split_bisection method on the boundary
-        case balrule_t::iso2_2d :
           //std::cout << "refLikeEl: e01 " << std::endl;
           // if (!myhface (0)->refine (balrule_t (balrule_t::e01).rotate (twist (0)), twist (0))) return false ;
           if (!myhface (0)->refine (r, twist (0))) return false ;
           split_bisection() ;
           break;
         case balrule_t::iso4 :
+          //in the 2d case we just to the same as e12
+          if(this->is2d()){
+            if (!myhface (0)->refine (r, twist (0))) return false ;
+            split_bisection() ;
+            break;
+          }
           //if (!myhface (0)->refine (balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false ;
           if (!myhface (0)->refine (r, twist (0))) return false ;
           split_iso4 () ;
@@ -739,11 +735,13 @@ namespace ALUGrid
         case myrule_t::e01 :
         case myrule_t::e12 :
         case myrule_t::e20 :
-        //iso2_2d is basically e12
-        case myrule_t::iso2_2d :
           split_bisection();
           break ;
         case myrule_t::iso4 :
+          if(this->is2d()) {
+            split_bisection();
+            break;
+          }
           split_iso4 () ;
           break ;
         default :
@@ -903,8 +901,6 @@ namespace ALUGrid
     case myhface_t::myrule_t::e01 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
-    //iso2_2d  are basically e12
-    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
@@ -912,6 +908,11 @@ namespace ALUGrid
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
     case myhface_t::myrule_t::iso4 :
+      //for the 2d faces we do the same as e12
+      if(this->is2d()){
+        alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
+        return myhface ( face )->subedge ( edge ) ;
+      }
       alugrid_assert ( edge < 3 );
       return ((twist ( face ) < 0) ? myhface ( face )->subedge ((8 - edge + twist ( face )) % 3) : myhface ( face )->subedge ((edge + twist ( face )) % 3)) ;
     case myhface_t::myrule_t::nosplit :
@@ -1052,8 +1053,6 @@ namespace ALUGrid
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       alugrid_assert ( false );
       return 0;
-    //iso2_2d are basically the same
-    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0 ||  twist(i) == 2 ||  twist(i) == -3 )
@@ -1071,6 +1070,16 @@ namespace ALUGrid
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::iso4 :
+      //for the 2d faces we do the same as for e12
+      if(this->is2d()){
+         alugrid_assert ( j < 2 );
+          if ( twist(i) == 0 ||  twist(i) == 2 ||  twist(i) == -3 )
+            return myhface(i)->subface(j) ;
+          if ( twist(i) == -1 || twist(i) == 1 ||  twist(i) == -2 )
+            return myhface(i)->subface(!j) ;
+          std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
+          return 0;
+      }
       alugrid_assert ( j < 4 );
       if ( j == 3 )
         return myhface(i)->subface(3);
@@ -2089,11 +2098,11 @@ namespace ALUGrid
     }
     else if( r == myrule_t::iso4_2d )
     {
-      //analogously to iso8, but the faces 1,2,3 have to use iso2_2d
       {
-          myhface (0)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso4).rotate (twist (0))) ;
-        for (int i = 1 ; i < 4 ; ++i)
-          myhface (i)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso2_2d).rotate (twist (i))) ;
+        //we refine everything with iso4, but first unset is2d on the face 0, so it gets treated as a 3d face
+          myhface (0)->reset2dFlag(); 
+        for (int i = 0 ; i < 4 ; ++i)
+          myhface (i)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso4).rotate (twist (i))) ;
       }
       splitIso4_2d () ;
     }
@@ -2131,13 +2140,13 @@ namespace ALUGrid
           case myrule_t::crs :
           case myrule_t::nosplit :
             return true ;
-          //for iso4_2d we refine faces 1,2,3 with iso2_2d and 0 with iso4
           case myrule_t::iso4_2d :
             {
-              if (!myhface (0)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (0)), twist (0))) return false ;
-              for (int i = 1 ; i < 4 ; ++i )
-                //rotate should do nothing on iso2_2d
-                if (!myhface (i)->refine (face3rule_t (face3rule_t::iso2_2d).rotate (twist (i)), twist (i))) return false ;
+              //we refine everything with rule iso4 but face 0 gets treated as a 3d face and therefore will be refined differently
+              myhface (0)->reset2dFlag();
+              for (int i = 0 ; i < 4 ; ++i )
+                //rotate should do nothing on iso4
+                if (!myhface (i)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (i)), twist (i))) return false ;
             }
             break ;
           case myrule_t::iso8 :
@@ -2175,7 +2184,7 @@ namespace ALUGrid
     // if status is still non-refined
     if (getrule () == myrule_t::nosplit)
     {
-      if( r == balrule_t::iso4 )
+      if( r == balrule_t::iso4 && !this->is2d())
       {
         // if face is a leaf face
         if (! myhface (fce)->leaf ())
@@ -2190,18 +2199,18 @@ namespace ALUGrid
           refineImmediate (myrule_t::iso8) ;
         }
       }
-      else if( r == balrule_t::iso2_2d)
+      else if( r == balrule_t::iso4 && this->is2d())
       {
        // if face is a leaf face
         if (! myhface (fce)->leaf ())
         {
-         if( fce != 0)
-            if ( ! myhface (0)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (0)), twist (0)) )
-                return false ;
-         for (int i = 1 ; i < 4 ; ++i)
+         //we refine everything with iso4 and set myhface to be a 3d face so it gets treated differently
+         if( myhface(0)->is2d())
+             myhface (0)->reset2dFlag();
+         for (int i = 0 ; i < 4 ; ++i)
           {
             if (i != fce)
-              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso2_2d ).rotate (twist (i)), twist (i)) )
+              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) )
                 return false ;
           }
           _req = myrule_t::nosplit ;
@@ -2427,11 +2436,13 @@ namespace ALUGrid
             case balrule_t::e01 :
             case balrule_t::e12 :
             case balrule_t::e20 :
-            //iso2_2d are essentially e12
-            case balrule_t::iso2_2d :
               { for (int j = 0 ; j < 2 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
               break ;
             case balrule_t::iso4 :
+              if(this->is2d()){
+                { for (int j = 0 ; j < 2 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
+                break ;
+              }
               { for (int j = 0 ; j < 4 ; j ++) f.subface (j)->nb.complete (f.nb) ; }
               break ;
             default :
@@ -2479,11 +2490,13 @@ namespace ALUGrid
       case myhface_t::myrule_t::e01 :
       case myhface_t::myrule_t::e12 :
       case myhface_t::myrule_t::e20 :
-      // iso2_2d are essentially e12
-      case myhface_t::myrule_t::iso2_2d :
         alugrid_assert ( j == 0 );
         return myhface (i)->subedge (0) ;
       case myhface_t::myrule_t::iso4 :
+        if(this->is2d()){
+           alugrid_assert ( j == 0 );
+          return myhface (i)->subedge (0) ;
+        }
         alugrid_assert ( j < 3 );
         return ((twist (i) < 0) ? myhface (i)->subedge ((8 - j + twist (i)) % 3) : myhface (i)->subedge ((j + twist (i)) % 3)) ;
       case myhface_t::myrule_t::nosplit :
@@ -2508,8 +2521,6 @@ namespace ALUGrid
         return myhface(i)->subface(!j) ;
         std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
         return 0;
-    //f iso2_2d are essentially e12
-    case myhface_t::myrule_t::iso2_2d :
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
@@ -2527,6 +2538,16 @@ namespace ALUGrid
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::iso4 :
+    // in 2d case do the same as e12
+      if(this->is2d()){
+        alugrid_assert ( j < 2 );
+        if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
+          return myhface(i)->subface(j) ;
+        if ( twist(i) == -1 ||  twist(i) == 1 ||  twist(i) == -2 )
+          return myhface(i)->subface(!j) ;
+        std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
+        return 0;
+      }
       alugrid_assert ( j < 4 );
       if ( j == 3 )
         return myhface(i)->subface (3) ;
@@ -2578,7 +2599,7 @@ namespace ALUGrid
     alugrid_assert (this->leaf()) ;
     switch(r) {
       case myrule_t::iso4 :
-
+        if(!is2d()){
         // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
         // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
         // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
@@ -2590,12 +2611,10 @@ namespace ALUGrid
         myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
         split_iso4 () ;
         break ;
-
+      }
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
-      //iso2_2d are e12
-      case myrule_t::iso2_2d :
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
 

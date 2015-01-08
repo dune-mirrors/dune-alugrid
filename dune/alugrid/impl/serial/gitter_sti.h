@@ -678,7 +678,7 @@ namespace ALUGrid
         flagNoCoarsen = 3,
         // if set item belongs to 2d grid (same as edge coarsen which is only set for
         // edges, whereas flagIs2d is only set for elements and faces)
-        flagIs2d = 3
+        flagIs2d = 4
       };
 
     protected:
@@ -907,6 +907,8 @@ namespace ALUGrid
       }
 
       void set2dFlag() { set( flagIs2d ); }
+      
+      void reset2dFlag() { unset ( flagIs2d ); }
 
       bool is2d() const { return isSet( flagIs2d ); }
     };
