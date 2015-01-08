@@ -69,7 +69,7 @@ namespace ALUGrid
     {
       enum rule_enum { crs=-1, nosplit=1, 
                        e01=2, e12=3, e20=4, e23=5, e30=6, e31=7, 
-                       iso8=8, bisect=9, iso4_2d = 14
+                       iso8=8, bisect=9
                      };
       typedef signed char rule_t;
 
@@ -352,7 +352,7 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: TetraRule :: isValid (const rule_t& r) {
-    return r == crs || r == nosplit || r == iso8 || r == bisect || r == iso4_2d ||
+    return r == crs || r == nosplit || r == iso8 || r == bisect || 
            r == e01 || r == e12     || r == e20  || r == e23    || r == e30      || r == e31;
   }
 
@@ -384,8 +384,6 @@ namespace ALUGrid
         return out << "iso8";
       case RefinementRules :: TetraRule :: bisect:
         return out << "bisection";
-      case RefinementRules :: TetraRule :: iso4_2d:
-        return out << "iso4 in 2d";
       default:
         return out << "!!! unknown !!!";
     }
