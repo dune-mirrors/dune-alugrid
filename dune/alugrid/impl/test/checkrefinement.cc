@@ -195,10 +195,10 @@ void checkRefinements( GitterType& grid, int n )
      // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
       TetraRule::iso4_2d,
-      cd .. TetraRule :: bisect,
+      TetraRule :: bisect
     };
 
-    for (int i=0; i<1; ++i )
+    for (int i=0; i<2; ++i )
     {
       std::cout << "*********************************************" <<std::endl;
       std::cout << "Refinement rule " << rules[ i ] << std::endl;
