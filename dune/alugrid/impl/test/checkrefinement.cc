@@ -190,11 +190,11 @@ void checkRefinements( GitterType& grid, int n )
   else // tetra
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
-    const TetraRule rules[ 1 ] =
-    { //TetraRule::iso8,
+    const TetraRule rules[ 2 ] =
+    { TetraRule::iso8,
      // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
-      TetraRule::iso4_2d,
+     // TetraRule::iso4_2d,
       TetraRule :: bisect
     };
 
