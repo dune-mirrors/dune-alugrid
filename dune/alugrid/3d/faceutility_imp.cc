@@ -898,24 +898,44 @@ namespace Dune
         outerNormal_[0] = factor * (_p0[1] - _p3[1]);
         outerNormal_[1] = factor * (_p3[0] - _p0[0]);
       }
-      //TODO: check
       else if(actualDimw == 3)
       {
+      
+        //Teh following is an adaption of 
+        //
+        //    const ReferenceElement< alu2d_ctype, dim > &refElement = 
+        //    ReferenceElements< alu2d_ctype, dim >::cube();
+        //    typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
+        //   typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
+        //    inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
+        //   outerNormal *= inside()->geometry().integrationElement( xInside );
+        //
+        // from the calculation of the former 2d code
+       
+      
+      
         typedef typename ALU3dGrid<2, actualDimw, hexa, Comm>::template Codim<1>::LocalGeometry LocalGeometry;
         typedef Dune :: ALU3dGridGeometry< 2, actualDimw, ALU3dGrid<2, actualDimw, hexa, Comm> > GeometryImpl;
+        //generate the local geometries - if not already present
         this->generateLocalGeometries();
+        //get the inside entity
         const GEOElementType &inner = this->connector_.innerEntity();
 
-             
+         //Get the 2d cube reference Element
        const ReferenceElement< alu3d_ctype, 2 > &refElement = 
         ReferenceElements< alu3d_ctype, 2 >::cube();
-        typename LocalGeometry::GlobalCoordinate xInside = this->intersectionSelfLocal()[0];
+        //get xInside in the geometryInInside coordinates
+        typename LocalGeometry::GlobalCoordinate xInside = this->intersectionSelfLocal()[1];
         xInside *= local[0];
-        xInside.axpy(1-local[0] , this->intersectionSelfLocal()[1]);
+        xInside.axpy(1-local[0] , this->intersectionSelfLocal()[0]);
+        
+        // get the normal of the reference element on the current face (DUNE index from the inside)
         typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( ElementTopologyMapping<hexa>::alu2duneFace(this->connector_.innerALUFaceIndex()) );
         
+        //construct the inner geometry
         GeometryImpl geo ;
-        geo.buildGeom(inner.myvertex(0)->Point(),inner.myvertex(1)->Point(),inner.myvertex(2)->Point(),inner.myvertex(3)->Point());
+        geo.buildGeom(inner.myvertex(0)->Point(), inner.myvertex(1)->Point(), inner.myvertex(3)->Point(), inner.myvertex(2)->Point());
+        //map the reference Normal back to the inner geometry
         geo.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal_ );
         outerNormal_ *= geo.integrationElement( xInside );
         

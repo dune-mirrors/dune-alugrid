@@ -628,14 +628,14 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        /*
+        
         typedef Dune::ALUGrid< 2, 3, Dune::cube, Dune::nonconforming > SurfaceGridType;
         std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
-        */
+        
       }
 
       // check non-conform ALUGrid for 2d 
@@ -667,8 +667,8 @@ int main (int argc , char **argv) {
       if( testALU2dConform ) 
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
-        //std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
-        std::string filename( "./dgf/cube-testgrid-2-2.dgf");
+        std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        //std::string filename( "./dgf/cube-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
         checkCapabilities< true >( *gridPtr );
         checkALUSerial(*gridPtr, 2, display);
