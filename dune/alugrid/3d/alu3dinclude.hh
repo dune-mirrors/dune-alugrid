@@ -7,20 +7,20 @@
 //////////////////////////////////////////////////////////////////////
 #define COMPILE_ALUGRID_LIB 0
 
-#if COMPILE_ALUGRID_LIB 
+#if COMPILE_ALUGRID_LIB
   #define COMPILE_ALUGRID_INLINE 0
-#else 
+#else
   #define COMPILE_ALUGRID_INLINE 1
 #endif
 
 #if COMPILE_ALUGRID_INLINE
-#define alu_inline inline 
+#define alu_inline inline
 #else
 #define alu_inline
 #endif
 /////////////////////////////////////////////////////////////////////
 
-// all methods and classes of the ALUGrid are defined in the namespace 
+// all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ::ALUGrid::
 
 #include <dune/alugrid/common/declaration.hh>
@@ -52,8 +52,8 @@ namespace ALUGrid
   typedef Gitter::AdaptRestrictProlong AdaptRestrictProlongType;
 
   static const int ProcessorBoundary_t = Gitter::hbndseg_STI::closure;
-  
-  // general GatherScatter type 
+
+  // general GatherScatter type
   typedef GatherScatter GatherScatterType;
 
 } // namespace ALUGrid
@@ -69,19 +69,19 @@ namespace ALUGrid
 #include <dune/alugrid/impl/duneinterface/gitter_dune_pll_impl.h>
 
 #if ALU3DGRID_PARALLEL
-// if MPI was found include MPI communications 
+// if MPI was found include MPI communications
 #include <dune/alugrid/impl/parallel/mpAccess_MPI.h>
 #endif // #if ALU3DGRID_PARALLEL
 
-//- local includes 
+//- local includes
 #include <dune/alugrid/3d/topology.hh>
 
 namespace Dune
 {
 
-  // typedef of ALU3dGridElementType see topology.hh 
-    
-  // i.e. double or float 
+  // typedef of ALU3dGridElementType see topology.hh
+
+  // i.e. double or float
   typedef double alu3d_ctype;
 
 
@@ -109,7 +109,7 @@ namespace Dune
 
     typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
 
-    //! method for ghost check 
+    //! method for ghost check
     template <class BndFaceType>
     static bool isGhost( const BndFaceType* ghost )
     {
@@ -134,7 +134,7 @@ namespace Dune
 
     typedef GitterType::Geometric::hedge1_GEO GEOEdgeType;
 
-    // method for ghost check 
+    // method for ghost check
     template <class BndFaceType>
     static bool isGhost( const BndFaceType* ghost )
     {
@@ -215,7 +215,7 @@ namespace Dune
     typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
-  
+
   template< ALU3dGridElementType elType, class Comm >
   struct ALU3dCodimImplTraits< elType, Comm, 2, 3 >
   {
@@ -235,53 +235,53 @@ namespace Dune
     typedef InterfaceType EntitySeedType;
     typedef typename GitterType::Geometric::VertexGeo ImplementationType;
   };
-  
+
     //Refinement rules in general
   template< class MarkRuleType, ALU3dGridElementType elType, int dim>
-  struct ALU3dRefinementTraits 
+  struct ALU3dRefinementTraits
   {};
-  
+
   //Refinement rules for 3d tetra
   template< class MarkRuleType >
   struct ALU3dRefinementTraits < MarkRuleType, tetra, 3 >
   {
      // refinement and coarsening enum
     enum { bisect_element_t  = MarkRuleType::bisect  };
-    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
-  
+
   //Refinement rules for 3d hexa
   template< class MarkRuleType >
   struct ALU3dRefinementTraits < MarkRuleType, hexa, 3 >
   {
      // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::iso8    };
-    enum { refine_element_t  = MarkRuleType::iso8    };
+    enum { bisect_element_t  = MarkRuleType::regular };
+    enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
-  
-  
+
+
   //Refinement rules for 2d tetra
   template< class MarkRuleType>
   struct ALU3dRefinementTraits < MarkRuleType, tetra, 2 >
   {
      // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::bisect};
-    enum { refine_element_t  = MarkRuleType::iso8 };
+    enum { bisect_element_t  = MarkRuleType::bisect  };
+    enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
-  
+
     //Refinement rules for 2d hexa
   template< class MarkRuleType>
   struct ALU3dRefinementTraits < MarkRuleType, hexa, 2 >
   {
      // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::iso4_2d };
-    enum { refine_element_t  = MarkRuleType::iso4_2d };
+    enum { bisect_element_t  = MarkRuleType::regular };
+    enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
@@ -327,8 +327,8 @@ namespace Dune
     : public ALU3dCodimImplTraits< tetra, Comm, dim, codim >
     {};
 
-    // access of faces 
-    template <class Elem> 
+    // access of faces
+    template <class Elem>
     static const GEOFaceType* getFace( const Elem& elem, const int aluFace )
     {
       return elem.myhface( aluFace );
@@ -367,8 +367,8 @@ namespace Dune
     : public ALU3dCodimImplTraits< hexa, Comm, dim, codim >
     {};
 
-    // access of faces 
-    template <class Elem> 
+    // access of faces
+    template <class Elem>
     static const GEOFaceType* getFace( const Elem& elem, const int aluFace )
     {
       return elem.myhface( aluFace );
@@ -376,11 +376,11 @@ namespace Dune
   };
 
 
- 
-  //! contains list of vertices of one level 
+
+  //! contains list of vertices of one level
   //! needed for VertexLevelIterator
   template< class Comm >
-  struct ALU3dGridVertexList 
+  struct ALU3dGridVertexList
   {
     // level vertex iterator list
     typedef typename ALU3dBasicImplTraits< Comm >::VertexType VertexType;
@@ -396,7 +396,7 @@ namespace Dune
     bool up2Date () const { return up2Date_;  }
     void unsetUp2Date ()  { up2Date_ = false; }
 
-    // make grid walkthrough and calc global size 
+    // make grid walkthrough and calc global size
     template <class GridType>
     void setupVxList (const GridType & grid, int level);
 
@@ -404,25 +404,25 @@ namespace Dune
     IteratorType end   () { return vertexList_.end(); }
 
     VertexListType & getItemList() { return vertexList_; }
-    
-    bool isValid( int index ) const { return validateList_[index] ; }  
-    bool isValid( VertexType &vx) const {return isValid( vx.getIndex() ) ; }  
-    
+
+    bool isValid( int index ) const { return validateList_[index] ; }
+    bool isValid( VertexType &vx) const {return isValid( vx.getIndex() ) ; }
+
   private:
     bool up2Date_;
-     //careful: due to the setupVxList structure the ordering of vertexList_ and validateList_ differ in the level Case    
+     //careful: due to the setupVxList structure the ordering of vertexList_ and validateList_ differ in the level Case
      //for validateList_ we want the ALUGrid Index as ordering, as we want to use it for faces
     VertexListType vertexList_;
     std::vector< bool > validateList_;
   };
 
 
-  //! contains list of vertices of one level 
+  //! contains list of vertices of one level
   //! needed for VertexLevelIterator
   template< class Comm >
-  struct ALU3dGridLeafVertexList 
+  struct ALU3dGridLeafVertexList
   {
-    // level vertex iterator list 
+    // level vertex iterator list
     typedef typename ALU3dBasicImplTraits< Comm >::VertexType VertexType;
     typedef std::pair< VertexType *, int > ItemType;
     typedef std::vector< ItemType > VertexListType;
@@ -437,7 +437,7 @@ namespace Dune
     bool up2Date () const { return up2Date_;  }
     void unsetUp2Date ()  { up2Date_ = false; }
 
-    // make grid walkthrough and calc global size 
+    // make grid walkthrough and calc global size
     template <class GridType>
     void setupVxList (const GridType & grid);
 
@@ -454,26 +454,26 @@ namespace Dune
       const ItemType & p = vertexList_[idx];
       if( p.first == 0 )
         return vertex.level();
-      else 
+      else
         return p.second;
     }
-    
-     
-    bool isValid( int index ) const { return validateList_[index] ; }  
-    bool isValid( VertexType &vx ) const { return isValid( vx.getIndex() ) ; }  
-    
+
+
+    bool isValid( int index ) const { return validateList_[index] ; }
+    bool isValid( VertexType &vx ) const { return isValid( vx.getIndex() ) ; }
+
   private:
     bool up2Date_;
     VertexListType vertexList_;
-    std::vector< bool > validateList_;    
+    std::vector< bool > validateList_;
   };
 
 
 
-  class ALU3dGridItemList 
+  class ALU3dGridItemList
   {
   public:
-    // level vertex iterator list 
+    // level vertex iterator list
     typedef std::vector < void * > ItemListType;
     typedef ItemListType :: iterator IteratorType;
 
@@ -499,7 +499,7 @@ namespace Dune
   typedef ALU3dGridItemList ALU3dGridItemListType;
 
   /////////////////////////////////////////////////////////////////////////
-  //  some helper functions 
+  //  some helper functions
   /////////////////////////////////////////////////////////////////////////
 
   template< class Comm >

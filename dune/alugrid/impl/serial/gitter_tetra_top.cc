@@ -622,7 +622,7 @@ namespace ALUGrid
         // sich selbst, weil die Anforderung durch die Fl"ache kam, und
         // dahinter keine Balancierung stattfinden muss.
 
-        //on the 2d faces we just have a e12 bisection refinement 
+        //on the 2d faces we just have a e12 bisection refinement
         if(myhface(0)->is2d()) split_bisection();
         else  split_iso4 () ;
       }
@@ -1922,7 +1922,7 @@ namespace ALUGrid
     h6->append(h7) ;
     _inner = new inner_t( h0, f0, e0 );
     alugrid_assert ( _inner );
-    _rule = myrule_t::iso8 ;
+    _rule = myrule_t::regular ;
 
     this->detachleafs();
     return ;
@@ -2003,7 +2003,7 @@ namespace ALUGrid
 
     _inner = new inner_t( h0, f0 );
     alugrid_assert ( _inner );
-    _rule = myrule_t::iso8 ;
+    _rule = myrule_t::regular ;
 
     this->detachleafs();
     return ;
@@ -2082,7 +2082,7 @@ namespace ALUGrid
     alugrid_assert (getrule () == myrule_t::nosplit) ;
     typedef typename myhface_t::myrule_t face3rule_t;
 
-    if( r == myrule_t::iso8 )
+    if( r == myrule_t::regular )
     {
       // Das refineImmediate (..) auf allen Fl"achen wird vom tetra::refine (..)
       // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
@@ -2093,18 +2093,18 @@ namespace ALUGrid
 
       //we refine everything with iso4, but first unset is2d on the face 0, so it gets treated as a 3d face
       if(myhface(0)->is2d())
-        myhface (0)->reset2dFlag(); 
-      
+        myhface (0)->reset2dFlag();
+
       {
         for (int i = 0 ; i < 4 ; ++i)
           myhface (i)->refineImmediate (face3rule_t (myhface_t::myrule_t::iso4).rotate (twist (i))) ;
       }
-      
+
       //in the 2d case we split the tetra differently
-      if(!this->is2d())
-        splitISO8 () ;
-      else  
+      if( this->is2d() )
         splitIso4_2d () ;
+      else // 3d case
+        splitISO8 () ;
     }
     else if( r == myrule_t::bisect )
     {
@@ -2140,7 +2140,7 @@ namespace ALUGrid
           case myrule_t::crs :
           case myrule_t::nosplit :
             return true ;
-          case myrule_t::iso8 :
+          case myrule_t::regular :
             {
               //we refine everything with rule iso4 but in 2d face 0 gets treated as a 3d face and therefore will be refined differently
               if(myhface(0)->is2d())
@@ -2191,7 +2191,7 @@ namespace ALUGrid
                 return false ;
           }
           _req = myrule_t::nosplit ;
-          refineImmediate (myrule_t::iso8) ;
+          refineImmediate (myrule_t::regular) ;
         }
       }
       else if( r == balrule_t::iso4 && this->is2d())
@@ -2209,7 +2209,7 @@ namespace ALUGrid
                 return false ;
           }
           _req = myrule_t::nosplit ;
-          refineImmediate (myrule_t::iso8) ;
+          refineImmediate (myrule_t::regular) ;
         }
       }
       else

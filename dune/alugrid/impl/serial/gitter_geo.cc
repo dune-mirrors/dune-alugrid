@@ -1,5 +1,5 @@
 // (c) bernhard schupp, 1997 - 1998
-// modification for the dune interface 
+// modification for the dune interface
 // (c) Robert Kloefkorn 2004 -- 2005
 #include <config.h>
 
@@ -20,18 +20,18 @@
 namespace ALUGrid
 {
 
-  const std::pair< Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::hface3::face3Neighbour::null 
+  const std::pair< Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::hface3::face3Neighbour::null
     = std::pair< Gitter::Geometric::hasFace3 *, int > (
         & (Gitter::Geometric::hasFaceEmpty::instance() ), -1);
 
-  const std::pair< Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::hface4::face4Neighbour::null 
-    = std::pair< Gitter::Geometric::hasFace4 *, int > ( 
+  const std::pair< Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::hface4::face4Neighbour::null
+    = std::pair< Gitter::Geometric::hasFace4 *, int > (
         & (Gitter::Geometric::hasFaceEmpty::instance() ), -1);
 
   // prototype of Tetra type ( the faces of a tetrahedron )
   const int Gitter::Geometric::Tetra::prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}};
 
-  // edge which tell from which face with which edge number we get edge 0 to 5 
+  // edge which tell from which face with which edge number we get edge 0 to 5
   const int Gitter::Geometric::Tetra::edgeMap [6][2] = {{3, 0},
                                                               {3, 2},
                                                               {1, 2},
@@ -39,7 +39,7 @@ namespace ALUGrid
                                                               {0, 0},
                                                               {0, 1}};
 
-  // calculation Fomula is 
+  // calculation Fomula is
   // edgeTwist = twist(face) < 0 ?
   //          (6 - vertex + twist(face)) % 3 :
   //          (vertex + twist(face)) % 3);
@@ -52,7 +52,7 @@ namespace ALUGrid
                                                                 {2, 0, 1}, // twist 2
                                                                       };
 
-  // calculation Fomula is 
+  // calculation Fomula is
   // vertexTwist = (twist(face) < 0 ?
   //                 (7 - vertex + twist(face)) % 3 :
   //                 (vertex + twist(face)) % 3);
@@ -64,17 +64,17 @@ namespace ALUGrid
                                                                 {1, 2, 0}, // twist 1
                                                                 {2, 0, 1}, // twist 2
                                                                       };
-                                                                      
-                                                                      
-  // return list with edges that lie not on given face 
-  const std::vector<int> & Gitter::Geometric::Tetra::verticesNotOnFace( const int face ) 
+
+
+  // return list with edges that lie not on given face
+  const std::vector<int> & Gitter::Geometric::Tetra::verticesNotOnFace( const int face )
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 4 );
-    
+
     static std::vector<int> verticesNotFace[4];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
       for(int f=0; f<4; ++f)
       {
@@ -86,21 +86,21 @@ namespace ALUGrid
     return verticesNotFace[face];
   }
 
-  // return list with edges that lie not on given face 
-  const std::vector<int> & Gitter::Geometric::Tetra::edgesNotOnFace( const int face ) 
+  // return list with edges that lie not on given face
+  const std::vector<int> & Gitter::Geometric::Tetra::edgesNotOnFace( const int face )
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 4 );
-    
+
     static std::vector<int> edgesNotFace[4];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
-      for(int f = 0; f<4; ++f ) 
+      for(int f = 0; f<4; ++f )
       {
-        edgesNotFace[f].resize(3); 
+        edgesNotFace[f].resize(3);
 
-        // tell which vertices belong to which edge 
+        // tell which vertices belong to which edge
         static const int protoEdges [6][2] = {{0, 1},
                                               {0, 2},
                                               {0, 3},
@@ -108,7 +108,7 @@ namespace ALUGrid
                                               {1, 3},
                                               {2, 3}};
 
-        const int (&edges)[6][2] = protoEdges;           
+        const int (&edges)[6][2] = protoEdges;
         const int (&vertices)[3] = prototype [ f ];
 
         int edgeCount = 0;
@@ -120,8 +120,8 @@ namespace ALUGrid
           {
             if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
               ++count;
-          } 
-          if (count < 2) 
+          }
+          if (count < 2)
           {
             edgesNotFace[f][edgeCount] = e;
             ++edgeCount;
@@ -134,15 +134,15 @@ namespace ALUGrid
     return edgesNotFace[face];
   }
 
-  // return list with edges that lie not on given face 
-  const std::vector<int> & Gitter::Geometric::Tetra::facesNotOnFace( const int face ) 
+  // return list with edges that lie not on given face
+  const std::vector<int> & Gitter::Geometric::Tetra::facesNotOnFace( const int face )
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 4 );
-    
+
     static std::vector<int> facesNotFace[4];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
       for(int f=0; f<4; ++f)
       {
@@ -161,10 +161,10 @@ namespace ALUGrid
     return facesNotFace[face];
   }
 
-  // prototype of periodic 3 type 
+  // prototype of periodic 3 type
   const int Gitter::Geometric::Periodic3::prototype [2][3] = {{0,1,2},{3,5,4}};
 
-  // prototype of periodic 4 type 
+  // prototype of periodic 4 type
   const int Gitter::Geometric::Periodic4::prototype [2][4] = {{0,3,2,1},{4,5,6,7}};
 
 
@@ -179,7 +179,7 @@ namespace ALUGrid
     //  Prototyp des Hexaeders wie er im Programm verwendet wird.
     //  Eckpunkte und Seitenflaechen:
     //
-    //                      x2 
+    //                      x2
     //                      /
     //                     /
     //              7---------6
@@ -192,47 +192,47 @@ namespace ALUGrid
     //          |  .      |  /
     //          | .   2   | / <-- 0 (unten)
     //          |.        |/
-    //          0---------1 --x1 
-    //         
-    //       
+    //          0---------1 --x1
     //
-    //  edge[0]  = [0,1]   [0 0 0] [1 0 0] 
-    //  edge[1]  = [0,3]   [0 0 0] [0 1 0] 
-    //  edge[2]  = [0,4]   [0 0 0] [0 0 1] 
-    //  edge[3]  = [1,2]   [1 0 0] [1 1 0] 
-    //  edge[4]  = [1,5]   [1 0 0] [1 0 1] 
-    //  edge[5]  = [2,3]   [1 1 0] [0 1 0] 
-    //  edge[6]  = [2,6]   [1 1 0] [1 1 1] 
-    //  edge[7]  = [3,7]   [0 1 0] [0 1 1] 
-    //  edge[8]  = [4,5]   [0 0 1] [1 0 1] 
-    //  edge[9]  = [4,7]   [0 0 1] [0 1 1] 
-    //  edge[10] = [5,6]   [1 0 1] [1 1 1] 
+    //
+    //
+    //  edge[0]  = [0,1]   [0 0 0] [1 0 0]
+    //  edge[1]  = [0,3]   [0 0 0] [0 1 0]
+    //  edge[2]  = [0,4]   [0 0 0] [0 0 1]
+    //  edge[3]  = [1,2]   [1 0 0] [1 1 0]
+    //  edge[4]  = [1,5]   [1 0 0] [1 0 1]
+    //  edge[5]  = [2,3]   [1 1 0] [0 1 0]
+    //  edge[6]  = [2,6]   [1 1 0] [1 1 1]
+    //  edge[7]  = [3,7]   [0 1 0] [0 1 1]
+    //  edge[8]  = [4,5]   [0 0 1] [1 0 1]
+    //  edge[9]  = [4,7]   [0 0 1] [0 1 1]
+    //  edge[10] = [5,6]   [1 0 1] [1 1 1]
     //  edge[11] = [6,7]   [1 1 1] [0 1 1]
     //
-    //       
+    //
 
-  // defines from which vertices one face is created 
-  const int Gitter::Geometric::Hexa::prototype [6][4] = 
+  // defines from which vertices one face is created
+  const int Gitter::Geometric::Hexa::prototype [6][4] =
           {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}};
 
-  const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face 
+  const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face
 
-  // return list with edges that lie not on given face 
-  const std::vector<int> & Gitter::Geometric::Hexa::verticesNotOnFace( const int face ) 
+  // return list with edges that lie not on given face
+  const std::vector<int> & Gitter::Geometric::Hexa::verticesNotOnFace( const int face )
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 6 );
-    
+
     static std::vector<int> verticesNotFace[6];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
       for(int f=0; f<6; ++f)
       {
         verticesNotFace[f].resize( 4 );
         int oppFace = Gitter::Geometric::hexa_GEO::oppositeFace[ f ];
 
-        // get vertices of opposite face of gFace 
+        // get vertices of opposite face of gFace
         const int (& vertices)[4] = Gitter::Geometric::hexa_GEO::prototype [ oppFace ];
 
         for (int i = 0; i < 4; ++i)
@@ -249,21 +249,21 @@ namespace ALUGrid
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 6 );
-    
+
     static std::vector<int> edgesNotFace[6];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
-      for(int f = 0; f<6; ++f ) 
+      for(int f = 0; f<6; ++f )
       {
         edgesNotFace[f].resize(8);
-        
-        // vertices of the edges of an Hexa 
-        static const int protoEdges [12][2] = 
+
+        // vertices of the edges of an Hexa
+        static const int protoEdges [12][2] =
             { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
               {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
 
-        const int (&edges)[12][2] = protoEdges;           
+        const int (&edges)[12][2] = protoEdges;
         const int (&vertices)[4]  = prototype [ f ];
 
         int edgeCount = 0;
@@ -275,8 +275,8 @@ namespace ALUGrid
           {
             if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
               ++count;
-          } 
-          if (count < 2) 
+          }
+          if (count < 2)
           {
             edgesNotFace[f][edgeCount] = e;
             ++edgeCount;
@@ -289,15 +289,15 @@ namespace ALUGrid
     return edgesNotFace[face];
   }
 
-  // return list with edges that lie not on given face 
-  const std::vector<int> & Gitter::Geometric::Hexa::facesNotOnFace( const int face ) 
+  // return list with edges that lie not on given face
+  const std::vector<int> & Gitter::Geometric::Hexa::facesNotOnFace( const int face )
   {
     alugrid_assert ( face >= 0 );
     alugrid_assert ( face < 6 );
-    
+
     static std::vector<int> facesNotFace[6];
     static bool calculated = false;
-    if( ! calculated ) 
+    if( ! calculated )
     {
       for(int f=0; f<6; ++f)
       {
@@ -316,7 +316,7 @@ namespace ALUGrid
     return facesNotFace[face];
   }
 
-  // defines how we get an edge from an hexa , first is face , second is edge 
+  // defines how we get an edge from an hexa , first is face , second is edge
   // for example the 0th edge is defined by the 3th edge of the 0th face
   const int Gitter::Geometric::Hexa::edgeMap [12][2] = {{0, 3},
                                                               {0, 0},
@@ -331,7 +331,7 @@ namespace ALUGrid
                                                               {1, 1},
                                                               {1, 2}};
 
-  // calculation Fomula is 
+  // calculation Fomula is
   // vertexTwist = twist(face) < 0 ?
   //                   (9 - vertex + twist(face)) % 4 :
   //                   (vertex + twist(face)) % 4)
@@ -346,8 +346,8 @@ namespace ALUGrid
     {2,3,0,1}, // twist = 2
     {3,0,1,2}  // twist = 3
   };
-                                                                      
-  // calculation Fomula is 
+
+  // calculation Fomula is
   // edgeTwist = twist(face) < 0 ?
   //          (6 - vertex + twist(face)) % 3 :
   //          (vertex + twist(face)) % 3);
@@ -364,7 +364,7 @@ namespace ALUGrid
    };
 
   const int Gitter::Geometric::Hexa::
-  vertex2Face [8][2] = { 
+  vertex2Face [8][2] = {
     {0,0},// vx = 0
     {0,3},// vx = 1
     {0,2},// vx = 2
@@ -374,8 +374,8 @@ namespace ALUGrid
     {1,2},// vx = 6
     {1,3} // vx = 7
   };
-                                                                      
-  int Gitter::Geometric::Hexa::test () const 
+
+  int Gitter::Geometric::Hexa::test () const
   {
     const int v0[8][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3}};
     const int v1[8][2] = {{2,0},{4,1},{3,1},{2,1},{2,3},{2,2},{3,2},{4,2}};
@@ -393,10 +393,10 @@ namespace ALUGrid
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
           std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0);
           std::cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1);
-          std::cerr << std::endl; 
+          std::cerr << std::endl;
           nfaults ++;
         }
-        if( myvertex (i0, j0) != myvertex (i2, j2)) 
+        if( myvertex (i0, j0) != myvertex (i2, j2))
         {
           std::cerr << "ERROR: On level " << level () << " ";
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")";
@@ -411,7 +411,7 @@ namespace ALUGrid
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalRefinement () {
-    return (request (myrule_t::iso8), 1);
+    return (request (myrule_t::regular), 1);
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalCoarsening () {
@@ -439,7 +439,7 @@ namespace ALUGrid
     }
     return inside;
     */
-    return 
+    return
          (((p [0] - c [0]) * (p [0] - c [0]) + (p [1] - c [1]) * (p [1] - c [1])
          + (p [2] - c [2]) * (p [2] - c [2])) < (r * r)) ? true : false;
   }
@@ -461,7 +461,7 @@ namespace ALUGrid
         if (insideBall (p,center,radius)) { hit = true; break; }
       }
     }
-    return hit ? (level () < limit ? (request (myrule_t::iso8), 1) 
+    return hit ? (level () < limit ? (request (myrule_t::regular), 1)
            : (request (myrule_t::nosplit), 0)) : (request (myrule_t::crs), 1);
   }
 
@@ -477,19 +477,19 @@ namespace ALUGrid
   //          z          y
   //         3 |-------- 2
   //           |\      .|     faces opposite to vertices
-  //           | \    . | 
-  //           |  \  .  | 
-  //           |   \.   |     math. positive orientation from INSIDE 
-  //           |   .\   |    
-  //           |  .  \  |     
-  //           | .    \ |      
-  //           |.      \|1 
-  //         0 ------------ x 
-  //                              
+  //           | \    . |
+  //           |  \  .  |
+  //           |   \.   |     math. positive orientation from INSIDE
+  //           |   .\   |
+  //           |  .  \  |
+  //           | .    \ |
+  //           |.      \|1
+  //         0 ------------ x
+  //
   // face 0 = { 1, 3, 2 }   NOTE: all faces are oriented such that when one looks from
   // face 1 = { 0, 2, 3 }         the inside, they are oriented math. positive
   // face 2 = { 0, 3, 1 }
-  // face 3 = { 0, 1, 2 } 
+  // face 3 = { 0, 1, 2 }
   //
   // edge 0 = {0,1}
   // edge 1 = {0,2}
@@ -500,14 +500,14 @@ namespace ALUGrid
   //
   //
   //   edgeMap[6][2] = {{3, 0},  (face ,edge)
-  //                    {3, 2}, 
+  //                    {3, 2},
   //                    {1, 2},
   //                    {0, 2},
   //                    {0, 0},
   //                    {0, 1}};
   //
   //
-  //  Edge numbering in the triangle 
+  //  Edge numbering in the triangle
   //
   //    2
   //    |\
@@ -518,7 +518,7 @@ namespace ALUGrid
   //    |     \
   //    |      \
   //  0 -------- 1
-  //        0 
+  //        0
   //
   */
 
@@ -527,13 +527,13 @@ namespace ALUGrid
     return 0;
   }
 
-  int Gitter::Geometric::Tetra::tagForGlobalRefinement () 
+  int Gitter::Geometric::Tetra::tagForGlobalRefinement ()
   {
-    // check whether bisection should be used 
-    if( this->myvertex(0)->myGrid()->conformingClosureNeeded() ) 
+    // check whether bisection should be used
+    if( this->myvertex(0)->myGrid()->conformingClosureNeeded() )
       return (request (myrule_t::bisect), 1);
-    else 
-      return (request (myrule_t::iso8), 1);
+    else
+      return (request (myrule_t::regular), 1);
   }
 
   int Gitter::Geometric::Tetra::tagForGlobalCoarsening () {
@@ -636,7 +636,7 @@ namespace ALUGrid
     return 0;
   }
 
-  Gitter::Geometric::BuilderIF::~BuilderIF () 
+  Gitter::Geometric::BuilderIF::~BuilderIF ()
   {
     if( iterators_attached () )
       std::cerr << "WARNING (ignored): Non-zero iterator count while deleting BuilderIF [" << iterators_attached () << "]" << std::endl;
@@ -678,7 +678,7 @@ namespace ALUGrid
   }
 
   IteratorSTI < Gitter::hface_STI > * Gitter::Geometric::BuilderIF::iterator (const IteratorSTI < hface_STI > * w) const {
-    return new AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI > 
+    return new AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI >
       (*(const AlignIterator < ListIterator < hface4_GEO >, ListIterator < hface3_GEO >, hface_STI > *)w);
   }
 
@@ -689,24 +689,24 @@ namespace ALUGrid
   }
 
   IteratorSTI < Gitter::hbndseg_STI > * Gitter::Geometric::BuilderIF::iterator (const IteratorSTI < hbndseg_STI > * w) const {
-    return new AlignIterator < ListIterator < hbndseg4_GEO >, ListIterator < hbndseg3_GEO >, hbndseg_STI > 
+    return new AlignIterator < ListIterator < hbndseg4_GEO >, ListIterator < hbndseg3_GEO >, hbndseg_STI >
               (*(const AlignIterator < ListIterator < hbndseg4_GEO >, ListIterator < hbndseg3_GEO >, hbndseg_STI > *)w);;
   }
 
-  IteratorSTI < Gitter::helement_STI > * Gitter::Geometric::BuilderIF::iterator (const helement_STI *a ) const 
+  IteratorSTI < Gitter::helement_STI > * Gitter::Geometric::BuilderIF::iterator (const helement_STI *a ) const
   {
     ListIterator < hexa_GEO > w1 (_hexaList);
     ListIterator < tetra_GEO > w2 (_tetraList);
-    
+
     return new AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > (w1,w2);
   }
 
   IteratorSTI < Gitter::helement_STI > * Gitter::Geometric::BuilderIF::iterator (const IteratorSTI < helement_STI > * w) const {
-    return new AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > 
+    return new AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI >
       (*(const AlignIterator < ListIterator < hexa_GEO >, ListIterator < tetra_GEO >, helement_STI > *)w);
   }
 
-  IteratorSTI < Gitter::hperiodic_STI > * Gitter::Geometric::BuilderIF::iterator (const hperiodic_STI *a ) const 
+  IteratorSTI < Gitter::hperiodic_STI > * Gitter::Geometric::BuilderIF::iterator (const hperiodic_STI *a ) const
   {
     ListIterator < periodic3_GEO > w1 (_periodic3List);
     ListIterator < periodic4_GEO > w2 (_periodic4List);
@@ -714,7 +714,7 @@ namespace ALUGrid
     return new AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, hperiodic_STI > (w1, w2 );
   }
 
-  IteratorSTI < Gitter::hperiodic_STI > * Gitter::Geometric::BuilderIF::iterator (const IteratorSTI < hperiodic_STI > * w) const 
+  IteratorSTI < Gitter::hperiodic_STI > * Gitter::Geometric::BuilderIF::iterator (const IteratorSTI < hperiodic_STI > * w) const
   {
     typedef AlignIterator < ListIterator < periodic3_GEO >, ListIterator < periodic4_GEO >, hperiodic_STI > Iterator;
     return new Iterator( (*(const Iterator *) w ) );
@@ -737,7 +737,7 @@ namespace ALUGrid
     header.setFormat( format );
     header.setSystemByteOrder();
 
-    if( format == MacroFileHeader::ascii ) 
+    if( format == MacroFileHeader::ascii )
     {
       // write header, for ascii it's complete here
       header.write( os );
@@ -747,13 +747,13 @@ namespace ALUGrid
       os << std::scientific;
       dumpMacroGridImpl( os );
     }
-    else // binary or zbinary 
+    else // binary or zbinary
     {
       ObjectStream data;
       dumpMacroGridImpl( data );
       data.put( char(' ') ); // make consistent with ascii stream
 
-      // write binary data to stream 
+      // write binary data to stream
       writeHeaderAndBinary( os, data, header );
     }
 
@@ -762,7 +762,7 @@ namespace ALUGrid
   }
 
   template<class ostream_t>
-  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os ) const 
+  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os ) const
   {
     // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
@@ -770,27 +770,27 @@ namespace ALUGrid
     // Dateiformats noch nicht spezifiziert.
     const int vertexListSize = _vertexList.size();
     const int tetraListSize  = _tetraList.size ();
-    const int hexaListSize   = _hexaList.size  (); 
+    const int hexaListSize   = _hexaList.size  ();
 
     StandardWhiteSpace_t ws ;
 
     {
       os << vertexListSize << std::endl;
       const vertexlist_t::const_iterator end = _vertexList.end ();
-      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i) 
+      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i)
       {
         vertex_GEO* vertex = (*i);
         os << vertex->ident() << ws << vertex->Point() << std::endl;
       }
     }
 
-    if( hexaListSize > 0 ) 
+    if( hexaListSize > 0 )
     {
       alugrid_assert (_hbndseg3List.size () == 0);
 
       os << hexaListSize << std::endl;
       const hexalist_t::const_iterator end = _hexaList.end ();
-      for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i ) 
+      for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i )
       {
         for (int j = 0; j < 7; ++ j )
         {
@@ -801,7 +801,7 @@ namespace ALUGrid
 
       os << int(_periodic4List.size ()) << ws << int(_hbndseg4List.size ()) << std::endl;
       const periodic4list_t::const_iterator pend = _periodic4List.end ();
-      for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != pend; ++i) 
+      for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != pend; ++i)
       {
         for (int j = 0; j < 7; ++j )
         {
@@ -810,26 +810,26 @@ namespace ALUGrid
         os << (*i)->myvertex (7)->ident() << std::endl;
       }
       const hbndseg4list_t::const_iterator hend = _hbndseg4List.end ();
-      for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i) 
+      for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i)
       {
         const int bndtype = (int)(*i)->bndtype ();
         // write negative bnd value in case of exterior bnd
-        if( bndtype != hbndseg_STI::closure ) 
+        if( bndtype != hbndseg_STI::closure )
           os << -bndtype << ws ;
-        for (int j = 0; j < 3; ++ j ) 
+        for (int j = 0; j < 3; ++ j )
         {
           os << (*i)->myvertex (0,j)->ident() << ws ;
         }
         os << (*i)->myvertex (0,3)->ident() << std::endl ;
       }
-    } 
-    else if( tetraListSize > 0 ) 
+    }
+    else if( tetraListSize > 0 )
     {
       os << tetraListSize << std::endl;
       const tetralist_t::const_iterator end = _tetraList.end ();
-      for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i ) 
+      for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i )
       {
-        for (int j = 0; j < 3; ++ j ) 
+        for (int j = 0; j < 3; ++ j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
@@ -838,9 +838,9 @@ namespace ALUGrid
 
       os << int(_periodic3List.size ()) << ws << int(_hbndseg3List.size ()) << std::endl;
       const periodic3list_t::const_iterator pend = _periodic3List.end ();
-      for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != pend; ++i ) 
+      for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != pend; ++i )
       {
-        for (int j = 0; j < 5; ++j ) 
+        for (int j = 0; j < 5; ++j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
@@ -848,13 +848,13 @@ namespace ALUGrid
       }
 
       const hbndseg3list_t::const_iterator hend = _hbndseg3List.end ();
-      for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != hend; ++i) 
+      for (hbndseg3list_t::const_iterator i = _hbndseg3List.begin (); i != hend; ++i)
       {
         const int bndtype = (int)(*i)->bndtype ();
         // write negative bnd value in case of exterior bnd
-        if( bndtype != hbndseg_STI::closure ) 
+        if( bndtype != hbndseg_STI::closure )
           os << -bndtype << ws ;
-        for( int j = 0; j < 2; ++ j ) 
+        for( int j = 0; j < 2; ++ j )
         {
           os << (*i)->myvertex(0,j)->ident() << ws ;
         }
@@ -864,33 +864,33 @@ namespace ALUGrid
 
     // backup linkage (for parallel backup/restore)
     linkagePatternMap_t& linkagePattern = const_cast< BuilderIF * > (this)->indexManagerStorage().linkagePatterns();
-    // write size of pattern, 0 == no patterns 
+    // write size of pattern, 0 == no patterns
     // the null patterns is always there
     const int linkPatternSize = linkagePattern.size()-1;
     os << linkPatternSize << std::endl;
-    if( linkPatternSize > 0 ) 
+    if( linkPatternSize > 0 )
     {
       std::vector< int > refCount( linkPatternSize+1, -1 );
       typedef linkagePatternMap_t :: iterator iterator ;
       int idx = 0;
       const iterator endL = linkagePattern.end();
-      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx ) 
+      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx )
       {
-        // save ref count 
+        // save ref count
         refCount[ idx ] = (*it).second ;
-        // overwrite ref count with position 
+        // overwrite ref count with position
         (*it).second = idx ;
 
-        // store linkage to backup stream 
+        // store linkage to backup stream
         const std::vector<int>& linkage = (*it).first ;
         const int linkageSize = linkage.size();
-        // the null pattern should be the first entry 
+        // the null pattern should be the first entry
         alugrid_assert( linkageSize == 0 ? idx == 0 : true );
-        if( linkageSize > 0 ) 
+        if( linkageSize > 0 )
         {
           os << linkageSize << ws;
-          for( int i=0; i<linkageSize; ++i ) 
-            os << linkage[ i ] << ws; 
+          for( int i=0; i<linkageSize; ++i )
+            os << linkage[ i ] << ws;
           os << std::endl;
         }
       }
@@ -905,22 +905,22 @@ namespace ALUGrid
       idx = 0 ;
       // store position of vertex linkage in the map if vertex is border vertex
       const vertexlist_t::const_iterator end = _vertexList.end ();
-      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i, ++idx) 
+      for (vertexlist_t::const_iterator i = _vertexList.begin (); i != end; ++i, ++idx)
       {
         vertex_GEO* vertex = (*i);
         // linkage info is only needed for border vertices
-        if( vertex->isBorder() ) 
+        if( vertex->isBorder() )
         {
-          os << idx << ws << vertex->linkagePosition(); 
-          // the methods linkedElements and linkagePosition will fail for serial vertices 
+          os << idx << ws << vertex->linkagePosition();
+          // the methods linkedElements and linkagePosition will fail for serial vertices
           // but for these isBorder should be false anyway
-          if( hasElementLinkage ) 
+          if( hasElementLinkage )
           {
             typedef vertex_GEO :: ElementLinkage_t ElementLinkage_t;
             const ElementLinkage_t& linkedElements = vertex->linkedElements();
             const int size = linkedElements.size();
-            os << ws << size ; 
-            for( int k=0; k<size; ++k ) 
+            os << ws << size ;
+            for( int k=0; k<size; ++k )
               os << ws << linkedElements[ k ];
           }
           os << std::endl;
@@ -928,9 +928,9 @@ namespace ALUGrid
       }
       os << int(-1) << std::endl; // end marker for vertex position list
 
-      // restore refcount 
+      // restore refcount
       idx = 0;
-      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx ) 
+      for( iterator it = linkagePattern.begin(); it != endL; ++it, ++idx )
       {
         // restore ref count to map entry
         (*it).second = refCount[ idx ] ;
@@ -975,19 +975,19 @@ namespace ALUGrid
     return _indexManagerStorage;
   }
 
-  size_t Gitter::Geometric::BuilderIF::numMacroBndSegments() const 
+  size_t Gitter::Geometric::BuilderIF::numMacroBndSegments() const
   {
-    // count periodic boundaries twice 
-    return _hbndseg3List.size() + 
-           _hbndseg4List.size() + 
+    // count periodic boundaries twice
+    return _hbndseg3List.size() +
+           _hbndseg4List.size() +
            (2 * _periodic3List.size()) +
            (2 * _periodic4List.size());
   }
 
-  // compress all index manager 
+  // compress all index manager
   void Gitter::Geometric::BuilderIF::compressIndexManagers()
   {
-    _indexManagerStorage.compress(); 
-  } 
+    _indexManagerStorage.compress();
+  }
 
 } // namespace ALUGrid

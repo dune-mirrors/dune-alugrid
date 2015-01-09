@@ -707,7 +707,7 @@ namespace ALUGrid
     return;
   }
 
-  //for iso4_2d we  use the subedge routine for the faces 0,1
+  //for regular 2d we use the subedge routine for the faces 0,1
   template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) {
     return (j < 4) ? ((twist (i) < 0) ? myhface4 (i)->myhedge ((8 - j + twist (i)) % 4) :
       myhface4 (i)->myhedge ((j + twist (i)) % 4)) :
@@ -722,7 +722,7 @@ namespace ALUGrid
     myhface4 (i)->subedge ((j + twist (i)) % 4));
   }
 
-  // subface routine for iso4_2d has to use twist
+  // subface routine for regular 2d has to use twist
   template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) {
     return ( myhface4(i)->getrule() == myhface4_t::myrule_t::iso4   ) ?
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
@@ -732,7 +732,7 @@ namespace ALUGrid
     (abort (), (myhface4_t *)0);
   }
 
-  //check subface routine  for iso4_2d  has to use twist
+  //check subface routine  for regular 2d has to use twist
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
     return ( myhface4(i)->getrule() == myhface4_t::myrule_t::iso4   ) ?
     myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
@@ -852,7 +852,7 @@ namespace ALUGrid
     _inner->store( f0 );
     // down ptr
     _inner->store( h0 );
-    _rule = myrule_t::iso8;
+    _rule = myrule_t::regular ;
     this->detachleafs();
     return;
   }
@@ -877,14 +877,9 @@ namespace ALUGrid
     _inner = new inner_t( 0 , 0, e0);
     alugrid_assert(_inner);
 
-
-
-
-
-
- // we just need four inner Faces
- // always the inner edge + the subedge of top and bottom  + one subedge of a side face
-// the top face is rotated in the other direction as the bottom face, so we need the subedges in the descending order.
+    // we just need four inner Faces
+    // always the inner edge + the subedge of top and bottom  + one subedge of a side face
+    // the top face is rotated in the other direction as the bottom face, so we need the subedges in the descending order.
     // inner face 0 at face 2
     innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge(1,4), 0, e0, 0, this->subedge(0,7), 1);
     // inner face 1 at face 3
@@ -928,26 +923,28 @@ namespace ALUGrid
     innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), twist (0), subface(1,2), twist(1), f1, 3, subface (3, 0), twist (3), subface (4, 1), twist (4), f2, -2 , this, 2, childVolume);
     innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), twist (0), subface(1,3), twist(1), f3, -1, f2, 3, subface (4, 0), twist(4), subface(5,1), twist(5),   this, 3, childVolume);
 
-
-   if(!checkHexa( h0, 0 )) std::cout << "0: " << h0 << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-   if(!checkHexa( h1, 1 )) std::cout << "1: " <<  h1<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-   if(!checkHexa( h2, 2 )) std::cout << "2: " << h2<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-   if(!checkHexa( h3, 3 )) std::cout << "3: " << h3<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-
-
-
-
     alugrid_assert (h0 && h1 && h2 && h3 );
+
+    alugrid_assert( checkHexa( h0, 0 ) );
+    alugrid_assert( checkHexa( h1, 1 ) );
+    alugrid_assert( checkHexa( h2, 2 ) );
+    alugrid_assert( checkHexa( h3, 3 ) );
+    /*
+    if(!checkHexa( h0, 0 )) std::cout << "0: " << h0 << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+    if(!checkHexa( h1, 1 )) std::cout << "1: " <<  h1<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+    if(!checkHexa( h2, 2 )) std::cout << "2: " << h2<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+    if(!checkHexa( h3, 3 )) std::cout << "3: " << h3<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
+    */
+
     h0->append(h1);
     h1->append(h2);
     h2->append(h3);
-
 
     // inner face
     _inner->store( f0 );
     // down ptr
     _inner->store( h0 );
-    _rule = myrule_t::iso4_2d;
+    _rule = myrule_t::regular;
     this->detachleafs();
     return;
   }
@@ -963,35 +960,27 @@ namespace ALUGrid
     // erzwingen m"ussen und d"urfen.
 
     alugrid_assert ( getrule() == myrule_t::nosplit );
-    switch( r )
+    alugrid_assert ( r == myrule_t::regular );
+    if( this->is2d() ) // 2d case
     {
-    case myrule_t::iso8 :
-      {
-        typedef typename myhface4_t::myrule_t myhface4rule_t;
-        for( int i = 0; i < 6; ++i )
-          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));
-        splitISO8();
-      }
-      break;
-
-    case myrule_t::iso4_2d :
-      {
-        typedef typename myhface4_t::myrule_t myhface4rule_t;
-        //first we need to refine the side faces to get the top and bottom indices
-        //for(int i = 0 ; i < 6; ++i) std::cout << myhface4(i)  ;
-        for( int i = 2; i < 6; ++i )
-          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso2).rotate (twist (i)));
-        for( int i = 0; i < 2; ++i)
-          myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));
-        splitISO4();
-      }
-      break;
-
-    default:
-      std::cerr << "ERROR (fatal): Forced refinement using rule " << r << " not possible." << std::endl;
-      abort();
-      break;
+      typedef typename myhface4_t::myrule_t myhface4rule_t;
+      //first we need to refine the side faces to get the top and bottom indices
+      for( int i = 2; i < 6; ++i )
+        myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso2).rotate (twist (i)));
+      for( int i = 0; i < 2; ++i)
+        myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));
+      splitISO4();
     }
+    else // 3d case
+    {
+      typedef typename myhface4_t::myrule_t myhface4rule_t;
+      for( int i = 0; i < 6; ++i )
+        myhface4 (i)->refineImmediate (myhface4rule_t (myhface4_t::myrule_t::iso4).rotate (twist (i)));
+
+      splitISO8();
+    }
+
+    // call post refinement method (default is empty)
     this->postRefinement();
   }
 
@@ -1010,17 +999,8 @@ namespace ALUGrid
         case myrule_t::nosplit:
           return true;
 
-        case myrule_t::iso8:
-          {
-            typedef typename myhface4_t::myrule_t myhface4rule_t;
-            for( int i = 0; i < 6; ++i )
-              if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso4 ).rotate( twist( i ) ), twist( i ) ) )
-                return false;
-            refineImmediate( r );
-            return true;
-          }
-
-        case myrule_t::iso4_2d:
+        case myrule_t::regular :
+          if( this->is2d() ) // 2d case
           {
             typedef typename myhface4_t::myrule_t myhface4rule_t;
             for( int i = 0; i < 2; ++i )
@@ -1032,7 +1012,15 @@ namespace ALUGrid
             refineImmediate( r );
             return true;
           }
-
+          else // 3d case
+          {
+            typedef typename myhface4_t::myrule_t myhface4rule_t;
+            for( int i = 0; i < 6; ++i )
+              if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso4 ).rotate( twist( i ) ), twist( i ) ) )
+                return false;
+            refineImmediate( r );
+            return true;
+          }
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << getrule() << "]." << std::endl;
           return false;
@@ -1042,19 +1030,24 @@ namespace ALUGrid
     return true;
   }
 
-  template< class A > bool HexaTop < A >::refineBalance (balrule_t r, int fce) {
+  template< class A > bool HexaTop < A >::refineBalance (balrule_t r, int fce)
+  {
     alugrid_assert (r == balrule_t::iso4 || r == balrule_t::iso2 );
-    if (getrule () == myrule_t::nosplit) {
-      if (! myhface4 (fce)->leaf ()) {
+    if (getrule () == myrule_t::nosplit)
+    {
+      if (! myhface4 (fce)->leaf ())
+      {
         switch( r )
         {
         case balrule_t::iso4:
-          for (int i = 0; i < 6; i ++)
+          for (int i = 0; i < 6; ++i)
+          {
             if (i != fce)
               if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4).rotate (twist (i)), twist (i)))
                 return false;
+          }
           _req = myrule_t::nosplit;
-          refineImmediate (myrule_t::iso8);
+          refineImmediate ( myrule_t::regular );
         case balrule_t::iso2:
           for( int i = 0; i < 2; ++i)
             if (i != fce)
@@ -1065,7 +1058,7 @@ namespace ALUGrid
               if (!myhface4 (i)->refine (balrule_t (balrule_t::iso2).rotate (twist (i)), twist (i)))
                 return false;
           _req = myrule_t::nosplit;
-          refineImmediate (myrule_t::iso4_2d);
+          refineImmediate ( myrule_t::regular );
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << getrule() << "]." << std::endl;
           return false;

@@ -1,6 +1,6 @@
 // (c) Bernhard Schupp 1997 - 1998
-// modifications for dune interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modifications for dune interface
+// (c) Robert Kloefkorn 2004 - 2005
 #ifndef WALK_H_INCLUDED
 #define WALK_H_INCLUDED
 
@@ -12,7 +12,7 @@
 namespace ALUGrid
 {
 
-  // always returns 1 for walk over all elements   
+  // always returns 1 for walk over all elements
   template< class A >
   class is_def_true
   {
@@ -22,7 +22,7 @@ namespace ALUGrid
     int operator () (const A & x) const { return 1; }
   };
 
-  // for leaf iterator , return true is elements is leaf 
+  // for leaf iterator , return true is elements is leaf
   template< class A >
   class is_leaf
   {
@@ -32,7 +32,7 @@ namespace ALUGrid
     int operator () (const A & x) const { return x.leaf (); }
   };
 
-  // for leaf iterator , return true is elements is not leaf 
+  // for leaf iterator , return true is elements is not leaf
   template< class A >
   class is_not_leaf
   {
@@ -43,7 +43,7 @@ namespace ALUGrid
   };
 
 
-  // returns true if given element has the level 
+  // returns true if given element has the level
   template < class A >
   class any_has_level
   {
@@ -55,11 +55,11 @@ namespace ALUGrid
     int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.level () == lvl ? 1 : 0; }
 
-    // return given level 
+    // return given level
     int level () const { return lvl; }
   };
 
-  // returns true if given element has the level 
+  // returns true if given element has the level
   template< class A >
   class any_has_level_periodic
   {
@@ -71,7 +71,7 @@ namespace ALUGrid
 
     int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return (x.level () == lvl) && ( ! x.leaf()  || x.isLeafEntity() ); }
-    // return given level 
+    // return given level
     int level () const { return lvl; }
   };
 
@@ -119,14 +119,14 @@ namespace ALUGrid
       int operator () (const A &) const;
   };
 
-  //! new rule for Dune LeafIterator 
+  //! new rule for Dune LeafIterator
   //! all entities with hav either the level or are leaf entities with one
-  //! level <= the desired level 
+  //! level <= the desired level
   template < class A > class leaf_or_has_level
   {
     int lvl_;
     public :
-      //! Constructor storing the level 
+      //! Constructor storing the level
       leaf_or_has_level (int i = 0) : lvl_ (i) { }
 
       //! check if go next
@@ -144,14 +144,14 @@ namespace ALUGrid
       }
   };
 
-  //! new rule for Dune LeafIterator minus one 
-  //! all entities with are either leaf entities or thier children are leaf entities 
+  //! new rule for Dune LeafIterator minus one
+  //! all entities with are either leaf entities or thier children are leaf entities
   template < class A > class leaf_or_father_of_leaf
   {
     public :
       typedef A val_t;
 
-      //! Constructor storing the level 
+      //! Constructor storing the level
       leaf_or_father_of_leaf () {}
 
       //! check if go next
@@ -167,49 +167,49 @@ namespace ALUGrid
       }
   };
 
-  //! new rule for Dune LeafIterator minus one 
-  //! all entities with are either leaf entities or thier children are leaf entities 
+  //! new rule for Dune LeafIterator minus one
+  //! all entities with are either leaf entities or thier children are leaf entities
   template < class A > class is_leaf_entity
   {
     public :
       typedef A val_t;
 
-      //! Constructor storing the level 
+      //! Constructor storing the level
       is_leaf_entity () {}
 
       //! check if go next
       int operator () (const A * x) const
       {
-        return ( x->isLeafEntity() ) ? 1 : 0; 
+        return ( x->isLeafEntity() ) ? 1 : 0;
       }
 
       //! check if go next
       int operator () (const A & x) const
       {
-        return ( x.isLeafEntity() ) ? 1 : 0; 
+        return ( x.isLeafEntity() ) ? 1 : 0;
       }
   };
 
-  //! new rule for Dune LeafIterator minus one 
-  //! all entities with are either leaf entities or thier children are leaf entities 
+  //! new rule for Dune LeafIterator minus one
+  //! all entities with are either leaf entities or thier children are leaf entities
   template < class A > class is_interior_leaf_entity
   {
     public :
       typedef A val_t;
 
-      //! Constructor storing the level 
+      //! Constructor storing the level
       is_interior_leaf_entity () {}
 
       //! check if go next
       int operator () (const A * x) const
       {
-        return ( x->isLeafEntity() && x->isInterior() ) ? 1 : 0; 
+        return ( x->isLeafEntity() && x->isInterior() ) ? 1 : 0;
       }
 
       //! check if go next
       int operator () (const A & x) const
       {
-        return ( x.isLeafEntity() && x.isInterior() ) ? 1 : 0; 
+        return ( x.isLeafEntity() && x.isInterior() ) ? 1 : 0;
       }
   };
 
@@ -227,9 +227,9 @@ namespace ALUGrid
     typename ListType::iterator _curr;
 
   public :
-    // createing ListIterator, default status is done 
+    // createing ListIterator, default status is done
     ListIterator (const ListType &);
-    // create ListIterator by making a copy  
+    // create ListIterator by making a copy
     ListIterator (const ListIterator < A > &);
     ~ListIterator ();
     void first ();
@@ -237,7 +237,7 @@ namespace ALUGrid
     int done () const;
     int size ();
     A & item () const;
-    // make a copy of the iterator 
+    // make a copy of the iterator
     virtual IteratorSTI < A > * clone () const;
   };
 
@@ -258,9 +258,9 @@ namespace ALUGrid
       val_t & item () const;
       virtual IteratorSTI < A > * clone () const;
     private :
-      // maximal depth of a grid hierarchy, 
-      // for iso8 refinement 16 should be enough 
-      // for bisection we need more 
+      // maximal depth of a grid hierarchy,
+      // for red refinement 16 should be enough
+      // for bisection we need more
       enum { maxStackDepth = 32 };
 
       A * _seed;
@@ -271,7 +271,7 @@ namespace ALUGrid
       int pushdown ();
       int pullup ();
       int count () const;
-      // make a copy of given iterator 
+      // make a copy of given iterator
       void assignIterator (const TreeIterator < A, B > &);
   };
 
@@ -306,14 +306,14 @@ namespace ALUGrid
       int done () const;
       C & item () const;
       IteratorSTI < C > * clone () const;
-    private:  
+    private:
   };
 
   template < class A > class VectorAlign : public IteratorSTI < A >
   {
     typedef IteratorSTI < A > * pointer_t;
     std::vector< pointer_t > _it;
-    typedef typename std::vector< pointer_t > :: iterator iterator_t; 
+    typedef typename std::vector< pointer_t > :: iterator iterator_t;
     typedef typename std::vector< pointer_t > :: const_iterator constiterator_t;
 
     constiterator_t  _curr, _ahead;
@@ -345,9 +345,9 @@ namespace ALUGrid
       val_t & item () const;
       virtual IteratorSTI < val_t > * clone () const;
     private :
-      void removeObj(); 
-      // count items 
-      int count () const; 
+      void removeObj();
+      // count items
+      int count () const;
 
       A _outer;
       B * _inner;
@@ -367,14 +367,14 @@ namespace ALUGrid
 
 
   template < class A > int childs_are_leafs < A > :: operator () (const A * x) const {
-    if (x->leaf ()) { 
-      return 0; 
-    } else { 
+    if (x->leaf ()) {
+      return 0;
+    } else {
       for (const A * y = x->down (); y; y = y->next ()) if (!y->leaf ()) return 0;
     }
     return 1;
   }
-    
+
   template < class A > int childs_are_leafs < A > :: operator () (const A & x) const {
     if (x.leaf ()) {
       return 0;
@@ -384,18 +384,18 @@ namespace ALUGrid
     return 1;
   }
 
-  template < class A > inline ListIterator < A > :: ListIterator (const ListType& l) 
+  template < class A > inline ListIterator < A > :: ListIterator (const ListType& l)
     : _list ((ListType &)l), _curr (_list.end()) {
     return;
   }
 
-  template < class A > inline ListIterator < A > :: 
+  template < class A > inline ListIterator < A > ::
   ListIterator (const ListIterator < A > & w) : _list(w._list) , _curr(w._curr)
   {
     return;
   }
 
-  template < class A > inline IteratorSTI< A > * ListIterator < A > :: 
+  template < class A > inline IteratorSTI< A > * ListIterator < A > ::
   clone () const
   {
     return new ListIterator < A > (*this);
@@ -429,7 +429,7 @@ namespace ALUGrid
 
   /////////////////////////////////////////////////////////////////////////////////////
   //
-  //  --TreeIterator 
+  //  --TreeIterator
   //
   /////////////////////////////////////////////////////////////////////////////////////
 
@@ -442,38 +442,38 @@ namespace ALUGrid
 
   template < class A, class B > inline int TreeIterator < A, B > :: pullup () {
     for(; _pos >= 0; _pos -- ) if ( (_stack [_pos] = _stack [_pos]->next () ) ) break;
-    return _pos < 0 ? 0 : 1; 
+    return _pos < 0 ? 0 : 1;
   }
 
   template < class A, class B > inline int TreeIterator < A, B > :: count () const
   {
     // we cannot use our own iterator, because counting will cahnge the
-    // status of the iterator 
-    TreeIterator < A, B > counter(*this); 
+    // status of the iterator
+    TreeIterator < A, B > counter(*this);
     int i = 0;
     for (counter.first (); ! counter.done (); counter.next ()) ++ i;
     return i;
   }
 
-  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c) 
+  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c)
     : _seed (& s), _cmp (c), _pos (0), _cnt (-1) {
     _stack [0] = 0;
     return;
   }
 
-  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c) 
+  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c)
     : _seed (s), _cmp(c), _pos(0), _cnt (-1) {
     _stack [0] = 0;
     return;
   }
 
-  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator ( const TreeIterator < A, B > & w) 
+  template < class A, class B > inline TreeIterator < A, B > :: TreeIterator ( const TreeIterator < A, B > & w)
   {
     assignIterator(w);
     return;
   }
 
-  template < class A, class B > inline IteratorSTI < A > *  TreeIterator < A, B > :: 
+  template < class A, class B > inline IteratorSTI < A > *  TreeIterator < A, B > ::
   clone () const
   {
     return new TreeIterator < A, B > (*this);
@@ -483,10 +483,10 @@ namespace ALUGrid
     return;
   }
 
-  template < class A, class B > inline void TreeIterator < A, B > :: 
-  assignIterator (const TreeIterator < A, B > & w) 
+  template < class A, class B > inline void TreeIterator < A, B > ::
+  assignIterator (const TreeIterator < A, B > & w)
   {
-    // make a copy of iterator 
+    // make a copy of iterator
     _seed = w._seed;
     _cnt  = w._cnt;
     _pos  = w._pos;
@@ -496,7 +496,7 @@ namespace ALUGrid
     for (int i = 0; i <= _pos; ++i) _stack [i] = w._stack [i];
   }
 
-  template < class A, class B > inline const TreeIterator < A, B > & TreeIterator < A, B > :: operator = (const TreeIterator < A, B > & w) 
+  template < class A, class B > inline const TreeIterator < A, B > & TreeIterator < A, B > :: operator = (const TreeIterator < A, B > & w)
   {
     assignIterator(w);
     return w;
@@ -548,7 +548,7 @@ namespace ALUGrid
 
   ////////////////////////////////////////////////////////////////////////////////////////
   //
-  //  --Wrapper 
+  //  --Wrapper
   //
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -560,7 +560,7 @@ namespace ALUGrid
     return;
   }
 
-  template < class A, class B > inline IteratorSTI< typename B::val_t > * 
+  template < class A, class B > inline IteratorSTI< typename B::val_t > *
   Wrapper < A, B > :: clone () const
   {
     return new Wrapper < A, B > (*this);
@@ -588,7 +588,7 @@ namespace ALUGrid
     return _walk.A :: done ();
   }
 
-  template < class A, class B > inline typename Wrapper < A, B > :: val_t & 
+  template < class A, class B > inline typename Wrapper < A, B > :: val_t &
   Wrapper < A, B > :: item () const {
     alugrid_assert (! done ());
     return B ()(_walk.A :: item ());
@@ -596,25 +596,25 @@ namespace ALUGrid
 
   ////////////////////////////////////////////////////////////////////////////
   //
-  //  --AlignIterator 
+  //  --AlignIterator
   //
   ////////////////////////////////////////////////////////////////////////////
 
-  template < class A, class B, class C > 
-  inline AlignIterator < A, B, C > :: 
-  AlignIterator (const A & a, const B & b) 
+  template < class A, class B, class C >
+  inline AlignIterator < A, B, C > ::
+  AlignIterator (const A & a, const B & b)
     : _walk1 (a), _walk2 (b), _curr (0), _cnt (-1) {
     return;
   }
 
-  template < class A, class B, class C > 
-  inline AlignIterator < A, B, C > :: AlignIterator (const AlignIterator < A, B, C > & a) 
+  template < class A, class B, class C >
+  inline AlignIterator < A, B, C > :: AlignIterator (const AlignIterator < A, B, C > & a)
     : _walk1 (a._walk1), _walk2 (a._walk2), _curr (a._curr), _cnt (-1) {
     return;
   }
 
-  template < class A, class B, class C > 
-  inline IteratorSTI < C > * AlignIterator < A, B, C > :: 
+  template < class A, class B, class C >
+  inline IteratorSTI < C > * AlignIterator < A, B, C > ::
   clone () const
   {
     return new AlignIterator < A, B, C > (*this);
@@ -624,7 +624,7 @@ namespace ALUGrid
     return;
   }
 
-  template < class A, class B, class C > inline void AlignIterator < A, B, C > :: first() { 
+  template < class A, class B, class C > inline void AlignIterator < A, B, C > :: first() {
     _curr = 0;
     _walk1.A :: first();
     if(_walk1.A :: done()) {
@@ -649,7 +649,7 @@ namespace ALUGrid
 
   template < class A, class B, class C > inline C & AlignIterator < A, B, C > :: item () const {
     alugrid_assert (! done ());
-    if (_curr) return (C &) _walk2.B::item (); 
+    if (_curr) return (C &) _walk2.B::item ();
     else return (C &) _walk1.A::item ();
   }
 
@@ -657,25 +657,25 @@ namespace ALUGrid
 
   ////////////////////////////////////////////////////////////////////////////////
   //
-  //  --VectorAlign 
+  //  --VectorAlign
   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  template < class A > inline VectorAlign < A > :: 
-  VectorAlign (const std::vector< pointer_t > & l) 
+  template < class A > inline VectorAlign < A > ::
+  VectorAlign (const std::vector< pointer_t > & l)
     : _it (l), _curr (_it.end()), _ahead (_it.end()), _cnt (-1) {
     return;
   }
 
-  template < class A > inline VectorAlign < A > :: 
-  VectorAlign (const VectorAlign < A > & org ) 
-    : _it(org._it.size(),0) , _curr(_it.end()) , _ahead(_it.end()) , _cnt(org._cnt) 
+  template < class A > inline VectorAlign < A > ::
+  VectorAlign (const VectorAlign < A > & org )
+    : _it(org._it.size(),0) , _curr(_it.end()) , _ahead(_it.end()) , _cnt(org._cnt)
   {
     // _it is a vector with pointers of iterators, we have to clone all
-    // pointers of the vector, therefore iterate over vector and call clone  
+    // pointers of the vector, therefore iterate over vector and call clone
     constiterator_t orgit = org._it.begin();
-    iterator_t pend   = _it.end (); 
-    for (iterator_t p = _it.begin (); p != pend; ++ p , ++ orgit ) 
+    iterator_t pend   = _it.end ();
+    for (iterator_t p = _it.begin (); p != pend; ++ p , ++ orgit )
     {
       (*p) = (*orgit)->clone();
       if( org._curr  == orgit ) _curr  = p;
@@ -684,26 +684,26 @@ namespace ALUGrid
 
     alugrid_assert ( (! org.done()) ? (_curr  != _it.end()) : 1 );
     alugrid_assert ( (! org.done()) ? ((org._ahead != org._it.end()) ? (_ahead != _it.end()) : 1) : 1 );
-    alugrid_assert ( (! org.done()) ? (!done()) : 1); 
+    alugrid_assert ( (! org.done()) ? (!done()) : 1);
   }
 
-  template < class A > inline IteratorSTI < A > * 
-  VectorAlign < A > :: clone () const 
+  template < class A > inline IteratorSTI < A > *
+  VectorAlign < A > :: clone () const
   {
     return new VectorAlign < A > (*this);
   }
 
-  template < class A > VectorAlign < A > :: ~VectorAlign () 
+  template < class A > VectorAlign < A > :: ~VectorAlign ()
   {
-    const iterator_t pend = _it.end (); 
-    for (iterator_t p = _it.begin (); p != pend; ++p ) 
+    const iterator_t pend = _it.end ();
+    for (iterator_t p = _it.begin (); p != pend; ++p )
     {
       delete *p;
     }
     return;
   }
 
-  template < class A > void VectorAlign < A > :: first () 
+  template < class A > void VectorAlign < A > :: first ()
   {
     const constiterator_t end = _it.end();
     for (_curr = _it.begin (); (_curr == end ? 0 : ((*_curr)->first (), (*_curr)->done ())); ++_curr);
@@ -714,7 +714,7 @@ namespace ALUGrid
     return;
   }
 
-  template < class A > void VectorAlign < A > :: next () 
+  template < class A > void VectorAlign < A > :: next ()
   {
     (*_curr)->next ();
     if ((*_curr)->done ())
@@ -727,9 +727,9 @@ namespace ALUGrid
     return;
   }
 
-  template < class A > int VectorAlign < A > :: size () 
+  template < class A > int VectorAlign < A > :: size ()
   {
-    if (_cnt == -1) 
+    if (_cnt == -1)
     {
       _cnt = 0;
       const iterator_t pend = _it.end ();
@@ -739,13 +739,13 @@ namespace ALUGrid
     return _cnt;
   }
 
-  template < class A > inline int VectorAlign < A > :: done () const 
+  template < class A > inline int VectorAlign < A > :: done () const
   {
     const constiterator_t end = _it.end ();
     return ((_ahead == end) ? ((_curr == end) ? 1 : (*_curr)->done ()) : 0);
   }
 
-  template < class A > inline A & VectorAlign < A > :: item () const 
+  template < class A > inline A & VectorAlign < A > :: item () const
   {
     alugrid_assert (! done ());
     return (*_curr)->item ();
@@ -753,57 +753,57 @@ namespace ALUGrid
 
   ////////////////////////////////////////////////////////////////////////////
   //
-  //  --Insert 
+  //  --Insert
   //
   ////////////////////////////////////////////////////////////////////////////
 
   template < class  A, class B > Insert < A, B > :: Insert (const A & w, comp_t c)
-    : _outer (w), _inner (0), _cnt (-1), _cmp (c) 
-  { 
+    : _outer (w), _inner (0), _cnt (-1), _cmp (c)
+  {
     return;
   }
 
-  template < class  A, class B > inline Insert < A, B > :: Insert (const Insert < A, B > & w) 
+  template < class  A, class B > inline Insert < A, B > :: Insert (const Insert < A, B > & w)
     : _outer (w._outer)
-    // if w_inner exsists, call copy constructor 
+    // if w_inner exsists, call copy constructor
     , _inner ( (w._inner) ? new B (* (w._inner) ) : 0 )
-    , _cnt (w._cnt), _cmp (w._cmp) 
-  { 
+    , _cnt (w._cnt), _cmp (w._cmp)
+  {
     return;
   }
 
-  template < class  A, class B > inline IteratorSTI< typename B :: val_t > * 
+  template < class  A, class B > inline IteratorSTI< typename B :: val_t > *
   Insert < A, B > :: clone () const
   {
-    return new Insert < A, B > (*this); 
+    return new Insert < A, B > (*this);
   }
 
-  template < class  A, class B > Insert < A, B > :: ~Insert () 
-  { 
-    removeObj(); 
+  template < class  A, class B > Insert < A, B > :: ~Insert ()
+  {
+    removeObj();
   }
 
-  template < class  A, class B > inline void Insert < A, B > :: removeObj () 
-  { 
-    if (_inner) 
-    { 
+  template < class  A, class B > inline void Insert < A, B > :: removeObj ()
+  {
+    if (_inner)
+    {
       delete _inner;
       _inner = 0;
     }
     return;
   }
 
-  template < class  A, class B > inline void Insert < A, B > :: first () 
+  template < class  A, class B > inline void Insert < A, B > :: first ()
   {
-    // deletes _inner 
-    removeObj(); 
-    
-    for (_outer.A::first (); ! _outer.A::done (); _outer.A::next ()) 
+    // deletes _inner
+    removeObj();
+
+    for (_outer.A::first (); ! _outer.A::done (); _outer.A::next ())
     {
       _inner = new B (_outer.A::item (), _cmp);
       _inner->B::first ();
       if(!_inner->B::done ()) break;
-      else { 
+      else {
         removeObj();
       }
     }
@@ -825,36 +825,36 @@ namespace ALUGrid
   template < class  A, class B > inline void Insert < A, B > :: next () {
     alugrid_assert (_inner);
     _inner->B::next ();
-    if(_inner->B::done ()) 
+    if(_inner->B::done ())
     {
       removeObj();
-      
-      for(_outer.A::next (); ! _outer.A::done (); _outer.A::next ()) 
+
+      for(_outer.A::next (); ! _outer.A::done (); _outer.A::next ())
       {
         _inner = new B(_outer.A::item (), _cmp);
         _inner->B::first ();
-        if(!_inner->B::done ()) 
+        if(!_inner->B::done ())
           break;
-        else 
+        else
           removeObj();
       }
     }
     return;
   }
-      
+
   template < class  A, class B > inline int Insert < A, B > :: done () const {
     return _outer.A::done () ? 1 : _inner ? _inner->B::done () : 1;
   }
 
-  template < class  A, class B > inline int Insert < A, B > :: size () 
+  template < class  A, class B > inline int Insert < A, B > :: size ()
   {
     return (_cnt == -1) ? (_cnt = count()) : _cnt;
   }
 
-  template < class  A, class B > inline typename Insert < A, B > :: val_t & 
-  Insert < A, B > :: item () const 
+  template < class  A, class B > inline typename Insert < A, B > :: val_t &
+  Insert < A, B > :: item () const
   {
-    alugrid_assert (! done ()); 
+    alugrid_assert (! done ());
     return _inner->B::item ();
   }
 
