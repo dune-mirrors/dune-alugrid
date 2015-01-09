@@ -7,14 +7,14 @@
 namespace ALUGrid
 {
 
-  struct RefinementRules 
+  struct RefinementRules
   {
     // Die Verfeinerungsregeln sind nur enumerierte Typen, mit Zuweisung
     // Vergleich und Typkonversion, im Falle der Regeln f"ur die Dreiecks-
     // bzw Vierecksfl"ache sind aber auch Methoden n"otig, die eine Regel
     // mit dem Twist der Fl"ache mitdrehen, damit der "Ubergang der
     // Verfeinerung stimmt.
-      
+
     struct Hedge1Rule
     {
       enum rule_enum { nosplit=1, iso2=2 };
@@ -26,11 +26,11 @@ namespace ALUGrid
       inline bool isValid () const ;
       static inline bool isValid (const rule_t &);
       inline Hedge1Rule rotate (int) const ;
-      
+
     private:
       rule_t _r ;
     } ;
-      
+
     struct Hface3Rule
     {
       enum rule_enum { nosplit=1, e01=2, e12=3, e20=4, iso4=6, undefined=-2 };
@@ -43,12 +43,12 @@ namespace ALUGrid
       static inline bool isValid (const rule_t &) ;
       inline Hface3Rule rotate (int) const ;
 
-      // return true if rule is one of the bisection rules 
-      bool bisection () const { return (_r >= e01) && (_r <= e20); }   
+      // return true if rule is one of the bisection rules
+      bool bisection () const { return (_r >= e01) && (_r <= e20); }
     private :
       rule_t _r ;
     } ;
-      
+
     struct Hface4Rule
     {
       enum rule_enum { nosplit=1, iso2=3, iso4=5,  undefined=-2 };
@@ -64,12 +64,12 @@ namespace ALUGrid
     private :
       rule_t _r ;
     } ;
-      
+
     struct TetraRule
     {
-      enum rule_enum { crs=-1, nosplit=1, 
-                       e01=2, e12=3, e20=4, e23=5, e30=6, e31=7, 
-                       iso8=8, bisect=9
+      enum rule_enum { crs=-1, nosplit=1,
+                       e01=2, e12=3, e20=4, e23=5, e30=6, e31=7,
+                       regular=8, bisect=9
                      };
       typedef signed char rule_t;
 
@@ -80,15 +80,15 @@ namespace ALUGrid
       inline bool isValid () const ;
       static inline bool isValid (const rule_t &) ;
 
-      // return true if rule is one of the bisection rules 
-      bool bisection () const { return (_r >= e01) && (_r <= e31); }   
+      // return true if rule is one of the bisection rules
+      bool bisection () const { return (_r >= e01) && (_r <= e31); }
     private :
       rule_t _r ;
     } ;
-      
+
     struct HexaRule
     {
-      enum rule_enum { crs = -1, nosplit = 1, iso8=8, iso4_2d = 14 };
+      enum rule_enum { crs = -1, nosplit = 1, regular=8 };
       typedef signed char rule_t;
 
       explicit HexaRule ( const rule_t & );
@@ -102,7 +102,7 @@ namespace ALUGrid
       rule_t _r ;
     } ;
 
-  }; // end refinement rules 
+  }; // end refinement rules
 
   // #     #                                    #    ######
   // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######
@@ -139,10 +139,10 @@ namespace ALUGrid
     return isValid( _r );
   }
 
-  inline RefinementRules :: Hedge1Rule RefinementRules :: Hedge1Rule :: rotate (int i) const 
+  inline RefinementRules :: Hedge1Rule RefinementRules :: Hedge1Rule :: rotate (int i) const
   {
     alugrid_assert (i == 0 || i == 1) ;
-    alugrid_assert ( _r == nosplit || _r == iso2 );  
+    alugrid_assert ( _r == nosplit || _r == iso2 );
     return Hedge1Rule( _r );
   }
 
@@ -159,7 +159,7 @@ namespace ALUGrid
     }
   }
 
-              
+
   // #     #                                  #####  ######
   // #     #  ######    ##     ####   ###### #     # #     #  #    #  #       ######
   // #     #  #        #  #   #    #  #            # #     #  #    #  #       #
@@ -192,8 +192,8 @@ namespace ALUGrid
   inline bool RefinementRules :: Hface3Rule :: isValid () const {
     return isValid( _r );
   }
-   
-  inline RefinementRules :: Hface3Rule RefinementRules :: Hface3Rule :: rotate (int t) const 
+
+  inline RefinementRules :: Hface3Rule RefinementRules :: Hface3Rule :: rotate (int t) const
   {
     alugrid_assert ((-4 < t) && (t < 3)) ;
     rule_t newr = _r ;
@@ -204,17 +204,17 @@ namespace ALUGrid
     case e01 :
       {
         //cout << "e01: my twist is " << t << endl;
-        static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked 
+        static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked
         newr = retRule[ t + 3 ];
         break ;
       }
     case e12 :
       {
         //cout << "e12: my twist is " << t << endl;
-        static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked 
+        static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked
         newr = retRule[ t + 3 ];
         break ;
-      }  
+      }
     case e20 :
       {
         //cout << "e20: my twist is " << t << endl;
@@ -227,7 +227,7 @@ namespace ALUGrid
       abort () ;
       return Hface3Rule (nosplit) ;
     }
-    // iso4 is not rotated 
+    // iso4 is not rotated
     return Hface3Rule( newr );
   }
 
@@ -244,7 +244,7 @@ namespace ALUGrid
       case RefinementRules :: Hface3Rule :: e20:
         return out << "e20";
       case RefinementRules :: Hface3Rule :: iso4:
-        return out << "iso4";            
+        return out << "iso4";
       case RefinementRules :: Hface3Rule :: undefined:
         return out << "undefined";
       default:
@@ -286,7 +286,7 @@ namespace ALUGrid
     return isValid( _r );
   }
 
-  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int t) const 
+  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int t) const
   {
     switch (_r) {
     case nosplit :
@@ -352,8 +352,8 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: TetraRule :: isValid (const rule_t& r) {
-    return r == crs || r == nosplit || r == iso8 || r == bisect || 
-           r == e01 || r == e12     || r == e20  || r == e23    || r == e30      || r == e31;
+    return r == crs || r == nosplit || r == regular || r == bisect ||
+           r == e01 || r == e12     || r == e20  || r == e23    || r == e30 || r == e31;
   }
 
   inline bool RefinementRules :: TetraRule :: isValid () const {
@@ -380,8 +380,8 @@ namespace ALUGrid
         return out << "e30";
       case RefinementRules :: TetraRule :: e31:
         return out << "e31";
-      case RefinementRules :: TetraRule :: iso8:
-        return out << "iso8";
+      case RefinementRules :: TetraRule :: regular:
+        return out << "regular";
       case RefinementRules :: TetraRule :: bisect:
         return out << "bisection";
       default:
@@ -421,7 +421,7 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: HexaRule :: isValid (const rule_t& r) {
-    return r == crs || r == nosplit || r == iso4_2d || r == iso8 ;
+    return r == crs || r == nosplit || r == regular ;
   }
 
   inline bool RefinementRules :: HexaRule :: isValid () const {
@@ -436,10 +436,8 @@ namespace ALUGrid
         return out << "coarsen";
       case RefinementRules :: HexaRule :: nosplit:
         return out << "nosplit";
-      case RefinementRules :: HexaRule :: iso4_2d:
-        return out << "iso4_2d";        
-      case RefinementRules :: HexaRule :: iso8:
-        return out << "iso8";
+      case RefinementRules :: HexaRule :: regular:
+        return out << "regular";
       default:
         return out << "!!! unknown !!!";
     }

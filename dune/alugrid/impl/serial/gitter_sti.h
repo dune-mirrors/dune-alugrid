@@ -907,7 +907,7 @@ namespace ALUGrid
       }
 
       void set2dFlag() { set( flagIs2d ); }
-      
+
       void reset2dFlag() { unset ( flagIs2d ); }
 
       bool is2d() const { return isSet( flagIs2d ); }
@@ -1098,7 +1098,7 @@ namespace ALUGrid
       // mark edges for allow or disallow coarsening
       virtual void markEdgeCoarsening () = 0;
 
-      // mark element for using iso8 rule
+      // mark element for using red rule
       virtual int tagForGlobalRefinement () = 0;
       // mark element for coarsening
       virtual int tagForGlobalCoarsening () = 0;

@@ -144,44 +144,42 @@ void checkRefinements( GitterType& grid, int n )
   if( isHexa )
   {
     typedef ALUGrid::Gitter ::Geometric :: HexaRule  HexaRule ;
-    const HexaRule rules[ 2 ] =
-        { HexaRule::iso8, HexaRule::iso4_2d };
+    const HexaRule rule = HexaRule::regular;
 
-    for( int i=0; i<2; ++i )
     {
 
-    std::cout << "*********************************************" <<std::endl;
-      std::cout << "Refinement rule " << rules[ i ] << std::endl;
+      std::cout << "*********************************************" <<std::endl;
+      std::cout << "Refinement rule " << rule << std::endl;
       std::cout << "*********************************************" <<std::endl;
 
       // get LeafIterator which iterates over all leaf elements of the grid
       ALUGrid::LeafIterator < HElemType > w (grid) ;
 
-
       // create empty gather scatter
       EmptyAdaptRestrictProlong rp;
 
-      for(int j = 0; j<n ; ++j){
-
-      for (w->first () ; ! w->done () ; w->next ())
+      for(int j = 0; j<n ; ++j)
       {
-        if( w->item ().type() == ALUGrid::hexa )
+
+        for (w->first () ; ! w->done () ; w->next ())
         {
-          typedef typename GitterType :: Objects :: hexa_IMPL hexa_IMPL ;
-          // mark element for refinement
-          hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
+          if( w->item ().type() == ALUGrid::hexa )
+          {
+            typedef typename GitterType :: Objects :: hexa_IMPL hexa_IMPL ;
+            // mark element for refinement
+            hexa_IMPL* item = ((hexa_IMPL *) &w->item ());
 
-          item->request ( rules[ i ] );
+            item->request ( rule );
+          }
         }
+
+        // adapt grid
+        grid.duneAdapt( rp );
+
+        // print size of grid
+        grid.printsize () ;
+
       }
-
-      // adapt grid
-      grid.duneAdapt( rp );
-
-      // print size of grid
-      grid.printsize () ;
-
-     }
 
       // coarsen again
       globalCoarsening( grid , n );
@@ -191,7 +189,7 @@ void checkRefinements( GitterType& grid, int n )
   {
     typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
     const TetraRule rules[ 2 ] =
-    { TetraRule::iso8,
+    { TetraRule::regular,
      // TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
      // TetraRule :: e23, TetraRule :: e30, TetraRule :: e31,
      // TetraRule::iso4_2d,
