@@ -284,8 +284,8 @@ protected:
   mutable int index_;
 
   mutable GeometryImpl intersectionGlobal_;
-  mutable GeometryImpl intersectionSelfLocal_;
-  mutable GeometryImpl intersectionNeighborLocal_;
+  mutable LocalGeometryImpl intersectionSelfLocal_;
+  mutable LocalGeometryImpl intersectionNeighborLocal_;
 
   // unit outer normal
   mutable NormalType unitOuterNormal_;

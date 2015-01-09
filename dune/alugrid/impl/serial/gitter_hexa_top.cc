@@ -527,7 +527,7 @@ namespace ALUGrid
         case balrule_t::iso4 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
 
-                  std::cout << "calling splitIso4 in refine like element" << std::endl;
+              //    std::cout << "calling splitIso4 in refine like element" << std::endl;
           // call refinement method
           splitISO4 ();
 
@@ -540,7 +540,7 @@ namespace ALUGrid
 
         case balrule_t::iso2 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso2).rotate (twist (0)), twist (0))) return false;
-        std::cout << "calling splitIso2 in refine like element" << std::endl;
+       // std::cout << "calling splitIso2 in refine like element" << std::endl;
           // call refinement method
           splitISO2 ();
 
