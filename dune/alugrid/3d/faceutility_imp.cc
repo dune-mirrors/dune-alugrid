@@ -809,16 +809,25 @@ namespace Dune
       {
         //we want the outer normal orhtogonal to the intersection and to the normal of the inner element,  with length of the intersection
         const GEOElementType & innerElement = this->connector_.innerEntity();
-        const alu3d_ctype (&_q1)[3] = face.myvertex(1)->Point();
-        const alu3d_ctype (&_q2)[3] = face.myvertex(2)->Point();
-        const alu3d_ctype (&_q3)[3] = face.myvertex(3)->Point();  
+        const alu3d_ctype (&_q1)[3] = innerElement.myvertex(1)->Point();
+        const alu3d_ctype (&_q2)[3] = innerElement.myvertex(2)->Point();
+        const alu3d_ctype (&_q3)[3] = innerElement.myvertex(3)->Point();  
          alu3d_ctype (normal)[3];      
         
-        
+        // calculate normal of the element 
         normal[0] = (_q2[1] - _q3[1]) * (_q1[2] - _q2[2]) - (_q2[2] - _q3[2]) * (_q1[1] - _q2[1]) ;
         normal[1] = (_q2[2] - _q3[2]) * (_q1[0] - _q2[0]) - (_q2[0] - _q3[0]) * (_q1[2] - _q2[2]) ;
         normal[2] = (_q2[0] - _q3[0]) * (_q1[1] - _q2[1]) - (_q2[1] - _q3[1]) * (_q1[0] - _q2[0]) ; 
         
+        //normalize
+        double length = 1./sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+        normal[0] *= length;
+        normal[1] *= length;
+        normal[2] *= length;
+        
+        
+        
+        //calculate cross product of element normal and intersection
         outerNormal_[0] = factor * (normal[1] * (_p1[2] - _p2[2]) - normal[2] * (_p1[1] - _p2[1]) );
         outerNormal_[1] = factor * (normal[2] * (_p1[0] - _p2[0]) - normal[0] * (_p1[2] - _p2[2]) );
         outerNormal_[2] = factor * (normal[0] * (_p1[1] - _p2[1]) - normal[1] * (_p1[0] - _p2[0]) ); 

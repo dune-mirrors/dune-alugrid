@@ -670,12 +670,15 @@ namespace Dune
         typedef typename DuneGridFormatParser::facemap_t::key_type Key;
         typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
 
-        const Key key = ElementFaceUtil::generateFace( dimworld, dgf_.elements[n], face );
+        const Key key = ElementFaceUtil::generateFace( dimension, dgf_.elements[n], face );
         const Iterator it = dgf_.facemap.find( key );
         if( it != dgf_.facemap.end() )
           factory_.insertBoundary( n, face, it->second.first );
       }
-    }
+    }      
+      
+
+     
 
     dgf::ProjectionBlock projectionBlock( file, dimworld );
     const DuneBoundaryProjection< dimworld > *projection

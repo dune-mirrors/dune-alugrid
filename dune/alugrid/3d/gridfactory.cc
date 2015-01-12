@@ -69,7 +69,7 @@ namespace Dune
       if( elementType == tetra )
       { 
         if(vertices_.size() == 0)
-          vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
+          vertices_.push_back( std::make_pair( VertexType(0.5), 0 ) );
 
         vertices_.push_back( std::make_pair( pos, globalId+1 ) );
       }
@@ -335,6 +335,7 @@ namespace Dune
       }
     }
 #endif
+
   }
 
   template< class ALUGrid >
@@ -367,9 +368,10 @@ namespace Dune
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
+
     if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
       recreateBoundaryIds();
-      
+
 
     // if dump file should be written 
     if( allowGridGeneration_ && !temporary )
@@ -826,7 +828,7 @@ namespace Dune
         FaceType key;
         generateFace( elements_[ n ], face, key );
         std::sort( key.begin(), key.end() );
-       
+
         const FaceIterator pos = faceMap.find( key );
         if( pos != faceMap.end() )
           faceMap.erase( key );
@@ -837,6 +839,7 @@ namespace Dune
         }
       }
     }
+
 
     // swap current boundary ids with an empty vector
     BoundaryIdMap boundaryIds;
