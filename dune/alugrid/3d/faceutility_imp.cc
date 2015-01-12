@@ -900,7 +900,7 @@ namespace Dune
       }
       else if(actualDimw == 3)
       {
-      
+        
         //Teh following is an adaption of 
         //
         //    const ReferenceElement< alu2d_ctype, dim > &refElement = 
@@ -911,9 +911,10 @@ namespace Dune
         //   outerNormal *= inside()->geometry().integrationElement( xInside );
         //
         // from the calculation of the former 2d code
+        // also it does not work for some reason - so this is implemented in iterator_imp.cc
        
       
-      
+        /*
         typedef typename ALU3dGrid<2, actualDimw, hexa, Comm>::template Codim<1>::LocalGeometry LocalGeometry;
         typedef Dune :: ALU3dGridGeometry< 2, actualDimw, ALU3dGrid<2, actualDimw, hexa, Comm> > GeometryImpl;
         //generate the local geometries - if not already present
@@ -938,6 +939,8 @@ namespace Dune
         //map the reference Normal back to the inner geometry
         geo.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal_ );
         outerNormal_ *= geo.integrationElement( xInside );
+        
+        */
         
       }
        
