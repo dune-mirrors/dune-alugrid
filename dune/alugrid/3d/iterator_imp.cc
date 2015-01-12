@@ -356,6 +356,19 @@ ALU3dGridIntersectionIterator<GridImp>::
 outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
   alugrid_assert (item_ != 0);
+  /*
+  if(GridImp::dimension == 2 && GridImp::dimworld == 3 && GridImp::elementType == hexa)
+  {
+    NormalType outerNormal;
+    const ReferenceElement< alu3d_ctype, dim > &refElement = 
+       ReferenceElements< alu3d_ctype, dim >::cube();
+    typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
+    typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
+    inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
+    outerNormal *= inside()->geometry().integrationElement( xInside );
+    return outerNormal;
+  }
+  */
   return geoProvider_.outerNormal(local);
 }
   

@@ -443,6 +443,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
+            writeFile( grid.levelGridView(1) );    
     gridcheck(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
@@ -628,14 +629,14 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        
+        /*
         typedef Dune::ALUGrid< 2, 3, Dune::cube, Dune::nonconforming > SurfaceGridType;
         std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
         checkALUSerial( *surfaceGridPtr, 1, display );
-        
+        */
       }
 
       // check non-conform ALUGrid for 2d 
@@ -711,6 +712,8 @@ int main (int argc , char **argv) {
                          (mysize == 1) ? 1 : 0, 
                          (mysize == 1) ? display: false);
         }
+        
+
         
         // perform parallel check only when more then one proc 
         if(mysize > 1)
