@@ -422,10 +422,10 @@ namespace Dune
     typedef ThisType MyType;
 
     // friend declarations
-    friend class ALU3dGridEntity< 0, dimworld, const ThisType>;
-    friend class ALU3dGridEntity< 1, dimworld, const ThisType>;
-    friend class ALU3dGridEntity< 2, dimworld, const ThisType>;
-    friend class ALU3dGridEntity< 3, dimworld, const ThisType>;
+    friend class ALU3dGridEntity< 0, dim, const ThisType>;
+    friend class ALU3dGridEntity< 1, dim, const ThisType>;
+    friend class ALU3dGridEntity< 2, dim, const ThisType>;
+    friend class ALU3dGridEntity< 3, dim, const ThisType>;
 
     friend class ALU3dGridIntersectionIterator< ThisType >;
 
