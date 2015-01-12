@@ -173,19 +173,19 @@ namespace Dune {
     // this method should only be called if a father exists 
     alugrid_assert ( item_->up() );
 
-    /*
+    
     // get child number 
     const int child = item_->nChild();
 
     // if the rule of the farher is not refine_element, it has to be bisection 
     // this can only be true for tetrahedral elements 
-    if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::refine_element_t) )
+    if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::template RefinementRules<dim>::refine_element_t) )
     {
-      */
+      
       static LocalGeometryImpl geom;
       geom.buildGeomInFather( father()->geometry(), geometry() );
       return LocalGeometry( geom );
-      /*
+      
     }
     else 
     {
@@ -194,7 +194,7 @@ namespace Dune {
       // get geometryInFather storage from grid and return childs geom
       return LocalGeometry( grid().nonConformingGeometryInFatherStorage()[ child ] ); 
     }
-    */
+    
   }
 
   //********* begin method subIndex ********************

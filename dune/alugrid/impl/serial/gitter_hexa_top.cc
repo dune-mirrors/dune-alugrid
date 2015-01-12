@@ -689,7 +689,7 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
-    // std::cout << "volume: " << _volume << " calculatedVolume: " << calculatedVolume << std::endl;
+     //std::cout <<" calculatedVolume: " << calculatedVolume << std::endl;
      alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 
@@ -845,6 +845,7 @@ namespace ALUGrid
     h4->append(h5);
     h5->append(h6);
     h6->append(h7);
+
 
     // inner edge
     _inner->store( e0 );
