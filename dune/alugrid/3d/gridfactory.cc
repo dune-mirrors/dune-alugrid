@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <list>
 
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
@@ -69,7 +70,7 @@ namespace Dune
       if( elementType == tetra )
       { 
         if(vertices_.size() == 0)
-          vertices_.push_back( std::make_pair( VertexType(100.0), 0 ) );
+          vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
 
         vertices_.push_back( std::make_pair( pos, globalId+1 ) );
       }
@@ -672,8 +673,143 @@ namespace Dune
     // and iterate that over the whole grid, in hope that we have an 
     // orientable surface.
     if(dimension ==2 && dimensionworld == 3 && elementType == tetra)
-      return;
+    {
+      //do everything in 2d - meaning just use vertices 1,2,3
+      //a flag to see if we have an orientable surface
+      bool orientable = true;
       
+      // A 2d face type, as we want to work in 2d
+      typedef std::array<unsigned int, 2>  Face2Type;
+
+      //The sorted faces that are pending to be worked on with 
+      //the elemIndex of the inner element and the corresponding twist
+      typedef std::map< Face2Type, std::pair<int, int> > FaceMap ;
+      typedef FaceMap::iterator FaceIterator;
+      FaceMap activeFaces;
+      
+      //The Faces already worked on
+      std::set< Face2Type > doneFaces;
+       
+       
+      //get first element
+      ElementType &element = elements_[0];     
+      //choose orientation as given by first inserted element and     
+      //build oriented faces and add to list of active faces     
+      for(int i = 0; i < 3 ; ++i)
+      {
+        Face2Type face = {element[1+i], element[1+(1+i)%3]} ;
+        int twist = face[0] < face[1] ? 0 : -1;
+        std::sort(face.begin(),face.end());        
+        activeFaces.insert( std::make_pair ( face, std::make_pair( 0 , twist  ) ) );
+      }
+     
+      
+      while(!(activeFaces.empty()))
+      {
+        //get iterator
+        FaceIterator faceBegin = activeFaces.begin();
+        
+        const Face2Type &currentFace = faceBegin->first;
+      
+        //if face is in doneFaces, just remove the face from the active face list
+        if(doneFaces.find(currentFace) != doneFaces.end())
+        {
+          activeFaces.erase(currentFace);
+          //while loop continue
+          continue;
+        }       
+              
+        //get first belonging element 
+        int innerElement = faceBegin->second.first;
+        //get twist 
+        int twist = faceBegin->second.second;      
+       // std::cout << "Current: " << currentFace << "  Twist: " << twist << std::endl;                
+        bool found = false;
+        int cnt = 0;
+        //find face in element list
+         const typename ElementVector::iterator elementEnd = elements_.end();
+         for( typename ElementVector::iterator elementIt = elements_.begin();
+           elementIt != elementEnd; ++elementIt, ++cnt )
+         {
+            ElementType &outerElement  = *elementIt;
+            if(cnt  == innerElement) continue;
+            for(int i=0; i<3 ;++i)
+              {
+                if (outerElement[1+i] == currentFace[(twist+2)%2])
+                {
+                //  std::cout << "Outer Element: [ " << outerElement[1] << ", " << outerElement[2] << ", "<<  outerElement[3] << "]" << std::endl;                              
+                  if( outerElement[1+(i+1)%3] == currentFace[(twist+1)%2 ]  )
+                  {
+                    //correct element orientation
+                    std::swap(outerElement[1 + (i + 1)%3 ], outerElement[ 1+ (i + 2)%3 ]);    
+                   // std::cout << "swapping: " <<  outerElement[1 + (i + 1)%3 ] << outerElement[ 1+ (i + 2)%3 ]  << std::endl;    
+                    found =true;
+                  }
+                  else if(outerElement[1+(i+2)%3] == currentFace[(twist+1)%2] )
+                  {
+                    //it is already in the right order, so do nothing here
+                    found = true;
+                  }
+                  else //this is not the element you are looking for
+                    break;  
+                    
+                  //build the other two faces with twists 
+                  Face2Type face1 =  { outerElement[1+i],outerElement[1+(1+i)%3] } ;
+                  Face2Type face2 =  { outerElement[1+(i+1)%3],outerElement[1+(i+2)%3] } ;
+                  int twist1 = face1[0] < face1[1] ? 0 : -1;
+                  int twist2 = face2[0] < face2[1] ? 0 : -1;
+                  std::sort(face1.begin(),face1.end());
+                  std::sort(face2.begin(),face2.end());
+                  
+
+
+                 // std::cout << "Face 1: " << face1 << "  Twist: "<< twist1 << std::endl;
+                 // std::cout << "Face 2: " << face2 << "  Twist: "<< twist2 << std::endl;
+                  
+                  //check that it is not in doneFaces
+                  if(doneFaces.find(face1) == doneFaces.end())
+                  {
+                    //check that it is not in activeFaces
+                    if(activeFaces.find(face1) == activeFaces.end())                  
+                      activeFaces.insert(std::make_pair( face1 , std::make_pair( cnt, twist1 ) ) );  
+                    //here we can make the orientability check - see assert
+                    else 
+                    {
+                     // alugrid_assert(std::abs(activeFaces.find(face1)->second.second - twist1) == 1); 
+                      activeFaces.erase(face1);
+                    }
+                  } 
+
+                 //check that it is not in doneFaces
+                  if(doneFaces.find(face2) == doneFaces.end())
+                  {
+                    //check that it is not in activeFaces
+                    if(activeFaces.find(face2) == activeFaces.end())                  
+                      activeFaces.insert(std::make_pair( face2 , std::make_pair( cnt, twist2 ) ) );  
+                    //here we make the orientability check
+                    else 
+                    {
+                      //alugrid_assert(std::abs(activeFaces.find(face2)->second.second - twist2) == 1); 
+                      activeFaces.erase(face2);
+                    }
+                  } 
+                  //break inner loop, as we do not need it anymore
+                  break;                  
+                }
+              }       
+              
+              //break element for loop if we found the element
+              if(found) break;
+            }
+            
+            // add the sorted face to doneFaces with innerElement and outerElement
+            doneFaces.insert( currentFace )  ;         
+            //remove face from activeFaces
+            activeFaces.erase(currentFace);                   
+      }
+      return;
+    }
+    
       const typename ElementVector::iterator elementEnd = elements_.end();
       for( typename ElementVector::iterator elementIt = elements_.begin();
            elementIt != elementEnd; ++elementIt )
