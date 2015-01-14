@@ -656,7 +656,7 @@ int main (int argc , char **argv) {
 
         
         typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming > SurfaceGridType;
-        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
+        std::string surfaceFilename( "./dgf/2-3-testgrid.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
@@ -681,7 +681,7 @@ int main (int argc , char **argv) {
         
         typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming > SurfaceGridType;
         //typedef ALUConformGrid< 2, 3 > SurfaceGridType;
-        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
+        std::string surfaceFilename( "./dgf/2-3-testgrid.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< true >( *surfaceGridPtr );

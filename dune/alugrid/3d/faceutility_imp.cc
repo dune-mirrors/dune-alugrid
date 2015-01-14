@@ -805,6 +805,7 @@ namespace Dune
         outerNormal_[0] = factor * (_p2[1]-_p1[1]);
         outerNormal_[1] = factor * (_p1[0]-_p2[0]);
       }
+      //TODO: some possible improvements
       else if(actualDimw == 3)
       {
         //we want the outer normal orhtogonal to the intersection and to the normal of the inner element,  with length of the intersection

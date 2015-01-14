@@ -69,7 +69,7 @@ namespace Dune
       if( elementType == tetra )
       { 
         if(vertices_.size() == 0)
-          vertices_.push_back( std::make_pair( VertexType(0.5), 0 ) );
+          vertices_.push_back( std::make_pair( VertexType(100.0), 0 ) );
 
         vertices_.push_back( std::make_pair( pos, globalId+1 ) );
       }
@@ -666,6 +666,14 @@ namespace Dune
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
+    //for 2,3 tetra we assume the surfacegrid to be oriented -
+    // we would actually have to choose the orientation on one elementEnd
+    // and then set the orientation on the neighbour to be the sameType
+    // and iterate that over the whole grid, in hope that we have an 
+    // orientable surface.
+    if(dimension ==2 && dimensionworld == 3 && elementType == tetra)
+      return;
+      
       const typename ElementVector::iterator elementEnd = elements_.end();
       for( typename ElementVector::iterator elementIt = elements_.begin();
            elementIt != elementEnd; ++elementIt )

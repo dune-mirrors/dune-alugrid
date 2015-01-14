@@ -140,7 +140,7 @@ void zeroEntityConsistency (Grid &g)
 {
   typedef typename Grid::ctype ctype;
   const int dimGrid = Grid::dimension;
-  // const int dimWorld = Grid::dimensionworld;
+  const int dimWorld = Grid::dimensionworld;
 
   typedef typename Grid::template Codim<0>::LevelIterator LevelIterator;
   typedef typename Grid::template Codim<0>::Geometry Geometry;
@@ -150,7 +150,7 @@ void zeroEntityConsistency (Grid &g)
   const typename Grid::LevelIndexSet &levelIndexSet = g.levelIndexSet( g.maxLevel() );
   const typename Grid::LeafIndexSet &leafIndexSet = g.leafIndexSet();
   const typename Grid::LocalIdSet &localIdSet = g.localIdSet();
- // const typename Grid::GlobalIdSet &globalIdSet = g.globalIdSet();
+  const typename Grid::GlobalIdSet &globalIdSet = g.globalIdSet();
 
   LevelIterator it = g.template lbegin<0>(g.maxLevel());
   const LevelIterator endit = g.template lend<0>(g.maxLevel());
@@ -173,11 +173,11 @@ void zeroEntityConsistency (Grid &g)
       std::cerr << "Error: Leaf index for subEntity< 0 >( 0 ) differs." << std::endl;
       assert( false );
     }
- /*   if( globalIdSet.id( *subEntity ) != globalIdSet.id( *it ) )
+    if( globalIdSet.id( *subEntity ) != globalIdSet.id( *it ) )
     {
       std::cerr << "Error: Global id for subEntity< 0 >( 0 ) differs." << std::endl;
       assert( false );
-    }*/
+    }
     if( localIdSet.id( *subEntity ) != localIdSet.id( *it ) )
     {
       std::cerr << "Error: Local id for subEntity< 0 >( 0 ) differs." << std::endl;
@@ -270,8 +270,8 @@ void assertNeighbor (Grid &g)
   enum { dim = Grid::dimension };
   //typedef typename Grid::ctype ct DUNE_UNUSED;
 
- // typedef typename Grid::GlobalIdSet GlobalIdSet;
- // const GlobalIdSet & globalid = g.globalIdSet();
+  typedef typename Grid::GlobalIdSet GlobalIdSet;
+  const GlobalIdSet & globalid = g.globalIdSet();
 
   typedef typename Grid::template Codim< 0 >::Entity Entity;
   typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
@@ -374,7 +374,7 @@ void assertNeighbor (Grid &g)
         }
 
         // check id
-      //  assert( globalid.id(*(it->inside())) == globalid.id( entity ) );
+        assert( globalid.id(*(it->inside())) == globalid.id( entity ) );
 
 
         // geometry
@@ -422,7 +422,7 @@ void assertNeighbor (Grid &g)
           // search neighbouring cell
           if( outsidePtr->partitionType() == Dune::InteriorEntity )
           {
-     //       assert( globalid.id( outside ) != globalid.id( entity ) );
+            assert( globalid.id( outside ) != globalid.id( entity ) );
             const Dune::PartitionIteratorType pitype = Dune::InteriorBorder_Partition;
 
             typedef typename Grid::template Codim< 0 >
@@ -442,8 +442,8 @@ void assertNeighbor (Grid &g)
                 assert( false );
               }
 
-              if( nit != outsidePtr ) ;
-     //           assert( globalid.id( outside ) != globalid.id( *nit ) );
+              if( nit != outsidePtr ) 
+                assert( globalid.id( outside ) != globalid.id( *nit ) );
               else
                 foundNeighbor = true;
             }
@@ -921,7 +921,7 @@ void gridcheck (Grid &g)
   for( int level = 0; level <= g.maxLevel(); ++level )
     Dune :: checkIndexSet( g, g.levelGridView( level ), Dune :: dvverb, true );
 
- /* // check at least if the subId method is there
+  // check at least if the subId method is there
   {
     typename Grid::Traits::template Codim<0>::LevelIterator it = g.template lbegin<0>(g.maxLevel());
     typename Grid::Traits::template Codim<0>::LevelIterator end = g.template lend<0>(g.maxLevel());
@@ -935,14 +935,15 @@ void gridcheck (Grid &g)
         assert(false);
       }
     }
-  } */
-
- // if( EnableLevelIntersectionIteratorCheck< Grid >::v )
-  //  checkBoundarySegmentIndex( g.levelGridView( 0 ) );
-  //else if( g.maxLevel() == 0 )
-  //  checkBoundarySegmentIndex( g.leafGridView() );
-  //else
+  } 
+/*
+  if( EnableLevelIntersectionIteratorCheck< Grid >::v )
+    checkBoundarySegmentIndex( g.levelGridView( 0 ) );
+  else if( g.maxLevel() == 0 )
+    checkBoundarySegmentIndex( g.leafGridView() );
+  else
     std::cout << "Warning: Skipping boundary segment index check (missing level intersection iterator)." << std::endl;
+*/
 }
 
 #endif // #ifndef GRIDCHECK_CC
