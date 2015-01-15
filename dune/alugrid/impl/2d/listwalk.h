@@ -803,8 +803,8 @@ namespace ALU2DGrid
 
     // this class is a pointer itself, therefore no creation of pointers
     // allowed
-    void * operator new (size_t ) { return 0; }
-    void operator delete (void *) { }
+    void * operator new (size_t );
+    void operator delete (void *);
 
     public :
 

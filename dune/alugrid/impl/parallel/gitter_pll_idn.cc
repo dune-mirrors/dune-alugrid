@@ -472,6 +472,7 @@ namespace ALUGrid
 
     void printVertexLinkage()
     {
+      std::cout << "VertexLinkage[ " << _me << " ]: " << std::endl;
       AccessIterator < vertex_STI >::Handle w ( _containerPll );
       for (w.first (); ! w.done (); w.next ())
       {

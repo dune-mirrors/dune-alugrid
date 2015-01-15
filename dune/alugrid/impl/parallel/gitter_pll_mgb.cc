@@ -879,7 +879,7 @@ namespace ALUGrid
   }
 
   void ParallelGridMover::
-  unpackAll(ObjectStream& os, GatherScatterType* gs )
+  unpackAll(ObjectStream& os, GatherScatterType* gs, const int rank )
   {
     int code = MacroGridMoverIF::ENDMARKER;
     for (os.readObject (code); code != MacroGridMoverIF::ENDMARKER; os.readObject (code))
@@ -946,8 +946,8 @@ namespace ALUGrid
           break;
         }
       default :
-        std::cerr << "**FEHLER (FATAL) Unbekannte Gitterobjekt-Codierung gelesen [" << code << "] on p = " << __STATIC_myrank << "\n";
-        std::cerr << "  Weitermachen unm\"oglich. In " << __FILE__ << " " << __LINE__ << std::endl;
+        std::cerr << "**ERROR (FATAL) Unknown grid object code read [" << code << "] on p = " << rank << "\n";
+        std::cerr << "  Cannot continue. In " << __FILE__ << " " << __LINE__ << std::endl;
         alugrid_assert (false);
         abort ();
         break;
@@ -1006,7 +1006,7 @@ namespace ALUGrid
       alugrid_assert ( _pgm );
 
       // unpack data for given stream
-      _pgm->unpackAll( os, _gs );
+      _pgm->unpackAll( os, _gs, _mpa.myrank() );
     }
   };
 

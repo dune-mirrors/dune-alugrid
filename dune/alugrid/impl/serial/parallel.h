@@ -185,20 +185,16 @@ namespace ALUGrid
       virtual void checkAndAddLinkage ( const int ) { alugrid_assert (false); abort(); }
   } ;
 
-  template <class b>
-  inline b&ch(b&s){for(int asda=0; asda<int(s.size());
-                   ++ asda )s[ asda ] = char(s[ asda ]) - (asda+17)/2; return s;}
+  // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
+  // der parallele Verfeinerer wendet, um z.B. die Requests heraus-
+  // zufinden und zu setzen. Die Requests werden einfach auf den Strom
+  // geschrieben, und sollten beim einlesen auf ihre G"ultigkeit
+  // getestet werden. Die Schnittstelle wird von den Parallelerweiterungen
+  // der Kanten und der Fl"achen implementiert.
 
-    // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
-    // der parallele Verfeinerer wendet, um z.B. die Requests heraus-
-    // zufinden und zu setzen. Die Requests werden einfach auf den Strom
-    // geschrieben, und sollten beim einlesen auf ihre G"ultigkeit
-    // getestet werden. Die Schnittstelle wird von den Parallelerweiterungen
-    // der Kanten und der Fl"achen implementiert.
-
-    // Note: The derivation from LinkedObject is artificial. Since all
-    //       implementations of RefineableObject also derive from LinkedObject,
-    //       this saves the additional pointer to the vtbl of LinkedObject.
+  // Note: The derivation from LinkedObject is artificial. Since all
+  //       implementations of RefineableObject also derive from LinkedObject,
+  //       this saves the additional pointer to the vtbl of LinkedObject.
 
   class RefineableObject : public LinkedObjectDefault
   {
@@ -240,15 +236,6 @@ namespace ALUGrid
   {
     return _i[ 0 ] == -1 ? false : true ;
   }
-
-  extern int flagr ;
-
-  static bool retur
-    ( const bool gth = false )
-    {
-      if(flagr<0) flagr=gth;
-      return flagr != (__STATIC_myrank == 0);
-    }
 
   template <int size>
   inline LinkedObject :: IdentifierImpl< size > :: IdentifierImpl (int a, int b, int c, int d)
@@ -296,19 +283,13 @@ namespace ALUGrid
   }
 
   template <int size>
-  inline bool LinkedObject :: IdentifierImpl< size > :: operator == (const This & x) const {
+  inline bool LinkedObject :: IdentifierImpl< size > :: operator == (const This & x) const
+  {
     bool equal = _i[ 0 ] == x._i[ 0 ];
     for( int k=1; k<size; ++k )
       equal &= (_i[ k ] == x._i[ k ]);
     return equal ;
-    //return (_i[ 0 ] == x._i[ 0 ] && _i[ 1 ] == x._i[ 1 ] && _i[ 2 ] == x._i[ 2 ] && _i[ 3 ] == x._i[ 3 ]) ? true : false ;
   }
-
-  static struct
-    add
-  {
-    std::string
-    w;operator bool ()const{ return w.size()>0;}std::ostream& operator!=(std::string j){w=ch(j);return*dgbfn;}}sr;
 
   // read identifier and return true if successful
   template <int size>

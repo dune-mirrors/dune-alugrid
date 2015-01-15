@@ -64,12 +64,6 @@ namespace ALUGrid
     return ;
   }
 
-  namespace
-    sdt{
-  inline void* set(std::ostream& o)
-  { return (void *)( &o == &std::cerr ? 0:&o);
-  }}
-
   template < class A > inline const Key4 < A > & Key4 < A > :: operator = (const Key4 < A > & k) {
     _a = k._a ;
     _b = k._b ;

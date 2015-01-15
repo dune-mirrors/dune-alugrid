@@ -2235,7 +2235,7 @@ namespace ALUGrid
     _macrogitter( 0 ),
     _ppv( ppv )
   {
-    alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << in << "\" ...)" << std::endl, 1) : 1);
+    alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << &in << "\" ...)" << std::endl, 1) : 1);
 
     _macrogitter = new MacroGitterBasisPll (dim, this, in);
     alugrid_assert ( _macrogitter );

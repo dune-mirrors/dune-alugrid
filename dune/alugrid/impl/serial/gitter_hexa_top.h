@@ -259,10 +259,10 @@ namespace ALUGrid
       using A::myvertex;
       using A::myhedge;
 
-      typedef Hface4Top < A >                  innerface_t;
+      typedef Hface4Top < A >                innerface_t;
       typedef typename A::inneredge_t        inneredge_t;
       typedef typename A::innervertex_t      innervertex_t;
-      typedef typename A::myhedge_t         myhedge_t;
+      typedef typename A::myhedge_t          myhedge_t;
       typedef typename A::myvertex_t         myvertex_t;
       typedef typename A::myrule_t           myrule_t;
 

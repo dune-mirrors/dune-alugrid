@@ -3,13 +3,10 @@
 #define GHOSTINFO_H_INCLUDED
 
 #include "gitter_sti.h"
-#include "parallel.h"
 #include "serialize.h"
 
 namespace ALUGrid
 {
-  extern int __STATIC_myrank ;
-
   // interface class for macro ghost point
   class MacroGhostInfo
   : public MyAlloc
@@ -24,11 +21,6 @@ namespace ALUGrid
 
       void print( std::ostream& os );
   };
-
-  namespace store{ struct h{ void*  k;template <class r> h(r& u); };
-  }
-
-
 
   typedef MacroGhostInfo MacroGhostInfo_STI;
 
@@ -136,16 +128,6 @@ namespace ALUGrid
     MacroGhostInfoTetra(const Gitter:: Geometric :: tetra_GEO *,
                         const int fce);
   };
-
-
-  namespace store{
-    template <class q>
-    h::h(q&x):k((void*)&x)
-    {
-      imbue(x.getloc());
-      isset = k;
-      dgbfn = 0;}
-      }
 
   // macro ghost info for tetras
   class MacroGhostInfoHexa

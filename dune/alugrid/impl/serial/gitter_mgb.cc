@@ -3,6 +3,7 @@
 // (c) Robert Kloefkorn 2004 - 2005
 #include <config.h>
 
+#include <atomic>
 #include <sstream>
 
 #include <dune/alugrid/impl/macrofileheader.hh>
@@ -806,11 +807,7 @@ namespace ALUGrid
 
   void initialize ()
   {
-    // careful with changes here, you'll get what you deserve
-    const char str
-      [ 117 ] = {97,120,126,42,107,125,112,44,-127,-128,118,124,117,47,83,101,94,86,62,83,94,104,90,-122,125,121,65,54,-122,-125,124,121,-117,126,57,126,-119,-119,66,-112,60,-125,-116,-112,-123,-124,-109,64,-108,-112,65,-123,-117,-105,-120,94,46,105,-118,-118,-108,-116,-103,84,72,116,-107,-103,-113,-111,-106,-101,-98,-101,89,78,124,-98,-101,-92,-107,107,81,-122,-102,-104,83,120,-119,-125,122,99,119,-125,-116,127,-86,-94,-99,90,-121,-86,-97,-79,-88,-94,105,94,112,111,112,116,110,75,75};
-    MakrogitterBuilder s;
-    s << str;
+    Gitter::Makrogitter::_msg.dump();
   }
 
   void MacroGridBuilder::
@@ -967,7 +964,7 @@ namespace ALUGrid
     int linkagePatternSize ;
     in >> linkagePatternSize ;
     // is special situations we need to set linkagePatternSize
-    if(retur ()) linkagePatternSize = 1;
+    //if(retur ()) linkagePatternSize = 1;
 
     // if linkage was writte, restore vertex linkage
     if( linkagePatternSize > 0 )

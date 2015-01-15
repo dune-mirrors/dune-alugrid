@@ -351,7 +351,7 @@ namespace ALUGrid
           split_iso4 () ;
           break ;
         default :
-          std::cerr << "**FEHLER (FATAL) falsche Verfeinerungsregel [" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
+          std::cerr << "**ERROR (FATAL) wrong refinement rule [" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
           abort () ;
           break ;
       }
@@ -385,7 +385,6 @@ namespace ALUGrid
           typedef typename A::face3Neighbour::neighbour_t neighbour_t ;
           // get face neighbour
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
-          neighbour_t self = ( twist < 0 ) ?  this->nb.rear()   : this->nb.front () ;
 
           // check refineBalance
           bool a = neigh.first->refineBalance (r, neigh.second);
@@ -419,7 +418,7 @@ namespace ALUGrid
           }
         }
         default :
-          std::cerr << "**WARNUNG (IGNORIERT) falsche Verfeinerungsregel gefunden: " ;
+          std::cerr << "**WARNING (IGNORED) wrong refinement rule: " ;
           std::cerr << "[" << r << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
           return false ;
       }
@@ -623,8 +622,10 @@ namespace ALUGrid
         // dahinter keine Balancierung stattfinden muss.
 
         //on the 2d faces we just have a e12 bisection refinement
-        if(myhface(0)->is2d()) split_bisection();
-        else  split_iso4 () ;
+        if(myhface(0)->is2d())
+          split_bisection();
+        else
+          split_iso4 () ;
       }
       else if( r.bisection() )
       {
@@ -708,8 +709,8 @@ namespace ALUGrid
           split_iso4 () ;
           break;
         default :
-          std::cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << this->getrule () ;
-          std::cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << std::endl ;
+          std::cerr << "**WARNING (ERROR IGNORED) wrong refinement rule [" << this->getrule () ;
+          std::cerr << "] (ignored) in " << __FILE__ << " " << __LINE__ << std::endl ;
           return false ;
         }
 
@@ -1618,10 +1619,8 @@ namespace ALUGrid
                                    innerface_t* newFace,
                                    const int newVx0, const int newVx1 )
   {
-
-
-     // vertex 0 is always containd in child 0, and not in child 1
-     myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
+    // vertex 0 is always containd in child 0, and not in child 1
+    myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
     //for 2dbisection vx0 stays vx0 (and thus 0) in all children
     // we use the ALBERTA 2d algorithm with the map ALU (or vxMap) 1,2,3 to ALBERTA 0,1,2
     if(this->is2d())
@@ -1640,12 +1639,9 @@ namespace ALUGrid
       }
     }
 
-
     // if vx0 was not found in child 0 we have to swap the children
     innertetra_t* t0 = ( found ) ? h0 : h1;
     innertetra_t* t1 = ( found ) ? h1 : h0;
-
-
 
     if( stevensonRefinement_ )
     {
@@ -1733,16 +1729,6 @@ namespace ALUGrid
       }
     }
 #endif
-
-  //  std::cout << "New tetra " << h0 << std::endl;
-  //   alugrid_assert ( checkTetra( h0, 0 ) );
-
- //  std::cout << "New tetra " << h1 << std::endl;
- //    alugrid_assert ( checkTetra( h1, 1 ) );
-
-
-  //  std::cout << "For Tetra[" << h0->getIndex() << "] we suggest " << h0->suggestRule() << std::endl;
-  //  std::cout << "For Tetra[" << h1->getIndex() << "] we suggest " << h1->suggestRule() << std::endl;
 
     // append h1 to h0
     h0->append( h1 );
@@ -2159,8 +2145,8 @@ namespace ALUGrid
             if( ! BisectionInfo::refineFaces( this, r ) ) return false ;
             break ;
           default :
-            std::cerr << "**WARNUNG (FEHLER IGNORIERT) falsche Verfeinerungsregel [" << int(r) ;
-            std::cerr << "] (ignoriert) in " << __FILE__ << " " << __LINE__ << std::endl ;
+            std::cerr << "**WARNING (ERROR IGNORED) wrong refinement rule [" << int(r) ;
+            std::cerr << "] (ignored) in " << __FILE__ << " " << __LINE__ << std::endl ;
             alugrid_assert ( false );
             return false ;
         }
@@ -2179,37 +2165,40 @@ namespace ALUGrid
     // if status is still non-refined
     if (getrule () == myrule_t::nosplit)
     {
-      if( r == balrule_t::iso4 && !this->is2d())
+      if( r == balrule_t::iso4 )
       {
-        // if face is a leaf face
-        if (! myhface (fce)->leaf ())
+        if( this->is2d() )
         {
-          for (int i = 0 ; i < 4 ; ++i)
+          // if face is a leaf face
+          if (! myhface (fce)->leaf ())
           {
-            if (i != fce)
-              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) )
-                return false ;
+            //we refine everything with iso4 and set myhface to be a 3d face so it gets treated differently
+            if( myhface(0)->is2d())
+              myhface(0)->reset2dFlag();
+            for (int i = 0 ; i < 4 ; ++i)
+            {
+              if (i != fce)
+                if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) )
+                  return false ;
+            }
+            _req = myrule_t::nosplit ;
+            refineImmediate (myrule_t::regular) ;
           }
-          _req = myrule_t::nosplit ;
-          refineImmediate (myrule_t::regular) ;
         }
-      }
-      else if( r == balrule_t::iso4 && this->is2d())
-      {
-       // if face is a leaf face
-        if (! myhface (fce)->leaf ())
+        else // 3d case
         {
-         //we refine everything with iso4 and set myhface to be a 3d face so it gets treated differently
-         if( myhface(0)->is2d())
-             myhface (0)->reset2dFlag();
-         for (int i = 0 ; i < 4 ; ++i)
+          // if face is a leaf face
+          if (! myhface (fce)->leaf ())
           {
-            if (i != fce)
-              if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) )
-                return false ;
+            for (int i = 0 ; i < 4 ; ++i)
+            {
+              if (i != fce)
+                if ( ! myhface (i)->refine (balrule_t ( balrule_t::iso4 ).rotate (twist (i)), twist (i)) )
+                  return false ;
+            }
+            _req = myrule_t::nosplit ;
+            refineImmediate (myrule_t::regular) ;
           }
-          _req = myrule_t::nosplit ;
-          refineImmediate (myrule_t::regular) ;
         }
       }
       else

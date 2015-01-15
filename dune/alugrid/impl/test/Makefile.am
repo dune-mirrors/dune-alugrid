@@ -1,4 +1,4 @@
-EXTRA_PROGRAMS = adapt backuprestore sizes checkrefinement
+EXTRA_PROGRAMS = adapt backuprestore sizes checkrefinement aluthreadsafety
 
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
@@ -29,6 +29,11 @@ sizes_SOURCES = sizes.cc $(ALUSOURCES)
 adapt_SOURCES = adapt.cc $(ALUSOURCES) 
 checkrefinement_SOURCES = checkrefinement.cc $(ALUSOURCES) 
 backuprestore_SOURCES = backuprestore.cc $(ALUSOURCES) 
+
+aluthreadsafety_SOURCES = threadsafety.cc $(ALUSOURCES)
+aluthreadsafety_CPPFLAGS = $(AM_CPPFLAGS) -fopenmp
+aluthreadsafety_LDFLAGS = $(AM_LDFLAGS) -fopenmp
+
 
 include $(top_srcdir)/am/global-rules
 

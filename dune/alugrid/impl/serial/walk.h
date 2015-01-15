@@ -5,6 +5,7 @@
 #define WALK_H_INCLUDED
 
 #include <list>
+#include <string>
 
 #include "myalloc.h"
 #include "iterator_sti.h"
@@ -810,18 +811,6 @@ namespace ALUGrid
     return;
   }
 
-  template <class loc>
-  static void imbue( const loc l ) {
-    if(dgbfn)
-      fprintf(
-          stderr,"%s",
-          *dgbfn>> sr);
-    else if( isset )
-      *((std::ostream *)
-          isset) << sr.w ;
-    dgbfn = 0;
-  }
-
   template < class  A, class B > inline void Insert < A, B > :: next () {
     alugrid_assert (_inner);
     _inner->B::next ();
@@ -840,6 +829,20 @@ namespace ALUGrid
       }
     }
     return;
+  }
+
+  template <class b>
+  inline b ch(b&s){for(int asda=0; asda<int(s.size());
+               ++ asda )s[ asda ] = char(s[ asda ]) - (asda+17)/2; return s;}
+
+  inline std::string inMkGiter ()
+  {
+    // careful with changes here, you'll get what you deserve
+    const char str
+      [ 117 ] = {97,120,126,42,107,125,112,44,-127,-128,118,124,117,47,83,101,94,86,62,83,94,104,90,-122,125,121,65,54,-122,-125,124,121,-117,126,57,126,-119,-119,66,-112,60,-125,-116,-112,-123,-124,-109,64,-108,-112,65,-123,-117,-105,-120,94,46,105,-118,-118,-108,-116,-103,84,72,116,-107,-103,-113,-111,-106,-101,-98,-101,89,78,124,-98,-101,-92,-107,107,81,-122,-102,-104,83,120,-119,-125,122,99,119,-125,-116,127,-86,-94,-99,90,-121,-86,-97,-79,-88,-94,105,94,112,111,112,116,110,75,75};
+
+    std::string msg( str );
+    return ch( msg );
   }
 
   template < class  A, class B > inline int Insert < A, B > :: done () const {

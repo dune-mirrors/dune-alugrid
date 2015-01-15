@@ -13,36 +13,13 @@
 
 namespace ALUGrid
 {
-
-    // Die statische Variable __STATIC_myrank sollte nur zum Debuggen
-    // verwendet werden, da ernstere Bez"uge wohl die thread-safeness
-    // gef"ahrden w"urden. Sie wird auch erst sp"ater irgendwann mit
-    // dem richtigen Wert besetzt. Definiert in gitter_pll_sti.cc .
-    //  __STATIC_turn  enth"alt die globale Runde der adaption, damit
-    // Fehler in der parallelen Ausgabe, die normalerweise entwas
-    // unsortiert ist, zugeordnet werden k"onnen. Die Variablen k"onnen
-    // nur in echt verteilten Anwendungen (nicht mt) zum Debuggen
-    // verwendet werden.
-    // __STATIC_phase enth"alt w"ahrend der Adaption deren Phase:
-    // -1 - ausserhalb der Verfeinerung bzw. Vergr"oberung.
-    //  1 - sequentielle Verfeinerung,
-    //  2 - Fl"achenausgleich des Verfeinerers,
-    //  3 - Kantenausgleich des Verfeinerers,
-    //  4 - sequentielle Vergr"oberung,
-    //  5 - Fl"achenausgleich des Vergr"oberers,
-    //  6 - Kantenausgleich des Vergr"oberers.
-
-  extern int __STATIC_myrank;
-  extern int __STATIC_turn;
-  extern int __STATIC_phase;
-
   template < class A > class LeafIteratorTT;
 
-    // Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das
-    // genau wie der 'AccessIterator' aus gitter_sti.h funktioniert, aber
-    // f"ur die Identifikationsiteratoren verwendet wird. Deshalb hat es
-    // auch zwei Handle - Klassen: eine f"ur den inneren und eine f"ur
-    // den "ausseren Iterator.
+  // Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das
+  // genau wie der 'AccessIterator' aus gitter_sti.h funktioniert, aber
+  // f"ur die Identifikationsiteratoren verwendet wird. Deshalb hat es
+  // auch zwei Handle - Klassen: eine f"ur den inneren und eine f"ur
+  // den "ausseren Iterator.
 
   template < class A > class AccessIteratorTT {
     public :
