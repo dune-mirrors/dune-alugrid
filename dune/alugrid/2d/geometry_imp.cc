@@ -21,10 +21,10 @@ inline ALU2dGridGeometry< mydim, cdim, GridImp >::ALU2dGridGeometry ()
 }
 
 template< int mydim, int cdim, class GridImp >
-inline ALU2dGridGeometry< mydim, cdim, GridImp >& 
+inline ALU2dGridGeometry< mydim, cdim, GridImp >&
 ALU2dGridGeometry< mydim, cdim, GridImp >::operator = ( const ALU2dGridGeometry& other )
 {
-  if( &other != this ) 
+  if( &other != this )
   {
     removeObj();
     assign( other );
@@ -54,9 +54,9 @@ inline void ALU2dGridGeometry< mydim, cdim, GridImp >::getObject()
 template< int mydim, int cdim, class GridImp >
 inline void ALU2dGridGeometry< mydim, cdim, GridImp >::assign( const ALU2dGridGeometry& other )
 {
-  // copy pointer 
+  // copy pointer
   geoImpl_ = other.geoImpl_ ;
-  
+
   // increase reference count
   ++ geoImpl();
 }
@@ -64,35 +64,35 @@ inline void ALU2dGridGeometry< mydim, cdim, GridImp >::assign( const ALU2dGridGe
 template< int mydim, int cdim, class GridImp >
 inline void ALU2dGridGeometry< mydim, cdim, GridImp >::removeObj()
 {
-  // decrease reference count 
+  // decrease reference count
   -- geoImpl();
 
-  // if reference count is zero free the object 
+  // if reference count is zero free the object
   if( ! geoImpl() )
   {
     geoProvider().freeObject( geoImpl_ );
   }
 
-  // reset pointer 
+  // reset pointer
   geoImpl_ = 0;
 }
 
 template< int mydim, int cdim, class GridImp >
 inline void ALU2dGridGeometry< mydim, cdim, GridImp >::invalidate()
 {
-  // if geometry is used elsewhere remove the pointer 
-  // and get a new one 
+  // if geometry is used elsewhere remove the pointer
+  // and get a new one
   if( geoImpl().stillUsed() )
   {
-    // remove old object 
+    // remove old object
     removeObj();
 
-    // get new object 
+    // get new object
     getObject();
   }
   else
   {
-    // otherwise invalidate object 
+    // otherwise invalidate object
     geoImpl().invalidate();
   }
 }
@@ -115,7 +115,7 @@ inline void ALU2dGridGeometry< mydim, cdim, GridImp >::print ( std::ostream &out
 ///////////////////////////////////////////////////////////////////////
 
 
-//! access to coordinates of corners. Index is the number of the corner 
+//! access to coordinates of corners. Index is the number of the corner
 template< int mydim, int cdim, class GridImp >
 inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
 ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
@@ -124,8 +124,8 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::corner ( int i ) const
 }
 
 
-//! maps a local coordinate within reference element to 
-//! global coordinate in element 
+//! maps a local coordinate within reference element to
+//! global coordinate in element
 template< int mydim, int cdim, class GridImp >
 inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::GlobalCoordinate
 ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local ) const
@@ -136,7 +136,7 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::global ( const LocalCoordinate &local
 }
 
 
-//! maps a global coordinate within the element to a 
+//! maps a global coordinate within the element to a
 //! local coordinate in its reference element
 template< int mydim, int cdim, class GridImp >
 inline typename ALU2dGridGeometry< mydim, cdim, GridImp >::LocalCoordinate
@@ -156,9 +156,9 @@ inline alu2d_ctype
 ALU2dGridGeometry< mydim, cdim, GridImp >::integrationElement ( const LocalCoordinate &local ) const
 {
   alugrid_assert ( geoImpl().valid() );
-  if( mydim == cdim ) 
+  if( mydim == cdim )
   {
-    if( std::abs( geoImpl().det( local ) - jacobianTransposed( local 
+    if( std::abs( geoImpl().det( local ) - jacobianTransposed( local
                      ).determinant() ) > 1e-8 )
       std::cout << "det = " << geoImpl().det( local ) << "  inv.det " <<
         jacobianTransposed( local ).determinant() << std::endl;
@@ -193,16 +193,16 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::jacobianInverseTransposed ( const Loc
 }
 
 
-//! built Geometry for triangles 
+//! built Geometry for triangles
 template< int mydim, int cdim, class GridImp >
 inline bool
 ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const HElementType &item )
 {
-  // check item 
+  // check item
   alugrid_assert ( &item );
   alugrid_assert ( mydim == 2 );
 
-  // update geometry impl 
+  // update geometry impl
   geoImpl().update( item );
 
   // geometry built
@@ -210,27 +210,27 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::buildGeom( const HElementType &item )
 }
 
 
-//! built Geometry for edges 
+//! built Geometry for edges
 template <int mydim, int cdim, class GridImp>
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildGeom(const HElementType & item, const int aluFace)
 {
   alugrid_assert ( mydim == 1 );
-  // face 1 is twisted 
+  // face 1 is twisted
   const int nf = item.numfaces();
 
   // for triangles face 1 is twisted and for quatrilaterals faces 1 and 2
   const int twist = (nf == 3) ? (aluFace % 2) : (aluFace>>1)^(aluFace&1);
   // std::cout << nf << " " << aluFace << " " << twist << std::endl;
   //           << " ( " item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
-  //           << " , " item.getVertex( (aluFace + 2 - twist ) % nf )->coord() 
+  //           << " , " item.getVertex( (aluFace + 2 - twist ) % nf )->coord()
   //           << " ) " << std::endl;
 
-  // check item 
+  // check item
   alugrid_assert ( &item );
 
 
-  // update geometry impl 
+  // update geometry impl
   geoImpl().update( item.getVertex( (aluFace + 1 + twist ) % nf )->coord() ,
                     item.getVertex( (aluFace + 2 - twist ) % nf )->coord() ,
                     item.sidelength( aluFace )
@@ -240,7 +240,7 @@ buildGeom(const HElementType & item, const int aluFace)
   return true;
 }
 
-//! built Geometry for vertices 
+//! built Geometry for vertices
 template <int mydim, int cdim, class GridImp>
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildGeom(const VertexType & item , const int )
@@ -248,12 +248,12 @@ buildGeom(const VertexType & item , const int )
   alugrid_assert ( mydim == 0 );
 
   alugrid_assert ( &item );
-  // update geometry impl 
-  // volume is already 1.0 
+  // update geometry impl
+  // volume is already 1.0
   geoImpl().update( item.coord() );
 
   // geometry built
-  return true; 
+  return true;
 }
 
 // built Geometry
@@ -262,7 +262,7 @@ template <class GeometryType, class LocalGeometryType >
 inline bool ALU2dGridGeometry<mydim,cdim,GridImp>::
 buildLocalGeom(const GeometryType &geo, const LocalGeometryType & localGeom)
 {
-  // update geometry 
+  // update geometry
   geoImpl().updateLocal( geo, localGeom );
   // geometry built
   return true;
@@ -278,14 +278,14 @@ ALU2dGridGeometry< mydim, cdim, GridImp >::calculateReferenceCoords ( const int 
   FieldMatrix< alu2d_ctype, 4, 2 > refCoord( 0. );
   FieldVector< alu2d_ctype, 4 > lengths( 1. );
 
-  // point 1 
+  // point 1
   refCoord[1][0] = 1.0;
   // point (corners-1)
   refCoord[corners-1][1] = 1.0;
   if( corners == 3 )
   {
     lengths[0] = M_SQRT2;
-  } 
+  }
   else
   {
     // point 2
@@ -308,8 +308,8 @@ buildLocalGeometry(const int aluFace, const int twist, const int corners)
   RefCoord refCoord( calculateReferenceCoords( corners ) );
 
   geoImpl().update( refCoord.first[ ( aluFace + 1+twist ) % corners ],
-                    refCoord.first[ ( aluFace + 2-twist ) % corners ], 
-                    refCoord.second[ aluFace ] 
+                    refCoord.first[ ( aluFace + 2-twist ) % corners ],
+                    refCoord.second[ aluFace ]
                  );
 
   // geometry built
@@ -319,15 +319,15 @@ buildLocalGeometry(const int aluFace, const int twist, const int corners)
 // built Geometry
 template <int mydim, int cdim, class GridImp >
 inline bool ALU2dGridGeometry<mydim, cdim,GridImp>::
-buildGeomInFather(const Geometry & fatherGeom , 
+buildGeomInFather(const Geometry & fatherGeom ,
                   const Geometry & myGeom)
 {
-  // update geometry 
+  // update geometry
   geoImpl().updateLocal( fatherGeom, myGeom );
   // geometry built
   return true;
 }
-  
-} //end namespace Dune 
+
+} //end namespace Dune
 
 #endif // #ifndef DUNE_ALU2DGRID_GEOMETRYIMP_CC

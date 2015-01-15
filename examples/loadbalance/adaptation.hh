@@ -1,19 +1,19 @@
-#ifndef ADAPTATION_HH 
-#define ADAPTATION_HH 
+#ifndef ADAPTATION_HH
+#define ADAPTATION_HH
 
-/** include the grid capabilities 
+/** include the grid capabilities
  ** to distiguish grids without local adaptation **/
 #include <dune/common/timer.hh>
 
 #include <dune/grid/common/capabilities.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 
-// global counter of adaptation cyclces 
-static int adaptationSequenceNumber = 0; 
+// global counter of adaptation cyclces
+static int adaptationSequenceNumber = 0;
 
 #include "datamap.hh"
 
-// interface class for callback adaptation 
+// interface class for callback adaptation
 #include <dune/grid/common/adaptcallback.hh>
 
 // LeafAdaptation
@@ -23,13 +23,13 @@ static int adaptationSequenceNumber = 0;
  *  \brief class used the adaptation procedure.
  *
  *  \tparam Grid     is the type of the underlying grid
- *  \tparam Vector   is the type of the solution vector 
+ *  \tparam Vector   is the type of the solution vector
  */
 template< class Grid, class Vector, class LoadBalanceHandle >
-class LeafAdaptation : public Dune::AdaptDataHandle< Grid, LeafAdaptation< Grid, Vector, LoadBalanceHandle > > 
+class LeafAdaptation : public Dune::AdaptDataHandle< Grid, LeafAdaptation< Grid, Vector, LoadBalanceHandle > >
 {
   typedef LeafAdaptation<Grid,Vector,LoadBalanceHandle> ThisType;
-public:  
+public:
   // dimensions of grid and world
   static const int dimGrid = Grid::dimension;
   static const int dimWorld = Grid::dimensionworld;
@@ -52,11 +52,11 @@ public:
   typedef typename Vector::VectorType Container;
 #endif
 
-  // type of grid view used 
+  // type of grid view used
   typedef typename Vector :: GridView  GridView;
 
   typedef typename GridView
-      ::template Codim< 0 >::template Partition< partition >::Iterator 
+      ::template Codim< 0 >::template Partition< partition >::Iterator
       Iterator;
 public:
   /** \brief constructor
@@ -78,24 +78,24 @@ public:
 
   /** \brief main method performing the adaptation and
              perserving the data.
-      \param solution  the data vector to perserve during 
+      \param solution  the data vector to perserve during
                        adaptation. This class must conform with the
                        parameter class V in the DataMap class and additional
                        provide a resize and communicate method.
   **/
   void operator() ( Vector &solution );
 
-  //! return time spent for the last adapation in sec 
+  //! return time spent for the last adapation in sec
   double adaptationTime() const { return adaptTime_; }
   //! return time spent for the last load balancing in sec
   double loadBalanceTime() const { return lbTime_; }
   //! return time spent for the last communication in sec
   double communicationTime() const { return commTime_; }
 
-  // this is called before the adaptation process starts 
+  // this is called before the adaptation process starts
   void initialize ();
 
-  // this is called after the adaptation process is finished 
+  // this is called after the adaptation process is finished
   void finalize ();
 
   //--------------------------------------------------
@@ -142,7 +142,7 @@ private:
 #endif
   Vector*            solution_;
 
-  Dune :: Timer      adaptTimer_ ; 
+  Dune :: Timer      adaptTimer_ ;
 
   double adaptTime_;
   double lbTime_;
@@ -155,32 +155,32 @@ inline void LeafAdaptation< Grid, Vector,LoadBalanceHandle >::operator() ( Vecto
   if (Dune :: Capabilities :: isCartesian<Grid> :: v)
     return;
 
-  // set pointer to solution 
+  // set pointer to solution
   solution_ = & solution ;
 
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
   commTime_  = 0.0;
 
-  // reset timer 
-  adaptTimer_.reset() ; 
+  // reset timer
+  adaptTimer_.reset() ;
 
-  // copy solution to PersistentContainer if necessary 
+  // copy solution to PersistentContainer if necessary
   initialize();
 
-  // callback adaptation, see interface methods above 
+  // callback adaptation, see interface methods above
   grid_.adapt( *this );
 
   // copy solution from PersistentContainer if necessary
-  finalize(); 
+  finalize();
 
-  // increase adaptation secuence number 
+  // increase adaptation secuence number
   ++adaptationSequenceNumber;
 }
 
 template< class Grid, class Vector, class LoadBalanceHandle >
 inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle >
-  ::initialize() 
+  ::initialize()
 {
 #ifdef USE_VECTOR_FOR_PWF
   const Vector& solution = getSolution();
@@ -197,7 +197,7 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle >
 }
 
 template< class Grid, class Vector, class LoadBalanceHandle >
-inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize() 
+inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize()
 {
   Vector& solution = getSolution();
 #ifndef USE_VECTOR_FOR_PWF
@@ -218,14 +218,14 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize()
 #endif
   lbTime_ = lbTimer.elapsed();
 
-  // reduce size of container, if possible 
+  // reduce size of container, if possible
   container_.resize();
 
 #ifdef USE_VECTOR_FOR_PWF
-  // reset timer to count again 
+  // reset timer to count again
   adaptTimer_.reset();
 
-  // resize to current grid size 
+  // resize to current grid size
   solution.resize();
 
   // retrieve data from container and store on new leaf grid
@@ -237,7 +237,7 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize()
     solution.setLocalDofVector( entity, container_[ entity ] );
   }
 
-  // store adaptation time 
+  // store adaptation time
   adaptTime_ += adaptTimer_.elapsed();
 #endif
 
@@ -246,8 +246,8 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize()
   solution.communicate();
   commTime_ = commTimer.elapsed();
 
-  // reset pointer 
+  // reset pointer
   solution_ = 0;
 }
 
-#endif 
+#endif

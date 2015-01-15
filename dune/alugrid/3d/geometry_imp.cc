@@ -35,7 +35,7 @@ template <int mydim, int cdim, class GridImp>
 inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
 assign ( const ALU3dGridGeometry& other )
 {
-  // copy pointer 
+  // copy pointer
   geoImpl_ = other.geoImpl_ ;
 
   // increase reference count
@@ -46,21 +46,21 @@ template <int mydim, int cdim, class GridImp>
 inline void ALU3dGridGeometry<mydim, cdim, GridImp> ::
 removeObj ()
 {
-  // decrease reference count 
+  // decrease reference count
   -- geoImpl();
 
-  // if reference count is zero free the object 
+  // if reference count is zero free the object
   if( ! geoImpl() )
   {
     geoProvider().freeObject( geoImpl_ );
   }
 
-  // reset pointer 
+  // reset pointer
   geoImpl_ = 0;
 }
 
 template <int mydim, int cdim, class GridImp>
-inline ALU3dGridGeometry<mydim, cdim, GridImp>& 
+inline ALU3dGridGeometry<mydim, cdim, GridImp>&
 ALU3dGridGeometry<mydim, cdim, GridImp> :: operator = (const ALU3dGridGeometry& other )
 {
   if( &other != this )
@@ -76,24 +76,24 @@ inline ALU3dGridGeometry<mydim, cdim, GridImp> ::
 ~ALU3dGridGeometry()
 {
   removeObj();
-} 
+}
 
 template< int mydim, int cdim, class GridImp>
-inline void 
-ALU3dGridGeometry< mydim, cdim, GridImp > :: invalidate () 
+inline void
+ALU3dGridGeometry< mydim, cdim, GridImp > :: invalidate ()
 {
-  // if geometry is used elsewhere remove the pointer 
-  // and get a new one 
+  // if geometry is used elsewhere remove the pointer
+  // and get a new one
   if( geoImpl().stillUsed() )
   {
-    // remove old object 
+    // remove old object
     removeObj();
-    // get new object 
+    // get new object
     getObject();
   }
-  else 
+  else
   {
-    // otherwise invalidate object 
+    // otherwise invalidate object
     geoImpl().invalidate();
   }
 }
@@ -109,21 +109,21 @@ template< int mydim, int cdim, class GridImp>
 inline GeometryType
 ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
 {
-  return GeometryType( (elementType == tetra) ? 
+  return GeometryType( (elementType == tetra) ?
       GenericGeometry :: SimplexTopology< mydim > :: type :: id :
-      GenericGeometry :: CubeTopology   < mydim > :: type :: id, 
+      GenericGeometry :: CubeTopology   < mydim > :: type :: id,
       mydim );
 }
 
 template< int mydim, int cdim, class GridImp>
-inline int 
-ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const 
+inline int
+ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const
 {
   return corners_;
 }
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate 
+inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 corner (int i) const
 {
@@ -132,9 +132,9 @@ corner (int i) const
 
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate 
+inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-global (const LocalCoordinate& local) const 
+global (const LocalCoordinate& local) const
 {
   GlobalCoordinate global;
   geoImpl().mapping().map2world(local, global);
@@ -142,9 +142,9 @@ global (const LocalCoordinate& local) const
 }
 
 template< int mydim, int cdim, class GridImp >
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::LocalCoordinate 
+inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::LocalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-local (const GlobalCoordinate& global) const 
+local (const GlobalCoordinate& global) const
 {
   LocalCoordinate local;
   geoImpl().mapping().world2map(global, local);
@@ -152,26 +152,26 @@ local (const GlobalCoordinate& global) const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype 
+inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-integrationElement (const LocalCoordinate& local) const 
+integrationElement (const LocalCoordinate& local) const
 {
   // this is the only case we need to specialize
-  if( mydim == 3 && elementType == tetra ) 
+  if( mydim == 3 && elementType == tetra )
   {
     alugrid_assert ( geoImpl().valid() );
     return 6.0 * geoImpl().volume();
   }
-  else 
+  else
     return geoImpl().mapping().det( local );
 }
 
 template<int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype 
+inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-volume () const 
+volume () const
 {
-  if( mydim == 3 ) 
+  if( mydim == 3 )
   {
     alugrid_assert ( geoImpl().valid() );
     return geoImpl().volume() ;
@@ -179,20 +179,20 @@ volume () const
   else if ( mydim == 2 && elementType == tetra )
   {
     enum { factor = Factorial<mydim>::factorial };
-    // local vector does not affect the result 
+    // local vector does not affect the result
     const LocalCoordinate dummy(0);
     return integrationElement( dummy ) / ((ctype) factor);
   }
-  else 
+  else
   {
     return integrationElement(LocalCoordinate(0.5));
   }
 }
 
 template< int mydim, int cdim, class GridImp>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-affine() const 
+affine() const
 {
   return geoImpl().mapping().affine();
 }
@@ -200,23 +200,23 @@ affine() const
 template< int mydim, int cdim, class GridImp>
 inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianInverseTransposed&
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-jacobianInverseTransposed (const LocalCoordinate& local) const 
+jacobianInverseTransposed (const LocalCoordinate& local) const
 {
   return geoImpl().mapping().jacobianInverseTransposed( local );
 }
 
 template< int mydim, int cdim, class GridImp>
-inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianTransposed& 
+inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianTransposed&
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-jacobianTransposed (const LocalCoordinate& local) const 
+jacobianTransposed (const LocalCoordinate& local) const
 {
   return geoImpl().mapping().jacobianTransposed( local );
 }
 
 template <int mydim, int cdim, class GridImp>
-inline void 
+inline void
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-print (std::ostream& ss) const 
+print (std::ostream& ss) const
 {
   const char* charElType = (elementType == tetra) ? "tetra" : "hexa";
   ss << "ALU3dGridGeometry<" << mydim << ", " << cdim << ", " << charElType << "> = {\n";
@@ -228,19 +228,19 @@ print (std::ostream& ss) const
   ss << "} \n";
 }
 
-// built Geometry 
+// built Geometry
 template <int mydim, int cdim, class GridImp>
 template <class GeometryType>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 {
-  // update geo impl 
+  // update geo impl
   geoImpl().updateInFather( fatherGeom, myGeom );
 
-  // my volume is a part of 1 for hexas, for tetra adjust with factor 
+  // my volume is a part of 1 for hexas, for tetra adjust with factor
   double volume = myGeom.volume() / fatherGeom.volume() ;
-  if( elementType == tetra && mydim == 3 ) 
+  if( elementType == tetra && mydim == 3 )
   {
     volume /= 6.0; // ???
     geoImpl().setVolume( volume );
@@ -249,7 +249,7 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
     alugrid_assert ( std::abs( 6.0 * geoImpl().volume() - integrationElement( local ) ) < 1e-12 );
 #endif
   }
-  else 
+  else
     geoImpl().setVolume( volume );
 
   return true;
@@ -257,16 +257,16 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 
 //--hexaBuildGeom
 template <int mydim, int cdim, class GridImp>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const IMPLElementType& item) 
+buildGeom(const IMPLElementType& item)
 {
   alugrid_assert( int(mydim) == 2 || int(mydim) == 3 );
 
-  if ( elementType == hexa ) 
+  if ( elementType == hexa )
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex 
+    // of number when calling myvertex
     alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
     alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
     alugrid_assert ( ElementTopo::dune2aluVertex(2) == 3 );
@@ -278,7 +278,7 @@ buildGeom(const IMPLElementType& item)
 
     if( mydim == 3 ) // hexahedron
     {
-      // update geo impl 
+      // update geo impl
       geoImpl().update( item.myvertex(0)->Point(),
                         item.myvertex(1)->Point(),
                         item.myvertex(3)->Point(),
@@ -297,18 +297,18 @@ buildGeom(const IMPLElementType& item)
                         item.myvertex(2)->Point() );
     }
   }
-  else if( elementType == tetra ) 
+  else if( elementType == tetra )
   {
     // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex 
+    // of number when calling myvertex
     alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
     alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
     alugrid_assert ( ElementTopo::dune2aluVertex(2) == 2 );
     alugrid_assert ( ElementTopo::dune2aluVertex(3) == 3 );
 
-    if( mydim == 3 ) // tetrahedron 
+    if( mydim == 3 ) // tetrahedron
     {
-      // update geo impl 
+      // update geo impl
       geoImpl().update( item.myvertex(0)->Point(),
                         item.myvertex(1)->Point(),
                         item.myvertex(2)->Point(),
@@ -323,9 +323,9 @@ buildGeom(const IMPLElementType& item)
     }
   }
 
-  if( mydim == 3 ) 
+  if( mydim == 3 )
   {
-    // get volume of element 
+    // get volume of element
     geoImpl().setVolume( item.volume() );
   }
 
@@ -334,33 +334,33 @@ buildGeom(const IMPLElementType& item)
 
 // buildFaceGeom
 template <int mydim, int cdim, class GridImp>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HFaceType & item, int twist, int duneFace ) 
+buildGeom(const HFaceType & item, int twist, int duneFace )
 {
-  
-  // get geo face 
+
+  // get geo face
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
-  // if face was not set (when face comes from face iteration), 
-  // then set it to zero 
+  // if face was not set (when face comes from face iteration),
+  // then set it to zero
   if( duneFace < 0 ) duneFace = 0;
 
   enum { numVertices = ElementTopo::numVerticesPerFace };
-  // for all vertices of this face get rotatedIndex 
-  int rotatedALUIndex[ 4 ]; 
+  // for all vertices of this face get rotatedIndex
+  int rotatedALUIndex[ 4 ];
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
     rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
   }
-  
+
   if( elementType == hexa )
   {
     if( mydim  == 2 ) //quadrilateral
-    { 
-      // update geometry implementation 
+    {
+      // update geometry implementation
       geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
                         face.myvertex(rotatedALUIndex[1])->Point(),
                         face.myvertex(rotatedALUIndex[2])->Point(),
@@ -377,7 +377,7 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   {
     if ( mydim == 2)  //triangle
     {
-      // update geometry implementation 
+      // update geometry implementation
       geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
                         face.myvertex(rotatedALUIndex[1])->Point(),
                         face.myvertex(rotatedALUIndex[2])->Point());
@@ -393,31 +393,31 @@ buildGeom(const HFaceType & item, int twist, int duneFace )
   return true;
 }
 
-// --buildFaceGeom 
+// --buildFaceGeom
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const coord_t& p0, 
+buildGeom(const coord_t& p0,
           const coord_t& p1,
           const coord_t& p2,
           const coord_t& p3)
-{         
-  // update geometry implementation 
+{
+  // update geometry implementation
   geoImpl().update( p0, p1, p2, p3 );
   return true;
 }
 
-// --buildFaceGeom 
+// --buildFaceGeom
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const coord_t& p0, 
+buildGeom(const coord_t& p0,
           const coord_t& p1,
           const coord_t& p2)
-{         
-  // update geometry implementation 
+{
+  // update geometry implementation
   geoImpl().update( p0, p1, p2 );
   return true;
 }
@@ -426,51 +426,51 @@ buildGeom(const coord_t& p0,
 // --buildFaceGeom for edges
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const coord_t& p0, 
+buildGeom(const coord_t& p0,
           const coord_t& p1)
-{         
+{
   alugrid_assert (mydim == 1 );
-  // update geometry implementation 
+  // update geometry implementation
   geoImpl().update( p0, p1 );
   return true;
 }
 
 
 template <int mydim, int cdim, class GridImp> // for faces
-inline bool 
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const FaceCoordinatesType& coords) 
+buildGeom(const FaceCoordinatesType& coords)
 {
   if ( elementType == hexa )
   {
-    if ( mydim == 2) 
-      return buildGeom( coords[0], coords[1], coords[2], coords[3] );  
-    else if ( mydim == 1 ) 
+    if ( mydim == 2)
+      return buildGeom( coords[0], coords[1], coords[2], coords[3] );
+    else if ( mydim == 1 )
       return buildGeom ( coords[0], coords[1] );
   }
-  else 
+  else
   {
     alugrid_assert ( elementType == tetra );
-    if (mydim == 2 )  
+    if (mydim == 2 )
       return buildGeom( coords[0], coords[1], coords[2] );
-    else if ( mydim == 1 ) 
+    else if ( mydim == 1 )
       return buildGeom ( coords[0], coords[1] );
   }
 }
 
-template <int mydim, int cdim, class GridImp> // for edges 
-inline bool 
+template <int mydim, int cdim, class GridImp> // for edges
+inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HEdgeType & item, int twist, int) 
+buildGeom(const HEdgeType & item, int twist, int)
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
- 
-  
+
+
   if (mydim == 1) // edge
   {
-     // update geometry implementation 
+     // update geometry implementation
     geoImpl().update( edge.myvertex((twist)  %2)->Point(),
                       edge.myvertex((1+twist)%2)->Point() );
   }
@@ -490,12 +490,12 @@ buildGeom(const HEdgeType & item, int twist, int)
   return true;
 }
 
-template <int mydim, int cdim, class GridImp> // for Vertices ,i.e. Points 
-inline bool 
-ALU3dGridGeometry<mydim, cdim, GridImp >:: 
-buildGeom(const VertexType & item, int twist, int) 
+template <int mydim, int cdim, class GridImp> // for Vertices ,i.e. Points
+inline bool
+ALU3dGridGeometry<mydim, cdim, GridImp >::
+buildGeom(const VertexType & item, int twist, int)
 {
-  // update geometry implementation 
+  // update geometry implementation
   geoImpl().update( static_cast<const GEOVertexType &> (item).Point() );
   return true;
 }

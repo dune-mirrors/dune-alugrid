@@ -24,12 +24,12 @@ namespace Dune
   public:
     using Base :: insertElement ;
 
-    typedef GridImp  Grid; 
+    typedef GridImp  Grid;
 
     static const int dimension = Grid::dimension;
     static const int dimensionworld = Grid::dimensionworld;
 
-    //! \brief type of boundary projection class 
+    //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
 
     template< int codim >
@@ -48,7 +48,7 @@ namespace Dune
 
     static const ALU2DSPACE ElementType elementType = Grid::elementType;
     static const unsigned int numFaceCorners = 2;
-    
+
     typedef FieldVector< ctype, dimensionworld > VertexType;
     typedef std::vector< unsigned int > ElementType;
     typedef array< unsigned int, numFaceCorners > FaceType;
@@ -80,7 +80,7 @@ namespace Dune
     typedef std::vector< Transformation > FaceTransformationVector;
     typedef std::map< FaceType, unsigned int, FaceLess > PeriodicNeighborMap;
 
-    // copy vertex numbers and store smalled #dimension ones 
+    // copy vertex numbers and store smalled #dimension ones
     void copyAndSort(const std::vector<unsigned int>& vertices, FaceType& faceId) const
     {
       std::vector<unsigned int> tmp( vertices );
@@ -101,7 +101,7 @@ namespace Dune
     virtual ~ALU2dGridFactory ();
 
     /** \brief insert a vertex into the coarse grid
-     *  
+     *
      *  \param[in]  pos  position of the vertex
      */
     virtual void insertVertex ( const VertexType &pos );
@@ -110,7 +110,7 @@ namespace Dune
     VertexId insertVertex ( const VertexType &pos, const size_t globalId );
 
     /** \brief insert an element into the coarse grid
-     * 
+     *
      *  \note The order of the vertices must coincide with the vertex order in
      *        the corresponding DUNE reference element.
      *
@@ -180,9 +180,9 @@ namespace Dune
     insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                             const shared_ptr<BoundarySegment<2,dimensionworld> >& boundarySegment ) ;
 
-    /** \brief insert a boundary projection object, (a copy is made)  
+    /** \brief insert a boundary projection object, (a copy is made)
      *
-     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a 
+     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a
      */
     virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
 
@@ -234,22 +234,22 @@ namespace Dune
 
     void setTolerance ( const ctype &epsilon ) { epsilon_ = epsilon; }
 
-  protected:  
+  protected:
     //! virtual method for creating grid object (virtual to avoid compiling method into library)
     virtual Grid* createGridObj( const bool temporary,
                                  const std::string& filename,
                                  std::istream& inFile,
                                  BoundaryProjectionVector* bndProjections )
     {
-      return ( temporary ) ? 
+      return ( temporary ) ?
             new Grid( filename, inFile, globalProjection_, bndProjections, grdVerbose_ ) :
             new Grid( filename, globalProjection_ , bndProjections, grdVerbose_ );
     }
 
-  public:  
+  public:
     /** \brief set factory's verbosity
-     *  
-     *  \param[in]  verbose  verbosity (true/flase) 
+     *
+     *  \param[in]  verbose  verbosity (true/flase)
      */
     void setVerbosity( const bool verbose ) { grdVerbose_ = verbose; }
 
@@ -289,7 +289,7 @@ namespace Dune
   };
 
 
-  /** \brief Specialization of the generic GridFactory for 
+  /** \brief Specialization of the generic GridFactory for
    *        ALUGrid<2,dimw, eltype, refinementtype, Comm >
    *  \ingroup GridFactory
    */
@@ -300,7 +300,7 @@ namespace Dune
   public:
     typedef ALUGrid<2, dimw, eltype, refinementtype, Comm > Grid;
 
-  protected:  
+  protected:
     typedef GridFactory ThisType;
     typedef ALU2dGridFactory< Grid > BaseType;
 
@@ -316,7 +316,7 @@ namespace Dune
     {}
 
     /** \brief constructor setting verbose flag
-     *  
+     *
      *  \param[in] verbose verbosity (true/false)
      */
     GridFactory ( const bool verbose )

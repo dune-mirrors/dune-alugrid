@@ -15,13 +15,13 @@ namespace ALU2DGrid
   {
     Vertex < N > *lret;
 
-    if (pidx < nr_of_pernbs) 
+    if (pidx < nr_of_pernbs)
       lret = pernb[pidx];
-    else 
+    else
       lret = (Vertex < N > *)0;
 
-    return lret; 
-  } 
+    return lret;
+  }
 
   template < int N >
   inline void Vertex < N >::set_pernb(Vertex< N > *pv)
@@ -58,10 +58,10 @@ namespace ALU2DGrid
   // ***************************************************
 
   template < int N >
-  inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level) 
-    : Vertex < N >( level ) 
+  inline Fullvertex < N >::Fullvertex(double (&p)[ncoord],int level)
+    : Vertex < N >( level )
   {
-    for(int i = 0; i < ncoord; i ++) 
+    for(int i = 0; i < ncoord; i ++)
       vcoord[i] = p[i];
   }
 
@@ -75,7 +75,7 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  inline double Bndel < N,NV >::area() const 
+  inline double Bndel < N,NV >::area() const
   {
     element_t *tr = (element_t *)(nbel(0));
     alugrid_assert (tr);
@@ -93,20 +93,20 @@ namespace ALU2DGrid
     _idx=phdl->getIndex(IndexProvider::IM_Edges);
   }
 
-  inline void Edge::freeIndex(IndexProvider* phdl)  
+  inline void Edge::freeIndex(IndexProvider* phdl)
   {
     alugrid_assert (isfree());
     phdl->freeIndex(IndexProvider::IM_Edges,_idx);
   }
 
   template < int N, int NV >
-  inline void Element < N, NV >::sethdl(IndexProvider *phdl) 
+  inline void Element < N, NV >::sethdl(IndexProvider *phdl)
   {
     alugrid_assert (_idx==-1);
     _idx = phdl->getIndex(IndexProvider::IM_Elements);
   }
   template < int N, int NV >
-  inline void Bndel < N, NV >::sethdl(IndexProvider *phdl) 
+  inline void Bndel < N, NV >::sethdl(IndexProvider *phdl)
   {
     alugrid_assert (_idx==-1);
     _idx=phdl->getIndex(IndexProvider::IM_Bnd);
@@ -152,7 +152,7 @@ namespace ALU2DGrid
   Element< N,NV >::getVertex ( int i ) const
   {
     alugrid_assert (0 <= i);
-    return (fullvertex_t *)(connect.vtx[mod(i)]); 
+    return (fullvertex_t *)(connect.vtx[mod(i)]);
   }
 
   template< int N, int NV >
@@ -160,7 +160,7 @@ namespace ALU2DGrid
   Element< N, NV >::vertex ( int i ) const
   {
     alugrid_assert (0 <= i);
-    return connect.vtx[mod(i)]; 
+    return connect.vtx[mod(i)];
   }
 
   // ***************************************************
@@ -221,12 +221,12 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  inline int Element < N, NV >::facevertex(int fce, int loc) const { 
+  inline int Element < N, NV >::facevertex(int fce, int loc) const {
     alugrid_assert (0 <= fce);
     alugrid_assert (0 <= loc);
-    fce = mod(fce); 
+    fce = mod(fce);
     loc %= connect.pv;
-    return mod(fce+loc+1); 
+    return mod(fce+loc+1);
   }
 
   // ***************************************************
@@ -239,12 +239,12 @@ namespace ALU2DGrid
   //   Gibt -1 oder 1 zur"uck abh"anig davon, ob die gerichtete Normale an
   //   die Kante moit der Nr. fce nach innen oder nach au"ssen zeigt.
   //   D.h. die gerichtete Normale ergibt sich aus der "ausseren Normale
-  //   multipliziert mit dem R"uckgabewert dieser Funktion. 
-  //   Auf dem Nachbardreieck an diese Kante ergibt diese Funktion immer 
-  //   den entsprechend anderen Wert, au"ser: 
+  //   multipliziert mit dem R"uckgabewert dieser Funktion.
+  //   Auf dem Nachbardreieck an diese Kante ergibt diese Funktion immer
+  //   den entsprechend anderen Wert, au"ser:
   //   1.) Bei einer nichtkonfornen Verfeinerung zeigt die gerichtete Normale
-  //   an Grenzen immer von den kleinen in das gro"se Dreieck 
-  //   2.) Am Rand zeigt die gerichtet Normale immer nach aussnn 
+  //   an Grenzen immer von den kleinen in das gro"se Dreieck
+  //   2.) Am Rand zeigt die gerichtet Normale immer nach aussnn
   //   Dieser kann auch benutzt werden, um in der Nummerik den Flu"s "uber die
   //   Kanten gerichtet zu berechnen, d.h. man berechnet ihn nur f"ur Kanten
   //   die eine 1 als R"uckgabewert haben.
@@ -261,10 +261,10 @@ namespace ALU2DGrid
   // ***************************************************
   // #begin(method)
   // #method:
-  //   void Element::nbconnect(int fce, Thinelement * n, int b)  
+  //   void Element::nbconnect(int fce, Thinelement * n, int b)
   // #parameters:
   //   \ int           | fce | Lokale Kantennr. >=0
-  //   \ Thinelement*  | n   | Pointer auf Nachbar 
+  //   \ Thinelement*  | n   | Pointer auf Nachbar
   //   \ int           | b   | Lokale Nr. der gemeinsammen Kante auf dem Nachbarelement >=0
   // #description:
   //   Legt alle Nachbarschaftsinformationen auf der Kante mit der lokalen Nr. fce
@@ -272,26 +272,26 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) { 
+  inline void Element < N, NV >::nbconnect(int fce, thinelement_t * n, int b) {
     alugrid_assert (0 <= fce);
     fce = mod(fce);
 
-    connect.nb[fce] = n; 
+    connect.nb[fce] = n;
     connect.bck[fce] = b;
     }
   template < int N, int NV >
-  inline void Element < N, NV >::edgeconnect(int fce, Edge * n) { 
+  inline void Element < N, NV >::edgeconnect(int fce, Edge * n) {
     alugrid_assert (0 <= fce);
     fce = mod(fce);
 
-    connect.edge[fce] = n; 
+    connect.edge[fce] = n;
     n->attach();
   }
 
   // ***************************************************
   // #begin(method)
   // #method:
-  //   void Element::setnormdir(int fce, int dir)  
+  //   void Element::setnormdir(int fce, int dir)
   // #parameters:
   //   \ int | fce | Lokale Kantennr. >= 0
   //   \ int | dor | Normalenrichtung (-1 oder 1)
@@ -317,9 +317,9 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  inline Element < N, NV >::c::c() { 
-    for( int i = 0; i < NV; i ++ ) vtx[i] = 0; 
-    for( int j = 0; j < NV; j ++ ) { hvtx[j] = 0; nb[j] = 0; bck[j] = -1; normdir[j]=0; edge[j] = 0;}  
+  inline Element < N, NV >::c::c() {
+    for( int i = 0; i < NV; i ++ ) vtx[i] = 0;
+    for( int j = 0; j < NV; j ++ ) { hvtx[j] = 0; nb[j] = 0; bck[j] = -1; normdir[j]=0; edge[j] = 0;}
   }
 
   // ***************************************************
@@ -334,10 +334,10 @@ namespace ALU2DGrid
   template < int N, int NV >
   inline Element < N, NV >::c::~c()
   {
-    for(int i = 0; i < NV; i ++ ) 
+    for(int i = 0; i < NV; i ++ )
       if(vtx[i]) vtx[i]->detach();
-    for(int i = 0; i < NV; i ++ ) 
-      if(hvtx[i]) delete hvtx[i];  
+    for(int i = 0; i < NV; i ++ )
+      if(hvtx[i]) delete hvtx[i];
     // edges are detached in the Element destructor
   }
 
@@ -365,7 +365,7 @@ namespace ALU2DGrid
   //   void Element::dirnormal(int fce,double (&n)[ncoord]) const
   // #parameters:
   //   \ int                 | fce | Lokale Kantennr.
-  //   \ double (&)[ncoord]  | n   | R"uckgabe der Normalen 
+  //   \ double (&)[ncoord]  | n   | R"uckgabe der Normalen
   // #description:
   //   Liefert unskalierte gerichtete Normale in n zur"uck
   // #end(method)

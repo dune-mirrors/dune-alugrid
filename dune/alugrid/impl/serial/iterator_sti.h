@@ -8,15 +8,15 @@ namespace ALUGrid
   ////////////////////////////////////////////////////////////////////
   //
   // Schnittstelle des Iterationsobjekts vgl. Gamma, Helm, Johnson &
-  // Vlissides: Design Patterns; Addison Wesley 
+  // Vlissides: Design Patterns; Addison Wesley
   // Die Schnittstellenbeschreibung wird sowohl polymorph als auch
   // in den verschiedenen Schablonen f"ur einfache Iterationsobjekte
   // s.a. Datei 'walk.h' verwendet.
   //
   ////////////////////////////////////////////////////////////////////
-  template < class A > class IteratorSTI 
+  template < class A > class IteratorSTI
   {
-  protected:  
+  protected:
     IteratorSTI () {}
   public :
     typedef A val_t;

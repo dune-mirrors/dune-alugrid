@@ -15,7 +15,7 @@ namespace Dune
   // --------------------------------------------------
 
   template< class GridImp, class LocalGeometryImpl >
-  alu2d_inline 
+  alu2d_inline
   ALU2DIntersectionGeometryStorage< GridImp, LocalGeometryImpl >
     ::ALU2DIntersectionGeometryStorage ()
   {
@@ -36,7 +36,7 @@ namespace Dune
   // ----------------------------------------------------
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   int ALU2dGridLevelIntersectionIterator< GridImp >
     ::getOppositeInFather ( const int nrInChild, const int nrOfChild )
   {
@@ -47,8 +47,8 @@ namespace Dune
   }
 
 
-  template< class GridImp > 
-  alu2d_inline 
+  template< class GridImp >
+  alu2d_inline
   int ALU2dGridLevelIntersectionIterator< GridImp >
     ::getOppositeInChild ( const int nrInFather, const int nrOfChild )
   {
@@ -59,7 +59,7 @@ namespace Dune
 
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::addNeighboursToStack ()
   {
     alugrid_assert ( current.index_ < current.nFaces() );
@@ -106,7 +106,7 @@ namespace Dune
       info.second = getOppositeInFather( info.second, info.first->childNr() );
       alugrid_assert ( (info.second >= 0) && (info.second < current.nFaces()) );
       info.first = info.first->father();
-    }      
+    }
 
     if( info.first )
     {
@@ -124,24 +124,24 @@ namespace Dune
 
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::doIncrement ()
   {
     alugrid_assert ( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
-    
+
     if( nbStack_.empty() )
-    { 
+    {
       ++current.index_;
       if( current.index_ >= current.nFaces() )
       {
         alugrid_assert ( current.index_ == current.nFaces() );
         return;
       }
-      
+
       addNeighboursToStack();
-      // if more then one element in stack we have non-conform intersection 
+      // if more then one element in stack we have non-conform intersection
       current.useOutside_ = (nbStack_.size() > 1);
 
       if( nbStack_.empty() )
@@ -155,19 +155,19 @@ namespace Dune
 
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
   {
-    // empty stack first 
+    // empty stack first
     while( !nbStack_.empty() )
       nbStack_.pop();
-    
+
     current.setInside( const_cast< HElementType * >( &elem ) );
     current.index_ = -1;
     current.setOutside( 0, -1 );
-    
+
     walkLevel_ = wLevel;
-    
+
     alugrid_assert ( current.inside() );
 
     increment();
@@ -175,7 +175,7 @@ namespace Dune
 
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLevelIntersectionIterator< GridImp >::setupIntersection ()
   {
     alugrid_assert ( !nbStack_.empty() );
@@ -192,9 +192,9 @@ namespace Dune
 
   //! increment iterator
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLeafIntersectionIterator< GridImp >::doIncrement ()
-  {  
+  {
     alugrid_assert ( current.index_ < current.nFaces() );
 
     this->unsetUp2Date();
@@ -228,7 +228,7 @@ namespace Dune
       if( current.useOutside_ )
       {
         IntersectionInfo info;
-        
+
         // insert left intersection
         HBndElType *left = bndnb->down();
         alugrid_assert ( left && left->leaf() );
@@ -254,9 +254,9 @@ namespace Dune
       current.useOutside_ = current.inside()->hasHangingNode( current.index_ );
       const int opposite = current.inside()->opposite( current.index_ );
       if( current.useOutside_ )
-      { 
+      {
         IntersectionInfo info;
-        
+
         // insert left intersection
         ThinelementType *left = current.inside()->getLeftIntersection( current.index_ );
         alugrid_assert ( left && left->thinis( ThinelementType::element_like ) );
@@ -274,7 +274,7 @@ namespace Dune
         nbStack_.push( info );
 
         setupIntersection();
-      } 
+      }
       else
         current.setOutside( (HElementType *)current.inside()->neighbour( current.index_ ), opposite );
     }
@@ -282,22 +282,22 @@ namespace Dune
 
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLeafIntersectionIterator< GridImp >::setFirstItem ( const HElementType &elem, int wLevel )
   {
     while( !nbStack_.empty() )
       nbStack_.pop();
-    
+
     current.setInside( const_cast< HElementType * >( &elem ) );
-    current.index_ = -1;  
+    current.index_ = -1;
     alugrid_assert ( current.inside() );
     walkLevel_ = wLevel;
     increment();
   }
- 
+
 
   template< class GridImp >
-  alu2d_inline 
+  alu2d_inline
   void ALU2dGridLeafIntersectionIterator< GridImp >::setupIntersection ()
   {
     alugrid_assert ( !nbStack_.empty() );

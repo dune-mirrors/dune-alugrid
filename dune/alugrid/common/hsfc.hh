@@ -1,5 +1,5 @@
-#ifndef DUNE_ALU3DGRID_HSFC_HH 
-#define DUNE_ALU3DGRID_HSFC_HH 
+#ifndef DUNE_ALU3DGRID_HSFC_HH
+#define DUNE_ALU3DGRID_HSFC_HH
 
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
@@ -7,9 +7,9 @@
 
 #define DISABLE_ZOLTAN_HSFC_ORDERING
 
-// to disable Zoltans HSFC ordering of the macro elements define 
+// to disable Zoltans HSFC ordering of the macro elements define
 // DISABLE_ZOLTAN_HSFC_ORDERING on the command line
-#if HAVE_ZOLTAN && HAVE_MPI 
+#if HAVE_ZOLTAN && HAVE_MPI
 #ifndef DISABLE_ZOLTAN_HSFC_ORDERING
 #define USE_ZOLTAN_HSFC_ORDERING
 #else
@@ -29,7 +29,7 @@ namespace Dune {
   template <class Coordinate>
   class SpaceFillingCurveOrdering
   {
-    // type of communicator 
+    // type of communicator
     typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
@@ -41,8 +41,8 @@ namespace Dune {
     mutable Zoltan zz_;
 
   public:
-    SpaceFillingCurveOrdering( const Coordinate& lower, 
-                               const Coordinate& upper, 
+    SpaceFillingCurveOrdering( const Coordinate& lower,
+                               const Coordinate& upper,
                                const CollectiveCommunication& comm =
                                CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
@@ -54,7 +54,7 @@ namespace Dune {
     }
 
     // return unique hilbert index in interval [0,1] given an element's center
-    double hilbertIndex( const Coordinate& point ) const 
+    double hilbertIndex( const Coordinate& point ) const
     {
       assert( point.size() == (unsigned int)dimension );
 
@@ -71,4 +71,4 @@ namespace Dune {
 
 #endif // #ifdef USE_ZOLTAN_HSFC_ORDERING
 
-#endif // #ifndef DUNE_ALU3DGRID_HSFC_HH 
+#endif // #ifndef DUNE_ALU3DGRID_HSFC_HH

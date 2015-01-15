@@ -33,9 +33,9 @@ namespace ALUGrid
     }
     else
     {
-      // only test in debug mode 
-#ifdef ALUGRIDDEBUG 
-      int test = 
+      // only test in debug mode
+#ifdef ALUGRIDDEBUG
+      int test =
 #endif
       std::fclose( fp );
       alugrid_assert (test == 0) ;

@@ -3,7 +3,7 @@
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
-#include "alu3dinclude.hh" 
+#include "alu3dinclude.hh"
 
 #include "geometry.hh"
 #include "entity.hh"
@@ -22,11 +22,11 @@ namespace Dune {
   ###    #    #     #    ######  #    #   ####   ######   ####      #       #
 ************************************************************************************/
 
-// --IntersectionIterator 
+// --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> :: 
+inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const FactoryType& factory,
-                              int wLevel) : 
+                              int wLevel) :
   connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
   geoProvider_(connector_),
   factory_( factory ),
@@ -36,12 +36,12 @@ ALU3dGridIntersectionIterator(const FactoryType& factory,
 {
 }
 
-// --IntersectionIterator 
+// --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> :: 
+inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const FactoryType& factory,
-                              HElementType *el, 
-                              int wLevel,bool end) : 
+                              HElementType *el,
+                              int wLevel,bool end) :
   connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
   geoProvider_(connector_),
   factory_( factory ),
@@ -49,52 +49,52 @@ ALU3dGridIntersectionIterator(const FactoryType& factory,
   ghost_(0),
   index_(-1)
 {
-  if( ! end ) 
+  if( ! end )
   {
     setFirstItem(*el,wLevel);
-  } 
-  else 
+  }
+  else
   {
     done();
   }
 }
 
 template<class GridImp>
-inline void 
-ALU3dGridIntersectionIterator<GridImp> :: done () 
+inline void
+ALU3dGridIntersectionIterator<GridImp> :: done ()
 {
   item_  = 0;
   ghost_ = 0;
-  // index < 0 indicates end iterator 
+  // index < 0 indicates end iterator
   index_ = -1;
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> :: 
-setFirstItem (const HElementType & elem, int wLevel) 
+inline void ALU3dGridIntersectionIterator<GridImp> ::
+setFirstItem (const HElementType & elem, int wLevel)
 {
   ghost_      = 0;
   item_       = static_cast<const IMPLElementType *> (&elem);
-  
+
   // Get first face
   const GEOFaceType* firstFace = getFace(*item_, index_);
 
   const GEOFaceType* childFace = firstFace->down();
-  if( childFace ) firstFace = childFace; 
+  if( childFace ) firstFace = childFace;
 
   // Store the face in the connector
   setNewFace(*firstFace);
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> :: 
-setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel) 
+inline void ALU3dGridIntersectionIterator<GridImp> ::
+setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
 {
 
-  // get correct face number 
+  // get correct face number
   index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
 
-  // store ghost for method inside 
+  // store ghost for method inside
   ghost_   = &ghost;
 
   // Get first face
@@ -102,7 +102,7 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
   item_   = static_cast<const IMPLElementType *> (&elem);
 
   const GEOFaceType* childFace = firstFace->down();
-  if( childFace ) firstFace = childFace; 
+  if( childFace ) firstFace = childFace;
 
   // Store the face in the connector
   setGhostFace(*firstFace);
@@ -110,11 +110,11 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
 
 template<class GridImp>
 template <class EntityType>
-inline void ALU3dGridIntersectionIterator<GridImp> :: 
-first (const EntityType & en, int wLevel) 
+inline void ALU3dGridIntersectionIterator<GridImp> ::
+first (const EntityType & en, int wLevel)
 {
-  if( ! en.isLeaf() && en.level()>0) 
-  { 
+  if( ! en.isLeaf() && en.level()>0)
+  {
     done();
     return ;
   }
@@ -126,9 +126,9 @@ first (const EntityType & en, int wLevel)
   {
     setInteriorItem(en.getItem(), en.getGhost(), wLevel);
   }
-  else 
+  else
   {
-    // for the 2d version numFaces is smaller then the actual 
+    // for the 2d version numFaces is smaller then the actual
     // stored nFaces of the element
     alugrid_assert ( dim == 3 ?
                     (numFaces == en.getItem().nFaces()) :
@@ -137,37 +137,37 @@ first (const EntityType & en, int wLevel)
   }
 }
 
-// copy constructor 
+// copy constructor
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> :: 
-ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org) : 
+inline ALU3dGridIntersectionIterator<GridImp> ::
+ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org) :
   connector_(org.connector_),
   geoProvider_(connector_),
   factory_( org.factory_ ),
   item_(org.item_),
   ghost_(org.ghost_)
 {
-  if(org.item_) 
-  { // else it's a end iterator 
+  if(org.item_)
+  { // else it's a end iterator
     item_        = org.item_;
     innerLevel_  = org.innerLevel_;
     index_       = org.index_;
-  } 
-  else 
+  }
+  else
   {
     done();
   }
 }
 
-// copy constructor 
+// copy constructor
 template<class GridImp>
-inline void 
-ALU3dGridIntersectionIterator<GridImp> :: 
-assign(const ALU3dGridIntersectionIterator<GridImp> & org)  
+inline void
+ALU3dGridIntersectionIterator<GridImp> ::
+assign(const ALU3dGridIntersectionIterator<GridImp> & org)
 {
-  if(org.item_) 
-  { 
-    // else it's a end iterator 
+  if(org.item_)
+  {
+    // else it's a end iterator
     item_       = org.item_;
     ghost_      = org.ghost_;
     innerLevel_ = org.innerLevel_;
@@ -175,46 +175,46 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
         item_->twist(ElementTopo::dune2aluFace(index_)));
     geoProvider_.resetFaceGeom();
-  } 
+  }
   else {
     done();
   }
   alugrid_assert ( equals(org) );
 }
 
-// check whether entities are the same or whether iterator is done 
+// check whether entities are the same or whether iterator is done
 template<class GridImp>
-inline bool ALU3dGridIntersectionIterator<GridImp> :: 
+inline bool ALU3dGridIntersectionIterator<GridImp> ::
 equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
 {
   // this method is only to check equality of real iterators and end
-  // iterators 
-  return ((item_  == i.item_) && 
+  // iterators
+  return ((item_  == i.item_) &&
           (index_ == i.index_ )
          );
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> :: increment () 
+inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 {
-  // leaf increment 
+  // leaf increment
   alugrid_assert (item_);
 
   const GEOFaceType * nextFace = 0;
 
   // When neighbour element is refined, try to get the next child on the face
-  if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER) 
+  if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER)
   {
     nextFace = connector_.face().next();
 
     // There was a next child face...
-    if (nextFace) 
+    if (nextFace)
     {
-      if( ImplTraits :: isGhost( ghost_ ) ) 
+      if( ImplTraits :: isGhost( ghost_ ) )
       {
         setGhostFace( *nextFace );
       }
-      else 
+      else
       {
         setNewFace(*nextFace);
       }
@@ -227,8 +227,8 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 
   // When the face number is larger than the number of faces an element
   // can have, we've reached the end...
-  // for ghost elements here is finito 
-  if (index_ >= numFaces || ghost_ ) 
+  // for ghost elements here is finito
+  if (index_ >= numFaces || ghost_ )
   {
     done();
     return;
@@ -241,7 +241,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   // Check whether we need to go down first
   //if (nextFace has children which need to be visited)
   const GEOFaceType * childFace = nextFace->down();
-  if( childFace ) nextFace = childFace; 
+  if( childFace ) nextFace = childFace;
 
   alugrid_assert (nextFace);
   setNewFace(*nextFace);
@@ -254,11 +254,11 @@ inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
 ALU3dGridIntersectionIterator<GridImp>::outside () const
 {
   alugrid_assert ( neighbor() );
-  // make sure that outside is not called for an end iterator  
+  // make sure that outside is not called for an end iterator
 
   if( connector_.ghostBoundary() )
   {
-    // create entity pointer with ghost boundary face 
+    // create entity pointer with ghost boundary face
     return EntityPointer(factory_, connector_.boundaryFace() );
   }
 
@@ -268,15 +268,15 @@ ALU3dGridIntersectionIterator<GridImp>::outside () const
 
 template<class GridImp>
 inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointer
-ALU3dGridIntersectionIterator<GridImp>::inside () const 
+ALU3dGridIntersectionIterator<GridImp>::inside () const
 {
-  if( ImplTraits :: isGhost( ghost_ ) ) 
+  if( ImplTraits :: isGhost( ghost_ ) )
   {
     return EntityPointer(factory_, *ghost_ );
   }
-  else 
+  else
   {
-    // make sure that inside is not called for an end iterator  
+    // make sure that inside is not called for an end iterator
     return EntityPointer(factory_, connector_.innerEntity() );
   }
 }
@@ -359,8 +359,8 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 
   if(GridImp::dimension == 2 && GridImp::dimensionworld == 3 && GridImp::elementType == hexa)
   {
-    static NormalType outerNormal;    
-    const ReferenceElement< alu3d_ctype, dim > &refElement = 
+    static NormalType outerNormal;
+    const ReferenceElement< alu3d_ctype, dim > &refElement =
        ReferenceElements< alu3d_ctype, dim >::cube();
     typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
     typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
@@ -368,17 +368,17 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     outerNormal *= inside().dereference().geometry().integrationElement( xInside );
     return outerNormal;
   }
-  
+
   return geoProvider_.outerNormal(local);
 }
-  
+
 template<class GridImp>
 inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType &
 ALU3dGridIntersectionIterator<GridImp>::
 unitOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
   unitOuterNormal_ = this->outerNormal(local);
-  unitOuterNormal_ *= (1.0/unitOuterNormal_.two_norm()); 
+  unitOuterNormal_ *= (1.0/unitOuterNormal_.two_norm());
   return unitOuterNormal_;
 }
 
@@ -396,8 +396,8 @@ inline GeometryType
 ALU3dGridIntersectionIterator<GridImp>::
 type () const
 {
-  return GeometryType( 
-      GridImp::elementType == tetra ? 
+  return GeometryType(
+      GridImp::elementType == tetra ?
         GenericGeometry :: SimplexTopology< dim-1 > :: type :: id :
         GenericGeometry :: CubeTopology   < dim-1 > :: type :: id,
           dim-1 );
@@ -412,7 +412,7 @@ ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
 }
 
 template<class GridImp>
-inline size_t 
+inline size_t
 ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 {
   alugrid_assert ( item_ );
@@ -421,7 +421,7 @@ ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 }
 
 template< class GridImp >
-inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() const 
+inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() const
 {
   intersectionSelfLocal_.buildGeom( geoProvider_.intersectionSelfLocal() );
   if ( !connector_.outerBoundary() )
@@ -431,7 +431,7 @@ inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() con
 template <class GridImp>
 inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
-getFace(const GEOTriangleBndType& bnd, int index) const 
+getFace(const GEOTriangleBndType& bnd, int index) const
 {
   return bnd.myhface3(0);
 }
@@ -439,7 +439,7 @@ getFace(const GEOTriangleBndType& bnd, int index) const
 template <class GridImp>
 inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
-getFace(const GEOQuadBndType& bnd, int index) const 
+getFace(const GEOQuadBndType& bnd, int index) const
 {
   return bnd.myhface4(0);
 }
@@ -465,7 +465,7 @@ getFace(const GEOHexaElementType& elem, int index) const {
 
 template <class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp>::
-setNewFace(const GEOFaceType& newFace) 
+setNewFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ! ghost_ );
   alugrid_assert ( innerLevel_ == item_->level() );
@@ -476,7 +476,7 @@ setNewFace(const GEOFaceType& newFace)
 
 template <class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp>::
-setGhostFace(const GEOFaceType& newFace) 
+setGhostFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ghost_ );
   alugrid_assert ( innerLevel_ == ghost_->level() );
@@ -485,7 +485,7 @@ setGhostFace(const GEOFaceType& newFace)
 }
 
 template <class GridImp>
-inline int 
+inline int
 ALU3dGridIntersectionIterator<GridImp>::
 level() const {
   alugrid_assert ( item_ && (innerLevel_ == item_->level()) );
@@ -502,23 +502,23 @@ level() const {
   ###    #    #     #    ######  #    #   ####   ######   ####      #       #
 ************************************************************************************/
 
-// --IntersectionIterator 
+// --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> :: 
+inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
-                                   int wLevel) 
+                                   int wLevel)
   : ALU3dGridIntersectionIterator<GridImp>(factory,wLevel)
   , levelNeighbor_(false)
   , isLeafItem_(false)
 {
 }
 
-// --IntersectionIterator 
+// --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> :: 
+inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
-                                   HElementType *el, 
-                                   int wLevel,bool end) 
+                                   HElementType *el,
+                                   int wLevel,bool end)
   : ALU3dGridIntersectionIterator<GridImp>(factory,el,wLevel,end)
   , levelNeighbor_(false)
   , isLeafItem_(false)
@@ -527,8 +527,8 @@ ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
 
 template<class GridImp>
 template <class EntityType>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> :: 
-first (const EntityType & en, int wLevel) 
+inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+first (const EntityType & en, int wLevel)
 {
   // if given Entity is not leaf, we create an end iterator
   index_  = 0;
@@ -538,9 +538,9 @@ first (const EntityType & en, int wLevel)
   {
     setInteriorItem(en.getItem(), en.getGhost(), wLevel);
   }
-  else 
+  else
   {
-    // for the 2d version numFaces is smaller then the actual 
+    // for the 2d version numFaces is smaller then the actual
     // stored nFaces of the element
     alugrid_assert ( dim == 3 ?
                     (numFaces == en.getItem().nFaces()) :
@@ -550,8 +550,8 @@ first (const EntityType & en, int wLevel)
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> :: 
-setFirstItem (const HElementType & elem, int wLevel) 
+inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+setFirstItem (const HElementType & elem, int wLevel)
 {
   ghost_       = 0;
   item_        = static_cast<const IMPLElementType *> (&elem);
@@ -563,13 +563,13 @@ setFirstItem (const HElementType & elem, int wLevel)
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> :: 
-setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel) 
+inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
 {
-  // store ghost for method inside 
+  // store ghost for method inside
   ghost_   = &ghost;
   item_   = static_cast<const IMPLElementType *> (&elem);
-  // get correct face number 
+  // get correct face number
   index_ = ElementTopo::alu2duneFace( ghost.getGhost().second );
 
   innerLevel_  = wLevel;
@@ -581,21 +581,21 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
   setNewFace(*firstFace);
 }
 
-// copy constructor 
+// copy constructor
 template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> :: 
-ALU3dGridLevelIntersectionIterator(const ThisType & org) 
-  : ALU3dGridIntersectionIterator<GridImp>(org) 
+inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+ALU3dGridLevelIntersectionIterator(const ThisType & org)
+  : ALU3dGridIntersectionIterator<GridImp>(org)
   , levelNeighbor_(org.levelNeighbor_)
   , isLeafItem_(org.isLeafItem_)
 {
 }
 
-// copy constructor 
+// copy constructor
 template<class GridImp>
-inline void 
-ALU3dGridLevelIntersectionIterator<GridImp> :: 
-assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)  
+inline void
+ALU3dGridLevelIntersectionIterator<GridImp> ::
+assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 {
   ALU3dGridIntersectionIterator<GridImp>::assign(org);
   levelNeighbor_ = org.levelNeighbor_;
@@ -603,10 +603,10 @@ assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment () 
+inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 {
 
-  // level increment 
+  // level increment
   alugrid_assert ( item_ );
 
   // Next face number of starting element
@@ -614,7 +614,7 @@ inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 
   // When the face number is larger than the number of faces an element
   // can have, we've reached the end...
-  if ( index_ >= numFaces || ImplTraits::isGhost( ghost_ ) ) 
+  if ( index_ >= numFaces || ImplTraits::isGhost( ghost_ ) )
   {
     done();
     return;
@@ -631,25 +631,25 @@ inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 template<class GridImp>
 inline bool ALU3dGridLevelIntersectionIterator<GridImp>::neighbor () const
 {
-  return levelNeighbor_ && (BaseType :: neighbor()); 
+  return levelNeighbor_ && (BaseType :: neighbor());
 }
 
 template <class GridImp>
 inline void ALU3dGridLevelIntersectionIterator<GridImp>::
-setNewFace(const GEOFaceType& newFace) 
+setNewFace(const GEOFaceType& newFace)
 {
 
   alugrid_assert ( item_->level() == innerLevel_ );
-  levelNeighbor_ = (newFace.level() == innerLevel_); 
+  levelNeighbor_ = (newFace.level() == innerLevel_);
   connector_.updateFaceInfo(newFace, innerLevel_,
-              ( ImplTraits::isGhost( ghost_ ) ) ? 
-                 ghost_->twist(0) : 
+              ( ImplTraits::isGhost( ghost_ ) ) ?
+                 ghost_->twist(0) :
                  item_->twist(ElementTopo::dune2aluFace( index_ )));
   geoProvider_.resetFaceGeom();
 
   // check again level neighbor because outer element might be coarser then
-  // this element 
-  if( isLeafItem_ ) 
+  // this element
+  if( isLeafItem_ )
   {
     if( connector_.ghostBoundary() )
     {

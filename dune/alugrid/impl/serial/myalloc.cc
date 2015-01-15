@@ -16,27 +16,27 @@
 namespace ALUGrid
 {
 
-  // MyAlloc initialize flag                                                   
+  // MyAlloc initialize flag
   bool MyAlloc::_initialized = false;
 
   const size_t MyAlloc::MAX_HOLD_ADD  = 40000;  // max MAX_HOLD_ADD Objekte werden gespeichert
   const double MyAlloc::MAX_HOLD_MULT = 0.25;   // max das MAX_HOLD_MULT-fache der momentan
                                                    // aktiven Objekte werden gespeichert
-  // if true objects could be freeed  
+  // if true objects could be freeed
   bool MyAlloc::_freeAllowed = true;
 
   static size_t ALUGridMemSpaceAllocated = 0;
 
 #ifdef ALUGRID_USES_DLMALLOC
-#define ONLY_MSPACES 1 
+#define ONLY_MSPACES 1
 #warning "Using DL malloc"
 #include DLMALLOC_SOURCE_INCLUDE
-#undef ONLY_MSPACES  
+#undef ONLY_MSPACES
   static void*  ALUGridMemorySpace = 0;
 #else
 
-  // class to store items of same size in a stack 
-  // also number of used items outside is stored 
+  // class to store items of same size in a stack
+  // also number of used items outside is stored
   class AllocEntry
   {
   public:
@@ -53,14 +53,14 @@ namespace ALUGrid
 
     AllocEntry () : N (0), S () {}
 
-    AllocEntry(const AllocEntry& other) 
-      : N(other.N) , S(other.S) 
-    {} 
-    
-    ~AllocEntry () 
+    AllocEntry(const AllocEntry& other)
+      : N(other.N) , S(other.S)
+    {}
+
+    ~AllocEntry ()
     {
       // only free memory here if garbage collection is disabled
-      while (!S.empty ()) 
+      while (!S.empty ())
       {
         std::free (S.top ());
         S.pop ();
@@ -68,7 +68,7 @@ namespace ALUGrid
     }
   };
 
-  // map holding AllocEntries for sizes 
+  // map holding AllocEntries for sizes
   typedef std::map< std::size_t, AllocEntry > memorymap_t;
   static  memorymap_t *freeStore = 0;
   static  std::set< void * > myAllocFreeLockers;
@@ -76,73 +76,73 @@ namespace ALUGrid
 #endif
 
   /*
-  //! get memory in MB 
-  double getMemoryUsage() 
+  //! get memory in MB
+  double getMemoryUsage()
   {
     struct rusage info;
     getrusage( RUSAGE_SELF, &info );
     return (info.ru_maxrss / 1024.0);
   }
 
-  class AllocCounter 
+  class AllocCounter
   {
     size_t _allocatedBytes;
     AllocCounter () : _allocatedBytes( 0 ) {}
-    ~AllocCounter() 
+    ~AllocCounter()
     {
       cout << "On exit: ";
       print();
     }
-  public:  
+  public:
     static void print()
     {
       cout << "bytes allocated = " << instance()._allocatedBytes << endl;
       cout << "rusage: " << getMemoryUsage() << endl;
     }
-    static void add( size_t i ) 
+    static void add( size_t i )
     {
       instance()._allocatedBytes += i;
     }
-    static void substract ( size_t i ) 
+    static void substract ( size_t i )
     {
       instance()._allocatedBytes -= i;
     }
 
-    static AllocCounter& instance () 
+    static AllocCounter& instance ()
     {
       static AllocCounter obj;
       return obj;
     }
   };
 
-  void printMemoryBytesUsed () 
+  void printMemoryBytesUsed ()
   {
     AllocCounter::print();
     cout << "rusage: " << getMemoryUsage() << endl;
   }
   */
 
-  void MyAlloc::lockFree (void * addr) 
+  void MyAlloc::lockFree (void * addr)
   {
 #ifndef ALUGRID_USES_DLMALLOC
-    // remember address of locker 
+    // remember address of locker
     myAllocFreeLockers.insert( addr );
-    _freeAllowed = true; 
+    _freeAllowed = true;
 #endif
   }
 
-  void MyAlloc::unlockFree (void * addr) 
+  void MyAlloc::unlockFree (void * addr)
   {
 #ifndef ALUGRID_USES_DLMALLOC
     myAllocFreeLockers.erase( addr );
-    // only if no-one else has locked 
+    // only if no-one else has locked
     if( myAllocFreeLockers.empty () )
     {
-      _freeAllowed = false; 
+      _freeAllowed = false;
     }
 #endif
 
-    // make free memory available to the system again 
+    // make free memory available to the system again
     clearFreeMemory();
   }
 
@@ -162,9 +162,9 @@ namespace ALUGrid
       }
 
       // pop the rest from the stack
-      for( std::size_t i = newSize; i<popSize; ++i ) 
+      for( std::size_t i = newSize; i<popSize; ++i )
       {
-        // get pointer from stack 
+        // get pointer from stack
         mem[ i ] = fs.S.top ();
         fs.S.pop ();
       }
@@ -172,7 +172,7 @@ namespace ALUGrid
   }
 #endif // end ALUGRID_USES_DLMALLOC
 
-  void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException) 
+  void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException)
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
     // increase memory usage counter
@@ -186,11 +186,11 @@ namespace ALUGrid
     {
       AllocEntry & fs = ((*freeStore) [s]);
       ++ fs.N;
-      if ( fs.S.empty () ) 
+      if ( fs.S.empty () )
       {
-        // else simply allocate block 
+        // else simply allocate block
         void * p = malloc (s);
-        if( !p ) 
+        if( !p )
         {
           std::cerr << "ERROR: Out of memory." << std::endl;
           throw OutOfMemoryException();
@@ -199,7 +199,7 @@ namespace ALUGrid
       }
       else
       {
-        // get pointer from stack 
+        // get pointer from stack
         void * p = fs.S.top ();
         fs.S.pop ();
         return p;
@@ -209,32 +209,32 @@ namespace ALUGrid
 #endif // DONT_USE_ALUGRID_ALLOC
   }
 
-  // operator delete, put pointer to stack 
-  void MyAlloc::operator delete (void *ptr, size_t s) 
+  // operator delete, put pointer to stack
+  void MyAlloc::operator delete (void *ptr, size_t s)
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
    // decrease memory usage counter
    ALUGridMemSpaceAllocated -= s ;
 
 #ifdef ALUGRID_USES_DLMALLOC
-   // defined in dlmalloc.c 
+   // defined in dlmalloc.c
    mspace_free( ALUGridMemorySpace, ptr );
-#else  
-    // get stack for size s 
+#else
+    // get stack for size s
     AllocEntry & fs ((*freeStore) [s]);
-    // push pointer to stack 
+    // push pointer to stack
     alugrid_assert (fs.N > 0);
     --fs.N;
     fs.S.push (ptr);
-   
-    // if free of objects is allowd 
+
+    // if free of objects is allowd
     // if( _freeAllowed )
     {
-      // check if max size is exceeded 
+      // check if max size is exceeded
       const size_t stackSize = fs.S.size ();
-      if ( ( stackSize >= MAX_HOLD_ADD ) && 
+      if ( ( stackSize >= MAX_HOLD_ADD ) &&
            ( double (stackSize) >= MAX_HOLD_MULT * double (fs.N) )
-         ) 
+         )
       {
         alugrid_assert (!fs.S.empty());
         free ( fs.S.top () );
@@ -245,13 +245,13 @@ namespace ALUGrid
 #endif // end #ifndef DONT_USE_ALUGRID_ALLOC
   }
 
-  // operator delete, put pointer to stack 
-  void MyAlloc::clearFreeMemory () 
+  // operator delete, put pointer to stack
+  void MyAlloc::clearFreeMemory ()
   {
 #ifdef ALUGRID_USES_DLMALLOC
     // if no objects are allocated clear memory space and reallocate
-    // this will free memory to the system 
-    if ( ALUGridMemSpaceAllocated == 0 ) 
+    // this will free memory to the system
+    if ( ALUGridMemSpaceAllocated == 0 )
     {
       destroy_mspace( ALUGridMemorySpace );
       ALUGridMemorySpace = create_mspace( 0, 0 );
@@ -259,15 +259,15 @@ namespace ALUGrid
 #endif
   }
 
-  // operator delete, put pointer to stack 
-  size_t MyAlloc::allocatedMemory () 
+  // operator delete, put pointer to stack
+  size_t MyAlloc::allocatedMemory ()
   {
     return ALUGridMemSpaceAllocated ;
   }
 
-  MyAlloc::Initializer::Initializer () 
+  MyAlloc::Initializer::Initializer ()
   {
-    if ( ! MyAlloc::_initialized ) 
+    if ( ! MyAlloc::_initialized )
     {
 #ifdef ALUGRID_USES_DLMALLOC
       ALUGridMemorySpace = create_mspace( 0, 0 );
@@ -281,18 +281,18 @@ namespace ALUGrid
     return;
   }
 
-  MyAlloc::Initializer::~Initializer () 
+  MyAlloc::Initializer::~Initializer ()
   {
-    if ( MyAlloc::_initialized ) 
+    if ( MyAlloc::_initialized )
     {
 #ifdef ALUGRID_USES_DLMALLOC
-      if( ALUGridMemorySpace ) 
+      if( ALUGridMemorySpace )
       {
         destroy_mspace( ALUGridMemorySpace );
         ALUGridMemorySpace = 0;
       }
 #else
-      if(freeStore) 
+      if(freeStore)
       {
         delete freeStore;
         freeStore = 0;

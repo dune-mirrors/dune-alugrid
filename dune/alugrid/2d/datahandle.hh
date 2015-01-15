@@ -40,16 +40,16 @@ namespace ALU2DGrid
      : grid_(grid)
       , reFather_(f)
       , reSon_(s)
-      , realFather_(rf) 
-      , realSon_(rs) 
-      , rp_(rp) 
-      , maxlevel_(-1) 
+      , realFather_(rf)
+      , realSon_(rs)
+      , rp_(rp)
+      , maxlevel_(-1)
     {}
 
-    virtual ~AdaptRestrictProlong2dImpl () 
+    virtual ~AdaptRestrictProlong2dImpl ()
     {}
 
-    //! restrict data , elem is always the father 
+    //! restrict data , elem is always the father
     int preCoarsening ( HElementType &father )
     {
       maxlevel_ = std::max( maxlevel_, father.level() );
@@ -60,7 +60,7 @@ namespace ALU2DGrid
       return 0;
     }
 
-    //! prolong data, elem is the father  
+    //! prolong data, elem is the father
     int postRefinement ( HElementType &father )
     {
       maxlevel_ = std::max( maxlevel_, father.level()+1 );

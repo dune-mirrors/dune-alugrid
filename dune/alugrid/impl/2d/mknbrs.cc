@@ -89,7 +89,7 @@ namespace ALU2DGrid
         for(typename map_t::iterator it = m.begin(); it != end; ++it)
         {
           const key_t &key = it->first;
-          std::cerr << "key:" << key.first->getIndex() 
+          std::cerr << "key:" << key.first->getIndex()
                << " " << key.second->getIndex() << std::endl;
         }
         abort();

@@ -12,7 +12,7 @@ namespace ALU2DGrid
   {
     edmaps.reserve(30);
     f4maps.reserve(30);
-    edmaps.push_back(map_t ()); 
+    edmaps.push_back(map_t ());
     f4maps.push_back(map_t());
   }
 
@@ -27,7 +27,7 @@ namespace ALU2DGrid
 
     f4maps.push_back(map_t());
 
-    
+
     for( walk.first(); ! walk.done(); walk.next()) {
 
       for(int e = 0; e < walk.getitem()->numfaces(); e ++) {
@@ -81,11 +81,11 @@ namespace ALU2DGrid
 
     std::vector< vertex_t * > v;
 
-    v.push_back(a); 
+    v.push_back(a);
 
     v.push_back(b);
 
-    v.push_back(c); 
+    v.push_back(c);
 
     v.push_back(d);
 
@@ -113,7 +113,7 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  void Multivertexadapter < N, NV >::insert( vertex_t * a, vertex_t * b, 
+  void Multivertexadapter < N, NV >::insert( vertex_t * a, vertex_t * b,
 
           vertex_t * ev, int l) {
 
@@ -123,7 +123,7 @@ namespace ALU2DGrid
 
     e.push_back(b);
 
-    sort(e.begin(), e.end());  
+    sort(e.begin(), e.end());
 
     edmaps[l][e] = val_t(ev,0);
 

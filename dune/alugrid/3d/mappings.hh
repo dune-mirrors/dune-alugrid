@@ -25,25 +25,25 @@ namespace Dune {
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
   //! space (same as in mapp_cube_3d.h, but for a different reference hexahedron)
-  class TrilinearMapping 
+  class TrilinearMapping
   {
-  public:  
+  public:
     typedef alu3d_ctype double_t[3];
     typedef FieldVector<alu3d_ctype, 3> coord_t;
     typedef FieldMatrix<alu3d_ctype, 3, 3> mat_t;
-  private:  
+  private:
     static const double _epsilon ;
 
-    // the internal mapping 
+    // the internal mapping
     alu3d_ctype a [8][3] ;
-    mat_t Df; 
-    mat_t Dfi; 
-    mat_t invTransposed_; 
+    mat_t Df;
+    mat_t Dfi;
+    mat_t invTransposed_;
     alu3d_ctype DetDf ;
 
-    bool calcedDet_; 
+    bool calcedDet_;
     bool calcedLinear_;
-    bool calcedInv_; 
+    bool calcedInv_;
     bool affine_;
 
     void linear (const alu3d_ctype, const alu3d_ctype, const alu3d_ctype) ;
@@ -54,46 +54,46 @@ namespace Dune {
                       const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&);
-    
-    // only to call from geometry class 
+
+    // only to call from geometry class
     TrilinearMapping () {}
-    
+
     TrilinearMapping (const TrilinearMapping &) ;
-    
+
     ~TrilinearMapping () {}
     alu3d_ctype det (const coord_t&) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
     const mat_t& jacobianTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
-    void map2world (const alu3d_ctype , const alu3d_ctype , const alu3d_ctype , 
+    void map2world (const alu3d_ctype , const alu3d_ctype , const alu3d_ctype ,
                     coord_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
 
     template <class vector_t>
     void buildMapping(const vector_t&, const vector_t&,
-                      const vector_t&, const vector_t&,  
-                      const vector_t&, const vector_t&,  
-                      const vector_t&, const vector_t&); 
+                      const vector_t&, const vector_t&,
+                      const vector_t&, const vector_t&,
+                      const vector_t&, const vector_t&);
 
-    // returns true if mapping is affine 
+    // returns true if mapping is affine
     inline bool affine () const { return affine_; }
   };
 
   //! A bilinear surface mapping
   // NOTE: this class is different to the BilinearSurfaceMapping in
-  // ALUGrid, for example the reference elements differ 
+  // ALUGrid, for example the reference elements differ
   // here we have [0,1]^2 and in ALUGrid its [-1,1]^2
-  // also the point numbering is different 
-  class SurfaceNormalCalculator 
+  // also the point numbering is different
+  class SurfaceNormalCalculator
   {
-  public:  
-    // our coordinate types  
+  public:
+    // our coordinate types
     typedef FieldVector<alu3d_ctype, 3> coord3_t;
     typedef FieldVector<alu3d_ctype, 2> coord2_t;
 
-    // type of coordinate vectors from elements 
+    // type of coordinate vectors from elements
     typedef alu3d_ctype double3_t[3];
-  protected:  
+  protected:
 
     alu3d_ctype _n [3][3] ;
 
@@ -108,63 +108,63 @@ namespace Dune {
     SurfaceNormalCalculator (const SurfaceNormalCalculator &) ;
     ~SurfaceNormalCalculator () {}
 
-    // returns true if mapping is affine 
+    // returns true if mapping is affine
     inline bool affine () const { return _affine ; }
 
-    // calcuates normal 
+    // calcuates normal
     void normal(const coord2_t&, coord3_t&) const ;
     void normal(const alu3d_ctype, const alu3d_ctype, coord3_t&)const;
-    
+
     void negativeNormal(const coord2_t&, coord3_t&) const ;
     void negativeNormal(const alu3d_ctype, const alu3d_ctype, coord3_t&)const;
-    
+
   public:
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & );
-  protected:  
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+  protected:
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
-                       const vector_t & , const vector_t & , 
+                       const vector_t & , const vector_t & ,
                        alu3d_ctype (&_b)[4][3] );
-  } ;  
+  } ;
 
 
   //! A bilinear surface mapping
   // NOTE: this class is different to the BilinearSurfaceMapping in
-  // ALUGrid, for example the reference elements differ 
+  // ALUGrid, for example the reference elements differ
   // here we have [0,1]^2 and in ALUGrid its [-1,1]^2
-  // also the point numbering is different 
-  class BilinearSurfaceMapping : public SurfaceNormalCalculator 
+  // also the point numbering is different
+  class BilinearSurfaceMapping : public SurfaceNormalCalculator
   {
-  protected:  
-    typedef SurfaceNormalCalculator BaseType; 
-    
+  protected:
+    typedef SurfaceNormalCalculator BaseType;
+
     using BaseType :: _n;
     static const double _epsilon;
 
-    // our coordinate types  
+    // our coordinate types
     typedef FieldVector<alu3d_ctype, 3> coord3_t;
     typedef FieldVector<alu3d_ctype, 2> coord2_t;
 
-    // type of coordinate vectors from elements 
+    // type of coordinate vectors from elements
     typedef alu3d_ctype double3_t[3];
 
-    // type for helper matrices 
+    // type for helper matrices
     typedef FieldMatrix<alu3d_ctype,3,3> mat3_t;
 
-    // type for inverse matrices 
+    // type for inverse matrices
     typedef FieldMatrix<alu3d_ctype,2,3> matrix_t;
 
-    // type for inverse matrices 
+    // type for inverse matrices
     typedef FieldMatrix<alu3d_ctype,3,2> inv_t;
 
     alu3d_ctype _b [4][3] ;
-    
+
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
     mutable matrix_t matrix_;
@@ -181,7 +181,7 @@ namespace Dune {
     //! Constructor creating empty mapping with double , i.e. zero
     BilinearSurfaceMapping ();
 
-    //! Constructor getting FieldVectors 
+    //! Constructor getting FieldVectors
     BilinearSurfaceMapping (const coord3_t&, const coord3_t&,
                             const coord3_t&, const coord3_t&) ;
     //! Constructor for double[3]
@@ -195,28 +195,28 @@ namespace Dune {
 
     const matrix_t& jacobianTransposed(const coord2_t&) const ;
 
-    // calculates determinant of face mapping using the normal 
+    // calculates determinant of face mapping using the normal
     alu3d_ctype det(const coord2_t&) const;
-    
-    // maps from local coordinates to global coordinates 
+
+    // maps from local coordinates to global coordinates
     void world2map(const coord3_t &, coord2_t & ) const;
 
     // maps form global coordinates to local (within reference element)
-    // coordinates 
+    // coordinates
     void map2world(const coord2_t&, coord3_t&) const ;
     void map2world(const alu3d_ctype ,const alu3d_ctype , coord3_t&) const ;
-    
-  private:  
+
+  private:
     void map2worldnormal(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype , coord3_t&)const;
     void map2worldlinear(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype ) const;
 
   public:
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & );
-  } ;  
+  } ;
 
 
 
@@ -224,7 +224,7 @@ namespace Dune {
   template< int cdim >
   class BilinearMapping
   {
-  public:  
+  public:
     typedef alu3d_ctype ctype;
 
     typedef FieldVector< ctype, cdim > world_t;
@@ -245,7 +245,7 @@ namespace Dune {
     mutable bool calcedDet_;
     mutable bool calcedInv_;
 
-  public:  
+  public:
     BilinearMapping ();
     BilinearMapping ( const world_t &p0, const world_t &p1,
                       const world_t &p2, const world_t &p3 );
@@ -279,12 +279,12 @@ namespace Dune {
 
   //! A linear mapping
   template< int cdim, int mydim >
-  class LinearMapping 
+  class LinearMapping
   {
-  public:  
+  public:
     typedef alu3d_ctype ctype;
 
-    typedef ctype double_t[ cdim ]; 
+    typedef ctype double_t[ cdim ];
 
     typedef FieldVector< ctype, cdim > world_t;
     typedef FieldVector< ctype, mydim > map_t;
@@ -292,54 +292,54 @@ namespace Dune {
     typedef FieldMatrix< ctype, mydim, cdim > matrix_t;
     typedef FieldMatrix< ctype, cdim, mydim > inv_t;
 
-  protected:  
-    matrix_t      _matrix;        //!< transformation matrix (transposed) 
+  protected:
+    matrix_t      _matrix;        //!< transformation matrix (transposed)
     mutable inv_t _invTransposed; //!< storage for inverse of jacobian (transposed)
     world_t _p0;                  //! P[0]
 
-    //! stores the determinant of the inverse 
-    mutable ctype _det;                            
+    //! stores the determinant of the inverse
+    mutable ctype _det;
 
-    //! true if inverse has been calculated 
-    mutable bool _calcedInv; 
+    //! true if inverse has been calculated
+    mutable bool _calcedInv;
 
-    //! true if determinant has been calculated 
-    mutable bool _calcedDet; 
+    //! true if determinant has been calculated
+    mutable bool _calcedDet;
 
-  public:  
+  public:
     //! Constructor creating empty mapping with double , i.e. zero
     LinearMapping ();
 
-    //! copy constructor 
+    //! copy constructor
     LinearMapping (const LinearMapping &) ;
-    
+
     // returns true if mapping is affine (which is always true)
     inline bool affine () const { return true ; }
 
-    // return reference to transposed jacobian  
+    // return reference to transposed jacobian
     const matrix_t& jacobianTransposed(const map_t &) const ;
 
-    // return reference to transposed jacobian inverse 
+    // return reference to transposed jacobian inverse
     const inv_t& jacobianInverseTransposed(const map_t &) const ;
 
-    // calculates determinant of mapping 
+    // calculates determinant of mapping
     ctype det(const map_t&) const;
-    
-    // maps from local coordinates to global coordinates 
+
+    // maps from local coordinates to global coordinates
     void world2map(const world_t &, map_t &) const;
 
     // maps form global coordinates to local (within reference element)
-    // coordinates 
+    // coordinates
     void map2world(const map_t &, world_t &) const ;
 
-  protected:  
-    // calculate inverse 
+  protected:
+    // calculate inverse
     void inverse (const map_t&) const;
-    
-    // calculate inverse one codim one entity 
+
+    // calculate inverse one codim one entity
     void inverseCodimOne (const map_t&) const;
-    
-    // calculate determinant  
+
+    // calculate determinant
     void calculateDeterminant (const map_t&) const;
 
     void multTransposedMatrix(const matrix_t& matrix,
@@ -348,33 +348,33 @@ namespace Dune {
     void multMatrix ( const matrix_t& A,
                       const FieldMatrix< ctype, mydim, mydim> &B,
                       inv_t& ret ) const ;
-    
+
   public:
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & );
 
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & );
 
-    // builds _b and _n, called from the constructors 
-    // public because also used in faceutility 
+    // builds _b and _n, called from the constructors
+    // public because also used in faceutility
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & );
 
     template <class vector_t>
     void buildMapping (const vector_t & );
-  } ;  
+  } ;
 
 
   ///////////////////////////////////////////////////////////////////
   //
-  // NonConforming Mappings 
+  // NonConforming Mappings
   //
   ///////////////////////////////////////////////////////////////////
 
@@ -386,16 +386,16 @@ namespace Dune {
 
   //! Non-conforming face mappings for tetrahedra
   template< int actualDim, int actualDimw, class Comm >
-  class NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm > 
+  class NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
   {
-  public:  
+  public:
     typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
     typedef typename ALU3dImplTraits< tetra, Comm >::HfaceRuleType RefinementRuleType;
-    
+
     NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
     : rule_( rule ), nChild_( nChild )
     {}
-    
+
     void child2parent ( const CoordinateType &childCoordinates,
                         CoordinateType &parentCoordinates) const;
 
@@ -421,7 +421,7 @@ namespace Dune {
   template< int actualDim, int actualDimw, class Comm >
   class NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
   {
-  public:  
+  public:
     typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
     typedef typename ALU3dImplTraits< hexa, Comm >::HfaceRuleType RefinementRuleType;
 
@@ -441,7 +441,7 @@ namespace Dune {
                           CoordinateType& parentCoordinates) const;
 
     RefinementRuleType rule_;
-    int nChild_; 
+    int nChild_;
   };
 
 } // end namespace Dune

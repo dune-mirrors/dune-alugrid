@@ -54,8 +54,8 @@ namespace ALUGrid
   alucoord_t TrilinearMapping :: det(const alucoord_t (&point)[3]) {
           //  Determinante der Abbildung f:[-1,1]^3 -> Hexaeder im Punkt point.
     linear (point) ;
-    return (DetDf = Df[0][0] * Df[1][1] * Df[2][2] - Df[0][0] * Df[1][2] * Df[2][1] - 
-                    Df[1][0] * Df[0][1] * Df[2][2] + Df[1][0] * Df[0][2] * Df[2][1] + 
+    return (DetDf = Df[0][0] * Df[1][1] * Df[2][2] - Df[0][0] * Df[1][2] * Df[2][1] -
+                    Df[1][0] * Df[0][1] * Df[2][2] + Df[1][0] * Df[0][2] * Df[2][1] +
                     Df[2][0] * Df[0][1] * Df[1][2] - Df[2][0] * Df[0][2] * Df[1][1]) ;
   }
 

@@ -41,7 +41,7 @@ namespace ALUGrid
         barycenter[1] = 0.125 * (p0[1] + p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1]);
         barycenter[2] = 0.125 * (p0[2] + p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2]);
 
-  #ifdef ALUGRIDDEBUG 
+  #ifdef ALUGRIDDEBUG
         {
           TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
           alucoord_t p[3];
@@ -54,7 +54,7 @@ namespace ALUGrid
   #endif
       }
 
-      // returns true if mapping is affine 
+      // returns true if mapping is affine
       inline bool affine() const;
   };
 
@@ -118,7 +118,7 @@ namespace ALUGrid
       inline void map2world(const alucoord_t (&)[2], alucoord_t (&)[3]) const;
       inline void map2world(alucoord_t x, alucoord_t y, alucoord_t (&w)[3]) const;
       inline void normal(const alucoord_t (&)[2], alucoord_t (&)[3]) const;
-      
+
       static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
                                     alucoord_t (&barycenter)[3])
       {
@@ -126,9 +126,9 @@ namespace ALUGrid
         barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
         barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
 
-  #ifdef ALUGRIDDEBUG 
+  #ifdef ALUGRIDDEBUG
         {
-          BilinearSurfaceMapping map(p0,p1,p2,p3); 
+          BilinearSurfaceMapping map(p0,p1,p2,p3);
           alucoord_t p[3];
           map.map2world(.0, .0, p);
           for(int j=0; j<3; ++j)
@@ -181,8 +181,8 @@ namespace ALUGrid
 
 
   inline TrilinearMapping::TrilinearMapping (const alucoord_t (&x0)[3], const alucoord_t (&x1)[3],
-                        const alucoord_t (&x2)[3], const alucoord_t (&x3)[3], const alucoord_t (&x4)[3], 
-                        const alucoord_t (&x5)[3], const alucoord_t (&x6)[3], const alucoord_t (&x7)[3]) 
+                        const alucoord_t (&x2)[3], const alucoord_t (&x3)[3], const alucoord_t (&x4)[3],
+                        const alucoord_t (&x5)[3], const alucoord_t (&x6)[3], const alucoord_t (&x7)[3])
     : p0(x0), p1(x1), p2(x2), p3(x3), p4(x4), p5(x5), p6(x6), p7(x7) {
     a [0][0] = p3 [0];
     a [0][1] = p3 [1];
@@ -208,13 +208,13 @@ namespace ALUGrid
     a [7][0] = p5 [0] - p4 [0] + p7 [0] - p6 [0] - p1 [0] + p0 [0] + a [2][0];
     a [7][1] = p5 [1] - p4 [1] + p7 [1] - p6 [1] - p1 [1] + p0 [1] + a [2][1];
     a [7][2] = p5 [2] - p4 [2] + p7 [2] - p6 [2] - p1 [2] + p0 [2] + a [2][2];
-    return;	 
+    return;
   }
 
   inline TrilinearMapping::TrilinearMapping (const TrilinearMapping & map)
-    : p0(map.p0), p1(map.p1), p2(map.p2), p3(map.p3), p4(map.p4), p5(map.p5), p6(map.p6), p7(map.p7) { 
+    : p0(map.p0), p1(map.p1), p2(map.p2), p3(map.p3), p4(map.p4), p5(map.p5), p6(map.p6), p7(map.p7) {
     for (int i = 0; i < 8; i ++)
-      for (int j = 0; j < 3; j ++) 
+      for (int j = 0; j < 3; j ++)
         a [i][j] = map.a [i][j];
     return;
   }
@@ -242,13 +242,13 @@ namespace ALUGrid
     return;
   }
 
-  inline bool TrilinearMapping::affine () const 
+  inline bool TrilinearMapping::affine () const
   {
     alucoord_t sum = 0.0;
-    // summ all factor from non-linaer terms 
-    for(int i=4; i<8; ++i) 
+    // summ all factor from non-linaer terms
+    for(int i=4; i<8; ++i)
     {
-      for(int j=0; j<3; ++j) 
+      for(int j=0; j<3; ++j)
       {
         sum += fabs(a[i][j]);
       }
@@ -261,7 +261,7 @@ namespace ALUGrid
   template< class A > inline typename QuadraturCube3D < A >::val_t QuadraturCube3D < A >::integrate2 (val_t base, const arg_t & x) {
 
           // Exakt f"ur Polynome vom Grad <= 2
-          // auf dem W"urfel [-1,1]x[-1,1]x[-1,1], V([-1,1]^3) = 8.0 
+          // auf dem W"urfel [-1,1]x[-1,1]x[-1,1], V([-1,1]^3) = 8.0
 
     for(int i = 0; i < 4; i ++) {
       val_t t = A()( _p2 [i], x);
@@ -269,7 +269,7 @@ namespace ALUGrid
     }
     return base;
   }
-      
+
   template< class A > inline typename QuadraturCube3D < A >::val_t QuadraturCube3D < A >::integrate3 (val_t base, const arg_t & x) {
 
           // exakt f"ur Polynome vom Grad <= 3
@@ -284,7 +284,7 @@ namespace ALUGrid
   template< class A > inline typename QuadraturCube3D_1 < A >::val_t QuadraturCube3D_1 < A >::integrate2 (val_t base, const arg_t & x) {
 
           // Exakt f"ur Polynome vom Grad <= 2
-          // auf dem W"urfel [-1,1]x[-1,1]x[-1,1], V([-1,1]^3) = 8.0 
+          // auf dem W"urfel [-1,1]x[-1,1]x[-1,1], V([-1,1]^3) = 8.0
 
     for(int i = 0; i < 4; i ++) {
       val_t t = A()( _p2 [i], _map, x);
@@ -292,7 +292,7 @@ namespace ALUGrid
     }
     return base;
   }
-      
+
   template< class A > inline typename QuadraturCube3D_1 < A >::val_t QuadraturCube3D_1 < A >::integrate3 (val_t base, const arg_t & x) {
 
           // exakt f"ur Polynome vom Grad <= 3
@@ -312,7 +312,7 @@ namespace ALUGrid
     return 1.0;
   }
 
-  inline BilinearSurfaceMapping::BilinearSurfaceMapping (const alucoord_t (&x0)[3], const alucoord_t (&x1)[3], const alucoord_t (&x2)[3], const alucoord_t (&x3)[3]) 
+  inline BilinearSurfaceMapping::BilinearSurfaceMapping (const alucoord_t (&x0)[3], const alucoord_t (&x1)[3], const alucoord_t (&x2)[3], const alucoord_t (&x3)[3])
     : _p0 (x0), _p1 (x1), _p2 (x2), _p3 (x3) {
     _b [0][0] = _p0 [0];
     _b [0][1] = _p0 [1];
@@ -333,12 +333,12 @@ namespace ALUGrid
     _n [1][1] = _b [1][2] * _b [3][0] - _b [1][0] * _b [3][2];
     _n [1][2] = _b [1][0] * _b [3][1] - _b [1][1] * _b [3][0];
     _n [2][0] = _b [3][1] * _b [2][2] - _b [3][2] * _b [2][1];
-    _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2]; 
+    _n [2][1] = _b [3][2] * _b [2][0] - _b [3][0] * _b [2][2];
     _n [2][2] = _b [3][0] * _b [2][1] - _b [3][1] * _b [2][0];
     return;
   }
 
-  inline BilinearSurfaceMapping::BilinearSurfaceMapping (const BilinearSurfaceMapping & m) 
+  inline BilinearSurfaceMapping::BilinearSurfaceMapping (const BilinearSurfaceMapping & m)
           : _p0(m._p0), _p1(m._p1), _p2(m._p2), _p3(m._p3) {
     {for (int i = 0; i < 4; i ++)
       for (int j = 0; j < 3; j ++ )
@@ -407,7 +407,7 @@ namespace ALUGrid
         p [1] = delta * (alucoord_t (j) + .5) - 1.0;
         _map.normal (p,n);
         val_t tmp = A () (p,n,x);
-        tmp *= w;     
+        tmp *= w;
         base += tmp;
       }
     }
@@ -442,7 +442,7 @@ namespace ALUGrid
       for(int j = 0; j < resolution; j ++) {
         p [1] = delta * (alucoord_t (j) + .5) - 1.0;
         val_t tmp = A () (p,_map,x);
-        tmp *= w;     
+        tmp *= w;
         base += tmp;
       }
     }

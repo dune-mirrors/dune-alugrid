@@ -9,7 +9,7 @@
 namespace ALUGrid
 {
 
-  //! type of coordinate storage 
+  //! type of coordinate storage
   typedef double alucoord_t;
 
 } // namespace ALUGrid
@@ -55,18 +55,18 @@ namespace ALUGrid
           inline void writeToStream  (ObjectStream &) const;
           inline int leftMaster () const;
           inline int rightMaster () const;
-        private:  
+        private:
       };
 
       class GraphVertex : public MyAlloc
       {
         typedef alucoord_t center_t[ 3 ];
 
-        int _index;   // global graph index 
-        int _weight;  // weight of vertex 
+        int _index;   // global graph index
+        int _weight;  // weight of vertex
 
 #ifdef GRAPHVERTEX_WITH_CENTER
-        const MacroGridMoverIF* _element ; // for computing the bary center if necessary 
+        const MacroGridMoverIF* _element ; // for computing the bary center if necessary
 #endif
 
         public :
@@ -76,7 +76,7 @@ namespace ALUGrid
           // contructor taking linked object (for barycenter calculation)
           inline GraphVertex (int,int, const MacroGridMoverIF& );
           inline GraphVertex (int,int);
-          // constructor without center is initializing center and weight to zero 
+          // constructor without center is initializing center and weight to zero
           inline GraphVertex (int);
           inline int index () const;
           inline int weight () const;
@@ -122,41 +122,41 @@ namespace ALUGrid
           const ldb_vertex_map_t :: iterator _vertexSetEnd ;
 
           // contains the sizes of the partition (vertices and edges of each proc)
-          // if this is zero, then the sizes will be communicated 
+          // if this is zero, then the sizes will be communicated
           std::vector< int > _graphSizes;
           std::vector< int > _elementCuts;
-          // true if no periodic faces are present 
+          // true if no periodic faces are present
           mutable bool _noPeriodicFaces;
         public :
-          enum method { 
-            // no load balancing 
+          enum method {
+            // no load balancing
             NONE = 0,
 
-            // collect all to rank 0 
+            // collect all to rank 0
             COLLECT = 1,
 
-            // assuming the elements to be ordered by a 
-            // space filling curve approach 
-            // here, the edges in the graph are neglected 
-            // parallel version 
-            ALUGRID_SpaceFillingCurveLinkage = 4, 
+            // assuming the elements to be ordered by a
+            // space filling curve approach
+            // here, the edges in the graph are neglected
+            // parallel version
+            ALUGRID_SpaceFillingCurveLinkage = 4,
             // serial version that requires the whole graph to be avaiable
-            ALUGRID_SpaceFillingCurveSerialLinkage = 5, 
+            ALUGRID_SpaceFillingCurveSerialLinkage = 5,
 
-            // METIS method for graph partitioning (with linkage storage) 
+            // METIS method for graph partitioning (with linkage storage)
             //METIS_PartGraphKwayLinkage      = 6,
             //METIS_PartGraphRecursiveLinkage = 7,
 
-            // ALU sfc without linkage 
-            ALUGRID_SpaceFillingCurve       = 9, 
+            // ALU sfc without linkage
+            ALUGRID_SpaceFillingCurve       = 9,
             ALUGRID_SpaceFillingCurveSerial = 10,
 
-            // METIS method for graph partitioning 
+            // METIS method for graph partitioning
             METIS_PartGraphKway = 11,
             METIS_PartGraphRecursive = 12,
 
-            // ZOLTAN partitioning 
-            ZOLTAN_LB_HSFC = 13 , 
+            // ZOLTAN partitioning
+            ZOLTAN_LB_HSFC = 13 ,
             ZOLTAN_LB_GraphPartitioning = 14 ,
             ZOLTAN_LB_PARMETIS = 15
           };
@@ -173,8 +173,8 @@ namespace ALUGrid
           const std::vector< int > &graphSizes () const { return _graphSizes; }
 
           void clearGraphSizesVector ()
-          { 
-            // clear graph size and also deallocate memory 
+          {
+            // clear graph size and also deallocate memory
             std::vector< int >().swap( _graphSizes );
             _noPeriodicFaces = false;
           }
@@ -194,9 +194,9 @@ namespace ALUGrid
           //! return true if mth specifies a serial partitioner
           static bool graphEdgesNeeded ( const method mth )
           {
-            return //mth == METIS_PartGraphKwayLinkage || 
-                   //mth == METIS_PartGraphRecursiveLinkage || 
-                   mth > ALUGRID_SpaceFillingCurveSerial && 
+            return //mth == METIS_PartGraphKwayLinkage ||
+                   //mth == METIS_PartGraphRecursiveLinkage ||
+                   mth > ALUGRID_SpaceFillingCurveSerial &&
                    mth != ZOLTAN_LB_HSFC;
           }
 
@@ -205,7 +205,7 @@ namespace ALUGrid
           static std::string methodToString( method );
 
           DataBase ();
-          explicit DataBase ( const std::vector< int > &graphSizes, 
+          explicit DataBase ( const std::vector< int > &graphSizes,
                               std::vector< int > &elementCuts );
           DataBase ( const DataBase & );
 
@@ -224,7 +224,7 @@ namespace ALUGrid
           template <class helement_t, class gatherscatter_t >
           int destination (helement_t& elem, gatherscatter_t* gs ) const
           {
-            // if gs is given use this to obtain detination 
+            // if gs is given use this to obtain detination
             return ( gs ) ? gs->destination( elem ) :
                             destination( elem.ldbVertexIndex() );
           }
@@ -233,19 +233,19 @@ namespace ALUGrid
 
           const ldb_connect_set_t& scan () const { return _connect; }
 
-          // original repartition method for ALUGrid 
+          // original repartition method for ALUGrid
           bool repartition (MpAccessGlobal &, method, const double tolerance = 1.2 );
 
           std::vector< int > repartition ( MpAccessGlobal &, method, int, const double tolerance = 1.2  );
 
           void printVertexSet() const;
 
-          // store internal element cuts in elementCuts 
-          void storeElementCuts( std::vector<int>& elementCuts ) 
-          { 
+          // store internal element cuts in elementCuts
+          void storeElementCuts( std::vector<int>& elementCuts )
+          {
             elementCuts.swap( _elementCuts );
           }
-        protected:  
+        protected:
           bool repartition ( MpAccessGlobal &, method, std::vector< int > &, const int, const double );
       };
   };
@@ -262,18 +262,18 @@ namespace ALUGrid
   inline bool LoadBalancer::debugOption (int level) {
 #ifdef ALUGRIDDEBUG
     return (getenv ("VERBOSE_LDB") ? ( atoi (getenv ("VERBOSE_LDB")) > level ? true : (level == 0)) : false);
-#else 
+#else
     return false ;
 #endif
   }
 
-  inline LoadBalancer::GraphEdge::GraphEdge ( ObjectStream& os ) 
+  inline LoadBalancer::GraphEdge::GraphEdge ( ObjectStream& os )
   {
     readFromStream( os );
   }
 
-  inline LoadBalancer::GraphEdge::GraphEdge (int i, int j, int w, int lmaster, int rmaster) 
-    : _leftNode (i), _rightNode (j), _weight (w), 
+  inline LoadBalancer::GraphEdge::GraphEdge (int i, int j, int w, int lmaster, int rmaster)
+    : _leftNode (i), _rightNode (j), _weight (w),
       _leftMaster(lmaster), _rightMaster(rmaster)
   {
     alugrid_assert ( _weight >= 0 );
@@ -285,7 +285,7 @@ namespace ALUGrid
 
   inline int LoadBalancer::GraphEdge::rightNode () const {
     return _rightNode;
-  } 
+  }
 
   inline int LoadBalancer::GraphEdge::weight () const {
     return _weight;
@@ -313,7 +313,7 @@ namespace ALUGrid
 
   inline LoadBalancer::GraphEdge LoadBalancer::GraphEdge::operator - () const {
     return GraphEdge (_rightNode, _leftNode, _weight, _rightMaster, _leftMaster);
-  } 
+  }
 
   template <class k>
   inline add& operator<<( k&o, add& w)
@@ -325,14 +325,14 @@ namespace ALUGrid
 
   inline const char* operator
       >>( std::ostream& o, add& h)
-  { 
+  {
     retur(h);
     return (o
         <<h,
         h.w.c_str());
   }
 
-  inline bool LoadBalancer::GraphEdge::readFromStream (ObjectStream & os) 
+  inline bool LoadBalancer::GraphEdge::readFromStream (ObjectStream & os)
   {
     os.readObject ( _leftNode  );
     os.readObject ( _rightNode );
@@ -351,7 +351,7 @@ namespace ALUGrid
     return;
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex ( ObjectStream& os ) 
+  inline LoadBalancer::GraphVertex::GraphVertex ( ObjectStream& os )
   {
     readFromStream( os );
   }
@@ -374,7 +374,7 @@ namespace ALUGrid
     alugrid_assert ( _weight > 0 );
   }
 
-  inline LoadBalancer::GraphVertex::GraphVertex (int i) 
+  inline LoadBalancer::GraphVertex::GraphVertex (int i)
     : _index (i), _weight (1)
 #ifdef GRAPHVERTEX_WITH_CENTER
       , _element( 0 )
@@ -392,12 +392,12 @@ namespace ALUGrid
     return _weight;
   }
 
-  inline void LoadBalancer::GraphVertex::computeBaryCenter( center_t& center ) const 
+  inline void LoadBalancer::GraphVertex::computeBaryCenter( center_t& center ) const
   {
 #ifdef GRAPHVERTEX_WITH_CENTER
     assert( _element ) ;
     _element->computeBaryCenter( center );
-#else 
+#else
     center[ 2 ] = center[ 1 ] = center[ 0 ] = 0;
 #endif
   }
@@ -414,42 +414,42 @@ namespace ALUGrid
     return _index == x._index;
   }
 
-  inline bool LoadBalancer::GraphVertex::readFromStream (ObjectStream & os) 
+  inline bool LoadBalancer::GraphVertex::readFromStream (ObjectStream & os)
   {
     os.readObject (_index);
     os.readObject (_weight);
     return true;
   }
 
-  inline void LoadBalancer::GraphVertex::writeToStream (ObjectStream & os) const 
+  inline void LoadBalancer::GraphVertex::writeToStream (ObjectStream & os) const
   {
     os.writeObject (_index);
     os.writeObject (_weight);
     return;
   }
 
-  inline LoadBalancer::DataBase::DataBase () 
-    : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
+  inline LoadBalancer::DataBase::DataBase ()
+    : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0),
       _edgeSet (), _vertexSet (), _vertexSetEnd( _vertexSet.end() ),
       _graphSizes(), _noPeriodicFaces( true )
   {
   }
 
-  inline LoadBalancer::DataBase::DataBase ( const std::vector< int > &graphSizes, 
+  inline LoadBalancer::DataBase::DataBase ( const std::vector< int > &graphSizes,
                                             std::vector< int > &elementCuts )
-  : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0), 
-    _edgeSet (), _vertexSet (), _vertexSetEnd( _vertexSet.end() ), 
-    _graphSizes( graphSizes ), 
-    _elementCuts(), _noPeriodicFaces( true ) 
+  : _minFaceLoad (0), _maxFaceLoad (0), _minVertexLoad (0), _maxVertexLoad (0),
+    _edgeSet (), _vertexSet (), _vertexSetEnd( _vertexSet.end() ),
+    _graphSizes( graphSizes ),
+    _elementCuts(), _noPeriodicFaces( true )
   {
-    // swap memory 
+    // swap memory
     _elementCuts.swap( elementCuts );
   }
 
-  inline LoadBalancer::DataBase::DataBase (const DataBase & b) 
-    : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad), 
-      _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad), 
-      _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) , 
+  inline LoadBalancer::DataBase::DataBase (const DataBase & b)
+    : _minFaceLoad (b._minFaceLoad), _maxFaceLoad (b._maxFaceLoad),
+      _minVertexLoad (b._minVertexLoad), _maxVertexLoad (b._maxVertexLoad),
+      _edgeSet (b._edgeSet), _vertexSet (b._vertexSet) ,
       _vertexSetEnd( _vertexSet.end() ),
       _graphSizes( b._graphSizes ),
       _elementCuts( b._elementCuts ),
@@ -462,7 +462,7 @@ namespace ALUGrid
   inline int LoadBalancer::DataBase::nEdges () const { return _edgeSet.size(); }
 
   inline int LoadBalancer::DataBase::nVertices () const { return _vertexSet.size(); }
-   
+
   inline int LoadBalancer::DataBase::AccVertexLoad::operator() ( int s, const std::pair< const GraphVertex, int > &p ) const
   {
     return s + p.first.weight();

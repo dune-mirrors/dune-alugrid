@@ -31,10 +31,10 @@ using ALUGrid::MacroFileHeader;
 // ElementRawID
 // ------------
 
-enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4  
-                    HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8 
+enum ElementRawID { TETRA_RAW = ALUGrid :: MacroGridBuilder :: TETRA_RAW,  // = 4
+                    HEXA_RAW  = ALUGrid :: MacroGridBuilder :: HEXA_RAW    // = 8
                   };
-static const int closure = ALUGrid :: Gitter :: hbndseg_STI :: closure ; // = 211 
+static const int closure = ALUGrid :: Gitter :: hbndseg_STI :: closure ; // = 211
 
 
 // Vertex
@@ -55,16 +55,16 @@ struct Vertex
   {
     links.clear();
     const size_t lSize = linkage.size() ;
-    if( lSize > 0 ) 
+    if( lSize > 0 )
     {
       typedef std::set<int> :: iterator iterator ;
-      // convert links to vector 
+      // convert links to vector
       links.reserve( lSize );
       iterator lend = linkage.end();
-      for( iterator link = linkage.begin(); link != lend; ++link ) 
+      for( iterator link = linkage.begin(); link != lend; ++link )
       {
-        // insert all ranks except mine 
-        if( *link != rank ) 
+        // insert all ranks except mine
+        if( *link != rank )
           links.push_back( *link );
       }
     }
@@ -86,16 +86,16 @@ struct Element< TETRA_RAW >
   static const int numFaces = 4 ;
   static const int numVerticesPerFace = 3 ;
   int vertices[ numVertices ];
-  int neighbor[ numFaces ]; 
+  int neighbor[ numFaces ];
   int rank ;
 
-  Element () : rank( 0 ) 
+  Element () : rank( 0 )
   {
     for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
     for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
   }
 
-  static int prototype( const int face, const int vx ) 
+  static int prototype( const int face, const int vx )
   {
     return ALUGrid::Gitter::Geometric::Tetra::prototype[ face ][ vx ];
   }
@@ -108,15 +108,15 @@ struct Element< HEXA_RAW >
   static const int numFaces = 6 ;
   static const int numVerticesPerFace = 4 ;
   int vertices[ numVertices ];
-  int neighbor[ numFaces ]; 
+  int neighbor[ numFaces ];
   int rank ;
 
-  Element () : rank( 0 ) 
+  Element () : rank( 0 )
   {
     for( int i=0; i<numVertices; ++ i ) vertices[ i ] = -1;
     for( int i=0; i<numFaces; ++ i )    neighbor[ i ] = -1;
   }
-  static int prototype( const int face, const int vx ) 
+  static int prototype( const int face, const int vx )
   {
     return ALUGrid::Gitter::Geometric::Hexa::prototype[ face ][ vx ];
   }
@@ -327,12 +327,12 @@ void readMacroGrid ( stream_t &input,
   bndSegs.resize( bndSegListSize );
   for( int i = 0; i < bndSegListSize; ++i )
   {
-    int bndid; 
+    int bndid;
     input >> bndid ;
     int j = 0;
-    if( bndid < 0 ) // exterior bnd 
+    if( bndid < 0 ) // exterior bnd
       bndSegs[ i ].bndid = -bndid ;
-    else // interior bnd 
+    else // interior bnd
     {
       bndSegs[ i ].vertices[ j++ ] = bndid ;
       bndSegs[ i ].bndid = closure ;
@@ -355,14 +355,14 @@ void writeMacroGrid ( stream_t &output,
                       const std::vector< Element< rawId > > &elements,
                       const std::vector< BndSeg< rawId > > &bndSegs,
                       const std::vector< Periodic< rawId > > &periodics,
-                      const int rank, 
+                      const int rank,
                       const int nPartition )
 {
   const int elementListSize = elements.size();
   const int bndSegListSize = bndSegs.size();
   const int periodicListSize = periodics.size();
 
-  const bool writeParallel = nPartition > 1 ; 
+  const bool writeParallel = nPartition > 1 ;
 
   ALUGrid::StandardWhiteSpace_t ws;
 
@@ -376,7 +376,7 @@ void writeMacroGrid ( stream_t &output,
     partitionElements = 0;
     for( int i = 0; i < elementListSize; ++i )
     {
-      // if element is not in current partition continue 
+      // if element is not in current partition continue
       if( elements[ i ].rank != rank ) continue ;
 
       ++ partitionElements ;
@@ -393,17 +393,17 @@ void writeMacroGrid ( stream_t &output,
   const typename std::set<int>::iterator pVxEnd = partitionVertexIds.end();
   for( int i = 0; i < vertexListSize; ++i )
   {
-    // if vertex is not in partition list continue 
+    // if vertex is not in partition list continue
     if( writeParallel && partitionVertexIds.find( vertices[ i ].id ) == pVxEnd ) continue ;
-    // write vertex id and coordinates 
-    output << vertices[ i ].id << ws 
+    // write vertex id and coordinates
+    output << vertices[ i ].id << ws
            << vertices[ i ].x[ 0 ] << ws << vertices[ i ].x[ 1 ] << ws << vertices[ i ].x[ 2 ] << std::endl;
   }
 
   output << partitionElements << std::endl;
   for( int i = 0; i < elementListSize; ++i )
   {
-    // if element is not in current partition continue 
+    // if element is not in current partition continue
     if( elements[ i ].rank != rank ) continue ;
 
     output << elements[ i ].vertices[ 0 ];
@@ -415,17 +415,17 @@ void writeMacroGrid ( stream_t &output,
   int bndSegPartSize   = ( writeParallel ) ? 0 : bndSegListSize;
   int periodicPartSize = ( writeParallel ) ? 0 : periodicListSize;
 
-  // count number of boundary segment for this partition 
+  // count number of boundary segment for this partition
   if( writeParallel )
   {
     for( int i = 0; i < periodicListSize; ++i )
     {
       assert( periodics[ i ].element[ 0 ] == periodics[ i ].element[ 1 ] );
-      if( elements[ periodics[ i ].element[ 0 ] ].rank == rank ) 
+      if( elements[ periodics[ i ].element[ 0 ] ].rank == rank )
         ++ periodicPartSize ;
     }
 
-    for( int i = 0; i < bndSegListSize; ++ i ) 
+    for( int i = 0; i < bndSegListSize; ++ i )
     {
       if( elements[ bndSegs[ i ].element ].rank == rank )
         ++ bndSegPartSize ;
@@ -456,12 +456,12 @@ void writeMacroGrid ( stream_t &output,
     output << std::endl;
   }
 
-  if( writeParallel ) 
+  if( writeParallel )
   {
     typedef std::vector< int > linkagePattern_t;
     typedef std::map< linkagePattern_t, int > linkagePatternMap_t;
 
-    // create linkage patterns 
+    // create linkage patterns
     linkagePatternMap_t linkage ;
 
     typedef typename partitionvx_t :: iterator iterator ;
@@ -470,24 +470,24 @@ void writeMacroGrid ( stream_t &output,
     {
       std::vector< int > links ;
       vertices[ *it ].fillLinkage( links, rank );
-      if( links.size() > 0 ) 
+      if( links.size() > 0 )
         linkage[ links ] = 1 ;
     }
 
-    // write size of linkage patterns 
+    // write size of linkage patterns
     output << linkage.size() << std::endl;
 
     typedef linkagePatternMap_t :: iterator linkiterator ;
     const linkiterator linkend = linkage.end();
     int idx = 0;
-    for( linkiterator it = linkage.begin(); it != linkend ; ++it, ++idx ) 
+    for( linkiterator it = linkage.begin(); it != linkend ; ++it, ++idx )
     {
-      // store index of linkage entry in list 
+      // store index of linkage entry in list
       (*it).second = idx ;
       const std::vector< int >& ranks = (*it).first ;
       const int rSize = ranks.size();
       output << rSize << ws ;
-      for( int i=0; i<rSize; ++i ) 
+      for( int i=0; i<rSize; ++i )
         output <<  ranks[ i ] << ws ;
       output << std::endl;
     }
@@ -505,13 +505,13 @@ void writeMacroGrid ( stream_t &output,
       if( links.size() > 0 )
       {
         output << idx << ws << linkage[ links ];
-        if( hasElementLinkage ) 
+        if( hasElementLinkage )
         {
           const int elsize = vertex.elements.size();
-          output << ws << elsize; 
+          output << ws << elsize;
           typedef std::set<int> :: const_iterator iterator ;
           const iterator elend = vertex.elements.end();
-          for( iterator it = vertex.elements.begin(); it != elend; ++it ) 
+          for( iterator it = vertex.elements.begin(); it != elend; ++it )
           {
             output << ws << (*it) ;
           }
@@ -520,9 +520,9 @@ void writeMacroGrid ( stream_t &output,
       }
     }
     output << int(-1) << std::endl; // end marker for vertex position list
-    
+
   }
-  else 
+  else
     output << int(0) << std::endl; // no linkage
 }
 
@@ -538,18 +538,18 @@ struct ProgramOptions
   std::string byteOrder;
   int nPartition ;
   int partitionMethod ;
-  
+
   ProgramOptions ()
-    : defaultRawId( HEXA_RAW ), format( "ascii" ), 
+    : defaultRawId( HEXA_RAW ), format( "ascii" ),
       byteOrder( "default" ), nPartition( 1 ), partitionMethod( 10 )
   {}
 };
 
-std::string rankFileName( const std::string& filename, const int rank, const int nPartition ) 
+std::string rankFileName( const std::string& filename, const int rank, const int nPartition )
 {
   if( nPartition <= 1 ) return filename ;
 
-  std::stringstream str; 
+  std::stringstream str;
   str << filename << "." << rank;
   return str.str();
 }
@@ -579,7 +579,7 @@ void writeBinaryFormat ( std::ostream &output, MacroFileHeader &header,
 // --------------
 
 template< ElementRawID rawId >
-void writeNewFormat ( const std::string& filename, 
+void writeNewFormat ( const std::string& filename,
                       const ProgramOptions &options,
                       std::vector< Vertex > &vertices,
                       std::vector< Element< rawId > > &elements,
@@ -589,7 +589,7 @@ void writeNewFormat ( const std::string& filename,
   // partition might change the order of elements due to space filling curve ordering
   partition( vertices, elements, bndSegs, periodics, options.nPartition, options.partitionMethod );
 
-  // compute vertex linkage 
+  // compute vertex linkage
   computeLinkage( vertices, elements );
 
   for( int rank=0; rank<options.nPartition; ++ rank )
@@ -616,7 +616,7 @@ void writeNewFormat ( const std::string& filename,
       case MacroFileHeader::native:
         writeBinaryFormat< rawId, ALUGrid::ObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
         break ;
-        
+
       case MacroFileHeader::bigendian:
         writeBinaryFormat< rawId, ALUGrid::BigEndianObjectStream >( output, header, vertices, elements, bndSegs, periodics, rank, options.nPartition );
         break ;
@@ -832,7 +832,7 @@ void convert ( std::istream &input, const std::string& filename, const ProgramOp
       convertLegacyFormat< TETRA_RAW >( input, filename, options );
     else if( (firstline.find( "Hexahedra" ) != firstline.npos) || (firstline.find( "Hexaeder" ) != firstline.npos) )
       convertLegacyFormat< HEXA_RAW >( input, filename, options );
-    else 
+    else
     {
       std::cerr << "ERROR: Unknown comment to file format (" << firstline << ")." << std::endl;
       std::exit( 1 );
@@ -956,7 +956,7 @@ int main ( int argc, char **argv )
     std::cerr << "       -b : write binary output (alias for -f binary)" << std::endl;
     std::cerr << "       -f : select output format (one of 'ascii', 'binary', 'zbinary')" << std::endl;
     std::cerr << "       -p : number of partitions (default is 1)" << std::endl;
-    std::cerr << "       -m : partitioning method (default is " << mth[ 0 ] << ")," << std::endl; 
+    std::cerr << "       -m : partitioning method (default is " << mth[ 0 ] << ")," << std::endl;
     std::cerr << "            also valid are " << mth[ 1 ] << " and " << mth[ 2 ] << std::endl;
     std::cerr << "       -o : select output byte order (one of 'native', 'bigendian', 'littleendian')" << std::endl;
     return 1;

@@ -10,25 +10,25 @@ namespace ALUGrid
   void MacroGhostInfoStorage<points>::
   inlineGhostElement(ObjectStream & os ) const
   {
-   // local face number 
+   // local face number
     os.writeObject( _fce );
 
-    // global vertex number of the hexas vertices  
+    // global vertex number of the hexas vertices
     for(int i=0; i<noVx; ++i) os.writeObject( _vx[i] );
-    
-    // global vertex numbers of the face not existing on this partition  
-    for(int i=0; i<noFaceVx; ++i) 
+
+    // global vertex numbers of the face not existing on this partition
+    for(int i=0; i<noFaceVx; ++i)
     {
       os.writeObject( _vxface[i] );
-      os.writeObject( _p[i][0] ); 
-      os.writeObject( _p[i][1] ); 
-      os.writeObject( _p[i][2] ); 
+      os.writeObject( _p[i][0] );
+      os.writeObject( _p[i][1] );
+      os.writeObject( _p[i][2] );
     }
   }
 
   template<int points>
   void MacroGhostInfoStorage<points>::
-  readData(ObjectStream & os ) 
+  readData(ObjectStream & os )
   {
     // read local face number
     os.readObject ( _fce );
@@ -39,7 +39,7 @@ namespace ALUGrid
       os.readObject ( _vx[i] );
     }
 
-#ifdef ALUGRIDDEBUG 
+#ifdef ALUGRIDDEBUG
     for( int i=0; i<noVx; ++i )
     {
       for( int j=0; j<noVx; ++j)
@@ -50,7 +50,7 @@ namespace ALUGrid
     }
 #endif
 
-    // read vertices of face an coordinates 
+    // read vertices of face an coordinates
     for(int i=0; i<noFaceVx; ++i)
     {
       os.readObject ( _vxface[i] );
@@ -65,7 +65,7 @@ namespace ALUGrid
   }
 
   MacroGhostInfoHexa::
-  MacroGhostInfoHexa(const Gitter::Geometric::hexa_GEO * hexa, 
+  MacroGhostInfoHexa(const Gitter::Geometric::hexa_GEO * hexa,
                      const int fce)
   {
     alugrid_assert ( points == this->nop() );
@@ -79,8 +79,8 @@ namespace ALUGrid
       this->_p[vx][1] = p[1];
       this->_p[vx][2] = p[2];
     }
-    
-    for(int i=0; i<noVx; i++) 
+
+    for(int i=0; i<noVx; i++)
     {
       this->_vx[i] = hexa->myvertex(i)->ident();
     }
@@ -100,7 +100,7 @@ namespace ALUGrid
       this->_p[vx][1] = p[1];
       this->_p[vx][2] = p[2];
     }
-    
+
     for( int i = 0; i < noVx; ++i )
       this->_vx[i] = tetra->myvertex(i)->ident();
 
@@ -114,7 +114,7 @@ namespace ALUGrid
 
   template class MacroGhostInfoStorage< 1 >;
   template class MacroGhostInfoStorage< 4 >;
-  class MacroGhostInfoHexa; 
-  class MacroGhostInfoTetra; 
+  class MacroGhostInfoHexa;
+  class MacroGhostInfoTetra;
 
 } // namespace ALUGrid

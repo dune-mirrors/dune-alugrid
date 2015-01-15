@@ -30,28 +30,28 @@ namespace ALUGrid
       void unpackHbnd4Int (ObjectStream &);
       void unpackHbnd4Ext (ObjectStream &);
 
-      // creates Hbnd3IntStorage with ghost info if needed 
+      // creates Hbnd3IntStorage with ghost info if needed
       bool InsertUniqueHbnd3_withPoint (int (&)[3],
                                         Gitter::hbndseg::bnd_t,
                                         int ldbVertexIndex,
                                         int master,
                                         MacroGhostInfoTetra* );
-    
-      // creates Hbnd4IntStorage with ghost info if needed 
-      bool InsertUniqueHbnd4_withPoint (int (&)[4], 
-                                        Gitter::hbndseg::bnd_t, 
+
+      // creates Hbnd4IntStorage with ghost info if needed
+      bool InsertUniqueHbnd4_withPoint (int (&)[4],
+                                        Gitter::hbndseg::bnd_t,
                                         int ldbVertexIndex,
                                         int master,
                                         MacroGhostInfoHexa* );
 
 
-      // former constructor 
+      // former constructor
       void initialize ();
-      void finalize (); 
+      void finalize ();
 
     public :
       ParallelGridMover (BuilderIF &  );
-      // unpack all elements from the stream 
+      // unpack all elements from the stream
       void unpackAll (ObjectStream &, GatherScatterType*);
       void packAll   (const int link, ObjectStream &, GatherScatterType* );
       // unpack all elements from all streams

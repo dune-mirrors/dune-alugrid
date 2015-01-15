@@ -1,26 +1,26 @@
-#include <iostream> 
+#include <iostream>
 #include <map>
 #include <vector>
 
 using namespace std;
 
-class Base 
+class Base
 {
 
-  virtual int foo () { return 0; };  
+  virtual int foo () { return 0; };
 };
 
-class A : public Base 
+class A : public Base
 {
   double bla;
   double & a;
-   
-public:  
+
+public:
   A () : a(bla) {}
-  
+
 };
 
-class B 
+class B
 {
   map < int , int , less<int> > m;
 };

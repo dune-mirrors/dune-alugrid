@@ -31,7 +31,7 @@ namespace Dune
   // ALU3dGridHierarchicIndexSet
   // ---------------------------
 
-  //! hierarchic index set of ALU3dGrid 
+  //! hierarchic index set of ALU3dGrid
     template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALU3dGridHierarchicIndexSet
   : public IndexSet< ALU3dGrid< dim, dimworld, elType, Comm >, ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm > >
@@ -43,14 +43,14 @@ namespace Dune
 
     friend class ALU3dGrid<dim, dimworld, elType, Comm >;
 
-    // constructor 
+    // constructor
     ALU3dGridHierarchicIndexSet( const GridType &grid )
     : grid_( grid )
     {}
 
   public:
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
-  
+
     //! return hierarchic index of given entity
     template <class EntityType>
     int index (const EntityType & ep) const
@@ -69,12 +69,12 @@ namespace Dune
     //! return subIndex i of given entity for subEntity with codim
     int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      // call method subIndex on real implementation 
+      // call method subIndex on real implementation
       return GridType::getRealImplementation( e ).subIndex( i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1
-    //! for given type, if type is not exisiting within grid 0 is returned 
+    //! for given type, if type is not exisiting within grid 0 is returned
     int size ( GeometryType type ) const
     {
       if( elType == tetra && !type.isSimplex() ) return 0;
@@ -96,12 +96,12 @@ namespace Dune
       return grid_.geomTypes(codim);
     }
 
-    //! return true because all entities are contained in this set 
+    //! return true because all entities are contained in this set
     template <class EntityType>
     bool contains (const EntityType &) const { return true; }
 
   private:
-    // our Grid 
+    // our Grid
     const GridType & grid_;
   };
 
@@ -110,12 +110,12 @@ namespace Dune
   //////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
 
-  class ALUMacroKey : public ALU3DSPACE Key4<int>  
+  class ALUMacroKey : public ALU3DSPACE Key4<int>
   {
-    typedef int A; 
+    typedef int A;
     typedef ALUMacroKey ThisType;
     typedef ALU3DSPACE Key4<A> BaseType;
-    
+
     public:
     ALUMacroKey() : BaseType(-1,-1,-1,-1) {}
     ALUMacroKey(const A&a,const A&b,const A&c,const A&d) : BaseType(a,b,c,d) {}
@@ -128,21 +128,21 @@ namespace Dune
 
     bool operator == (const ALUMacroKey & org) const
     {
-      return ( (this->_a == org._a) && 
-               (this->_b == org._b) && 
-               (this->_c == org._c) && 
-               (this->_d == org._d) ); 
+      return ( (this->_a == org._a) &&
+               (this->_b == org._b) &&
+               (this->_c == org._c) &&
+               (this->_d == org._d) );
     }
 
     // operator < is already implemented in BaseType
     bool operator > (const ALUMacroKey & org) const
     {
-      return ( (!this->operator == (org)) && (!this->operator <(org)) ); 
+      return ( (!this->operator == (org)) && (!this->operator <(org)) );
     }
 
 
-    void extractKey(std::vector<int> &key) const  
-    { 
+    void extractKey(std::vector<int> &key) const
+    {
       alugrid_assert ( key.size() == 4 );
       key[0] = this->_a;
       key[1] = this->_b;
@@ -150,7 +150,7 @@ namespace Dune
       key[3] = this->_d;
     }
 
-    void print(std::ostream & out) const 
+    void print(std::ostream & out) const
     {
       out << "[" << this->_a << "," << this->_b << "," << this->_c << "," << this->_d << "]";
     }
@@ -170,30 +170,30 @@ namespace Dune
   };
 
   template <class MacroKeyImp>
-  class ALUGridId 
+  class ALUGridId
   {
-    MacroKeyImp key_;   
+    MacroKeyImp key_;
     int nChild_;
-    int codim_; 
+    int codim_;
 
   public:
-    ALUGridId() : key_() 
-                , nChild_(-1) 
-                , codim_(-1) 
+    ALUGridId() : key_()
+                , nChild_(-1)
+                , codim_(-1)
     {}
-     
-    ALUGridId(const MacroKeyImp & key, int nChild , int cd) 
-      : key_(key) , nChild_(nChild)
-      , codim_(cd)  
-    {} 
-     
-    ALUGridId(const ALUGridId & org ) 
-      : key_(org.key_) 
-      , nChild_(org.nChild_)
-      , codim_(org.codim_) 
-    {} 
 
-    ALUGridId & operator = (const ALUGridId & org ) 
+    ALUGridId(const MacroKeyImp & key, int nChild , int cd)
+      : key_(key) , nChild_(nChild)
+      , codim_(cd)
+    {}
+
+    ALUGridId(const ALUGridId & org )
+      : key_(org.key_)
+      , nChild_(org.nChild_)
+      , codim_(org.codim_)
+    {}
+
+    ALUGridId & operator = (const ALUGridId & org )
     {
       key_    = org.key_;
       nChild_ = org.nChild_;
@@ -206,8 +206,8 @@ namespace Dune
       return equals(org);
     }
 
-    bool operator != (const ALUGridId & org) const 
-    { 
+    bool operator != (const ALUGridId & org) const
+    {
       return ! equals(org);
     }
 
@@ -232,7 +232,7 @@ namespace Dune
     {
       return (!equals(org) && ! lesser(org));
     }
-     
+
     const MacroKeyImp & getKey() const { return key_; }
     int nChild() const { return nChild_; }
     int codim() const  { return codim_; }
@@ -242,7 +242,7 @@ namespace Dune
       return ( (nChild_ >= 0) && (codim_  >= 0) );
     }
 
-    void reset() 
+    void reset()
     {
       nChild_ = -1;
       codim_  = -1;
@@ -265,29 +265,29 @@ namespace Dune
 
 #endif // HAVE_DUNE_HASH
 
-  protected:  
-    // returns true is the id is lesser then org 
+  protected:
+    // returns true is the id is lesser then org
     bool lesser(const ALUGridId & org) const
     {
       if(getKey() < org.getKey() ) return true;
       if(getKey() > org.getKey() ) return false;
-      if(getKey() == org.getKey() ) 
+      if(getKey() == org.getKey() )
       {
-        if(nChild_ == org.nChild_) 
+        if(nChild_ == org.nChild_)
         {
           return codim_ < org.codim_;
         }
-        else 
+        else
           return nChild_ < org.nChild_;
       }
-      alugrid_assert ( equals(org) );     
+      alugrid_assert ( equals(org) );
       return false;
-    } 
-     
-    // returns true if this id equals org 
+    }
+
+    // returns true if this id equals org
     bool equals(const ALUGridId & org) const
     {
-      return ( (getKey() == org.getKey() ) && (nChild_ == org.nChild_) 
+      return ( (getKey() == org.getKey() ) && (nChild_ == org.nChild_)
             && (codim_ == org.codim_) );
     }
   };
@@ -299,14 +299,14 @@ DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(typename MacroKeyImp),DUNE_HASH_TYPE(Du
 
 namespace Dune {
 
-  inline std::ostream& operator<< (std::ostream& s, const ALUMacroKey & key) 
+  inline std::ostream& operator<< (std::ostream& s, const ALUMacroKey & key)
   {
     key.print(s);
     return s;
   }
-    
-  template <class KeyImp> 
-  inline std::ostream& operator<< (std::ostream& s, const ALUGridId<KeyImp> & id) 
+
+  template <class KeyImp>
+  inline std::ostream& operator<< (std::ostream& s, const ALUGridId<KeyImp> & id)
   {
     id.print(s);
     return s;
@@ -325,13 +325,13 @@ namespace Dune {
   {
     typedef ALU3dGrid< dim, dimworld, elType, Comm > GridType;
     typedef typename GridType::HierarchicIndexSet  HierarchicIndexSetType;
-    
+
     typedef ALU3dImplTraits< elType, Comm > ImplTraitsType;
     typedef typename ImplTraitsType::IMPLElementType IMPLElementType;
     typedef typename ImplTraitsType::GEOElementType GEOElementType;
     typedef typename ImplTraitsType::GEOFaceType GEOFaceType;
     typedef typename ImplTraitsType::GEOEdgeType GEOEdgeType;
-  
+
     typedef typename ImplTraitsType::GitterImplType GitterImplType;
 
     typedef typename ImplTraitsType::HElementType HElementType;
@@ -350,72 +350,72 @@ namespace Dune {
 
   private:
     typedef ALUMacroKey MacroKeyType;
-    
+
     typedef ALUGridId <  MacroKeyType > MacroIdType;
     enum { numCodim = GridType::dimension+1 };
 
-    // this means that only up to 300000000 entities are allowed 
+    // this means that only up to 300000000 entities are allowed
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
   private:
     mutable std::map< int , IdType > ids_[numCodim];
     //mutable std::map< int , MacroKeyType > macroKeys_[numCodim];
-    
-    // our Grid 
+
+    // our Grid
     const GridType & grid_;
 
-    // the hierarchicIndexSet 
+    // the hierarchicIndexSet
     const HierarchicIndexSetType & hset_;
-    
+
     int vertexKey_[4];
 
     int chunkSize_ ;
 
     enum { startOffSet_ = 0 };
-    
-  public:  
+
+  public:
 
     //! import default implementation of subId<cc>
     //! \todo remove after next release
     using IdSet < GridType , ALU3dGridGlobalIdSet, IdType > :: subId;
 
-    //! create id set, only allowed for ALU3dGrid 
-    ALU3dGridGlobalIdSet(const GridType & grid) 
-      : grid_(grid), hset_(grid.hierarchicIndexSet()) 
+    //! create id set, only allowed for ALU3dGrid
+    ALU3dGridGlobalIdSet(const GridType & grid)
+      : grid_(grid), hset_(grid.hierarchicIndexSet())
       , chunkSize_(100)
     {
-      if(elType == hexa) 
+      if(elType == hexa)
       {
-        // see dune/alugrid/impl/serial/gitter_mgb.cc 
-        // InsertUniqueHexa 
+        // see dune/alugrid/impl/serial/gitter_mgb.cc
+        // InsertUniqueHexa
         const int vxKey[4] = {0,1,3,4};
-        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i]; 
+        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
       }
-      else 
+      else
       {
         alugrid_assert ( elType == tetra );
-        // see dune/alugrid/impl/serial/gitter_mgb.cc 
-        // InsertUniqueTetra 
+        // see dune/alugrid/impl/serial/gitter_mgb.cc
+        // InsertUniqueTetra
         const int vxKey[4] = {0,1,2,3};
-        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i]; 
+        for(int i=0; i<4; i++) vertexKey_[i] = vxKey[i];
       }
-      
-      // setup the id set 
+
+      // setup the id set
       buildIdSet();
     }
 
     virtual ~ALU3dGridGlobalIdSet() {}
 
-    // update id set after adaptation 
-    void updateIdSet() 
+    // update id set after adaptation
+    void updateIdSet()
     {
-      // to be revised 
+      // to be revised
       buildIdSet();
     }
 
-    // print all ids 
-    void print () const 
+    // print all ids
+    void print () const
     {
-      for(int i=0 ;i<numCodim; ++i) 
+      for(int i=0 ;i<numCodim; ++i)
       {
         std::cout << "*****************************************************\n";
         std::cout << "Ids for codim " << i << "\n";
@@ -428,12 +428,12 @@ namespace Dune {
       }
     }
 
-    template <class IterType> 
-    void checkId(const IdType & macroId, const IterType & idIter) const //int codim , unsigned int num ) const 
+    template <class IterType>
+    void checkId(const IdType & macroId, const IterType & idIter) const //int codim , unsigned int num ) const
     {
 
       IdType id = getId(macroId);
-      for(int i=0 ;i<numCodim; ++i) 
+      for(int i=0 ;i<numCodim; ++i)
       {
         typedef typename std::map<int,IdType>::iterator IteratorType;
         IteratorType end = ids_[i].end();
@@ -441,22 +441,22 @@ namespace Dune {
         //for(unsigned int k=0; k<ids_[i].size(); ++k)
         {
           if(idIter == it) continue;
-          //if((i == codim) && (k == num)) continue; 
+          //if((i == codim) && (k == num)) continue;
           const IdType & checkMId = (*it).second; //ids_[i][k];
           IdType checkId = getId(checkMId);
-          if( id == checkId ) 
+          if( id == checkId )
           {
             //std::cout << "Check(codim,num = " << codim<< "," << num <<") failed for k="<<k << " codim = " << i << "\n";
             std::cout << id << " equals " << checkId << "\n";
             alugrid_assert ( id != checkId );
             DUNE_THROW(GridError," " << id << " equals " << checkId << "\n");
           }
-          else 
+          else
           {
             bool lesser  = (id < checkId);
             bool greater = (id > checkId);
             alugrid_assert ( lesser != greater );
-            if( lesser == greater ) 
+            if( lesser == greater )
             {
               alugrid_assert ( lesser != greater );
               DUNE_THROW(GridError," lesser equals greater of one id ");
@@ -466,10 +466,10 @@ namespace Dune {
       }
     }
 
-    // check id set for uniqueness 
-    void uniquenessCheck() const 
+    // check id set for uniqueness
+    void uniquenessCheck() const
     {
-      for(int i=0 ;i<numCodim; i++) 
+      for(int i=0 ;i<numCodim; i++)
       {
         typedef typename std::map<int,IdType>::iterator IteratorType;
         IteratorType end = ids_[i].end();
@@ -477,7 +477,7 @@ namespace Dune {
           //unsigned int k=0; k<ids_[i].size(); ++k)
         {
           const IdType & id = (*it).second; //ids_[i][k];
-          if( id.isValid() ) 
+          if( id.isValid() )
             checkId(id,it);//i,k);
         }
       }
@@ -487,18 +487,18 @@ namespace Dune {
     {
       chunkSize_ = chunkSize;
     }
-    
-    // creates the id set 
-    void buildIdSet () 
+
+    // creates the id set
+    void buildIdSet ()
     {
       for(int i=0; i<numCodim; ++i)
       {
         ids_[i].clear();
       }
-      
+
       GitterImplType &gitter = grid_.myGrid();
 
-      // all interior and border vertices 
+      // all interior and border vertices
       {
         typename ALU3DSPACE AccessIterator< VertexType >::Handle fw( gitter.container() );
         for( fw.first (); !fw.done(); fw.next() )
@@ -507,55 +507,55 @@ namespace Dune {
           ids_[3][idx] = buildMacroVertexId( fw.item() );
         }
       }
-      
-      // all ghost vertices 
+
+      // all ghost vertices
       {
         typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 3, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
-        typedef typename IteratorType :: val_t val_t; 
-        for (fw.first () ; ! fw.done () ; fw.next ()) 
+        typedef typename IteratorType :: val_t val_t;
+        for (fw.first () ; ! fw.done () ; fw.next ())
         {
           val_t & item = fw.item();
           alugrid_assert ( item.first );
-          VertexType & vx = * (item.first); 
+          VertexType & vx = * (item.first);
           int idx = vx.getIndex();
           ids_[3][idx] = buildMacroVertexId( vx );
         }
       }
-        
-      // create ids for all macro edges 
+
+      // create ids for all macro edges
       {
         typename ALU3DSPACE AccessIterator< HEdgeType >::Handle w( gitter.container() );
-        for (w.first(); !w.done(); w.next()) 
+        for (w.first(); !w.done(); w.next())
         {
           int idx = w.item().getIndex();
           ids_[2][idx] = buildMacroEdgeId( w.item() );
           buildEdgeIds( w.item() , ids_[2][idx] , startOffSet_ );
         }
       }
-      
-      // all ghost edges 
+
+      // all ghost edges
       {
         typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 2, Ghost_Partition, Comm > IteratorType;
         IteratorType fw( grid_, 0, grid_.nlinks() );
-        typedef typename IteratorType :: val_t val_t; 
-        for (fw.first () ; ! fw.done () ; fw.next ()) 
+        typedef typename IteratorType :: val_t val_t;
+        for (fw.first () ; ! fw.done () ; fw.next ())
         {
           val_t & item = fw.item();
           alugrid_assert ( item.first );
-          HEdgeType & edge = * (item.first); 
+          HEdgeType & edge = * (item.first);
           int idx = edge.getIndex();
-          
+
           ids_[2][idx] = buildMacroEdgeId( edge );
           buildEdgeIds( edge , ids_[2][idx] , startOffSet_ );
         }
       }
-        
 
-      // for all macro faces and all children 
+
+      // for all macro faces and all children
       {
         typename ALU3DSPACE AccessIterator< HFaceType >::Handle w( gitter.container() );
-        for (w.first () ; ! w.done () ; w.next ()) 
+        for (w.first () ; ! w.done () ; w.next ())
         {
           int idx = w.item().getIndex();
           ids_[1][idx] = buildMacroFaceId( w.item() );
@@ -563,53 +563,53 @@ namespace Dune {
         }
       }
 
-      // all ghost faces  
+      // all ghost faces
       {
-        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 1, Ghost_Partition, Comm > IteratorType; 
+        typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 1, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
-        typedef typename IteratorType :: val_t val_t; 
-        for (fw.first () ; ! fw.done () ; fw.next ()) 
+        typedef typename IteratorType :: val_t val_t;
+        for (fw.first () ; ! fw.done () ; fw.next ())
         {
           val_t & item = fw.item();
           alugrid_assert ( item.first );
-          HFaceType & face = * (item.first); 
+          HFaceType & face = * (item.first);
           int idx = face.getIndex();
           ids_[1][idx] = buildMacroFaceId( face );
           buildFaceIds( face , ids_[1][idx] , startOffSet_ );
         }
       }
-        
+
       // for all macro elements and all internal entities
       {
         typename ALU3DSPACE AccessIterator< HElementType >::Handle w( gitter.container() );
-        for (w.first () ; ! w.done () ; w.next ()) 
+        for (w.first () ; ! w.done () ; w.next ())
         {
           int idx = w.item().getIndex();
           ids_[0][idx] = buildMacroElementId( w.item() );
           buildElementIds( w.item() , ids_[0][idx] , startOffSet_ );
         }
       }
-      
-      // all ghost elements  
+
+      // all ghost elements
       {
         typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Ghost_Partition, Comm > IteratorType;
         IteratorType fw (grid_ , 0 , grid_.nlinks() );
-        typedef typename IteratorType :: val_t val_t; 
-        for (fw.first () ; ! fw.done () ; fw.next ()) 
+        typedef typename IteratorType :: val_t val_t;
+        for (fw.first () ; ! fw.done () ; fw.next ())
         {
           val_t & item = fw.item();
           alugrid_assert ( item.second );
-          HElementType & elem = * ( item.second->getGhost().first ); 
+          HElementType & elem = * ( item.second->getGhost().first );
           int idx = elem.getIndex();
           ids_[0][idx] = buildMacroElementId( elem );
           buildElementIds( elem , ids_[0][idx] , startOffSet_ );
         }
       }
 
-      // check uniqueness of id only in serial, because 
+      // check uniqueness of id only in serial, because
       // in parallel some faces and edges of ghost exists more than once
       // but have the same id, but not the same index, there for the check
-      // will fail for ghost elements  
+      // will fail for ghost elements
       // be carefull with this check, it's complexity is O(N^2)
       //uniquenessCheck();
     }
@@ -627,26 +627,26 @@ namespace Dune {
     {
       const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
       int vx[4] = {-1,-1,-1,-1};
-      for(int i=0; i<2; ++i) 
+      for(int i=0; i<2; ++i)
       {
-        vx[i] = edge.myvertex(i)->ident(); 
+        vx[i] = edge.myvertex(i)->ident();
       }
-      
+
       enum { codim = 2 };
       MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
       MacroIdType id( key,1,  codim + startOffSet_ );
       return id;
     }
-    
+
     IdType buildMacroFaceId(const HFaceType & item )
     {
       const GEOFaceType & face = static_cast<const GEOFaceType &> (item);
       int vx[4] = {-1,-1,-1,-1};
-      for(int i=0; i<3; ++i) 
+      for(int i=0; i<3; ++i)
       {
-        vx[i] = face.myvertex(i)->ident(); 
+        vx[i] = face.myvertex(i)->ident();
       }
-      
+
       enum { codim = 1 };
       MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
       MacroIdType id(key,1,  codim + startOffSet_ );
@@ -657,36 +657,36 @@ namespace Dune {
     {
       const GEOElementType & elem = static_cast<const GEOElementType &> (item);
       int vx[4] = {-1,-1,-1,-1};
-      for(int i=0; i<4; ++i) 
+      for(int i=0; i<4; ++i)
       {
-        vx[i] = elem.myvertex(vertexKey_[i])->ident(); 
+        vx[i] = elem.myvertex(vertexKey_[i])->ident();
       }
       enum { codim = 0 };
       MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
       return MacroIdType(key,1,  codim + startOffSet_ );
     }
 
-    template <int cd> 
+    template <int cd>
     IdType createId(const typename ImplTraitsType::
         template Codim<dim, cd>::InterfaceType & item , const IdType & creatorId , int nChild )
     {
       alugrid_assert ( creatorId.isValid() );
-       
-      // we have up to 12 internal hexa faces, therefore need 100 offset 
+
+      // we have up to 12 internal hexa faces, therefore need 100 offset
       enum { childOffSet = ((cd == 1) && (elType == hexa)) ? 16 : 8 };
       enum { codimOffSet = 4 };
 
       alugrid_assert ( nChild < childOffSet );
-      
+
       int newChild = (creatorId.nChild() * childOffSet ) + nChild;
       int newCodim = (creatorId.codim()  * codimOffSet ) + ( cd + startOffSet_ );
-      
+
       IdType newId( creatorId.getKey() , newChild , newCodim );
       alugrid_assert ( newId != creatorId );
       return newId;
     }
 
-    // build ids for all children of this element 
+    // build ids for all children of this element
     void buildElementIds(const HElementType & item , const IdType & macroId , int nChild)
     {
       enum { codim = 0 };
@@ -697,40 +697,40 @@ namespace Dune {
       buildInteriorElementIds(item,itemId);
     }
 
-    // build ids for all children of this element 
+    // build ids for all children of this element
     void buildInteriorElementIds(const HElementType & item , const IdType & fatherId)
     {
       alugrid_assert ( fatherId.isValid() );
-      
-      // build id for inner vertex 
+
+      // build id for inner vertex
       {
-        const VertexType * v = item.innerVertex() ; 
-        // for tetras there is no inner vertex, therefore check 
-        if(v) buildVertexIds(*v,fatherId ); 
+        const VertexType * v = item.innerVertex() ;
+        // for tetras there is no inner vertex, therefore check
+        if(v) buildVertexIds(*v,fatherId );
       }
-      
-      // build edge ids for all inner edges 
-      { 
+
+      // build edge ids for all inner edges
+      {
         int inneredge = startOffSet_;
         for(const HEdgeType * e = item.innerHedge () ; e ; e = e->next ())
         {
-          buildEdgeIds(*e,fatherId,inneredge); 
+          buildEdgeIds(*e,fatherId,inneredge);
           ++inneredge;
         }
       }
 
-      // build face ids for all inner faces 
+      // build face ids for all inner faces
       {
         int innerface = startOffSet_;
         for(const HFaceType * f = item.innerHface () ; f ; f = f->next ())
         {
-          buildFaceIds(*f,fatherId,innerface); 
+          buildFaceIds(*f,fatherId,innerface);
           ++innerface;
         }
       }
 
-      // build ids of all children 
-      {       
+      // build ids of all children
+      {
         int numChild = startOffSet_;
         for(const HElementType * child = item.down(); child; child =child->next() )
         {
@@ -741,89 +741,89 @@ namespace Dune {
       }
     }
 
-    // build ids for all children of this face 
+    // build ids for all children of this face
     void buildFaceIds(const HFaceType & face, const IdType & fatherId , int innerFace )
     {
       enum { codim = 1 };
-      ids_[codim][face.getIndex()] = createId<codim>(face,fatherId,innerFace); 
+      ids_[codim][face.getIndex()] = createId<codim>(face,fatherId,innerFace);
       const IdType & faceId = ids_[codim][face.getIndex()];
-      
+
       buildInteriorFaceIds(face,faceId);
     }
-    
-    // build ids for all children of this face 
+
+    // build ids for all children of this face
     void buildInteriorFaceIds(const HFaceType & face, const IdType & faceId)
     {
       alugrid_assert ( faceId.isValid () );
-      
-      // build id for inner vertex 
+
+      // build id for inner vertex
       {
-        const VertexType * v = face.innerVertex() ; 
+        const VertexType * v = face.innerVertex() ;
         //std::cout << "create inner vertex of face " << face.getIndex() << "\n";
-        if(v) buildVertexIds(*v,faceId ); 
+        if(v) buildVertexIds(*v,faceId );
       }
-      
-      // build ids for all inner edges 
+
+      // build ids for all inner edges
       {
         int inneredge = startOffSet_;
-        for (const HEdgeType * e = face.innerHedge () ; e ; e = e->next ()) 
+        for (const HEdgeType * e = face.innerHedge () ; e ; e = e->next ())
         {
-          buildEdgeIds(*e,faceId ,inneredge ); 
+          buildEdgeIds(*e,faceId ,inneredge );
           ++inneredge;
         }
       }
-      
-      // build ids for all child faces 
+
+      // build ids for all child faces
       {
         int child = startOffSet_;
         for(const HFaceType * f = face.down () ; f ; f = f->next ())
         {
           alugrid_assert ( child == f->nChild()+startOffSet_);
-          buildFaceIds(*f,faceId,child); 
+          buildFaceIds(*f,faceId,child);
           ++child;
         }
       }
     }
-    
-    // build ids for all children of this edge 
+
+    // build ids for all children of this edge
     void buildEdgeIds(const HEdgeType & edge, const IdType & fatherId , int inneredge)
     {
     /*
       enum { codim = 2 };
-      ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge); 
+      ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge);
       const IdType & edgeId = ids_[codim][edge.getIndex()];
       buildInteriorEdgeIds(edge,edgeId);
-    */    
+    */
     }
-    
+
     void buildInteriorEdgeIds(const HEdgeType & edge, const IdType & edgeId)
     {
       alugrid_assert ( edgeId.isValid() );
 
-      // build id for inner vertex 
+      // build id for inner vertex
       {
-        const VertexType * v = edge.innerVertex() ; 
-        if(v) buildVertexIds(*v,edgeId ); 
+        const VertexType * v = edge.innerVertex() ;
+        if(v) buildVertexIds(*v,edgeId );
       }
-      
-      // build ids for all inner edges 
+
+      // build ids for all inner edges
       {
         int child = startOffSet_;
-        for (const HEdgeType * e = edge.down () ; e ; e = e->next ()) 
+        for (const HEdgeType * e = edge.down () ; e ; e = e->next ())
         {
           alugrid_assert ( child == e->nChild()+ startOffSet_ );
-          buildEdgeIds(*e,edgeId , child ); 
+          buildEdgeIds(*e,edgeId , child );
           ++child;
         }
       }
     }
 
-    // build id for this vertex  
+    // build id for this vertex
     void buildVertexIds(const VertexType & vertex, const IdType & fatherId )
     {
       enum { codim = 3 };
-      // inner vertex number is 1 
-      ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,1); 
+      // inner vertex number is 1
+      ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,1);
       alugrid_assert ( ids_[codim][vertex.getIndex()].isValid() );
     }
 
@@ -841,7 +841,7 @@ namespace Dune {
     {
       enum { cd = EntityType :: codimension };
       alugrid_assert ( ids_[cd].find( hset_.index(ep) ) != ids_[cd].end() );
-      const IdType & macroId = ids_[cd][hset_.index(ep)]; 
+      const IdType & macroId = ids_[cd][hset_.index(ep)];
       alugrid_assert ( macroId.isValid() );
       return getId(macroId);
     }
@@ -851,7 +851,7 @@ namespace Dune {
     IdType id (const typename GridType:: template Codim<codim> :: Entity & ep) const
     {
       alugrid_assert ( ids_[codim].find( hset_.index(ep) ) != ids_[codim].end() );
-      const IdType & macroId = ids_[codim][hset_.index(ep)]; 
+      const IdType & macroId = ids_[codim][hset_.index(ep)];
       alugrid_assert ( macroId.isValid() );
       return getId(macroId);
     }
@@ -861,20 +861,20 @@ namespace Dune {
     {
       const int hIndex = hset_.subIndex( e, i, codim );
       alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
-      const IdType &macroId = ids_[ codim ][ hIndex ]; 
+      const IdType &macroId = ids_[ codim ][ hIndex ];
       alugrid_assert ( macroId.isValid() );
       return getId( macroId );
     }
 
-    template <int d, ALU3dGridElementType element_t > 
-    struct BuildIds; 
+    template <int d, ALU3dGridElementType element_t >
+    struct BuildIds;
 
-    template <int d> 
-    struct BuildIds<d,tetra> 
+    template <int d>
+    struct BuildIds<d,tetra>
     {
       //static const IdType zero;
       template <class MyIdSet, class IdStorageType>
-      static void buildFace(MyIdSet & set, const HElementType & item, int faceNum, 
+      static void buildFace(MyIdSet & set, const HElementType & item, int faceNum,
                   IdStorageType & ids )
       {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
@@ -884,13 +884,13 @@ namespace Dune {
         set.buildInteriorFaceIds(face,id);
       }
     };
-    
-    template <int d> 
-    struct BuildIds<d,hexa> 
+
+    template <int d>
+    struct BuildIds<d,hexa>
     {
       //static const IdType zero;
       template <class MyIdSet, class IdStorageType>
-      static void buildFace(MyIdSet & set, const HElementType & item, int faceNum, 
+      static void buildFace(MyIdSet & set, const HElementType & item, int faceNum,
                   IdStorageType & ids )
       {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
@@ -900,15 +900,15 @@ namespace Dune {
         set.buildInteriorFaceIds(face,id);
       }
     };
-    
-    // create ids for refined elements  
-    int postRefinement( HElementType & item ) 
+
+    // create ids for refined elements
+    int postRefinement( HElementType & item )
     {
       {
         enum { elCodim = 0 };
         const IdType & fatherId = ids_[elCodim][item.getIndex()];
         alugrid_assert ( fatherId.isValid() );
-        buildInteriorElementIds(item, fatherId ); 
+        buildInteriorElementIds(item, fatherId );
       }
 
       for(int i=0; i<EntityCountType::numFaces; ++i)
@@ -916,7 +916,7 @@ namespace Dune {
         enum { faceCodim = 1 };
         BuildIds< GridType::dimension, elType >::buildFace(*this,item,i,ids_[faceCodim]);
       }
-      
+
       for(int i=0; i<EntityCountType::numEdges; ++i)
       {
         enum { edgeCodim = 2 };
@@ -929,8 +929,8 @@ namespace Dune {
       return 0;
     }
 
-    // dummy functions  
-    int preCoarsening( HElementType & elem ) 
+    // dummy functions
+    int preCoarsening( HElementType & elem )
     {
       /*
       const IdType & fatherId = ids_[0][item.getIndex()];
@@ -939,13 +939,13 @@ namespace Dune {
 
       for(int i=0; i<EntityCountType::numFaces; ++i)
         BuildIds<dim,elType>::buildFace(*this,item,i,ids_[1]);
-      
+
       for(int i=0; i<EntityCountType::numEdges; ++i)
       {
         const IMPLElementType & elem = static_cast<const IMPLElementType &> (item);
         const HEdgeType & edge  = *( elem.myhedge1(i));
         const HEdgeType * child = edge.down();
-        alugrid_assert ( child ); 
+        alugrid_assert ( child );
         if( ids_[2][child->getIndex() ] > zero_ ) continue;
         buildEdgeIds(edge,ids_[2][edge.getIndex()],0);
       }
@@ -953,24 +953,24 @@ namespace Dune {
       //uniquenessCheck();
 #endif
       */
-      return 0; 
+      return 0;
     }
-    
-    // dummy functions  
+
+    // dummy functions
     int preCoarsening ( HBndSegType & el ) { return 0; }
 
-    //! prolong data, elem is the father  
+    //! prolong data, elem is the father
     int postRefinement ( HBndSegType & el ) { return 0; }
 
   };
 
   //***********************************************************
   //
-  //  --LocalIdSet 
+  //  --LocalIdSet
   //
   //***********************************************************
 
-  //! hierarchic index set of ALU3dGrid 
+  //! hierarchic index set of ALU3dGrid
     template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALU3dGridLocalIdSet
   : public IdSet< ALU3dGrid< dim, dimworld, elType, Comm >, ALU3dGridLocalIdSet< dim, dimworld, elType, Comm >, int >,
@@ -985,12 +985,12 @@ namespace Dune {
     typedef ALU3dGrid< dim, dimworld, elType, Comm > GridType;
     typedef typename GridType::HierarchicIndexSet HierarchicIndexSetType;
 
-    // this means that only up to 300000000 entities are allowed 
+    // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
- 
-    // create local id set , only for the grid allowed 
-    ALU3dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet()) 
+
+    // create local id set , only for the grid allowed
+    ALU3dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())
     {
       for( int codim = 0; codim <= GridType::dimension; ++codim )
         codimStart_[ codim ] = codim * codimMultiplier;
@@ -998,14 +998,14 @@ namespace Dune {
 
     friend class ALU3dGrid< dim, dimworld, elType, Comm >;
 
-    // fake method to have the same method like GlobalIdSet 
+    // fake method to have the same method like GlobalIdSet
     void updateIdSet() {}
 
     using ALU3DSPACE AdaptRestrictProlongType :: postRefinement ;
     using ALU3DSPACE AdaptRestrictProlongType :: preCoarsening ;
 
   public:
-    //! export type of id 
+    //! export type of id
     typedef int IdType;
 
     //! import default implementation of subId<cc>
@@ -1037,24 +1037,24 @@ namespace Dune {
       return codimStart_[ codim ] + hset_.subIndex( e, i, codim );
     }
 
-    // dummy functions  
+    // dummy functions
     int preCoarsening( HElementType & elem )  { return 0; }
-    // create ids for refined elements  
+    // create ids for refined elements
     int postRefinement( HElementType & item )  { return 0; }
-    
-    // dummy functions  
+
+    // dummy functions
     int preCoarsening ( HBndSegType & el ) { return 0; }
 
-    //! prolong data, elem is the father  
+    //! prolong data, elem is the father
     int postRefinement ( HBndSegType & el ) { return 0; }
 
     void setChunkSize( int chunkSize ) {}
-    
+
   private:
-    // our HierarchicIndexSet 
+    // our HierarchicIndexSet
     const HierarchicIndexSetType & hset_;
 
-    // store start of each codim numbers 
+    // store start of each codim numbers
     int codimStart_[ GridType::dimension+1 ];
   };
 

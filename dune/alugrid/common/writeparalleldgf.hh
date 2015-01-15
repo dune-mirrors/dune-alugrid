@@ -1,7 +1,7 @@
 #ifndef DUNE_DGFWRITER_HH
 #define DUNE_DGFWRITER_HH
 
-/** \file 
+/** \file
  *  \brief write a GridView to a DGF file
  *  \author Martin Nolte
  */
@@ -64,21 +64,21 @@ public:
    *  \param[in] fileName  name of the write to write the grid to
    */
   template <class LoadBalanceHandle>
-  std::string write ( const std::string &fileName, const LoadBalanceHandle &ldb, 
+  std::string write ( const std::string &fileName, const LoadBalanceHandle &ldb,
                       const int size, const int rank ) const;
   template <class LoadBalanceHandle>
-  void write ( const std::string &fileName, const LoadBalanceHandle &ldb, 
+  void write ( const std::string &fileName, const LoadBalanceHandle &ldb,
                const int size ) const;
 
-protected:  
+protected:
   GridView gridView_;
 
 protected:
   /////////////////////////////////////////////
-  //  helper methods 
+  //  helper methods
   /////////////////////////////////////////////
   // write one element
-  void writeElement( const Element& element, 
+  void writeElement( const Element& element,
                      const IndexSet& indexSet,
                      const Dune::GeometryType& elementType,
                      const std::vector< Index >& vertexIndex,
@@ -93,7 +93,7 @@ protected:
     Index vertices[ vxSize ];
     for( size_t i = 0; i < vxSize; ++i )
       vertices[ i ] = vertexIndex[ indexSet.subIndex( element, i, dimGrid ) ];
-    
+
     gridout << vertices[ 0 ];
     for( size_t i = 1; i < vxSize; ++i )
       gridout << " " << vertices[ i ];
@@ -111,7 +111,7 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
   // set the stream to full double precision
   gridout.setf( std::ios_base::scientific, std::ios_base::floatfield );
   gridout.precision( 16 );
-  
+
   const IndexSet &indexSet = gridView_.indexSet();
 
   // write DGF header
@@ -125,9 +125,9 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
   // write all vertices into the "vertex" block
   gridout << std::endl << "VERTEX" << std::endl;
   Index vertexCount = 0;
-  
+
   // vector containing entity seed (only needed if new ordering is given)
-  std::vector< ElementSeed > elementSeeds; 
+  std::vector< ElementSeed > elementSeeds;
 
   size_t countElements = 0 ;
   {
@@ -141,14 +141,14 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
         // push element into seed vector
         elementSeeds.push_back( element.seed() ) ;
         countElements++;
-  
+
         // write vertices
         const int numCorners = element.subEntities( dimGrid );
-        for( int i=0; i<numCorners; ++i ) 
+        for( int i=0; i<numCorners; ++i )
         {
           const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
           assert( vxIndex < vxSize );
-          if( vertexIndex[ vxIndex ] == vxSize ) 
+          if( vertexIndex[ vxIndex ] == vxSize )
           {
             vertexIndex[ vxIndex ] = vertexCount++;
             gridout << element.geometry().corner( i ) << std::endl;
@@ -159,23 +159,23 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
   }
   gridout << "#" << std::endl;
 
-  // type of element to write 
+  // type of element to write
   Dune::GeometryType simplex( Dune::GeometryType::simplex, dimGrid );
 
   typedef typename std::vector<ElementSeed> :: const_iterator iterator ;
   const iterator end = elementSeeds.end();
 
-  // only write simplex block if grid view contains simplices 
+  // only write simplex block if grid view contains simplices
   if( indexSet.size( simplex ) > 0 )
   {
     // write all simplices to the "simplex" block
     gridout << std::endl << "SIMPLEX" << std::endl;
 
-    // write all simplex elements 
+    // write all simplex elements
     // perform grid traversal based on new element ordering
-    for( iterator it = elementSeeds.begin(); it != end ; ++ it ) 
+    for( iterator it = elementSeeds.begin(); it != end ; ++ it )
     {
-      // convert entity seed into entity pointer 
+      // convert entity seed into entity pointer
       const ElementPointer ep = gridView_.grid().entityPointer( *it );
       // write element
       writeElement( *ep, indexSet, simplex, vertexIndex, gridout );
@@ -185,17 +185,17 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
   }
 
   {
-    // cube geometry type 
+    // cube geometry type
     Dune::GeometryType cube( Dune::GeometryType::cube, dimGrid );
 
     // only write cube block if grid view contains cubes
-    if( indexSet.size( cube ) > 0 ) 
+    if( indexSet.size( cube ) > 0 )
     {
       // write all cubes to the "cube" block
       gridout << std::endl << "CUBE" << std::endl;
-      for( iterator it = elementSeeds.begin(); it != end ; ++ it ) 
+      for( iterator it = elementSeeds.begin(); it != end ; ++ it )
       {
-        // convert entity seed into entity pointer 
+        // convert entity seed into entity pointer
         const ElementPointer ep = gridView_.grid().entityPointer( *it );
         // write element
         writeElement( *ep, indexSet, cube, vertexIndex, gridout );
@@ -208,12 +208,12 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
 
   // write all boundaries to the "boundarysegments" block
   gridout << std::endl << "BOUNDARYSEGMENTS" << std::endl;
-  for( iterator it = elementSeeds.begin(); it != end ; ++ it ) 
+  for( iterator it = elementSeeds.begin(); it != end ; ++ it )
   {
-    // convert entity seed into entity pointer 
+    // convert entity seed into entity pointer
     const ElementPointer ep = gridView_.grid().entityPointer( *it );
     const Element& element = *ep;
-    if( !element.hasBoundaryIntersections() ) 
+    if( !element.hasBoundaryIntersections() )
       continue;
 
     const RefElement &refElement = RefElements::general( element.type() );
@@ -249,17 +249,17 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
   gridout << "#" << std::endl << std::endl;
 
   gridout << std::endl << "GLOBALVERTEXINDEX" << std::endl;
-  for( iterator it = elementSeeds.begin(); it != end ; ++ it ) 
+  for( iterator it = elementSeeds.begin(); it != end ; ++ it )
   {
-    // convert entity seed into entity pointer 
+    // convert entity seed into entity pointer
     const ElementPointer ep = gridView_.grid().entityPointer( *it );
     const Element& element = *ep;
     const int numCorners = element.subEntities( dimGrid );
-    for( int i=0; i<numCorners; ++i ) 
+    for( int i=0; i<numCorners; ++i )
     {
       const Index vxIndex = indexSet.subIndex( element, i, dimGrid );
       assert( vxIndex < vxSize );
-      if( vertexIndex[ vxIndex ] != vxSize ) 
+      if( vertexIndex[ vxIndex ] != vxSize )
       {
         vertexIndex[ vxIndex ] = vxSize;
         gridout << vxIndex << std::endl;

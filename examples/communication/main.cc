@@ -5,8 +5,8 @@
 /** standard headers **/
 #include <iostream>
 /** dune (mpi, field-vector and grid type for dgf) **/
-#include <dune/common/fvector.hh>        
-#include <dune/common/timer.hh>        
+#include <dune/common/fvector.hh>
+#include <dune/common/timer.hh>
 
 /** numerical scheme **/
 #include "piecewisefunction.hh"
@@ -26,7 +26,7 @@
 
 // method
 // ------
-void method ( int problem, int startLvl, int maxLvl, 
+void method ( int problem, int startLvl, int maxLvl,
               const char* outpath, const int mpiSize  )
 {
   typedef Dune::GridSelector::GridType Grid;
@@ -68,11 +68,11 @@ void method ( int problem, int startLvl, int maxLvl,
 
   std::string outPath( outpath );
 
-  // create the diagnostics object 
+  // create the diagnostics object
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
 
   /* ... some global refinement steps */
-  if( verboseRank ) 
+  if( verboseRank )
     std::cout << "globalRefine: " << startLevel << std::endl;
   grid.globalRefine( startLevel );
 
@@ -111,14 +111,14 @@ void method ( int problem, int startLvl, int maxLvl,
     // mark grid for initial refinement
     GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
     scheme.mark( 0, solution, gridMarker );
-    // adapt grid 
+    // adapt grid
     if( gridMarker.marked() )
       adaptation( solution );
     // initialize solution for new grid
     solution.initialize( model.problem() );
   }
 
-  if( vtkOut ) 
+  if( vtkOut )
   {
     /* output the initial grid and the solution */
     vtkOut->write( 0.0 );
@@ -128,7 +128,7 @@ void method ( int problem, int startLvl, int maxLvl,
   /* final time for simulation */
   const double endTime = model.problem().endTime();
   /* interval for saving data */
-  const double saveInterval = model.problem().saveInterval();     
+  const double saveInterval = model.problem().saveInterval();
   /* first point where data is saved */
   double saveStep = saveInterval;
   /* cfl number */
@@ -137,20 +137,20 @@ void method ( int problem, int startLvl, int maxLvl,
   DataType update( gridView );
 
   /* print info about initialization */
-  if ( verboseRank )  
+  if ( verboseRank )
     std::cout << "Intialization done!" << std::endl;
 
   /* now do the time stepping */
   unsigned int step = 0;
   double time = 0.0;
   const unsigned int maxTimeSteps = model.problem().maxTimeSteps();
-  while ( time < endTime ) 
+  while ( time < endTime )
   {
     Dune::Timer overallTimer ;
 
     // update vector might not be of the right size if grid has changed
     update.resize();
-    // set update to zero 
+    // set update to zero
     update.clear();
     double dt;
 
@@ -172,8 +172,8 @@ void method ( int problem, int startLvl, int maxLvl,
 #endif
     // multiply time step by CFL number
     dt *= cfl;
-    // stop time 
-    const double solveTime = solveTimer.elapsed(); 
+    // stop time
+    const double solveTime = solveTimer.elapsed();
 
     Dune :: Timer commTimer ;
     // minimize time step over all processes
@@ -196,7 +196,7 @@ void method ( int problem, int startLvl, int maxLvl,
     /* check if data should be written */
     if( time >= saveStep )
     {
-      if( vtkOut ) 
+      if( vtkOut )
       {
         /* visualize with VTK */
         vtkOut->write( time );
@@ -210,7 +210,7 @@ void method ( int problem, int startLvl, int maxLvl,
       double imbalance = double(maxElements)/double(minElements);
 
       /* print info about time, timestep size and counter */
-      if ( verboseRank )  
+      if ( verboseRank )
       {
         std::cout << "elements = " << sumElements ;
         std::cout << " ("<<minElements << "," << maxElements << "," << imbalance << ")";
@@ -228,13 +228,13 @@ void method ( int problem, int startLvl, int maxLvl,
       adaptation( solution );
 
     {
-      // write times to run file 
+      // write times to run file
       diagnostics.write( time, dt,                     // time and time step
                          elements,                     // number of elements
                          ModelType::dimRange,          // number of dofs per element (max)
-                         solveTime,                    // time for operator evaluation 
-                         commTime + adaptation.communicationTime(), // communication time  
-                         adaptation.adaptationTime(),  // time for adaptation 
+                         solveTime,                    // time for operator evaluation
+                         commTime + adaptation.communicationTime(), // communication time
+                         adaptation.adaptationTime(),  // time for adaptation
                          adaptation.loadBalanceTime(), // time for load balance
                          overallTimer.elapsed(),       // time step overall time
                          getMemoryUsage() );                   // memory usage
@@ -242,21 +242,21 @@ void method ( int problem, int startLvl, int maxLvl,
     }
 
     // abort when maximal number of time steps is reached (default is disabled)
-    if( step >= maxTimeSteps ) 
+    if( step >= maxTimeSteps )
       break ;
-  }           
+  }
 
-  if( vtkOut ) 
+  if( vtkOut )
   {
     /* output final result */
     vtkOut->write( time );
   }
 
-  // flush diagnostics 
+  // flush diagnostics
   diagnostics.flush();
 
   delete vtkOut ;
-  // delete grid 
+  // delete grid
   delete gridPtr ;
 }
 /***************************************************
@@ -270,7 +270,7 @@ try
 {
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
-  
+
   if( argc < 2 )
   {
     /* display usage */
@@ -280,11 +280,11 @@ try
   }
 
 #if HAVE_ALUGRID
-  if( mpi.rank() == 0 ) 
+  if( mpi.rank() == 0 )
     std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
 #endif
-     
-  // meassure program time 
+
+  // meassure program time
   Dune::Timer timer ;
 
   /* create problem */
@@ -297,11 +297,11 @@ try
   const char* path = (argc > 4) ? argv[ 4 ] : "./";
   method( problem, startLevel, maxLevel, path, mpi.size() );
 
-#ifdef HAVE_MPI 
+#ifdef HAVE_MPI
   MPI_Barrier ( MPI_COMM_WORLD );
 #endif
 
-  if( mpi.rank() == 0 ) 
+  if( mpi.rank() == 0 )
     std::cout << "Program finished: CPU time = " << timer.elapsed() << " sec." << std::endl;
 
   /* done */
