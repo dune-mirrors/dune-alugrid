@@ -14,10 +14,6 @@
 namespace ALUGrid
 {
 
-  extern int __STATIC_myrank ;
-  int __STATIC_turn   = -1;
-  int __STATIC_phase  = -1;
-
   std::pair< IteratorSTI < GitterPll::vertex_STI > *, IteratorSTI < GitterPll::vertex_STI > *> GitterPll::
     iteratorTT (const GitterPll::vertex_STI *, int l) {
 
@@ -308,7 +304,6 @@ namespace ALUGrid
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
             _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os );
         }
-        _repeat |= retur();
       }
       catch (Parallel::AccessPllException)
       {
@@ -422,16 +417,12 @@ namespace ALUGrid
       // jetzt normal verfeinern und den Status der Verfeinerung
       // [unvollst"andige / vollst"andige Verfeinerung] sichern.
 
-      __STATIC_phase = 1;
-
       state = Gitter::refine ();
 
       // Phase des Fl"achenausgleichs an den Schnittfl"achen des
       // verteilten Gitters. Weil dort im sequentiellen Fall pseudorekursive
       // Methodenaufrufe vorliegen k"onnen, muss solange iteriert werden,
       // bis die Situation global station"ar ist.
-
-      __STATIC_phase = 2;
 
       bool repeat (false);
       _refineLoops = 0;
@@ -460,8 +451,6 @@ namespace ALUGrid
       // dann wieder zur"ucktransportiert werden, eine einfache L"osung, wie bei
       // den Fl"achen (1/1 Beziehung) scheidet aus.
 
-      __STATIC_phase = 3;
-
       {
         PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
         mpAccess().exchange( edgeData );
@@ -472,8 +461,6 @@ namespace ALUGrid
         mpAccess().exchange( edgeData );
       }
     }
-
-    __STATIC_phase = -1;
 
     return state;
   }
@@ -980,8 +967,6 @@ namespace ALUGrid
         // wird die angeforderte Operation zur"uckgewiesen, um erst sp"ater von aussen nochmals
         // angestossen zu werden.
 
-        __STATIC_phase = 4;
-
         // do real coarsening of elements
         Gitter::doCoarse ();
 
@@ -1001,8 +986,6 @@ namespace ALUGrid
         // Vergr"oberung in beiden Teilgittern durchgef"uhrt werden darf,
         // wenn ja, wird in beiden Teilgittern vergr"obert und der Vollzug
         // getestet.
-
-        __STATIC_phase = 5;
 
         typedef std::vector< int > cleanvector_t;
         std::vector< cleanvector_t > clean (nl);
@@ -1029,8 +1012,6 @@ namespace ALUGrid
       try
       {
         // Phase des Kantenausgleichs im parallelen Vergr"oberungsalgorithmus:
-
-        __STATIC_phase  = 6;
 
         // Weil hier jede Kante nur eindeutig auftreten darf, muss sie in einem
         // map als Adresse hinterlegt werden, dann k"onnen die verschiedenen
@@ -1066,7 +1047,6 @@ namespace ALUGrid
       }
     }
 
-    __STATIC_phase = -1;
   }
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -1088,8 +1068,6 @@ namespace ALUGrid
     // loop until refinement leads to a conforming situation (conforming refinement only)
     do
     {
-      __STATIC_myrank = mpAccess ().myrank ();
-      __STATIC_turn ++;
       alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::adapt ()" << std::endl, 1) : 1);
       alugrid_assert (! iterators_attached ());
 
@@ -1562,8 +1540,6 @@ namespace ALUGrid
     mpa.barrier();
 #endif
 
-    // set static rank info
-    __STATIC_myrank = mpa.myrank();
   }
 
 } // namespace ALUGrid

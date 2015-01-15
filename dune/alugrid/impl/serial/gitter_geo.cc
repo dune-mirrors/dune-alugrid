@@ -65,100 +65,100 @@ namespace ALUGrid
                                                                 {2, 0, 1}, // twist 2
                                                                       };
 
+  const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_verticesNotOnFace( Gitter::Geometric::Tetra::initVerticesNotOnFace() );
+  const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_edgesNotOnFace( Gitter::Geometric::Tetra::initEdgesNotOnFace() );
+  const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_facesNotOnFace( Gitter::Geometric::Tetra::initFacesNotOnFace() );
+
+  // return list with edges that lie not on given face
+  std::vector< std::vector< int > >  Gitter::Geometric::Tetra::initVerticesNotOnFace()
+  {
+    std::vector< std::vector< int > > verticesNotFace( 4 );
+    for(int f=0; f<4; ++f)
+    {
+      verticesNotFace[f].resize(1);
+      verticesNotFace[f][0] = f;
+    }
+    return verticesNotFace;
+  }
 
   // return list with edges that lie not on given face
   const std::vector<int> & Gitter::Geometric::Tetra::verticesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 4 );
+    alugrid_assert( face >= 0 && face < int(_verticesNotOnFace.size() ) );
+    return _verticesNotOnFace[ face ];
+  }
 
-    static std::vector<int> verticesNotFace[4];
-    static bool calculated = false;
-    if( ! calculated )
+  // return list with edges that lie not on given face
+  std::vector< std::vector< int > > Gitter::Geometric::Tetra::initEdgesNotOnFace()
+  {
+    std::vector< std::vector< int > > edgesNotFace(4);
+    for(int f = 0; f<4; ++f )
     {
-      for(int f=0; f<4; ++f)
+      edgesNotFace[f].resize(3);
+
+      // tell which vertices belong to which edge
+      const int protoEdges [6][2] = {{0, 1},
+                                     {0, 2},
+                                     {0, 3},
+                                     {1, 2},
+                                     {1, 3},
+                                     {2, 3}};
+
+      const int (&edges)[6][2] = protoEdges;
+      const int (&vertices)[3] = prototype [ f ];
+
+      int edgeCount = 0;
+      for (int e = 0; e < 6; ++e)
       {
-        verticesNotFace[f].resize(1);
-        verticesNotFace[f][0] = f;
+        const int (&edgeVx)[2] = edges[e];
+        int count = 0;
+        for(int v=0; v<3; ++v)
+        {
+          if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
+            ++count;
+        }
+        if (count < 2)
+        {
+          edgesNotFace[f][edgeCount] = e;
+          ++edgeCount;
+        }
       }
-      calculated = true;
+      alugrid_assert ( edgeCount == 3 );
     }
-    return verticesNotFace[face];
+    return edgesNotFace;
   }
 
   // return list with edges that lie not on given face
   const std::vector<int> & Gitter::Geometric::Tetra::edgesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 4 );
+    alugrid_assert( face >=0 && face < int(_edgesNotOnFace.size()) );
+    return _edgesNotOnFace[ face ];
+  }
 
-    static std::vector<int> edgesNotFace[4];
-    static bool calculated = false;
-    if( ! calculated )
+  // return list with edges that lie not on given face
+  std::vector< std::vector< int > > Gitter::Geometric::Tetra::initFacesNotOnFace()
+  {
+    std::vector< std::vector< int > > facesNotFace( 4 );
+    for(int f=0; f<4; ++f)
     {
-      for(int f = 0; f<4; ++f )
+      facesNotFace[f].resize( 3 );
+      int count = 0;
+      for(int i=0; i<4; ++i)
       {
-        edgesNotFace[f].resize(3);
-
-        // tell which vertices belong to which edge
-        static const int protoEdges [6][2] = {{0, 1},
-                                              {0, 2},
-                                              {0, 3},
-                                              {1, 2},
-                                              {1, 3},
-                                              {2, 3}};
-
-        const int (&edges)[6][2] = protoEdges;
-        const int (&vertices)[3] = prototype [ f ];
-
-        int edgeCount = 0;
-        for (int e = 0; e < 6; ++e)
-        {
-          const int (&edgeVx)[2] = edges[e];
-          int count = 0;
-          for(int v=0; v<3; ++v)
-          {
-            if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
-              ++count;
-          }
-          if (count < 2)
-          {
-            edgesNotFace[f][edgeCount] = e;
-            ++edgeCount;
-          }
-        }
-        alugrid_assert ( edgeCount == 3 );
+        if( i == f ) continue;
+        facesNotFace[f][count] = i;
+        ++count;
       }
-      calculated = true;
+      alugrid_assert ( count == 3 );
     }
-    return edgesNotFace[face];
+    return facesNotFace;
   }
 
   // return list with edges that lie not on given face
   const std::vector<int> & Gitter::Geometric::Tetra::facesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 4 );
-
-    static std::vector<int> facesNotFace[4];
-    static bool calculated = false;
-    if( ! calculated )
-    {
-      for(int f=0; f<4; ++f)
-      {
-        facesNotFace[f].resize( 3 );
-        int count = 0;
-        for(int i=0; i<4; ++i)
-        {
-          if( i == f ) continue;
-          facesNotFace[f][count] = i;
-          ++count;
-        }
-        alugrid_assert ( count == 3 );
-      }
-      calculated = true;
-    }
-    return facesNotFace[face];
+    alugrid_assert( face >= 0 && face < int(_facesNotOnFace.size()) );
+    return _facesNotOnFace[face];
   }
 
   // prototype of periodic 3 type
@@ -217,103 +217,103 @@ namespace ALUGrid
 
   const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face
 
+  const std::vector< std::vector< int > > Gitter::Geometric::Hexa::_verticesNotOnFace( Gitter::Geometric::Hexa::initVerticesNotOnFace() );
+  const std::vector< std::vector< int > > Gitter::Geometric::Hexa::_edgesNotOnFace( Gitter::Geometric::Hexa::initEdgesNotOnFace() );
+  const std::vector< std::vector< int > > Gitter::Geometric::Hexa::_facesNotOnFace( Gitter::Geometric::Hexa::initFacesNotOnFace() );
+
+  // return list with edges that lie not on given face
+  std::vector< std::vector< int > > Gitter::Geometric::Hexa::initVerticesNotOnFace()
+  {
+    std::vector< std::vector< int > > verticesNotFace( 6 );
+    for(int f=0; f<6; ++f)
+    {
+      verticesNotFace[f].resize( 4 );
+      int oppFace = Gitter::Geometric::hexa_GEO::oppositeFace[ f ];
+
+      // get vertices of opposite face of gFace
+      const int (& vertices)[4] = Gitter::Geometric::hexa_GEO::prototype [ oppFace ];
+
+      for (int i = 0; i < 4; ++i)
+      {
+        verticesNotFace[f][i] = vertices[i];
+      }
+    }
+    return verticesNotFace;
+  }
+
   // return list with edges that lie not on given face
   const std::vector<int> & Gitter::Geometric::Hexa::verticesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 6 );
+    alugrid_assert( face >= 0 && face < int( _verticesNotOnFace.size() ) );
+    return _verticesNotOnFace[ face ];
+  }
 
-    static std::vector<int> verticesNotFace[6];
-    static bool calculated = false;
-    if( ! calculated )
+  std::vector< std::vector< int > > Gitter::Geometric::Hexa::initEdgesNotOnFace()
+  {
+    std::vector< std::vector< int > > edgesNotFace( 6 );
+    for(int f = 0; f<6; ++f )
     {
-      for(int f=0; f<6; ++f)
+      edgesNotFace[f].resize(8);
+
+      // vertices of the edges of an Hexa
+      const int protoEdges [12][2] =
+          { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
+            {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
+
+      const int (&edges)[12][2] = protoEdges;
+      const int (&vertices)[4]  = prototype [ f ];
+
+      int edgeCount = 0;
+      for (int e = 0; e < 12; ++e)
       {
-        verticesNotFace[f].resize( 4 );
-        int oppFace = Gitter::Geometric::hexa_GEO::oppositeFace[ f ];
-
-        // get vertices of opposite face of gFace
-        const int (& vertices)[4] = Gitter::Geometric::hexa_GEO::prototype [ oppFace ];
-
-        for (int i = 0; i < 4; ++i)
+        const int (&edgeVx)[2] = edges[e];
+        int count = 0;
+        for(int v=0; v<4; ++v)
         {
-          verticesNotFace[f][i] = vertices[i];
+          if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
+            ++count;
+        }
+        if (count < 2)
+        {
+          edgesNotFace[f][edgeCount] = e;
+          ++edgeCount;
         }
       }
-      calculated = true;
+      alugrid_assert ( edgeCount == 8 );
     }
-    return verticesNotFace[face];
+    return edgesNotFace;
   }
 
   const std::vector<int> & Gitter::Geometric::Hexa::edgesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 6 );
+    alugrid_assert( face >=0 && face < int(_edgesNotOnFace.size()) );
+    return _edgesNotOnFace[ face ];
+  }
 
-    static std::vector<int> edgesNotFace[6];
-    static bool calculated = false;
-    if( ! calculated )
+  // return list with edges that lie not on given face
+  std::vector< std::vector< int > > Gitter::Geometric::Hexa::initFacesNotOnFace()
+  {
+    std::vector< std::vector< int > > facesNotFace( 6 );
+    for(int f=0; f<6; ++f)
     {
-      for(int f = 0; f<6; ++f )
+      facesNotFace[f].resize( 5 );
+      int count = 0;
+      for(int i=0; i<6; ++i)
       {
-        edgesNotFace[f].resize(8);
-
-        // vertices of the edges of an Hexa
-        static const int protoEdges [12][2] =
-            { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
-              {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
-
-        const int (&edges)[12][2] = protoEdges;
-        const int (&vertices)[4]  = prototype [ f ];
-
-        int edgeCount = 0;
-        for (int e = 0; e < 12; ++e)
-        {
-          const int (&edgeVx)[2] = edges[e];
-          int count = 0;
-          for(int v=0; v<4; ++v)
-          {
-            if( vertices[v] == edgeVx[0] || vertices[v] == edgeVx[1] )
-              ++count;
-          }
-          if (count < 2)
-          {
-            edgesNotFace[f][edgeCount] = e;
-            ++edgeCount;
-          }
-        }
-        alugrid_assert ( edgeCount == 8 );
+        if( i == f ) continue;
+        facesNotFace[f][count] = i;
+        ++count;
       }
-      calculated = true;
+      alugrid_assert ( count == 5 );
     }
-    return edgesNotFace[face];
+    return facesNotFace;
   }
 
   // return list with edges that lie not on given face
   const std::vector<int> & Gitter::Geometric::Hexa::facesNotOnFace( const int face )
   {
-    alugrid_assert ( face >= 0 );
-    alugrid_assert ( face < 6 );
-
-    static std::vector<int> facesNotFace[6];
-    static bool calculated = false;
-    if( ! calculated )
-    {
-      for(int f=0; f<6; ++f)
-      {
-        facesNotFace[f].resize( 5 );
-        int count = 0;
-        for(int i=0; i<6; ++i)
-        {
-          if( i == f ) continue;
-          facesNotFace[f][count] = i;
-          ++count;
-        }
-        alugrid_assert ( count == 5 );
-      }
-      calculated = true;
-    }
-    return facesNotFace[face];
+    alugrid_assert( face >= 0 && face < int(_facesNotOnFace.size()) );
+    return _facesNotOnFace[ face ];
   }
 
   // defines how we get an edge from an hexa , first is face , second is edge
@@ -411,7 +411,7 @@ namespace ALUGrid
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalRefinement () {
-    return (request (myrule_t::regular), 1);
+    return (request (myrule_t::iso8), 1);
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalCoarsening () {
@@ -461,7 +461,7 @@ namespace ALUGrid
         if (insideBall (p,center,radius)) { hit = true; break; }
       }
     }
-    return hit ? (level () < limit ? (request (myrule_t::regular), 1)
+    return hit ? (level () < limit ? (request (myrule_t::iso8), 1)
            : (request (myrule_t::nosplit), 0)) : (request (myrule_t::crs), 1);
   }
 
@@ -533,7 +533,7 @@ namespace ALUGrid
     if( this->myvertex(0)->myGrid()->conformingClosureNeeded() )
       return (request (myrule_t::bisect), 1);
     else
-      return (request (myrule_t::regular), 1);
+      return (request (myrule_t::iso8), 1);
   }
 
   int Gitter::Geometric::Tetra::tagForGlobalCoarsening () {
@@ -724,9 +724,9 @@ namespace ALUGrid
   dumpMacroGrid ( std::ostream &os, const MacroFileHeader::Format format ) const
   {
     MacroFileHeader header;
-    if( _tetraList.size() == 0 )
+    if( _tetraList.empty() )
       header.setType( MacroFileHeader::hexahedra );
-    else if( _hexaList.size() == 0 )
+    else if( _hexaList.empty() )
       header.setType( MacroFileHeader::tetrahedra );
     else
     {

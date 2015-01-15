@@ -142,8 +142,8 @@ namespace ALUGrid
     GitterDuneBasis * _grd;
     IteratorSTI < A > * _w;
     const A * _a;
-    void * operator new (size_t) { return 0; }
-    void operator delete (void *) {}
+    void * operator new (size_t);
+    void operator delete (void *);
     inline PureElementLeafIterator ();
     public :
       inline PureElementLeafIterator (GitterDuneBasis &);

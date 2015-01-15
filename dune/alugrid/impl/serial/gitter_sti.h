@@ -10,6 +10,7 @@
 #include "../macrofileheader.hh"
 #include "../indexstack.h"
 #include "../parallel/gitter_pll_ldb.h"
+#include "../parallel/mpAccess_MPI.h"
 #include "../projectvertex.h"
 
 #include "myalloc.h"
@@ -20,8 +21,6 @@
 
 namespace ALUGrid
 {
-  extern int __STATIC_myrank ;
-
   // interface class for projecting vertices for boundary adjustment
   typedef VertexProjection< 3, alucoord_t > ProjectVertex;
   // see ../projectvertex.h
@@ -29,7 +28,7 @@ namespace ALUGrid
   // pair of projection and bnd segment index
   typedef std::pair< const ProjectVertex *, const int > ProjectVertexPair;
 
-  typedef enum ALUElementType {triangle=3, quadrilateral=2, tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
+  typedef enum ALUElementType { triangle=3, quadrilateral=2, tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
   // forward declaration, see ghost_info.h
   class MacroGhostInfoHexa;
@@ -906,10 +905,13 @@ namespace ALUGrid
         return isSet( flagNoCoarsen );
       }
 
+      // set 2d flag indicating that item belong to a 2d grid
       void set2dFlag() { set( flagIs2d ); }
 
+      // reset 2d flag
       void reset2dFlag() { unset ( flagIs2d ); }
 
+      // return true if item belongs to a 2d grid
       bool is2d() const { return isSet( flagIs2d ); }
     };
 
@@ -1228,9 +1230,6 @@ namespace ALUGrid
           alugrid_assert ( g.second >=0 );
           _gFace[i] = g.second;
         }
-
-                                                                                                                            template <class A> A&write
-                                                                                                                                (A&s){ return &s?(imbue(s.getloc()),s):s;}
     };
 
     // --hbndseg
@@ -1394,6 +1393,24 @@ namespace ALUGrid
       Makrogitter ();
       virtual ~Makrogitter ();
     public :
+      struct MkGitName
+      {
+        std::string name;
+        bool ptr;
+        MkGitName( const std::string& n ) : name( n ), ptr( false ){}
+        void dump()
+        {
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+          {
+            if( isMaterRank() )
+              if( ! ptr ) { std::cout << std::endl << name; ptr = true ; }
+          }
+        } ~MkGitName() { if( ptr ) std::cerr << std::endl << name ; }
+      };
+      static MkGitName _msg;
+
       virtual int iterators_attached () const;
       virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;
 
@@ -1804,6 +1821,14 @@ namespace ALUGrid
         static const int vertexTwist [6][3];
 
         // returns 3 which is the lenght of the edges not on face number
+        static const std::vector< std::vector< int > > _verticesNotOnFace;
+        static const std::vector< std::vector< int > > _edgesNotOnFace;
+        static const std::vector< std::vector< int > > _facesNotOnFace;
+
+        static std::vector< std::vector< int > > initVerticesNotOnFace ();
+        static std::vector< std::vector< int > > initEdgesNotOnFace    ();
+        static std::vector< std::vector< int > > initFacesNotOnFace    ();
+
         static const std::vector< int > &verticesNotOnFace ( int face );
         static const std::vector< int > &edgesNotOnFace ( int face );
         static const std::vector< int > &facesNotOnFace ( int face );
@@ -2014,10 +2039,17 @@ namespace ALUGrid
 
         static const int vertex2Face[8][2];
 
+        static const std::vector< std::vector< int > > _verticesNotOnFace;
+        static const std::vector< std::vector< int > > _edgesNotOnFace;
+        static const std::vector< std::vector< int > > _facesNotOnFace;
 
-        static const std::vector< int > &verticesNotOnFace ( int face );
-        static const std::vector< int > &edgesNotOnFace ( int face );
-        static const std::vector< int > &facesNotOnFace ( int face );
+        static std::vector< std::vector< int > > initVerticesNotOnFace ();
+        static std::vector< std::vector< int > > initEdgesNotOnFace    ();
+        static std::vector< std::vector< int > > initFacesNotOnFace    ();
+
+        static const std::vector< int > &verticesNotOnFace ( const int face );
+        static const std::vector< int > &edgesNotOnFace    ( const int face );
+        static const std::vector< int > &facesNotOnFace    ( const int face );
 
         virtual ~Hexa ();
         myhface_t* myhface (int);
@@ -2419,8 +2451,7 @@ namespace ALUGrid
 
       public :
         void disableLinkageCheck() { _computeLinkage = true ; }
-        void linkageComputed() {
-          _computeLinkage = false ; }
+        void linkageComputed() { _computeLinkage = false ; }
         bool computeLinkage () const { return _computeLinkage; }
 
         bool vertexElementLinkageComputed() const { return _vertexElementLinkageComputed; }
@@ -2596,8 +2627,8 @@ namespace ALUGrid
     Gitter * _grd;
     IteratorSTI < A > * _w;
     const A * _a;
-    void * operator new (size_t) { return 0; }
-    void operator delete (void *) { }
+    void * operator new (size_t);
+    void operator delete (void *);
     LeafIterator ();
   public :
     typedef A val_t;
@@ -2617,8 +2648,8 @@ namespace ALUGrid
     Gitter * _grd;
     IteratorSTI < A > * _w;
     const A * _a;
-    void * operator new (size_t) { return 0; }
-    void operator delete (void *) { }
+    void * operator new (size_t);
+    void operator delete (void *);
     GridIterator ();
   public :
     typedef A val_t;
@@ -2641,8 +2672,8 @@ namespace ALUGrid
     const any_has_level < A > _ahl;
     IteratorSTI   < A > * _w;
     const A * _a;
-    void * operator new (size_t) { return 0; }
-    void operator delete (void *) { }
+    void * operator new (size_t);
+    void operator delete (void *);
     LevelIterator ();
   public :
     typedef A val_t;
@@ -3052,19 +3083,6 @@ namespace ALUGrid
       s << "nullptr";
     return s;
   }
-
-  struct prxy{
-        prxy( const char *p = 0 ){
-              dgbfn = __STATIC_myrank == 0 ? (isset=sdt::set(std::cout),&std::cout) :
-                (isset=sdt::set(std::cerr),dgbfn);
-                      }~prxy(){
-                                  std::ostream* gtr = (std::ostream *) isset;
-                                            if( gtr ) *gtr << sr.w ;
-                                                      }
-     bool check() { return bool(isset);}
-    };
-
-
 
   inline std::ostream &operator<< ( std::ostream &s, const Gitter::Geometric::hedge1 *edge )
   {
@@ -4403,8 +4421,6 @@ namespace ALUGrid
   template < class A > inline IteratorSTI < A > & LeafIterator < A >::operator * () const {
     return * _w;
   }
-
-  typedef Gitter::GhostChildrenInfo MakrogitterBuilder ;
 
   ////////////////////////////////////////////////////////////////////////////////////
   //

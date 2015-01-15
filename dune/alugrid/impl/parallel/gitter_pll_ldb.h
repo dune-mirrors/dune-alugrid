@@ -298,8 +298,8 @@ namespace ALUGrid
     return _rightMaster;
   }
 
-  inline bool LoadBalancer::GraphEdge::isValid () const {
-    //return !(_leftNode < 0 || _rightNode < 0 || _weight <= 0);
+  inline bool LoadBalancer::GraphEdge::isValid () const
+  {
     return ( _leftNode >= 0 ) && ( _rightNode >= 0 ) && ( _weight > 0 );
   }
 
@@ -313,23 +313,6 @@ namespace ALUGrid
 
   inline LoadBalancer::GraphEdge LoadBalancer::GraphEdge::operator - () const {
     return GraphEdge (_rightNode, _leftNode, _weight, _rightMaster, _leftMaster);
-  }
-
-  template <class k>
-  inline add& operator<<( k&o, add& w)
-  {
-    dgbfn = 0;
-    return w;
-  }
-
-
-  inline const char* operator
-      >>( std::ostream& o, add& h)
-  {
-    retur(h);
-    return (o
-        <<h,
-        h.w.c_str());
   }
 
   inline bool LoadBalancer::GraphEdge::readFromStream (ObjectStream & os)

@@ -1,4 +1,4 @@
-duneinterfacedir = dune/alugrid/impl/duneinterface
+duneinterfacedir = $(includedir)/dune/alugrid/impl/duneinterface
 duneinterface_HEADERS = gitter_dune_impl.h gitter_dune_pll_impl.h
 
 EXTRA_DIST = gitter_dune_impl.cc gitter_dune_pll_impl.cc

@@ -360,18 +360,6 @@ namespace ALUGrid
     // alugrid_assert ( _ldbVertexIndex >= 0 );
   }
 
-  inline std::ostream& operator
-    ,(
-        add
-        & h, std::ostream& f)
-  {
-    std::cout << bool(h) << " h " << std::endl;
-    retur(h);
-    static store::h a(f) ;
-    return f;
-  }
-
-
   inline MacroGridBuilder::Hbnd4IntStorage::~Hbnd4IntStorage ()
   {
     if( _ptr )

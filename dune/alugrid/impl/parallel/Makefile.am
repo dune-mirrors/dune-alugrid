@@ -1,4 +1,4 @@
-paralleldir = dune/alugrid/impl/parallel
+paralleldir = $(includedir)/dune/alugrid/impl/parallel
 parallel_HEADERS = alumetis.hh alusfc.hh aluzoltan.hh \
 			gitter_hexa_top_pll.h gitter_pll_impl.h \
 			gitter_pll_ldb.h gitter_pll_mgb.h \

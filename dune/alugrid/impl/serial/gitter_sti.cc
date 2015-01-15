@@ -12,6 +12,7 @@
 
 namespace ALUGrid
 {
+  Gitter::Makrogitter::MkGitName Gitter::Makrogitter::_msg( inMkGiter() );
 
 #ifdef ALUGRIDDEBUG
 #ifdef DEBUG_ALUGRID
@@ -24,8 +25,6 @@ namespace ALUGrid
   }
 #endif
 #endif
-
-  int __STATIC_myrank = -1;
 
   typedef Wrapper < AccessIterator < Gitter::vertex_STI >::Handle,
     Gitter::InternalVertex >              leaf_vertex__macro_vertex__iterator;

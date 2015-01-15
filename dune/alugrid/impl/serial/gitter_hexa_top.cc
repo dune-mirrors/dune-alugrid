@@ -189,19 +189,14 @@ namespace ALUGrid
     _inner = new inner_t( 0 , e0);
     alugrid_assert(_inner);
 
-
-
-
     // level, edge,twist x 4, nChild
     innerface_t * f0 = new innerface_t (l, this->myhedge(0), twist(0), this->subedge(1,0), twist(0), e0, 1, this->subedge(3,1), twist(3), 0);
     innerface_t * f1 = new innerface_t (l, e0, 0, this->subedge(1,1), twist(1), this->myhedge(2), twist(2), this->subedge(3,0), twist(3), 1);
 
-   // std::cout << this << f0 << f1 << std::endl ;
-
+    //std::cout << this << f0 << f1 << std::endl ;
 
     alugrid_assert (f0 && f1);
     f0->append(f1);
-
 
     // down pointer
     _inner->store( f0 );
@@ -527,7 +522,6 @@ namespace ALUGrid
         case balrule_t::iso4 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
 
-              //    std::cout << "calling splitIso4 in refine like element" << std::endl;
           // call refinement method
           splitISO4 ();
 
@@ -540,7 +534,7 @@ namespace ALUGrid
 
         case balrule_t::iso2 :
           if (! myhface4 (0)->refine(balrule_t (balrule_t::iso2).rotate (twist (0)), twist (0))) return false;
-       // std::cout << "calling splitIso2 in refine like element" << std::endl;
+
           // call refinement method
           splitISO2 ();
 
@@ -689,7 +683,6 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
-     //std::cout <<" calculatedVolume: " << calculatedVolume << std::endl;
      alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 
@@ -723,23 +716,30 @@ namespace ALUGrid
   }
 
   // subface routine for regular 2d has to use twist
-  template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) {
-    return ( myhface4(i)->getrule() == myhface4_t::myrule_t::iso4   ) ?
-    myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
-    (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
-    ((twist(i) < 0) ?  myhface4(i)->subface((j+1)%2):
-    myhface4(i)->subface(j) ):
-    (abort (), (myhface4_t *)0);
+  template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j)
+  {
+    typedef typename myhface4_t::myrule_t  facerule_t ;
+    innerface_t * face = myhface4(i);
+    const facerule_t facerule = face->getrule();
+    return ( facerule == facerule_t::iso4 ) ?
+                face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+             (facerule == facerule_t::iso2) ?
+                ((twist(i) < 0) ? face->subface((j+1)%2):
+                                  face->subface(j) ):
+              (abort (), (myhface4_t *)0);
   }
 
   //check subface routine  for regular 2d has to use twist
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
-    return ( myhface4(i)->getrule() == myhface4_t::myrule_t::iso4   ) ?
-    myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
-    (myhface4(i)->getrule() == myhface4_t::myrule_t::iso2) ?
-    ((twist(i) < 0) ?  myhface4(i)->subface((j+1)%2):
-    myhface4(i)->subface(j) ):
-    (abort (), (myhface4_t *)0);
+    typedef typename myhface4_t::myrule_t  facerule_t ;
+    const innerface_t * face = myhface4(i);
+    const facerule_t facerule = face->getrule();
+    return ( facerule == facerule_t::iso4 ) ?
+                face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+             (facerule == facerule_t::iso2) ?
+                ((twist(i) < 0) ? face->subface((j+1)%2):
+                                  face->subface(j) ):
+              (abort (), (myhface4_t *)0);
   }
 
   template< class A > void HexaTop < A >::splitISO8 ()
@@ -890,8 +890,6 @@ namespace ALUGrid
     // inner face 3 at face 5
     innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->subedge(1,7), 0, e0, 0, this->subedge(0,4), 1);
 
-    //std::cout << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-
     alugrid_assert (f0 && f1 && f2 && f3 );
     f0->append(f1);
     f1->append(f2);
@@ -930,12 +928,6 @@ namespace ALUGrid
     alugrid_assert( checkHexa( h1, 1 ) );
     alugrid_assert( checkHexa( h2, 2 ) );
     alugrid_assert( checkHexa( h3, 3 ) );
-    /*
-    if(!checkHexa( h0, 0 )) std::cout << "0: " << h0 << "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-    if(!checkHexa( h1, 1 )) std::cout << "1: " <<  h1<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-    if(!checkHexa( h2, 2 )) std::cout << "2: " << h2<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-    if(!checkHexa( h3, 3 )) std::cout << "3: " << h3<< "inner Faces: " << std::endl << f0 << f1 << f2 <<f3 ;
-    */
 
     h0->append(h1);
     h1->append(h2);
@@ -1261,6 +1253,7 @@ namespace ALUGrid
 
     std::cout << "Valid twist not found!!!" << std::endl;
     return 0;
+
     // we should not get here
     alugrid_assert ( false );
     abort();
@@ -1270,13 +1263,13 @@ namespace ALUGrid
   template< class A > int
   HexaTop < A >::calculateFace3Twist( const int (&vx)[4], const myhface4_t* subFace, const int thirdVx ) const
   {
-    std::cout << "check v0 = " << vx[0] << " v1 = " << vx[1] << " v2 = " << vx[2] << " v3 = " << vx[3] << std::endl;
+    //std::cout << "check v0 = " << vx[0] << " v1 = " << vx[1] << " v2 = " << vx[2] << " v3 = " << vx[3] << std::endl;
 
     const int faceIndices[ 4 ] = { subFace->myvertex( 0 )->getIndex(),
                                    subFace->myvertex( 1 )->getIndex(),
                                    subFace->myvertex( 2 )->getIndex(),
                                    subFace->myvertex( 3 )->getIndex() };
-    std::cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << faceIndices[3] << std::endl;
+    //std::cout << faceIndices[0] << " " << faceIndices[1] << " " << faceIndices[2] << " " << faceIndices[3] << std::endl;
 
     for(int twst = -4; twst<4; ++twst )
     {

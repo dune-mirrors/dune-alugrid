@@ -47,9 +47,6 @@ namespace ALUGrid
     : GitterBasisPll( dim, filename, mp, ppv ),
       balanceGrid_ ( false )
     {
-#ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank();
-#endif
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
@@ -59,9 +56,6 @@ namespace ALUGrid
     : GitterBasisPll( dim, in, mp, ppv ),
       balanceGrid_( false )
     {
-#ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank();
-#endif
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
@@ -71,9 +65,6 @@ namespace ALUGrid
       : GitterBasisPll (dim, "", mp, 0)
       , balanceGrid_ (false)
     {
-#ifdef ALUGRIDDEBUG
-      __STATIC_myrank = mp.myrank();
-#endif
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }

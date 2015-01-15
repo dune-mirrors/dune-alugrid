@@ -11,8 +11,6 @@
 
 namespace ALUGrid
 {
-  extern int __STATIC_myrank;
-
   inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm )
   {
     int wasInitialized = 0;
@@ -47,7 +45,6 @@ namespace ALUGrid
     int rank = -1;
     MY_INT_TEST MPI_Comm_rank ( _mpiComm, & rank );
     alugrid_assert (test == MPI_SUCCESS);
-    __STATIC_myrank = rank ;
     return rank;
   }
 
@@ -61,7 +58,8 @@ namespace ALUGrid
 
 
   inline MpAccessMPI::MpAccessMPI (const MpAccessMPI & a)
-   : _minmaxsum( copyMPIComm( a._mpiComm ) ),
+   : MpAccessLocal( a ),
+     _minmaxsum( copyMPIComm( a._mpiComm ) ),
      _psize( getSize() ) , _myrank( getRank() )
   {
     initMinMaxSum();
