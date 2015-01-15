@@ -25,7 +25,7 @@ namespace ALUGrid
     }
   }
 
-  void MpAccessLocal::computeDestinations( const linkage_t& linkage, vector_t& dest )  
+  void MpAccessLocal::computeDestinations( const linkage_t& linkage, vector_t& dest )
   {
     typedef linkage_t::const_iterator const_iterator ;
     dest.resize( linkage.size() );
@@ -52,20 +52,20 @@ namespace ALUGrid
       for (const_iterator i = req.begin (); i != reqEnd; ++i )
       {
         const int val = (*i);
-        // negative ranks mean receive ranks 
-        if( val < 0 ) 
+        // negative ranks mean receive ranks
+        if( val < 0 )
         {
           const int rank = recvRank( val );
-          // if rank was not inserted, insert with current link number 
+          // if rank was not inserted, insert with current link number
           if( rank != me && (_recvLinkage.find ( rank ) == recvEnd ) )
           {
             _recvLinkage.insert( std::make_pair( rank, recvLink++) );
           }
         }
-        else 
+        else
         {
           const int rank = sendRank( val );
-          // if rank was not inserted, insert with current link number 
+          // if rank was not inserted, insert with current link number
           if( rank != me && (_sendLinkage.find ( rank ) == sendEnd ) )
           {
             _sendLinkage.insert( std::make_pair( rank, sendLink++) );
@@ -76,11 +76,11 @@ namespace ALUGrid
 
     // compute send destinations
     computeDestinations( _sendLinkage, _sendDest );
-  
+
     // compute send destinations
     computeDestinations( _recvLinkage, _recvDest );
 
-    // set pointers to recv stuff 
+    // set pointers to recv stuff
     _currentRecvLinkage = & _recvLinkage ;
     _currentRecvDest    = & _recvDest ;
 
@@ -102,7 +102,7 @@ namespace ALUGrid
       {
         const int val = (*i);
         const int rank = (val < 0 ) ? recvRank( val ) : sendRank( val );
-        // if rank was not inserted, insert with current link number 
+        // if rank was not inserted, insert with current link number
         if( rank != me && (_sendLinkage.find ( rank ) == linkageEnd ) )
         {
           _sendLinkage.insert( std::make_pair( rank, link++) );
@@ -111,22 +111,22 @@ namespace ALUGrid
     }
 
     linkage_t().swap( _recvLinkage );
-    // since linkage is symmetric, use sendLinkage for both 
+    // since linkage is symmetric, use sendLinkage for both
     _currentRecvLinkage = & _sendLinkage;
 
     // compute send destinations
     computeDestinations( _sendLinkage, _sendDest );
-  
+
     vector_t().swap( _recvDest );
-    // since linkage is symmetric, use sendDest for both 
+    // since linkage is symmetric, use sendDest for both
     _currentRecvDest = & _sendDest ;
 
     return sendLinks();
   }
 
-  // insertRequestSymmetric needs a global communication 
-  // this method is used to build the pattern for the loadBalancing 
-  // where we don't know who is sending whom something 
+  // insertRequestSymmetric needs a global communication
+  // this method is used to build the pattern for the loadBalancing
+  // where we don't know who is sending whom something
   int MpAccessLocal::insertRequestSymmetricGlobalComm ( const std::set< int >& req )
   {
     const int me = myrank ();
@@ -151,7 +151,7 @@ namespace ALUGrid
 
     const iterator linkageEnd = _sendLinkage.end ();
     std::vector< std::vector< int > > in = gcollect (out);
-    { 
+    {
       for (std::vector< int >::const_iterator i = out.begin (); i != out.end (); ++i )
       {
         if (_sendLinkage.find (*i) == linkageEnd )
@@ -168,24 +168,24 @@ namespace ALUGrid
       if( std::find (in[ i ].begin(), in[ i ].end(), me) != in[ i ].end()  )
       {
         alugrid_assert (i != me);
-        if (_sendLinkage.find (i) == linkageEnd ) 
+        if (_sendLinkage.find (i) == linkageEnd )
         {
           int n = _sendLinkage.size ();
           _sendLinkage [i] = n;
-          cnt ++; 
+          cnt ++;
         }
       }
     }
 
     linkage_t().swap( _recvLinkage );
-    // since linkage is symmetric, use sendLinkage for both 
+    // since linkage is symmetric, use sendLinkage for both
     _currentRecvLinkage = & _sendLinkage;
 
     // compute send destinations
     computeDestinations( _sendLinkage, _sendDest );
-  
+
     vector_t().swap( _recvDest );
-    // since linkage is symmetric, use sendDest for both 
+    // since linkage is symmetric, use sendDest for both
     _currentRecvDest = & _sendDest ;
 
     return sendLinks();

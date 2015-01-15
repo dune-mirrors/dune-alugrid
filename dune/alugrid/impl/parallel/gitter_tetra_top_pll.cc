@@ -9,20 +9,20 @@
 namespace ALUGrid
 {
 
-  template < class A, class X, class MX > 
+  template < class A, class X, class MX >
   void Hbnd3PllInternal < A, X, MX >::HbndPll::splitGhost ( GhostChildrenInfo_t &info )
   {
     if(_ghostPair.first)
     {
-      // get the childs 
+      // get the childs
       typedef typename Gitter::Geometric::tetra_GEO  tetra_GEO;
       typedef typename Gitter::Geometric::hface3_GEO hface3_GEO;
 
-      // ghostpair.second is the internal face number of the face 
-      // connected to the interior of the process 
-      // in case of bisection count can be zero since the face might have not been split 
+      // ghostpair.second is the internal face number of the face
+      // connected to the interior of the process
+      // in case of bisection count can be zero since the face might have not been split
 
-      GhostTetra_t* ghost = static_cast<GhostTetra_t *> (_ghostPair.first); 
+      GhostTetra_t* ghost = static_cast<GhostTetra_t *> (_ghostPair.first);
 
       if( ! ghost->down() )
       {
@@ -32,7 +32,7 @@ namespace ALUGrid
 
       typedef std::pair< Gitter::Geometric::hasFace3 *, int > neigh_t;
 
-      hface3_GEO * orgFace = ghost->myhface( _ghostPair.second ); 
+      hface3_GEO * orgFace = ghost->myhface( _ghostPair.second );
       hface3_GEO * face    = orgFace->down();
 
 #ifdef ALUGRIDDEBUG
@@ -49,9 +49,9 @@ namespace ALUGrid
         }
 
         tetra_GEO* elem = static_cast<tetra_GEO *> (neighbour.first);
-        // make sure that cast worked 
+        // make sure that cast worked
         alugrid_assert ( dynamic_cast<tetra_GEO *> (neighbour.first) );
-        // refine element with suitable refinement rule 
+        // refine element with suitable refinement rule
         elem->tagForGlobalRefinement();
         elem->refine();
 
@@ -59,7 +59,7 @@ namespace ALUGrid
         alugrid_assert ( breakCount++ < 5 );
       }
 
-      // find new ghost elements 
+      // find new ghost elements
       {
         alugrid_assert ( face );
         int count = 0;
@@ -67,9 +67,9 @@ namespace ALUGrid
         {
           alugrid_assert (face);
 
-          // check neighbours 
+          // check neighbours
           neigh_t neighbour = face->nb.front();
-          // if nb is boundary take other neighbour 
+          // if nb is boundary take other neighbour
           if( neighbour.second < 0 )
           {
             alugrid_assert ( neighbour.first->isboundary() );
@@ -81,8 +81,8 @@ namespace ALUGrid
           alugrid_assert ( dynamic_cast<tetra_GEO *> (neighbour.first) );
           // check father only for non-conforming refinement
           alugrid_assert ( ghost->getrule().bisection() ? true : ghch->up() == ghost );
-         
-          // set element pointer and local face number 
+
+          // set element pointer and local face number
           info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
           ++count;
@@ -92,58 +92,58 @@ namespace ALUGrid
     }
   }
 
-  template < class A, class X, class MX > 
+  template < class A, class X, class MX >
   void Hbnd3PllInternal < A, X, MX >::HbndPll::
-  removeDescendents( helement_STI & elem ) 
+  removeDescendents( helement_STI & elem )
   {
-    elem.resetRefinementRequest(); 
-    // check all children first 
+    elem.resetRefinementRequest();
+    // check all children first
     for( helement_STI* child = elem.down(); child; child = child->next() )
     {
-      // if child is not leaf coarse childs first 
+      // if child is not leaf coarse childs first
       if( ! child->leaf() )
         removeDescendents( *child );
-      
-      // if something went wrong, return ghosts are removed later 
+
+      // if something went wrong, return ghosts are removed later
       if( ! child->leaf () ) return;
 
-      // mark child for coarsening 
-      child->tagForGlobalCoarsening(); 
+      // mark child for coarsening
+      child->tagForGlobalCoarsening();
     }
 
-    // if element is not already leaf call coarse 
+    // if element is not already leaf call coarse
     if( ! elem.leaf () )
     {
       elem.coarse();
     }
   }
 
-  template < class A, class X, class MX > 
-  void Hbnd3PllInternal < A, X, MX >::HbndPll:: coarseGhost () 
+  template < class A, class X, class MX >
+  void Hbnd3PllInternal < A, X, MX >::HbndPll:: coarseGhost ()
   {
     if(_ghostPair.first)
     {
-      helement_STI& ghost = (*_ghostPair.first); 
+      helement_STI& ghost = (*_ghostPair.first);
       if( ghost.leaf() ) return;
 
-      // remove all descendents if possible 
+      // remove all descendents if possible
       removeDescendents( ghost );
     }
   }
 
-  template < class A, class X, class MX > 
-  void Hbnd3PllInternal < A, X, MX >::HbndPll:: 
-  setGhost ( const ghostpair_STI & gpair ) 
+  template < class A, class X, class MX >
+  void Hbnd3PllInternal < A, X, MX >::HbndPll::
+  setGhost ( const ghostpair_STI & gpair )
   {
     if(gpair.first)
     {
-      _ghostPair = gpair; 
+      _ghostPair = gpair;
       alugrid_assert ( _ghostPair.first );
-      
+
       // copy indices from internal boundry to myhface(.) of ghost
       _ghostPair.first->setIndicesAndBndId ( *(this->myhface(0)) , _ghostPair.second );
     }
-    else 
+    else
     {
       _ghostPair.first  =  0;
       _ghostPair.second = -1;
@@ -153,23 +153,23 @@ namespace ALUGrid
   //***************************************************************************************
   //  --HbndPllMacro
   //***************************************************************************************
-  template < class A, class X, class MX > 
+  template < class A, class X, class MX >
   const MacroGhostInfo_STI* Hbnd3PllInternal < A, X, MX >::
   HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
   {
-    alugrid_assert ( _gm == 0 ); 
+    alugrid_assert ( _gm == 0 );
     int code = MacroGridMoverIF::ENDMARKER;
-    os.readObject (code); 
+    os.readObject (code);
     alugrid_assert ( code == MacroGridMoverIF::HBND3INT );
 
     {
       int bfake;
       os.readObject (bfake);
-#ifdef ALUGRIDDEBUG 
+#ifdef ALUGRIDDEBUG
       Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
       alugrid_assert ( b == Gitter::hbndseg::closure );
 #endif
-      // read global graph vertex index 
+      // read global graph vertex index
       int ldbVertexIndex = -1;
       int master = -1;
       os.readObject( ldbVertexIndex );
@@ -183,16 +183,16 @@ namespace ALUGrid
       int readPoint = 0;
       os.readObject( readPoint );
 
-      // the following makes only sense if information has been transmitted 
+      // the following makes only sense if information has been transmitted
       if( readPoint != MacroGridMoverIF::POINTTRANSMITTED )
       {
         std::cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << std::endl;
         abort();
       }
 
-      // create macro ghost cell     
+      // create macro ghost cell
       {
-        // create ghost info and read from stream 
+        // create ghost info and read from stream
         MacroGhostInfoTetra* ghInfo = new MacroGhostInfoTetra( os );
 
         myhface3_t * f = this->myhface(0);
@@ -200,7 +200,7 @@ namespace ALUGrid
 
         // ghInfo is stored inside MacroGhostHexa
         _gm = new MacroGhostTetra( _mgb , ghInfo,  f );
-        this->setGhost ( _gm->getGhost() );   
+        this->setGhost ( _gm->getGhost() );
       }
     }
 
@@ -208,15 +208,15 @@ namespace ALUGrid
     return _gm->getGhostInfo();
   }
 
-  // template instantiation 
+  // template instantiation
   typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
-  template class Hbnd3PllInternal < Hbnd3DefaultType , 
+  template class Hbnd3PllInternal < Hbnd3DefaultType ,
                                     BndsegPllBaseXClosure < Hbnd3DefaultType > ,
                                     BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >;
 
-  // from serial part with different template argument 
-  template class Hface3Top< GitterBasisPll::ObjectsPll::Hface3EmptyPll >; 
-  template class TetraTop< GitterBasisPll::ObjectsPll::TetraEmptyPll >; 
+  // from serial part with different template argument
+  template class Hface3Top< GitterBasisPll::ObjectsPll::Hface3EmptyPll >;
+  template class TetraTop< GitterBasisPll::ObjectsPll::TetraEmptyPll >;
   template class Periodic3Top < GitterBasisPll::ObjectsPll::Periodic3EmptyPll >;
 
 } // namespace ALUGrid

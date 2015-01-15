@@ -17,10 +17,10 @@ namespace ALUGrid
 #ifdef DEBUG_ALUGRID
     // Der Globale Z"ahler soll helfen, nicht gel"oschte
     // Gitterobjekte oder Iteratorobjekte zu erkennen.
-    // (Wird aber nur in den DEBUG-Versionen angelegt.) 
+    // (Wird aber nur in den DEBUG-Versionen angelegt.)
     //
     // Refcounting only turned on, if NDEBUG is not defined and
-    // DEBUG_ALUGRID is defined 
+    // DEBUG_ALUGRID is defined
     class Globalcount
     {
       int _c;
@@ -50,7 +50,7 @@ namespace ALUGrid
     operator int () const;
   };
 
-  class IteratorRefcount 
+  class IteratorRefcount
   {
   public:
     void reset () { }
@@ -58,7 +58,7 @@ namespace ALUGrid
     int operator++ ( int ) const { return 0; }
     int operator++ () const { return 0; }
     int operator-- ( int ) const { return 0; }
-    int operator-- () const { return 0; }  
+    int operator-- () const { return 0; }
     bool operator! () const { return false; }
     operator int () const { return 0; }
   };

@@ -27,15 +27,15 @@ struct BallData
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
-  { 
+  {
     std::ostringstream dgfFileName;
-    if( problem_ == 1 ) 
+    if( problem_ == 1 )
       dgfFileName << path << "/dgf/cube_hc_512.dgf";
-    else if ( problem_ == 2 ) 
+    else if ( problem_ == 2 )
       dgfFileName << path << "/dgf/cube_hc_4096.dgf";
-    else if ( problem_ == 3 ) 
+    else if ( problem_ == 3 )
       dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-    else 
+    else
       dgfFileName << path << "/dgf/unitcube3d.dgf";
     return dgfFileName.str();
   }
@@ -46,15 +46,15 @@ struct BallData
     return 1.0;
   }
 
-  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
   {
     return 0;
   }
 
   //! \copydoc ProblemData::adaptationIndicator
   double adaptationIndicator ( const DomainType& x, double time,
-                               const RangeType& uLeft, const RangeType &uRight ) const 
-  { 
+                               const RangeType& uLeft, const RangeType &uRight ) const
+  {
     DomainType xx(x);
     xx -= c_;
     DomainType y(0);
@@ -63,7 +63,7 @@ struct BallData
     xx -= y;
     double r = xx.two_norm();
     return ( (r>0.15 && r<0.25)? 1 : 0 );
-  } 
+  }
 
   //! \copydoc ProblemData::refineTol
   double refineTol () const
@@ -72,7 +72,7 @@ struct BallData
   }
 
   //! \copydoc ProblemData::saveInterval
-  double saveInterval() const 
+  double saveInterval() const
   {
     return 0.1;
   }
@@ -86,7 +86,7 @@ private:
 // BallModel
 // ------------
 
-/** \brief Problem describing the Euler equation of gas dynamics 
+/** \brief Problem describing the Euler equation of gas dynamics
  */
 template <int dimD>
 struct BallModel : public TransportModel<dimD>
@@ -100,8 +100,8 @@ struct BallModel : public TransportModel<dimD>
   static const int dimRange = RangeType::dimension;
   static const bool hasFlux = false;
 
-  /** \brief constructor 
-   *  \param problem switch between different data settings 
+  /** \brief constructor
+   *  \param problem switch between different data settings
    */
   BallModel( unsigned int problem )
   : problem_( 0 )
@@ -122,7 +122,7 @@ struct BallModel : public TransportModel<dimD>
   }
 
   /** \brief destructor */
-  ~BallModel() 
+  ~BallModel()
   {
     delete problem_;
   }
@@ -142,13 +142,13 @@ struct BallModel : public TransportModel<dimD>
   double indicator ( const DomainType &normal,
                      const double time,
                      const DomainType &xGlobal,
-                     const RangeType &uLeft, const RangeType &uRight) const 
+                     const RangeType &uLeft, const RangeType &uRight) const
   {
     return problem().adaptationIndicator( xGlobal, time, uLeft, uRight );
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal,
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
@@ -159,4 +159,4 @@ struct BallModel : public TransportModel<dimD>
   Problem *problem_;
 };
 
-#endif 
+#endif

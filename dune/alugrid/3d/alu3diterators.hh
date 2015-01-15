@@ -12,18 +12,18 @@ namespace ALUGrid
 {
 
   //*************************************************************
-  //  definition of original LeafIterators of ALUGrid 
+  //  definition of original LeafIterators of ALUGrid
   //
   // default is element (codim = 0)
   template< int codim, class Comm >
-  struct BSMacroIterator 
+  struct BSMacroIterator
   {
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
     typedef typename AccessIterator< HElementType >::Handle IteratorType;
   };
 
   //******************************************************************
-  //  LevelIterators 
+  //  LevelIterators
   //******************************************************************
   template< int codim, class Comm >
   struct ALUHElementType;
@@ -54,26 +54,26 @@ namespace ALUGrid
 
 
   //*********************************************************
-  //  LevelIterator Wrapper 
+  //  LevelIterator Wrapper
   //*********************************************************
   template< class val_t >
   class IteratorWrapperInterface
   : public IteratorSTI< val_t >
   {
-  public:  
+  public:
     virtual ~IteratorWrapperInterface () {}
-    
+
     virtual int size  () = 0;
     virtual void next () = 0;
     virtual void first() = 0;
     virtual int done  () const = 0;
     virtual val_t & item () const = 0;
-    virtual IteratorSTI< val_t > * clone () const { alugrid_assert (false); abort(); return 0; } 
+    virtual IteratorSTI< val_t > * clone () const { alugrid_assert (false); abort(); return 0; }
   };
 
   typedef Dune::PartitionIteratorType PartitionIteratorType;
-  
-  // defines the pair of element and boundary 
+
+  // defines the pair of element and boundary
   template< int codim, class Comm >
   struct IteratorElType
   {
@@ -81,36 +81,36 @@ namespace ALUGrid
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HBndSegType HBndSegType;
     typedef std::pair< ElType *, HBndSegType * > val_t;
   };
-  
+
   template< int codim, PartitionIteratorType pitype, class Comm >
   class ALU3dGridLevelIteratorWrapper;
-  
-  // the element level iterator 
+
+  // the element level iterator
   template< PartitionIteratorType pitype, class Comm >
-  class ALU3dGridLevelIteratorWrapper< 0, pitype, Comm > 
+  class ALU3dGridLevelIteratorWrapper< 0, pitype, Comm >
   : public IteratorWrapperInterface< typename IteratorElType< 0, Comm >::val_t >
   {
     typedef typename IteratorElType< 0, Comm >::ElType ElType;
     typedef typename IteratorElType< 0, Comm >::HBndSegType HBndSegType;
     typedef ALU3DSPACE LevelIterator< ElType > IteratorType;
-    
-    // the iterator 
+
+    // the iterator
     IteratorType it_;
 
   public:
     typedef typename IteratorElType< 0, Comm >::val_t val_t;
     mutable val_t elem_;
-    
-    // constructor creating iterator 
+
+    // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : it_( grid.myGrid(), level ),
       elem_( (ElType *)0, (HBndSegType *)0 )
     {}
-   
-    // copy constructor 
+
+    // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : it_( org.it_ ), elem_(org.elem_) 
+      : it_( org.it_ ), elem_(org.elem_)
     {
     }
 
@@ -118,15 +118,15 @@ namespace ALUGrid
     void next ()    { it_->next();  }
     void first()    { it_->first(); }
     int done () const     { return it_->done(); }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first  = & it_->item(); 
-      return elem_; 
+      elem_.first  = & it_->item();
+      return elem_;
     }
   };
 
-  // the face level iterator 
+  // the face level iterator
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLevelIteratorWrapper< 1, pitype, Comm >
   : public IteratorWrapperInterface< typename IteratorElType< 1, Comm >::val_t >
@@ -135,23 +135,23 @@ namespace ALUGrid
     typedef typename IteratorElType< 1, Comm >::HBndSegType HBndSegType;
     typedef ALU3DSPACE any_has_level_periodic< ElType > StopRule_t;
     typedef GridIterator< ElType, StopRule_t > IteratorType;
-    
-    // the iterator 
+
+    // the iterator
     IteratorType it_;
-    
+
 
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
     mutable val_t elem_;
-    
-    // constructor creating iterator 
+
+    // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : it_( grid.myGrid(), StopRule_t(level) ),
       elem_( (ElType *)0, (HBndSegType*)0 )
     {}
-    
-    // copy constructor 
+
+    // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : it_( org.it_ ), elem_(org.elem_)
     {}
@@ -160,17 +160,17 @@ namespace ALUGrid
     void next ()    { it_->next();  }
     void first()    { it_->first(); }
     int done () const     { return it_->done(); }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first  = & it_->item(); 
-      return elem_; 
+      elem_.first  = & it_->item();
+      return elem_;
     }
   };
 
-  // the vertex level iterator, little bit different to the others 
+  // the vertex level iterator, little bit different to the others
   // this implementation uses the vertex leaf iterator and runs over all
-  // vertices with level <= the given iteration level 
+  // vertices with level <= the given iteration level
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLevelIteratorWrapper< 3, pitype, Comm >
   : public IteratorWrapperInterface< typename IteratorElType< 3, Comm >::val_t >
@@ -181,7 +181,7 @@ namespace ALUGrid
     typedef typename VertexListType::IteratorType IteratorType;
 
     VertexListType & vxList_;
-    
+
     mutable int count_;
     const int size_;
     const int dim_;
@@ -189,8 +189,8 @@ namespace ALUGrid
   public:
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
     mutable val_t elem_;
-    
-    // constructor creating iterator 
+
+    // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : vxList_ ( grid.getVertexList( level ) ),
@@ -201,47 +201,47 @@ namespace ALUGrid
     {
       alugrid_assert ( vxList_.up2Date() );
     }
-  
-    // copy constructor 
+
+    // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_) 
+      : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_)
       , elem_(org.elem_) , dim_(org.dim_)
     {
     }
 
-    // returns size of leaf iterator, wrong here, return leaf size 
+    // returns size of leaf iterator, wrong here, return leaf size
     int size  ()  { return size_; }
 
-    //! if level of item is larger then walk level, go next 
-    void next ()    
+    //! if level of item is larger then walk level, go next
+    void next ()
     {
       ++count_;
       goNextValid();
       return ;
     }
 
-    void first()  
-    { 
+    void first()
+    {
       count_ = 0;
       goNextValid();
     }
     int done () const { return (count_ >= size_) ? 1 : 0; }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first = vxList_.getItemList()[count_]; 
+      elem_.first = vxList_.getItemList()[count_];
       alugrid_assert ( elem_.first );
       return elem_;
     }
   private:
-   val_t & getItem () const 
-    { 
-      //elem_.first = vxList_.getItemList()[count_]; 
+   val_t & getItem () const
+    {
+      //elem_.first = vxList_.getItemList()[count_];
       alugrid_assert ( ! done () );
-      elem_.first = vxList_.getItemList()[count_]; 
+      elem_.first = vxList_.getItemList()[count_];
       return elem_;
     }
-   void goNextValid() 
+   void goNextValid()
     {
       if( done() ) return ;
       if (!isValid())
@@ -255,13 +255,13 @@ namespace ALUGrid
       //for 3d all vertices are valid
       if(dim_ == 3) return true;
       //cast to VertexGeo to get access to the index - getItem to actually have the item, otherwise elem_ is 0
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;    
+      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;
       GEOVertexType * vx = static_cast<GEOVertexType *> (getItem().first);
       int idx = vx->getIndex();
       return vxList_.isValid(idx);
-    }    
+    }
   };
- 
+
   template< int codim, PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper;
 
@@ -269,7 +269,7 @@ namespace ALUGrid
   //typedef IteratorWrapperInterface<LeafValType> IteratorWrapperInterfaceType;
 
   //**********************************************************
-  //  LeafIterator Wrapper 
+  //  LeafIterator Wrapper
   //**********************************************************
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper< 0, pitype, Comm >
@@ -279,7 +279,7 @@ namespace ALUGrid
     typedef typename IteratorElType< 0, Comm >::HBndSegType HBndSegType;
     typedef LeafIterator< ElType > IteratorType;
 
-    // the ALU3dGrid Iterator 
+    // the ALU3dGrid Iterator
     IteratorType it_;
 
   public:
@@ -289,27 +289,27 @@ namespace ALUGrid
     mutable val_t elem_;
 
   public:
-    // constructor creating Iterator 
+    // constructor creating Iterator
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
     : it_( grid.myGrid() ),
       elem_( (ElType *)0, (HBndSegType *)0 )
     {}
 
-    // constructor copying iterator 
+    // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
-      : it_( org.it_ ), elem_(org.elem_) 
+      : it_( org.it_ ), elem_(org.elem_)
     {}
 
     int size  ()    { return it_->size(); }
     void next ()    { it_->next(); }
     void first()    { it_->first(); }
     int done () const     { return it_->done(); }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first  = & it_->item(); 
-      return elem_; 
+      elem_.first  = & it_->item();
+      return elem_;
     }
   };
 
@@ -321,7 +321,7 @@ namespace ALUGrid
 
   // only in parallel we need only the interior items, in serial all items
   // are interior, to make the check fasterm this is only in parallel
-  // implemented 
+  // implemented
   template< class ElType >
   struct LeafStopRule< ElType, Dune::Interior_Partition, Dune::ALUGridMPIComm >
   {
@@ -330,29 +330,29 @@ namespace ALUGrid
 
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper< 1, pitype, Comm >
-  : public IteratorWrapperInterface< typename IteratorElType< 1, Comm >::val_t > 
+  : public IteratorWrapperInterface< typename IteratorElType< 1, Comm >::val_t >
   {
     typedef typename IteratorElType< 1, Comm >::ElType ElType;
     typedef typename IteratorElType< 1, Comm >::HBndSegType HBndSegType;
     typedef typename LeafStopRule< ElType, pitype, Comm >::StopRule_t StopRule_t;
     typedef GridIterator< ElType, StopRule_t > IteratorType;
 
-    // the face iterator 
-    IteratorType it_;   
-  
+    // the face iterator
+    IteratorType it_;
+
   public:
     typedef typename IteratorElType< 1, Comm >::val_t val_t;
   private:
     mutable val_t elem_;
-  public:  
-    // constructor creating Iterator 
+  public:
+    // constructor creating Iterator
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
     : it_( grid.myGrid(), StopRule_t() ),
       elem_( (ElType *)0, (HBndSegType *)0 )
     {}
 
-    // constructor copying iterator 
+    // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
       : it_( org.it_ ), elem_(org.elem_){}
 
@@ -364,18 +364,18 @@ namespace ALUGrid
     void next ()    { it_->next();  }
     void first()    { it_->first();  }
     int done () const     { return it_->done(); }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first  = & it_->item(); 
-      return elem_; 
+      elem_.first  = & it_->item();
+      return elem_;
     }
- 
+
   };
 
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper< 2, pitype, Comm >
-  : public IteratorWrapperInterface< typename IteratorElType< 2, Comm >::val_t > 
+  : public IteratorWrapperInterface< typename IteratorElType< 2, Comm >::val_t >
   {
     typedef typename IteratorElType< 2, Comm >::ElType ElType;
     typedef typename IteratorElType< 2, Comm >::HBndSegType HBndSegType;
@@ -386,20 +386,20 @@ namespace ALUGrid
     typedef typename IteratorElType< 2, Comm >::val_t val_t;
 
   private:
-    // the edge iterator 
+    // the edge iterator
     IteratorType it_;
-    
+
     mutable val_t elem_;
 
   public:
-    // constructor creating Iterator 
+    // constructor creating Iterator
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int links )
     : it_( grid.myGrid(), StopRule_t() ),
       elem_( (ElType *)0, (HBndSegType *)0 )
     {}
 
-    // constructor copying iterator 
+    // constructor copying iterator
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper  & org )
       : it_( org.it_ ), elem_(org.elem_) {}
 
@@ -407,16 +407,16 @@ namespace ALUGrid
     void next ()      { it_->next(); }
     void first()      { it_->first(); }
     int done () const { return it_->done(); }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
-      elem_.first  = & it_->item(); 
-      return elem_; 
+      elem_.first  = & it_->item();
+      return elem_;
     }
   };
 
 
-  // the vertex leaf iterator, little bit different to the others 
+  // the vertex leaf iterator, little bit different to the others
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLeafIteratorWrapper< 3, pitype, Comm >
   : public IteratorWrapperInterface< typename IteratorElType< 3, Comm >::val_t >
@@ -430,7 +430,7 @@ namespace ALUGrid
 
     LeafVertexListType & vxList_;
     typedef typename LeafVertexListType :: IteratorType ListIteratorType;
-    
+
     mutable int count_;
     const int size_;
     const int dim_;
@@ -439,8 +439,8 @@ namespace ALUGrid
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
     mutable val_t elem_;
     const StopRule_t rule_;
-    
-    // constructor creating iterator 
+
+    // constructor creating iterator
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : vxList_( grid.getLeafVertexList() ),
@@ -452,54 +452,54 @@ namespace ALUGrid
     {
       alugrid_assert ( vxList_.up2Date() );
     }
-  
-    // copy constructor 
+
+    // copy constructor
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
-      : vxList_(org.vxList_) 
-      , count_(org.count_) , size_(org.size_) 
-      , elem_(org.elem_) 
+      : vxList_(org.vxList_)
+      , count_(org.count_) , size_(org.size_)
+      , elem_(org.elem_)
       , rule_()
       , dim_(org.dim_)
     {
     }
 
-    // returns size of leaf iterator, wrong here, return leaf size 
+    // returns size of leaf iterator, wrong here, return leaf size
     int size  ()  { return size_; }
 
-    //! if level of item is larger then walk level, go next 
-    void next ()    
+    //! if level of item is larger then walk level, go next
+    void next ()
     {
       ++count_;
       goNextValid();
       return ;
     }
 
-    void first()  
-    { 
+    void first()
+    {
       count_ = 0;
       goNextValid();
     }
     int done () const { return (count_ >= size_) ? 1 : 0; }
-    val_t & item () const 
-    { 
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
       alugrid_assert ( elem_.first );
       return elem_;
     }
   private:
-    val_t & getItem () const 
-    { 
-      //elem_.first = vxList_.getItemList()[count_].first; 
+    val_t & getItem () const
+    {
+      //elem_.first = vxList_.getItemList()[count_].first;
       alugrid_assert ( ! done () );
-      elem_.first = vxList_.getItemList()[count_].first; 
+      elem_.first = vxList_.getItemList()[count_].first;
       return elem_;
     }
-    void goNextValid() 
+    void goNextValid()
     {
       if( done() ) return ;
-      if( getItem().first == 0) 
+      if( getItem().first == 0)
       {
-        ++count_; 
+        ++count_;
         goNextValid();
       }
       else if (!isValid())
@@ -507,10 +507,10 @@ namespace ALUGrid
         ++count_;
         goNextValid();
       }
-      else 
+      else
       {
         alugrid_assert ( elem_.first );
-        if(! rule_( elem_.first ) ) 
+        if(! rule_( elem_.first ) )
         {
           ++count_;
           goNextValid();
@@ -524,52 +524,52 @@ namespace ALUGrid
       //we assume that elem_ is no ghost - already checked for elem_.first
       alugrid_assert(elem_.first);
       //cast to VertexGeo to get access to the index
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;    
+      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;
       GEOVertexType * vx = static_cast<GEOVertexType *> (elem_.first);
       int idx = vx->getIndex();
       return vxList_.isValid(idx);
     }
   };
- 
+
   template< int codim >
-  class LeafLevelIteratorTTProxy 
+  class LeafLevelIteratorTTProxy
   {
-    // type is hface_STI or hedge_STI 
-    typedef typename ALUHElementType< codim, Dune::ALUGridMPIComm >::ElementType ElType; 
+    // type is hface_STI or hedge_STI
+    typedef typename ALUHElementType< codim, Dune::ALUGridMPIComm >::ElementType ElType;
 
     typedef typename Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::GitterImplType GitterImplType;
 
-    typedef IteratorSTI< ElType > IteratorType; 
+    typedef IteratorSTI< ElType > IteratorType;
     IteratorType * inner_;
     IteratorType * outer_;
 
   public:
-    // constructor creating leafBorderIteratorTT 
-    LeafLevelIteratorTTProxy( GitterImplType & gitter , int link ) 
+    // constructor creating leafBorderIteratorTT
+    LeafLevelIteratorTTProxy( GitterImplType & gitter , int link )
     {
-      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
+      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * >
         p = gitter.leafBorderIteratorTT( (ElType *) 0 , link );
-      
+
       inner_ = p.first;
-      outer_ = p.second; 
+      outer_ = p.second;
     }
 
-    // constructor creating levelBorderIteratorTT 
-    LeafLevelIteratorTTProxy( GitterImplType & gitter , int link , int level ) 
+    // constructor creating levelBorderIteratorTT
+    LeafLevelIteratorTTProxy( GitterImplType & gitter , int link , int level )
     {
-      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * > 
+      std::pair < IteratorSTI< ElType > * , IteratorSTI< ElType > * >
         p = gitter.levelBorderIteratorTT( (ElType *) 0 , link , level );
-      
+
       inner_ = p.first;
-      outer_ = p.second; 
+      outer_ = p.second;
     }
 
-    LeafLevelIteratorTTProxy( const LeafLevelIteratorTTProxy & org ) 
+    LeafLevelIteratorTTProxy( const LeafLevelIteratorTTProxy & org )
       : inner_(org.inner_->clone())
       , outer_(org.outer_->clone())
       {}
 
-    ~LeafLevelIteratorTTProxy() 
+    ~LeafLevelIteratorTTProxy()
     {
       delete inner_;
       delete outer_;
@@ -578,50 +578,50 @@ namespace ALUGrid
     IteratorType & inner () { alugrid_assert (inner_); return *inner_; }
     IteratorType & outer () { alugrid_assert (outer_); return *outer_; }
   };
- 
+
 
   typedef std::pair< ALUHElementType< 0, Dune::ALUGridMPIComm >::ElementType *, Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::HBndSegType * > LeafValType;
 
   //****************************
   //
-  //  --GhostIterator 
+  //  --GhostIterator
   //
   //****************************
   class ALU3dGridGhostIterator
   : public IteratorWrapperInterface< LeafValType >
-  { 
-  public:  
+  {
+  public:
     typedef Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::GitterImplType GitterImplType;
 
     typedef Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::HElementType HElementType;
     typedef Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::HBndSegType HBndSegType;
 
   protected:
-    GitterImplType & gitter_; 
+    GitterImplType & gitter_;
 
     // this tpye is hface_STI
     typedef ALUHElementType< 1, Dune::ALUGridMPIComm >::ElementType ElType;
-    
+
     typedef LeafLevelIteratorTTProxy< 1 > IteratorType;
 
     IteratorType * iterTT_;
-      
+
     typedef IteratorSTI < ElType > InnerIteratorType;
     InnerIteratorType * it_;
 
-    // number of links 
+    // number of links
     const int nl_;
-  
-    // current link 
+
+    // current link
     int link_;
 
     bool usingInner_;
   public:
     typedef LeafValType val_t;
   private:
-    // the pair of elementand boundary face 
+    // the pair of elementand boundary face
     mutable val_t elem_;
-    // true if ghost cells are enabled 
+    // true if ghost cells are enabled
     const bool ghostCellsEnabled_ ;
   public:
     typedef ElementPllXIF_t ItemType;
@@ -632,25 +632,25 @@ namespace ALUGrid
       iterTT_( 0 ),
       it_( 0 ),
       nl_( nlinks ),
-      link_( nlinks ), // makes default status == done 
+      link_( nlinks ), // makes default status == done
       elem_( (HElementType *)0, (HBndSegType *)0 ),
       ghostCellsEnabled_( grid.ghostCellsEnabled() )
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
-      : gitter_(org.gitter_) 
+      : gitter_(org.gitter_)
       , iterTT_(0) , it_(0)
       , nl_(org.nl_)
-      , link_(org.link_) 
-      , usingInner_(false) 
+      , link_(org.link_)
+      , usingInner_(false)
       , elem_(org.elem_)
       , ghostCellsEnabled_( org.ghostCellsEnabled_ )
     {
-      if( org.iterTT_ ) 
-      { 
+      if( org.iterTT_ )
+      {
         iterTT_ = new IteratorType ( *org.iterTT_ );
         usingInner_ = org.usingInner_;
-        if( org.it_ ) 
+        if( org.it_ )
         {
           alugrid_assert ( ! org.it_->done() );
           it_ = (usingInner_) ? &( iterTT_->inner() ) : &( iterTT_->outer() );
@@ -663,15 +663,15 @@ namespace ALUGrid
       removeIterators();
     }
 
-  protected:    
-    virtual IteratorType * newIterator() 
-    { 
+  protected:
+    virtual IteratorType * newIterator()
+    {
       return new IteratorType ( gitter_, link_ );
     }
-    
-    void removeIterators() 
+
+    void removeIterators()
     {
-      if(iterTT_) delete iterTT_; 
+      if(iterTT_) delete iterTT_;
       iterTT_ = 0;
       it_ = 0;
       usingInner_ = false;
@@ -737,7 +737,7 @@ namespace ALUGrid
 
       it_ = 0;
     }
-    
+
     virtual void checkLeafEntity ()
     {
       if(it_)
@@ -748,17 +748,17 @@ namespace ALUGrid
           HBndSegType * pll = el.second;
           alugrid_assert ( pll );
 
-          // this occurs if internal element is leaf but the corresponding 
-          // ghost is not leaf, we have to go next 
+          // this occurs if internal element is leaf but the corresponding
+          // ghost is not leaf, we have to go next
           if ( ! pll->isLeafEntity() ) next();
         }
       }
     }
 
-  public:  
+  public:
     int size  ()    // ???? gives size only of small part of ghost cells ????
     {
-      // if no iterator then size is zero 
+      // if no iterator then size is zero
       // which can happen in the case of parallel grid with 1 processor
       if(!it_)
       {
@@ -767,15 +767,15 @@ namespace ALUGrid
       return it_->size();
     }
 
-    // go next ghost 
+    // go next ghost
     void next ()
     {
       if(it_)
       {
-        // if not done increment 
+        // if not done increment
         if( !it_->done() ) it_->next();
-        
-        // if now done, create new iterator 
+
+        // if now done, create new iterator
         if( it_->done() ) createIterator();
 
         checkLeafEntity();
@@ -788,7 +788,7 @@ namespace ALUGrid
       {
         link_ = -1;
         usingInner_ = false;
-        // create iterator calls also first of iterators 
+        // create iterator calls also first of iterators
         createIterator();
         checkLeafEntity();
         if( it_ ) alugrid_assert ( !it_->done());
@@ -812,21 +812,21 @@ namespace ALUGrid
       return elem_;
     }
 
-  }; // end ALU3dGridGhostIterator 
+  }; // end ALU3dGridGhostIterator
 
-  
-  // the leaf ghost partition iterator 
+
+  // the leaf ghost partition iterator
   template<>
-  class ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > 
+  class ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIterator
   {
   protected:
     typedef LeafLevelIteratorTTProxy<1> IteratorType;
-    IteratorType * newIterator() 
-    {  
+    IteratorType * newIterator()
+    {
       return new IteratorType ( this->gitter_, this->link_ );
     }
-    
+
     void checkLeafEntity ()
     {
       if(this->it_)
@@ -837,23 +837,23 @@ namespace ALUGrid
           HBndSegType * pll = el.second;
           alugrid_assert ( pll );
 
-          // this occurs if internal element is leaf but the corresponding 
-          // ghost is not leaf, we have to go next 
+          // this occurs if internal element is leaf but the corresponding
+          // ghost is not leaf, we have to go next
           if ( ! pll->isLeafEntity() ) this->next();
         }
       }
     }
 
-  public: 
+  public:
     template <class GridImp>
     ALU3dGridLeafIteratorWrapper(const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIterator(grid,level,nlinks) {}
-     
+
     ALU3dGridLeafIteratorWrapper(const ALU3dGridLeafIteratorWrapper & org)
       : ALU3dGridGhostIterator(org) {}
   };
 
-  // the level ghost partition iterator 
+  // the level ghost partition iterator
   template<>
   class ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIterator
@@ -862,13 +862,13 @@ namespace ALUGrid
     const int mxl_;
   protected:
     typedef LeafLevelIteratorTTProxy<1> IteratorType;
-    IteratorType * newIterator() 
-    {  
-      // create new level Iterator Proxy 
+    IteratorType * newIterator()
+    {
+      // create new level Iterator Proxy
       return new IteratorType ( this->gitter_, this->link_ , level_ );
     }
-    
-    // for level iterators don't check leaf entity 
+
+    // for level iterators don't check leaf entity
     void checkLeafEntity ()
     {
       if(this->it_)
@@ -876,13 +876,13 @@ namespace ALUGrid
         if(! this->it_->done())
         {
           val_t & el = this->item();
-          
+
           alugrid_assert ( el.second );
           HBndSegType & pll = *(el.second);
 
-          // this occurs if internal element is leaf but the corresponding 
+          // this occurs if internal element is leaf but the corresponding
           // ghost is not leaf, we have to go next if level of ghost is not
-          // our level 
+          // our level
           if ( ! pll.down() )
           {
             if( pll.ghostLevel() != level_ )  this->next();
@@ -891,24 +891,24 @@ namespace ALUGrid
       }
     }
 
-  public: 
+  public:
     template <class GridImp>
-    ALU3dGridLevelIteratorWrapper(const GridImp & grid,int level , const int nlinks ) 
-      : ALU3dGridGhostIterator(grid,level,nlinks) 
+    ALU3dGridLevelIteratorWrapper(const GridImp & grid,int level , const int nlinks )
+      : ALU3dGridGhostIterator(grid,level,nlinks)
       , level_(level) , mxl_(grid.maxLevel()){}
-     
+
     ALU3dGridLevelIteratorWrapper(const ALU3dGridLevelIteratorWrapper & org)
       : ALU3dGridGhostIterator(org) , level_(org.level_) , mxl_(org.mxl_){}
   };
 
   ///////////////////////////////////////////
   //
-  //  Helper class to get item from Helement 
+  //  Helper class to get item from Helement
   //
   //////////////////////////////////////////
   template< class GridImp, int cd >
-  struct GetItem; 
-  
+  struct GetItem;
+
   template< class GridImp >
   struct GetItem< GridImp, 1 >
   {
@@ -920,20 +920,20 @@ namespace ALUGrid
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HElementType HElementType;
     typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
     typedef typename IteratorElType< 1, Comm >::ElType ItemType;
-    
+
     static ItemType *getItem ( HElementType &el, int i )
     {
       return static_cast< GEOElementType & >( el ).myhface( i );
     }
-    
-    static int numItems () 
+
+    static int numItems ()
     {
       return Dune::EntityCount< elType >::numFaces;
     }
   };
 
   template< class GridImp >
-  struct GetItem< GridImp, 2 > 
+  struct GetItem< GridImp, 2 >
   {
     enum { cd = 2 };
     enum { elType = GridImp::elementType };
@@ -948,8 +948,8 @@ namespace ALUGrid
     {
       return static_cast< GEOElementType & >( el ).myhedge1( i );
     }
-    
-    static int numItems () 
+
+    static int numItems ()
     {
       return Dune::EntityCount<elType>::numEdges;
     }
@@ -979,24 +979,24 @@ namespace ALUGrid
   };
 
 
-  //! Ghost Iterator 
+  //! Ghost Iterator
   template< int codim >
   class ALU3dGridGhostIteratorHigherCodim
   : public IteratorWrapperInterface< typename IteratorElType< codim, Dune::ALUGridMPIComm >::val_t >
   {
-  public:  
+  public:
     typedef typename Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::HElementType HElementType;
     typedef typename Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::HBndSegType HBndSegType;
     typedef typename Dune::ALU3dBasicImplTraits< Dune::ALUGridMPIComm >::GhostPairType GhostPairType;
-    typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::ElType ElType; 
-    typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t; 
-    
+    typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::ElType ElType;
+    typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
+
   private:
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType, int cd >
     struct SelectVector;
 
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
-    struct SelectVector< actualDim, actualDimw, elType, 1 > 
+    struct SelectVector< actualDim, actualDimw, elType, 1 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
 
@@ -1017,7 +1017,7 @@ namespace ALUGrid
     };
 
     template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
-    struct SelectVector< actualDim, actualDimw, elType, 3 > 
+    struct SelectVector< actualDim, actualDimw, elType, 3 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector ( int face )
@@ -1028,19 +1028,19 @@ namespace ALUGrid
 
     typedef ElType *getItemFunc_t ( HElementType &el, int i );
 
-  private:  
-    typedef Dune :: ALU3dGridItemListType GhostItemListType; 
+  private:
+    typedef Dune :: ALU3dGridItemListType GhostItemListType;
     GhostItemListType &ghList_;
-    typedef typename GhostItemListType :: IteratorType IteratorType; 
-    IteratorType curr_; 
-    IteratorType end_; 
+    typedef typename GhostItemListType :: IteratorType IteratorType;
+    IteratorType curr_;
+    IteratorType end_;
     mutable val_t elem_;
     mutable size_t count_;
     const bool ghostCellsEnabled_ ;
 
   public:
     template< class GhostElementIteratorImp, class GridImp >
-    ALU3dGridGhostIteratorHigherCodim ( GhostElementIteratorImp *, const GridImp &grid, 
+    ALU3dGridGhostIteratorHigherCodim ( GhostElementIteratorImp *, const GridImp &grid,
                                         int level, const int nlinks, GhostItemListType &ghList )
     : ghList_( ghList ),
       elem_( (ElType *)0, (HBndSegType *)0 ),
@@ -1049,7 +1049,7 @@ namespace ALUGrid
     {
       if( ! ghostCellsEnabled_ )
       {
-        count_ = ghList_.getItemList().size() ; 
+        count_ = ghList_.getItemList().size() ;
         return ;
       }
 
@@ -1058,9 +1058,9 @@ namespace ALUGrid
         GhostElementIteratorImp ghostIter(grid,level,nlinks);
         updateGhostList(grid,ghostIter,ghList_);
       }
-    }  
+    }
 
-    ALU3dGridGhostIteratorHigherCodim(const ALU3dGridGhostIteratorHigherCodim & org) 
+    ALU3dGridGhostIteratorHigherCodim(const ALU3dGridGhostIteratorHigherCodim & org)
       : ghList_( org.ghList_ )
       , elem_(org.elem_)
       , count_(org.count_)
@@ -1068,19 +1068,19 @@ namespace ALUGrid
     {}
 
     int size  () { return ghList_.getItemList().size(); }
-    void first() { if( ghostCellsEnabled_ ) count_ = 0; } 
+    void first() { if( ghostCellsEnabled_ ) count_ = 0; }
     void next () { ++count_; }
-    int done () const { return (count_ >= ghList_.getItemList().size() ? 1 : 0); } 
-    val_t & item () const 
-    { 
-      alugrid_assert ( ! done() ); 
-      void * item = ghList_.getItemList()[count_]; 
+    int done () const { return (count_ >= ghList_.getItemList().size() ? 1 : 0); }
+    val_t & item () const
+    {
+      alugrid_assert ( ! done() );
+      void * item = ghList_.getItemList()[count_];
       elem_.first = ((ElType * ) item);
       alugrid_assert ( elem_.first );
-      return elem_; 
+      return elem_;
     }
 
-  protected:  
+  protected:
     template <class GridImp, class GhostElementIteratorImp>
     void updateGhostList(const GridImp & grid, GhostElementIteratorImp & ghostIter, GhostItemListType & ghList)
     {
@@ -1090,7 +1090,7 @@ namespace ALUGrid
         ++count;
       }
 
-      const int numItems = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::getNotOnItemVector(0).size(); 
+      const int numItems = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::getNotOnItemVector(0).size();
       const int maxSize = numItems * count;
 
       ghList.getItemList().reserve(maxSize);
@@ -1102,8 +1102,8 @@ namespace ALUGrid
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
         const std::vector<int> & notOnFace = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::
-                                          getNotOnItemVector(ghPair.second); 
-        for(int i=0; i<numItems; ++i) 
+                                          getNotOnItemVector(ghPair.second);
+        for(int i=0; i<numItems; ++i)
         {
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
           int idx = item->getIndex();
@@ -1117,26 +1117,26 @@ namespace ALUGrid
       ghList.markAsUp2Date();
     }
   };
-  
-  // the leaf ghost partition iterator 
-  template<> 
+
+  // the leaf ghost partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 1, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
-  : public ALU3dGridGhostIteratorHigherCodim< 1 > 
+  : public ALU3dGridGhostIteratorHigherCodim< 1 >
   {
     enum { codim = 1 };
     typedef ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLeafList(codim)) {}
 
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the leaf ghost partition iterator 
-  template<> 
+
+  // the leaf ghost partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 2, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIteratorHigherCodim< 2 >
   {
@@ -1144,16 +1144,16 @@ namespace ALUGrid
     typedef ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLeafList(codim)) {}
 
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the leaf ghost partition iterator 
-  template<> 
+
+  // the leaf ghost partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 3, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIteratorHigherCodim< 3 >
   {
@@ -1161,16 +1161,16 @@ namespace ALUGrid
     typedef ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLeafList(codim)) {}
 
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the level ghost partition iterator 
-  template<> 
+
+  // the level ghost partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 1, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIteratorHigherCodim< 1 >
   {
@@ -1178,33 +1178,33 @@ namespace ALUGrid
     typedef ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLevelList(codim,level)) {}
 
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the level ghost partition iterator 
-  template<> 
+
+  // the level ghost partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 2, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
-  : public ALU3dGridGhostIteratorHigherCodim< 2 > 
+  : public ALU3dGridGhostIteratorHigherCodim< 2 >
   {
     enum { codim = 2 };
     typedef ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLevelList(codim,level)) {}
 
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the level ghost partition iterator 
-  template<> 
+
+  // the level ghost partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 3, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIteratorHigherCodim< 3 >
   {
@@ -1212,16 +1212,16 @@ namespace ALUGrid
     typedef ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostElementIteratorType;
 
   public:
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : ALU3dGridGhostIteratorHigherCodim<codim>((GhostElementIteratorType *)0,grid,level,nlinks,grid.getGhostLevelList(codim,level)) {}
 
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : ALU3dGridGhostIteratorHigherCodim<codim>(org) {}
   };
-  
-  // the all partition iterator 
-  template<> 
+
+  // the all partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 0, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 0, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1229,24 +1229,24 @@ namespace ALUGrid
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
     typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1254,8 +1254,8 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 1, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 1, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1263,24 +1263,24 @@ namespace ALUGrid
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
     typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1288,33 +1288,33 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
-  class ALU3dGridLeafIteratorWrapper< 2, Dune::All_Partition, Dune::ALUGridMPIComm > 
+  // the all partition iterator
+  template<>
+  class ALU3dGridLeafIteratorWrapper< 2, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 2, Dune::ALUGridMPIComm >::val_t >
   {
     enum { codim = 2 };
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
     typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1322,8 +1322,8 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLeafIteratorWrapper< 3, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 3, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1331,24 +1331,24 @@ namespace ALUGrid
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLeafIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
     typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLeafIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org ) 
+
+    ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1356,32 +1356,32 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< LeafValType >
   {
     typedef ALU3dGridLevelIteratorWrapper< 0, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef LeafValType val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
-    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType; 
+    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org) 
+
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org)
       : iter_(org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1389,31 +1389,31 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // placed here because we need ALU3dGridLevelIteratorWrapper<0,Dune::All_Partition> here 
-  // the edge level iterator 
+  // placed here because we need ALU3dGridLevelIteratorWrapper<0,Dune::All_Partition> here
+  // the edge level iterator
   template< PartitionIteratorType pitype, class Comm >
   class ALU3dGridLevelIteratorWrapper< 2, pitype, Comm >
   : public IteratorWrapperInterface< typename IteratorElType< 2, Comm >::val_t >
   {
-  public:  
+  public:
     typedef typename ALUHElementType< 2, Comm >::ElementType ElType;
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::HBndSegType HBndSegType;
     typedef typename Dune::ALU3dBasicImplTraits< Comm >::GEOEdgeType GEOEdgeType;
-    
+
     typedef typename IteratorElType< 2, Comm >::val_t val_t;
 
   private:
     mutable val_t elem_;
     const int level_;
 
-    typedef Dune :: ALU3dGridItemListType ItemListType; 
+    typedef Dune :: ALU3dGridItemListType ItemListType;
     ItemListType & edgeList_;
 
     size_t count_ ;
     bool maxLevel_;
-      
-  public:  
-    // constructor creating iterator 
+
+  public:
+    // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : elem_( (ElType *)0, (HBndSegType *)0 ),
@@ -1425,9 +1425,9 @@ namespace ALUGrid
         updateEdgeList(grid,level,nlinks);
     }
 
-    // copy constructor 
+    // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : elem_(org.elem_) 
+      : elem_(org.elem_)
       , level_(org.level_)
       , edgeList_( org.edgeList_ )
       , count_(org.count_)
@@ -1435,30 +1435,30 @@ namespace ALUGrid
     }
 
     int size  () { return edgeList_.getItemList().size(); }
-    void next ()      
-    { 
+    void next ()
+    {
       ++count_;
     }
 
-    void first()      
-    { 
+    void first()
+    {
       count_ = 0;
     }
-    
+
     int done () const { return ((count_ >= edgeList_.size()) ? 1: 0); }
-    
-    val_t & item () const 
-    { 
+
+    val_t & item () const
+    {
       alugrid_assert ( ! done () );
       elem_.first = ( (ElType *) edgeList_.getItemList()[count_]);
 
       alugrid_assert ( elem_.first );
-      return elem_; 
+      return elem_;
     }
 
-  private: 
+  private:
     template <class GridImp>
-    void updateEdgeList(const GridImp & grid, int level, int nlinks) 
+    void updateEdgeList(const GridImp & grid, int level, int nlinks)
     {
       typedef ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIterator;
       typedef typename ElementLevelIterator :: val_t el_val_t;
@@ -1466,22 +1466,22 @@ namespace ALUGrid
 
       edgeList_.getItemList().resize(0);
       std::map< int, int > visited;
-      
+
       for( iter.first(); ! iter.done(); iter.next() )
       {
         typedef typename Dune::ALU3dImplTraits< GridImp::elementType, Comm >::GEOElementType GEOElementType;
         enum { numEdges = Dune::EntityCount< GridImp::elementType >::numEdges };
-        
+
         GEOElementType *elem = 0;
         el_val_t & item = iter.item();
-        
+
         if( item.first )
           elem = static_cast< GEOElementType * > (item.first);
         else if( item.second )
           elem = static_cast< GEOElementType * > (item.second->getGhost().first);
 
         alugrid_assert ( elem );
-        for(int e=0; e<numEdges; ++e) 
+        for(int e=0; e<numEdges; ++e)
         {
           ElType * edge = elem->myhedge1(e);
           if( edge->isGhost() ) continue;
@@ -1498,8 +1498,8 @@ namespace ALUGrid
     }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 1, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 1, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1507,24 +1507,24 @@ namespace ALUGrid
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
-    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType; 
+    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1532,8 +1532,8 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 2, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface< IteratorElType< 2, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1541,24 +1541,24 @@ namespace ALUGrid
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
-    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType; 
+    typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }
@@ -1566,8 +1566,8 @@ namespace ALUGrid
     val_t & item () const { alugrid_assert ( ! done() ); return iter_.item(); }
   };
 
-  // the all partition iterator 
-  template<> 
+  // the all partition iterator
+  template<>
   class ALU3dGridLevelIteratorWrapper< 3, Dune::All_Partition, Dune::ALUGridMPIComm >
   : public IteratorWrapperInterface < IteratorElType< 3, Dune::ALUGridMPIComm >::val_t >
   {
@@ -1575,24 +1575,24 @@ namespace ALUGrid
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::InteriorBorder_Partition, Dune::ALUGridMPIComm > InteriorIteratorType;
     typedef ALU3dGridLevelIteratorWrapper< codim, Dune::Ghost_Partition, Dune::ALUGridMPIComm > GhostIteratorType;
 
-  public:  
+  public:
     typedef IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
     // use ALUGrids AlignIterator to combine Interior and Ghost Iterator
     typedef AlignIterator< InteriorIteratorType, GhostIteratorType, val_t > IteratorType;
   private:
     IteratorType iter_;
   public:
-    
-    template <class GridImp> 
-    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks ) 
+
+    template <class GridImp>
+    ALU3dGridLevelIteratorWrapper (const GridImp & grid, int level , const int nlinks )
       : iter_ ( InteriorIteratorType ( grid, level, nlinks ) ,
                 GhostIteratorType    ( grid, level, nlinks ) )
     {
     }
-    
-    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org ) 
+
+    ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
       : iter_ (org.iter_) {}
-    
+
     int size  () { return iter_.size(); }
     void next () { iter_.next(); }
     void first() { iter_.first(); }

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-// include serial part of ALUGrid 
+// include serial part of ALUGrid
 #include <dune/alugrid/grid.hh>
 
 using namespace ALUGrid;
@@ -14,7 +14,7 @@ using namespace std;
 typedef Hmesh GridType;
 
 
-void globalRefine(GridType& grid, int refCount ) 
+void globalRefine(GridType& grid, int refCount )
 {
   if( refCount <= 0 ) return ;
 
@@ -25,42 +25,42 @@ void globalRefine(GridType& grid, int refCount )
     {
       Element & tr = walk->getitem();
       tr.Refco_el::mark(Refco::ref);
-    } // end element loop 
+    } // end element loop
 
-    // refine the mesh 
+    // refine the mesh
     grid.refine();
   }
 }
 
 void hierarchicClear (Hmesh_basic::helement_t* el)
 {
-  // clear actual tag 
+  // clear actual tag
   el->Refco_el::clear();
-  // clear refined tag 
+  // clear refined tag
   el->Refco_el::clearWas();
-  // go to children  
+  // go to children
   for(Hmesh_basic::helement_t* child = el->down(); child; child = child->next())
   {
-    // clear marker for child 
+    // clear marker for child
     hierarchicClear(child);
   }
 }
 
-void postAdapt(GridType& grid) 
+void postAdapt(GridType& grid)
 {
   typedef Macro < Element > macro_t;
-  // get macro element iterator 
+  // get macro element iterator
   Listwalkptr <macro_t> walk( grid );
   for( walk->first() ; ! walk->done() ; walk->next())
   {
-    // get element pointer 
+    // get element pointer
     Hmesh_basic::helement_t* el = walk->getitem().operator ->();
-    // hierarchically clear all markers 
+    // hierarchically clear all markers
     hierarchicClear(el);
   }
 }
 
-int size(GridType& grid) 
+int size(GridType& grid)
 {
   int count = 0;
   Listwalkptr < Vertex > walk( grid );
@@ -81,22 +81,22 @@ int main (int argc, char ** argv )
 
   Hmesh* gridptr = 0;
   int ref = 1;
-  if( argc > 2 ) 
+  if( argc > 2 )
   {
-    // create conforming grid 
-    gridptr = new Hmesh( filename.c_str() ); 
+    // create conforming grid
+    gridptr = new Hmesh( filename.c_str() );
     ref = 2 ;
-    cout << "Create conforming grid " << endl; 
+    cout << "Create conforming grid " << endl;
   }
-  else 
+  else
   {
-    // create non-conforming grid 
+    // create non-conforming grid
     gridptr = new Hmesh( filename.c_str() , 1,   Refco::quart );
-    cout << "Create non-conforming grid " << endl; 
+    cout << "Create non-conforming grid " << endl;
   }
 
   Hmesh& grid = *gridptr ;
-  
+
   const int gRefine = 6;
   const int Nstep = (argc > 1) ? atoi( argv[1] ) : 5 ;
   const int N = (ref == 2) ? (ref * Nstep + 1) : Nstep;
@@ -149,10 +149,10 @@ int main (int argc, char ** argv )
     std::cout << "postAdapt(): " << timerRefine.elapsed() << std::endl ;
     refTimes[i] +=  timerRefine.elapsed();
 
-    if( i > 0 ) 
+    if( i > 0 )
       std::cout << "Factor to previous run: " << refTimes[i]/refTimes[i-1] << std::endl << std::endl;
-    else 
-      std::cout << std::endl; 
+    else
+      std::cout << std::endl;
   }
 
   for (int i = 0; i<N; ++i)
@@ -180,10 +180,10 @@ int main (int argc, char ** argv )
     std::cout << "postAdapt(): " << timerRefine.elapsed() << std::endl ;
     refTimes[i] +=  timerRefine.elapsed();
 
-    if( i > 0 ) 
+    if( i > 0 )
       std::cout << "Factor to previous run: " << crsTimes[i]/crsTimes[i-1] << std::endl << std::endl ;
-    else 
-      std::cout << std::endl; 
+    else
+      std::cout << std::endl;
   }
   return 0;
 }

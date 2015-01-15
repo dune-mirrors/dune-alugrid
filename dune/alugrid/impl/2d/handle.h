@@ -4,21 +4,21 @@
 #include "../indexstack.h"
 #include "../projectvertex.h"
 #include "vtxprojection.h"
-#include "grid.h"                               
+#include "grid.h"
 #include "listwalk.h"
 
 namespace ALU2DGrid
 {
 
-  // is defined in indexstack.h 
+  // is defined in indexstack.h
   typedef ::ALUGrid::IndexManagerType IndexManager2dType;
 
-  // is defined in indexstack.h 
+  // is defined in indexstack.h
   typedef ::ALUGrid::RestoreInfo RestoreInfo;
 
   // number of different index manager that exists
   enum { numOfIndexManager2d = 4 };
-  // see specific codes in class Hmesh below 
+  // see specific codes in class Hmesh below
 
 
   // +----------------------------------------------------------------------------+
@@ -29,32 +29,32 @@ namespace ALU2DGrid
 
   struct IndexProvider
   {
-     enum { IM_Elements = 0, // index manager id for elements 
-            IM_Edges = 1,    // index manager id for edges  
-            IM_Vertices = 2, // index manager id for vertices  
-            IM_Bnd = 3       // index manager id for bnd 
+     enum { IM_Elements = 0, // index manager id for elements
+            IM_Edges = 1,    // index manager id for edges
+            IM_Vertices = 2, // index manager id for vertices
+            IM_Bnd = 3       // index manager id for bnd
      };
 
-     int getIndex(int indextype) 
+     int getIndex(int indextype)
      {
        alugrid_assert ( indextype >= 0 && indextype < numOfIndexManager2d );
        return indexmanager[indextype].getIndex();
      }
 
-     void freeIndex(int indextype, int index) 
+     void freeIndex(int indextype, int index)
      {
        alugrid_assert ( indextype >= 0 && indextype < numOfIndexManager2d );
        indexmanager[indextype].freeIndex(index);
      }
 
-     // return current size of used indices 
-     int indexManagerSize (int cd) const 
+     // return current size of used indices
+     int indexManagerSize (int cd) const
      {
-       // only for elements, edges, and vertices 
+       // only for elements, edges, and vertices
        alugrid_assert (cd<3 && cd>=0);
        return indexmanager[cd].getMaxIndex();
      }
-     
+
      virtual ~IndexProvider() {}
     protected:
      IndexManager2dType indexmanager[numOfIndexManager2d];
@@ -146,52 +146,52 @@ namespace ALU2DGrid
 
       const ProjectVertex_t  *_projectVertex;
       CompatibilityVertexProjection _compatibilityVertexProjection;
-      
+
       Listwalk < helement_t > * walk( helement_t *) { return new Leafwalk < element_t > (mel); }
 
       // von mir dazugeschrieben...
       Listwalk < helement_t > * walk( helement_t *, int level) { return new Levelwalk < element_t > (mel, level); }
-      
-      Listwalk < vertex_t > * walk(vertex_t *) { return new Listwalk_impl < vertex_t > (vl); } 
+
+      Listwalk < vertex_t > * walk(vertex_t *) { return new Listwalk_impl < vertex_t > (vl); }
 
       Listwalk < macroelement_t > * walk(macroelement_t *) { return new Listwalk_impl < macroelement_t > (mel); }
-      
+
       Listwalk < hbndel_t > * walk( hbndel_t *) { return new Leafwalk < bndel_t > (mbl); }
-      
+
       // von mir dazugeschrieben... (von wem?)
       Listwalk < hbndel_t > * walk( hbndel_t *, int level) { return new Levelwalk < bndel_t > (mbl, level); }
 
       Hmesh_basic(const Hmesh_basic &);
-      
+
       Hmesh_basic & operator = (const Hmesh_basic &);
 
    protected:
-      void asciiwritetriang(std::ostream &, double, unsigned long int nbr, 
+      void asciiwritetriang(std::ostream &, double, unsigned long int nbr,
                             int nconfDeg, Refco::tag_t ref_rule);
-      
+
       void asciireadtriang ( std::istream &, const bool = true );
 
       void setorientation();
 
     public :
-     Hmesh_basic() : 
-        vl(this), 
-        mel(this), 
+     Hmesh_basic() :
+        vl(this),
+        mel(this),
         mbl(this),
         _projectVertex( 0 )
      {}
 
-     Hmesh_basic(const ProjectVertex_t* pv) : 
-        vl(this), 
-        mel(this), 
+     Hmesh_basic(const ProjectVertex_t* pv) :
+        vl(this),
+        mel(this),
         mbl(this),
         _projectVertex( pv )
      {}
 
-     virtual ~Hmesh_basic() {}     
+     virtual ~Hmesh_basic() {}
 
-     // return number of macro boundary segments 
-     size_t numMacroBndSegments() const 
+     // return number of macro boundary segments
+     size_t numMacroBndSegments() const
      {
        return mbl.size();
      }
@@ -210,7 +210,7 @@ namespace ALU2DGrid
          (*_projectVertex)( static_cast< const helement_t * >( element ), local, global );
      }
 
-     // set vertex projection pointer 
+     // set vertex projection pointer
      void setVertexProjection(const ProjectVertex_t* ppv)
      {
        _projectVertex = ppv;
@@ -221,15 +221,15 @@ namespace ALU2DGrid
        _compatibilityVertexProjection.setVertexProjection( ppv );
        _projectVertex = &_compatibilityVertexProjection;
      }
-     
+
      void makeneighbours();
-             
+
      virtual void refresh() { }
-         
+
      friend class Listwalkptr < helement_t >;
-   
+
      friend class Listwalkptr < vertex_t >;
-    
+
      friend class Listwalkptr < hbndel_t >;
 
      friend class Listwalkptr < macroelement_t >;
@@ -313,7 +313,7 @@ namespace ALU2DGrid
     Hmesh ();
     Hmesh ( const std::string &, int, Refco::tag_t pref_rule );
 
-    void printMemSize () 
+    void printMemSize ()
     {
       std::cout << "short int    = " << sizeof(short int) << std::endl;
       std::cout << "Basic        = " << sizeof( Basic  ) << std::endl;
@@ -331,7 +331,7 @@ namespace ALU2DGrid
     }
 
     // constructor taking istream with macro triang
-    // number of hanging nodes and refinement rule 
+    // number of hanging nodes and refinement rule
     Hmesh ( std::istream &, int, Refco::tag_t pref_rule );
     Hmesh ( const std::string &, Refco::tag_t pref_rule = Refco::ref_1 );
     Hmesh ( const std::string &, int );

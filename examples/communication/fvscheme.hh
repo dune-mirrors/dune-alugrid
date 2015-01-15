@@ -18,10 +18,10 @@
  *  which are not so much based on an indicator but more on mere
  *  geometrical and run time considerations. If based on some indicator
  *  an entity is to be marked, this class additionally tests for example
- *  that a maximal or minimal level will not be exceeded. 
+ *  that a maximal or minimal level will not be exceeded.
  */
 template< class Grid >
-struct GridMarker 
+struct GridMarker
 {
   typedef typename Grid::template Codim< 0 >::Entity        Entity;
   typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
@@ -38,10 +38,10 @@ struct GridMarker
     minLevel_( minLevel ),
     maxLevel_( maxLevel ),
     wasMarked_( 0 ),
-    adaptive_( maxLevel_ > minLevel_ ) 
+    adaptive_( maxLevel_ > minLevel_ )
   {}
 
-  /** \brief mark an element for refinement 
+  /** \brief mark an element for refinement
    *  \param entity  the entity to mark; it will only be marked if its level is below maxLevel.
    */
   void refine ( const Entity &entity )
@@ -65,13 +65,13 @@ struct GridMarker
     }
   }
 
-  /** \brief get the refinement marker 
+  /** \brief get the refinement marker
    *  \param entity entity for which the marker is required
    *  \return value of the marker
    */
   int get ( const Entity &entity ) const
   {
-    if( adaptive_ ) 
+    if( adaptive_ )
       return grid_.getMark( entity );
     else
     {
@@ -80,11 +80,11 @@ struct GridMarker
     }
   }
 
-  /** \brief returns true if any entity was marked for refinement 
+  /** \brief returns true if any entity was marked for refinement
    */
-  bool marked() 
+  bool marked()
   {
-    if( adaptive_ ) 
+    if( adaptive_ )
     {
       wasMarked_ = grid_.comm().max (wasMarked_);
       return (wasMarked_ != 0);
@@ -109,7 +109,7 @@ private:
  *
  *  \tparam  V    type of vector modelling a piecewise constant function
  *  \tparam  Model  discretization of the Model.
- *                  This template class must provide 
+ *                  This template class must provide
  *                  the following types and methods:
  *  \code
       typedef ... RangeType;
@@ -117,11 +117,11 @@ private:
       double numericalFlux ( const DomainType &normal,
                              const double time,
                              const DomainType &xGlobal,
-                             const RangeType &uLeft, 
+                             const RangeType &uLeft,
                              const RangeType &uRight,
                              RangeType &flux ) const;
-      double boundaryFlux ( const int bndId, 
-                            const DomainType &normal, 
+      double boundaryFlux ( const int bndId,
+                            const DomainType &normal,
                             const double time,
                             const DomainType &xGlobal,
                             const RangeType& uLeft,
@@ -135,15 +135,15 @@ private:
       double indicator ( const DomainType &normal,
                          const double time,
                          const DomainType &xGlobal,
-                         const RangeType &uLeft, const RangeType &uRight) const 
-      double boundaryIndicator ( const int bndId, 
-                                 const DomainType &normal, 
+                         const RangeType &uLeft, const RangeType &uRight) const
+      double boundaryIndicator ( const int bndId,
+                                 const DomainType &normal,
                                  const double time,
                                  const DomainType &xGlobal,
                                  const RangeType& uLeft) const
  *  \endcode
  */
-template< class V, class Model > 
+template< class V, class Model >
 struct FiniteVolumeScheme
 {
   // first we extract some types
@@ -155,7 +155,7 @@ struct FiniteVolumeScheme
   static const int dimRange = Model::dimRange;
   typedef typename Grid::ctype ctype;
 
-  // only apply the scheme to interior elements 
+  // only apply the scheme to interior elements
   static const Dune :: PartitionIteratorType ptype = Dune :: InteriorBorder_Partition ;
 
   // types of codim zero entity iterator and geometry
@@ -179,7 +179,7 @@ public:
   /** \brief constructor
    *
    *  \param[in]  gridView  gridView to operate on
-   *  \param[in]  model       discretization of the Model 
+   *  \param[in]  model       discretization of the Model
    */
   FiniteVolumeScheme ( const GridView &gridView, const Model &model )
   : gridView_( gridView )
@@ -189,7 +189,7 @@ public:
   /** \brief compute the update vector for one time step
    *
    *  \param[in]   time      current time
-   *  \param[in]   solution  solution at time <tt>time</tt> 
+   *  \param[in]   solution  solution at time <tt>time</tt>
    *                         (arbitrary type with operator[](const Entity&) operator)
    *  \param[out]  update    result of the flux computation
    *
@@ -202,7 +202,7 @@ public:
   double
   border ( const double time, const Arg &solution, Vector &update ) const;
 
-  /** \brief set grid marker for refinement / coarsening 
+  /** \brief set grid marker for refinement / coarsening
    *
    *  \param[in]  time      current time
    *  \param[in]  solution  solution at time <tt>time</tt>
@@ -210,9 +210,9 @@ public:
    *
    *  \note The marker is responsible for limiting the grid depth.
    *
-   *  \return number of interior elements 
+   *  \return number of interior elements
    */
-  size_t 
+  size_t
   mark ( const double time, const Vector &solution, GridMarker< Grid > &marker ) const;
 
   /** \brief obtain the grid view for this scheme
@@ -232,40 +232,40 @@ private:
   const Model &model_;
 }; // end FiniteVolumeScheme
 
-template< class V, class Model > 
+template< class V, class Model >
 template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::border ( const double time, const Arg &solution, Vector &update ) const
 {
-  // time step size (using std:min(.,dt) so set to maximum) 
-  double dt = std::numeric_limits<double>::infinity(); 
+  // time step size (using std:min(.,dt) so set to maximum)
+  double dt = std::numeric_limits<double>::infinity();
 
   static const Dune :: PartitionIteratorType pghosttype = Dune :: Ghost_Partition ;
   typedef typename GridView::template Codim< 0 >:: template Partition< pghosttype > :: Iterator  Iterator;
   // compute update vector and optimum dt in one grid traversal
-  const Iterator endit = gridView().template end< 0, pghosttype >();     
+  const Iterator endit = gridView().template end< 0, pghosttype >();
   for( Iterator it = gridView().template begin< 0, pghosttype >(); it != endit; ++it )
   {
     const Entity &entity = *it;
-    const IntersectionIterator iitend = gridView().iend( entity ); 
+    const IntersectionIterator iitend = gridView().iend( entity );
     for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
       apply( *(iit->outside()), time, solution, update, dt );
-  } // end grid traversal                     
+  } // end grid traversal
 
   // return time step
   return  dt;
 }
 
-template< class V, class Model > 
+template< class V, class Model >
 template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
-  // time step size (using std:min(.,dt) so set to maximum) 
-  double dt = std::numeric_limits<double>::infinity(); 
+  // time step size (using std:min(.,dt) so set to maximum)
+  double dt = std::numeric_limits<double>::infinity();
 
   // compute update vector and optimum dt in one grid traversal
-  const Iterator endit = gridView().template end< 0, ptype >();     
+  const Iterator endit = gridView().template end< 0, ptype >();
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it )
     apply( *it, time, solution, update, dt );
 
@@ -273,10 +273,10 @@ inline double FiniteVolumeScheme< V, Model >
   return  dt;
 }
 
-template< class V, class Model > 
+template< class V, class Model >
 template< class Arg >
 inline void FiniteVolumeScheme< V, Model >
-  ::apply ( const Entity &entity, 
+  ::apply ( const Entity &entity,
               const double time, const Arg &solution, Vector &update, double &dt ) const
 {
   if ( ! update.visitElement( entity ) )
@@ -288,13 +288,13 @@ inline void FiniteVolumeScheme< V, Model >
   double waveSpeed = 0.0;
 
   // cell volume
-  const double enVolume = geo.volume(); 
-  
+  const double enVolume = geo.volume();
+
   // 1 over cell volume
-  const double enVolume_1 = 1.0/enVolume; 
+  const double enVolume_1 = 1.0/enVolume;
 
   // run through all intersections with neighbors and boundary
-  const IntersectionIterator iitend = gridView().iend( entity ); 
+  const IntersectionIterator iitend = gridView().iend( entity );
   for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
   {
     const Intersection &intersection = *iit;
@@ -324,13 +324,13 @@ inline void FiniteVolumeScheme< V, Model >
         const RangeType uLeft  = solution.evaluate( entity, point );
         const RangeType uRight = solution.evaluate( neighbor, point );
         // apply numerical flux
-        RangeType flux; 
+        RangeType flux;
         double ws = model_.numericalFlux( normal, time, point, uLeft, uRight, flux );
         waveSpeed = ws * faceVolume;
 
-        // calc update of entity 
+        // calc update of entity
         update[ entity ].axpy( -enVolume_1 * faceVolume, flux );
-        // calc update of neighbor 
+        // calc update of neighbor
         update[ neighbor ].axpy( nbVolume_1 * faceVolume, flux );
 
         // compute dt restriction
@@ -342,8 +342,8 @@ inline void FiniteVolumeScheme< V, Model >
     {
       // evaluate data
       const RangeType uLeft = solution.evaluate( entity, point );
-      // apply boundary flux 
-      RangeType flux; 
+      // apply boundary flux
+      RangeType flux;
       double ws = model_.boundaryFlux( normal, time, point, uLeft, flux );
       waveSpeed = ws * faceVolume;
 
@@ -353,23 +353,23 @@ inline void FiniteVolumeScheme< V, Model >
       // compute dt restriction
       dt = std::min( dt, enVolume / waveSpeed );
     }
-  } // end all intersections            
+  } // end all intersections
 
-  // mark entity as done 
+  // mark entity as done
   update.visited( entity );
 }
 
-template< class V, class Model > 
+template< class V, class Model >
 inline size_t FiniteVolumeScheme< V, Model >
   ::mark ( const double time, const Vector &solution, GridMarker<Grid> &marker ) const
 {
-  size_t elements = 0; 
+  size_t elements = 0;
 
   // clear grid markers internal flags
   marker.reset();
 
   // grid traversal
-  const Iterator endit = gridView().template end< 0, ptype >();     
+  const Iterator endit = gridView().template end< 0, ptype >();
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it, ++elements )
   {
     const Entity &entity = *it;
@@ -377,15 +377,15 @@ inline size_t FiniteVolumeScheme< V, Model >
     // if marked for refinement nothing has to be done for this element
     if( marker.get( entity ) > 0 )
       continue;
-    
+
     // maximum value of the indicator over all intersections
     double entityIndicator = 0.0;
 
     // need the value on the entity
     const RangeType &uLeft = solution[ entity ];
-    
+
     // run through all intersections with neighbors and boundary
-    const IntersectionIterator iiterend = gridView().iend( entity ); 
+    const IntersectionIterator iiterend = gridView().iend( entity );
     for( IntersectionIterator iiter = gridView().ibegin( entity ); iiter != iiterend; ++iiter )
     {
       const Intersection &intersection = *iiter;
@@ -435,7 +435,7 @@ inline size_t FiniteVolumeScheme< V, Model >
     }
   } // end of loop over entities
 
-  // return number of elements 
+  // return number of elements
   return elements;
 }
 

@@ -3,7 +3,7 @@
 
 #include <dune/alugrid/common/memory.hh>
 
-namespace Dune 
+namespace Dune
 {
   template <class InterfaceType>
   struct MakeableInterfaceObject ;
@@ -22,13 +22,13 @@ namespace Dune
     template <class GridObjectFactory>
     class ALUGridEntityFactory<GridObjectFactory,0>
     {
-    public:  
+    public:
       enum { codim = 0 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
       typedef typename EntityObject :: ImplementationType EntityImp;
-      
-      inline static EntityObject * 
+
+      inline static EntityObject *
       getNewEntity (const GridObjectFactory& factory, int level)
       {
         return factory.entityProvider_.getEntityObject( factory, level, (EntityImp *) 0);
@@ -43,13 +43,13 @@ namespace Dune
     template <class GridObjectFactory>
     class ALUGridEntityFactory<GridObjectFactory,1>
     {
-    public:  
+    public:
       enum { codim = 1 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
       typedef typename EntityObject :: ImplementationType EntityImp;
-      
-      inline static EntityObject * 
+
+      inline static EntityObject *
       getNewEntity (const GridObjectFactory& factory, int level)
       {
         return factory.faceProvider_.getEntityObject( factory, level, (EntityImp *) 0);
@@ -64,13 +64,13 @@ namespace Dune
     template <class GridObjectFactory>
     class ALUGridEntityFactory<GridObjectFactory,2>
     {
-    public:  
+    public:
       enum { codim = 2 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
       typedef typename EntityObject :: ImplementationType EntityImp;
-      
-      inline static EntityObject * 
+
+      inline static EntityObject *
       getNewEntity (const GridObjectFactory& factory, int level)
       {
         return factory.edgeProvider_.getEntityObject( factory, level, (EntityImp *) 0);
@@ -81,17 +81,17 @@ namespace Dune
         factory.edgeProvider_.freeObject( e );
       }
     };
-    
+
     template <class GridObjectFactory>
     class ALUGridEntityFactory<GridObjectFactory,3>
     {
-    public:  
+    public:
       enum { codim = 3 };
       typedef typename GridImp :: template Codim<codim> :: Entity Entity;
       typedef MakeableInterfaceObject<Entity> EntityObject;
       typedef typename EntityObject :: ImplementationType EntityImp;
-      
-      inline static EntityObject * 
+
+      inline static EntityObject *
       getNewEntity (const GridObjectFactory& factory, int level)
       {
         return factory.vertexProvider_.getEntityObject( factory, level, (EntityImp *) 0);
@@ -104,7 +104,7 @@ namespace Dune
     }; // end of ALUGridEntityFactory
 
     enum { vxCodim = GridImp :: dimension };
-  public:  
+  public:
     typedef GridImp GridType;
     typedef ALUGridObjectFactory FactoryType;
 
@@ -116,13 +116,13 @@ namespace Dune
     typedef typename GridType :: LeafIntersectionIteratorImp  LeafIntersectionIteratorImp ;
     typedef typename GridType :: LevelIntersectionIteratorImp LevelIntersectionIteratorImp ;
 
-    // declare friendship 
+    // declare friendship
     friend class ALUGridEntityFactory<FactoryType,0>;
     friend class ALUGridEntityFactory<FactoryType,1>;
     friend class ALUGridEntityFactory<FactoryType,2>;
     friend class ALUGridEntityFactory<FactoryType,3>;
 
-  protected:  
+  protected:
     typedef ALUMemoryProvider< EntityObject > EntityProvider;
     typedef ALUMemoryProvider< FaceObject >   FaceProvider;
     typedef ALUMemoryProvider< EdgeObject >   EdgeProvider;
@@ -132,7 +132,7 @@ namespace Dune
     mutable FaceProvider     faceProvider_;
     mutable EdgeProvider     edgeProvider_;
     mutable VertexProvider   vertexProvider_;
-  
+
     typedef ALUMemoryProvider< LeafIntersectionIteratorImp > LeafIntersectionIteratorProviderType;
     typedef ALUMemoryProvider< LevelIntersectionIteratorImp >   LevelIntersectionIteratorProviderType;
 
@@ -141,7 +141,7 @@ namespace Dune
 
     const GridType& grid_ ;
 
-  private:  
+  private:
     ALUGridObjectFactory( const ALUGridObjectFactory& other );
 
   public:
@@ -149,8 +149,8 @@ namespace Dune
 
     ALUGridObjectFactory( const GridType& grid ) : grid_( grid ) {}
 
-    template <int codim> 
-    inline MakeableInterfaceObject<typename GridType :: Traits::template Codim<codim>::Entity> * 
+    template <int codim>
+    inline MakeableInterfaceObject<typename GridType :: Traits::template Codim<codim>::Entity> *
     getNewEntity ( int level = -1 ) const
     {
       return ALUGridEntityFactory<FactoryType,codim>::getNewEntity( *this, level);
@@ -161,21 +161,21 @@ namespace Dune
     {
       ALUGridEntityFactory<FactoryType,codim>::freeEntity(*this, en);
     }
-  
+
     LeafIntersectionIteratorImp& getIntersection( const int wLevel, const LeafIntersectionIteratorImp* ) const
     {
-      return * (leafInterItProvider_.getObject( *this, wLevel )); 
+      return * (leafInterItProvider_.getObject( *this, wLevel ));
     }
 
-    LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const 
+    LevelIntersectionIteratorImp& getIntersection(const int wLevel, const LevelIntersectionIteratorImp* ) const
     {
-      return * (levelInterItProvider_.getObject( *this, wLevel )); 
+      return * (levelInterItProvider_.getObject( *this, wLevel ));
     }
 
-    //! free intersection 
+    //! free intersection
     void freeIntersection(LeafIntersectionIteratorImp  & it) const { leafInterItProvider_.freeObject( &it ); }
     void freeIntersection(LevelIntersectionIteratorImp & it) const { levelInterItProvider_.freeObject( &it ); }
   }; /// end class ALUGridObjectFactory
 
-}  // end namespace Dune 
+}  // end namespace Dune
 #endif

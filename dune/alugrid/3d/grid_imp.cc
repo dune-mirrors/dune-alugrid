@@ -16,7 +16,7 @@
 #include "grid.hh"
 
 #if COMPILE_ALUGRID_INLINE
-#define alu_inline inline 
+#define alu_inline inline
 #else
 #define alu_inline
 #endif
@@ -25,41 +25,41 @@ namespace Dune
 {
 
   template< class Comm >
-  template< class GridType > 
-  alu_inline 
-  void ALU3dGridVertexList< Comm >:: 
-  setupVxList(const GridType & grid, int level) 
+  template< class GridType >
+  alu_inline
+  void ALU3dGridVertexList< Comm >::
+  setupVxList(const GridType & grid, int level)
   {
     // iterates over grid elements of given level and adds all vertices to
-    // given list  
+    // given list
 
     enum { codim = 3 };
 
     VertexListType & vxList = vertexList_;
-    
+
     //we need Codim 3 instead of Codim dim because the ALUGrid IndexManager is called
-    unsigned int vxsize = grid.hierarchicIndexSet().size(codim); 
-    if( vxList.size() < vxsize ) vxList.reserve(vxsize);      
+    unsigned int vxsize = grid.hierarchicIndexSet().size(codim);
+    if( vxList.size() < vxsize ) vxList.reserve(vxsize);
     std::vector<int> visited_(vxsize);
-    
-    for(unsigned int i=0; i<vxsize; i++) 
+
+    for(unsigned int i=0; i<vxsize; i++)
     {
       visited_[i] = 0;
     }
 
     vxList.resize(0);
-    
+
     std::vector< bool > & validList = validateList_;
-    
+
     if( validList.capacity() < vxsize) validList.reserve(vxsize);
     validList.resize(vxsize);
 
-    //set all values to true 
-    for(size_t i=0; i<vxsize; ++i)   
+    //set all values to true
+    for(size_t i=0; i<vxsize; ++i)
        validList[i] = true;
-    
-    
-    
+
+
+
     const ALU3dGridElementType elType = GridType:: elementType;
     const int dim = GridType:: dimension;
 
@@ -68,17 +68,17 @@ namespace Dune
     if( elType == tetra && dim == 2 )
     {
       validList[0] = false;
-    }     
+    }
 
     typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIteratorType;
     typedef typename ElementLevelIteratorType :: val_t val_t;
-    
+
     typedef ALU3dImplTraits< elType, Comm > ImplTraits;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
     typedef typename ImplTraits::VertexType VertexType;
 
     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
-    
+
     ElementLevelIteratorType it ( grid, level, grid.nlinks() );
 
     int count = 0;
@@ -86,25 +86,25 @@ namespace Dune
     {
       val_t & item = it.item();
 
-      IMPLElementType * elem = 0; 
+      IMPLElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first); 
+        elem = static_cast<IMPLElementType *> (item.first);
       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
 
       alugrid_assert ( elem );
 
       for(int i=0; i<nVx; ++i)
       {
-        VertexType * vx = elem->myvertex(i); 
+        VertexType * vx = elem->myvertex(i);
         alugrid_assert ( vx );
 
-        // insert only interior and border vertices 
+        // insert only interior and border vertices
         if( vx->isGhost() ) continue;
 
-        const int idx = vx->getIndex(); 
+        const int idx = vx->getIndex();
         //in the 2d hexa case items are only valid, if the local ALU index is below 4
-        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;  
+        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);
@@ -114,43 +114,43 @@ namespace Dune
       }
     }
     alugrid_assert ( count == (int) vxList.size());;
-    up2Date_ = true;    
+    up2Date_ = true;
   }
 
 
   template< class Comm >
   template< class GridType >
-  alu_inline 
+  alu_inline
   void ALU3dGridLeafVertexList< Comm >::
-  setupVxList(const GridType & grid) 
+  setupVxList(const GridType & grid)
   {
     // iterates over grid elements of given level and adds all vertices to
-    // given list  
+    // given list
     enum { codim = 3 };
 
     VertexListType & vxList = vertexList_;
-    
-    //we need Codim 3 instead of Codim dim because the ALUGrid IndexManager is called    
+
+    //we need Codim 3 instead of Codim dim because the ALUGrid IndexManager is called
     size_t vxsize = grid.hierarchicIndexSet().size(codim);
     if( vxList.capacity() < vxsize) vxList.reserve(vxsize);
     vxList.resize(vxsize);
 
-    for(size_t i=0; i<vxsize; ++i) 
-    {   
+    for(size_t i=0; i<vxsize; ++i)
+    {
       ItemType & vx = vxList[i];
       vx.first  = 0;
       vx.second = -1;
     }
-    
- 
-    std::vector< bool > & validList = validateList_; 
-    
+
+
+    std::vector< bool > & validList = validateList_;
+
     if( validList.capacity() < vxsize) validList.reserve(vxsize);
     validList.resize(vxsize);
 
     //set all values to true
-    for(size_t i=0; i<vxsize; ++i)   
-      validList[i] = true;              
+    for(size_t i=0; i<vxsize; ++i)
+      validList[i] = true;
 
     const ALU3dGridElementType elType = GridType:: elementType;
     const int dim = GridType:: dimension;
@@ -159,17 +159,17 @@ namespace Dune
     if(elType == tetra && dim == 2)
     {
       validList[0] = false;
-    } 
+    }
 
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, Dune::All_Partition, Comm > ElementIteratorType;
     typedef typename ElementIteratorType :: val_t val_t;
-    
+
     typedef ALU3dImplTraits< elType, Comm > ImplTraits;
     typedef typename ImplTraits::IMPLElementType IMPLElementType;
-    typedef typename ImplTraits::VertexType VertexType; 
+    typedef typename ImplTraits::VertexType VertexType;
 
     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
-    
+
     ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
 
 #ifdef ALUGRIDDEBUG
@@ -179,48 +179,48 @@ namespace Dune
     {
       val_t & item = it.item();
 
-      IMPLElementType * elem = 0; 
+      IMPLElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first); 
+        elem = static_cast<IMPLElementType *> (item.first);
       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
-      
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+
       alugrid_assert ( elem );
       int level = elem->level();
 
       for(int i=0; i<nVx; ++i)
       {
-        VertexType * vx = elem->myvertex(i); 
+        VertexType * vx = elem->myvertex(i);
         alugrid_assert ( vx );
 
-        // insert only interior and border vertices 
+        // insert only interior and border vertices
         if( vx->isGhost() ) continue;
 
-        const int idx = vx->getIndex(); 
+        const int idx = vx->getIndex();
         ItemType & vxpair = vxList[idx];
         //in the 2d hexa case items are only valid, if the local index is below 4
         if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;
         if( vxpair.first == 0 )
         {
-          vxpair.first  = vx; 
-          vxpair.second = level; 
+          vxpair.first  = vx;
+          vxpair.second = level;
 #ifdef ALUGRIDDEBUG
           ++ count;
 #endif
         }
         // always store max level of vertex as grdi definition says
-        else 
+        else
         {
           // set the max level for each vertex, see Grid definition
           if (vxpair.second < level) vxpair.second = level;
         }
       }
     }
-    
+
     //std::cout << count << "c | s " << vxList.size() << "\n";
-    // make sure that the found number of vertices equals to stored ones 
+    // make sure that the found number of vertices equals to stored ones
     //alugrid_assert ( count == (int)vxList.size() );
-    up2Date_ = true;    
+    up2Date_ = true;
   }
 
 
@@ -229,7 +229,7 @@ namespace Dune
   // ---------
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   const ALU3dGrid< actualDim, actualDimw, elType, Comm > &
   ALU3dGrid< actualDim, actualDimw, elType, Comm >::operator= ( const ALU3dGrid< actualDim, actualDimw, elType, Comm > &other )
   {
@@ -239,11 +239,11 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   ALU3dGrid< actualDim, actualDimw, elType, Comm >::~ALU3dGrid ()
   {
     delete communications_;
-    delete vertexProjection_; 
+    delete vertexProjection_;
     //delete bndPrj_;
     if( bndVec_ )
     {
@@ -251,7 +251,7 @@ namespace Dune
       for(size_t i=0; i<bndSize; ++i)
       {
         delete (*bndVec_)[i];
-      } 
+      }
       delete bndVec_; bndVec_ = 0;
     }
 
@@ -271,10 +271,10 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   int ALU3dGrid< actualDim, actualDimw, elType, Comm >::size ( int level, int codim ) const
   {
-    // if we dont have this level return 0 
+    // if we dont have this level return 0
     if( (level > maxlevel_) || (level < 0) ) return 0;
 
     alugrid_assert ( codim >= 0);
@@ -287,7 +287,7 @@ namespace Dune
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
   size_t ALU3dGrid< actualDim, actualDimw, elType, Comm >::numBoundarySegments () const
-  { 
+  {
     if (actualDim == 3)
       return myGrid().numMacroBndSegments();
     else if(elType == tetra)
@@ -297,19 +297,19 @@ namespace Dune
   }
 
 
-  // --size 
+  // --size
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
-  int ALU3dGrid< actualDim, actualDimw, elType, Comm >::size ( int level, GeometryType type ) const 
+  alu_inline
+  int ALU3dGrid< actualDim, actualDimw, elType, Comm >::size ( int level, GeometryType type ) const
   {
-    if(elType == tetra && !type.isSimplex()) return 0; 
-    if(elType == hexa  && !type.isCube   ()) return 0; 
+    if(elType == tetra && !type.isSimplex()) return 0;
+    if(elType == hexa  && !type.isCube   ()) return 0;
     return size( level, dimension - type.dim() );
   }
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   int ALU3dGrid< actualDim, actualDimw, elType, Comm >::size ( int codim ) const
   {
     alugrid_assert ( codim >= 0 );
@@ -321,17 +321,17 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   int ALU3dGrid< actualDim, actualDimw, elType, Comm >::size ( GeometryType type ) const
   {
-    if(elType == tetra && !type.isSimplex()) return 0; 
-    if(elType == hexa  && !type.isCube   ()) return 0; 
+    if(elType == tetra && !type.isSimplex()) return 0;
+    if(elType == hexa  && !type.isCube   ()) return 0;
     return size( dimension - type.dim() );
   }
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   int ALU3dGrid< actualDim, actualDimw, elType, Comm >::ghostSize ( int codim ) const
   {
     return ( ghostCellsEnabled() && codim == 0 ) ? 1 : 0 ;
@@ -339,15 +339,15 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   int ALU3dGrid< actualDim, actualDimw, elType, Comm >::ghostSize ( int level, int codim ) const
   {
     return ghostSize( codim );
   }
 
-  // calc all necessary things that might have changed 
+  // calc all necessary things that might have changed
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::updateStatus()
   {
     calcMaxLevel();
@@ -356,29 +356,29 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::calcMaxLevel ()
   {
-    // old fashioned way 
+    // old fashioned way
     int testMaxLevel = 0;
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
     IteratorType w (*this, maxLevel(), nlinks() );
-    
-    typedef typename IteratorType :: val_t val_t ; 
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
-    
+
+    typedef typename IteratorType :: val_t val_t ;
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
-      IMPLElementType * elem = 0; 
+      IMPLElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first); 
+        elem = static_cast<IMPLElementType *> (item.first);
       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first); 
+        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
 
       alugrid_assert ( elem );
-      
+
       int level = elem->level();
       if(level > testMaxLevel) testMaxLevel = level;
     }
@@ -389,7 +389,7 @@ namespace Dune
 
   // --calcExtras
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::calcExtras ()
   {
     // make sure maxLevel is the same on all processes ????
@@ -398,11 +398,11 @@ namespace Dune
     if(sizeCache_) delete sizeCache_;
     sizeCache_ = new SizeCacheType (*this);
 
-    // unset up2date before recalculating the index sets, 
+    // unset up2date before recalculating the index sets,
     // becasue they will use this feature
     leafVertexList_.unsetUp2Date();
-    for(size_t i=0; i<MAXL; ++i) 
-    { 
+    for(size_t i=0; i<MAXL; ++i)
+    {
       vertexList_[i].unsetUp2Date();
       levelEdgeList_[i].unsetUp2Date();
     }
@@ -416,15 +416,15 @@ namespace Dune
       }
     }
 
-    // update all index set that are already in use 
+    // update all index set that are already in use
     for(size_t i=0; i<levelIndexVec_.size(); ++i)
     {
-      if(levelIndexVec_[i]) 
+      if(levelIndexVec_[i])
         (*(levelIndexVec_[i])).calcNewIndex( this->template lbegin<0>( i ),
                                              this->template lend<0>( i ) );
     }
 
-    if(leafIndexSet_) 
+    if(leafIndexSet_)
       leafIndexSet_->calcNewIndex( this->template leafbegin<0>(), this->template leafend<0>() );
 
     // build global ID set new (to be revised)
@@ -436,7 +436,7 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   const typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::LeafIndexSet &
   ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafIndexSet () const
   {
@@ -447,13 +447,13 @@ namespace Dune
   }
 
 
-  // global refine 
+  // global refine
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::globalRefine ( int refCount )
   {
-    alugrid_assert ( (refCount + maxLevel()) < MAXL ); 
-    
+    alugrid_assert ( (refCount + maxLevel()) < MAXL );
+
     for( int count = refCount; count > 0; --count )
     {
       const LeafIteratorType end = leafend();
@@ -467,7 +467,7 @@ namespace Dune
 
   // preprocess grid
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   bool ALU3dGrid< actualDim, actualDimw, elType, Comm >::preAdapt()
   {
     return (coarsenMarked_ > 0);
@@ -476,12 +476,12 @@ namespace Dune
 
   // adapt grid
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   bool ALU3dGrid< actualDim, actualDimw, elType, Comm >::adapt ()
   {
     bool ref = false;
 
-    if( lockPostAdapt_ == true ) 
+    if( lockPostAdapt_ == true )
     {
       DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
     }
@@ -492,56 +492,56 @@ namespace Dune
     {
       //std::cout << "Start adapt with globalIdSet prolong \n";
       int defaultChunk = newElementsChunk_;
-      int actChunk     = refineEstimate_ * refineMarked_; 
-  
-      // guess how many new elements we get 
-      int newElements = std::max( actChunk , defaultChunk ); 
-      
+      int actChunk     = refineEstimate_ * refineMarked_;
+
+      // guess how many new elements we get
+      int newElements = std::max( actChunk , defaultChunk );
+
       globalIdSet_->setChunkSize( newElements );
-      ref = myGrid().duneAdapt(*globalIdSet_); // adapt grid 
+      ref = myGrid().duneAdapt(*globalIdSet_); // adapt grid
     }
-    else 
+    else
     {
-      ref = myGrid().adaptWithoutLoadBalancing(); 
+      ref = myGrid().adaptWithoutLoadBalancing();
     }
 
-    // in parallel this is different 
-    if( this->comm().size() == 1 ) 
+    // in parallel this is different
+    if( this->comm().size() == 1 )
     {
       ref = ref && refineMarked_ > 0;
     }
 
     if(ref || mightCoarse)
     {
-      // calcs maxlevel and other extras 
+      // calcs maxlevel and other extras
       updateStatus();
 
-      // notify that postAdapt must be called 
+      // notify that postAdapt must be called
       lockPostAdapt_ = true;
     }
     return ref;
   }
 
-  // post process grid  
+  // post process grid
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::clearIsNewMarkers ()
   {
-    // old fashioned way 
+    // old fashioned way
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
     IteratorType w (*this, maxLevel(), nlinks() );
-    
+
     typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;  
-    
+    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
       alugrid_assert ( item.first || item.second );
-      IMPLElementType * elem = 0; 
+      IMPLElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first); 
+        elem = static_cast<IMPLElementType *> (item.first);
       else if( item.second )
       {
         elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
@@ -562,14 +562,14 @@ namespace Dune
   }
 
 
-  // post process grid  
+  // post process grid
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::postAdapt ()
   {
     if( lockPostAdapt_ )
-    { 
-      // clear all isNew markers on entities 
+    {
+      // clear all isNew markers on entities
       clearIsNewMarkers();
 
       // make that postAdapt has been called
@@ -587,69 +587,69 @@ namespace Dune
 
     std::ofstream macro( filename.str().c_str() );
 
-    if( macro ) 
+    if( macro )
     {
-      // dump distributed macro grid as ascii files 
+      // dump distributed macro grid as ascii files
       myGrid().container().dumpMacroGrid( macro, format );
     }
-    else 
+    else
       std::cerr << "WARNING: couldn't open file `" <<  filename.str() << "' for writing!" << std::endl;
 
     return true;
   }
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::
   backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
-    // backup grid to given stream 
+    // backup grid to given stream
     myGrid().backup( stream, format );
   }
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::restore( std::istream& stream )
   {
-    // if grid exists delete first 
+    // if grid exists delete first
     if( mygrid_ ) delete mygrid_;
-    // create new grid from stream 
+    // create new grid from stream
     mygrid_ = createALUGrid( stream );
 
-    // check for grid 
-    if( ! mygrid_ ) 
+    // check for grid
+    if( ! mygrid_ )
     {
       DUNE_THROW(InvalidStateException,"ALUGrid::restore failed");
     }
 
-    // check for element type 
+    // check for element type
     this->checkMacroGrid ();
-    
-    // restore hierarchy from given stream 
+
+    // restore hierarchy from given stream
     myGrid().restore( stream );
 
-    // calculate new maxlevel 
-    // calculate indices 
+    // calculate new maxlevel
+    // calculate indices
     updateStatus();
 
-    // reset refinement markers 
+    // reset refinement markers
     clearIsNewMarkers();
   }
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::checkMacroGridFile ( const std::string filename )
   {
     if(filename == "") return;
-    
+
     std::ifstream file(filename.c_str());
-    if(!file) 
+    if(!file)
     {
       std::cerr << "Couldn't open file '" << filename <<"' !" << std::endl;
       DUNE_THROW(IOError,"Couldn't open file '" << filename <<"' !");
     }
-    
+
     const std::string aluid((elType == tetra) ? "!Tetrahedra" : "!Hexahedra");
     const std::string oldAluId((elType == tetra) ? "!Tetraeder" : "!Hexaeder");
     std::string idline;
@@ -658,18 +658,18 @@ namespace Dune
     std::string id;
     idstream >> id;
 
-    if(id == aluid ) 
+    if(id == aluid )
     {
-      return; 
+      return;
     }
-    else if ( id == oldAluId ) 
+    else if ( id == oldAluId )
     {
       derr << "\nKeyword '" << oldAluId << "' is deprecated! Change it to '" << aluid << "' in file '" << filename<<"'! \n";
-      return ; 
+      return ;
     }
-    else 
+    else
     {
-      std::cerr << "Delivered file '"<<filename<<"' does not contain keyword '" 
+      std::cerr << "Delivered file '"<<filename<<"' does not contain keyword '"
         << aluid << "'. Found id '" <<id<< "'. Check the macro grid file! Bye." << std::endl;
       DUNE_THROW(IOError,"Wrong file format! ");
     }
@@ -677,12 +677,12 @@ namespace Dune
 
 
   template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  alu_inline 
+  alu_inline
   void ALU3dGrid< actualDim, actualDimw, elType, Comm >::checkMacroGrid ()
   {
     typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
     typedef ALU3DSPACE PureElementLeafIterator< HElementType > IteratorType;
-    IteratorType w( this->myGrid()  ); 
+    IteratorType w( this->myGrid()  );
     for (w->first () ; ! w->done () ; w->next ())
     {
       ALU3dGridElementType type = (ALU3dGridElementType) w->item().type();
@@ -697,7 +697,7 @@ namespace Dune
   }
 
 
-  alu_inline 
+  alu_inline
   const char * elType2Name( ALU3dGridElementType elType )
   {
     switch( elType )
@@ -710,14 +710,14 @@ namespace Dune
   }
 
 
-#if COMPILE_ALUGRID_LIB 
+#if COMPILE_ALUGRID_LIB
   // Instantiation
   template class ALU3dGrid< 2, 2, hexa, ALUGridNoComm >;
   template class ALU3dGrid< 2, 2, tetra, ALUGridNoComm >;
 
   template class ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >;
-  
+
   //2-3
   template class ALU3dGrid< 2, 3, hexa, ALUGridNoComm >;
   template class ALU3dGrid< 2, 3, tetra, ALUGridNoComm >;
@@ -732,7 +732,7 @@ namespace Dune
   template class ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >;
 
-#endif // #if COMPILE_ALUGRID_LIB 
+#endif // #if COMPILE_ALUGRID_LIB
 
 } // end namespace Dune
 

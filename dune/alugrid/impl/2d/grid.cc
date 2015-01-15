@@ -37,7 +37,7 @@ namespace ALU2DGrid
   template< int N >
   void Fullvertex< N >::read ( std::istream &in )
   {
-    for ( int i = 0; i < ncoord; ++i ) 
+    for ( int i = 0; i < ncoord; ++i )
       in >> vcoord[i] ;
   }
   // ***************************************************
@@ -86,15 +86,15 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  Element < N, NV >::~Element() 
+  Element < N, NV >::~Element()
   {
     alugrid_assert (_idx>=0);
     IndexProvider* hdl = gethdl();
     hdl->freeIndex(IndexProvider::IM_Elements,_idx);
 
-    for (int i=0;i<NV;++i) 
+    for (int i=0;i<NV;++i)
     {
-      if (connect.edge[i]) 
+      if (connect.edge[i])
       {
         connect.edge[i]->detach();
         if (connect.edge[i]->isfree())
@@ -105,7 +105,7 @@ namespace ALU2DGrid
       }
     }
 
-    // reset refcount, otherwise assertion in Basic 
+    // reset refcount, otherwise assertion in Basic
     nvertices() = 0;
   }
 
@@ -121,7 +121,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   void Element < N, NV >::c::write ( std::ostream &out ) const
   {
-    for(int i = 0 ; i < NV ; i ++ ) 
+    for(int i = 0 ; i < NV ; i ++ )
     {
       out << (vtx[i] ? vtx[i]->Listagent < vertex_t > :: number() : -1 ) << "  " ;
   //    out << bck[i] << "  " ;
@@ -133,7 +133,7 @@ namespace ALU2DGrid
   // ***************************************************
   // #begin(method)
   // #method:
-  //   void Element::c::read(istream & in, Vertex ** v, const int l) 
+  //   void Element::c::read(istream & in, Vertex ** v, const int l)
   // #parameters:
   //   Einlesen der connect-Daten (privat)
   // #description:
@@ -151,7 +151,7 @@ namespace ALU2DGrid
     {
       int vtxNumber = 0 ;
       linein >> vtxNumber ;
-      if ( !linein ) 
+      if ( !linein )
       {
         // we want at least 3 vertices (also for NV = 4)
         if ( i >= 3 )
@@ -194,7 +194,7 @@ namespace ALU2DGrid
     for (int i=0;i<2;++i)
       lpos[i] = (1.-npos)*rc0[i] + npos*rc1[i];
 
-    // apply vertex projection, if existent 
+    // apply vertex projection, if existent
     dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, lpos, ppoint );
 
 #endif
@@ -227,7 +227,7 @@ namespace ALU2DGrid
 
 #ifndef ALU2D_OLD_BND_PROJECTION
 
-    // apply vertex projection, if existent 
+    // apply vertex projection, if existent
     dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, pos, ppoint );
 
 #endif
@@ -239,7 +239,7 @@ namespace ALU2DGrid
   // ***************************************************
   // #begin(method)
   // #method:
-  //   void Element::setrefine(int fce) 
+  //   void Element::setrefine(int fce)
   // #parameters:
   //   \ int | fce | Lokale Kantennr.
   // #description:
@@ -247,7 +247,7 @@ namespace ALU2DGrid
   // #end(method)
   // ***************************************************
   template < int N, int NV >
-  void Element < N, NV >::setrefine(int fce) 
+  void Element < N, NV >::setrefine(int fce)
   {
     alugrid_assert ( numfaces() == 3 && numvertices() == 3 );
     alugrid_assert ( 0<=fce );
@@ -265,12 +265,12 @@ namespace ALU2DGrid
     // double tmp_onx[3]={_outernormal[0][0],_outernormal[1][0],_outernormal[2][0]};
     // double tmp_ony[3]={_outernormal[0][1],_outernormal[1][1],_outernormal[2][1]};
     for (int j=0;j<numvertices();j++)
-    {  
-      connect.vtx[j]=tmp_v[mod(fce+j)];  
-      connect.bck[j]=tmp_b[mod(fce+j)];  
-      connect.nb[j]=tmp_n[mod(fce+j)];  
-      connect.edge[j]=tmp_e[mod(fce+j)];  
-      connect.normdir[j]=tmp_no[mod(fce+j)];  
+    {
+      connect.vtx[j]=tmp_v[mod(fce+j)];
+      connect.bck[j]=tmp_b[mod(fce+j)];
+      connect.nb[j]=tmp_n[mod(fce+j)];
+      connect.edge[j]=tmp_e[mod(fce+j)];
+      connect.normdir[j]=tmp_no[mod(fce+j)];
       connect.nb[j]->nbconnect(connect.bck[j],this,j);
       connect.hvtx[j] = tmp_btree[mod(fce+j)];
 
@@ -290,7 +290,7 @@ namespace ALU2DGrid
   // ***************************************************
   template < int N, int NV >
   void Element < N, NV >::init()
-  { 
+  {
     /* calculate area */
     if ( ncoord == 2 && NV == 3 )
     {
@@ -361,7 +361,7 @@ namespace ALU2DGrid
   //   int Element::setrefine()
   // #parameters:
   // #description:
-  //   Macht die l"angste Kante zur Verfeinerungskante und 
+  //   Macht die l"angste Kante zur Verfeinerungskante und
   //   gibt 0 zur"uck falls eine umsortierung n"otig war
   //   1 sonst
   // #end(method)
@@ -371,7 +371,7 @@ namespace ALU2DGrid
   {
     double maxkantenlen=-1.0,kantenlen;
     int maxkante=-1;
-    
+
     for (int i=0;i<numfaces();i++)
     {
       kantenlen=sidelength(i);
@@ -379,7 +379,7 @@ namespace ALU2DGrid
       {
         maxkantenlen=kantenlen;
         maxkante=i;
-      } 
+      }
     }
     if (maxkante>0)
       setrefine(maxkante);
@@ -395,7 +395,7 @@ namespace ALU2DGrid
   //   Sorgt da"ur das das Dreieck gegen den Uhrzeigersinn orientiert wird
   //   (wichtig z.B. f"ur outernormal). Liefert 0 zur"uck falls die Orientierung
   //   vorher im Uhrzeigersinn war, 1 falls keine Umsortierung der Punkte
-  //   n"otig war. L"a"st die Verfeinerungskante umber"uhrt 
+  //   n"otig war. L"a"st die Verfeinerungskante umber"uhrt
   // #end(method)
   ***************************************************/
   template < int N, int NV >
@@ -403,7 +403,7 @@ namespace ALU2DGrid
   {
     double o;
     const int nf = numfaces();
-    if (ncoord==2) 
+    if (ncoord==2)
     {
       const double (&v0)[ncoord]=connect.vtx[0]->coord();
       const double (&v1)[ncoord]=connect.vtx[1]->coord();
@@ -411,12 +411,12 @@ namespace ALU2DGrid
       o=(v1[0]-v0[0])*(v2[1]-v1[1])-(v1[1]-v0[1])*(v2[0]-v1[0]);
       if (fabs(o)<1e-10)
       {
-        std::cerr << o << " " 
+        std::cerr << o << " "
              << v0[0] << "," << v0[1] << " "
              << v1[0] << "," << v1[1] << " "
              << v2[0] << "," << v2[1] << std::endl;
       }
-      if (NV == 4) 
+      if (NV == 4)
       { // test that element is convex
         // note: for a convex cube all four value of o will have the same
         //       sign, for a non convex cube one value will have a different
@@ -434,9 +434,9 @@ namespace ALU2DGrid
                       << std::endl;
             std::cout << "The verticies of the offending element are:" << std::endl;
             for (int i=0;i<4;++i)
-              std::cout << "p_" << i << " = ( " 
+              std::cout << "p_" << i << " = ( "
                         << connect.vtx[i]->coord()[0] << " "
-                        << connect.vtx[i]->coord()[1] 
+                        << connect.vtx[i]->coord()[1]
                         << std::endl;
             abort();
           }
@@ -465,8 +465,8 @@ namespace ALU2DGrid
     connect.nb[b]->nbconnect(connect.bck[b],this,b);
 
     const int lastVx = numvertices() - 1 ;
-    // only do this for cubes 
-    if ( lastVx == 3 ) 
+    // only do this for cubes
+    if ( lastVx == 3 )
     {
       vertex_t *tmpv=connect.vtx[0];
       connect.vtx[0]=connect.vtx[1];
@@ -498,23 +498,23 @@ namespace ALU2DGrid
         connect.hvtx[fce] = new vtx_btree_t(connect.vtx[mod(fce+1)],lnb,rnb);
       connect.hvtx[fce]->insert(invtx,lnb,rnb);
     } else {
-      alugrid_assert (!connect.hvtx[fce]); 
+      alugrid_assert (!connect.hvtx[fce]);
     }
   }
 
   template < int N, int NV >
   void Element < N, NV >::removehvtx(int fce,vertex_t *vtx)
   {
-    if (connect.hvtx[fce]->count()==1) 
+    if (connect.hvtx[fce]->count()==1)
     {
       alugrid_assert (connect.hvtx[fce]->getHead()==vtx);
       delete connect.hvtx[fce];
       connect.hvtx[fce] = 0;
-    } 
-    else 
+    }
+    else
     {
 #ifdef ALUGRIDDEBUG
-      // only used in assert 
+      // only used in assert
       bool found=
 #endif
         connect.hvtx[fce]->remove(vtx);
@@ -523,13 +523,13 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  Bndel < N, NV >::~Bndel() 
+  Bndel < N, NV >::~Bndel()
   {
     IndexProvider* hdl = gethdl();
     alugrid_assert (_idx>=0);
     hdl->freeIndex(IndexProvider::IM_Bnd,_idx);
 
-    if (connect.edge) 
+    if (connect.edge)
     {
       connect.edge->detach();
       if (connect.edge->isfree())
@@ -542,13 +542,13 @@ namespace ALU2DGrid
 
   template < int N, int NV >
   int Bndel < N,NV >::facevertex(int , int j) const {
-   
+
     alugrid_assert (0 <= j) ;
-    
+
     alugrid_assert (j < connect.nv) ;
-    
+
     return j ;
-    
+
   }
 
   template < int N, int NV >
@@ -568,25 +568,25 @@ namespace ALU2DGrid
     alugrid_assert (0 <= i);
 
     i%=connect.nv;
-   
+
     return connect.vtx[i] ;
-    
+
   }
 
   template < int N, int NV >
   void Bndel < N,NV >::nbconnect(int fce, thinelement_t * n, int b) {
 
     alugrid_assert (!fce) ;
-   
-    connect.nb = n ; 
 
-    connect.bck = b ; 
+    connect.nb = n ;
+
+    connect.bck = b ;
 
   }
   template < int N, int NV >
-  void Bndel < N,NV >::edgeconnect(int fce, Edge * n) { 
+  void Bndel < N,NV >::edgeconnect(int fce, Edge * n) {
     alugrid_assert (0 <= fce) ;
-    connect.edge = n ; 
+    connect.edge = n ;
     n->attach();
   }
 
@@ -606,7 +606,7 @@ namespace ALU2DGrid
   template < int N, int NV >
   Bndel < N,NV >::c::~c() {
 
-    for(int i = 0 ; i < nv ; i ++ ) 
+    for(int i = 0 ; i < nv ; i ++ )
 
       if(vtx[i]) vtx[i]->detach() ;
 
@@ -657,7 +657,7 @@ namespace ALU2DGrid
     for (int i=0;i<ncoord;++i)
       ppoint[i] = (1.-pos)*c0[i] + pos*c1[i];
 
-    // old method, new method below 
+    // old method, new method below
 #ifdef ALU2D_OLD_BND_PROJECTION
     if (lf && lDf)
     {
@@ -709,9 +709,9 @@ namespace ALU2DGrid
       ppoint[0] += lt * lvx;
       ppoint[1] += lt * lvy;
     }
-#else // use new method 
+#else // use new method
 
-    // apply vertex projection, if existent 
+    // apply vertex projection, if existent
     dynamic_cast< Hmesh<N,NV>* >(gethdl())->projectVertex( this, pos, ppoint );
 
 #endif
@@ -849,10 +849,10 @@ namespace ALU2DGrid
       count += dwn->refine(a,b,ncv,nconfDeg,default_ref,pro_el) ;
     else {
       // Wegen rek. Aufbau der Dreiecksverf. ist eine Funktion n"otig, die Verf.
-      // aber nicht u"ber den Baum l"auft. 
+      // aber nicht u"ber den Baum l"auft.
       // Bei Rekursivem Verf. stimmt R"uckgabe sowieso nicht
 
-      count += refine_leaf(a,b,ncv,nconfDeg,default_ref,pro_el) ; 
+      count += refine_leaf(a,b,ncv,nconfDeg,default_ref,pro_el) ;
     }
 
     return count ;

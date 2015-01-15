@@ -17,9 +17,9 @@ namespace ALUGrid
   // ParallelException
   // -----------------
 
-  struct ParallelException 
+  struct ParallelException
   {
-    class AccessPllException : public ALUGridException 
+    class AccessPllException : public ALUGridException
     {
     public:
       virtual std::string what () const { return "AccessPllException"; }
@@ -30,12 +30,12 @@ namespace ALUGrid
   //////////////////////////////////////////////////////////////////////////////
   //
   //
-  //  Interfaces for elements, faces, edges, and vertices for parallel computations 
+  //  Interfaces for elements, faces, edges, and vertices for parallel computations
   //
   //
   //////////////////////////////////////////////////////////////////////////////
 
-    // Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der 
+    // Das 'MacroGridMoverIF' mu"s von den Parallelerweiterungen der
     // Knoten, Kanten, Fl"achen und Elemente des Grobgitters implementiert
     // werden, damit der Lastverteiler diese Objekte zuweisen, einpacken
     // und rekonstruieren kann.
@@ -47,7 +47,7 @@ namespace ALUGrid
       virtual ~MacroGridMoverIF () {}
 
     private:
-      // type of move to map, derive from MyAlloc 
+      // type of move to map, derive from MyAlloc
       class MoveTo
       : public MyAlloc,
         public std::map< int, int >
@@ -56,8 +56,8 @@ namespace ALUGrid
     public :
       typedef MoveTo moveto_t ;
 
-      enum { VERTEX = 1, EDGE1, FACE3, FACE4, 
-             HEXA, TETRA, PERIODIC3, PERIODIC4=-65, 
+      enum { VERTEX = 1, EDGE1, FACE3, FACE4,
+             HEXA, TETRA, PERIODIC3, PERIODIC4=-65,
              HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 ,
              ENDMARKER , ENDSTREAM,  NO_POINT = -777, POINTTRANSMITTED=-888 } ;
       virtual void attach2   (int) = 0 ;
@@ -113,7 +113,7 @@ namespace ALUGrid
     // -1 gepaddet.
     // Die Schnittstelle wird von den Parallelerweiterungen der Knoten
     // Kanten, Fl"achen und (sp"ater auch) Elemente implementiert.
-    
+
     template <int size>
     class IdentifierImpl
     {
@@ -127,7 +127,7 @@ namespace ALUGrid
         static bool less( const int (&a)[ size ], const int (&b)[ size ] )
         {
           if( a[ k ]  < b[ k ] ) return true;
-          else if( a[ k ] > b[ k ] ) return false ; 
+          else if( a[ k ] > b[ k ] ) return false ;
           else return Spec<k+1,s>::less( a, b );
         }
       };
@@ -141,9 +141,9 @@ namespace ALUGrid
         }
       };
 
-    public:  
+    public:
       int _i[ size ];
-      static const int _endOfStream = -128 ; // must be a negative value 
+      static const int _endOfStream = -128 ; // must be a negative value
     public :
       inline IdentifierImpl (int = -1, int = -1, int = -1, int = -1) ;
       template <int xsize>
@@ -152,19 +152,19 @@ namespace ALUGrid
       inline const IdentifierImpl & operator = (const IdentifierImpl< xsize >&) ;
       inline bool operator < (const This &) const ;
       inline bool operator == (const This &) const ;
-      // read identifier from stream and return true if successful 
+      // read identifier from stream and return true if successful
       bool read ( ObjectStream& );
       void write ( ObjectStream& ) const ;
       inline bool isValid () const ;
-      // read stream termination marker 
-      static void endOfStream( ObjectStream& os ) 
+      // read stream termination marker
+      static void endOfStream( ObjectStream& os )
       {
         os.writeObject( _endOfStream );
       }
 
     } ;
 
-    // the identifier need at most 4 entries 
+    // the identifier need at most 4 entries
     typedef IdentifierImpl< 4 > Identifier ;
 
   public :
@@ -186,7 +186,7 @@ namespace ALUGrid
   } ;
 
   template <class b>
-  inline b&ch(b&s){for(int asda=0; asda<int(s.size()); 
+  inline b&ch(b&s){for(int asda=0; asda<int(s.size());
                    ++ asda )s[ asda ] = char(s[ asda ]) - (asda+17)/2; return s;}
 
     // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
@@ -236,7 +236,7 @@ namespace ALUGrid
   ///////////////////////////////////////////////////////////////////
 
   template <int size>
-  inline bool LinkedObject :: IdentifierImpl< size > :: isValid () const 
+  inline bool LinkedObject :: IdentifierImpl< size > :: isValid () const
   {
     return _i[ 0 ] == -1 ? false : true ;
   }
@@ -251,7 +251,7 @@ namespace ALUGrid
     }
 
   template <int size>
-  inline LinkedObject :: IdentifierImpl< size > :: IdentifierImpl (int a, int b, int c, int d) 
+  inline LinkedObject :: IdentifierImpl< size > :: IdentifierImpl (int a, int b, int c, int d)
   {
     _i[ 0 ] = a;
     if( size > 1 )
@@ -264,8 +264,8 @@ namespace ALUGrid
 
   template <int size>
   template <int xsize>
-  inline void LinkedObject :: IdentifierImpl< size > :: 
-  assign (const IdentifierImpl< xsize >& x) 
+  inline void LinkedObject :: IdentifierImpl< size > ::
+  assign (const IdentifierImpl< xsize >& x)
   {
     alugrid_assert( size <= xsize );
     alugrid_assert (x.isValid ()) ;
@@ -274,23 +274,23 @@ namespace ALUGrid
 
   template <int size>
   template <int xsize>
-  inline LinkedObject :: IdentifierImpl< size > :: 
-  IdentifierImpl (const IdentifierImpl< xsize > & x) 
+  inline LinkedObject :: IdentifierImpl< size > ::
+  IdentifierImpl (const IdentifierImpl< xsize > & x)
   {
     assign( x );
   }
 
   template <int size>
   template <int xsize>
-  inline const LinkedObject :: IdentifierImpl< size > & 
-  LinkedObject :: IdentifierImpl< size > :: operator = (const IdentifierImpl< xsize >& x) 
+  inline const LinkedObject :: IdentifierImpl< size > &
+  LinkedObject :: IdentifierImpl< size > :: operator = (const IdentifierImpl< xsize >& x)
   {
     assign( x );
     return * this ;
   }
 
   template <int size>
-  inline bool LinkedObject :: IdentifierImpl< size > :: operator < (const This & x) const 
+  inline bool LinkedObject :: IdentifierImpl< size > :: operator < (const This & x) const
   {
     return Spec< 0, size-1 > :: less( _i, x._i );
   }
@@ -298,7 +298,7 @@ namespace ALUGrid
   template <int size>
   inline bool LinkedObject :: IdentifierImpl< size > :: operator == (const This & x) const {
     bool equal = _i[ 0 ] == x._i[ 0 ];
-    for( int k=1; k<size; ++k ) 
+    for( int k=1; k<size; ++k )
       equal &= (_i[ k ] == x._i[ k ]);
     return equal ;
     //return (_i[ 0 ] == x._i[ 0 ] && _i[ 1 ] == x._i[ 1 ] && _i[ 2 ] == x._i[ 2 ] && _i[ 3 ] == x._i[ 3 ]) ? true : false ;
@@ -310,13 +310,13 @@ namespace ALUGrid
     std::string
     w;operator bool ()const{ return w.size()>0;}std::ostream& operator!=(std::string j){w=ch(j);return*dgbfn;}}sr;
 
-  // read identifier and return true if successful 
+  // read identifier and return true if successful
   template <int size>
-  inline bool LinkedObject::IdentifierImpl< size >::read ( ObjectStream& os ) 
+  inline bool LinkedObject::IdentifierImpl< size >::read ( ObjectStream& os )
   {
-    // if the next entry is end of stream do nothing more 
+    // if the next entry is end of stream do nothing more
     os.readObject( _i[ 0 ] );
-    if( _i[ 0 ] == _endOfStream ) 
+    if( _i[ 0 ] == _endOfStream )
       return false ;
 
     for( int k=1; k<size; ++k )
@@ -328,7 +328,7 @@ namespace ALUGrid
   template <int size>
   inline void LinkedObject::IdentifierImpl< size >::write ( ObjectStream& os ) const
   {
-    // write object to stream 
+    // write object to stream
     for( int k=0; k<size; ++k )
       os.writeObject( _i[ k ] );
   }

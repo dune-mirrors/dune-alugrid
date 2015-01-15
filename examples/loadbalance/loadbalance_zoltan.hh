@@ -23,17 +23,17 @@ private:
   };
 
   struct ZoltanPartitioning{
-    int changes; // 1 if partitioning was changed, 0 otherwise 
-    int numGidEntries;  // Number of integers used for a global ID 
-    int numLidEntries;  // Number of integers used for a global ID 
+    int changes; // 1 if partitioning was changed, 0 otherwise
+    int numGidEntries;  // Number of integers used for a global ID
+    int numLidEntries;  // Number of integers used for a global ID
     int numExport;      // Number of vertices I must send to other processes
     int numImport;      // Number of vertices I must send to other processes
-    unsigned int *importLocalGids;  // Global IDs of the vertices I must send 
-    unsigned int *importGlobalGids; // Global IDs of the vertices I must send 
-    unsigned int *exportLocalGids;  // Global IDs of the vertices I must send 
-    unsigned int *exportGlobalGids; // Global IDs of the vertices I must send 
-    int *importProcs;    // Process to which I send each of the vertices 
-    int *exportProcs;    // Process to which I send each of the vertices 
+    unsigned int *importLocalGids;  // Global IDs of the vertices I must send
+    unsigned int *importGlobalGids; // Global IDs of the vertices I must send
+    unsigned int *exportLocalGids;  // Global IDs of the vertices I must send
+    unsigned int *exportGlobalGids; // Global IDs of the vertices I must send
+    int *importProcs;    // Process to which I send each of the vertices
+    int *exportProcs;    // Process to which I send each of the vertices
     int *importToPart;
     int *exportToPart;
   };
@@ -57,14 +57,14 @@ private:
     FixedElements fixed_elmts;
     HGraphData() : vtxGID(0), vtxWEIGHT(0), edgeGID(0), nborIndex(0), nborGID(0), nborWEIGHT(0), nborPROC(0) {}
     ~HGraphData() { freeMemory();}
-    void freeMemory() 
+    void freeMemory()
     {
       if (!nborWEIGHT)
         free(nborWEIGHT);
       if (!nborPROC)
         free(nborPROC);
       if (!nborGID)
-        free(nborGID); 
+        free(nborGID);
       if (!nborIndex)
         free(nborIndex);
       if (!edgeGID)
@@ -83,25 +83,25 @@ public:
   // this method is called before invoking the repartition method on the
   // grid, to check if the user defined partitioning needs to be readjusted
   bool repartition ()
-  { 
+  {
     int elements = grid_.size(0);
     size_t sumElements = grid_.comm().sum( elements );
     size_t minElements = grid_.comm().min( elements );
     size_t maxElements = grid_.comm().max( elements );
     double mean = sumElements / grid_.comm().size();
-    const bool repartition = ((maxElements > (ldbOver_ * mean)) || (minElements < (ldbUnder_ * mean) )) 
-                             ? true : false ; 
-    if (!repartition) 
+    const bool repartition = ((maxElements > (ldbOver_ * mean)) || (minElements < (ldbUnder_ * mean) ))
+                             ? true : false ;
+    if (!repartition)
       return false;
     if (!first_)
     {
-      Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
-                   &(new_partitioning_.importLocalGids), 
-                   &(new_partitioning_.importProcs), 
+      Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids),
+                   &(new_partitioning_.importLocalGids),
+                   &(new_partitioning_.importProcs),
                    &(new_partitioning_.importToPart) );
-      Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids), 
-                   &(new_partitioning_.exportLocalGids), 
-                   &(new_partitioning_.exportProcs), 
+      Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids),
+                   &(new_partitioning_.exportLocalGids),
+                   &(new_partitioning_.exportProcs),
                    &(new_partitioning_.exportToPart) );
     }
     generateHypergraph();
@@ -112,26 +112,26 @@ public:
     ** partition 0, process rank 1 will own partition 1, and so on.
     ******************************************************************/
     Zoltan_LB_Partition(zz_, // input (all remaining fields are output)
-          &new_partitioning_.changes,        // 1 if partitioning was changed, 0 otherwise 
-          &new_partitioning_.numGidEntries,  // Number of integers used for a global ID 
-          &new_partitioning_.numLidEntries,  // Number of integers used for a local ID 
-          &new_partitioning_.numImport,      // Number of vertices to be sent to me 
-          &new_partitioning_.importGlobalGids,  // Global IDs of vertices to be sent to me 
-          &new_partitioning_.importLocalGids,   // Local IDs of vertices to be sent to me 
-          &new_partitioning_.importProcs,    // Process rank for source of each incoming vertex 
-          &new_partitioning_.importToPart,   // New partition for each incoming vertex 
+          &new_partitioning_.changes,        // 1 if partitioning was changed, 0 otherwise
+          &new_partitioning_.numGidEntries,  // Number of integers used for a global ID
+          &new_partitioning_.numLidEntries,  // Number of integers used for a local ID
+          &new_partitioning_.numImport,      // Number of vertices to be sent to me
+          &new_partitioning_.importGlobalGids,  // Global IDs of vertices to be sent to me
+          &new_partitioning_.importLocalGids,   // Local IDs of vertices to be sent to me
+          &new_partitioning_.importProcs,    // Process rank for source of each incoming vertex
+          &new_partitioning_.importToPart,   // New partition for each incoming vertex
           &new_partitioning_.numExport,      // Number of vertices I must send to other processes
-          &new_partitioning_.exportGlobalGids,  // Global IDs of the vertices I must send 
-          &new_partitioning_.exportLocalGids,   // Local IDs of the vertices I must send 
-          &new_partitioning_.exportProcs,    // Process to which I send each of the vertices 
-          &new_partitioning_.exportToPart);  // Partition to which each vertex will belong 
+          &new_partitioning_.exportGlobalGids,  // Global IDs of the vertices I must send
+          &new_partitioning_.exportLocalGids,   // Local IDs of the vertices I must send
+          &new_partitioning_.exportProcs,    // Process to which I send each of the vertices
+          &new_partitioning_.exportToPart);  // Partition to which each vertex will belong
     first_ = false;
     return (new_partitioning_.changes == 1);
   }
-  
-  // return destination (i.e. rank) where the given element should be moved to 
-  int operator()( const Element &element ) const 
-  { 
+
+  // return destination (i.e. rank) where the given element should be moved to
+  int operator()( const Element &element ) const
+  {
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // GIdType id = globalIdSet_.id(element);
     // id.getKey().extractKey(elementGID);
@@ -223,8 +223,8 @@ ZoltanLoadBalanceHandle(const Grid &grid)
   Zoltan_Set_Param(zz_, "GRAPH_SYM_WEIGHT","MAX");
   Zoltan_Set_Param(zz_, "GRAPH_SYMMETRIZE","NONE" );
   Zoltan_Set_Param(zz_, "PHG_EDGE_SIZE_THRESHOLD", ".25");
-  Zoltan_Set_Param(zz_, "CHECK_HYPERGRAPH", "0"); 
-  Zoltan_Set_Param(zz_, "CHECK_GRAPH", "0"); 
+  Zoltan_Set_Param(zz_, "CHECK_HYPERGRAPH", "0");
+  Zoltan_Set_Param(zz_, "CHECK_GRAPH", "0");
 
   /* PHG parameters  - see the Zoltan User's Guide for many more
   */
@@ -271,13 +271,13 @@ ZoltanLoadBalanceHandle<Grid>::
 {
   if (!first_)
   {
-    Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids), 
-                 &(new_partitioning_.importLocalGids), 
-                 &(new_partitioning_.importProcs), 
+    Zoltan_LB_Free_Part(&(new_partitioning_.importGlobalGids),
+                 &(new_partitioning_.importLocalGids),
+                 &(new_partitioning_.importProcs),
                  &(new_partitioning_.importToPart) );
-    Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids), 
-                 &(new_partitioning_.exportLocalGids), 
-                 &(new_partitioning_.exportProcs), 
+    Zoltan_LB_Free_Part(&(new_partitioning_.exportGlobalGids),
+                 &(new_partitioning_.exportLocalGids),
+                 &(new_partitioning_.exportProcs),
                  &(new_partitioning_.exportToPart) );
   }
   Zoltan_Destroy(&zz_);
@@ -292,7 +292,7 @@ void ZoltanLoadBalanceHandle<Grid>::
 generateHypergraph()
 {
   hg_.freeMemory();
-  // setup the hypergraph by iterating over the macro level 
+  // setup the hypergraph by iterating over the macro level
   // (ALU can only partition on the macro level)
   const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
   typedef typename Grid::MacroGridView GridView;
@@ -324,7 +324,7 @@ generateHypergraph()
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // use special ALU method that returns a pure integer tuple which is a
     // unique id on the macrolevel
-	  elementGID[0] = gridView.macroId(entity); 
+	  elementGID[0] = gridView.macroId(entity);
 
 	  for (int i=0; i<NUM_GID_ENTRIES; ++i)
 	  {
@@ -348,7 +348,7 @@ generateHypergraph()
 		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
         // use special ALU method that returns a pure integer tuple which is a
         // unique id on the macrolevel
-	      neighborGID[0] = gridView.macroId(neighbor); 
+	      neighborGID[0] = gridView.macroId(neighbor);
         // use the alu specific weight function between neighboring elements
         weight += gridView.weight( intersection );
 
@@ -377,7 +377,7 @@ generateHypergraph()
 
     }
     // add one because not only neighbors are used in graph, but also entity itself
-	  tempNborIndex[element_count+1] = tempNborIndex[element_count] + num_of_neighbors; 
+	  tempNborIndex[element_count+1] = tempNborIndex[element_count] + num_of_neighbors;
 
 	  element_count++;
   }
@@ -483,7 +483,7 @@ get_num_edges_list(void *data, int sizeGID, int sizeLID,
   HGraphData *temphg = (HGraphData *)data;
   *ierr = ZOLTAN_OK;
   for (int i=0;i<num_obj;++i)
-    numEdges[i] = temphg->nborIndex[i+1]-temphg->nborIndex[i]; 
+    numEdges[i] = temphg->nborIndex[i+1]-temphg->nborIndex[i];
 }
 template< class Grid >
 void ZoltanLoadBalanceHandle<Grid>::
@@ -498,7 +498,7 @@ get_edge_list(void *data, int sizeGID, int sizeLID,
   int k=0;
   for (int i=0;i<num_obj;++i)
   {
-    int l = temphg->nborIndex[i]; 
+    int l = temphg->nborIndex[i];
     for (int j=0;j<num_edges[i];++j)
     {
       nborGID[k]  = temphg->nborGID[l];

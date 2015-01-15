@@ -14,15 +14,15 @@ namespace Dune
 {
 
   // Forward declarations
-  template<int cd, int dim, class GridImp> 
+  template<int cd, int dim, class GridImp>
   class ALU2dGridEntity;
   template<int cd, PartitionIteratorType pitype, class GridImp >
   class ALU2dGridLevelIterator;
-  template<int cd, class GridImp > 
+  template<int cd, class GridImp >
   class ALU2dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU2dGridGeometry;
-  template<class GridImp> 
+  template<class GridImp>
   class ALU2dGridHierarchicIterator;
   template<class GridImp>
   class ALU2dGridIntersectionBase;
@@ -39,7 +39,7 @@ namespace Dune
 
   // ALU2DIntersectionGeometryStorage
   // --------------------------------
-  
+
   template< class GridImp, class LocalGeometryImpl >
   class ALU2DIntersectionGeometryStorage
   {
@@ -52,7 +52,7 @@ namespace Dune
   public:
     ALU2DIntersectionGeometryStorage ();
 
-    // return reference to local geometry  
+    // return reference to local geometry
     const LocalGeometryImpl &localGeom ( const int aluFace, const int twist, const int corners ) const
     {
       alugrid_assert ( corners == 3 || corners == 4 );
@@ -61,17 +61,17 @@ namespace Dune
       return geoms_[ corners-3 ][ aluFace ][ twist ];
     }
 
-    // return static instance 
+    // return static instance
     static const ThisType &instance ()
     {
-      // create a storage for each thread, otherwise we get conflicts with the geometry references 
+      // create a storage for each thread, otherwise we get conflicts with the geometry references
       static const std::vector< ThisType > geomStorage( GridImp :: maxThreads() );
       return geomStorage[ GridImp :: thread() ];
     }
   };
 
 
- 
+
   //**********************************************************************
   //
   // --ALU2dGridIntersectionBase
@@ -101,26 +101,26 @@ namespace Dune
     typedef ALU2dGridIntersectionBase< GridImp > ImplementationType;
     //! type of the intersection
     typedef Dune::Intersection< GridImp, Dune::ALU2dGridIntersectionBase< GridImp > > Intersection;
-    
+
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
 
     typedef typename GridImp::template Codim<0>::Entity Entity;
     typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-    
+
     typedef typename GridImp::template Codim<1>::Geometry Geometry;
     typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
     typedef ALU2dGridEntity<0,dim,GridImp> EntityImp;
     typedef FieldVector< alu2d_ctype, dimworld > NormalType;
     typedef FieldVector< alu2d_ctype, dim-1 > LocalCoordinate;
-    
+
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointerImp;
 
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
 
-    // type of local geometry storage 
+    // type of local geometry storage
     typedef ALU2DIntersectionGeometryStorage< GridImp, LocalGeometryImpl > LocalGeometryStorageType;
 
     typedef ALU2dGridIntersectionBase<GridImp> ThisType;
@@ -130,15 +130,15 @@ namespace Dune
     friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
   protected:
-    struct impl 
-    {    
+    struct impl
+    {
       explicit impl( HElementType *inside = 0 )
       : index_(0), useOutside_(false)
       {
         setInside( inside );
         setOutside( 0, -1 );
       }
-     
+
       HElementType *inside () const
       {
         return inside_;
@@ -196,14 +196,14 @@ namespace Dune
     } current;
 
   public:
-    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator 
+    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
     ALU2dGridIntersectionBase(const FactoryType& factory, int wLevel);
-    
+
     //! The copy constructor
     ALU2dGridIntersectionBase(const ThisType & org);
 
     virtual ~ALU2dGridIntersectionBase() {}
-    
+
     //! The copy constructor
     void assign (const ThisType & org);
 
@@ -220,52 +220,52 @@ namespace Dune
 
     //! return true if intersection is with boundary
     bool boundary() const;
-    
+
     //! return boundary type
     int boundaryId () const;
 
     //! return the boundary segment index
     size_t boundarySegmentIndex() const;
-       
+
     //! return true if intersection is with neighbor on this level
-    bool neighbor () const; 
-    
+    bool neighbor () const;
+
     //! return EntityPointer to the Entity on the inside of this intersection.
     EntityPointer inside() const;
-    
+
     //! return EntityPointer to the Entity on the outside of this intersection.
     EntityPointer outside() const;
 
     //! local index of codim 1 entity in self where intersection is contained in
     int indexInInside () const;
-    
+
     //! local index of codim 1 entity in neighbor where intersection is contained in
     int indexInOutside () const;
 
     int twistInInside () const;
     int twistInOutside () const;
-    
+
     //! \deprecated Use twistInInside() instead. This method will be removed after Dune 2.3.
     int twistInSelf () const
     DUNE_DEPRECATED_MSG("Use twistInInside() instead.")
     { return twistInInside(); }
-    
+
     //! \deprecated Use twistInOutside() instead. This method will be removed after Dune 2.3.
     int twistInNeighbor () const
     DUNE_DEPRECATED_MSG("Use twistInOutside() instead.")
     { return twistInOutside(); }
-    
+
     NormalType outerNormal ( const LocalCoordinate &local ) const;
     NormalType integrationOuterNormal ( const LocalCoordinate &local ) const;
     NormalType unitOuterNormal ( const LocalCoordinate &local ) const;
-      
+
     LocalGeometry geometryInInside () const;
     LocalGeometry geometryInOutside () const;
     Geometry geometry () const;
 
     /** \brief obtain the type of reference element for this intersection */
     GeometryType type () const;
-    
+
   protected:
     const GridImp& grid() const { return factory_.grid(); }
 
@@ -278,12 +278,12 @@ namespace Dune
     void done ( const HElementType *inside );
     void done ( const EntityImp &en ) { done( &en.getItem() ); }
 
-    // invalidate status of internal objects 
+    // invalidate status of internal objects
     void unsetUp2Date() ;
-    
+
     // reset IntersectionIterator to first neighbour
     void first ( const EntityImp &en, int wLevel );
-    
+
     // reset IntersectionIterator to first neighbour
     virtual void setFirstItem ( const HElementType &elem, int wLevel ) = 0;
 
@@ -297,11 +297,11 @@ namespace Dune
     const LocalGeometryStorageType &localGeomStorage_;
 
     mutable int walkLevel_;
-  }; // end ALU2dGridIntersectionBase 
-    
-    
-    
-       
+  }; // end ALU2dGridIntersectionBase
+
+
+
+
   //**********************************************************************
   //
   // --ALU2dGridLevelIntersectionIterator
@@ -312,13 +312,13 @@ namespace Dune
   class ALU2dGridLevelIntersectionIterator
   : public ALU2dGridIntersectionBase< GridImp >
   {
-    typedef ALU2dGridLevelIntersectionIterator< GridImp > ThisType; 
+    typedef ALU2dGridLevelIntersectionIterator< GridImp > ThisType;
     typedef ALU2dGridIntersectionBase< GridImp > BaseType;
 
     static const int dim = GridImp::dimension;
     static const int dimworld  = GridImp::dimensionworld;
     static const ALU2DSPACE ElementType eltype = GridImp::elementType;
-    
+
     typedef typename ALU2dImplTraits< dimworld, eltype >::ThinelementType ThinelementType;
     typedef typename BaseType::HElementType HElementType;
     typedef typename ALU2dImplTraits< dimworld, eltype >::HBndElType HBndElType;
@@ -333,7 +333,7 @@ namespace Dune
   public:
     typedef typename GridImp :: GridObjectFactoryType  FactoryType;
     typedef ALUMemoryProvider< ThisType > StorageType;
-    
+
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
 
@@ -348,13 +348,13 @@ namespace Dune
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointer;
 
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
-  
-    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator 
+
+    //! The default Constructor , creating an empty ALU2dGridIntersectionIterator
     ALU2dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel);
-    
-    //! The default Constructor , level tells on which level we want neighbours 
+
+    //! The default Constructor , level tells on which level we want neighbours
     ALU2dGridLevelIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end=true);
-    
+
     //! The copy constructor
     ALU2dGridLevelIntersectionIterator(const ALU2dGridLevelIntersectionIterator<GridImp> & org);
 
@@ -364,9 +364,9 @@ namespace Dune
     void increment ();
 
   public:
-    //! level is conforming when non-conform grid used 
-    //! otherwise might not be conform 
-    bool conforming () const 
+    //! level is conforming when non-conform grid used
+    //! otherwise might not be conform
+    bool conforming () const
     {
       return (this->grid().nonConform() || isConform());
     }
@@ -377,18 +377,18 @@ namespace Dune
       return (!current.outside() || (current.outside() == current.inside()->neighbour( current.index_ )));
     }
 
-  private:    
+  private:
     void doIncrement ();
 
     // reset IntersectionIterator to first neighbour
-    void setFirstItem(const HElementType & elem, int wLevel);  
-    
+    void setFirstItem(const HElementType & elem, int wLevel);
+
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
-    void first(const EntityType & en, int wLevel);   
+    void first(const EntityType & en, int wLevel);
 
     void addNeighboursToStack();
-    
+
     static int getOppositeInFather ( int nrInChild, int nrOfChild );
     static int getOppositeInChild ( int nrInFather, int nrOfChild );
 
@@ -402,19 +402,19 @@ namespace Dune
 
   private:
     mutable std::stack<IntersectionInfo> nbStack_;
-  }; // end ALU2dGridLevelIntersectionIterator 
+  }; // end ALU2dGridLevelIntersectionIterator
 
 
 
   //********************************************************************
   //
   //  --ALU2dGridLeafIntersectionIterator
-  //  
-  // 
+  //
+  //
   //********************************************************************
 
   template< class GridImp >
-  class ALU2dGridLeafIntersectionIterator 
+  class ALU2dGridLeafIntersectionIterator
   : public ALU2dGridIntersectionBase< GridImp >
   {
     typedef ALU2dGridLeafIntersectionIterator< GridImp > ThisType;
@@ -430,7 +430,7 @@ namespace Dune
   public:
     typedef typename GridImp :: GridObjectFactoryType  FactoryType;
     typedef ALUMemoryProvider< ThisType > StorageType;
-    
+
     enum { dimension       = GridImp::dimension };
     enum { dimensionworld  = GridImp::dimensionworld };
 
@@ -453,13 +453,13 @@ namespace Dune
     typedef ALU2dGridEntityPointer<0,GridImp> EntityPointer;
 
     typedef MakeableInterfaceObject< Geometry > GeometryObject;
-    
-    //! The default Constructor , createing an empty ALU2dGridIntersectionIterator 
+
+    //! The default Constructor , createing an empty ALU2dGridIntersectionIterator
     ALU2dGridLeafIntersectionIterator(const FactoryType& factory, int wLevel);
-    
-    //! The default Constructor , level tells on which level we want neighbours 
+
+    //! The default Constructor , level tells on which level we want neighbours
     ALU2dGridLeafIntersectionIterator(const FactoryType& factory, const HElementType* el, int wLevel, bool end=true);
-    
+
     //! The copy constructor
     ALU2dGridLeafIntersectionIterator(const ALU2dGridLeafIntersectionIterator<GridImp> & org);
 
@@ -467,10 +467,10 @@ namespace Dune
 
     //! increment iterator
     void increment ();
-      
+
   public:
-    //! leaf is conforming, when conform grid version used 
-    bool conforming () const 
+    //! leaf is conforming, when conform grid version used
+    bool conforming () const
     {
       return (!this->grid().nonConform() || isConform());
     }
@@ -484,11 +484,11 @@ namespace Dune
   private:
     void doIncrement ();
     // reset IntersectionIterator to first neighbour
-    void setFirstItem(const HElementType & elem, int wLevel);  
-    
+    void setFirstItem(const HElementType & elem, int wLevel);
+
     // reset IntersectionIterator to first neighbour
     template <class EntityType>
-    void first(const EntityType & en, int wLevel);    
+    void first(const EntityType & en, int wLevel);
 
     void setupIntersection ();
 

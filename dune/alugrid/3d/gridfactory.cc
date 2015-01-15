@@ -1,5 +1,5 @@
-#ifndef DUNE_ALU3DGRID_FACTORY_CC 
-#define DUNE_ALU3DGRID_FACTORY_CC 
+#ifndef DUNE_ALU3DGRID_FACTORY_CC
+#define DUNE_ALU3DGRID_FACTORY_CC
 
 #if COMPILE_ALUGRID_INLINE == 0
 #include <config.h>
@@ -19,30 +19,30 @@
 #include <dune/alugrid/common/hsfc.hh>
 
 #if COMPILE_ALUGRID_INLINE
-#define alu_inline inline 
+#define alu_inline inline
 #else
 #define alu_inline
 #endif
 
 namespace Dune
 {
-  
+
   template< class ALUGrid >
   alu_inline
   ALU3dGridFactory< ALUGrid > :: ~ALU3dGridFactory ()
   {}
 
-  
+
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexInputType &pos )
   {
     doInsertVertex( pos, vertices_.size() );
-  } 
+  }
 
 
   template< class ALUGrid >
-  alu_inline 
+  alu_inline
   void ALU3dGridFactory< ALUGrid >::insertVertex ( const VertexInputType &coord, const VertexId globalId )
   {
     // mark that vertices with global id have been inserted
@@ -51,7 +51,7 @@ namespace Dune
   }
 
   template< class ALUGrid >
-  alu_inline 
+  alu_inline
   void ALU3dGridFactory< ALUGrid >::doInsertVertex ( const VertexInputType &coord, const VertexId globalId )
   {
     VertexType pos ( 0 );
@@ -68,7 +68,7 @@ namespace Dune
     else if (dimension == 2)
     {
       if( elementType == tetra )
-      { 
+      {
         if(vertices_.size() == 0)
           vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
 
@@ -84,7 +84,7 @@ namespace Dune
     }
   }
 
-  
+
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
@@ -92,7 +92,7 @@ namespace Dune
                        const std::vector< VertexId > &vertices )
   {
     assertGeometryType( geometry );
-    
+
     if( geometry.dim() != dimension )
       DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
                              "into a 3-dimensional ALUGrid." );
@@ -119,7 +119,7 @@ namespace Dune
         element.resize( 4 );
 
         // construct element following the DUNE reference tetrahedron
-        element[0] = 0;                
+        element[0] = 0;
         element[1] = vertices[ 0 ] + 1;
         element[2] = vertices[ 1 ] + 1;
         element[3] = vertices[ 2 ] + 1;
@@ -147,7 +147,7 @@ namespace Dune
 
     BndPair boundaryId;
     if(dimension == 3)
-    { 
+    {
       for( unsigned int i = 0; i < numFaceCorners; ++i )
       {
         const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
@@ -168,12 +168,12 @@ namespace Dune
         face[0] = 2*vertices[0];
         face[3] = 2*vertices[1];
         face[1] = face[0]+1;
-        face[2] = face[3]+1;       
+        face[2] = face[3]+1;
       }
       const int nFace = elementType == hexa ? 4 : 3;
       for (int i = 0; i < nFace; ++i)
       {
-        boundaryId.first[ i ] = face[ i ];       
+        boundaryId.first[ i ] = face[ i ];
       }
     }
 
@@ -189,14 +189,14 @@ namespace Dune
   {
     if( (element < 0) || (element >= (int)elements_.size()) )
       DUNE_THROW( RangeError, "ALU3dGridFactory::insertBoundary: invalid element index given." );
-  
+
    // BndPair boundaryId;
   // generateFace( elements_[ element ], face, boundaryId.first );
   //  std::cout <<  "Element: [" << elements_[element][0] << ","<<elements_[element][1]<<"," << elements_[element][2] << "," << elements_[element][3] <<"] Face: " << face << " Boundary: " <<     boundaryId.first  << std::endl;
-    
+
     //in 2d the local face ids are correct, because we need the faces 0,1,2 in tetra and 0,1,2,3 for hexas
     //and that is exactly what we get form the 2d dgfparser.
-    
+
     doInsertBoundary( element, face, id );
   }
 
@@ -216,19 +216,19 @@ namespace Dune
 
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid > :: 
-  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection ) 
+  void ALU3dGridFactory< ALUGrid > ::
+  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
   {
-    if( globalProjection_ ) 
+    if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
-    globalProjection_ = &bndProjection; 
+    globalProjection_ = &bndProjection;
   }
 
 
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid > :: 
+  void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection ( const GeometryType &type,
                              const std::vector< VertexId > &vertices,
                              const DuneBoundaryProjectionType *projection )
@@ -260,17 +260,17 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::sortElements( const VertexVector& vertices, 
+    ::sortElements( const VertexVector& vertices,
                     const ElementVector& elements,
-                    std::vector< int >& ordering ) 
+                    std::vector< int >& ordering )
   {
-    const size_t elemSize = elements.size(); 
+    const size_t elemSize = elements.size();
     ordering.resize( elemSize );
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
 #ifdef USE_ZOLTAN_HSFC_ORDERING
-    // the serial version do not special ordering 
+    // the serial version do not special ordering
     // since no load balancing has to be done
     {
       typedef MPIHelper :: MPICommunicator MPICommunicator;
@@ -278,9 +278,9 @@ namespace Dune
 
       // if we are in parallel insertion mode we need communication
       const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
-      if( foundGlobalIndex ) 
+      if( foundGlobalIndex )
       {
-        if( comm.rank() == 0 ) 
+        if( comm.rank() == 0 )
           std::cerr << "WARNING: Hilbert space filling curve ordering does not work for parallel grid factory yet!" << std::endl;
         return ;
       }
@@ -288,13 +288,13 @@ namespace Dune
       VertexType maxCoord;
       VertexType minCoord;
       const size_t vertexSize = vertices.size();
-      if( vertexSize > 0 ) 
+      if( vertexSize > 0 )
       {
         maxCoord = vertices[ 0 ].first;
         minCoord = vertices[ 0 ].first;
       }
 
-      for( size_t i=0; i<vertexSize; ++i ) 
+      for( size_t i=0; i<vertexSize; ++i )
       {
         const VertexType& vx = vertices[ i ].first;
         for( unsigned int d=0; d<dimension; ++d )
@@ -303,19 +303,19 @@ namespace Dune
           minCoord[ d ] = std::min( minCoord[ d ], vx[ d ] );
         }
       }
-     
+
       // get element's center to hilbert index mapping
       SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord, comm );
 
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;
 
-      for( size_t i=0; i<elemSize; ++i ) 
+      for( size_t i=0; i<elemSize; ++i )
       {
         VertexType center( 0 );
-        // compute barycenter 
-        const int vxSize = elements[ i ].size(); 
-        for( int vx = 0; vx<vxSize; ++vx ) 
+        // compute barycenter
+        const int vxSize = elements[ i ].size();
+        for( int vx = 0; vx<vxSize; ++vx )
         {
           const VertexType& vertex = vertices[ elements[ i ][ vx ] ].first;
           for( unsigned int d=0; d<dimension; ++d )
@@ -323,12 +323,12 @@ namespace Dune
         }
         center /= double(vxSize);
 
-        // generate hilbert index from element's center and store index 
+        // generate hilbert index from element's center and store index
         hsfc[ sfc.hilbertIndex( center ) ] = i;
       }
 
       typedef typename hsfc_t :: iterator iterator;
-      const iterator end = hsfc.end(); 
+      const iterator end = hsfc.end();
       size_t idx = 0;
       for( iterator it = hsfc.begin(); it != end; ++it, ++idx )
       {
@@ -374,26 +374,26 @@ namespace Dune
       recreateBoundaryIds();
 
 
-    // if dump file should be written 
+    // if dump file should be written
     if( allowGridGeneration_ && !temporary )
     {
       std::string filename ( name );
-      
+
       std::ofstream out( filename.c_str() );
       out.setf( std::ios_base::scientific, std::ios_base::floatfield );
       out.precision( 16 );
       if( elementType == tetra )
-        out << "!Tetrahedra"; 
+        out << "!Tetrahedra";
       else
         out << "!Hexahedra";
 
       const unsigned int numVertices = vertices_.size();
-      // print information about vertices and elements 
-      // to header to have an easy check 
+      // print information about vertices and elements
+      // to header to have an easy check
       out << "  ( noVertices = " << numVertices;
       out << " | noElements = " << elements_.size() << " )" << std :: endl;
 
-      // now start writing grid 
+      // now start writing grid
       out << numVertices << std :: endl;
       typedef typename VertexVector::iterator VertexIteratorType;
       const VertexIteratorType endV = vertices_.end();
@@ -447,8 +447,8 @@ namespace Dune
         out << std::endl;
       }
 
-      // no linkage 
-      out << int(0) << std::endl; 
+      // no linkage
+      out << int(0) << std::endl;
 
       out.close();
     }
@@ -456,82 +456,82 @@ namespace Dune
     const size_t boundarySegments = boundaryIds_.size();
 
     const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 ) 
+    if( bndProjectionSize > 0 )
     {
-      // the memory is freed by the grid on destruction 
+      // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
                                                     (DuneBoundaryProjectionType*) 0 );
       const BoundaryIdIteratorType endB = boundaryIds_.end();
       int segmentIndex = 0;
       for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
       {
-        // generate boundary segment pointer 
+        // generate boundary segment pointer
         FaceType faceId ( (*it).first);
         std::sort( faceId.begin(), faceId.end() );
 
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
-        // if no projection given we use global projection, otherwise identity 
+        // if no projection given we use global projection, otherwise identity
         if( ! projection && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
-          // we need to wrap the global projection because of 
-          // delete in desctructor of ALUGrid 
+          // we need to wrap the global projection because of
+          // delete in desctructor of ALUGrid
           projection = new ProjectionWrapperType( *globalProjection_ );
           alugrid_assert ( projection );
         }
 
-        // copy pointer 
+        // copy pointer
         (*bndProjections)[ segmentIndex ] = projection;
       }
     } // if( allowGridGeneration_ && !temporary )
 
-    // free memory 
+    // free memory
     boundaryProjections_.clear();
 
-    // if we have a vector reset global projection 
-    // because empty positions are filled with global projection anyway  
+    // if we have a vector reset global projection
+    // because empty positions are filled with global projection anyway
     if( bndProjections ) globalProjection_ = 0;
 
-    // ALUGrid is taking ownership of bndProjections 
-    // and is going to delete this pointer 
+    // ALUGrid is taking ownership of bndProjections
+    // and is going to delete this pointer
     Grid* grid = createGridObj( bndProjections , name );
     alugrid_assert ( grid );
 
-    // remove pointers 
+    // remove pointers
     globalProjection_ = 0;
-    // is removed by grid instance 
+    // is removed by grid instance
     bndProjections    = 0;
 
-    // insert grid using ALUGrid macro grid builder   
+    // insert grid using ALUGrid macro grid builder
     if( !vertices_.empty() )
     {
       ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder(), grid->vertexProjection() );
 
-      // now start inserting grid 
-      const int vxSize = vertices_.size(); 
+      // now start inserting grid
+      const int vxSize = vertices_.size();
 
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
         const VertexType &vertex = position( vxIdx );
         if(dimensionworld == 3)
         {
-          // insert vertex 
+          // insert vertex
           mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
         }
         else if (dimensionworld == 2 && elementType == hexa)
         {
           if(globalId (vxIdx) % 2 == 0 )
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );         
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );
           else
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );                    
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );
         }
         else if (dimensionworld == 2 && elementType ==tetra)
         {
           if(globalId(vxIdx) == 0)
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );                    
-          else 
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );                               
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );
+          else
+            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );
         }
       }
 
@@ -546,7 +546,7 @@ namespace Dune
           {
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
-          }       
+          }
           mgb.InsertUniqueHexa( element );
         }
         else if( elementType == tetra )
@@ -559,7 +559,7 @@ namespace Dune
           }
           mgb.InsertUniqueTetra( element, (elemIndex % 2) );
         }
-        else 
+        else
           DUNE_THROW( GridError, "Invalid element type");
       }
 
@@ -587,7 +587,7 @@ namespace Dune
           }
           mgb.InsertUniqueHbnd3( bndface, bndType );
         }
-        else 
+        else
           DUNE_THROW( GridError, "Invalid element type");
       }
 
@@ -605,7 +605,7 @@ namespace Dune
           }
 
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
-          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ), 
+          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
           mgb.InsertUniquePeriodic4( perel, bndId );
 
@@ -619,20 +619,20 @@ namespace Dune
             perel[ i+3 ] = globalId( facePair.second.first[ (3 - i) % 3 ] );
           }
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
-          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ), 
+          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
           mgb.InsertUniquePeriodic3( perel, bndId );
         }
-        else 
+        else
           DUNE_THROW( GridError, "Invalid element type" );
       }
     }
 
-    // clear vertices  
+    // clear vertices
     VertexVector().swap( vertices_ );
-    // clear elements 
+    // clear elements
     ElementVector().swap( elements_ );
-    // free memory 
+    // free memory
     boundaryIds_.clear();
 
     if( realGrid_ )
@@ -670,60 +670,60 @@ namespace Dune
     //for 2,3 tetra we assume the surfacegrid to be oriented -
     // we would actually have to choose the orientation on one elementEnd
     // and then set the orientation on the neighbour to be the sameType
-    // and iterate that over the whole grid, in hope that we have an 
+    // and iterate that over the whole grid, in hope that we have an
     // orientable surface.
     if(dimension ==2 && dimensionworld == 3 && elementType == tetra)
     {
       //do everything in 2d - meaning just use vertices 1,2,3
       //a flag to see if we have an orientable surface
       bool orientable = true;
-      
+
       // A 2d face type, as we want to work in 2d
       typedef std::array<unsigned int, 2>  Face2Type;
 
-      //The sorted faces that are pending to be worked on with 
+      //The sorted faces that are pending to be worked on with
       //the elemIndex of the inner element and the corresponding twist
       typedef std::map< Face2Type, std::pair<int, int> > FaceMap ;
       typedef FaceMap::iterator FaceIterator;
       FaceMap activeFaces;
-      
+
       //The Faces already worked on
       std::set< Face2Type > doneFaces;
-       
-       
+
+
       //get first element
-      ElementType &element = elements_[0];     
-      //choose orientation as given by first inserted element and     
-      //build oriented faces and add to list of active faces     
+      ElementType &element = elements_[0];
+      //choose orientation as given by first inserted element and
+      //build oriented faces and add to list of active faces
       for(int i = 0; i < 3 ; ++i)
       {
         Face2Type face = {element[1+i], element[1+(1+i)%3]} ;
         int twist = face[0] < face[1] ? 0 : -1;
-        std::sort(face.begin(),face.end());        
+        std::sort(face.begin(),face.end());
         activeFaces.insert( std::make_pair ( face, std::make_pair( 0 , twist  ) ) );
       }
-     
-      
+
+
       while(!(activeFaces.empty()))
       {
         //get iterator
         FaceIterator faceBegin = activeFaces.begin();
-        
+
         const Face2Type &currentFace = faceBegin->first;
-      
+
         //if face is in doneFaces, just remove the face from the active face list
         if(doneFaces.find(currentFace) != doneFaces.end())
         {
           activeFaces.erase(currentFace);
           //while loop continue
           continue;
-        }       
-              
-        //get first belonging element 
+        }
+
+        //get first belonging element
         int innerElement = faceBegin->second.first;
-        //get twist 
-        int twist = faceBegin->second.second;      
-       // std::cout << "Current: " << currentFace << "  Twist: " << twist << std::endl;                
+        //get twist
+        int twist = faceBegin->second.second;
+       // std::cout << "Current: " << currentFace << "  Twist: " << twist << std::endl;
         bool found = false;
         int cnt = 0;
         //find face in element list
@@ -737,12 +737,12 @@ namespace Dune
               {
                 if (outerElement[1+i] == currentFace[(twist+2)%2])
                 {
-                //  std::cout << "Outer Element: [ " << outerElement[1] << ", " << outerElement[2] << ", "<<  outerElement[3] << "]" << std::endl;                              
+                //  std::cout << "Outer Element: [ " << outerElement[1] << ", " << outerElement[2] << ", "<<  outerElement[3] << "]" << std::endl;
                   if( outerElement[1+(i+1)%3] == currentFace[(twist+1)%2 ]  )
                   {
                     //correct element orientation
-                    std::swap(outerElement[1 + (i + 1)%3 ], outerElement[ 1+ (i + 2)%3 ]);    
-                   // std::cout << "swapping: " <<  outerElement[1 + (i + 1)%3 ] << outerElement[ 1+ (i + 2)%3 ]  << std::endl;    
+                    std::swap(outerElement[1 + (i + 1)%3 ], outerElement[ 1+ (i + 2)%3 ]);
+                   // std::cout << "swapping: " <<  outerElement[1 + (i + 1)%3 ] << outerElement[ 1+ (i + 2)%3 ]  << std::endl;
                     found =true;
                   }
                   else if(outerElement[1+(i+2)%3] == currentFace[(twist+1)%2] )
@@ -751,65 +751,65 @@ namespace Dune
                     found = true;
                   }
                   else //this is not the element you are looking for
-                    break;  
-                    
-                  //build the other two faces with twists 
+                    break;
+
+                  //build the other two faces with twists
                   Face2Type face1 =  { outerElement[1+i],outerElement[1+(1+i)%3] } ;
                   Face2Type face2 =  { outerElement[1+(i+1)%3],outerElement[1+(i+2)%3] } ;
                   int twist1 = face1[0] < face1[1] ? 0 : -1;
                   int twist2 = face2[0] < face2[1] ? 0 : -1;
                   std::sort(face1.begin(),face1.end());
                   std::sort(face2.begin(),face2.end());
-                  
+
 
 
                  // std::cout << "Face 1: " << face1 << "  Twist: "<< twist1 << std::endl;
                  // std::cout << "Face 2: " << face2 << "  Twist: "<< twist2 << std::endl;
-                  
+
                   //check that it is not in doneFaces
                   if(doneFaces.find(face1) == doneFaces.end())
                   {
                     //check that it is not in activeFaces
-                    if(activeFaces.find(face1) == activeFaces.end())                  
-                      activeFaces.insert(std::make_pair( face1 , std::make_pair( cnt, twist1 ) ) );  
+                    if(activeFaces.find(face1) == activeFaces.end())
+                      activeFaces.insert(std::make_pair( face1 , std::make_pair( cnt, twist1 ) ) );
                     //here we can make the orientability check - see assert
-                    else 
+                    else
                     {
-                     // alugrid_assert(std::abs(activeFaces.find(face1)->second.second - twist1) == 1); 
+                     // alugrid_assert(std::abs(activeFaces.find(face1)->second.second - twist1) == 1);
                       activeFaces.erase(face1);
                     }
-                  } 
+                  }
 
                  //check that it is not in doneFaces
                   if(doneFaces.find(face2) == doneFaces.end())
                   {
                     //check that it is not in activeFaces
-                    if(activeFaces.find(face2) == activeFaces.end())                  
-                      activeFaces.insert(std::make_pair( face2 , std::make_pair( cnt, twist2 ) ) );  
+                    if(activeFaces.find(face2) == activeFaces.end())
+                      activeFaces.insert(std::make_pair( face2 , std::make_pair( cnt, twist2 ) ) );
                     //here we make the orientability check
-                    else 
+                    else
                     {
-                      //alugrid_assert(std::abs(activeFaces.find(face2)->second.second - twist2) == 1); 
+                      //alugrid_assert(std::abs(activeFaces.find(face2)->second.second - twist2) == 1);
                       activeFaces.erase(face2);
                     }
-                  } 
+                  }
                   //break inner loop, as we do not need it anymore
-                  break;                  
+                  break;
                 }
-              }       
-              
+              }
+
               //break element for loop if we found the element
               if(found) break;
             }
-            
+
             // add the sorted face to doneFaces with innerElement and outerElement
-            doneFaces.insert( currentFace )  ;         
+            doneFaces.insert( currentFace )  ;
             //remove face from activeFaces
-            activeFaces.erase(currentFace);                   
+            activeFaces.erase(currentFace);
       }
       return;
     }
-    
+
       const typename ElementVector::iterator elementEnd = elements_.end();
       for( typename ElementVector::iterator elementIt = elements_.begin();
            elementIt != elementEnd; ++elementIt )
@@ -840,16 +840,16 @@ namespace Dune
 
         if( n * p3 > 0 )
           continue;
-        
-        
+
+
 
         if( elementType == hexa )
         {
         //we changed this,because for the 2d case it is important, that the valid vertices 0,1,2,3 remain the vertices 0,1,2,3
         //  for( int i = 0; i < 4; ++i )
         //    std::swap( element[ i ], element[ i+4 ] );
-          std::swap( element[ 5 ], element[ 6 ] );          
-          std::swap( element[ 1 ], element[ 2 ] );          
+          std::swap( element[ 5 ], element[ 6 ] );
+          std::swap( element[ 1 ], element[ 2 ] );
         }
         else
           std::swap( element[ 2 ], element[ 3 ] );
@@ -860,7 +860,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   bool ALU3dGridFactory< ALUGrid >
-    ::identifyFaces ( const Transformation &transformation, 
+    ::identifyFaces ( const Transformation &transformation,
                       const FaceType &key1, const FaceType &key2,
                       const int defaultId )
   {
@@ -889,12 +889,12 @@ namespace Dune
     int bndId[ 2 ] = { 20, 20 };
     FaceType keys[ 2 ] = { key1, key2 };
 
-    for( int i=0; i<2; ++i ) 
+    for( int i=0; i<2; ++i )
     {
       typedef typename BoundaryIdMap :: iterator iterator ;
       iterator pos = boundaryIds_.find( keys[ i ] );
-    
-      if( pos != boundaryIds_.end() ) 
+
+      if( pos != boundaryIds_.end() )
       {
         bndId[ i ] = (*pos).second ;
         boundaryIds_.erase( pos );
@@ -934,7 +934,7 @@ namespace Dune
         const TrafoIterator trend = faceTransformations_.end();
         for( TrafoIterator trit = faceTransformations_.begin(); trit != trend; ++trit )
         {
-          if( identifyFaces( *trit, key1, key2, defaultId) || 
+          if( identifyFaces( *trit, key1, key2, defaultId) ||
               identifyFaces( *trit, key2, key1, defaultId) )
           {
             faceMap.erase( fit );
@@ -1007,7 +1007,7 @@ namespace Dune
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
     }
-    
+
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
@@ -1027,7 +1027,7 @@ namespace Dune
           key[ i ] = vertices_[ faceIt->first[ i ] ].second;
         std::sort( key.begin(), key.end() );
         globalFaceMap.insert( std::make_pair(key, faceIt->first) );
-        
+
         for( unsigned int i = 0; i < numFaceCorners; ++i )
           boundariesMine[ idx++ ] = key[ i ];
       }
@@ -1039,7 +1039,7 @@ namespace Dune
     // get out of here, if the face maps on all processors are empty (all boundaries have been inserted)
     if( numBoundariesMax == 0 ) return ;
 
-    // get internal boundaries from each process 
+    // get internal boundaries from each process
     std::vector< std::vector< int > > boundariesEach;
 
 #if HAVE_MPI
@@ -1072,7 +1072,7 @@ namespace Dune
               reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
               faceMap.erase( pos );
             }
-            else 
+            else
             {
               // should never get here but does when this method is called to
               // construct the "reference" elements for alu
@@ -1081,7 +1081,7 @@ namespace Dune
         }
       }
       boundariesEach[ p ].clear();
-    } // end for all p 
+    } // end for all p
 
     // add all new boundaries (with defaultId)
     const FaceIterator faceEnd = faceMap.end();
@@ -1094,11 +1094,11 @@ namespace Dune
   template class ALU3dGridFactory< ALUGrid< 3, 3, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
-  
+
   template class ALU3dGridFactory< ALUGrid< 2, 3, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, conforming > >;
-  
+
   template class ALU3dGridFactory< ALUGrid< 2, 2, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, conforming > >;

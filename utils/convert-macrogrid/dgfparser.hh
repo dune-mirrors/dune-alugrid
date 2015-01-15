@@ -16,8 +16,8 @@ class DGFParser
 public:
   typedef Base::facemap_t facemap_t;
 
-  DGFParser ( const Dune::ALUGridElementType type, 
-              const int dimgrid = 3, 
+  DGFParser ( const Dune::ALUGridElementType type,
+              const int dimgrid = 3,
               const int dimworld = 3 )
     : Base( 0, 1 )
   {

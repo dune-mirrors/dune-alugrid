@@ -42,7 +42,7 @@ struct ProblemData
    *
    *  \returns the evaluated initial data
    */
-  virtual RangeType initial ( const DomainType &x ) const 
+  virtual RangeType initial ( const DomainType &x ) const
   {
     return RangeType(0);
   }
@@ -54,7 +54,7 @@ struct ProblemData
    *
    *  \returns the evaluated boundary data
    */
-  virtual RangeType boundaryValue ( const DomainType &x, double time ) const 
+  virtual RangeType boundaryValue ( const DomainType &x, double time ) const
   {
     return initial(x);
   }
@@ -68,7 +68,7 @@ struct ProblemData
   /** \brief obtain the interval for writing data to disk */
   virtual double saveInterval () const = 0;
 
-  /** \brief compute a jump type indicator 
+  /** \brief compute a jump type indicator
    *
    *  \param uLeft left state
    *  \param uRight right state
@@ -78,10 +78,10 @@ struct ProblemData
                                        const RangeType &uLeft, const RangeType &uRight ) const = 0;
   /** \brief refine tolerance to use */
   virtual double refineTol () const = 0;
-  /** \brief coarsening tolerance (defaults to 1/3 of refinement tolerance 
+  /** \brief coarsening tolerance (defaults to 1/3 of refinement tolerance
    *         Default implementation is 1/3 of the refinement tolerance
    */
-  virtual double coarsenTol () const 
+  virtual double coarsenTol () const
   {
     return refineTol()/3.;
   }
@@ -93,6 +93,6 @@ struct ProblemData
   virtual unsigned int maxTimeSteps() const { return std::numeric_limits<unsigned int>::max(); }
 
 }; // end class ProblemData
-// Code moved to problem-transport.hh 
+// Code moved to problem-transport.hh
 
 #endif // PROBLEM_HH

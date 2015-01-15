@@ -41,7 +41,7 @@ namespace Dune
   private:
     static int callProjection ( const DuneBoundaryProjectionType *prj, double (&global)[ ncoord ] )
     {
-      if( prj ) 
+      if( prj )
       {
         CoordinateType x, y;
         for( int i = 0; i < ncoord; ++i )
@@ -56,6 +56,6 @@ namespace Dune
     const Grid &grid_;
   };
 
-} // end namespace Dune 
+} // end namespace Dune
 
 #endif // #ifndef DUNE_ALU2D_BNDPROJECTION_HH

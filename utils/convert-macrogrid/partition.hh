@@ -45,10 +45,10 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
     CoordinateType center( 0 );
     for( int i=0; i<rawId; ++i )
     {
-      center += vertices[ elements[ el ].vertices[ i ] ].x; 
+      center += vertices[ elements[ el ].vertices[ i ] ].x;
     }
     center /= double( rawId );
-    // generate hilbert index from element's center and store index 
+    // generate hilbert index from element's center and store index
     hsfc[ sfc.hilbertIndex( center ) ] = el;
   }
 
@@ -62,7 +62,7 @@ void orderElementHSFC(const std::vector< Vertex > &vertices,
 
   // store newly ordered elements in element vector
   elements.swap( orderedElements );
-#else 
+#else
   std::cerr << "Zoltan not found, no Hilbert space filling curve available." << std::endl;
 #endif
 }
@@ -79,12 +79,12 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
 
   FaceMapType faceMap;
   const int nElements = elements.size();
-  for( int el = 0; el<nElements; ++el ) 
+  for( int el = 0; el<nElements; ++el )
   {
-    for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
+    for( int fce=0; fce<Element< rawId >::numFaces; ++fce )
     {
       int vx[ 4 ] = {-1,-1,-1,-1};
-      // get face vertex numbers 
+      // get face vertex numbers
       for( int j=0; j<Element< rawId >::numVerticesPerFace; ++ j )
       {
         vx[ j ] = elements[ el ].vertices[ Element< rawId >::prototype( fce, j ) ];
@@ -94,14 +94,14 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
       FaceKeyType key( vx[0], vx[1], vx[2], vx[3] );
       faceMap[ key ].push_back( pair_t( el, fce ) );
 
-      // reset neighbor information (-1 is boundary) 
+      // reset neighbor information (-1 is boundary)
       elements[ el ].neighbor[ fce ] = -1;
     }
   }
 
   typedef typename FaceMapType :: iterator iterator ;
   const iterator end = faceMap.end();
-  for( iterator it = faceMap.begin(); it != end; ++it ) 
+  for( iterator it = faceMap.begin(); it != end; ++it )
   {
     std::vector< pair_t >& nbs = (*it).second ;
     // size should be either 2 (interior) or 1 (boundary)
@@ -115,10 +115,10 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
   }
 
   const int bndSegSize = bndSegs.size();
-  for( int i=0; i<bndSegSize; ++i ) 
+  for( int i=0; i<bndSegSize; ++i )
   {
     int vx[ 4 ] = {-1,-1,-1,-1};
-    // get face vertex numbers 
+    // get face vertex numbers
     for( int j=0; j<BndSeg< rawId >::numVertices; ++ j )
     {
       vx[ j ] = bndSegs[ i ].vertices[ j ];
@@ -133,14 +133,14 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
   }
 
   const int periodicsSize = periodics.size();
-  for( int i=0; i<periodicsSize; ++i ) 
+  for( int i=0; i<periodicsSize; ++i )
   {
     int vx[ 4 ] = {-1,-1,-1,-1};
     const int vxSize = Periodic< rawId >::numVertices/2;
     int fceVx = 0;
-    for( int fce=0; fce<2; ++fce ) 
+    for( int fce=0; fce<2; ++fce )
     {
-      // get face vertex numbers 
+      // get face vertex numbers
       for( int j=0; j<vxSize; ++ j, ++fceVx )
       {
         vx[ j ] = periodics[ i ].vertices[ fceVx ];
@@ -158,7 +158,7 @@ void fillNeighbors(const std::vector< Vertex > &vertices,
 
 template < ElementRawID rawId >
 void computeLinkage( std::vector< Vertex >& vertices,
-                     const std::vector< Element< rawId > > &elements ) 
+                     const std::vector< Element< rawId > > &elements )
 {
   // store element-vertex linkage in case this option was selected
   const int elementListSize = elements.size();
@@ -188,11 +188,11 @@ void partition(const std::vector< Vertex >     &vertices,
 {
   typedef ALUGrid::LoadBalancer LoadBalancerType;
   typedef typename LoadBalancerType :: DataBase DataBaseType;
-   
+
   const DataBaseType :: method mth = DataBaseType :: method ( partMethod );
 
-  if( mth < DataBaseType :: ALUGRID_SpaceFillingCurveSerial || 
-      mth > DataBaseType :: METIS_PartGraphRecursive ) 
+  if( mth < DataBaseType :: ALUGRID_SpaceFillingCurveSerial ||
+      mth > DataBaseType :: METIS_PartGraphRecursive )
   {
     std::cerr << "Invalid partitioning method, valid are: " <<
       DataBaseType :: methodToString(DataBaseType::ALUGRID_SpaceFillingCurveSerial) << ", " <<
@@ -201,7 +201,7 @@ void partition(const std::vector< Vertex >     &vertices,
     std::abort();
   }
 
-  // load balancing data base 
+  // load balancing data base
   DataBaseType db ;
 
   // order elements using the Hilbert space filling curve
@@ -217,12 +217,12 @@ void partition(const std::vector< Vertex >     &vertices,
     db.vertexUpdate( typename LoadBalancerType::GraphVertex( el, weight ) );
   }
 
-  // if graph partitioning is used 
-  if( mth > DataBaseType :: ALUGRID_SpaceFillingCurveSerial ) 
+  // if graph partitioning is used
+  if( mth > DataBaseType :: ALUGRID_SpaceFillingCurveSerial )
   {
     for( int el = 0; el<nElements; ++el )
     {
-      for( int fce=0; fce<Element< rawId >::numFaces; ++fce ) 
+      for( int fce=0; fce<Element< rawId >::numFaces; ++fce )
       {
         const int nbIdx = elements[ el ].neighbor[ fce ];
         const int elIdx = el ;
@@ -234,21 +234,21 @@ void partition(const std::vector< Vertex >     &vertices,
     }
   }
 
-  // serial mp access 
+  // serial mp access
   ALUGrid :: MpAccessSerial mpa ;
 
-  // obtain partition vector using ALUGrid's serial sfc partitioning 
+  // obtain partition vector using ALUGrid's serial sfc partitioning
   std::vector< int > partition = db.repartition( mpa, mth, nPartitions );
 
-  // set rank information 
+  // set rank information
   for( int el = 0; el<nElements; ++el )
   {
     elements[ el ].rank = partition[ el ];
   }
 
-  // elements on periodic boundary need to be on one process 
+  // elements on periodic boundary need to be on one process
   const int periodicsSize = periodics.size();
-  for( int i=0; i<periodicsSize; ++i ) 
+  for( int i=0; i<periodicsSize; ++i )
   {
     // make element have the same rank, element 0 sets rank of element 1
     elements[ periodics[ i ].element[ 1 ] ].rank = elements[ periodics[ i ].element[ 0 ] ].rank;
@@ -256,7 +256,7 @@ void partition(const std::vector< Vertex >     &vertices,
 
   bndSegs.reserve( bndSegs.size() * 2 );
 
-  //insert internal boundaries 
+  //insert internal boundaries
   for( int el = 0; el<nElements; ++el )
   {
     Element< rawId >& element = elements[ el ];
@@ -269,10 +269,10 @@ void partition(const std::vector< Vertex >     &vertices,
         if( element.rank != elements[ nb ].rank )
         {
           BndSeg< rawId > bndSeg;
-          bndSeg.bndid = closure ; // 211 
+          bndSeg.bndid = closure ; // 211
 
-          // get vertex numbers 
-          for( int vx=0; vx<BndSeg< rawId >::numVertices; ++vx ) 
+          // get vertex numbers
+          for( int vx=0; vx<BndSeg< rawId >::numVertices; ++vx )
           {
             bndSeg.vertices[ vx ] = element.vertices[ Element< rawId >::prototype( fce, vx ) ];
           }

@@ -14,7 +14,7 @@
 /** @file
  @author Robert Kloefkorn
  @brief Provides default index set implementations for Level- and
- LeafIndexsets used by ALUGrid. 
+ LeafIndexsets used by ALUGrid.
 */
 
 namespace Dune
@@ -40,7 +40,7 @@ namespace Dune
   template <class GridImp>
   struct DefaultLeafIteratorTypes
   {
-    //! The types of the iterator 
+    //! The types of the iterator
     template<int cd>
     struct Codim
     {
@@ -55,10 +55,10 @@ namespace Dune
 
 
 
-  /*! \brief 
-    DefaultIndexSet creates an index set by using the grids persistent container 
-    an a given pair of iterators 
-   */ 
+  /*! \brief
+    DefaultIndexSet creates an index set by using the grids persistent container
+    an a given pair of iterators
+   */
   template < class GridImp, class IteratorImp >
   class DefaultIndexSet :
     public IndexSet< GridImp, DefaultIndexSet <GridImp, IteratorImp>, unsigned int >
@@ -69,15 +69,15 @@ namespace Dune
   public:
     enum { ncodim = GridType::dimension + 1 };
 
-    //! type of index 
+    //! type of index
     typedef unsigned int IndexType;
 
   private:
-    //! type of iterator to generate index set 
+    //! type of iterator to generate index set
     typedef IteratorImp IteratorType ;
 
   public:
-    struct Index 
+    struct Index
     {
       int index_;
       Index() : index_( -1 ) {}
@@ -122,107 +122,107 @@ namespace Dune
       }
     };
 
-    template <class EntityType, int codim> 
+    template <class EntityType, int codim>
     struct EntitySpec
     {
       static IndexType subIndex( const PersistentContainerType& indexContainer,
-                                 const EntityType & e, 
-                                 int i ) 
+                                 const EntityType & e,
+                                 int i )
       {
-        // if the codimension equals that of the entity simply return the index 
-        if( codim == EntityType::codimension ) 
-          return indexContainer[ e ].index(); 
+        // if the codimension equals that of the entity simply return the index
+        if( codim == EntityType::codimension )
+          return indexContainer[ e ].index();
 
         DUNE_THROW(NotImplemented,"subIndex for entities with codimension > 0 is not implemented");
         return IndexType(-1);
       }
     };
-    
-    template <class EntityType> 
+
+    template <class EntityType>
     struct EntitySpec<EntityType,0>
     {
       static IndexType subIndex( const PersistentContainerType& indexContainer,
-                                 const EntityType & e, 
-                                 int i ) 
+                                 const EntityType & e,
+                                 int i )
       {
         alugrid_assert ( indexContainer( e, i ).index() >= 0 );
         return indexContainer( e, i ).index();
       }
     };
-    
+
   public:
     //! import default implementation of subIndex<cc>
     //! \todo remove after next release
     using IndexSet<GridType, DefaultIndexSet>::subIndex;
-      
-    //! create index set by using the given begin and end iterator 
+
+    //! create index set by using the given begin and end iterator
     //! for the given level (level == -1 means leaf level)
-    DefaultIndexSet( const GridType & grid , 
+    DefaultIndexSet( const GridType & grid ,
                      const IteratorType& begin,
                      const IteratorType& end,
                      const int level = -1 )
-    : grid_(grid), 
+    : grid_(grid),
       indexContainers_( ncodim, (PersistentContainerType *) 0),
       size_( ncodim, -1 ),
       level_(level)
     {
-      for( int codim=0; codim < ncodim; ++codim ) 
+      for( int codim=0; codim < ncodim; ++codim )
         indexContainers_[ codim ] = new PersistentContainerType( grid, codim );
 
       calcNewIndex (begin, end);
     }
 
     //! desctructor deleting persistent containers
-    ~DefaultIndexSet () 
+    ~DefaultIndexSet ()
     {
       for( int codim=0; codim < ncodim; ++codim )
         delete indexContainers_[ codim ];
     }
 
-    const PersistentContainerType& indexContainer( const size_t codim ) const 
+    const PersistentContainerType& indexContainer( const size_t codim ) const
     {
       alugrid_assert ( codim < indexContainers_.size() );
       alugrid_assert ( indexContainers_[ codim ] );
       return *( indexContainers_[ codim ] );
     }
 
-    PersistentContainerType& indexContainer( const size_t codim ) 
+    PersistentContainerType& indexContainer( const size_t codim )
     {
       alugrid_assert ( codim < indexContainers_.size() );
       alugrid_assert ( indexContainers_[ codim ] );
       return *( indexContainers_[ codim ] );
     }
 
-    //! return LevelIndex of given entity 
+    //! return LevelIndex of given entity
     template<class EntityType>
-    IndexType index (const EntityType & en) const 
+    IndexType index (const EntityType & en) const
     {
       enum { cd = EntityType::codimension };
-      // this must not be true for vertices 
-      // therefore only check other codims 
-#ifdef ALUGRIDDEBUG 
+      // this must not be true for vertices
+      // therefore only check other codims
+#ifdef ALUGRIDDEBUG
       const int codim = cd;
-      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
+      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() ));
       alugrid_assert ( indexContainer( codim )[ en ].index() >= 0 );
 #endif
       return indexContainer( cd )[ en ].index();
     }
-   
-    //! return LevelIndex of given entity 
+
+    //! return LevelIndex of given entity
     template<int cd>
-    IndexType index (const typename GridImp::template Codim<cd>::Entity& en) const 
+    IndexType index (const typename GridImp::template Codim<cd>::Entity& en) const
     {
-      // this must not be true for vertices 
-      // therefore only check other codims 
-#ifdef ALUGRIDDEBUG 
+      // this must not be true for vertices
+      // therefore only check other codims
+#ifdef ALUGRIDDEBUG
       const int codim = cd;
       //const bool isLeaf = (codim == 0) ? en.isLeaf() : true ;
-      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() )); 
+      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() ));
       alugrid_assert ( indexContainer( cd )[ en ].index() >= 0 );
 #endif
       return indexContainer( cd )[ en ].index();
     }
-   
+
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
     template< int cc >
@@ -242,15 +242,15 @@ namespace Dune
       return (indexContainer( cd )[ en ].index() >= 0 );
     }
 
-    //! return size of IndexSet for a given level and codim 
+    //! return size of IndexSet for a given level and codim
     IndexType size ( int codim ) const
     {
       alugrid_assert ( codim >= 0 && codim <= GridType::dimension );
       return size_[ codim ];
     }
 
-    //! return size of IndexSet for a given level and codim 
-    //! this method is to be revised 
+    //! return size of IndexSet for a given level and codim
+    //! this method is to be revised
     IndexType size ( GeometryType type ) const
     {
       if( typeNotValid(type) ) return 0;
@@ -258,11 +258,11 @@ namespace Dune
     }
 
     //! do calculation of the index set, has to be called when grid was
-    //! changed or if index set is created 
+    //! changed or if index set is created
     void calcNewIndex ( const IteratorType &begin, const IteratorType &end )
     {
-      // resize arrays to new size 
-      // and set size to zero 
+      // resize arrays to new size
+      // and set size to zero
       for( int cd = 0; cd < ncodim; ++cd )
       {
         indexContainer( cd ).resize( Index() );
@@ -270,7 +270,7 @@ namespace Dune
         size_[ cd ] = 0;
       }
 
-      // grid walk to setup index set 
+      // grid walk to setup index set
       for( IteratorType it = begin; it != end; ++it )
       {
         alugrid_assert ( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
@@ -279,12 +279,12 @@ namespace Dune
       }
 
       // remember the number of entity on level and cd = 0
-      for(int cd=0; cd<ncodim; ++cd) 
+      for(int cd=0; cd<ncodim; ++cd)
       {
 #ifdef ALUGRIDDEBUG
-        const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd); 
+        const int gridSize = ( level_ < 0 ) ? grid_.size( cd ) : grid_.size( level_, cd);
         const int mySize = size_[cd];
-        if( mySize > gridSize ) 
+        if( mySize > gridSize )
         {
           std::cout << "DefaultIndexSet[ " << level_ << " ]: " << mySize << " s | g " << gridSize << std::endl;
         }
@@ -308,25 +308,25 @@ namespace Dune
     }
 
   private:
-    // return whether set has this type stored or not 
-    bool typeNotValid (const GeometryType & type) const 
+    // return whether set has this type stored or not
+    bool typeNotValid (const GeometryType & type) const
     {
       int codim = GridType::dimension - type.dim();
-      const std::vector<GeometryType> & geomT = geomTypes(codim); 
+      const std::vector<GeometryType> & geomT = geomTypes(codim);
       for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
-      return true;  
+      return true;
     }
 
-    // grid this index set belongs to 
+    // grid this index set belongs to
     const GridType& grid_;
 
-    //! vector with PersistentContainer for each codim 
+    //! vector with PersistentContainer for each codim
     PersistentContainerVectorType indexContainers_;
 
-    // number of entitys of each level an codim 
+    // number of entitys of each level an codim
     std::vector< int > size_;
 
-    // the level for which this index set is created 
+    // the level for which this index set is created
     const int level_;
   };
 

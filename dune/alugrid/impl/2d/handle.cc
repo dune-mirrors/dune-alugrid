@@ -20,41 +20,41 @@ namespace ALU2DGrid
   Hmesh<N,NV>::Hmesh(const std::string &macroname, int pnconfDeg, Refco::tag_t pref_rule) :
     _nconfDeg(pnconfDeg), refinement_rule(pref_rule)
   {
-    setup_grid(macroname);      
+    setup_grid(macroname);
   }
 
   template < int N, int NV >
   Hmesh<N,NV> :: Hmesh(std::istream &gridfile, int pnconfDeg, Refco::tag_t pref_rule) :
-    _nconfDeg(pnconfDeg), refinement_rule(pref_rule) 
+    _nconfDeg(pnconfDeg), refinement_rule(pref_rule)
   {
     double time;
     long unsigned int nbr;
 
     bool restart = setup_grid(gridfile, time, nbr);
-    if( restart ) 
-    { 
+    if( restart )
+    {
       recoverGrid( gridfile );
     }
   }
 
   template < int N, int NV >
   Hmesh<N,NV> :: Hmesh(const std::string &macroname,int pnconfDeg) :
-    _nconfDeg(pnconfDeg), refinement_rule(Refco::quart) 
+    _nconfDeg(pnconfDeg), refinement_rule(Refco::quart)
   {
-    setup_grid(macroname);    
+    setup_grid(macroname);
   }
 
   template < int N, int NV >
   Hmesh<N,NV>::Hmesh(const std::string &macroname, Refco::tag_t  pref_rule) :
-    _nconfDeg(0), refinement_rule(pref_rule) 
+    _nconfDeg(0), refinement_rule(pref_rule)
   {
-    setup_grid(macroname);    
+    setup_grid(macroname);
   }
 
   template < int N, int NV >
-  void Hmesh<N,NV>::setup_grid(const std::string &filename) 
+  void Hmesh<N,NV>::setup_grid(const std::string &filename)
   {
-#ifdef ALUGRIDDEBUG 
+#ifdef ALUGRIDDEBUG
     std::cerr << "\n  Hmesh_basic::asciireadtriang(?) opens: ";
     std::cerr << filename << "\n" << std::endl;
 #endif
@@ -74,16 +74,16 @@ namespace ALU2DGrid
     double time;
     long unsigned int nbr;
 
-    // call setup with std::istream 
+    // call setup with std::istream
     const bool restart = setup_grid(in, time, nbr);
 
-    // if restart we have to read the hierarchy 
+    // if restart we have to read the hierarchy
     if( restart )
       recoverGrid( in );
   }
 
   template < int N, int NV >
-  bool Hmesh<N,NV>::setup_grid(std::istream &macrofile, double &time, long unsigned int &nbr) 
+  bool Hmesh<N,NV>::setup_grid(std::istream &macrofile, double &time, long unsigned int &nbr)
   {
     ncv=NULL;
     adp = new multivertexadapter_t;
@@ -145,13 +145,13 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  void Hmesh<N,NV>::refresh() { 
+  void Hmesh<N,NV>::refresh() {
 
     Listwalk_impl < macroelement_t > walk (mel);
 
     adp->refresh(walk);
 
-  } 
+  }
 
   template < int N, int NV >
   bool Hmesh<N,NV>::checkConf()
@@ -226,8 +226,8 @@ namespace ALU2DGrid
 
     //Listwalk_impl <macroelement_t> walk(mel);
     //for( walk.first(); !walk.done(); walk.next() )
-    //  walk.getitem()->clearAllWas();  
-    
+    //  walk.getitem()->clearAllWas();
+
     do {
       Listwalk_impl <macroelement_t> walk(mel);
       for (walk.first(); !walk.done(); walk.next())
@@ -278,7 +278,7 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  void Hmesh<N,NV>::setdata(void (*f)(element_t &)) 
+  void Hmesh<N,NV>::setdata(void (*f)(element_t &))
   {
     Leafwalk < element_t > walk(mel);
     for (walk.first();walk.done();walk.next())

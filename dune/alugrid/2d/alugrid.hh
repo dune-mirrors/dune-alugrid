@@ -8,20 +8,20 @@
 namespace Dune
 {
 
-/** 
+/**
    (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
-   \li Available Implementations 
+   \li Available Implementations
         - quadrilateral and hexahedral elements only nonconforming refinement
-          - Dune::ALUGrid< 2, 2, cube, nonconforming >  
+          - Dune::ALUGrid< 2, 2, cube, nonconforming >
           - Dune::ALUGrid< 2, 3, cube, nonconforming >
           - Dune::ALUGrid< 3, 3, cube, nonconforming >
-        - simplicial elements and nonconforming refinement  
-          - Dune::ALUGrid< 2, 2, simplex, nonconforming >  
+        - simplicial elements and nonconforming refinement
+          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
           - Dune::ALUGrid< 2, 3, simplex, nonconforming >
           - Dune::ALUGrid< 3, 3, simplex, nonconforming >
-        - simplicial elements and bisection refinement  
-          - Dune::ALUGrid< 2, 2, simplex, conforming >  
+        - simplicial elements and bisection refinement
+          - Dune::ALUGrid< 2, 2, simplex, conforming >
           - Dune::ALUGrid< 2, 3, simplex, conforming >
           - Dune::ALUGrid< 3, 3, simplex, conforming > (work in progress)
 
@@ -38,10 +38,10 @@ class ALUGrid< 2, dimw, elType, refinementType, Comm >
   enum { dimworld = dimw };
 
 public:
-  //! type of boundary projection 
+  //! type of boundary projection
   typedef typename BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
 
-  //! type of boundary projection 
+  //! type of boundary projection
   typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
   //! \brief constructor for creating ALUSimplexGrid from given macro grid file
@@ -56,7 +56,7 @@ public:
           const DuneBoundaryProjectionType* bndProject  = 0,
           const DuneBoundaryProjectionVector* bndVector = 0,
           const bool verbose = true )
-    : BaseType(macroName, hangingNodes(), bndProject, bndVector) 
+    : BaseType(macroName, hangingNodes(), bndProject, bndVector)
   {
     if( verbose )
     {
@@ -79,12 +79,12 @@ public:
           const DuneBoundaryProjectionType* bndProject  = 0,
           const DuneBoundaryProjectionVector* bndVector = 0,
           const bool verbose = true )
-    : BaseType("", hangingNodes(), bndProject, bndVector, &macroFile) 
+    : BaseType("", hangingNodes(), bndProject, bndVector, &macroFile)
   {
-    if( verbose ) 
+    if( verbose )
     {
       std::cout << "\nCreated serial " << name() << nameSuffix();
-      if( macroName != "" ) 
+      if( macroName != "" )
         std::cout <<" from macro grid file '" << macroName;
       std::cout << "." << std::endl << std::endl;
     }
@@ -92,8 +92,8 @@ public:
 
   static std::string name () { return std::string("ALUGrid"); }
 
-  //! constructor creating empty grid 
-  ALUGrid( ) : BaseType( hangingNodes() ) 
+  //! constructor creating empty grid
+  ALUGrid( ) : BaseType( hangingNodes() )
   {
     std::cout << "\nCreated serial " << name() << nameSuffix() << "." << std::endl << std::endl;
   }
@@ -135,7 +135,7 @@ public:
   LevelGridView levelView ( int level ) const { return levelGridView( level ); }
 
   LeafGridView leafView () const { return leafGridView(); }
- 
+
   // new grid view methods
   template< PartitionIteratorType pitype >
   typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
@@ -176,8 +176,8 @@ private:
   }
 
   // returns number of hanging nodes allowed (0 or 1)
-  int hangingNodes() const 
-  { 
+  int hangingNodes() const
+  {
     return ((elType == simplex) && (refinementType == conforming)) ? 0 : 1;
   }
 
@@ -189,14 +189,14 @@ private:
 
   template< class >
   friend class ALU2dGridFactory;
-  
-  //! Copy constructor should not be used  
+
+  //! Copy constructor should not be used
   ALUGrid( const ALUGrid & g ) ; // : BaseType(g) {}
-  
-  //! assignment operator should not be used  
-  This& operator = (const ALUGrid& g); 
+
+  //! assignment operator should not be used
+  This& operator = (const ALUGrid& g);
 };
 
-} //end  namespace Dune 
+} //end  namespace Dune
 
 #endif

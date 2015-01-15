@@ -16,15 +16,15 @@
 
 namespace Dune {
   // Forward declarations
-  template<int cd, int dim, class GridImp> 
+  template<int cd, int dim, class GridImp>
   class ALU3dGridEntity;
   template<int cd, PartitionIteratorType pitype, class GridImp >
   class ALU3dGridLevelIterator;
-  template<int cd, class GridImp > 
+  template<int cd, class GridImp >
   class ALU3dGridEntityPointer;
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
-  template<class GridImp> 
+  template<class GridImp>
   class ALU3dGridHierarchicIterator;
   template<class GridImp>
   class ALU3dGridIntersectionIterator;
@@ -49,18 +49,18 @@ namespace Dune {
   of an element!
  */
 template<class GridImp>
-class ALU3dGridIntersectionIterator  
+class ALU3dGridIntersectionIterator
 //: public IntersectionIteratorDefaultImplementation <GridImp,ALU3dGridIntersectionIterator>
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
-    
+
   typedef typename GridImp::MPICommunicatorType Comm;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
 
   typedef typename ImplTraits::HElementType  HElementType ;
-  typedef typename ImplTraits::HBndSegType   HBndSegType; 
+  typedef typename ImplTraits::HBndSegType   HBndSegType;
   typedef typename ImplTraits::GEOElementType GEOElementType;
   typedef typename ImplTraits::IMPLElementType IMPLElementType;
   typedef typename ImplTraits::GEOFaceType GEOFaceType;
@@ -68,9 +68,9 @@ class ALU3dGridIntersectionIterator
   typedef typename ImplTraits::BNDFaceType BNDFaceType;
 
   typedef typename ALU3dImplTraits< tetra, Comm >::GEOElementType GEOTetraElementType;
-  typedef typename ALU3dImplTraits< tetra, Comm >::BNDFaceType    GEOTriangleBndType; 
+  typedef typename ALU3dImplTraits< tetra, Comm >::BNDFaceType    GEOTriangleBndType;
   typedef typename ALU3dImplTraits< hexa,  Comm >::GEOElementType GEOHexaElementType;
-  typedef typename ALU3dImplTraits< hexa,  Comm >::BNDFaceType    GEOQuadBndType; 
+  typedef typename ALU3dImplTraits< hexa,  Comm >::BNDFaceType    GEOQuadBndType;
 
   typedef ALU3dGridFaceInfo< dim, dimworld, GridImp::elementType, Comm > FaceInfoType;
 
@@ -78,22 +78,22 @@ class ALU3dGridIntersectionIterator
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
-      
+
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 
   enum { numFaces = (dim==3) ? EntityCount<GridImp::elementType>::numFaces : (GridImp::elementType==tetra ? 3 : 4) };
-  enum { numVerticesPerFace = 
+  enum { numVerticesPerFace =
          GeometryInfoType::numVerticesPerFace };
   enum { numVertices = (dim==3) ? EntityCount<GridImp::elementType>::numVertices  : (GridImp::elementType==tetra ? 3 : 4)};
 
   typedef ALU3dGridIntersectionIterator<GridImp> ThisType;
-  
+
   friend class ALU3dGridEntity<0,dim,GridImp>;
   friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 
-protected:  
-  enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth }; 
+protected:
+  enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
 
   typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
   typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
@@ -108,30 +108,30 @@ public:
   typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
   //! type of the intersection
   typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator< GridImp > > Intersection;
-  
+
   typedef FieldVector<alu3d_ctype, dimworld> NormalType;
   typedef ALU3dGridEntityPointer<0,GridImp> EntityPointer;
 
   typedef ALUMemoryProvider< ThisType > StorageType;
-  
+
   //! The default Constructor , level tells on which level we want
-  //! neighbours 
-  ALU3dGridIntersectionIterator(const FactoryType& factory, 
+  //! neighbours
+  ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 HElementType *el,
                                 int wLevel,bool end=false);
-  
+
   ALU3dGridIntersectionIterator(const FactoryType& factory, int wLevel);
-  
-  //! The copy constructor 
+
+  //! The copy constructor
   ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org);
 
-  //! assignment of iterators  
+  //! assignment of iterators
   void assign(const ALU3dGridIntersectionIterator<GridImp> & org);
 
-  //! The copy constructor 
+  //! The copy constructor
   bool equals (const ALU3dGridIntersectionIterator<GridImp> & i) const;
 
-  //! increment iterator 
+  //! increment iterator
   void increment ();
 
   //! access neighbor
@@ -144,22 +144,22 @@ public:
   bool boundary () const;
 
   //! return true if across the face an neighbor on leaf exists
-  bool neighbor () const; 
+  bool neighbor () const;
 
-  //! return information about the Boundary 
-  int boundaryId () const; 
+  //! return information about the Boundary
+  int boundaryId () const;
 
   //! return the boundary segment index
   size_t boundarySegmentIndex() const;
-      
+
   //! intersection of codimension 1 of this neighbor with element where
-  //! iteration started. 
+  //! iteration started.
   //! Here returned element is in LOCAL coordinates of the element
   //! where iteration started.
   LocalGeometry geometryInInside () const;
 
   //! intersection of codimension 1 of this neighbor with element where
-  //!  iteration started. 
+  //!  iteration started.
   //! Here returned element is in GLOBAL coordinates of the element where
   //! iteration started.
   Geometry geometry () const;
@@ -168,18 +168,18 @@ public:
   GeometryType type () const;
 
   //! local index of codim 1 entity in self where intersection is contained
-  //!  in 
+  //!  in
   int indexInInside () const;
 
   //! intersection of codimension 1 of this neighbor with element where
-  //! iteration started. 
+  //! iteration started.
   //! Here returned element is in LOCAL coordinates of neighbor
   LocalGeometry geometryInOutside () const;
 
-  //! local index of codim 1 entity in neighbor where intersection is 
+  //! local index of codim 1 entity in neighbor where intersection is
   //! contained
   int indexInOutside () const;
- 
+
   //! returns twist of face compared to inner element
   int twistInSelf() const { return twistInInside(); }
 
@@ -192,16 +192,16 @@ public:
   //! returns twist of face compared to outer element
   int twistInOutside() const;
 
-  //! return unit outer normal, this should be dependent on local 
-  //! coordinates for higher order boundary 
+  //! return unit outer normal, this should be dependent on local
+  //! coordinates for higher order boundary
   NormalType & unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
-  
-  //! return outer normal, this should be dependent on local 
-  //! coordinates for higher order boundary 
+
+  //! return outer normal, this should be dependent on local
+  //! coordinates for higher order boundary
   NormalType & outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
-  //! return outer normal, this should be dependent on local 
-  //! coordinates for higher order boundary 
+  //! return outer normal, this should be dependent on local
+  //! coordinates for higher order boundary
   NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return level of iterator (level of item)
@@ -209,48 +209,48 @@ public:
 
   int outsideLevel () const { return connector_.outsideLevel(); }
 
-  //! return true if intersection is conforming 
-  bool conforming () const 
+  //! return true if intersection is conforming
+  bool conforming () const
   {
-    return (connector_.conformanceState() == FaceInfoType::CONFORMING);  
+    return (connector_.conformanceState() == FaceInfoType::CONFORMING);
   }
 
-  //! return current face 
+  //! return current face
   const GEOFaceType& getItem() const { return connector_.face(); }
 
   //! return communication weight
-  int weight() const 
+  int weight() const
   {
     return this->getItem().weight();
   }
 
 protected:
-  // set interator to end iterator 
+  // set interator to end iterator
   void done () ;
   template< class EntityType > void done ( const EntityType &en ) { done(); }
-  
-  // reset IntersectionIterator to first neighbour 
+
+  // reset IntersectionIterator to first neighbour
   void setFirstItem(const HElementType & elem, int wLevel);
 
-  // reset IntersectionIterator to first neighbour 
-  void setInteriorItem(const HElementType  & elem, 
+  // reset IntersectionIterator to first neighbour
+  void setInteriorItem(const HElementType  & elem,
                        const BNDFaceType& bnd, int wLevel);
 
-  // reset IntersectionIterator to first neighbour 
+  // reset IntersectionIterator to first neighbour
   template <class EntityType>
   void first(const EntityType & en, int wLevel);
 
   // set new face
   void setNewFace(const GEOFaceType& newFace);
 
-private:  
+private:
   // set new face (only LeafIntersectionIterator)
   void setGhostFace(const GEOFaceType& newFace);
 
-protected:  
-  // generate local geometries 
+protected:
+  // generate local geometries
   void buildLocalGeometries() const;
-  
+
   // get the face corresponding to the index
   const typename ALU3dImplTraits< tetra, Comm >::GEOFaceType *
   getFace ( const GEOTriangleBndType &bnd, int index ) const;
@@ -273,12 +273,12 @@ protected:
 
   // reference to factory
   const FactoryType& factory_;
-  
-  //! current element from which we started the intersection iterator
-  const IMPLElementType* item_;  
 
-  //! current pointer to ghost face if iterator was started from ghost element 
-  const BNDFaceType* ghost_; 
+  //! current element from which we started the intersection iterator
+  const IMPLElementType* item_;
+
+  //! current pointer to ghost face if iterator was started from ghost element
+  const BNDFaceType* ghost_;
 
   mutable int innerLevel_;
   mutable int index_;
@@ -292,14 +292,14 @@ protected:
 };
 
 template<class GridImp>
-class ALU3dGridLevelIntersectionIterator : 
+class ALU3dGridLevelIntersectionIterator :
 public ALU3dGridIntersectionIterator<GridImp>
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
-    
+
   typedef typename GridImp::MPICommunicatorType Comm;
-  
+
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
 
   typedef typename ImplTraits::HElementType  HElementType ;
@@ -315,12 +315,12 @@ public ALU3dGridIntersectionIterator<GridImp>
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
-      
+
   typedef ElementTopologyMapping<GridImp::elementType> ElementTopo;
   typedef FaceTopologyMapping<GridImp::elementType> FaceTopo;
 
   enum { numFaces = (dim==3) ? EntityCount<GridImp::elementType>::numFaces : (GridImp::elementType==tetra ? 3 : 4) };
-  enum { numVerticesPerFace = 
+  enum { numVerticesPerFace =
          GeometryInfoType::numVerticesPerFace };
   enum { numVertices = (dim==3) ? EntityCount<GridImp::elementType>::numVertices  : (GridImp::elementType==tetra ? 3 : 4)};
 
@@ -348,53 +348,53 @@ public:
   typedef ALUMemoryProvider< ThisType > StorageType;
 
   //! The default Constructor , level tells on which level we want
-  //! neighbours 
-  ALU3dGridLevelIntersectionIterator(const FactoryType& factory, 
+  //! neighbours
+  ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                      HElementType *el,
                                      int wLevel,bool end=false);
-  
+
   ALU3dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel);
-  
-  //! The copy constructor 
+
+  //! The copy constructor
   ALU3dGridLevelIntersectionIterator(const ThisType & org);
 
-  //! assignment of iterators  
+  //! assignment of iterators
   void assign(const ThisType & org);
 
-  //! increment iterator 
+  //! increment iterator
   void increment ();
 
-  // reset IntersectionIterator to first neighbour 
+  // reset IntersectionIterator to first neighbour
   template <class EntityType>
   void first(const EntityType & en, int wLevel);
 
   //! return true if across the edge an neighbor on this level exists
-  bool neighbor () const; 
+  bool neighbor () const;
 
-  //! return true if intersection is conforming 
-  bool conforming () const 
+  //! return true if intersection is conforming
+  bool conforming () const
   {
-    alugrid_assert ( ( ! connector_.conformingRefinement() ) ? 
-      ( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING ) : true );  
-    // for conforming refinement use base implementation 
-    // otherwise its true 
-    return connector_.conformingRefinement() ? 
+    alugrid_assert ( ( ! connector_.conformingRefinement() ) ?
+      ( !neighbor() || this->connector_.conformanceState() == FaceInfoType::CONFORMING ) : true );
+    // for conforming refinement use base implementation
+    // otherwise its true
+    return connector_.conformingRefinement() ?
       BaseType :: conforming() : true ;
   }
 
-private:  
+private:
   // set new face
   void setNewFace(const GEOFaceType& newFace);
 
-  // reset IntersectionIterator to first neighbour 
+  // reset IntersectionIterator to first neighbour
   void setFirstItem(const HElementType & elem, int wLevel);
 
-  // reset IntersectionIterator to first neighbour 
-  void setInteriorItem(const HElementType  & elem, 
+  // reset IntersectionIterator to first neighbour
+  void setInteriorItem(const HElementType  & elem,
                        const BNDFaceType& bnd, int wLevel);
 
-  bool levelNeighbor_; 
-  bool isLeafItem_; 
+  bool levelNeighbor_;
+  bool isLeafItem_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -402,59 +402,59 @@ private:
 //  --IterationImpl
 //
 //////////////////////////////////////////////////////////////////////////////
-template <class InternalIteratorType > 
-class ALU3dGridTreeIterator 
+template <class InternalIteratorType >
+class ALU3dGridTreeIterator
 {
-public:  
+public:
   typedef typename InternalIteratorType :: val_t val_t;
 
-  // here the items level will do 
-  template <class GridImp, int codim> 
-  class GetLevel 
+  // here the items level will do
+  template <class GridImp, int codim>
+  class GetLevel
   {
-  public:  
-    template <class ItemType> 
+  public:
+    template <class ItemType>
     static int getLevel(const GridImp & grid, const ItemType & item, int level )
     {
       alugrid_assert ( & item );
       return (level < 0) ? item.level() : level;
     }
   };
- 
-  // level is not needed for codim = 0 
-  template <class GridImp> 
+
+  // level is not needed for codim = 0
+  template <class GridImp>
   class GetLevel<GridImp,0>
   {
-  public:  
-    template <class ItemType> 
+  public:
+    template <class ItemType>
     static int getLevel(const GridImp & grid, const ItemType & item, int level )
     {
       return level;
     }
   };
-  
-  template <class GridImp> 
+
+  template <class GridImp>
   class GetLevel<GridImp,3>
   {
-  public:  
-    template <class ItemType> 
+  public:
+    template <class ItemType>
     static int getLevel(const GridImp & grid, const ItemType & item, int level)
     {
       return (level < 0) ? grid.getLevelOfLeafVertex(item) : level;
     }
   };
-  
-protected: 
-  // set iterator to first item 
-  template <class GridImp, class IteratorImp> 
-  void firstItem(const GridImp & grid, IteratorImp & it, int level ) 
+
+protected:
+  // set iterator to first item
+  template <class GridImp, class IteratorImp>
+  void firstItem(const GridImp & grid, IteratorImp & it, int level )
   {
     InternalIteratorType & iter = it.internalIterator();
-    iter.first(); 
+    iter.first();
     ValidItem<IteratorImp::codimension, GridImp> validate;
     while(!validate(grid,iter))
     {
-      iter.next();      
+      iter.next();
       if(iter.done())
       {
         it.removeIter();
@@ -465,14 +465,14 @@ protected:
     {
       alugrid_assert ( iter.size() > 0 );
       setItem(grid,it,iter,level);
-    } 
-    else 
+    }
+    else
     {
       it.removeIter();
     }
-  } 
+  }
 
-  // set the iterators entity to actual item 
+  // set the iterators entity to actual item
   template <class GridImp, class IteratorImp>
   void setItem (const GridImp & grid, IteratorImp & it, InternalIteratorType & iter, int level)
   {
@@ -481,41 +481,41 @@ protected:
     alugrid_assert ( item.first || item.second );
     if( item.first )
     {
-      it.updateEntityPointer( item.first , 
-          GetLevel<GridImp,codim>::getLevel(grid, *(item.first) , level) ); 
+      it.updateEntityPointer( item.first ,
+          GetLevel<GridImp,codim>::getLevel(grid, *(item.first) , level) );
     }
     else
       it.updateGhostPointer( *item.second );
   }
- 
-  // increment iterator 
+
+  // increment iterator
   template <class GridImp, class IteratorImp>
-  void incrementIterator(const GridImp & grid, IteratorImp & it, int level) 
+  void incrementIterator(const GridImp & grid, IteratorImp & it, int level)
   {
-    // if iter_ is zero, then end iterator 
+    // if iter_ is zero, then end iterator
     InternalIteratorType & iter = it.internalIterator();
     ValidItem<IteratorImp::codimension, GridImp> validate;
     do{
       iter.next();
-    
-    
+
+
       if(iter.done())
       {
         it.removeIter();
         return ;
       }
-          
+
     }while(!(validate(grid,iter) ) );
-    
-    setItem(grid,it,iter,level);    
+
+    setItem(grid,it,iter,level);
     return ;
   }
-  
+
 private:
-  
-  // in 2d check if item is valid 
+
+  // in 2d check if item is valid
   template <int codim, class GridImp>
-  struct ValidItem 
+  struct ValidItem
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
@@ -524,7 +524,7 @@ private:
   };
 
   template <class GridImp>
-  struct ValidItem<1, GridImp> 
+  struct ValidItem<1, GridImp>
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
@@ -533,60 +533,60 @@ private:
       {
           typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 1>::ImplementationType GEOElementType;
           val_t & item = iter.item();
-          alugrid_assert ( item.first || item.second ); 
+          alugrid_assert ( item.first || item.second );
           GEOElementType * elem  = 0;
           if( item.first )
-              elem = dynamic_cast<GEOElementType *> (item.first); 
+              elem = dynamic_cast<GEOElementType *> (item.first);
           else if( item.second )
-              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first); 
+              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
           if(GridImp::elementType == tetra)
           {
-             //face of tetra - valid if first corner has index zero          
+             //face of tetra - valid if first corner has index zero
               return (elem->myvertex(0)->getIndex() == 0);
           }
           else if (GridImp::elementType == hexa)
           {
-            
+
             ALU3dGridLeafVertexList< typename GridImp::MPICommunicatorType > & vxList = grid.getLeafVertexList();
-           //face of hexa - valid if the vx 0 is valid and vx 1  is not valid       
+           //face of hexa - valid if the vx 0 is valid and vx 1  is not valid
             return (vxList.isValid(elem->myvertex(0)->getIndex()) && !vxList.isValid(elem->myvertex(1)->getIndex())) ;
           }
        }
        return false;
      }
   };
-  
-  
+
+
   template <class GridImp>
-  struct ValidItem<2, GridImp> 
+  struct ValidItem<2, GridImp>
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
       return true;
-      
-      //The check whether vertices are valid is done in alu3diterators.hh 
+
+      //The check whether vertices are valid is done in alu3diterators.hh
       // see class ALU3dGridLevelIteratorWrapper<3 , ... > and ALU3dGridLeafIteratorWrapper <3, ...>
-      
+
     /*  if(GridImp::dimension ==3 ) return true;
       else if (GridImp::dimension == 2)
       {
           typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 2>::ImplementationType GEOElementType;
           val_t & item = iter.item();
-          alugrid_assert ( item.first || item.second ); 
+          alugrid_assert ( item.first || item.second );
           GEOElementType * elem  = 0;
           if( item.first )
-              elem = dynamic_cast<GEOElementType *> (item.first); 
+              elem = dynamic_cast<GEOElementType *> (item.first);
           else if( item.second )
-              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first); 
+              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
           if(GridImp::elementType == tetra)
           {
-             //vertex of tetra - valid if not index zero         
-              return (elem->getIndex() != 0) ;        
+             //vertex of tetra - valid if not index zero
+              return (elem->getIndex() != 0) ;
           }
           else if (GridImp::elementType == hexa)
           {
-             //vertex of hexa - valid if even          
-              return !(elem->getIndex() % 2);          
+             //vertex of hexa - valid if even
+              return !(elem->getIndex() % 2);
           }
         }
       return false;*/
@@ -624,61 +624,61 @@ public:
 
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef ALU3dGridVertexList< Comm > VertexListType;
-    
-  //! typedef of my type 
+
+  //! typedef of my type
   typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ThisType;
-  // the wrapper for the original iterator of the ALU3dGrid  
-  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > IteratorType; 
-  typedef IteratorType InternalIteratorType; 
+  // the wrapper for the original iterator of the ALU3dGrid
+  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > IteratorType;
+  typedef IteratorType InternalIteratorType;
   typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, Comm >::val_t val_t;
- 
-  //! Constructor for begin iterator 
+
+  //! Constructor for begin iterator
   ALU3dGridLevelIterator(const FactoryType& factory, int level, bool);
-  
-  //! Constructor for end iterator 
+
+  //! Constructor for end iterator
   ALU3dGridLevelIterator(const FactoryType& factory, int level);
-  
+
   //! Constructor
   ALU3dGridLevelIterator(const ThisType & org);
-  
-  // destructor 
+
+  // destructor
   ~ALU3dGridLevelIterator();
 
   //! prefix increment
   void increment ();
 
-  //! dereference Entity, faster then the entity pointersmethod 
+  //! dereference Entity, faster then the entity pointersmethod
   Entity & dereference () const;
 
-  //! release entity 
+  //! release entity
   void releaseEntity () {}
 
-  //! assignment of iterators  
+  //! assignment of iterators
   ThisType & operator = (const ThisType & org);
 private:
-  //! do assignment 
+  //! do assignment
   void assign (const ThisType & org);
 
   // actual level
   int level_;
 
-  // the internal iterator 
+  // the internal iterator
   IteratorType * iter_ ;
-  
-  // deletes iter_ 
+
+  // deletes iter_
   void removeIter ();
 
-  IteratorType & internalIterator () 
-  { 
-    alugrid_assert ( iter_ ); 
-    return *iter_; 
+  IteratorType & internalIterator ()
+  {
+    alugrid_assert ( iter_ );
+    return *iter_;
   }
 };
 
 //********************************************************************
 //
-//  --ALU3dGridLeafIterator 
-//  --LeafIterator 
+//  --ALU3dGridLeafIterator
+//  --LeafIterator
 //
 //********************************************************************
 //! Leaf iterator
@@ -688,9 +688,9 @@ class ALU3dGridLeafIterator
   public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, pitype, typename GridImp::MPICommunicatorType > >
 {
   enum { dim = GridImp :: dimension };
-  
+
   friend class ALU3dGridEntity<cdim,dim,GridImp>;
-  enum { codim = cdim }; 
+  enum { codim = cdim };
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
@@ -704,49 +704,49 @@ public:
 
   typedef IteratorType InternalIteratorType;
   typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, Comm >::val_t val_t;
-  
+
   typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
-  //! Constructor for end iterators 
+  //! Constructor for end iterators
   ALU3dGridLeafIterator(const FactoryType& factory, int level);
 
-  //! Constructor for begin Iterators 
+  //! Constructor for begin Iterators
   ALU3dGridLeafIterator(const FactoryType& factory, int level , bool isBegin);
 
   //! copy Constructor
   ALU3dGridLeafIterator(const ThisType & org);
-  
-  //! destructor deleting real iterator 
+
+  //! destructor deleting real iterator
   ~ALU3dGridLeafIterator();
 
   //! prefix increment
   void increment ();
 
-  //! dereference Entity, faster then the entity pointersmethod 
+  //! dereference Entity, faster then the entity pointersmethod
   Entity & dereference () const;
 
-  //! release entity 
+  //! release entity
   void releaseEntity () {}
 
-  //! assignment of iterators 
+  //! assignment of iterators
   ThisType & operator = (const ThisType & org);
-  
+
 private:
-  // the internal iterator 
+  // the internal iterator
   IteratorType * iter_;
 
-  // max level for iteration  
+  // max level for iteration
   int walkLevel_ ;
 
-  //! do assignment 
+  //! do assignment
   void assign (const ThisType & org);
-  
-  // deletes iter_  
+
+  // deletes iter_
   void removeIter () ;
 
-  // return reference to iter_ 
-  InternalIteratorType & internalIterator () 
-  { 
+  // return reference to iter_
+  InternalIteratorType & internalIterator ()
+  {
     alugrid_assert ( iter_ );
     return *iter_;
   }
@@ -768,14 +768,14 @@ class ALU3dGridHierarchicIterator
   typedef typename ImplTraits::HElementType HElementType;
   typedef typename ImplTraits::HBndSegType HBndSegType;
 
-  template < class PointerType, class CommT > 
+  template < class PointerType, class CommT >
   class GhostElementStorage;
 
-  //! empty implementation for 
-  template < class PointerType > 
+  //! empty implementation for
+  template < class PointerType >
   class GhostElementStorage< PointerType, ALUGridNoComm >
   {
-  public:  
+  public:
     GhostElementStorage() {}
     explicit GhostElementStorage( const PointerType& ) {}
     PointerType& operator * () {  PointerType* p = 0; alugrid_assert ( false ); abort(); return *p; }
@@ -789,18 +789,18 @@ class ALU3dGridHierarchicIterator
     bool valid () const { return false; }
   };
 
-  //! implementation holding two ghost pointer 
-  template < class PointerType > 
+  //! implementation holding two ghost pointer
+  template < class PointerType >
   class GhostElementStorage< PointerType, ALUGridMPIComm >
   {
-  private:  
-    // pointers to ghost and current ghost 
+  private:
+    // pointers to ghost and current ghost
     const HBndSegType * ghost_;
     HBndSegType * nextGhost_;
-  public:  
+  public:
     GhostElementStorage() : ghost_( 0 ), nextGhost_( 0 ) {}
     explicit GhostElementStorage( const PointerType& gh ) : ghost_( &gh ), nextGhost_( 0 ) {}
-    GhostElementStorage( const GhostElementStorage& org ) 
+    GhostElementStorage( const GhostElementStorage& org )
       : ghost_( org.ghost_ ), nextGhost_( org.nextGhost_ ) {}
 
     PointerType& operator * () { alugrid_assert ( nextGhost_ ); return *nextGhost_; }
@@ -809,13 +809,13 @@ class ALU3dGridHierarchicIterator
     PointerType* operator -> () { return nextGhost_; }
     bool operator != (const PointerType* p ) const { return (nextGhost_ != p); }
     bool operator ! () const { return nextGhost_ == 0; }
-    GhostElementStorage& operator= (const GhostElementStorage& org) 
+    GhostElementStorage& operator= (const GhostElementStorage& org)
     {
       ghost_ = org.ghost_;
       nextGhost_ = org.nextGhost_;
       return *this;
     }
-    GhostElementStorage& operator= (PointerType* p) 
+    GhostElementStorage& operator= (PointerType* p)
     {
       nextGhost_ = p;
       return *this;
@@ -831,52 +831,52 @@ public:
 
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const FactoryType& factory,
-                              const HElementType & elem, 
+                              const HElementType & elem,
                               int maxlevel, bool end );
-  
-  //! start constructor for ghosts 
+
+  //! start constructor for ghosts
   ALU3dGridHierarchicIterator(const FactoryType& factory,
-                              const HBndSegType& ghost, 
-                              int maxlevel, 
+                              const HBndSegType& ghost,
+                              int maxlevel,
                               bool end);
-  
+
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const ThisType &org);
-    
+
   //! increment
   void increment();
 
-  //! dereference Entity, faster then the entity pointersmethod 
+  //! dereference Entity, faster then the entity pointersmethod
   Entity & dereference () const;
 
-  //! release entity 
+  //! release entity
   void releaseEntity () {}
 
-  //! the assignment operator 
+  //! the assignment operator
   ThisType & operator = (const ThisType & org);
-  
+
 private:
-  // assign iterator 
+  // assign iterator
   void assign(const ThisType & org);
 
-  //! return level of item 
-  int getLevel(const HElementType* item) const; 
-  
-  //! return correct level for ghosts 
+  //! return level of item
+  int getLevel(const HElementType* item) const;
+
+  //! return correct level for ghosts
   int getLevel(const HBndSegType* face) const;
-  
-  // go to next valid element 
+
+  // go to next valid element
   template <class HItemType>
   HItemType* goNextElement (const HItemType* startElem, HItemType * oldEl);
-  
-  //! element from where we started 
+
+  //! element from where we started
   const HElementType * elem_;
 
-  // pointers to ghost and current ghost 
+  // pointers to ghost and current ghost
   GhostElementStorage< HBndSegType, Comm > ghostElem_;
 
   //! maximal level to go down
-  int maxlevel_; 
+  int maxlevel_;
 };
 
 

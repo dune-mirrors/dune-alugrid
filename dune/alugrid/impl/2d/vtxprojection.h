@@ -8,7 +8,7 @@
 namespace ALU2DGrid
 {
 
-  template <int N, int NV> 
+  template <int N, int NV>
   struct VtxProjection
   {
     typedef Hier< Bndel < N, NV > > hbndel_t;
