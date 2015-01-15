@@ -293,7 +293,7 @@ void assertNeighbor (Grid &g)
         std::cerr << "Warning: Skipping level neighbor check." << std::endl;
       return;
     }
-    
+
     // small check if LevenIntersectionIterators
     // from work reassigned EntityPointers
     // after creation of LevelIterator on different level
@@ -442,7 +442,7 @@ void assertNeighbor (Grid &g)
                 assert( false );
               }
 
-              if( nit != outsidePtr ) 
+              if( nit != outsidePtr )
                 assert( globalid.id( outside ) != globalid.id( *nit ) );
               else
                 foundNeighbor = true;
@@ -892,19 +892,19 @@ void gridcheck (Grid &g)
 
   /*
    * now the runtime-tests
-   */  
+   */
   const Grid & cg = g;
   iteratorEquals(g);
   iteratorEquals(cg);
   iterate<true>(g);
   iterate<false>(cg);
-  zeroEntityConsistency(g);   
+  zeroEntityConsistency(g);
   zeroEntityConsistency(cg);
   assertNeighbor(g);
   assertNeighbor(cg);
   checkFatherLevel(g);
   checkFatherLevel(cg);
-  
+
 
   // check geometries of macro level and leaf level
   checkGeometry( g.levelGridView( 0 ) );
@@ -935,7 +935,7 @@ void gridcheck (Grid &g)
         assert(false);
       }
     }
-  } 
+  }
 /*
   if( EnableLevelIntersectionIteratorCheck< Grid >::v )
     checkBoundarySegmentIndex( g.levelGridView( 0 ) );

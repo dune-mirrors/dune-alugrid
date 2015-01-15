@@ -19,14 +19,14 @@
 //////////////////////////////////////////////////////////////////////
 #define COMPILE_ALU2DGRID_LIB 0
 
-#if COMPILE_ALU2DGRID_LIB 
+#if COMPILE_ALU2DGRID_LIB
   #define COMPILE_ALU2DGRID_INLINE 0
 #else
   #define COMPILE_ALU2DGRID_INLINE 1
 #endif
 
 #if COMPILE_ALU2DGRID_INLINE
-#define alu2d_inline inline 
+#define alu2d_inline inline
 #else
 #define alu2d_inline
 #endif
@@ -100,23 +100,23 @@ namespace Dune
   // ALU2dGridMarkerVector
   // ---------------------
 
-  class ALU2dGridMarkerVector 
+  class ALU2dGridMarkerVector
   {
     typedef std::vector< int > VectorType;
   public:
     ALU2dGridMarkerVector() : valid_(false) {}
-   
+
     bool valid() const { return valid_; }
 
     void invalidate() { valid_ = false; }
-    
-    bool isOnElement(int elementIndex, int idx, int codim) const 
+
+    bool isOnElement(int elementIndex, int idx, int codim) const
     {
-      return marker_[codim-1][idx] == elementIndex; 
+      return marker_[codim-1][idx] == elementIndex;
     }
-    
-    template <class GridType> 
-    void update (const GridType & grid, int level ) 
+
+    template <class GridType>
+    void update (const GridType & grid, int level )
     {
       enum { dim = GridType::dimension };
       static const int dimworld = GridType::dimensionworld;
@@ -125,14 +125,14 @@ namespace Dune
       typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
-      // resize 
-      for(int i=0; i<2; ++i) 
+      // resize
+      for(int i=0; i<2; ++i)
       {
         int s = grid.hierSetSize(i+1);
         if((int) marker_[i].size() < s ) marker_[i].resize(s);
 
         size_t markerSize = marker_[i].size();
-        // reset marker vector to default value 
+        // reset marker vector to default value
         for(size_t k=0; k<markerSize; ++k) marker_[i][k] = -1;
       }
 
@@ -143,12 +143,12 @@ namespace Dune
         ElementType & elem = iter->getitem();
         int elIdx = elem.getIndex();
 
-        for(int i=0; i<elem.numvertices(); ++i) 
+        for(int i=0; i<elem.numvertices(); ++i)
         {
           enum { vxCodim = 1 };
           int vxIdx = elem.getVertex(i)->getIndex();
           if( marker_[vxCodim][vxIdx] < 0) marker_[vxCodim][vxIdx] = elIdx;
-          
+
           enum { edgeCodim = 0 };
           int edgeIdx = elem.edge_idx(i);
           if( marker_[edgeCodim][edgeIdx] < 0) marker_[edgeCodim][edgeIdx] = elIdx;
@@ -163,28 +163,28 @@ namespace Dune
     bool valid_;
   };
 
-  class ALU2dGridLeafMarkerVector 
+  class ALU2dGridLeafMarkerVector
   {
     typedef std::vector< int > VectorType;
   public:
     ALU2dGridLeafMarkerVector() : valid_(false) {}
-   
+
     bool valid() const { return valid_; }
 
     void invalidate() { valid_ = false; }
-    
-    // return true, if edge is visited on given element 
-    bool isOnElement(int elementIndex, int idx, int codim) const 
+
+    // return true, if edge is visited on given element
+    bool isOnElement(int elementIndex, int idx, int codim) const
     {
       alugrid_assert ( valid_ );
-      // this marker only works for codim 1, i.e. edges  
+      // this marker only works for codim 1, i.e. edges
       alugrid_assert ( codim == 1 );
-      return marker_[idx] == elementIndex; 
+      return marker_[idx] == elementIndex;
     }
-    
+
     // this is for the LeafIterator
-    template <class GridType> 
-    void update (const GridType & grid) 
+    template <class GridType>
+    void update (const GridType & grid)
     {
       static const int dimworld = GridType::dimensionworld;
       static const ALU2DSPACE ElementType eltype = GridType::elementType;
@@ -192,22 +192,22 @@ namespace Dune
       typedef typename ALU2dImplTraits< dimworld, eltype >::template Codim<0>::InterfaceType ElementType;
       typedef ALU2DSPACE Listwalkptr< ElementType > IteratorType;
 
-      // resize edge marker 
+      // resize edge marker
       {
         int s = grid.hierSetSize(1);
         if((int) marker_.size() < s ) marker_.resize(s);
 
         size_t markerSize = marker_.size();
-        // reset marker vector to default value 
+        // reset marker vector to default value
         for(size_t k=0; k<markerSize; ++k) marker_[k] = -1;
       }
 
-      // resize vertex levels 
+      // resize vertex levels
       {
         int s = grid.hierSetSize(2);
         if((int) vertexLevels_.size() < s ) vertexLevels_.resize(s);
 
-        // initialize with -1 
+        // initialize with -1
         size_t vxSize = vertexLevels_.size();
         for(size_t k=0; k<vxSize; ++k) vertexLevels_[k] = -1;
       }
@@ -222,32 +222,32 @@ namespace Dune
 
         int level = elem.level();
 
-        for(int i=0; i<elem.numvertices(); ++i) 
+        for(int i=0; i<elem.numvertices(); ++i)
         {
           int vxIdx = elem.getVertex(i)->getIndex();
 
           // set max level to vertices, see Grid docu paper
-          if(level > vertexLevels_[vxIdx]) vertexLevels_[vxIdx] = level;    
-          
+          if(level > vertexLevels_[vxIdx]) vertexLevels_[vxIdx] = level;
+
           int edgeIdx = elem.edge_idx(i);
           if( marker_[edgeIdx] < 0) marker_[edgeIdx] = elIdx;
         }
-      }     
+      }
       valid_ = true;
     }
 
-    //! return level of vertex 
-    int levelOfVertex(const int vxIdx) const 
+    //! return level of vertex
+    int levelOfVertex(const int vxIdx) const
     {
       alugrid_assert ( valid_ );
       alugrid_assert ( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
-      // if this assertion is thrown, the level has not been initialized 
+      // if this assertion is thrown, the level has not been initialized
       alugrid_assert ( vertexLevels_[vxIdx] >= 0 );
       return vertexLevels_[vxIdx];
     }
 
-    //! return level of vertex 
-    bool isValidVertex(const int vxIdx) const 
+    //! return level of vertex
+    bool isValidVertex(const int vxIdx) const
     {
       alugrid_assert ( valid_ );
       alugrid_assert ( vxIdx >= 0 && vxIdx < (int) vertexLevels_.size());
@@ -261,7 +261,7 @@ namespace Dune
     bool valid_;
   };
 
-  // dummy object stream class 
+  // dummy object stream class
   class ALU2dGridObjectStream
   {
     public:
@@ -274,13 +274,13 @@ namespace Dune
       void writeObject (T &) {}
       void writeObject (int) {}
       void writeObject (double) {}
-     
+
       template <class T>
       void read (T &) const {}
-      template <class T> 
+      template <class T>
       void write (const T &) {}
-  };  
-      
+  };
+
 } // namespace Dune
 
 #endif // #ifndef DUNE_ALU2DGRID_INCLUDE_HH

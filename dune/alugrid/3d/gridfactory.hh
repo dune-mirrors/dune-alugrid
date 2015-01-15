@@ -38,7 +38,7 @@ namespace Dune
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
-    //! \brief type of boundary projection class 
+    //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
 
     template< int codim >
@@ -67,7 +67,7 @@ namespace Dune
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
     static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
-    
+
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
@@ -95,7 +95,7 @@ namespace Dune
 
     typedef std::vector< Transformation > FaceTransformationVector;
 
-    // copy vertex numbers and store smalled #dimension ones 
+    // copy vertex numbers and store smalled #dimension ones
     void copyAndSort ( const std::vector< unsigned int > &vertices, FaceType &faceId ) const
     {
       std::vector<unsigned int> tmp( vertices );
@@ -106,7 +106,7 @@ namespace Dune
     }
 
   private:
-    // return grid object 
+    // return grid object
     virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
     {
       return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
@@ -118,7 +118,7 @@ namespace Dune
                                 bool removeGeneratedFile = true );
 
     /** \brief constructor taking filename for temporary outfile */
-    explicit ALU3dGridFactory ( const std::string &filename, 
+    explicit ALU3dGridFactory ( const std::string &filename,
                                 const MPICommunicatorType &communicator = Grid::defaultCommunicator() );
 
     /** \brief constructor taking verbose flag */
@@ -128,20 +128,20 @@ namespace Dune
     virtual ~ALU3dGridFactory ();
 
     /** \brief insert a vertex into the coarse grid
-     *  
+     *
      *  \param[in]  pos  position of the vertex
      */
     virtual void insertVertex ( const VertexInputType &pos );
 
-    /** \brief insert a vertex into the coarse grid including the vertex's globally unique id  
-     *  
+    /** \brief insert a vertex into the coarse grid including the vertex's globally unique id
+     *
      *  \param[in]  pos       position of the vertex
-     *  \param[in]  globalId  globally unique id for vertex 
+     *  \param[in]  globalId  globally unique id for vertex
      */
     void insertVertex ( const VertexInputType &pos, const VertexId globalId );
 
     /** \brief insert an element into the coarse grid
-     * 
+     *
      *  \note The order of the vertices must coincide with the vertex order in
      *        the corresponding DUNE reference element.
      *
@@ -202,7 +202,7 @@ namespace Dune
     virtual void
     insertBoundarySegment ( const std::vector< VertexId >& vertices ) ;
 
-    virtual void 
+    virtual void
     insertProcessBorder ( const std::vector< VertexId >& vertices );
 
     /** \brief insert a shaped boundary segment into the macro grid
@@ -214,9 +214,9 @@ namespace Dune
     insertBoundarySegment ( const std::vector< VertexId >& vertices,
                             const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment ) ;
 
-    /** \brief insert a boundary projection object, (a copy is made)  
+    /** \brief insert a boundary projection object, (a copy is made)
      *
-     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved 
+     *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved
      */
     virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
 
@@ -269,7 +269,7 @@ namespace Dune
       std::vector< unsigned int > vertices;
       const typename Codim< 0 >::EntityPointer inPtr = intersection.inside();
       const typename Codim< 0 >::Entity &in = *inPtr;
-      const Dune::ReferenceElement< double, dimension > &refElem = 
+      const Dune::ReferenceElement< double, dimension > &refElem =
           Dune::ReferenceElements< double, dimension >::general( in.type() );
       int faceNr = intersection.indexInInside();
       const int vxSize = refElem.size( faceNr, 1, dimension );
@@ -289,7 +289,7 @@ namespace Dune
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundary() && 
+      return intersection.boundary() &&
              (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
@@ -327,13 +327,13 @@ namespace Dune
     ElementVector elements_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
-    const DuneBoundaryProjectionType* globalProjection_ ; 
+    const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
     unsigned int numFacesInserted_;
     bool realGrid_;
     const bool allowGridGeneration_;
-    bool foundGlobalIndex_ ; 
+    bool foundGlobalIndex_ ;
 
     MPICommunicatorType communicator_;
   };
@@ -373,7 +373,7 @@ namespace Dune
                                "ALUGrid< 3, 3, cube, refrule >." );
     }
   }
-  
+
   /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
    *  \ingroup GridFactory
    */
@@ -393,23 +393,23 @@ namespace Dune
     explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( communicator )
     {}
-    
+
     /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename, 
+    GridFactory ( const std::string &filename,
                   const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
     {}
 
-  protected:  
+  protected:
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid, 
+    GridFactory ( const bool realGrid,
                   const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( realGrid, communicator )
     {}
   };
-  
-  
+
+
    /** \brief Specialization of the generic GridFactory for ALUCubeGrid<2,dimw>
    *  \ingroup GridFactory
    */
@@ -429,17 +429,17 @@ namespace Dune
     explicit GridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( communicator )
     {}
-    
+
     /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename, 
+    GridFactory ( const std::string &filename,
                   const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
     {}
 
-  protected:  
+  protected:
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid, 
+    GridFactory ( const bool realGrid,
                   const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( realGrid, communicator )
     {}
@@ -450,7 +450,7 @@ namespace Dune
   // ----------------------------------
 
   template< class ALUGrid >
-  inline 
+  inline
   ALU3dGridFactory< ALUGrid >
     :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                           bool removeGeneratedFile )
@@ -464,7 +464,7 @@ namespace Dune
   {}
 
   template< class ALUGrid >
-  inline 
+  inline
   ALU3dGridFactory< ALUGrid >
     :: ALU3dGridFactory ( const std::string &filename,
                           const MPICommunicatorType &communicator )
@@ -478,9 +478,9 @@ namespace Dune
   {}
 
   template< class ALUGrid >
-  inline 
+  inline
   ALU3dGridFactory< ALUGrid >
-    :: ALU3dGridFactory ( const bool realGrid, 
+    :: ALU3dGridFactory ( const bool realGrid,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
     globalProjection_ ( 0 ),
@@ -558,7 +558,7 @@ namespace Dune
     GeometryType type;
     if( numVx == 3 )
       type.makeSimplex( dimension-1 );
-    else  
+    else
       type.makeCube( dimension-1 );
 
     // we need double here because of the structure of BoundarySegment
@@ -567,10 +567,10 @@ namespace Dune
     std::vector< CoordType > coords( numVx );
     for( size_t i = 0; i < numVx; ++i )
     {
-      // if this assertions is thrown vertices were not inserted at first 
+      // if this assertions is thrown vertices were not inserted at first
       alugrid_assert ( vertices_.size() > vertices[ i ] );
 
-      // get global coordinate and copy it 
+      // get global coordinate and copy it
       const VertexType &x = position( vertices[ i ] );
       for( unsigned int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
@@ -579,8 +579,8 @@ namespace Dune
     BoundarySegmentWrapperType* prj
       = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
-#ifdef ALUGRIDDEBUG 
-    // consistency check 
+#ifdef ALUGRIDDEBUG
+    // consistency check
     for( size_t i = 0; i < numVx; ++i )
     {
       CoordType global = (*prj)( coords [ i ] );

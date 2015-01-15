@@ -19,14 +19,14 @@ namespace Dune
     // Capabilities for ALUGrid
     // ------------------------
 
-    /** \brief ALUGrid has only one geometry type for codim 0 entities 
+    /** \brief ALUGrid has only one geometry type for codim 0 entities
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
     struct hasSingleGeometryType< ALUGrid< dim, dimworld, eltype, refinementtype, Comm > >
     {
       static const bool v = true;
-      static const unsigned int topologyId = (eltype == cube) ? 
+      static const unsigned int topologyId = (eltype == cube) ?
         GenericGeometry :: CubeTopology< dim > :: type :: id :
         GenericGeometry :: SimplexTopology< dim > :: type :: id ;
     };
@@ -40,7 +40,7 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm 
+    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
@@ -49,7 +49,7 @@ namespace Dune
       static const bool v = false;
     };
 
-    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm 
+    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
@@ -67,7 +67,7 @@ namespace Dune
       static const bool v = false;
     };
 
-    /** \brief ALUGrid can communicate 
+    /** \brief ALUGrid can communicate
     \ingroup ALUGrid
     */
     template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
@@ -105,6 +105,6 @@ namespace Dune
 
   } // end namespace Capabilities
 
-} //end  namespace Dune 
+} //end  namespace Dune
 
 #endif // #ifdef DUNE_ALUGRID_CAPABILITIES_HH

@@ -22,24 +22,24 @@ public:
   typedef typename Container::Grid::template Codim< 0 >::Entity Entity;
 
 protected:
-  // data map 
+  // data map
   Container &data_;
   const Grid &grid_;
 
 public:
-  //! create DiscreteOperator with a LocalOperator 
+  //! create DiscreteOperator with a LocalOperator
   DataHandle ( const Grid &grid, Container &data )
   : data_( data )
   , grid_(grid)
   {}
 
-  //! see documentation in Dune::CommDataHandleIF 
+  //! see documentation in Dune::CommDataHandleIF
   bool contains ( int dim, int codim ) const
   {
     return (codim == 0);
   }
 
-  //! see documentation in Dune::CommDataHandleIF 
+  //! see documentation in Dune::CommDataHandleIF
   bool fixedsize ( int dim, int codim ) const
   {
     return (codim > 0);
@@ -58,7 +58,7 @@ public:
     // we only have data on the leaf level
     if( entity.isLeaf() )
     {
-      // write data to stream  
+      // write data to stream
       buffer.write( data_[ entity ] );
     }
   }

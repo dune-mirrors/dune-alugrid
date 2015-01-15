@@ -16,7 +16,7 @@ namespace ALU2DGrid
   //   class Triang : public Hier < Element >
   //   class Bndel_triang   : public Hier < Bndel >
   // #end(header)
-  // *************************************************** 
+  // ***************************************************
 
   // ***************************************************
   // #begin(class)
@@ -92,7 +92,7 @@ namespace ALU2DGrid
     private:
 
       Triang(const Triang &);
-      
+
       Triang & operator = (const Triang & ) ;
 
     protected:
@@ -138,7 +138,7 @@ namespace ALU2DGrid
       typedef Multivertexadapter < N, NV > multivertexadapter_t;
 
       typedef Thinelement < N, NV > thinelement_t;
-      typedef typename thinelement_t::splitrule_t splitrule_t; 
+      typedef typename thinelement_t::splitrule_t splitrule_t;
 
       typedef Element < N,NV > element_t;
 
@@ -174,7 +174,7 @@ namespace ALU2DGrid
       using hbndel_t::type;
 
       Bndel_triang(const int segmentIndex, bnd_t t)
-      : time(0.0) 
+      : time(0.0)
       {
         bndel_t::typ = t;
         this->copySegmentIndex( segmentIndex );
@@ -247,12 +247,12 @@ namespace ALU2DGrid
       Bndel_periodic *periodic_nb;
 
       Bndel_periodic()
-        : bndel_triang_t(-1,bndel_t::periodic), 
+        : bndel_triang_t(-1,bndel_t::periodic),
           periodic_nb(0)
         { }
 
       Bndel_periodic(const int segmentIndex)
-        : bndel_triang_t(segmentIndex, bndel_t::periodic), 
+        : bndel_triang_t(segmentIndex, bndel_t::periodic),
           periodic_nb(0)
         { }
 
@@ -260,7 +260,7 @@ namespace ALU2DGrid
         : bndel_triang_t(v1,v2,bndel_t::periodic),
           periodic_nb(0)
         { }
-      
+
       virtual double area() const {
         alugrid_assert (periodic_nb);
         return periodic_nb->nbel(0)->area();
@@ -300,7 +300,7 @@ namespace ALU2DGrid
                         int,Refco::tag_t,prolong_basic_t *pro_el);
 
       virtual int docoarsen(nconf_vtx_t *ncv,int,restrict_basic_t *rest_el);
-   
+
   };
   // #end(class)
   // ***************************************************

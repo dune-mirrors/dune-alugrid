@@ -12,7 +12,7 @@
 //          not match ours. The following complicated preprocessor code tries
 //          to cope with this problem.
 
-#if HAVE_ZOLTAN 
+#if HAVE_ZOLTAN
 
 // if DUNE was built with MPI
 #if HAVE_MPI
@@ -22,7 +22,7 @@
 #endif
 
 #if HAVE_PARMETIS
-#undef HAVE_PARMETIS 
+#undef HAVE_PARMETIS
 #define HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif
 
@@ -39,16 +39,16 @@
 #undef HAVE_PARMETIS
 #endif
 
-#ifdef HAVE_MPI_WAS_UNDEFED_HERE 
+#ifdef HAVE_MPI_WAS_UNDEFED_HERE
 // redefine our definition of HAVE_MPI if it was undef'd before
 #define HAVE_MPI ENABLE_MPI
 #undef HAVE_MPI_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_MPI_WAS_UNDEFED_HERE
 
-#ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE 
+#ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
 // redefine our definition of HAVE_PARMETIS if it was undef'd before
 #define HAVE_PARMETIS ENABLE_PARMETIS
-#undef HAVE_PARMETIS_WAS_UNDEFED_HERE 
+#undef HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
 
 #endif // #if HAVE_ZOLTAN
@@ -57,7 +57,7 @@ namespace ALUGridZoltan
 {
 #if HAVE_ZOLTAN
   template < class ldb_vertex_map_t, class ldb_edge_set_t >
-  class ObjectCollection 
+  class ObjectCollection
   {
     int _rank;
     ldb_vertex_map_t& _vertexMap ;
@@ -68,7 +68,7 @@ namespace ALUGridZoltan
 
   public:
     // constructor
-    ObjectCollection( int rank, ldb_vertex_map_t& vertexMap, ldb_edge_set_t& edgeMap ) 
+    ObjectCollection( int rank, ldb_vertex_map_t& vertexMap, ldb_edge_set_t& edgeMap )
       : _rank( rank ),
         _vertexMap( vertexMap ),
         _edgeMap( edgeMap ),
@@ -79,18 +79,18 @@ namespace ALUGridZoltan
     ldb_vertex_map_t& vertexMap() { return _vertexMap; }
     ldb_edge_set_t& edgeMap() { return _edgeMap; }
     std::vector< std::vector<std::pair<edgeType,bool> > >& edges() { return _edges; }
-    int edgeIdx(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeIdx(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() );
                                return ( (_edges[i][k].second) ?
-                                   _edges[i][k].first->rightNode() : 
+                                   _edges[i][k].first->rightNode() :
                                    _edges[i][k].first->leftNode() ) ; }
-    int edgeMaster(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeMaster(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() );
                                return ( (_edges[i][k].second) ?
-                                   _edges[i][k].first->rightMaster() : 
+                                   _edges[i][k].first->rightMaster() :
                                    _edges[i][k].first->leftMaster() ) ; }
-    int edgeWeight(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() ); 
+    int edgeWeight(int i,int k) { alugrid_assert ( i < (int)_edges.size() && k < (int)_edges[i].size() );
                                  return _edges[i][k].first->weight(); }
 
-    // query functions that respond to requests from Zoltan 
+    // query functions that respond to requests from Zoltan
 
     static int get_number_of_objects(void *data, int *ierr)
     {
@@ -111,11 +111,11 @@ namespace ALUGridZoltan
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
 
-      // In this example, return the IDs of our objects, 
-      int i = 0; 
+      // In this example, return the IDs of our objects,
+      int i = 0;
       typedef typename ldb_vertex_map_t :: iterator iterator ;
       const iterator end = vertexMap.end();
-      for ( iterator it = vertexMap.begin(); it != end; ++ it, ++i ) 
+      for ( iterator it = vertexMap.begin(); it != end; ++ it, ++i )
       {
         // std::cout << "[" << objs->rank() << "]: ";
         // std::cout << "vertex(" << i << ") = " << (*it).first.index() << std::endl;
@@ -148,10 +148,10 @@ namespace ALUGridZoltan
       const int rank = objs->rank();
 
       typename ldb_edge_set_t::const_iterator iEnd = objs->edgeMap().end();
-      for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it ) 
+      for (typename ldb_edge_set_t::const_iterator it = objs->edgeMap().begin (); it != iEnd; ++it )
       {
-        if ( it->leftMaster() == rank ) 
-        {  
+        if ( it->leftMaster() == rank )
+        {
           int node = it->leftNode();
           int i=0;
           // std::cout << "[" << objs->rank() << "]: ";
@@ -164,8 +164,8 @@ namespace ALUGridZoltan
           ++numEdges[i];
           objs->edges()[i].push_back( std::make_pair(it,true) );
         }
-        if ( it->rightMaster() == rank ) 
-        {  
+        if ( it->rightMaster() == rank )
+        {
           int node = it->rightNode();
           // std::cout << "[" << objs->rank() << "]: ";
           // std::cout << "edge(" << node << ") = " << it->leftNode() << " " << it->leftMaster() << std::endl;
@@ -214,7 +214,7 @@ namespace ALUGridZoltan
       *ierr = ZOLTAN_OK;
     }
 
-    // return dimension of coordinates 
+    // return dimension of coordinates
     static int get_num_geometry(void *data, int *ierr)
     {
       *ierr = ZOLTAN_OK;
@@ -239,11 +239,11 @@ namespace ALUGridZoltan
 
       ldb_vertex_map_t& vertexMap = objs->vertexMap();
 
-      int idx = 0; 
+      int idx = 0;
       typedef typename ldb_vertex_map_t :: iterator iterator ;
       double coord[ 3 ];
       const iterator end = vertexMap.end();
-      for ( iterator it = vertexMap.begin(); it != end; ++ it ) 
+      for ( iterator it = vertexMap.begin(); it != end; ++ it )
       {
         (*it).first.computeBaryCenter( coord );
         for( int d=0; d<dimension; ++d, ++idx )
@@ -281,7 +281,7 @@ namespace ALUGridZoltan
     Zoltan *zz = new Zoltan( comm );
     alugrid_assert ( zz );
 
-    // General parameters 
+    // General parameters
     const char* debug = ( verbose ) ? "1" : "0";
     zz->Set_Param( "DEBUG_LEVEL", debug );
     zz->Set_Param( "OBJ_WEIGHT_DIM", "1");
@@ -300,13 +300,13 @@ namespace ALUGridZoltan
     else
     {
       zz->Set_Param( "LB_METHOD", "GRAPH");
-      zz->Set_Param( "LB_APPROACH", "REPARTITION"); 
+      zz->Set_Param( "LB_APPROACH", "REPARTITION");
       // zz->Set_Param( "LB_APPROACH","PARTITION"); // give an error in PARMETIS with an
       //       empty partitioning - no idea why...
       // zz->Set_Param( "LB_APPROACH", "REFINE");  // gives bad loadbalance with
       //       PARMETOS and the rest of the setting - no idea why
       zz->Set_Param( "EDGE_WEIGHT_DIM","1");
-      zz->Set_Param( "GRAPH_SYMMETRIZE","NONE" ); 
+      zz->Set_Param( "GRAPH_SYMMETRIZE","NONE" );
       // zz->Set_Param( "GRAPH_SYMMETRIZE","TRANSPOSE");
       zz->Set_Param( "GRAPH_SYM_WEIGHT","MAX");
       // zz->Set_Param( "GRAPH_BUILD_TYPE","FAST_NO_DUP");
@@ -316,12 +316,12 @@ namespace ALUGridZoltan
 #elif HAVE_SCOTCH
       zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
-      zz->Set_Param( "CHECK_GRAPH", "0"); 
+      zz->Set_Param( "CHECK_GRAPH", "0");
       zz->Set_Param( "PHG_EDGE_SIZE_THRESHOLD", ".25");
     }
 
 
-    
+
     zz->Set_Num_Obj_Fn ( ObjectCollectionType::get_number_of_objects, &objects);
     zz->Set_Obj_List_Fn( ObjectCollectionType::get_object_list, &objects);
     zz->Set_Num_Geom_Fn( ObjectCollectionType::get_num_geometry, &objects);
@@ -343,16 +343,16 @@ namespace ALUGridZoltan
     int *exportProcs  = 0;
     int *exportToPart = 0;
 
-    double tolerance = givenTolerance ; 
+    double tolerance = givenTolerance ;
     int rc = ZOLTAN_OK + 1 ;
     int count = 0 ;
-    while( rc != ZOLTAN_OK ) 
+    while( rc != ZOLTAN_OK )
     {
       // std::cout << "[" << rank << "]: ";
       // std::cout << "zoltan partitioning tolerance: " << tolerance << std::endl;
-      // tolerance for load imbalance 
+      // tolerance for load imbalance
       {
-        std::stringstream tol; 
+        std::stringstream tol;
         tol << tolerance ;
         zz->Set_Param( "IMBALANCE_TOL", tol.str() );
       }
@@ -361,7 +361,7 @@ namespace ALUGridZoltan
                             numImport, importGlobalIds, importLocalIds, importProcs, importToPart,
                             numExport, exportGlobalIds, exportLocalIds, exportProcs, exportToPart);
 
-      // increase imbalance tolerance and try again 
+      // increase imbalance tolerance and try again
       if( rc != ZOLTAN_OK )
       {
         tolerance *= 1.05 ;
@@ -370,8 +370,8 @@ namespace ALUGridZoltan
       }
     }
 
-    // if new partitioning has been calculated 
-    if (rc == ZOLTAN_OK) 
+    // if new partitioning has been calculated
+    if (rc == ZOLTAN_OK)
     {
       typedef typename ldb_vertex_map_t::iterator iterator;
       for (int i=0; i < numExport; ++i)
@@ -397,11 +397,11 @@ namespace ALUGridZoltan
         connect.insert( ALUGrid::MpAccessLocal::recvRank( importProcs[ i ] ) );
       }
     }
-    else 
+    else
     {
-      if( verbose && mpa.myrank() == 0 ) 
-        std::cerr << "ERROR: Zoltan partitioning failed, partitioning won't change! " << std::endl; 
-      // no changes 
+      if( verbose && mpa.myrank() == 0 )
+        std::cerr << "ERROR: Zoltan partitioning failed, partitioning won't change! " << std::endl;
+      // no changes
       changes = 0;
     }
 
@@ -413,17 +413,17 @@ namespace ALUGridZoltan
     Zoltan::LB_Free_Part(&importGlobalIds, &importLocalIds, &importProcs, &importToPart);
     Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
 
-    // delete zoltan structure 
+    // delete zoltan structure
     delete zz;
 
-    // return true if partition changed 
+    // return true if partition changed
     return (changes > 0);
-#else 
+#else
     std::cerr << "ERROR: Zoltan library not found, cannot use Zoltan partitioning! " << std::endl;
     std::abort();
     return false ;
 #endif // #if HAVE_ZOLTAN && HAVE_MPI
-  } // CALL_Zoltan_LB_Partition 
+  } // CALL_Zoltan_LB_Partition
 
 } // namespace ALUGridZoltan
 

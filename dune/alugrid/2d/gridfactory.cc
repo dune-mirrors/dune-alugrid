@@ -23,9 +23,9 @@ namespace Dune
     vertices_.push_back( pos );
   }
 
-  
+
   template< class GridImp >
-  typename ALU2dGridFactory< GridImp >::VertexId 
+  typename ALU2dGridFactory< GridImp >::VertexId
   ALU2dGridFactory< GridImp >::insertVertex ( const VertexType &pos, const size_t globalId )
   {
     const VertexId vertexId = vertices_.size();
@@ -33,7 +33,7 @@ namespace Dune
     return vertexId;
   }
 
-  
+
   template< class GridImp >
   void ALU2dGridFactory< GridImp >
     ::insertElement ( const GeometryType &geometry,
@@ -41,12 +41,12 @@ namespace Dune
   {
     switch( elementType )
     {
-      case ALU2DSPACE triangle: 
+      case ALU2DSPACE triangle:
         if( !geometry.isTriangle() )
           DUNE_THROW( GridError, "Only triangles can be inserted into "
                                  "ALUGrid< 2, " << dimensionworld << ", triangle >." );
         break;
-      case ALU2DSPACE quadrilateral: 
+      case ALU2DSPACE quadrilateral:
         if( !geometry.isCube() )
           DUNE_THROW( GridError, "Only cubes can be inserted into "
                                  "ALUGrid< 2, " << dimensionworld << ", quadrilateral >." );
@@ -68,7 +68,7 @@ namespace Dune
                        const std::vector< unsigned int > &vertices,
                        const int id )
   {
-    // lines can be either cube or simplex 
+    // lines can be either cube or simplex
     alugrid_assert ( geometry.isSimplex() || geometry.isCube() );
     if( geometry.dim() != dimension-1 )
     {
@@ -107,9 +107,9 @@ namespace Dune
   void ALU2dGridFactory< GridImp >
     ::insertBoundaryProjection ( const DuneBoundaryProjectionType &bndProjection )
   {
-    if( globalProjection_ ) 
+    if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
-    
+
     globalProjection_ = &bndProjection;
   }
 
@@ -175,7 +175,7 @@ namespace Dune
     std::pair< FaceType, int > boundaryId;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
       boundaryId.first[ i ] = vertices[ i ];
-    boundaryId.second = -222; 
+    boundaryId.second = -222;
     boundaryIds_.push_back( boundaryId );
   }
 
@@ -198,16 +198,16 @@ namespace Dune
     GeometryType type;
     if( numVx == 3 )
       type.makeSimplex( dimension-1 );
-    else 
+    else
       type.makeCube( dimension-1 );
 
     std::vector< VertexType > coords( numVx );
     for( size_t i = 0; i < numVx; ++i )
     {
-      // if this assertions is thrown vertices were not inserted at first 
+      // if this assertions is thrown vertices were not inserted at first
       alugrid_assert ( vertices_.size() > vertices[ i ] );
 
-      // get global coordinate and copy it 
+      // get global coordinate and copy it
       const VertexType &x = vertices_[ vertices[ i ] ];
       for( int j = 0; j < dimensionworld; ++j )
         coords[ i ][ j ] = x[ j ];
@@ -217,8 +217,8 @@ namespace Dune
       = new BoundarySegmentWrapperType( type, coords, boundarySegment );
     boundaryProjections_[ faceId ] = prj;
 
-#ifdef ALUGRIDDEBUG 
-    // consistency check 
+#ifdef ALUGRIDDEBUG
+    // consistency check
     for( size_t i = 0; i < numVx; ++i )
     {
       VertexType global = (*prj)( coords [ i ] );
@@ -254,12 +254,12 @@ namespace Dune
       recreateBoundaryIds();
 
     std::ofstream outfile;
-    std::stringstream temp; 
+    std::stringstream temp;
 
     std::ostream* outptr = 0;
-    if( temporary ) 
+    if( temporary )
       outptr = & temp;
-    else 
+    else
     {
       outfile.open( filename.c_str() , std::ios::out );
       outptr = & outfile;
@@ -268,10 +268,10 @@ namespace Dune
 
     out.setf( std::ios_base::scientific, std::ios_base::floatfield );
     out.precision( 16 );
-    out << "!Triangles" << std::endl; 
+    out << "!Triangles" << std::endl;
 
     const unsigned int numVertices = vertices_.size();
-    // now start writing grid 
+    // now start writing grid
     out << numVertices << std :: endl;
     typedef typename std :: vector< VertexType > :: iterator VertexIteratorType;
     const VertexIteratorType endV = vertices_.end();
@@ -305,7 +305,7 @@ namespace Dune
     const size_t bndProjectionSize = boundaryProjections_.size();
     if( bndProjectionSize > 0 )
     {
-      // the memory is freed by the grid on destruction 
+      // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
                                                     (DuneBoundaryProjectionType*)0 );
     }
@@ -333,22 +333,22 @@ namespace Dune
 
       if( bndProjectionSize > 0 )
       {
-        // generate boundary segment pointer 
+        // generate boundary segment pointer
         FaceType faceId (boundaryId.first);
         std::sort( faceId.begin(), faceId.end() );
 
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
         // if no projection given we use global projection, otherwise identity
-        if( ! projection && globalProjection_ ) 
+        if( ! projection && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
-          // we need to wrap the global projection because of 
-          // deleting in desctructor of ALUGrid 
+          // we need to wrap the global projection because of
+          // deleting in desctructor of ALUGrid
           projection = new ProjectionWrapperType( *globalProjection_ );
         }
 
-        // copy pointer 
+        // copy pointer
         (*bndProjections)[ segmentIndex ] = projection;
       }
     }
@@ -362,16 +362,16 @@ namespace Dune
 
     std::istream& inFile = temp;
 
-    // if we have a vector reset global projection 
-    // because empty positions are filled with global projection anyway  
+    // if we have a vector reset global projection
+    // because empty positions are filled with global projection anyway
     if( bndProjections ) globalProjection_ = 0;
 
-    // ALUGrid is taking ownership of the bndProjections pointer 
+    // ALUGrid is taking ownership of the bndProjections pointer
     Grid *grid = createGridObj( temporary, filename, inFile, bndProjections );
 
-    // remove pointers 
+    // remove pointers
     globalProjection_ = 0;
-    // is removed by the grid 
+    // is removed by the grid
     bndProjections    = 0;
 
     return grid;
@@ -510,7 +510,7 @@ namespace Dune
         FaceType key;
         generateFace( elements_[ n ], face, key );
         std::sort( key.begin(), key.end() );
-       
+
         const FaceIterator pos = faceMap.find( key );
         if( pos != faceMap.end() )
           faceMap.erase( key );
@@ -523,7 +523,7 @@ namespace Dune
     BoundaryIdVector boundaryIds;
     boundaryIds_.swap( boundaryIds );
     alugrid_assert ( boundaryIds_.size() == 0 );
-    
+
     // add all current boundary ids again (with their reordered keys)
     typedef typename BoundaryIdVector::iterator BoundaryIterator;
     const BoundaryIterator bndEnd = boundaryIds.end();
@@ -560,7 +560,7 @@ template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune:
 
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming, Dune::ALUGridNoComm > >;
 
-// new versions 
+// new versions
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming,    Dune::ALUGridNoComm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming, Dune::ALUGridNoComm > >;
 template class Dune::ALU2dGridFactory< Dune::ALUGrid< 2, 3, Dune::cube,    Dune::nonconforming, Dune::ALUGridNoComm > >;

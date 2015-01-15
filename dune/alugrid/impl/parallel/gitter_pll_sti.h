@@ -31,14 +31,14 @@ namespace ALUGrid
     //  4 - sequentielle Vergr"oberung,
     //  5 - Fl"achenausgleich des Vergr"oberers,
     //  6 - Kantenausgleich des Vergr"oberers.
-    
+
   extern int __STATIC_myrank;
   extern int __STATIC_turn;
   extern int __STATIC_phase;
 
   template < class A > class LeafIteratorTT;
 
-    // Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das 
+    // Der Smartpointer 'AccessIteratorTT' ist ein Iteratorproxy, das
     // genau wie der 'AccessIterator' aus gitter_sti.h funktioniert, aber
     // f"ur die Identifikationsiteratoren verwendet wird. Deshalb hat es
     // auch zwei Handle - Klassen: eine f"ur den inneren und eine f"ur
@@ -51,7 +51,7 @@ namespace ALUGrid
     public :
       virtual std::pair< IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const A *, int) = 0;
       virtual std::pair< IteratorSTI < A > *, IteratorSTI < A > * > iteratorTT (const std::pair< IteratorSTI < A > *, IteratorSTI < A > * > &, int) = 0;
-      class HandleBase : public IteratorSTI < A > 
+      class HandleBase : public IteratorSTI < A >
       {
         AccessIteratorTT < A > & _fac;
         int _l;
@@ -63,10 +63,10 @@ namespace ALUGrid
           HandleBase (const HandleBase &);
 
           // HandleBase behaves like EmptyIterator (see gitter_sti.h )
-          virtual void first (); 
-          virtual void next () ; 
+          virtual void first ();
+          virtual void next () ;
           virtual int done () const;
-          virtual int size (); 
+          virtual int size ();
           virtual A & item () const;
           virtual IteratorSTI < A > * clone () const;
 
@@ -107,14 +107,14 @@ namespace ALUGrid
     // Der 'listSmartpointer__to__iteratorSTI' Smartpointer verwaltet
     // die Iteratorkopien.
 
-  template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A > 
+  template < class A > class listSmartpointer__to__iteratorSTI : public IteratorSTI < A >
   {
     typedef std::list< A* > container_t ;
-    // list to iterate 
+    // list to iterate
     container_t& _l;
-    // current item 
+    // current item
     typedef typename container_t::iterator listiterator_t;
-    
+
     const listiterator_t _end ;
     listiterator_t _curr;
 
@@ -135,12 +135,12 @@ namespace ALUGrid
       static inline bool debugOption (int = 0);
     public :
     class MacroGitterPll : public virtual Gitter::Geometric::BuilderIF,
-        public AccessIteratorTT < vertex_STI >, 
-        public AccessIteratorTT < hedge_STI >, 
-        public AccessIteratorTT < hface_STI > 
+        public AccessIteratorTT < vertex_STI >,
+        public AccessIteratorTT < hedge_STI >,
+        public AccessIteratorTT < hface_STI >
     {
     protected :
-        
+
       // Die nachfolgenden Vektoren von Listenpaaren sind die Identifikationsabbildung auf dem Grobgitter:
       // Jeder Vektoreintrag geh"ort zu dem entsprechenden lokalen Link (Verbindung zum Nachbargebiet) und
       // enth"alt ein paar von zwei Listen ('inner' und 'outer'). Die erste Liste enth"alt Referenzen auf
@@ -149,7 +149,7 @@ namespace ALUGrid
       // des Nachbargebiets zu rechnen sind. Die Ordnung der Listen ist folgendermassen: Durchl"auft man
       // hier 'inner', dann korrespondieren auf dem Nachbargebiet die Objekte in 'outer' in der Reihenfolge
       // des Durchlaufs (und umgekehrt).
-    
+
       typedef std::vector< std::pair< std::list< vertex_STI* >, std::list< vertex_STI* > > > vertexTT_t;
       typedef std::vector< std::pair< std::list< hedge_STI*  >, std::list< hedge_STI*  > > > hedgeTT_t ;
       typedef std::vector< std::pair< std::list< hface_STI*  >, std::list< hface_STI*  > > > hfaceTT_t ;
@@ -158,7 +158,7 @@ namespace ALUGrid
       hfaceTT_t   _hfaceTT;
 
       virtual void secondScan ( std::set< int >& ) = 0 ;
-    public:  
+    public:
       virtual void clearLinkagePattern () = 0;
       virtual void vertexLinkageEstimate (MpAccessLocal &, const bool );
       // vertexLinkageEstimation with gcollect( MPI_Allgather, memory consuming )
@@ -178,7 +178,7 @@ namespace ALUGrid
       // AccessIteratorTT < . >::InnerHandle/OuterHandle um die verwaltung der Iterationsobjekte loszuwerden.
       // Diese Smartpointer sehen nach aussen aus wie Iteratorenstandardschnittstellen, delegieren aber alles
       // an die Iterationsobjekte, die sie vom Grobgittercontainer bekommen haben.
-    
+
       std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const vertex_STI *, int);
       std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > iteratorTT (const std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > * > &, int);
       std::pair< IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > * > iteratorTT (const hedge_STI *, int);
@@ -188,35 +188,35 @@ namespace ALUGrid
       virtual inline int iterators_attached () const;
       virtual void identification (MpAccessLocal &, LoadBalancer::DataBase* , const bool );
       virtual void fullIntegrityCheck (MpAccessLocal &);
-    }; // end MacroGitterPll 
+    }; // end MacroGitterPll
 
     public :
-    
+
     // Das verteilte Gitter "uberschreibt die meisten Methoden der
     // unterliegenden Monogitter durch eigene Implementierungen.
     // printSizeTT () ist neu und schreibt die Gr"ossen der
     // Identifikationsabbildungen auf die Standarausgabe.
-    
+
       virtual void printsize ();
       virtual void fullIntegrityCheck ();
 
-    protected:  
+    protected:
       virtual bool refine ();
       virtual void coarse ();
       virtual bool adapt ();
-    public:  
+    public:
       virtual void printSizeTT ();
 
-      // communication of border data 
+      // communication of border data
       virtual void borderBorderCommunication (
                GatherScatterType & vertexData ,
                GatherScatterType & edgeData,
                GatherScatterType & faceData ,
-              GatherScatterType & elementData ) 
+              GatherScatterType & elementData )
       {
         abort();
       }
-      
+
     protected :
       virtual Makrogitter & container () = 0;
       virtual const Makrogitter & container () const = 0;
@@ -224,8 +224,8 @@ namespace ALUGrid
       virtual const MacroGitterPll & containerPll () const = 0;
       virtual MpAccessLocal & mpAccess () = 0;
       virtual const MpAccessLocal & mpAccess () const = 0;
-      
-    // Der nachfolgende Methodenblock dient dazu, das Verhalten des 
+
+    // Der nachfolgende Methodenblock dient dazu, das Verhalten des
     // parallelen Gitters einigermassen unter Kontrolle zu bringen.
     // Dabei wird von einem Schichtenmodell ausgegangen:
     // - der dynamische Zustand des Gitters ist die Verfeinerungs-
@@ -234,24 +234,24 @@ namespace ALUGrid
     //   bleibt der entsprechenden Implemntierung "uberlassen.
     // Dementsprechend werden die exchange--*-- Methoden immer
     // aufgerufen, sobald sich der zugeh"orige Zustand ge"andert hat.
-      
+
       virtual void exchangeStaticState ();
       virtual void exchangeDynamicState ();
 
-    protected:   
+    protected:
       void computeGraphVertexIndices();
       void doNotifyMacroGridChanges ( LoadBalancer::DataBase* db = 0 );
-    public:  
+    public:
       virtual void repartitionMacroGrid (LoadBalancer::DataBase &, GatherScatterType* );
-      
+
       virtual bool checkPartitioning(LoadBalancer::DataBase &, GatherScatterType* );
       virtual bool loadBalance ( GatherScatterType* gs = 0 );
       virtual void loadBalancerMacroGridChangesNotify ();
       virtual void notifyMacroGridChanges ();
-      
+
     // Die Methoden iteratorTT (const . *, int)  sind der Zugang zu den
     // Identifikationsabbildungen des hierarchischen Gitters f"ur die
-    // feinsten Objekte in der Hierarchie. Sie erzeugen ein Paar von 
+    // feinsten Objekte in der Hierarchie. Sie erzeugen ein Paar von
     // Iterationsobjekten, die zu einem entsprechenden Link, d.h. zu einer
     // bestimmten Verbindung mit einem benachbarten Teilgitter geh"oren.
     // Der erste Iterator im Paar verweist auf die Objekte, die es hier
@@ -260,12 +260,12 @@ namespace ALUGrid
     // befinden. Die Identifikation verl"auft folgendermassen: Die Objekte,
     // die der erste Iterator hier zeigt, korrespondieren zu denen die der
     // zweite Iterator auf dem Nachbargitter abl"auft (und umgekehrt).
-      
+
       std::pair< IteratorSTI < vertex_STI > *, IteratorSTI < vertex_STI > *> iteratorTT (const vertex_STI *, int);
       std::pair< IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> iteratorTT (const hedge_STI *, int);
       std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> iteratorTT (const hface_STI *, int);
 
-      // constructor, take communicator for parameter communication 
+      // constructor, take communicator for parameter communication
       explicit GitterPll ( MpAccessLocal & mpa );
      ~GitterPll () {}
 
@@ -273,36 +273,36 @@ namespace ALUGrid
       friend class LeafIteratorTT < hedge_STI >;
       friend class LeafIteratorTT < hface_STI >;
     protected :
-      template <class StopRule_t> 
-      inline std::pair< IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *> 
+      template <class StopRule_t>
+      inline std::pair< IteratorSTI < hedge_STI > *, IteratorSTI < hedge_STI > *>
       createEdgeIteratorTT (const StopRule_t *, int);
 
-      template <class StopRule_t> 
-      inline std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *> 
+      template <class StopRule_t>
+      inline std::pair< IteratorSTI < hface_STI > *, IteratorSTI < hface_STI > *>
       createFaceIteratorTT (const StopRule_t rule , int);
 
       bool serialPartitioner()      const { return LoadBalancer::DataBase::serialPartitionerUsed( _ldbMethod ); }
       bool storeLinkageInVertices() const { return LoadBalancer::DataBase::storeLinkageInVertices( _ldbMethod ); }
-    
+
       /////////////////////////////////////
-      //  member variables  
+      //  member variables
       /////////////////////////////////////
-      std::vector<int> _graphSizes;  // only used for serial partitioners 
+      std::vector<int> _graphSizes;  // only used for serial partitioners
       std::vector<int> _elementCuts; // only used for parallel sfc partitioning
 
-      // Load Balancer parameters 
+      // Load Balancer parameters
       double  _ldbOver, _ldbUnder;
       LoadBalancer::DataBase::method _ldbMethod;
-      
+
       // Die Variable _refineLoops dient nur der Kommunikation
       // zwischen adapt () und refine (), damit die Zahl der
       // Iterationen am Ende ausgegeben werden kann.
-   
+
       int  _refineLoops;
       bool _ldbVerticesComputed;
   };
 
-  template < class A > class LeafIteratorTT 
+  template < class A > class LeafIteratorTT
   {
     GitterPll & _grd;
     int _link;
@@ -338,15 +338,15 @@ namespace ALUGrid
   }
 
   template < class A > inline AccessIteratorTT < A >::HandleBase::
-  HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i) 
+  HandleBase (AccessIteratorTT < A > & f, int i) : _fac (f), _l (i)
   {
     this->_fac.ref ++;
     this->_pw = _fac.iteratorTT ((A *)0,_l);
   }
 
   template < class A > inline AccessIteratorTT < A >::HandleBase::
-  HandleBase (const ThisType& org) 
-    : _fac (org._fac), _l (org._l) 
+  HandleBase (const ThisType& org)
+    : _fac (org._fac), _l (org._l)
     , _pw( org._pw.first ->clone() , org._pw.second->clone() )
   {
     this->_fac.ref ++;
@@ -360,43 +360,43 @@ namespace ALUGrid
   }
 
   template < class A > inline void AccessIteratorTT < A >::HandleBase::
-  first () 
+  first ()
   {
-  } 
+  }
 
   template < class A > inline void AccessIteratorTT < A >::HandleBase::
-  next ()  
+  next ()
   {
-  } 
-
-  template < class A > inline int AccessIteratorTT < A >::HandleBase::
-  done () const 
-  { 
-    return 1; 
   }
 
   template < class A > inline int AccessIteratorTT < A >::HandleBase::
-  size () 
-  { 
-    return 0; 
+  done () const
+  {
+    return 1;
+  }
+
+  template < class A > inline int AccessIteratorTT < A >::HandleBase::
+  size ()
+  {
+    return 0;
   }
 
   template < class A > inline A & AccessIteratorTT < A >::HandleBase::
-  item () const 
-  { 
-    alugrid_assert ( ! done ()); 
+  item () const
+  {
+    alugrid_assert ( ! done ());
     A * a = 0;
-    return *a; 
+    return *a;
   }
 
   template < class A > inline IteratorSTI < A > * AccessIteratorTT < A >::HandleBase::
-  clone () const 
+  clone () const
   {
     return new ThisType(*this);
   }
 
   template < class A > inline AccessIteratorTT < A >::InnerHandle::
-  InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i) 
+  InnerHandle (AccessIteratorTT < A > & f, int i) : HandleBase (f,i)
   {
   }
 
@@ -428,8 +428,8 @@ namespace ALUGrid
     return this->_pw.first->item ();
   }
 
-  template < class A > inline IteratorSTI < A > * AccessIteratorTT < A >::InnerHandle:: 
-  clone () const 
+  template < class A > inline IteratorSTI < A > * AccessIteratorTT < A >::InnerHandle::
+  clone () const
   {
     return new typename AccessIteratorTT < A >::InnerHandle (*this);
   }
@@ -438,7 +438,7 @@ namespace ALUGrid
   }
 
   template < class A > inline AccessIteratorTT < A >::OuterHandle::
-  OuterHandle (const OuterHandle & p) : HandleBase (p) 
+  OuterHandle (const OuterHandle & p) : HandleBase (p)
   {
   }
 
@@ -466,21 +466,21 @@ namespace ALUGrid
     return this->_pw.second->item ();
   }
 
-  template < class A > inline IteratorSTI < A > * AccessIteratorTT < A >::OuterHandle:: 
-  clone () const 
+  template < class A > inline IteratorSTI < A > * AccessIteratorTT < A >::OuterHandle::
+  clone () const
   {
     return new typename AccessIteratorTT < A >::OuterHandle (*this);
   }
 
 
   template < class A > listSmartpointer__to__iteratorSTI < A >::
-  listSmartpointer__to__iteratorSTI ( container_t & a) 
+  listSmartpointer__to__iteratorSTI ( container_t & a)
    : _l (a),  _end( _l.end() ), _curr( _end )
   {
   }
 
   template < class A > listSmartpointer__to__iteratorSTI < A >::
-  listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a) 
+  listSmartpointer__to__iteratorSTI (const listSmartpointer__to__iteratorSTI < A > & a)
     : _l (a._l), _end( _l.end() ), _curr(a._curr) {}
 
   template < class A > listSmartpointer__to__iteratorSTI < A >::~listSmartpointer__to__iteratorSTI () {
@@ -490,7 +490,7 @@ namespace ALUGrid
     _curr = _l.begin ();
   }
 
-  template < class A > void listSmartpointer__to__iteratorSTI < A >::next () 
+  template < class A > void listSmartpointer__to__iteratorSTI < A >::next ()
   {
     ++_curr;
   }
@@ -509,7 +509,7 @@ namespace ALUGrid
   }
 
   template < class A > IteratorSTI < A > * listSmartpointer__to__iteratorSTI < A >::
-  clone () const 
+  clone () const
   {
     return new listSmartpointer__to__iteratorSTI < A > (*this);
   }
@@ -517,7 +517,7 @@ namespace ALUGrid
   inline bool GitterPll::debugOption (int level) {
 #ifdef ALUGRIDDEBUG
     return (getenv ("VERBOSE_PLL") ? ( atoi (getenv ("VERBOSE_PLL")) > level ? true : (level == 0)) : false);
-#else 
+#else
     return false ;
 #endif
   }
@@ -537,16 +537,16 @@ namespace ALUGrid
 
     Insert < AccessIteratorTT < hface_STI >::InnerHandle, TreeIterator < hface_STI, has_int_edge < hface_STI > > > fimi (mfi);
     Insert < AccessIteratorTT < hface_STI >::OuterHandle, TreeIterator < hface_STI, has_int_edge < hface_STI > > > fimo (mfo);
-    
+
     Wrapper < Insert < AccessIteratorTT < hface_STI >::InnerHandle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimi (fimi);
     Wrapper < Insert < AccessIteratorTT < hface_STI >::OuterHandle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfimo (fimo);
-    
+
     Insert < Wrapper < Insert < AccessIteratorTT < hface_STI >::InnerHandle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, StopRule_t> > eifi (dfimi);
-    
+
     Insert < Wrapper < Insert < AccessIteratorTT < hface_STI >::OuterHandle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, StopRule_t> > eifo (dfimo);
@@ -563,8 +563,8 @@ namespace ALUGrid
   }
 
   template <class StopRule_t>
-  inline std::pair< IteratorSTI < GitterPll::hface_STI > *, IteratorSTI < GitterPll::hface_STI > *> 
-    GitterPll::createFaceIteratorTT (const StopRule_t rule , int l) 
+  inline std::pair< IteratorSTI < GitterPll::hface_STI > *, IteratorSTI < GitterPll::hface_STI > *>
+    GitterPll::createFaceIteratorTT (const StopRule_t rule , int l)
   {
     AccessIteratorTT < hface_STI >::InnerHandle mif (containerPll () , l);
     AccessIteratorTT < hface_STI >::OuterHandle mof (containerPll () , l);
@@ -579,12 +579,12 @@ namespace ALUGrid
   }
 
   template < class A > inline LeafIteratorTT < A >::LeafIteratorTT (const LeafIteratorTT & org)
-    : _grd (org._grd), _link (org._link), _a (0) 
-    , _p( org._p.first->clone() , org._p.second->clone() ) 
+    : _grd (org._grd), _link (org._link), _a (0)
+    , _p( org._p.first->clone() , org._p.second->clone() )
   {
   }
 
-  template < class A > inline LeafIteratorTT < A >::~LeafIteratorTT () 
+  template < class A > inline LeafIteratorTT < A >::~LeafIteratorTT ()
   {
     delete _p.first;
     delete _p.second;
@@ -594,7 +594,7 @@ namespace ALUGrid
   {
     return * _p.first;
   }
-   
+
   template < class A > const inline IteratorSTI < A > & LeafIteratorTT < A >::inner () const
   {
     return * _p.first;

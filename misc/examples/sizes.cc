@@ -1,16 +1,16 @@
 //***********************************************************************
 //
-//  Example program how to use ALUGrid. 
-//  Author: Robert Kloefkorn 
+//  Example program how to use ALUGrid.
+//  Author: Robert Kloefkorn
 //
-//  This little program read one of the macrogrids and generates a grid. 
-//  The  grid is refined and coarsend again. 
+//  This little program read one of the macrogrids and generates a grid.
+//  The  grid is refined and coarsend again.
 //
 //***********************************************************************
 #include <config.h>
 #include <iostream>
 
-// include serial part of ALUGrid 
+// include serial part of ALUGrid
 #include <dune/alugrid/grid.hh>
 
 using namespace ALUGrid;
@@ -47,23 +47,23 @@ struct EmptyGatherScatter : public GatherScatter
 
 struct EmptyAdaptRestrictProlong : public Gitter :: AdaptRestrictProlong
 {
-  virtual int preCoarsening (HElemType & elem )   { return 1; } 
+  virtual int preCoarsening (HElemType & elem )   { return 1; }
   virtual int postRefinement (HElemType & elem ) { return 1; }
   virtual int preCoarsening (HGhostType & bnd )     { return 1; }
-  virtual int postRefinement (HGhostType & bnd )    { return 1; } 
+  virtual int postRefinement (HGhostType & bnd )    { return 1; }
 };
 
 
-// refine grid globally, i.e. mark all elements and then call adapt 
+// refine grid globally, i.e. mark all elements and then call adapt
 template <class GitterType>
-bool needConformingClosure( GitterType& grid, bool useClosure ) 
+bool needConformingClosure( GitterType& grid, bool useClosure )
 {
   bool needClosure = false ;
   {
-    // get LeafIterator which iterates over all leaf elements of the grid 
+    // get LeafIterator which iterates over all leaf elements of the grid
     LeafIterator < Gitter::helement_STI > w (grid) ;
-    w->first(); 
-    if( ! w->done() ) 
+    w->first();
+    if( ! w->done() )
     {
       if( w->item ().type() == tetra )
       {
@@ -74,45 +74,45 @@ bool needConformingClosure( GitterType& grid, bool useClosure )
   return needClosure ;
 }
 
-       
-// refine grid globally, i.e. mark all elements and then call adapt 
+
+// refine grid globally, i.e. mark all elements and then call adapt
 template <class GitterType>
-void checkRefinements( GitterType& grid ) 
+void checkRefinements( GitterType& grid )
 {
   // if bisection is not enabled do nothing here
   if( ! grid.conformingClosureNeeded() ) return ;
 
   {
-    // get LeafIterator which iterates over all leaf elements of the grid 
+    // get LeafIterator which iterates over all leaf elements of the grid
     LeafIterator < Gitter::helement_STI > w (grid) ;
-    w->first(); 
-    if( ! w->done() ) 
+    w->first();
+    if( ! w->done() )
     {
       if( w->size() > 1 || w->item ().type() != tetra ) return ;
     }
   }
-       
+
   typedef Gitter ::Geometric :: TetraRule  TetraRule ;
-  const Gitter ::Geometric :: TetraRule rules[ 6 ] = 
-  { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20, 
+  const Gitter ::Geometric :: TetraRule rules[ 6 ] =
+  { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
     TetraRule :: e23, TetraRule :: e30, TetraRule :: e31 };
 
-  for (int i=0; i<6; ++i ) 
+  for (int i=0; i<6; ++i )
   {
     cout << "*********************************************" <<endl;
     cout << "Refinement rule " << rules[ i ] << endl;
     cout << "*********************************************" <<endl;
 
     {
-      // get LeafIterator which iterates over all leaf elements of the grid 
+      // get LeafIterator which iterates over all leaf elements of the grid
       LeafIterator < Gitter::helement_STI > w (grid) ;
-       
+
       for (w->first () ; ! w->done () ; w->next ())
       {
-        if( w->item ().type() == tetra ) 
+        if( w->item ().type() == tetra )
         {
           typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
-          // mark element for refinement 
+          // mark element for refinement
           tetra_IMPL* item = ((tetra_IMPL *) &w->item ());
 
           item->request ( rules[ i ] );
@@ -120,14 +120,14 @@ void checkRefinements( GitterType& grid )
       }
     }
 
-    // create empty gather scatter 
+    // create empty gather scatter
     EmptyAdaptRestrictProlong rp;
 
-    // adapt grid 
+    // adapt grid
     grid.duneAdapt( rp );
 
 
-    // coarsen again 
+    // coarsen again
     globalCoarsening( grid , 1 );
   }
 
@@ -136,7 +136,7 @@ void checkRefinements( GitterType& grid )
   cout << "*********************************************" <<endl;
 }
 
-// refine grid globally, i.e. mark all elements and then call adapt 
+// refine grid globally, i.e. mark all elements and then call adapt
 template <class GitterType>
 void globalRefine(GitterType& grid, bool global, int step, int mxl,
                   const bool loadBalance = true )
@@ -144,16 +144,16 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
    {
      if (global)
      {
-       // get LeafIterator which iterates over all leaf elements of the grid 
+       // get LeafIterator which iterates over all leaf elements of the grid
        LeafIterator < Gitter::helement_STI > w (grid) ;
-        
+
        for (w->first () ; ! w->done () ; w->next ())
        {
-         // mark element for refinement 
+         // mark element for refinement
          w->item ().tagForGlobalRefinement ();
        }
      }
-     else 
+     else
      {
        double t = double(step)/10.;
        double center[3] = {0.2,0.2,0.2};
@@ -166,69 +166,69 @@ void globalRefine(GitterType& grid, bool global, int step, int mxl,
        grid.markForBallRefinement(center,rad,mxl);
      }
 
-     // create empty gather scatter 
+     // create empty gather scatter
      EmptyAdaptRestrictProlong rp;
 
-     // adapt grid 
+     // adapt grid
      grid.duneAdapt( rp );
 
 #ifdef PARALLEL
-     if( loadBalance ) 
+     if( loadBalance )
      {
-       // load balance 
+       // load balance
        grid.duneLoadBalance();
      }
 #endif
 
 #ifdef PRINT_OUTPUT
-     // print size of grid 
+     // print size of grid
      grid.printsize () ;
 #endif
    }
 
 }
 
-// coarse grid globally, i.e. mark all elements for coarsening 
-// and then call adapt 
-template <class GitterType> 
+// coarse grid globally, i.e. mark all elements for coarsening
+// and then call adapt
+template <class GitterType>
 void globalCoarsening(GitterType& grid, int refcount) {
-    
-  for (int count=refcount ; count > 0; count--) 
+
+  for (int count=refcount ; count > 0; count--)
   {
     cout << "Global Coarsening: run " << refcount-count << endl;
     {
-       // get leafiterator which iterates over all leaf elements of the grid 
+       // get leafiterator which iterates over all leaf elements of the grid
        LeafIterator < Gitter::helement_STI > w (grid) ;
-       
+
        for (w->first () ; ! w->done () ; w->next ())
        {
-         // mark elements for coarsening  
+         // mark elements for coarsening
          w->item ().tagForGlobalCoarsening() ;
        }
     }
 
-    // create empty gather scatter 
+    // create empty gather scatter
     EmptyAdaptRestrictProlong rp;
 
-    // adapt grid 
+    // adapt grid
     grid.duneAdapt( rp );
 
-    // print size of grid 
+    // print size of grid
     grid.printsize () ;
 
   }
 }
 
-// perform walk over elements of a certain level  
+// perform walk over elements of a certain level
 void levelwalk(GitterBasisImpl* grid, int level) {
    typedef Insert <AccessIterator <
-     Gitter::helement_STI>::Handle, 
-     TreeIterator <Gitter :: helement_STI, any_has_level <Gitter::helement_STI> > > 
+     Gitter::helement_STI>::Handle,
+     TreeIterator <Gitter :: helement_STI, any_has_level <Gitter::helement_STI> > >
        LevelIterator;
 
    LevelIterator it (grid->container(), level);
    int i = 0;
-   for (it.first(); !it.done(); it.next()) 
+   for (it.first(); !it.done(); it.next())
    {
       cout << "Element " << it.item().getIndex() << " has " << i++ << " as level index " << endl;
    }
@@ -236,23 +236,23 @@ void levelwalk(GitterBasisImpl* grid, int level) {
 }
 
 
-// exmaple on read grid, refine global and print again 
-int main (int argc, char ** argv, const char ** envp) 
+// exmaple on read grid, refine global and print again
+int main (int argc, char ** argv, const char ** envp)
 {
 #if PARALLEL
   MPI_Init(&argc,&argv);
 #endif
 
-  int mxl = 0, glb = 0; 
+  int mxl = 0, glb = 0;
   const char* filename = 0 ;
-  if (argc < 2) 
+  if (argc < 2)
   {
     filename = "../macrogrids/reference.tetra";
     mxl = 1;
     glb = 1;
     cout << "usage: "<< argv[0] << " <macro grid> <opt: level global> \n";
   }
-  else 
+  else
   {
     filename = argv[ 1 ];
   }
@@ -268,22 +268,22 @@ int main (int argc, char ** argv, const char ** envp)
 
     if (argc < 3)
     {
-      if( rank == 0 ) 
+      if( rank == 0 )
         cout << "Default level = "<< mxl << " choosen! \n";
     }
-    else 
+    else
       mxl = atoi(argv[2]);
     if (argc < 4)
     {
-      if( rank == 0 ) 
+      if( rank == 0 )
         cout << "Default global refinement = "<< glb << " choosen! \n";
     }
-    else 
+    else
       glb = atoi(argv[3]);
 
     std::string macroname( filename );
 
-    if( rank == 0 ) 
+    if( rank == 0 )
     {
       cout << "\n-----------------------------------------------\n";
       cout << "read macro grid from < " << macroname << " > !" << endl;
@@ -293,14 +293,14 @@ int main (int argc, char ** argv, const char ** envp)
     {
 #ifdef PARALLEL
       GitterDunePll grid(macroname.c_str(),mpa);
-#else 
+#else
       GitterDuneImpl grid(macroname.c_str());
 #endif
       bool closure = needConformingClosure( grid, useClosure );
 #ifdef PARALLEL
       closure = mpa.gmax( closure );
 #endif
-      if( closure ) 
+      if( closure )
       {
         grid.enableConformingClosure() ;
         grid.disableGhostCells();
@@ -311,10 +311,10 @@ int main (int argc, char ** argv, const char ** envp)
 
       //cout << "P[ " << rank << " ] : Grid generated! \n";
 #ifdef PRINT_OUTPUT
-      grid.printsize(); 
+      grid.printsize();
       cout << "---------------------------------------------\n";
 #endif
-    
+
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
       {
         std::ostringstream ss;
@@ -352,7 +352,7 @@ int main (int argc, char ** argv, const char ** envp)
         grid.tovtk(  ss.str().c_str() );
       }
       */
-      grid.printsize(); 
+      grid.printsize();
     }
   }
 

@@ -41,8 +41,8 @@ namespace ALU2DGrid
         insertNode(node->next, newNode);
       else
         node->next = newNode;
-    } 
-    else 
+    }
+    else
     {
       if( node->prev != 0 )
         insertNode(node->prev, newNode);
@@ -63,7 +63,7 @@ namespace ALU2DGrid
   Vtx_btree < N,NV >::left() const
   {
     Vtx_btree* left = 0;
-    if( head->prev ) 
+    if( head->prev )
     {
       left = new Vtx_btree(rvtx,lnb,rnb);
       left->head = head->prev;
@@ -81,7 +81,7 @@ namespace ALU2DGrid
   Vtx_btree < N,NV >::right() const
   {
     Vtx_btree* right = 0;
-    if( head->next ) 
+    if( head->next )
     {
       right = new Vtx_btree(head->vtx,head->lnb,head->rnb);
       right->head = head->next;
@@ -155,7 +155,7 @@ namespace ALU2DGrid
   }
 
   template < int N, int NV >
-  void 
+  void
   Vtx_btree < N,NV >::Node::nbconnect(int opp, thinelement_t *el , int i) {
     if (lnb)
       lnb->nbconnect(opp,el,i);
@@ -164,7 +164,7 @@ namespace ALU2DGrid
     if (prev)
       prev->nbconnect(opp,el,i);
     if (next)
-      next->nbconnect(opp,el,i);  
+      next->nbconnect(opp,el,i);
   }
 
   template < int N, int NV >

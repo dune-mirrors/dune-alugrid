@@ -27,27 +27,27 @@ namespace Dune
 {
 
   // Forward declarations
-  template<int cd, int dim, class GridImp> 
-  class ALU2dGridEntity;  
-  template<int cd, PartitionIteratorType pitype, class GridImp > 
+  template<int cd, int dim, class GridImp>
+  class ALU2dGridEntity;
+  template<int cd, PartitionIteratorType pitype, class GridImp >
   class ALU2dGridLevelIterator;
   template<int cd, class GridImp >
-  class ALU2dGridEntityPointer;  
+  class ALU2dGridEntityPointer;
   template<int cd, class GridImp >
   class ALU2dGridEntitySeed;
-  template<int mydim, int coorddim, class GridImp>  
+  template<int mydim, int coorddim, class GridImp>
   class ALU2dGridMakeableGeometry;
-  template<int mydim, int cdim, class GridImp>  
+  template<int mydim, int cdim, class GridImp>
   class ALU2dGridGeometry;
   template<class GridImp>
-  class ALU2dGridHierarchicIterator;    
+  class ALU2dGridHierarchicIterator;
   template<class GridImp>
   class ALU2dGridIntersectionBase;
   template<class GridImp>
   class ALU2dGridLevelIntersectionIterator;
   template<class GridImp>
-  class ALU2dGridLeafIntersectionIterator;  
-  template<int codim, PartitionIteratorType pitype, class GridImp>  
+  class ALU2dGridLeafIntersectionIterator;
+  template<int codim, PartitionIteratorType pitype, class GridImp>
   class ALU2dGridLeafIterator;
   template <int mydim, int coorddim, class GridImp>
   class ALU2dGridMakeableEntity;
@@ -63,7 +63,7 @@ namespace Dune
   class ALU2dGrid;
   template <class GridImp, class GeometryImp, int nChild>
   class ALULocalGeometryStorage;
-  
+
   class ALU2dObjectStream;
 
 
@@ -90,7 +90,7 @@ namespace Dune
   //
   //**********************************************************************
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
-  struct ALU2dGridFamily   
+  struct ALU2dGridFamily
   {
     typedef ALU2dGrid< dim, dimworld, eltype > GridImp;
 
@@ -99,7 +99,7 @@ namespace Dune
 
     //! Type of the local id set
     typedef ALU2dGridLocalIdSet<dim,dimworld,eltype> LocalIdSetImp;
-           
+
     typedef int GlobalIdType;
     typedef int LocalIdType;
 
@@ -113,7 +113,7 @@ namespace Dune
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper< const GridImp >, LeafIntersectionWrapper< const GridImp > > IntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LeafIntersectionIteratorWrapper< const GridImp >, LeafIntersectionWrapper< const GridImp > > LeafIntersectionIterator;
       typedef Dune::IntersectionIterator<const GridImp, LevelIntersectionIteratorWrapper< const GridImp >, LevelIntersectionWrapper< const GridImp > > LevelIntersectionIterator;
-      
+
       typedef Dune::EntityIterator< 0, const GridImp, ALU2dGridHierarchicIterator< const GridImp > > HierarchicIterator;
 
       typedef DuneBoundaryProjection< dimworld > DuneBoundaryProjectionType;
@@ -152,9 +152,9 @@ namespace Dune
       template <PartitionIteratorType pitype>
       struct Partition
       {
-        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> > 
+        typedef Dune::GridView<DefaultLevelGridViewTraits<const GridImp,pitype> >
         LevelGridView;
-        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> > 
+        typedef Dune::GridView<DefaultLeafGridViewTraits<const GridImp,pitype> >
         LeafGridView;
       };
 
@@ -181,25 +181,25 @@ namespace Dune
 
   /**
      \brief [<em> provides \ref Dune::Grid </em>]
-     \brief 2D grid, will provide non conform grids 
-     The ALU2dGrid implements the Dune GridInterface for 2d meshes. 
+     \brief 2D grid, will provide non conform grids
+     The ALU2dGrid implements the Dune GridInterface for 2d meshes.
      This grid can be locally adapted and will provide non conform grids.
 
      @note
-     Adaptive grid, written mainly by Bernard Schupp. 
+     Adaptive grid, written mainly by Bernard Schupp.
      This grid supports non conform grids.
-  
+
      (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
 
   */
-  
+
   template< int dim, int dimworld, ALU2DSPACE ElementType eltype >
   class ALU2dGrid
   : public GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > >,
-    public HasObjectStream, 
-    public HasHierarchicIndexSet 
+    public HasObjectStream,
+    public HasHierarchicIndexSet
   {
-    typedef ALU2dGrid< dim, dimworld, eltype > ThisType; 
+    typedef ALU2dGrid< dim, dimworld, eltype > ThisType;
     typedef GridDefaultImplementation< dim, dimworld, alu2d_ctype, ALU2dGridFamily< dim, dimworld, eltype > > BaseType;
 
     static_assert ( dim == 2, "ALU2dGrid only implemented for grid dim 2." );
@@ -221,20 +221,20 @@ namespace Dune
     typedef typename ALU2dImplTraits<dimworld, elementType >::HmeshType HmeshType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::HElementType HElementType ;
     typedef typename ALU2dImplTraits<dimworld, elementType >::ElementType ElementType ;
-    
+
     template< class > friend struct DGFBaseFactory;
 
     template< int, int, class > friend class ALU2dGridEntity;
-   
+
     friend class ALU2dGridGeometry<0,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<1,dimworld,const ThisType>;
     friend class ALU2dGridGeometry<dim,dimworld,const ThisType>;
     template< class, class, int > friend class ALULocalGeometryStorage;
- 
+
     friend class ALU2dGridEntityPointer<0,const ThisType>;
     friend class ALU2dGridEntityPointer<1,const ThisType>;
     friend class ALU2dGridEntityPointer<dim,const ThisType>;
-    
+
     friend class ALU2dGridHierarchicIndexSet<dim,dimworld,elementType>;
 
     friend class ALU2dGridIntersectionBase < const ThisType > ;
@@ -249,53 +249,53 @@ namespace Dune
             Codim<0>::Geometry> GeometryObject;
     friend class ALULocalGeometryStorage<const ThisType, GeometryObject, 4 >;
     friend class ALULocalGeometryStorage<const ThisType, GeometryObject, 2 >;
-    
-  public:  
-   
-    //! dummy object stream 
+
+  public:
+
+    //! dummy object stream
     typedef ALU2dGridObjectStream ObjectStreamType;
     typedef ObjectStreamType  InStreamType ;
     typedef ObjectStreamType  OutStreamType ;
 
-    //! my Traits class 
+    //! my Traits class
     typedef ALU2dGridFamily < dim, dimworld, eltype > GridFamily;
 
     //! Type of the hierarchic index set
     typedef ALU2dGridHierarchicIndexSet<dim,dimworld,elementType> HierarchicIndexSet;
-    
+
     //! Type of the local id set
     typedef ALU2dGridLocalIdSet<dim,dimworld,elementType> LocalIdSetImp;
     typedef LocalIdSetImp GlobalIdSetImp;
 
-    //! Type of the global id set 
+    //! Type of the global id set
     typedef typename Traits::GlobalIdSet GlobalIdSet;
-    
-    //! Type of the local id set 
+
+    //! Type of the local id set
     typedef typename Traits::LocalIdSet LocalIdSet;
-   
+
 
     //! Type of the level index set
     typedef typename GridFamily::LevelIndexSetImp  LevelIndexSetImp;
     //! Type of the leaf index set
     typedef typename GridFamily::LeafIndexSetImp  LeafIndexSetImp;
-    
-    //! a standard leaf iterator  
+
+    //! a standard leaf iterator
     typedef ALU2dGridLeafIterator<0, All_Partition, const ThisType> LeafIteratorImp;
     typedef typename Traits::template Codim<0>::LeafIterator LeafIteratorType;
     typedef typename Traits::template Codim<0>::LeafIterator LeafIterator;
-    
-    //! a standard leaf iterator  
+
+    //! a standard leaf iterator
     typedef ALU2dGridLevelIterator<0, All_Partition, const ThisType> LevelIteratorImp;
     typedef typename Traits::template Codim<0>::LevelIterator LevelIteratorType;
-    typedef typename Traits::template Codim<0>::LevelIterator LevelIterator;       
-    
+    typedef typename Traits::template Codim<0>::LevelIterator LevelIterator;
+
     typedef ALU2dGridHierarchicIterator<ThisType> HierarchicIteratorImp;
 
     typedef typename Traits::CollectiveCommunication CollectiveCommunicationType;
 
 
-    //! maximal number of levels 
-    enum { 
+    //! maximal number of levels
+    enum {
       //! maximal number of levels is 64
       MAXL = 64 };
 
@@ -310,10 +310,10 @@ namespace Dune
           causes apporximately not more than
           this number of new elements  */
       refineEstimate_ = 40 };
-        
-    //! \brief boundary projection type 
+
+    //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;
-    //! \brief boundary projection type 
+    //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     //! type of ALUGrid Vertex Projection Interface
@@ -323,63 +323,63 @@ namespace Dune
 
     friend class ALUGridBoundaryProjection< ThisType >;
     friend class ALU2dGridBoundaryProjection< ThisType >;
-    // type of ALUGrid boundary projection wrapper 
+    // type of ALUGrid boundary projection wrapper
     typedef ALU2dGridBoundaryProjection< ThisType > ALUGridBoundaryProjectionType;
 
-    //! Constructor which reads an ALU2dGrid Macro Triang file 
-    //! or given GridFile  
+    //! Constructor which reads an ALU2dGrid Macro Triang file
+    //! or given GridFile
     //- --constructor
-    ALU2dGrid(const std::string macroTriangFilename, 
+    ALU2dGrid(const std::string macroTriangFilename,
               const int nrOfHangingNodes,
-              const DuneBoundaryProjectionType*, 
+              const DuneBoundaryProjectionType*,
               const DuneBoundaryProjectionVector*,
-              std::istream* macroFile = 0); 
+              std::istream* macroFile = 0);
 
-    // method creating mesh object  
+    // method creating mesh object
     HmeshType* createGrid(const std::string&,
-                          const int, 
+                          const int,
                           std::istream* );
 
-    //! Constructor which constructs an empty ALU2dGrid 
+    //! Constructor which constructs an empty ALU2dGrid
     explicit ALU2dGrid( int );
-    
-  public: 
-    //! Desctructor 
+
+  public:
+    //! Desctructor
     ~ALU2dGrid();
 
     //! Return maximum level defined in this grid. Levels are numbered
-    //! 0 ... maxLevel with 0 the coarsest level.  
+    //! 0 ... maxLevel with 0 the coarsest level.
     int maxLevel() const;
-           
+
     //! --Leveliterator
     //! Iterator to first entity of given codim on level
     template<int cd, PartitionIteratorType pitype>
     typename Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
-    lbegin (int level) const; 
-  
+    lbegin (int level) const;
+
     //! one past the end on this level
     template<int cd, PartitionIteratorType pitype>
     typename Traits::template Codim<cd>::template Partition<pitype>::LevelIterator
     lend (int level) const;
-      
+
     //! Iterator to first entity of given codim on level
     template<int cd>
     typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator 
+    template Partition<All_Partition>::LevelIterator
     lbegin (int level) const;
 
     //! one past the end on this level
     template<int cd>
     typename Traits::template Codim<cd>::
-    template Partition<All_Partition>::LevelIterator 
+    template Partition<All_Partition>::LevelIterator
     lend (int level) const;
-    
+
     //! Iterator to first entity of codim 0 on level
     LevelIteratorType lbegin (int level) const;
 
     //! last entity of codim 0 on level
     LevelIteratorType lend (int level) const;
-        
+
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
     typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
@@ -399,21 +399,21 @@ namespace Dune
     template <int codim>
     typename Traits::template Codim<codim>::LeafIterator
     leafend() const;
-  
-  private:  
+
+  private:
     //! Iterator to first entity of codim 0 on leaf level (All_Partition)
     LeafIteratorType leafbegin () const;
 
     //! one past the end on this leaf level (codim 0 and All_Partition)
-    LeafIteratorType leafend () const;    
-  
-  public:  
+    LeafIteratorType leafend () const;
+
+  public:
     //! number of grid entities per level and codim
     int size (int level, int cd) const;
-    
+
     //! number of leaf entities per codim in this process
     int size (int codim) const;
-    
+
     //! number of entities per level, codim and geometry type in this process
     int size (int level, GeometryType type) const;
 
@@ -422,35 +422,35 @@ namespace Dune
 
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
-    
+
     //****************************************************************
-    // index and id sets 
+    // index and id sets
     //****************************************************************
 
-    //! get global id set of grid 
-    const GlobalIdSet & globalIdSet () const; 
+    //! get global id set of grid
+    const GlobalIdSet & globalIdSet () const;
 
-    //! get global id set of grid 
+    //! get global id set of grid
     const LocalIdSet & localIdSet () const;
-    
+
     //! number of grid entities in the entire grid for given codim
     int hierSetSize (int cd) const;
-    
+
     //! get hierarchic index set of the grid
     const HierarchicIndexSet & hierarchicIndexSet () const ;
-    
+
     //! get leaf index set of the grid
     const typename Traits::LeafIndexSet & leafIndexSet () const;
-    
+
     //! get level index set of the grid
-    const typename Traits::LevelIndexSet & levelIndexSet (int level) const;   
-    
-    
+    const typename Traits::LevelIndexSet & levelIndexSet (int level) const;
+
+
     //**********************************************************
     // End of Interface Methods
     //**********************************************************
-    
-    // return reference to org ALU2dGrid 
+
+    // return reference to org ALU2dGrid
     // private method, but otherwise we have to friend class all possible
     // types of LevelIterator ==> later
     HmeshType & myGrid();
@@ -461,13 +461,13 @@ namespace Dune
 
     template< class GridImp, class DataHandle >
     void globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &hamdle );
-    
+
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );
-    
+
     //! clear all entity new markers
     void postAdapt ( );
-    
+
     /**! refine all positive marked leaf entities,
     return true if a least one entity was refined
     */
@@ -475,59 +475,59 @@ namespace Dune
 
     template< class GridImp, class DataHandle >
     bool adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle );
-    
+
     // refine grid
     bool refineGrid();
-   
+
     //! @copydoc Dune::Grid::getMark
     int getMark(const typename Traits::template Codim<0>::Entity & e) const;
 
     //! @copydoc Dune::Grid::mark
-    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & e);                  
-    
-    //! return dummy communication 
+    bool mark( int refCount , const typename Traits::template Codim<0>::Entity & e);
+
+    //! return dummy communication
     const CollectiveCommunicationType & comm() const;
   private:
     CollectiveCommunicationType comm_;
-    
+
     void updateStatus();
-    
+
     void calcMaxlevel();
-    
+
     void calcExtras();
-   
-    // clear refinement marker of element and all children 
+
+    // clear refinement marker of element and all children
     void hierarchicClear( HElementType *el );
   public:
     typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
     typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> VertexObject;
-    
-  protected:  
+
+  protected:
     // create GeomTypes
     void makeGeomTypes ();
-    
+
     friend class Conversion<ALU2dGrid<dim, dimworld,eltype>, HasObjectStream>;
     friend class Conversion<const ALU2dGrid<dim, dimworld,eltype>, HasObjectStream>;
 
     friend class Conversion<ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
     friend class Conversion<const ALU2dGrid<dim, dimworld,eltype>, HasHierarchicIndexSet>;
 
-  private:  
-    //! Copy constructor should not be used  
+  private:
+    //! Copy constructor should not be used
     ALU2dGrid( const ThisType & g );
-  
-    //! assignment operator should not be used  
-    ThisType & operator = (const ThisType & g); 
 
-  protected:  
-    // check macro file and return const char * to filename 
+    //! assignment operator should not be used
+    ThisType & operator = (const ThisType & g);
+
+  protected:
+    // check macro file and return const char * to filename
     const char * checkMacroGridFile(const std::string & filename);
-  
-    //! the real grid 
+
+    //! the real grid
     mutable HmeshType* mygrid_;
 
-    // return reference to grid 
+    // return reference to grid
     HmeshType& mesh() const {
       alugrid_assert (mygrid_);
       return *mygrid_;
@@ -535,40 +535,40 @@ namespace Dune
 
     GridObjectFactoryType factory_;
 
-    //! the hierarchic index set 
+    //! the hierarchic index set
     HierarchicIndexSet hIndexSet_;
 
     //! out global id set
     LocalIdSetImp localIdSet_;
- 
+
     //! the level index set ( default type )
     mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
-        
+
     // at the moment the number of different geom types is 1
     enum { numberOfGeomTypes = 1 };
     std::vector< std::vector<GeometryType> > geomTypes_;
-    
+
     //! the leaf index set
     mutable LeafIndexSetImp * leafIndexSet_;
 
     int maxLevel_;
     int refineMarked_ , coarsenMarked_;
     const int nrOfHangingNodes_;
-    
+
     //! the type of our size cache
     typedef SizeCache<ThisType> SizeCacheType;
     SizeCacheType * sizeCache_;
 
-    // flag to make sure postAdapt is called after adapt 
+    // flag to make sure postAdapt is called after adapt
     bool lockPostAdapt_;
 
-    // pointer to Dune boundary projection 
+    // pointer to Dune boundary projection
     const DuneBoundaryProjectionType* bndPrj_;
 
-    // pointer to Dune boundary projection 
+    // pointer to Dune boundary projection
     const DuneBoundaryProjectionVector* bndVec_;
- 
-    // boundary projection for vertices  
+
+    // boundary projection for vertices
     ALUGridBoundaryProjectionType* vertexProjection_ ;
 
     const DuneBoundaryProjectionType *globalProjection () const
@@ -576,7 +576,7 @@ namespace Dune
       return bndPrj_;
     }
 
-    //! return boudanry projection for given segment Id 
+    //! return boudanry projection for given segment Id
     const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
     {
       if( bndPrj_ )
@@ -592,14 +592,14 @@ namespace Dune
       }
     }
 
-  public:  
-    //! return number of macro boundary segments 
+  public:
+    //! return number of macro boundary segments
     size_t numBoundarySegments () const
-    { 
+    {
       return myGrid().numMacroBndSegments();
     }
 
-    //! return true if boudanry projection is set 
+    //! return true if boudanry projection is set
     bool hasBoundaryProjection() const
     {
       return (vertexProjection_ != 0);
@@ -622,10 +622,10 @@ namespace Dune
       return factory_;
     }
 
-    //! return current thread number 
+    //! return current thread number
     static int thread () { return ALUMemoryProvider< int > :: thread(); }
-    
-    //! return max number of threads  
+
+    //! return max number of threads
     static int maxThreads () { return ALUMemoryProvider< int > :: maxThreads(); }
 
   protected:
@@ -637,13 +637,13 @@ namespace Dune
     friend class LevelIntersectionIteratorWrapper< const ThisType > ;
 
     mutable ALU2dGridMarkerVector marker_[MAXL];
-  public: 
+  public:
     typedef ALU2dGridLeafMarkerVector ALU2dGridLeafMarkerVectorType;
-  private:  
+  private:
     // always update this marker!!!
     mutable ALU2dGridLeafMarkerVectorType leafMarker_;
 
-  public: 
+  public:
     template < class EntitySeed >
     typename Traits::template Codim< EntitySeed::codimension >::EntityPointer
     entityPointer( const EntitySeed& seed ) const
@@ -654,7 +654,7 @@ namespace Dune
     }
 
     //! return reference to vector telling on which element a face is
-    //! visted for this level 
+    //! visted for this level
     ALU2dGridMarkerVector & getMarkerVector(int level) const
     {
       alugrid_assert ( level >= 0);
@@ -663,43 +663,43 @@ namespace Dune
     }
 
     //! return reference to vector determing on which element a face is
-    //! visited 
+    //! visited
     ALU2dGridLeafMarkerVectorType & getLeafMarker() const
     {
       return leafMarker_;
     }
-    
+
     /** \brief backup to ostream */
     void backup( std::ostream&, const ALU3DSPACE MacroFileHeader::Format format  ) const ;
 
     /** \brief restore from istream */
     void restore( std::istream& ) ;
 
-    //! return true if grid uses conforming refinement 
-    bool conformingRefinement () const 
-    { 
+    //! return true if grid uses conforming refinement
+    bool conformingRefinement () const
+    {
       return ! nonConform ();
     }
 
   protected:
-    //! return true if grid allows hanging nodes on leaf level  
-    //! i.e. returns true for ALUSimplexGrid and returns false for ALUConformGrid 
-    bool nonConform () const 
-    { 
+    //! return true if grid allows hanging nodes on leaf level
+    //! i.e. returns true for ALUSimplexGrid and returns false for ALUConformGrid
+    bool nonConform () const
+    {
       return (nrOfHangingNodes_ > 0);
     }
 
   public:
       /** \brief @copydoc Dune::Grid::communicate */
     template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
         InterfaceType iftype, CommunicationDirection dir, int level) const;
 
     /** \brief Communicate information on distributed entities on the leaf grid.
        Template parameter is a model of Dune::CommDataHandleIF.
     */
     template<class DataHandleImp,class DataTypeImp>
-    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data, 
+    void communicate (CommDataHandleIF<DataHandleImp,DataTypeImp> & data,
         InterfaceType iftype, CommunicationDirection dir) const;
 
     int ghostSize ( int level, int codim ) const { return 0; }
@@ -716,7 +716,7 @@ namespace Dune
 
   }; // end class ALU2dGrid
 
-  namespace Capabilities 
+  namespace Capabilities
   {
     template<int dim, int dimw, ALU2DSPACE ElementType eltype, int cdim>
     struct hasEntity<ALU2dGrid<dim,dimw,eltype>, cdim >
@@ -731,7 +731,7 @@ namespace Dune
     };
 
   } // end namespace Capabilities
-  
+
 } // end namespace Dune
 
 #include "entity.hh"

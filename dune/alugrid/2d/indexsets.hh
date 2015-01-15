@@ -28,23 +28,23 @@ namespace Dune
   // ALU2dGridHierarchicIndexSet
   // ---------------------------
 
-  //! hierarchic index set of ALU2dGrid 
-  template <int dim, int dimworld, ALU2DSPACE ElementType eltype> 
-  class ALU2dGridHierarchicIndexSet : 
-    public IndexSet< ALU2dGrid< dim, dimworld, eltype >, 
+  //! hierarchic index set of ALU2dGrid
+  template <int dim, int dimworld, ALU2DSPACE ElementType eltype>
+  class ALU2dGridHierarchicIndexSet :
+    public IndexSet< ALU2dGrid< dim, dimworld, eltype >,
                      ALU2dGridHierarchicIndexSet< dim, dimworld, eltype >, int >
   {
     typedef ALU2dGridHierarchicIndexSet< dim, dimworld, eltype > This;
 
     typedef ALU2dGrid< dim, dimworld, eltype > GridType;
-    enum { numCodim = dim+1 }; // i.e. 3 
+    enum { numCodim = dim+1 }; // i.e. 3
 
     friend class ALU2dGrid< dim, dimworld, eltype >;
 
     ALU2dGridHierarchicIndexSet( const GridType &grid )
     : grid_( grid )
     {}
-        
+
   public:
     //! return hierarchic index of given entity
     template< int codim >
@@ -75,10 +75,10 @@ namespace Dune
     }
 
     //! return size of indexset, i.e. maxindex+1
-    //! for given type, if type is not exisiting within grid 0 is returned 
+    //! for given type, if type is not exisiting within grid 0 is returned
     int size ( GeometryType type ) const
     {
-      const int codim = dim-type.dim();      
+      const int codim = dim-type.dim();
       alugrid_assert ( grid_.geomTypes(codim).size() == 1 );
       if( type != grid_.geomTypes(codim)[0] ) return 0;
       // return size of hierarchic index set
@@ -98,47 +98,47 @@ namespace Dune
       return grid_.geomTypes(codim);
     }
 
-    //! return true because all entities are contained in this set 
+    //! return true because all entities are contained in this set
     template <class EntityType>
     bool contains (const EntityType &) const { return true; }
 
   private:
-    // our Grid 
+    // our Grid
     const GridType & grid_;
   };
 
   //***********************************************************
   //
-  //  --LocalIdSet 
+  //  --LocalIdSet
   //
   //***********************************************************
 
-  //! hierarchic index set of ALU3dGrid 
-  template <int dim, int dimworld, ALU2DSPACE ElementType eltype> 
-  class ALU2dGridLocalIdSet : 
+  //! hierarchic index set of ALU3dGrid
+  template <int dim, int dimworld, ALU2DSPACE ElementType eltype>
+  class ALU2dGridLocalIdSet :
     public IdSet < ALU2dGrid< dim, dimworld, eltype >,
-                   ALU2dGridLocalIdSet< dim, dimworld, eltype >, int > 
+                   ALU2dGridLocalIdSet< dim, dimworld, eltype >, int >
   {
     typedef ALU2dGrid< dim, dimworld, eltype > GridType;
     typedef typename GridType :: HierarchicIndexSet HierarchicIndexSetType;
 
     friend class ALU2dGrid< dim, dimworld, eltype >;
 
-    // this means that only up to 300000000 entities are allowed 
+    // this means that only up to 300000000 entities are allowed
     enum { codimMultiplier = 300000000 };
- 
-    // create local id set , only for the grid allowed 
-    ALU2dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet()) 
+
+    // create local id set , only for the grid allowed
+    ALU2dGridLocalIdSet(const GridType & grid) : hset_(grid.hierarchicIndexSet())
     {
       for(int i=0; i<dim+1; i++)
-        codimStart_[i] = i*codimMultiplier; 
+        codimStart_[i] = i*codimMultiplier;
     }
 
-    // fake method to have the same method like GlobalIdSet 
+    // fake method to have the same method like GlobalIdSet
     void updateIdSet() {}
 
   public:
-    //! export type of id 
+    //! export type of id
     typedef int IdType;
 
     //! return global id of given entity
@@ -175,13 +175,13 @@ namespace Dune
     }
 
   private:
-    // our HierarchicIndexSet 
+    // our HierarchicIndexSet
     const HierarchicIndexSetType & hset_;
 
-    // store start of each codim numbers 
-    int codimStart_[dim+1]; 
+    // store start of each codim numbers
+    int codimStart_[dim+1];
   };
 
-} // end namespace Dune 
+} // end namespace Dune
 
 #endif

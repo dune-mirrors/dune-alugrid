@@ -27,17 +27,17 @@ struct EulerProblemFFS
 protected:
   const int problem_;
 
-public:  
+public:
   EulerProblemFFS ( const int problem ) : problem_( problem )
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
-  { 
+  {
     std::ostringstream dgfFileName;
     if( problem_ < 12 )
       dgfFileName << path << "/dgf/ffs" << dimDomain << "d.dgf";
-    else 
+    else
       dgfFileName << path << "/dgf/ffs" << dimDomain << "d_fine.dgf";
     return dgfFileName.str();
   }
@@ -45,13 +45,13 @@ public:
   //! \copydoc ProblemData::initial
   RangeType initial ( const DomainType &x ) const
   {
-    // set all values to zero 
+    // set all values to zero
     RangeType val( 0 );
 
     val[ 0 ] = 1.4; // rho
     val[ 1 ] = 4.2; // m_1
     val[ dimDomain+1 ] = 8.8; // e
-    
+
     return val;
   }
 
@@ -78,10 +78,10 @@ public:
 
   //! \copydoc ProblemData::adaptationIndicator
   double adaptationIndicator ( const DomainType& x, double time,
-                               const RangeType &uLeft, const RangeType &uRight ) const 
-  { 
+                               const RangeType &uLeft, const RangeType &uRight ) const
+  {
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));
-  } 
+  }
 
   //! \copydoc ProblemData::refineTol
   double refineTol () const
@@ -90,15 +90,15 @@ public:
   }
 
   //! \copydoc ProblemData::saveInterval
-  double saveInterval() const 
+  double saveInterval() const
   {
     return 0.025 * endTime();
   }
 };
 
-// ShockBubble  
+// ShockBubble
 template< int dimD >
-class EulerProblemShockBubble 
+class EulerProblemShockBubble
 : public ProblemData< dimD, dimD+2 >
 {
 public:
@@ -110,10 +110,10 @@ public:
   static const int dimDomain = DomainType::dimension;
   static const int dimRange = RangeType::dimension;
 
-  EulerProblemShockBubble( const int problem ) 
-   : gamma(1.4) 
+  EulerProblemShockBubble( const int problem )
+   : gamma(1.4)
    , center_(0.5)
-   , radius2_( 0.2 * 0.2 ) 
+   , radius2_( 0.2 * 0.2 )
    , problem_( problem )
   {
     center_[dimDomain-1] = 0;
@@ -121,9 +121,9 @@ public:
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
-  { 
+  {
     std::ostringstream dgfFileName;
-    if( dimD == 3 ) 
+    if( dimD == 3 )
     {
       if( problem_ == 21 )
         dgfFileName << path << "/dgf/cube_hc_512.dgf";
@@ -133,10 +133,10 @@ public:
         dgfFileName << path << "/dgf/cube_hc_32768.dgf";
       else if( problem_ == 25 )
         dgfFileName << path << "/dgf/sb3d_" << mpiSize << ".dgf";
-      else 
+      else
         dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     }
-    else 
+    else
       dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
@@ -148,11 +148,11 @@ public:
 
     enum { dimR = RangeType :: dimension };
 
-    // behind shock 
-    if ( x[0] <= 0.2 ) 
+    // behind shock
+    if ( x[0] <= 0.2 )
     {
       const double gamma1 = gamma-1.;
-      // pressure left of shock 
+      // pressure left of shock
       const double pinf = 5;
       const double rinf = ( gamma1 + (gamma+1)*pinf )/( (gamma+1) + gamma1*pinf );
       const double vinf = (1.0/std::sqrt(gamma)) * (pinf - 1.)/
@@ -162,14 +162,14 @@ public:
       val[dimR-1] = 0.5*rinf*vinf*vinf + pinf/gamma1;
       val[1] = vinf * rinf;
     }
-    else if( (x - center_).two_norm2() <= radius2_ ) 
+    else if( (x - center_).two_norm2() <= radius2_ )
     {
       val[0] = 0.1;
-      // pressure in bubble  
+      // pressure in bubble
       val[dimR-1] = 2.5;
     }
-    // elsewhere 
-    else 
+    // elsewhere
+    else
     {
       val[0] = 1;
       val[dimR-1] = 2.5;
@@ -200,10 +200,10 @@ public:
 
   //! \copydoc ProblemData::adaptationIndicator
   double adaptationIndicator ( const DomainType& x, double time,
-                               const RangeType &uLeft, const RangeType &uRight ) const 
-  { 
+                               const RangeType &uLeft, const RangeType &uRight ) const
+  {
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));
-  } 
+  }
 
   //! \copydoc ProblemData::refineTol
   double refineTol () const
@@ -212,20 +212,20 @@ public:
   }
 
   //! \copydoc ProblemData::saveInterval
-  double saveInterval() const 
+  double saveInterval() const
   {
     return 0.04 * endTime();
   }
 
-  //! only every 10th timestep we want load balancing 
+  //! only every 10th timestep we want load balancing
   int balanceStep() const { return 25; }
 
   unsigned int maxTimeSteps() const { return (problem_ == 25) ? 50 : Base::maxTimeSteps(); }
 
   private:
   const double gamma;
-  DomainType center_; 
-  const double radius2_; 
+  DomainType center_;
+  const double radius2_;
   const int problem_;
 };
 
@@ -247,7 +247,7 @@ enum EulerFluxType { LLF, HLL, HLLC };
  *
  *  \tparam dim space dimension
  *  \tparam flux switch between local Lax-Friedrich (LLF), and
- *          Harten-Lax-vanLeer (HLL) flux, and  
+ *          Harten-Lax-vanLeer (HLL) flux, and
  *          Harten-Lax-vanLeer-Contact (HLLC) flux
  *
  */
@@ -256,7 +256,7 @@ struct EulerFlux
 {
   /** \internal
    *  \brief constructor
-   *  
+   *
    *  \param[in]  gamma  adiabatic constant in the pressure equation
    */
   EulerFlux ( double gamma )
@@ -309,22 +309,22 @@ struct EulerFlux
 private:
   void flux(const double U[dim+2], double *f[dim]) const;
 
-  double num_flux(const double Uj[dim+2], const double Un[dim+2], 
+  double num_flux(const double Uj[dim+2], const double Un[dim+2],
                   const double normal[dim], double gj[dim+2]) const;
 
-  double num_flux_LLF(const double Uj[dim+2], const double Un[dim+2], 
+  double num_flux_LLF(const double Uj[dim+2], const double Un[dim+2],
                       const double normal[dim], double gj[dim+2]) const;
 
-  double num_flux_HLL(const double Uj[dim+2], const double Un[dim+2], 
+  double num_flux_HLL(const double Uj[dim+2], const double Un[dim+2],
                       const double normal[dim], double gj[dim+2]) const;
-  
-  double num_flux_HLLC(const double Uj[dim+2], const double Un[dim+2], 
+
+  double num_flux_HLLC(const double Uj[dim+2], const double Un[dim+2],
                        const double normal[dim], double gj[dim+2]) const;
-  
-  static void rotate(const double normal[dim], 
+
+  static void rotate(const double normal[dim],
                      const double u[dim], double u_rot[dim]);
 
-  static void rotate_inv(const double normal[dim], 
+  static void rotate_inv(const double normal[dim],
                          const double u_rot[dim], double u[dim]);
 
   const double _gamma;
@@ -333,7 +333,7 @@ private:
 // EulerProblem
 // ------------
 
-/** \brief Problem describing the Euler equation of gas dynamics 
+/** \brief Problem describing the Euler equation of gas dynamics
  */
 template< int dimD, EulerFluxType flux_type = HLLC >
 struct EulerModel
@@ -347,8 +347,8 @@ struct EulerModel
   static const int dimRange = RangeType::dimension;
   static const bool hasFlux = true;
 
-  /** \brief constructor 
-   *  \param problem switch between different data settings 
+  /** \brief constructor
+   *  \param problem switch between different data settings
    */
   EulerModel( unsigned int problem )
   : problem_( 0 ),
@@ -359,7 +359,7 @@ struct EulerModel
     case 1:
     case 11:
     case 12:
-    case 13: 
+    case 13:
       problem_ = new EulerProblemFFS< dimDomain >( problem );
       break;
     case 2:
@@ -377,7 +377,7 @@ struct EulerModel
   }
 
   /** \brief destructor */
-  ~EulerModel() 
+  ~EulerModel()
   {
     delete problem_;
   }
@@ -400,27 +400,27 @@ struct EulerModel
                          const RangeType &uLeft, const RangeType &uRight,
                          RangeType &flux ) const
   {
-    // calculate unit normal 
+    // calculate unit normal
     DomainType unitNormal( normal );
     const double faceVol = normal.two_norm();
     unitNormal *= 1.0 / faceVol;
-    
-    // apply numerical flux  
+
+    // apply numerical flux
     const double dt = numFlux_.numFlux( uLeft, uRight, unitNormal, flux );
 
     // apply face volume
     flux *= faceVol;
-    
+
     return dt * faceVol;
   }
 
   /** \brief boundary ids for different types of boundary typical for the
    *         Euler euqaitons
    */
-  // enum { Inflow = 1 , Outflow = 2, Reflection = 3 }; 
+  // enum { Inflow = 1 , Outflow = 2, Reflection = 3 };
 
   /** \copydoc TransportProblem::boundaryFlux */
-  double boundaryFlux ( const DomainType &normal, 
+  double boundaryFlux ( const DomainType &normal,
                         const double time,
                         const DomainType &xGlobal,
                         const RangeType& uLeft,
@@ -435,13 +435,13 @@ struct EulerModel
   double indicator ( const DomainType &normal,
                      const double time,
                      const DomainType &xGlobal,
-                     const RangeType &uLeft, const RangeType &uRight) const 
+                     const RangeType &uLeft, const RangeType &uRight) const
   {
     return problem().adaptationIndicator( xGlobal, time, uLeft, uRight );
   }
 
   /** \copydoc TransportProblem::boundaryIndicator */
-  double boundaryIndicator ( const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal,
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
@@ -455,7 +455,7 @@ private:
   /** \brief the boundary flux inserts a ghost cell value into the
    *         numerical flux - this function computes these values for the
    *         different boundary types */
-  void boundaryValue( const DomainType &normal, 
+  void boundaryValue( const DomainType &normal,
                       const double time,
                       const DomainType &xGlobal,
                       const RangeType& uLeft,
@@ -466,7 +466,7 @@ private:
       uRight = problem().boundaryValue(xGlobal,time);
     else if (bndType == 2) // Neumann
       uRight = uLeft;
-    else 
+    else
       {
         DomainType unitNormal( normal );
         const double faceVol = normal.two_norm();
@@ -521,7 +521,7 @@ inline void EulerFlux< dim, flux_type >
       u_rot[0] = n[0]*u[0]           + n[1]*u[1]          + n[2]*u[2];
       u_rot[1] = -n[1]*d_1*u[0]      + n[0]*d_1* u[1];
       u_rot[2] = -n[0]*n[2]*d_1*u[0] - n[1]*n[2]*d_1*u[1] + d*u[2];
-    } 
+    }
     else {
       u_rot[0] = n[2]*u[2];
       u_rot[1] = u[1];
@@ -555,13 +555,13 @@ inline void EulerFlux< dim, flux_type >
       u[0] = n[0]*u_rot[0] - n[1]*d_1*u_rot[1] - n[0]*n[2]*d_1*u_rot[2];
       u[1] = n[1]*u_rot[0] + n[0]*d_1*u_rot[1] - n[1]*n[2]*d_1*u_rot[2];
       u[2] = n[2]*u_rot[0]                     + d*u_rot[2];
-    } 
+    }
     else {
       u[0] = -n[2]*u_rot[2];
       u[1] = u_rot[1];
       u[2] = n[2]*u_rot[0];
     }
-    
+
     //assert(0); // test it, not tested up to now
   }
 
@@ -582,7 +582,7 @@ inline void EulerFlux< dim, flux_type >
     u[i] = (1.0/rho) * rho_u[i];
     Ekin2 += rho_u[i] * u[i];
   }
- 
+
   const double p = (_gamma-1.0)*(E - 0.5*Ekin2);
 
   for(int i=0; i<dim; i++){
@@ -733,7 +733,7 @@ inline double EulerFlux< dim, flux_type >
     }
     else{
       const double tmp1 = sj * sn;
-      const double tmp2 = 1.0/(sn - sj);      
+      const double tmp2 = 1.0/(sn - sj);
       gj[0] = tmp2 * ( sn*rho_uj[0] - sj*rho_un[0] + tmp1*(rhon - rhoj) );
 
       for(int i=0; i<dim; i++){
@@ -822,7 +822,7 @@ inline double EulerFlux< dim, flux_type >
   {
     g[0] = rho_um[0];
 
-    for(int i=0; i<dim; i++) 
+    for(int i=0; i<dim; i++)
       guj[i] = rho_um[i]*um[0];
     guj[0] += pm;
 
@@ -832,7 +832,7 @@ inline double EulerFlux< dim, flux_type >
   {
     g[0] = rho_up[0];
 
-    for(int i=0; i<dim; i++) 
+    for(int i=0; i<dim; i++)
       guj[i] = rho_up[i]*up[0];
     guj[0] += pp;
 
@@ -847,22 +847,22 @@ inline double EulerFlux< dim, flux_type >
     {
       g[0] = rho_um[0] + rhom*(tmpm-sm);
 
-      for(int i=0; i<dim; i++) 
+      for(int i=0; i<dim; i++)
         guj[i] = rho_um[i]*um[0] + rhom*um[i]*tmpm - sm*rho_um[i];
       guj[0] += pm + rhom*(u_star-um[0])*tmpm;
 
-      g[dim+1] = (Em+pm)*um[0] + Em*(tmpm-sm) 
+      g[dim+1] = (Em+pm)*um[0] + Em*(tmpm-sm)
         + tmpm*(u_star-um[0])*( rhom*u_star + pm/(sm-um[0]) );
     }
     else
     {
       g[0] = rho_up[0] + rhop*(tmpp-sp);
 
-      for(int i=0; i<dim; i++) 
+      for(int i=0; i<dim; i++)
         guj[i] = rho_up[i]*up[0] + rhop*up[i]*tmpp - sp*rho_up[i];
       guj[0] += pp + rhop*(u_star-up[0])*tmpp;
 
-      g[dim+1] = (Ep+pp)*up[0] + Ep*(tmpp-sp) 
+      g[dim+1] = (Ep+pp)*up[0] + Ep*(tmpp-sp)
         + tmpp*(u_star-up[0])*( rhop*u_star + pp/(sp-up[0]) );
     }
   }

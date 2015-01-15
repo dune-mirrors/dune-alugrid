@@ -62,7 +62,7 @@ namespace ALUGrid
       if( stream )
       {
         std::istream::streampos pos = stream.tellg();
-        pos -= zinfo.avail_in ; 
+        pos -= zinfo.avail_in ;
         stream.seekg( pos );
       }
 

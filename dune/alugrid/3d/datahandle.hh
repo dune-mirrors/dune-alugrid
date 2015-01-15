@@ -1,7 +1,7 @@
 #ifndef DUNE_ALU3DGRIDDATAHANDLE_HH
 #define DUNE_ALU3DGRIDDATAHANDLE_HH
 
-//- system includes 
+//- system includes
 #include <iostream>
 
 #include <dune/common/typetraits.hh>
@@ -12,7 +12,7 @@
 #include <dune/alugrid/3d/datacollectorcaps.hh>
 #include <dune/alugrid/common/ldbhandleif.hh>
 
-//- local includes 
+//- local includes
 #include "alu3dinclude.hh"
 
 namespace ALUGrid
@@ -23,7 +23,7 @@ namespace ALUGrid
   class GatherScatterBaseImpl
   : public GatherScatter
   {
-  protected:  
+  protected:
     enum {dim = GridType::dimension};
     const GridType & grid_;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
@@ -32,7 +32,7 @@ namespace ALUGrid
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
 
     typedef typename GridType::MPICommunicatorType Comm;
-    
+
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
     typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
@@ -55,8 +55,8 @@ namespace ALUGrid
 
   public:
     //! Constructor
-    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en, 
-        RealEntityType & realEntity , DataCollectorType & dc) 
+    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc)
       , variableSize_( ! dc_.fixedsize(EntityType::dimension,codim) )
     {
@@ -65,37 +65,37 @@ namespace ALUGrid
     //! returns contains of dc_
     bool contains(int dim, int cd) const { return dc_.contains(dim,cd); }
 
-    // returns true, if element is contained in set of comm interface 
-    // this method must be overlaoded by the impl classes 
+    // returns true, if element is contained in set of comm interface
+    // this method must be overlaoded by the impl classes
     virtual bool containsItem (const HElementType & elem) const = 0;
 
     // set elem to realEntity
     virtual void setElement(const HElementType & elem) = 0;
-      
+
     void setData ( ObjectStreamType & str , HElementType & elem )
     {
-      // one of this should be either true 
+      // one of this should be either true
       alugrid_assert ( this->containsItem( elem ) || elem.isGhost() );
 
-      // set element and then start 
+      // set element and then start
       setElement(elem);
 
-      // make sure partition type is set correct 
+      // make sure partition type is set correct
       alugrid_assert ( elem.isGhost() == (entity_.partitionType() == Dune :: GhostEntity) );
 
       size_t size = getSize(str, entity_);
-      // use normal scatter method 
-      dc_.scatter(str,entity_, size ); 
+      // use normal scatter method
+      dc_.scatter(str,entity_, size );
     }
 
-    //! write Data of one element to stream 
+    //! write Data of one element to stream
     void sendData ( ObjectStreamType & str , HElementType & elem )
     {
       // make sure element is contained in communication interface
       //alugrid_assert ( this->containsItem( elem ) );
       setElement(elem);
 
-      // if varaible size, also send size 
+      // if varaible size, also send size
       if( variableSize_ )
       {
         size_t size = dc_.size( entity_ );
@@ -105,7 +105,7 @@ namespace ALUGrid
       dc_.gather(str, entity_ );
     }
 
-    //! read Data of one element from stream 
+    //! read Data of one element from stream
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
       alugrid_assert ( this->containsItem( elem ) );
@@ -115,23 +115,23 @@ namespace ALUGrid
       dc_.scatter(str,entity_, size );
     }
 
-  protected:  
+  protected:
     size_t getSize(ObjectStreamType & str, EntityType & en)
     {
-      if(variableSize_) 
+      if(variableSize_)
       {
         size_t size;
         str.read(size);
         return size;
       }
-      else 
+      else
         return dc_.size(en);
     }
   };
 
   //***********************************************************
   //
-  //  --specialisation for codim 0 
+  //  --specialisation for codim 0
   //
   //***********************************************************
 
@@ -139,22 +139,22 @@ namespace ALUGrid
   template <class GridType, class DataCollectorType >
   class GatherScatterBaseImpl<GridType,DataCollectorType,0> : public GatherScatter
   {
-  protected:  
+  protected:
     enum { codim = 0 };
     enum { dim = GridType::dimension};
     const GridType & grid_;
     typedef typename GridType::template Codim<0>::Entity       EntityType;
     typedef typename GridType::EntityObject                    MakeableEntityType ;
     typedef typename MakeableEntityType :: ImplementationType  RealEntityType;
-    
+
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
     typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
-    
+
     typedef typename ImplTraits::template Codim< dim, codim >::GhostInterfaceType HGhostType;
     typedef typename ImplTraits::template Codim< dim, codim >::GhostImplementationType ImplGhostType;
 
@@ -163,58 +163,58 @@ namespace ALUGrid
     EntityType& entity_;
     RealEntityType & realEntity_;
 
-    // data handle 
+    // data handle
     DataCollectorType & dc_;
 
     const bool variableSize_;
 
-    // used MessageBuffer 
+    // used MessageBuffer
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
-    // use all other containsItem from the base class 
+    // use all other containsItem from the base class
     using GatherScatter :: setData ;
     using GatherScatter :: sendData ;
     using GatherScatter :: recvData ;
 
   public:
-    // use all other containsItem from the base class 
+    // use all other containsItem from the base class
     using GatherScatter :: containsItem ;
 
     //! Constructor
-    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en, 
-        RealEntityType & realEntity , DataCollectorType & dc) 
-      : grid_(grid), entity_(en), realEntity_(realEntity) 
+    GatherScatterBaseImpl(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc)
+      : grid_(grid), entity_(en), realEntity_(realEntity)
       , dc_(dc) , variableSize_ ( ! dc_.fixedsize( EntityType :: dimension, codim ))
     {}
 
-    // return true if dim,codim combination is contained in data set 
-    bool contains(int dim, int codim) const 
+    // return true if dim,codim combination is contained in data set
+    bool contains(int dim, int codim) const
     {
       return dc_.contains(dim,codim);
     }
 
-    // return true if item might from entity belonging to data set  
-    virtual bool containsItem (const HElementType & elem) const 
+    // return true if item might from entity belonging to data set
+    virtual bool containsItem (const HElementType & elem) const
     {
       return elem.isLeafEntity();
     }
 
-    // return true if item might from entity belonging to data set  
-    virtual bool containsItem (const HGhostType & ghost) const = 0; 
+    // return true if item might from entity belonging to data set
+    virtual bool containsItem (const HGhostType & ghost) const = 0;
 
-    //! write Data of one element to stream 
+    //! write Data of one element to stream
     void sendData ( ObjectStreamType & str , const HElementType & elem )
     {
       alugrid_assert ( this->containsItem(elem) );
       realEntity_.setElement( const_cast<HElementType &> (elem) );
 
-      // write size in case of variable size 
+      // write size in case of variable size
       writeSize( str, entity_);
-      // gather data 
+      // gather data
       dc_.gather(str, entity_);
     }
-   
-    //! write Data of one ghost element to stream 
+
+    //! write Data of one ghost element to stream
     void sendData ( ObjectStreamType & str , const HGhostType& ghost)
     {
       alugrid_assert ( this->containsItem( ghost ) );
@@ -222,23 +222,23 @@ namespace ALUGrid
       // set ghost as entity
       realEntity_.setGhost( const_cast <HGhostType &> (ghost) );
 
-      // write size in case of variable size 
+      // write size in case of variable size
       writeSize( str, entity_);
-      // gather data 
+      // gather data
       dc_.gather(str, entity_);
     }
-   
-    //! read Data of one element from stream 
+
+    //! read Data of one element from stream
     void recvData ( ObjectStreamType & str , HElementType & elem )
     {
       // alugrid_assert ( this->containsItem( elem ) );
-      realEntity_.setElement( elem ); 
-      
-      size_t size = getSize(str, entity_); 
+      realEntity_.setElement( elem );
+
+      size_t size = getSize(str, entity_);
       dc_.scatter(str, entity_, size);
     }
 
-    //! read Data of one element from stream 
+    //! read Data of one element from stream
     void recvData ( ObjectStreamType & str , HGhostType & ghost )
     {
       alugrid_assert ( this->containsItem( ghost ) );
@@ -246,24 +246,24 @@ namespace ALUGrid
       // set ghost as entity
       realEntity_.setGhost( ghost );
 
-      size_t size = getSize(str , entity_ ); 
+      size_t size = getSize(str , entity_ );
       dc_.scatter(str, entity_, size );
     }
-    
-  protected:  
+
+  protected:
     size_t getSize(ObjectStreamType & str, EntityType & en)
     {
-      if(variableSize_) 
+      if(variableSize_)
       {
         size_t size;
         str.read(size);
         return size;
       }
-      else 
+      else
         return dc_.size(en);
     }
-    
-    // write variable size to stream 
+
+    // write variable size to stream
     void writeSize(ObjectStreamType & str, EntityType & en)
     {
       if( variableSize_ )
@@ -276,7 +276,7 @@ namespace ALUGrid
 
   //! the corresponding interface class is defined in bsinclude.hh
   template< class GridType, class DataCollectorType, int codim >
-  class GatherScatterLeafData 
+  class GatherScatterLeafData
   : public GatherScatterBaseImpl< GridType, DataCollectorType, codim >
   {
     enum { dim = GridType :: dimension };
@@ -292,55 +292,55 @@ namespace ALUGrid
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 
   public:
-    // use all other containsItem methods from the base class 
+    // use all other containsItem methods from the base class
     using BaseType :: containsItem ;
 
     //! Constructor
-    GatherScatterLeafData(const GridType & grid, MakeableEntityType & en, 
+    GatherScatterLeafData(const GridType & grid, MakeableEntityType & en,
         RealEntityType & realEntity , DataCollectorType & dc)
-      : BaseType(grid,en,realEntity,dc) 
+      : BaseType(grid,en,realEntity,dc)
     {
-      // if leaf vertices are communicated, 
-      // make sure that vertex list is up2date 
+      // if leaf vertices are communicated,
+      // make sure that vertex list is up2date
       // but only do this, if vertex data contained,
-      // because the list update is expensive  
-      if( (codim == 3) && dc.contains(dim,codim) ) 
+      // because the list update is expensive
+      if( (codim == 3) && dc.contains(dim,codim) )
       {
-        // call of this method forces update of list, 
+        // call of this method forces update of list,
         // if list is not up to date
         grid.getLeafVertexList();
       }
-    } 
+    }
 
-    // returns true, if element is contained in set of comm interface 
-    bool containsItem (const HElementType & elem) const 
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HElementType & elem) const
     {
       return elem.isLeafEntity();
     }
 
-    // returns true, if element is contained in set of comm interface 
-    bool containsItem (const HGhostType & ghost) const 
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HGhostType & ghost) const
     {
       return ghost.isLeafEntity();
     }
 
-    // returns true, if interior element is contained in set of comm interface 
-    bool containsInterior (const HFaceType & face, PllElementType & pll) const 
+    // returns true, if interior element is contained in set of comm interface
+    bool containsInterior (const HFaceType & face, PllElementType & pll) const
     {
       return face.isInteriorLeaf();
     }
 
-    // returns true, if ghost is contianed in set of comm interface 
-    bool containsGhost (const HFaceType & face , PllElementType & pll) const 
+    // returns true, if ghost is contianed in set of comm interface
+    bool containsGhost (const HFaceType & face , PllElementType & pll) const
     {
       return pll.ghostLeaf();
     }
@@ -348,14 +348,14 @@ namespace ALUGrid
     // set elem to realEntity
     void setElement(const HElementType & elem)
     {
-      this->realEntity_.setElement(elem); 
+      this->realEntity_.setElement(elem);
     }
   };
 
   //! the corresponding interface class is defined in bsinclude.hh
   template <class GridType, class DataCollectorType , int codim >
-  class GatherScatterLevelData 
-  : public GatherScatterBaseImpl<GridType,DataCollectorType,codim> 
+  class GatherScatterLevelData
+  : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
   {
     enum {dim = GridType::dimension};
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
@@ -369,9 +369,9 @@ namespace ALUGrid
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
@@ -386,15 +386,15 @@ namespace ALUGrid
     using BaseType :: containsItem ;
 
     //! Constructor
-    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en, 
-        RealEntityType & realEntity , DataCollectorType & dc, 
+    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc,
         const LevelIndexSetImp & levelSet, const int level)
-      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) 
+      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level)
     {
-    } 
+    }
 
-    // returns true, if element is contained in set of comm interface 
-    bool containsItem (const HElementType & elem) const 
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HElementType & elem) const
     {
       return levelSet_.containsIndex(codim, elem.getIndex() );
     }
@@ -402,16 +402,16 @@ namespace ALUGrid
     // set elem to realEntity
     void setElement(const HElementType & elem)
     {
-      this->realEntity_.setElement(elem,level_); 
+      this->realEntity_.setElement(elem,level_);
     }
-      
+
   };
 
 
   //! the corresponding interface class is defined in bsinclude.hh
   template <class GridType, class DataCollectorType>
   class GatherScatterLevelData<GridType,DataCollectorType,0>
-  : public GatherScatterBaseImpl<GridType,DataCollectorType,0> 
+  : public GatherScatterBaseImpl<GridType,DataCollectorType,0>
   {
     enum { codim = 0 };
     enum {dim  = GridType:: dimension};
@@ -426,9 +426,9 @@ namespace ALUGrid
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType IMPLElementType;
     typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
-    
+
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
     typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
 
@@ -440,28 +440,28 @@ namespace ALUGrid
     const int level_;
   public:
     //! Constructor
-    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en, 
-        RealEntityType & realEntity , DataCollectorType & dc, 
+    GatherScatterLevelData(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc,
         const LevelIndexSetImp & levelSet, const int level)
-      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) {} 
+      : BaseType(grid,en,realEntity,dc) , levelSet_(levelSet) , level_(level) {}
 
-    // returns true, if element is contained in set of comm interface 
-    bool containsItem (const HElementType & elem) const 
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HElementType & elem) const
     {
       return levelSet_.containsIndex(codim, elem.getIndex() );
     }
 
-    // returns true, if element is contained in set of comm interface 
-    bool containsItem (const HGhostType & ghost) const 
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HGhostType & ghost) const
     {
       alugrid_assert ( ghost.getGhost().first );
       return containsItem( * (ghost.getGhost().first) );
     }
-    
-    // returns true, if interior element is contained in set of comm interface 
-    bool containsInterior (const HFaceType & face, PllElementType & pll) const 
+
+    // returns true, if interior element is contained in set of comm interface
+    bool containsInterior (const HFaceType & face, PllElementType & pll) const
     {
-      // if face level is not level_ then interior cannot be contained 
+      // if face level is not level_ then interior cannot be contained
       if(face.level() != level_) return false;
 
       typedef Gitter::helement_STI HElementType;
@@ -471,18 +471,18 @@ namespace ALUGrid
       std::pair< HElementType *, HBndSegType * > p( (HElementType *)0, (HBndSegType *)0 );
       pll.getAttachedElement( p );
       alugrid_assert ( p.first );
-      // check inside level 
+      // check inside level
       bool contained = (p.first->level() == level_);
       alugrid_assert ( contained == this->containsItem( *p.first ));
       return contained;
     }
 
-    // returns true, if ghost is contianed in set of comm interface 
-    bool containsGhost (const HFaceType & face, PllElementType & pll) const 
+    // returns true, if ghost is contianed in set of comm interface
+    bool containsGhost (const HFaceType & face, PllElementType & pll) const
     {
-      // if face level is not level_ then ghost cannot be contained 
+      // if face level is not level_ then ghost cannot be contained
       if(face.level() != level_) return false;
-      // otherwise check ghost level 
+      // otherwise check ghost level
       return (pll.ghostLevel() == level_);
     }
   };
@@ -493,12 +493,12 @@ namespace ALUGrid
   // --GatherScatterLoadBalance: ALU data handle implementation for user defined load balance
   //
   ////////////////////////////////////////////////////////////////////////////////////////////
-  template <class GridType, class LoadBalanceHandleType> 
+  template <class GridType, class LoadBalanceHandleType>
   class GatherScatterLoadBalance : public GatherScatter
   {
-    // no copying 
+    // no copying
     GatherScatterLoadBalance( const GatherScatterLoadBalance& );
-  protected:  
+  protected:
     typedef typename GridType::MPICommunicatorType Comm;
 
 
@@ -519,25 +519,25 @@ namespace ALUGrid
     LoadBalanceHandleType* ldbHandle_;
 
     // true if userDefinedPartitioning is used, false if loadWeights is used
-    // both are disabled if ldbHandle_ is NULL 
+    // both are disabled if ldbHandle_ is NULL
     const bool useExternal_ ;
 
   public:
     //! Constructor
-    GatherScatterLoadBalance( GridType & grid, 
-                              LoadBalanceHandleType& ldb, 
+    GatherScatterLoadBalance( GridType & grid,
+                              LoadBalanceHandleType& ldb,
                               const bool useExternal )
-      : grid_(grid), 
-        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ), 
+      : grid_(grid),
+        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ),
         entity_( entityObj_ ),
         ldbHandle_( &ldb ),
         useExternal_( useExternal )
     {}
 
     //! Constructor
-    explicit GatherScatterLoadBalance( GridType & grid ) 
-      : grid_(grid), 
-        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ), 
+    explicit GatherScatterLoadBalance( GridType & grid )
+      : grid_(grid),
+        entityObj_( EntityImp( grid.factory(), grid.maxLevel() ) ),
         entity_( entityObj_ ),
         ldbHandle_( 0 ),
         useExternal_( false )
@@ -546,8 +546,8 @@ namespace ALUGrid
     // return false, since no user dataHandle is present
     bool hasUserData() const { return false ; }
 
-    // return true if user defined partitioning methods should be used 
-    bool userDefinedPartitioning () const 
+    // return true if user defined partitioning methods should be used
+    bool userDefinedPartitioning () const
     {
       return useExternal_ && ldbHandle_ ;
     }
@@ -558,65 +558,65 @@ namespace ALUGrid
       return ! useExternal_ && ldbHandle_ ;
     }
 
-    // returns true if user defined partitioning needs to be readjusted 
-    bool repartition () 
-    { 
+    // returns true if user defined partitioning needs to be readjusted
+    bool repartition ()
+    {
       return userDefinedPartitioning(); // && ldbHandle().repartition();
     }
 
     // return set of ranks data is imported from during load balance
-    // this method is only used for user defined repartitioning  
-    bool importRanks( std::set<int>& ranks ) const 
+    // this method is only used for user defined repartitioning
+    bool importRanks( std::set<int>& ranks ) const
     {
       alugrid_assert( userDefinedPartitioning() );
       return ldbHandle().importRanks( ranks );
     }
 
     // return set of ranks data is exported to during load balance
-    // this method is only used for user defined repartitioning  
-    bool exportRanks( std::set<int>& ranks ) const 
+    // this method is only used for user defined repartitioning
+    bool exportRanks( std::set<int>& ranks ) const
     {
-      // NOTE: This feature is not yet include in the user interface 
+      // NOTE: This feature is not yet include in the user interface
       //alugrid_assert( userDefinedPartitioning() );
       //return ldbHandle().exportRanks( ranks );
       return false ;
     }
 
-    // return destination (i.e. rank) where the given element should be moved to 
+    // return destination (i.e. rank) where the given element should be moved to
     // this needs the methods userDefinedPartitioning to return true
     int destination ( HElementType &elem )
-    { 
-      // make sure userDefinedPartitioning is enabled 
+    {
+      // make sure userDefinedPartitioning is enabled
       alugrid_assert ( elem.level () == 0 );
       alugrid_assert ( userDefinedPartitioning() );
       return ldbHandle()( setEntity( elem ) );
     }
 
-    // return load weight of given element 
+    // return load weight of given element
     int loadWeight ( HElementType &elem )
     {
-      // make sure userDefinedLoadWeights is enabled 
+      // make sure userDefinedLoadWeights is enabled
       alugrid_assert( userDefinedLoadWeights() );
       alugrid_assert ( elem.level() == 0 );
       return ldbHandle()( setEntity( elem ) );
     }
 
   protected:
-    EntityType& setEntity( HElementType& elem ) 
-    {  
+    EntityType& setEntity( HElementType& elem )
+    {
       GridType::getRealImplementation( entity_ ).setElement( elem );
       return entity_ ;
     }
 
-    LoadBalanceHandleType& ldbHandle() 
-    { 
-      alugrid_assert( ldbHandle_ ); 
+    LoadBalanceHandleType& ldbHandle()
+    {
+      alugrid_assert( ldbHandle_ );
       return *ldbHandle_;
     }
 
     const LoadBalanceHandleType& ldbHandle() const
-    { 
-      alugrid_assert( ldbHandle_ ); 
+    {
+      alugrid_assert( ldbHandle_ );
       return *ldbHandle_;
     }
 
@@ -627,15 +627,15 @@ namespace ALUGrid
   // --GatherScatterLoadBalance: ALU data handle implementation for CommDataHandleIF
   //
   ////////////////////////////////////////////////////////////////////////////////////////
-  template <class GridType, class LoadBalanceHandleType, class DataHandleImpl, class Data> 
-  class GatherScatterLoadBalanceDataHandle 
+  template <class GridType, class LoadBalanceHandleType, class DataHandleImpl, class Data>
+  class GatherScatterLoadBalanceDataHandle
     : public GatherScatterLoadBalance< GridType, LoadBalanceHandleType >
   {
-    // no copying 
+    // no copying
     GatherScatterLoadBalanceDataHandle( const GatherScatterLoadBalanceDataHandle& );
 
     typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType > BaseType ;
-  protected:  
+  protected:
     static const int dimension = GridType :: dimension ;
     typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
 
@@ -688,7 +688,7 @@ namespace ALUGrid
     // data handle (CommDataHandleIF)
     DataHandleType& dataHandle_;
 
-    // used MessageBuffer 
+    // used MessageBuffer
     typedef typename GatherScatter :: ObjectStreamType ObjectStreamType;
 
     using BaseType :: grid_ ;
@@ -703,27 +703,27 @@ namespace ALUGrid
       return maxLevel == grid_.maxLevel();
     }
   public:
-    //! Constructor taking load balance handle and data handle 
-    GatherScatterLoadBalanceDataHandle( GridType & grid, 
-                                        DataHandleType& dh, 
-                                        LoadBalanceHandleType& ldb, 
+    //! Constructor taking load balance handle and data handle
+    GatherScatterLoadBalanceDataHandle( GridType & grid,
+                                        DataHandleType& dh,
+                                        LoadBalanceHandleType& ldb,
                                         const bool useExternal = false )
-      : BaseType( grid, ldb, useExternal ), 
+      : BaseType( grid, ldb, useExternal ),
         dataHandle_( dh )
     {
       alugrid_assert( maxLevelConsistency() );
     }
 
-    //! Constructor for DataHandle only 
+    //! Constructor for DataHandle only
     GatherScatterLoadBalanceDataHandle( GridType& grid, DataHandleType& dh )
-      : BaseType( grid ), 
+      : BaseType( grid ),
         dataHandle_( dh )
     {
       alugrid_assert( maxLevelConsistency() );
     }
 
-    // return true if dim,codim combination is contained in data set 
-    bool contains(int dim, int codim) const 
+    // return true if dim,codim combination is contained in data set
+    bool contains(int dim, int codim) const
     {
       return dataHandle_.contains( dim, codim );
     }
@@ -731,21 +731,21 @@ namespace ALUGrid
     // return true if user dataHandle is present which is the case here
     bool hasUserData() const { return true ; }
 
-    //! this method is called from the dunePackAll method of the corresponding 
-    //! here the data is written to the ObjectStream 
+    //! this method is called from the dunePackAll method of the corresponding
+    //! here the data is written to the ObjectStream
     void inlineData ( ObjectStreamType & str , HElementType & elem, const int estimatedElements )
     {
       // store number of elements to be written (for restore)
       str.write(estimatedElements);
-      // set element and then start 
+      // set element and then start
       alugrid_assert ( elem.level () == 0 );
 
-      // pack data for the whole hierarchy 
+      // pack data for the whole hierarchy
       inlineHierarchy( str, elem );
     }
 
-    //! this method is called from the duneUnpackSelf method of the corresponding 
-    //! here the data is read from the ObjectStream 
+    //! this method is called from the duneUnpackSelf method of the corresponding
+    //! here the data is read from the ObjectStream
     void xtractData ( ObjectStreamType & str , HElementType & elem )
     {
       alugrid_assert ( elem.level () == 0 );
@@ -755,34 +755,34 @@ namespace ALUGrid
       str.read( newElements );
 
       // if data handle provides reserve feature, reserve memory
-      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress
       CompressAndReserveType :: reserveMemory( dataHandle_, newElements );
 
       // unpack data for the hierarchy
       xtractHierarchy( str, elem );
     }
 
-    //! call compress on data 
-    void compress () 
+    //! call compress on data
+    void compress ()
     {
       // if data handle provides compress, do compress here
-      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress 
+      // the data handle has to be derived from LoadBalanceHandleWithReserveAndCompress
       CompressAndReserveType :: compress( dataHandle_ );
-    } 
+    }
 
-  protected:  
-    // inline data for the hierarchy 
-    void inlineHierarchy( ObjectStreamType & str, HElementType& elem ) 
+  protected:
+    // inline data for the hierarchy
+    void inlineHierarchy( ObjectStreamType & str, HElementType& elem )
     {
-      // pack elements data 
+      // pack elements data
       inlineElementData( str, setEntity( elem ) );
       // pack using deep first strategy
       for( HElementType* son = elem.down(); son ; son = son->next() )
         inlineHierarchy( str, *son );
     }
 
-    // inline data for the hierarchy 
-    void xtractHierarchy( ObjectStreamType & str, HElementType& elem ) 
+    // inline data for the hierarchy
+    void xtractHierarchy( ObjectStreamType & str, HElementType& elem )
     {
       xtractElementData( str, setEntity( elem ) );
       // reset element is new flag
@@ -800,7 +800,7 @@ namespace ALUGrid
         inlineEntityData<0>( stream, element );
       }
 
-      // now call all higher codims 
+      // now call all higher codims
       inlineCodimData< 1 >( stream, element );
       inlineCodimData< 2 >( stream, element );
       inlineCodimData< 3 >( stream, element );
@@ -814,14 +814,14 @@ namespace ALUGrid
         xtractEntityData<0>( stream, element );
       }
 
-      // now call all higher codims 
+      // now call all higher codims
       xtractCodimData< 1 >( stream, element );
       xtractCodimData< 2 >( stream, element );
       xtractCodimData< 3 >( stream, element );
     }
 
     template <int codim>
-    int subEntities( const EntityType &element ) const 
+    int subEntities( const EntityType &element ) const
     {
 #if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
       return element.subEntities( codim );
@@ -889,7 +889,7 @@ namespace ALUGrid
 
   /////////////////////////////////////////////////////////////////
   //
-  //  --AdaptRestrictProlong 
+  //  --AdaptRestrictProlong
   //
   /////////////////////////////////////////////////////////////////
   template< class GridType, class AdaptDataHandle >
@@ -901,12 +901,12 @@ namespace ALUGrid
     typedef Dune :: MakeableInterfaceObject<
       typename GridType::template Codim<0>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
-    
+
     EntityType & reFather_;
     EntityType & reSon_;
     RealEntityType & realFather_;
     RealEntityType & realSon_;
-   
+
     AdaptDataHandle &rp_;
 
     typedef typename GridType::MPICommunicatorType Comm;
@@ -924,32 +924,32 @@ namespace ALUGrid
     AdaptRestrictProlongImpl ( GridType &grid,
                                MakeableEntityType &f, RealEntityType &rf,
                                MakeableEntityType &s, RealEntityType &rs,
-                               AdaptDataHandle &rp ) 
+                               AdaptDataHandle &rp )
       : grid_(grid)
       , reFather_(f)
       , reSon_(s)
-      , realFather_(rf) 
-      , realSon_(rs) 
-      , rp_(rp) 
+      , realFather_(rf)
+      , realSon_(rs)
+      , rp_(rp)
     {
     }
 
-    virtual ~AdaptRestrictProlongImpl () 
+    virtual ~AdaptRestrictProlongImpl ()
     {
     }
 
-    //! restrict data for elements 
+    //! restrict data for elements
     int preCoarsening ( HElementType & father )
     {
       realFather_.setElement( father );
       rp_.preCoarsening( reFather_ );
-     
-      // reset refinement marker 
+
+      // reset refinement marker
       father.resetRefinedTag();
       return 0;
     }
 
-    //! prolong data for elements 
+    //! prolong data for elements
     int postRefinement ( HElementType & father )
     {
       realFather_.setElement( father );
@@ -963,11 +963,11 @@ namespace ALUGrid
       return 0;
     }
 
-    //! restrict data for ghost elements 
+    //! restrict data for ghost elements
     int preCoarsening ( HBndSegType & ghost ) { return 0; }
 
 
-    //! prolong data for ghost elements 
+    //! prolong data for ghost elements
     int postRefinement ( HBndSegType & ghost ) { return 0; }
   };
 
@@ -983,7 +983,7 @@ namespace ALUGrid
     typedef Dune :: MakeableInterfaceObject<
       typename GridType::template Codim<0>::Entity> MakeableEntityType;
     typedef typename MakeableEntityType :: ImplementationType RealEntityType;
-    
+
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
@@ -1006,7 +1006,7 @@ namespace ALUGrid
 
     virtual ~AdaptRestrictProlongGlSet () {}
 
-    //! prolong data, elem is the father  
+    //! prolong data, elem is the father
     int postRefinement ( HElementType & elem )
     {
       set_.postRefinement( elem );

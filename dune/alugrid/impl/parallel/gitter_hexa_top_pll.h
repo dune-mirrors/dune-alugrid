@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
-// modification for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modification for Dune Interface
+// (c) Robert Kloefkorn 2004 - 2005
 #ifndef GITTER_HEXA_TOP_PLL_H_INCLUDED
 #define GITTER_HEXA_TOP_PLL_H_INCLUDED
 
@@ -64,34 +64,34 @@ namespace ALUGrid
           mypllx_t _ext;
 
         protected :
-          // ghost element behind pllx bnd, can be pointer to null 
+          // ghost element behind pllx bnd, can be pointer to null
           mutable ghostpair_STI _ghostPair;
 
-          // refine ghost if face is refined and ghost is not zero 
+          // refine ghost if face is refined and ghost is not zero
           void splitGhost ( GhostChildrenInfo_t & );
 
-          // mark children for coarsening and call coarse 
+          // mark children for coarsening and call coarse
           void removeDescendents ( helement_STI & );
 
-          // coarse ghost if face is coarsened  
+          // coarse ghost if face is coarsened
           void coarseGhost ();
 
           // set ghost pointer, use this method otherwise all constructors
-          // have to be changed 
+          // have to be changed
           void setGhost (const ghostpair_STI & gpair);
         public:
-          // return ghost pointer 
+          // return ghost pointer
           ghostpair_STI & getGhost () const;
 
         public:
-          // for dune 
+          // for dune
           inline int ghostLevel () const;
       };
       typedef class HbndPll micro_t;
 
-      // NOTE: ghost element support is missing. 
-      // the necessary changes are similar to the changes in 
-      // gitter_tetra_top* 
+      // NOTE: ghost element support is missing.
+      // the necessary changes are similar to the changes in
+      // gitter_tetra_top*
     public :
       class HbndPllMacro : public Hbnd4Top < micro_t > {
         public :
@@ -117,13 +117,13 @@ namespace ALUGrid
           ElementPllXIF_t & accessPllX () throw (Parallel::AccessPllException);
           const ElementPllXIF_t & accessPllX () const throw (Parallel::AccessPllException);
           void detachPllXFromMacro () throw (Parallel::AccessPllException);
-    
-          // builds ghost cell if not exists 
+
+          // builds ghost cell if not exists
           virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
-          // for dune 
+          // for dune
           inline int ghostLevel () const;
 
-          // overload ldbVertexIndex, otherwise the default is return which is wrong in this case 
+          // overload ldbVertexIndex, otherwise the default is return which is wrong in this case
           int ldbVertexIndex () const { alugrid_assert ( _mxt ); return _mxt->ldbVertexIndex(); }
           int master() const { alugrid_assert ( _mxt ); return _mxt->master(); }
           // call mxt's setLoadBalanceVertexIndex (otherwise default impl is called which is wrong)
@@ -149,8 +149,8 @@ namespace ALUGrid
     //
 
   template < class A, class MX > inline Hbnd4PllExternal < A, MX >::
-  Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt) 
-    : Hbnd4Top < A > (0,f,t,bt), _mxt (new MX (*this)) 
+  Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt)
+    : Hbnd4Top < A > (0,f,t,bt), _mxt (new MX (*this))
   {
     this->restoreFollowFace ();
     return;
@@ -223,25 +223,25 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX >
-  inline Gitter::ghostpair_STI & 
+  inline Gitter::ghostpair_STI &
   Hbnd4PllInternal < A, X, MX >::HbndPll::getGhost () const
   {
-    // assert is not needed here when we dont use ghost cells 
+    // assert is not needed here when we dont use ghost cells
     return _ghostPair;
   }
 
   template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::
   HbndPllMacro::HbndPllMacro (myhface4_t * f, int t,
-                const bnd_t bt, 
+                const bnd_t bt,
                 BuilderIF & mgb,
-                MacroGhostInfoHexa* ghInfo ) 
+                MacroGhostInfoHexa* ghInfo )
   : Hbnd4Top < micro_t > (0,f,t,bt)
-  , _mxt (0) 
-  , _mgb(mgb) 
-  , _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )  
+  , _mxt (0)
+  , _mgb(mgb)
+  , _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )
   {
     alugrid_assert ( _gm );
-    this->setGhost ( _gm->getGhost() );   
+    this->setGhost ( _gm->getGhost() );
     _mxt = new MX (*this, _gm->getGhostInfo() );
     alugrid_assert ( _mxt );
 
@@ -255,8 +255,8 @@ namespace ALUGrid
                                 BuilderIF & mgb)
   : Hbnd4Top < micro_t > (0,f,t,bt)
   , _mxt (new MX (*this))
-  , _mgb(mgb) 
-  , _gm(0)  
+  , _mgb(mgb)
+  , _gm(0)
   {
     alugrid_assert ( _mxt );
     this->restoreFollowFace ();

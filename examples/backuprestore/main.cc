@@ -5,7 +5,7 @@
 /** standard headers **/
 #include <iostream>
 /** dune (mpi, field-vector and grid type for dgf) **/
-#include <dune/common/fvector.hh>        
+#include <dune/common/fvector.hh>
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
@@ -15,24 +15,24 @@
 // include mpi stuff before sionlib header
 #include <dune/common/parallel/mpihelper.hh>
 
-// parallel dgf reading 
+// parallel dgf reading
 #include "paralleldgf.hh"
 
-// SIONlib backup/restore 
+// SIONlib backup/restore
 #include "sionlib.hh"
 
-void restoreGrid( const std::string& method, 
+void restoreGrid( const std::string& method,
                   std::istream& in )
 {
   typedef Dune::GridSelector::GridType Grid;
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
 
   /* Grid construction using restore method */
-  // the restore method returns an object of type Grid* 
-  // the user takes control of this object 
-  Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in ); 
+  // the restore method returns an object of type Grid*
+  // the user takes control of this object
+  Grid* gridPtr = Dune::BackupRestoreFacility< Grid > :: restore( in );
 
-  // get grid reference 
+  // get grid reference
   Grid &grid = *gridPtr;
 
   /* get view to leaf grid */
@@ -44,13 +44,13 @@ void restoreGrid( const std::string& method,
   /* output the restored grid */
   vtk.write( method );
 
-  // delete grid 
+  // delete grid
   delete gridPtr ;
 }
 
 // method
 // ------
-void method ( const std::string& gridFileName, 
+void method ( const std::string& gridFileName,
               const int startLvl, const int rank )
 {
   typedef Dune::GridSelector::GridType Grid;
@@ -59,8 +59,8 @@ void method ( const std::string& gridFileName,
 
   typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
 
-  // backup and restore stream 
-  std::stringstream stream ; 
+  // backup and restore stream
+  std::stringstream stream ;
   std::string filename;
 
   {
@@ -76,7 +76,7 @@ void method ( const std::string& gridFileName,
     const bool verboseRank = grid.comm().rank() == 0 ;
 
     /* ... some global refinement steps */
-    if( verboseRank ) 
+    if( verboseRank )
       std::cout << "globalRefine: " << startLevel << std::endl;
     grid.globalRefine( startLevel );
 
@@ -89,52 +89,52 @@ void method ( const std::string& gridFileName,
     /* output the restored grid */
     vtk.write( "original" );
 
-    // instead of stringstream we could also use any other std::ostream 
+    // instead of stringstream we could also use any other std::ostream
     Dune::BackupRestoreFacility< Grid > :: backup( grid, stream );
 
     // also write backup to hard disk
     std::stringstream filenamestr;
     filenamestr << "checkpoint." << grid.comm().rank();
-    // store file name for restore 
+    // store file name for restore
     filename = filenamestr.str();
 
-    // create checkpoint file 
+    // create checkpoint file
     std::ofstream file( filename );
-    // if file was opened 
-    if( file ) 
+    // if file was opened
+    if( file )
     {
-      // write backup to given file 
+      // write backup to given file
       Dune::BackupRestoreFacility< Grid > :: backup( grid, file );
     }
 
-    // write backup to hard drive using SIONlib 
+    // write backup to hard drive using SIONlib
     // (alternative to writing one file per core above)
     backupSION( "sioncheckpoint", rank, stream );
-  } // here GridPtr is destroyed 
-  
+  } // here GridPtr is destroyed
+
   ///////////////////////////////////////////////////////////////
   //
-  // Now we will recreate the grid using the different backups 
+  // Now we will recreate the grid using the different backups
   //
   ///////////////////////////////////////////////////////////////
 
   // restore grid from above stringstream
-  { 
+  {
     restoreGrid( "internalrestore", stream );
   }
 
-  // restore grid from stream sionlib file 
-  { 
+  // restore grid from stream sionlib file
+  {
     std::stringstream restore ;
-    // write backup to hard drive using SIONlib 
+    // write backup to hard drive using SIONlib
     restoreSION( "sioncheckpoint", rank, restore );
 
     restoreGrid( "sionrestore", restore );
   }
 
-  // restore grid from file stream 
+  // restore grid from file stream
   std::ifstream file( filename );
-  if( file ) 
+  if( file )
   {
     restoreGrid( "filerestore", file );
   }
@@ -151,7 +151,7 @@ try
 {
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
-  
+
   if( argc < 1 )
   {
     /* display usage */
@@ -161,17 +161,17 @@ try
   }
 
 #if HAVE_ALUGRID
-  if( mpi.rank() == 0 ) 
+  if( mpi.rank() == 0 )
     std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
 #endif
-     
+
   /* create problem */
   const char* gridFileName = (argc > 1) ? argv[ 1 ] : "./dgf/unitcube3d.dgf";
 
   /* get level to use for computation */
   const int startLevel = (argc > 2 ? atoi( argv[ 2 ] ) : 0);
 
-  // method does a backup and restore of the given grid 
+  // method does a backup and restore of the given grid
   method( gridFileName, startLevel, mpi.rank() );
 
   /* done */

@@ -22,11 +22,11 @@ namespace ALU2DGrid
     A * last_list;
 
     int number_list;
-    
+
     //int nlistwalks;
-    
-    void listwalkattach() {} //nlistwalks ++; } 
-      
+
+    void listwalkattach() {} //nlistwalks ++; }
+
     void listwalkdetach() {} // nlistwalks --; }
 
     int operator == (const Listagency & a) { return (void *)this == (void *) & a; }
@@ -48,7 +48,7 @@ namespace ALU2DGrid
       a->prev_list = 0;
 
       a->number_list = 0;
-        
+
       number_list --;
 
 
@@ -60,7 +60,7 @@ namespace ALU2DGrid
     first_list(0), last_list(0), number_list(0) //, nlistwalks(0)
     {}
 
-     ~Listagency() { 
+     ~Listagency() {
         alugrid_assert (! busy());
 
         A * curr = first_list;
@@ -94,11 +94,11 @@ namespace ALU2DGrid
 
       }
 
-      void insert(A * a) 
+      void insert(A * a)
       {
-        if (last_list) 
+        if (last_list)
           last_list->next_list = a;
-        else 
+        else
           first_list = a;
 
         a->prev_list = last_list;
@@ -110,9 +110,9 @@ namespace ALU2DGrid
       int size() const { return number_list; }
 
       int busy() const { /*return nlistwalks;*/ return 0; }
-    
+
     friend class Listagent < A >;
-      
+
     friend class Listwalk_impl < A >;
 
   };
@@ -125,35 +125,35 @@ namespace ALU2DGrid
 
   template < class A > class Listwalk {
 
-    protected:  
-      // do not creat instances of interface class 
+    protected:
+      // do not creat instances of interface class
       Listwalk() {}
     public :
-      // destructor 
+      // destructor
       virtual ~Listwalk() {}
-    
-      // set iterator to first element 
+
+      // set iterator to first element
       virtual void first() = 0;
 
-      // set iterator to last element 
+      // set iterator to last element
       virtual void last() = 0;
-      
-      // set iterator to next element 
+
+      // set iterator to next element
       virtual void next() = 0;
-     
-      // set iterator to previous element  
+
+      // set iterator to previous element
       virtual void prev() = 0;
-     
-      // return done 
+
+      // return done
       virtual int done() const = 0;
 
-      // return size of iterated set 
+      // return size of iterated set
       virtual int size() = 0;
-     
+
       // return current element
       virtual A & getitem() const = 0;
 
-      // create clone of object 
+      // create clone of object
       virtual Listwalk < A >  * clone () const = 0;
   };
 
@@ -161,41 +161,41 @@ namespace ALU2DGrid
   // +----------------------------------------------------------------------------+
   // | template Listwalk_empty < . > stellt den null iterator dar.                |
   // +----------------------------------------------------------------------------+
-  template < class A > class Listwalk_empty : public Listwalk< A >  
+  template < class A > class Listwalk_empty : public Listwalk< A >
   {
     public :
-      // createing empty list walk 
+      // createing empty list walk
       Listwalk_empty() {}
 
-      // copy construtor 
+      // copy construtor
       Listwalk_empty(const Listwalk_empty &) {}
 
-      // assign list walk 
+      // assign list walk
       Listwalk_empty & operator=(const Listwalk_empty &) { return * this; }
-      
+
       virtual ~Listwalk_empty() { }
-    
+
       virtual void first() { }
 
       virtual void last() { }
-      
+
       virtual void next() { }
-      
+
       virtual void prev() { }
-      
+
       virtual int done() const { return 1; }
 
       virtual int size() { return 0; }
-      
-      virtual A & getitem() const { 
+
+      virtual A & getitem() const {
         alugrid_assert ( ! done () );
         void * p = (void *)(0);  // schlechter Trick ...
         // in der Tat, sehr schlechter Trick, R.K.
-        abort();      // .. und Tsch"uss ! 
+        abort();      // .. und Tsch"uss !
         return *(A *)(p);  // never reached .
       }
 
-      // create clone of object 
+      // create clone of object
       virtual Listwalk < A >  * clone () const { return new  Listwalk_empty < A > (*this); }
   };
 
@@ -219,12 +219,12 @@ namespace ALU2DGrid
       Alignwalk(Listwalk < A > & a, Listwalk < B > & b) : walk1(a), walk2(b), curr(0) { }
 
       Alignwalk(const Alignwalk < A , B , C > & org )
-        : walk1(org.walk1), walk2(org.walk2), curr(org.curr) 
+        : walk1(org.walk1), walk2(org.walk2), curr(org.curr)
       {}
 
      ~Alignwalk() { }
 
-      void first() { 
+      void first() {
 
         curr = 0;
 
@@ -278,13 +278,13 @@ namespace ALU2DGrid
 
       C & getitem() const {
 
-        if(curr) return walk2.getitem(); 
-   
+        if(curr) return walk2.getitem();
+
         else return walk1.getitem();
 
       }
 
-      virtual Listwalk < C > * clone () const 
+      virtual Listwalk < C > * clone () const
       {
         return new Alignwalk < A , B , C > (*this);
       }
@@ -303,20 +303,20 @@ namespace ALU2DGrid
     Listagency < A > & agency;
 
     A * curr;
-    
+
     public :
 
-      // copy constructor 
-      Listwalk_impl ( const Listwalk_impl & w) 
-        : agency(w.agency), curr(w.curr) 
-      { 
-        agency.listwalkattach(); 
+      // copy constructor
+      Listwalk_impl ( const Listwalk_impl & w)
+        : agency(w.agency), curr(w.curr)
+      {
+        agency.listwalkattach();
       }
 
-      Listwalk_impl ( Listagency < A > & a) 
-        : agency(a), curr(0) 
-      { 
-        agency.listwalkattach(); 
+      Listwalk_impl ( Listagency < A > & a)
+        : agency(a), curr(0)
+      {
+        agency.listwalkattach();
       }
 
      ~Listwalk_impl() { agency.listwalkdetach(); }
@@ -333,15 +333,15 @@ namespace ALU2DGrid
 
       int size() { return agency.number_list; }
 
-      A & getitem() const 
-      { 
-        alugrid_assert ( curr ); 
-        return * curr; 
+      A & getitem() const
+      {
+        alugrid_assert ( curr );
+        return * curr;
       }
 
-      virtual Listwalk < A > * clone() const 
+      virtual Listwalk < A > * clone() const
       {
-        return new Listwalk_impl < A > (*this); 
+        return new Listwalk_impl < A > (*this);
       }
   };
 
@@ -353,19 +353,19 @@ namespace ALU2DGrid
       typedef Hier < A > hier_t;
 
     private :
-    
+
       hier_t & el;
-     
+
       Macro(const Macro & e) : el(e.el) { }
 
       Macro & operator = (const Macro &) { }
-      
+
     public :
 
       void sethdl(IndexProvider *phdl) {el.sethdl(phdl);}
-      
-      Macro(hier_t & e) : el(e) { } 
-       
+
+      Macro(hier_t & e) : el(e) { }
+
      ~Macro() { delete & el; }
 
       hier_t * operator->() const { return & el; }
@@ -373,7 +373,7 @@ namespace ALU2DGrid
       hier_t & operator * () const { return el; }
 
       hier_t & operator [](int ) const { return el; }
-    
+
   };
 
 
@@ -384,14 +384,14 @@ namespace ALU2DGrid
   // | Iterator zu bekommen, der nur "uber die Bl"atter l"auft.                   |
   // +----------------------------------------------------------------------------+
 
-  template < class A > class Leafwalk : public Listwalk < Hier < A > > 
+  template < class A > class Leafwalk : public Listwalk < Hier < A > >
   {
     public :
 
       typedef Macro < A > macro_t;
 
       typedef Hier < A > hier_t;
-   
+
     private :
 
       enum { max = 100 };
@@ -399,49 +399,49 @@ namespace ALU2DGrid
       Listagency < macro_t > & agency;
 
       Listwalk_impl < macro_t > macro;
-      
+
       hier_t ** stack;
-    
+
       int pos;
-      
+
     public :
-    
-      Leafwalk(Listagency < macro_t > & a) 
-        : agency(a), macro(agency) , pos(0) 
-      { 
+
+      Leafwalk(Listagency < macro_t > & a)
+        : agency(a), macro(agency) , pos(0)
+      {
         stack = new hier_t * [max];
         alugrid_assert (stack);
       }
 
       Leafwalk(const Leafwalk & w) : agency(w.agency)
-                                   , macro(w.macro) 
+                                   , macro(w.macro)
                                    , pos(w.pos)
       {
         stack = new hier_t * [max];
         alugrid_assert (stack);
-        // pos is implicitly set by iterating until w.pos 
+        // pos is implicitly set by iterating until w.pos
         for(int p = 0; p <= w.pos; ++ p) stack [p] = w.stack [p];
       }
-      
-      ~Leafwalk() 
+
+      ~Leafwalk()
       {
         delete[] stack;
       }
-     
-      void first()  
+
+      void first()
       {
         pos = 0;
 
         macro.first();
 
         * stack = macro.done() ? 0 : & * macro.getitem();
-    
-        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max) ) 
+
+        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max) )
 
           stack[ ++ pos] = (e = e->down());
       }
 
-      void last() 
+      void last()
       {
         macro.last();
 
@@ -458,33 +458,33 @@ namespace ALU2DGrid
         }
 
       }
-      
+
       void next() {
-    
+
         for(; pos > 0; pos -- )
         {
           stack[pos] = stack[pos]->next();
           if(stack[pos]) break;
         }
-        
-        if(pos == 0) 
+
+        if(pos == 0)
         {
           macro.next();
-           
+
           * stack = macro.done() ? 0 : & * macro.getitem();
         }
 
-        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max)) 
+        for( hier_t * e = stack[pos]; e ? ! e->leaf() : 0; alugrid_assert (pos < max))
           stack[ ++ pos] = (e = e->down());
       }
-      
+
       void prev() {
 
         for(; pos > 0; pos -- )
           if(stack[pos - 1]->down() != stack[pos]) break;
 
 
-        if(pos == 0) 
+        if(pos == 0)
         {
           macro.prev();
 
@@ -506,8 +506,8 @@ namespace ALU2DGrid
         }
 
       }
-    
-      int size() 
+
+      int size()
       {
 
         Listwalk_impl < macro_t > walk (agency);
@@ -520,17 +520,17 @@ namespace ALU2DGrid
      }
 
      int done() const { return macro.done(); }
-     
-     hier_t & getitem() const 
+
+     hier_t & getitem() const
      {
         alugrid_assert ( stack[pos] );
         return * stack[pos];
      }
 
-     virtual Listwalk< Hier< A > > * clone () const { 
+     virtual Listwalk< Hier< A > > * clone () const {
        return new Leafwalk< A > (*this);
      }
-  }; 
+  };
 
 
   // +----------------------------------------------------------------------------+
@@ -539,21 +539,21 @@ namespace ALU2DGrid
   // +----------------------------------------------------------------------------+
 
   template < class A > class Levelwalk : public Listwalk < Hier < A > > {
-   
+
     public :
 
       typedef Macro < A > macro_t;
 
       typedef Hier < A > hier_t;
-   
+
     private :
 
       Listagency < macro_t > & agency;
 
       Listwalk_impl < macro_t > macro;
-      
+
       hier_t ** stack;
-    
+
       int pos;
 
       int depth;
@@ -568,47 +568,47 @@ namespace ALU2DGrid
 
       }
 
-      int pullup() 
+      int pullup()
       {
-        for(; pos > 0; pos -- ) 
+        for(; pos > 0; pos -- )
         {
           stack[pos] = stack[pos]->next();
           if(stack[pos]) break;
         }
-        return pos == 0 ? 0 : 1; 
+        return pos == 0 ? 0 : 1;
       }
 
     public :
 
-      Levelwalk( Listagency < macro_t > & a, int d) 
-        : agency(a), macro(agency), pos(0) , depth(d)  
+      Levelwalk( Listagency < macro_t > & a, int d)
+        : agency(a), macro(agency), pos(0) , depth(d)
       {
         stack = new hier_t * [depth + 1];
         alugrid_assert (stack);
       }
 
-      Levelwalk( const Levelwalk & w ) 
+      Levelwalk( const Levelwalk & w )
         : agency(w.agency)
-        , macro(w.macro) 
+        , macro(w.macro)
         , pos(w.pos)
-        , depth(w.depth) 
+        , depth(w.depth)
       {
         stack = new hier_t * [depth + 1];
         alugrid_assert (stack);
-        // pos is implicitly set by iterating until w.pos 
+        // pos is implicitly set by iterating until w.pos
         for(int p = 0; p <= w.pos; ++p) stack [p] = w.stack [p];
       }
 
-      ~Levelwalk() 
+      ~Levelwalk()
       {
         delete[] stack;
       }
 
-      void first()  
+      void first()
       {
         pos = 0;
-    
-        for( macro.first(); ! macro.done(); macro.next()) 
+
+        for( macro.first(); ! macro.done(); macro.next())
         {
           * stack = & * macro.getitem();
 
@@ -621,7 +621,7 @@ namespace ALU2DGrid
           } while(pullup());
 
         }
-    
+
       }
 
       void last ()
@@ -645,7 +645,7 @@ namespace ALU2DGrid
 
           if(macro.done()) { * stack = 0; return; }
 
-          else { 
+          else {
 
             * stack = & * macro.getitem();
 
@@ -655,13 +655,13 @@ namespace ALU2DGrid
         } while(depth);
       }
 
-      void prev () 
+      void prev ()
       {
         std::cerr << "Levelwalk< . >.prev() not implemented." << std::endl;
         abort();
       }
 
-      int size() 
+      int size()
       {
 
         Listwalk_impl < macro_t > walk (agency);
@@ -676,23 +676,23 @@ namespace ALU2DGrid
 
       int done() const { return macro.done(); }
 
-      hier_t & getitem() const 
+      hier_t & getitem() const
       {
-        alugrid_assert ( stack[pos] ); 
+        alugrid_assert ( stack[pos] );
         alugrid_assert ( stack[pos]->level() == depth);
         return * stack[pos];
       }
 
-      macro_t & getmacro() const 
+      macro_t & getmacro() const
       {
         alugrid_assert ( stack[pos] );
         alugrid_assert (stack[pos]->level() == depth);
         alugrid_assert (depth==0);
         return macro.getitem();
       }
-      
-      virtual Listwalk< Hier< A > > * clone () const 
-      { 
+
+      virtual Listwalk< Hier< A > > * clone () const
+      {
         return new Levelwalk< A > (*this);
       }
   };
@@ -784,7 +784,7 @@ namespace ALU2DGrid
     Hier<T>* operator-> () const {
       return (done_ ? NULL : stack[pos]);
     }
-    Hier<T>& getitem() const {	
+    Hier<T>& getitem() const {
       alugrid_assert (!done_);
       return *(stack[pos]);
     }
@@ -798,50 +798,50 @@ namespace ALU2DGrid
     Listwalk < A > * walk;
 
     IndexProvider * hdl;
-    
+
     A * a;
 
     // this class is a pointer itself, therefore no creation of pointers
-    // allowed 
+    // allowed
     void * operator new (size_t ) { return 0; }
     void operator delete (void *) { }
-   
+
     public :
-    
+
       // create empty list walk
-      Listwalkptr() 
-        : walk ( new Listwalk_empty < A > () ) , hdl(0) , a(0) 
+      Listwalkptr()
+        : walk ( new Listwalk_empty < A > () ) , hdl(0) , a(0)
       {}
-      
+
       template <int N,int NV>
       Listwalkptr(Hmesh_basic<N,NV> &h) : hdl(&h) , a(0) { walk = h.walk(a); }
 
       template <int N,int NV>
       Listwalkptr(Hmesh_basic<N,NV> &h, int level) : hdl(&h) , a(0) { walk = h.walk(a, level); }
-      
+
       Listwalkptr(const Listwalkptr & p) : hdl(p.hdl) , a(0)
-      { 
+      {
         alugrid_assert ( p.walk );
-        walk = p.walk->clone(); 
+        walk = p.walk->clone();
       }
-      
+
       ~Listwalkptr() { delete walk; }
 
-      Listwalkptr & operator = (const Listwalkptr & p) 
+      Listwalkptr & operator = (const Listwalkptr & p)
       {
         delete walk;
         hdl = p.hdl;
         alugrid_assert ( p.walk );
-        walk = p.walk->clone(); 
+        walk = p.walk->clone();
         return *this;
       }
-     
+
       Listwalk < A > * operator -> () { return walk; }
       const Listwalk < A > * operator -> () const { return walk; }
-      
+
       Listwalk < A > & operator * ()  { return * walk; }
       const Listwalk < A > & operator * () const { return * walk; }
-      
+
       Listwalk < A > & operator [] (int ) { return * walk; }
       const Listwalk < A > & operator [] (int ) const { return * walk; }
   };

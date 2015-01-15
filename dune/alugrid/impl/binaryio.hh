@@ -22,14 +22,14 @@ namespace ALUGrid
     uint64_t size = data.size();
     stream.read( (char *) &size, sizeof(uint64_t) );
 
-    // reserve memory 
+    // reserve memory
     data.reserve( size );
     data.clear();
 
-    // read binary data from zlib 
+    // read binary data from zlib
     readBinary( stream, data.raw(), size, zlibCompressed );
 
-    // set wb counter in ObjectStream 
+    // set wb counter in ObjectStream
     data.seekp( size );
   }
 
@@ -39,17 +39,17 @@ namespace ALUGrid
     uint64_t size = data.size();
     stream.write( (char *) &size, sizeof(uint64_t) );
 
-    writeBinary( stream, data.raw(), size, zlibCompressed ); 
+    writeBinary( stream, data.raw(), size, zlibCompressed );
   }
 
   template <class Traits, class MacroFileHeader>
-  inline void readBinary ( std::istream &stream, BasicObjectStream< Traits >& data, const MacroFileHeader& header ) 
+  inline void readBinary ( std::istream &stream, BasicObjectStream< Traits >& data, const MacroFileHeader& header )
   {
-    // reserve memory, size is determined by header 
+    // reserve memory, size is determined by header
     data.reserve( header.size() );
     data.clear();
 
-    // read binary data from zlib 
+    // read binary data from zlib
     readBinary( stream, data.raw(), header.size(), header.binaryFormat() );
 
     if( !stream )
@@ -58,20 +58,20 @@ namespace ALUGrid
       std::abort();
     }
 
-    // set wb counter in ObjectStream 
+    // set wb counter in ObjectStream
     data.seekp( header.size() );
   }
 
   template <class Traits, class MacroFileHeader>
   inline void writeHeaderAndBinary ( std::ostream &stream, const BasicObjectStream< Traits >& data, MacroFileHeader& header )
   {
-    // get data size and store in header 
+    // get data size and store in header
     header.setSize( data.size() );
-    // write header and then data 
+    // write header and then data
     header.write( stream );
 
-    // write binary data 
-    writeBinary( stream, data.raw(), header.size(), header.binaryFormat() ); 
+    // write binary data
+    writeBinary( stream, data.raw(), header.size(), header.binaryFormat() );
 
     if( !stream )
     {

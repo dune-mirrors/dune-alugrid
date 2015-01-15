@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1998
-// modifications for dune 
-// (c) robert kloefkorn 2007 
+// modifications for dune
+// (c) robert kloefkorn 2007
 #ifndef MYALLOC_H_INCLUDED
 #define MYALLOC_H_INCLUDED
 
@@ -10,50 +10,50 @@
 
 // if defined the memory allocation from dlmalloc is used
 #if HAVE_DLMALLOC
-#define ALUGRID_USES_DLMALLOC 
-#else 
+#define ALUGRID_USES_DLMALLOC
+#else
 // if defined, standard C++ new and delete are used
-// this is the default if dlmalloc is not found 
-#define DONT_USE_ALUGRID_ALLOC 
+// this is the default if dlmalloc is not found
+#define DONT_USE_ALUGRID_ALLOC
 #endif
 
 namespace ALUGrid
 {
   extern int __STATIC_myrank ;
 
-  class ALUGridException 
+  class ALUGridException
   {
   protected:
     ALUGridException () {}
-  public:  
+  public:
     virtual ~ALUGridException () {}
     virtual std::string what () const = 0 ;
   };
 
-#ifndef DONT_USE_ALUGRID_ALLOC 
+#ifndef DONT_USE_ALUGRID_ALLOC
 
   class MyAlloc
   {
-    // max number of storable items per stack 
+    // max number of storable items per stack
     static const std::size_t MAX_HOLD_ADD;
-    // overestimation factor 
+    // overestimation factor
     static const double MAX_HOLD_MULT ;
 
-    // true if initialized 
+    // true if initialized
     static bool _initialized ;
 
-    // if true objects are not free, only pushed to stack 
+    // if true objects are not free, only pushed to stack
     static bool _freeAllowed ;
-    
+
   public :
-    static const bool ALUGridUsesDLMalloc = 
+    static const bool ALUGridUsesDLMalloc =
 #ifdef ALUGRID_USES_DLMALLOC
       true ;
-#else 
+#else
       false ;
 #endif
 
-      class Initializer 
+      class Initializer
       {
         // initializer versucht, die statischen Objekte der Speicherverwaltung
         // vor allem anderen zu initialisieren, damit keine Fehler auftreten,
@@ -63,24 +63,24 @@ namespace ALUGrid
           Initializer () ;
          ~Initializer () ;
       } ;
-      
-      class OutOfMemoryException : public ALUGridException 
-      { 
+
+      class OutOfMemoryException : public ALUGridException
+      {
       public:
         virtual std::string what () const { return "OutOfMemoryException"; }
       };
       friend class Initializer;
 
-      // if called, freeing objects is allowed again 
+      // if called, freeing objects is allowed again
       static void unlockFree(void *);
 
-      // if called free of objects is not allowed 
-      static void lockFree (void *); 
+      // if called free of objects is not allowed
+      static void lockFree (void *);
 
-      // try to make free memory available for the system 
+      // try to make free memory available for the system
       static void clearFreeMemory () ;
 
-      // return size of allocated memory 
+      // return size of allocated memory
       static size_t allocatedMemory () ;
 
 
@@ -90,43 +90,43 @@ namespace ALUGrid
 
     public :
 
-      // new version of operator new 
+      // new version of operator new
       void * operator new (size_t) throw (OutOfMemoryException) ;
-      // corresponding version of operator delete 
+      // corresponding version of operator delete
       void operator delete (void *,size_t) ;
   } ;
 
   static MyAlloc :: Initializer allocatorInitializer ;
 
-#else //  #ifndef DONT_USE_ALUGRID_ALLOC 
+#else //  #ifndef DONT_USE_ALUGRID_ALLOC
 
-  // dummy class 
-  class MyAlloc 
+  // dummy class
+  class MyAlloc
   {
-  public:  
-    class OutOfMemoryException : public ALUGridException 
-    { 
+  public:
+    class OutOfMemoryException : public ALUGridException
+    {
     public:
       virtual std::string what () const { return "OutOfMemoryException"; }
     };
-    // this is false here anyway 
+    // this is false here anyway
     static const bool ALUGridUsesDLMalloc = false ;
 
-    // if called, freeing objects is allowed again 
+    // if called, freeing objects is allowed again
     inline static void unlockFree(void *) {}
 
-    // if called free of objects is not allowed 
-    inline static void lockFree (void *) {} 
+    // if called free of objects is not allowed
+    inline static void lockFree (void *) {}
 
-    // try to make free memory available for the system 
+    // try to make free memory available for the system
     inline static void clearFreeMemory () {}
 
-    // return size of allocated memory 
+    // return size of allocated memory
     inline static size_t allocatedMemory () { return 0; }
 
   };
 
-#endif // #else //  #ifndef DONT_USE_ALUGRID_ALLOC 
+#endif // #else //  #ifndef DONT_USE_ALUGRID_ALLOC
 
   template <class A>
   void ik(A&a) { printf("%s",a.c_str()); }

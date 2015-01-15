@@ -26,9 +26,9 @@
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
-#include <dune/alugrid/dgf.hh> 
+#include <dune/alugrid/dgf.hh>
 
-#if ALU3DGRID_PARALLEL && HAVE_MPI 
+#if ALU3DGRID_PARALLEL && HAVE_MPI
 #define USE_PARALLEL_TEST 1
 #endif
 
@@ -39,7 +39,7 @@ void printGeometry(const GeometryType geo)
   for(int i=0; i<geo.corners(); ++i)
   {
     std::cout << " corner " << i << " ";
-    std::cout << "{" << geo.corner(i) << "}"; 
+    std::cout << "{" << geo.corner(i) << "}";
     std::cout << std::endl;
   }
   std::cout << "} \n";
@@ -48,10 +48,10 @@ void printGeometry(const GeometryType geo)
 
 
 template <int codim, class GridType>
-void checkIteratorCodim(GridType & grid) 
+void checkIteratorCodim(GridType & grid)
 {
   typedef typename GridType::template Codim<codim>::
-     template Partition<Dune::InteriorBorder_Partition>::LeafIterator 
+     template Partition<Dune::InteriorBorder_Partition>::LeafIterator
         IteratorInteriorBorder;
 
   typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
@@ -66,13 +66,13 @@ void checkIteratorCodim(GridType & grid)
     /** Provide geometry type of element. */
     const Geometry& geo = iter->geometry();
     std::cout << "Number: " << cnt << std::endl;
-    
+
     printGeometry(geo);
-    if( geo.corners() > 1 ) 
+    if( geo.corners() > 1 )
     {
-      Dune::FieldVector<ctype, GridType::dimension> 
+      Dune::FieldVector<ctype, GridType::dimension>
         diff( geo.corner(0) - geo.corner(1) );
-      if( diff.two_norm() < 1e-8 ) 
+      if( diff.two_norm() < 1e-8 )
       {
         std::cout << diff << " twonorm = " << diff.two_norm() << " point 0 and 1 do not differ! " << std::endl;
         assert ( diff.two_norm() > 1e-8 );
@@ -80,7 +80,7 @@ void checkIteratorCodim(GridType & grid)
     }
     cnt++;
   }
-  
+
   std::cout << std::endl << std::endl;
 }
 
@@ -104,8 +104,8 @@ void writeFile( const GridView& gridView )
   vtk.write( "dump" );
 }
 
-template <class GridType> 
-void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false) 
+template <class GridType>
+void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 {
 
   writeFile( grid.leafGridView() );
@@ -118,7 +118,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
-  // check iterators  
+  // check iterators
   //checkIterators( grid );
   checkIntersectionIterator(grid);
 
@@ -127,10 +127,10 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 
 
 int main (int argc , char **argv) {
-  
+
   // this method calls MPI_Init, if MPI is enabled
   Dune::MPIHelper &mpihelper = Dune::MPIHelper::instance( argc, argv );
-  int myrank = mpihelper.rank(); 
+  int myrank = mpihelper.rank();
   int mysize = mpihelper.size();
 
   try {
@@ -138,19 +138,19 @@ int main (int argc , char **argv) {
 
     std::string key;
     bool initialize = true ;
-    if( argc >= 2 ) 
+    if( argc >= 2 )
     {
       key = argv[1];
       initialize = false;
     }
-    else 
+    else
     {
       std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube> <display>" << std::endl;
     }
 
-    const char *newfilename = 0; 
+    const char *newfilename = 0;
     bool display = false;
-    if( argc > 2 ) 
+    if( argc > 2 )
     {
       display = (std::string( argv[ 2 ] ) == "display");
       newfilename = (display ? 0 : argv[ 2 ]);
@@ -162,7 +162,7 @@ int main (int argc , char **argv) {
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
     bool testALU2dCube    = initialize ;
-    if( key == "2d" ) 
+    if( key == "2d" )
     {
       testALU2dSimplex = true ;
       testALU2dConform = true ;
@@ -180,9 +180,9 @@ int main (int argc , char **argv) {
 
       // check empty grid
 
-     
-      // check non-conform ALUGrid for 2d 
-      if( testALU2dCube ) 
+
+      // check non-conform ALUGrid for 2d
+      if( testALU2dCube )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
         std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
@@ -204,8 +204,8 @@ int main (int argc , char **argv) {
         */
       }
 
-      // check non-conform ALUGrid for 2d 
-      if( testALU2dSimplex ) 
+      // check non-conform ALUGrid for 2d
+      if( testALU2dSimplex )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
         //std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
@@ -228,15 +228,15 @@ int main (int argc , char **argv) {
         */
       }
 
-      // check conform ALUGrid for 2d 
-      if( testALU2dConform ) 
+      // check conform ALUGrid for 2d
+      if( testALU2dConform )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
         std::cout << "begin simplex test conforming" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
-        
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);

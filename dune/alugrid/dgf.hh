@@ -25,7 +25,7 @@ namespace Dune
     class GlobalVertexIndexBlock
     : public dgf::BasicBlock
     {
-      bool goodline;       
+      bool goodline;
 
     public:
       GlobalVertexIndexBlock ( std :: istream &in )
@@ -62,7 +62,7 @@ namespace Dune
     class ALUParallelBlock
     : public dgf::BasicBlock
     {
-      bool goodline;       
+      bool goodline;
 
     public:
       ALUParallelBlock ( std :: istream &in )
@@ -91,7 +91,7 @@ namespace Dune
       }
     };
 
-  } // end empty namespace 
+  } // end empty namespace
 
 
 
@@ -127,7 +127,7 @@ namespace Dune
         dgf_( 0, 1 )
     {}
 
-    explicit DGFBaseFactory ( MPICommunicatorType comm ) 
+    explicit DGFBaseFactory ( MPICommunicatorType comm )
       : factory_(),
         dgf_( rank(comm), size(comm) )
     {}
@@ -151,7 +151,7 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const ReferenceElement< double, dimension > & refElem = 
+      const ReferenceElement< double, dimension > & refElem =
         ReferenceElements< double, dimension >::general( entity.type() );
       int corners = refElem.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
@@ -170,7 +170,7 @@ namespace Dune
     }
 
     template< class GG, class II >
-    const typename DGFBoundaryParameter::type & 
+    const typename DGFBoundaryParameter::type &
       boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
@@ -178,7 +178,7 @@ namespace Dune
       const typename Intersection::Entity & entity = *inside;
       const int face = intersection.indexInInside();
 
-      const ReferenceElement< double, dimension > & refElem = 
+      const ReferenceElement< double, dimension > & refElem =
         ReferenceElements< double, dimension >::general( entity.type() );
       int corners = refElem.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
@@ -235,50 +235,50 @@ namespace Dune
 
   protected:
     bool generateALUGrid( const ALUGridElementType eltype,
-                          std::istream &file, 
+                          std::istream &file,
                           MPICommunicatorType communicator,
                           const std::string &filename );
 
     bool generateALU2dGrid( const ALUGridElementType eltype,
-                            std::istream &file, 
+                            std::istream &file,
                             MPICommunicatorType communicator,
                             const std::string &filename );
 
     static Grid* callDirectly( const char* gridname,
-                               const int rank, 
+                               const int rank,
                                const char *filename,
                                MPICommunicatorType communicator )
     {
-      if( ! Conversion< MPICommunicatorType , No_Comm > :: sameType ) 
+      if( ! Conversion< MPICommunicatorType , No_Comm > :: sameType )
       {
-        // in parallel runs add rank to filename 
+        // in parallel runs add rank to filename
         std :: stringstream tmps;
         tmps << filename << "." << rank;
         const std :: string &tmp = tmps.str();
 
-        // if file exits then use it 
+        // if file exits then use it
         if( fileExists( tmp.c_str() ) )
           return new Grid( tmp.c_str(), communicator );
       }
 
-      // for rank 0 we also check the normal file name 
-      if( rank == 0 ) 
+      // for rank 0 we also check the normal file name
+      if( rank == 0 )
       {
         if( fileExists( filename ) )
           return new Grid( filename , communicator );
 
-        // only throw this exception on rank 0 because 
-        // for the other ranks we can still create empty grids 
+        // only throw this exception on rank 0 because
+        // for the other ranks we can still create empty grids
         DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
                     << filename << "'." );
       }
       // don't create messages in every proc, this does not work for many cores.
-      //else 
+      //else
       //{
       //  dwarn << "WARNING:  P[" << rank << "]: Creating empty grid!" << std::endl;
       //}
 
-      // return empty grid on all other processes 
+      // return empty grid on all other processes
       return new Grid( communicator );
     }
     static bool fileExists ( const char *fileName )
@@ -311,16 +311,16 @@ namespace Dune
   };
 
   template < ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
-  struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype, Comm > > : 
+  struct DGFGridFactory< ALUGrid<3,3, eltype, refinementtype, Comm > > :
     public DGFBaseFactory< ALUGrid<3,3, eltype, refinementtype, Comm > >
   {
     typedef ALUGrid<3,3, eltype, refinementtype, Comm > DGFGridType;
     typedef DGFBaseFactory< DGFGridType > BaseType;
     typedef typename BaseType :: MPICommunicatorType MPICommunicatorType;
-  protected:  
+  protected:
     using BaseType :: grid_;
     using BaseType :: callDirectly;
-  public:  
+  public:
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
     : BaseType( comm )
@@ -332,16 +332,16 @@ namespace Dune
       generate( input, comm );
     }
 
-    explicit DGFGridFactory ( const std::string &filename, 
-                              MPICommunicatorType comm = MPIHelper::getCommunicator()) 
-    : BaseType( comm ) 
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
+    : BaseType( comm )
     {
       std::ifstream input( filename.c_str() );
       bool fileFound = input.is_open() ;
-      if( fileFound ) 
+      if( fileFound )
         fileFound = generate( input, comm, filename );
 
-      if( ! fileFound ) 
+      if( ! fileFound )
         grid_ = callDirectly( "ALUGrid< 3, 3, eltype, ref, comm >", this->rank( comm ), filename.c_str(), comm );
     }
 
@@ -350,7 +350,7 @@ namespace Dune
   };
 
   template < int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
-  struct DGFGridFactory< ALUGrid<2, dimw, eltype, refinementtype, Comm > > : 
+  struct DGFGridFactory< ALUGrid<2, dimw, eltype, refinementtype, Comm > > :
     public DGFBaseFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > >
   {
     typedef ALUGrid< 2, dimw, eltype, refinementtype, Comm > DGFGridType;
@@ -362,7 +362,7 @@ namespace Dune
 
     explicit DGFGridFactory ( std::istream &input,
                               MPICommunicatorType comm = MPIHelper::getCommunicator() )
-    : BaseType( comm ) 
+    : BaseType( comm )
     {
       input.clear();
       input.seekg( 0 );
@@ -371,8 +371,8 @@ namespace Dune
       generate( input, comm );
     }
 
-    explicit DGFGridFactory ( const std::string &filename, 
-                              MPICommunicatorType comm = MPIHelper::getCommunicator()) 
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType comm = MPIHelper::getCommunicator())
       : BaseType( comm )
     {
       std::ifstream input( filename.c_str() );
@@ -411,9 +411,9 @@ namespace Dune
           double x;
           if( getnextentry(x) )
             tolerance_ = x;
-          else 
+          else
           {
-            if( verbose ) 
+            if( verbose )
             {
               dwarn << "GridParameterBlock: found keyword `tolerance' but no value, "
                     << "defaulting to `" <<  tolerance_ <<"'!" << std::endl;
@@ -440,17 +440,17 @@ namespace Dune
 
   } //end namespace dgf
 
-  template < class G > 
-  inline bool DGFBaseFactory< G > :: 
-  generateALUGrid( const ALUGridElementType eltype, 
-                   std::istream &file, MPICommunicatorType communicator, 
+  template < class G >
+  inline bool DGFBaseFactory< G > ::
+  generateALUGrid( const ALUGridElementType eltype,
+                   std::istream &file, MPICommunicatorType communicator,
                    const std::string &filename )
   {
     typedef G DGFGridType ;
 
-    const int dimworld = DGFGridType :: dimensionworld ; 
-    dgf_.element = ( eltype == simplex) ? 
-                        DuneGridFormatParser::Simplex : 
+    const int dimworld = DGFGridType :: dimensionworld ;
+    dgf_.element = ( eltype == simplex) ?
+                        DuneGridFormatParser::Simplex :
                         DuneGridFormatParser::Cube ;
     dgf_.dimgrid = dimworld;
     dgf_.dimw = dimworld;
@@ -500,7 +500,7 @@ namespace Dune
       if( !dgf_.readDuneGrid( file, dimworld, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
-      if( eltype == simplex ) 
+      if( eltype == simplex )
       {
         dgf_.setOrientation( 2, 3 );
       }
@@ -525,8 +525,8 @@ namespace Dune
         }
       }
 
-      GeometryType elementType( (eltype == simplex) ? 
-                                    GeometryType::simplex : 
+      GeometryType elementType( (eltype == simplex) ?
+                                    GeometryType::simplex :
                                     GeometryType::cube, dimworld );
 
       const int nFaces = (eltype == simplex) ? dimworld+1 : 2*dimworld;
@@ -555,9 +555,9 @@ namespace Dune
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
-        GeometryType type( (eltype == simplex) ? 
-                               GeometryType::simplex : 
-                               GeometryType::cube, 
+        GeometryType type( (eltype == simplex) ?
+                               GeometryType::simplex :
+                               GeometryType::cube,
                             dimworld-1);
 
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
@@ -594,7 +594,7 @@ namespace Dune
 
     if( !parameter.dumpFileName().empty() )
       grid_ = factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() );
-    else 
+    else
       grid_ = factory_.createGrid( addMissingBoundariesGlobal, true, filename );
     return true;
   }
@@ -607,20 +607,20 @@ namespace Dune
   }
 
 
-  // ALUGrid 2d version 
+  // ALUGrid 2d version
   //-------------------
 
-  template < class G > 
-  inline bool DGFBaseFactory< G > :: 
-    generateALU2dGrid( const ALUGridElementType eltype, 
-                       std::istream &file, 
-                       MPICommunicatorType communicator, 
+  template < class G >
+  inline bool DGFBaseFactory< G > ::
+    generateALU2dGrid( const ALUGridElementType eltype,
+                       std::istream &file,
+                       MPICommunicatorType communicator,
                        const std::string &filename )
   {
-  
+
     const int dimgrid = G::dimension;
-    const int dimworld = G::dimensionworld ; 
-    dgf_.element = (eltype == simplex) ? 
+    const int dimworld = G::dimensionworld ;
+    dgf_.element = (eltype == simplex) ?
         DuneGridFormatParser::Simplex : DuneGridFormatParser::Cube ;
     dgf_.dimgrid = dimgrid;
     dgf_.dimw = dimworld;
@@ -629,16 +629,16 @@ namespace Dune
     file.seekg( 0 );
     if( !isDGF )
       return false;
-   
+
     int rank = 0;
 #if HAVE_MPI
     MPI_Comm_rank( communicator, &rank );
 #endif
 
-    // set verbosity of factory only for rank = 0 
+    // set verbosity of factory only for rank = 0
   //  factory_.setVerbosity( (rank == 0) );
 
-    // only print warnings of ALU2dGridParameterBlock on rank = 0 
+    // only print warnings of ALU2dGridParameterBlock on rank = 0
     dgf::ALU2dGridParameterBlock parameter( file, (rank == 0) );
 
   //  factory_.setTolerance( parameter.tolerance() );
@@ -648,21 +648,21 @@ namespace Dune
 
 
     for( int n = 0; n < dgf_.nofvtx; ++n )
-    { 
+    {
       FieldVector< double, dimworld > pos;
       for( int i = 0; i < dimworld; ++i )
         pos[ i ] = dgf_.vtx[ n ][ i ];
-      factory_.insertVertex( pos );  
+      factory_.insertVertex( pos );
     }
 
-    GeometryType elementType( (eltype == simplex) ? 
-                               GeometryType::simplex : 
+    GeometryType elementType( (eltype == simplex) ?
+                               GeometryType::simplex :
                                GeometryType::cube, dimgrid );
 
     const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
     for( int n = 0; n < dgf_.nofelements; ++n )
     {
-      
+
 
       factory_.insertElement( elementType, dgf_.elements[n] );
       for( int face = 0; face <nFaces; ++face )
@@ -675,10 +675,10 @@ namespace Dune
         if( it != dgf_.facemap.end() )
           factory_.insertBoundary( n, face, it->second.first );
       }
-    }      
-      
+    }
 
-     
+
+
 
     dgf::ProjectionBlock projectionBlock( file, dimworld );
     const DuneBoundaryProjection< dimworld > *projection
@@ -688,8 +688,8 @@ namespace Dune
     const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
     for( size_t i = 0; i < numBoundaryProjections; ++i )
     {
-      GeometryType type( (eltype == simplex) ? 
-                         GeometryType::simplex : 
+      GeometryType type( (eltype == simplex) ?
+                         GeometryType::simplex :
                          GeometryType::cube, dimgrid-1 );
       const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
       const DuneBoundaryProjection< dimworld > *projection
@@ -718,12 +718,12 @@ namespace Dune
 
     if ( ! parameter.dumpFileName().empty() && (rank == 0) )
       grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
-    else 
+    else
       grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
     return true;
   }
 
-  template <int dimw, ALUGridElementType eltype, 
+  template <int dimw, ALUGridElementType eltype,
             ALUGridRefinementType refinementtype, class Comm >
   inline bool DGFGridFactory< ALUGrid< 2, dimw, eltype, refinementtype, Comm > >
     ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )

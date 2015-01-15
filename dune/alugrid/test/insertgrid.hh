@@ -1,7 +1,7 @@
 #ifndef ALUGRID_INSERTGRID_HH
 #define ALUGRID_INSERTGRID_HH
 
-// include serial part of ALUGrid 
+// include serial part of ALUGrid
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
@@ -13,7 +13,7 @@
 #include "../../../utils/convert-macrogrid/dgfparser.hh"
 
 
-void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid ) 
+void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
 {
   double extraPoint[ 3] = {3,3,3};
 
@@ -25,7 +25,7 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
     mgb.InsertUniqueVertex( extraPoint[0], extraPoint[1], extraPoint[2], 0 );
 
   const int nVx = dgf.numVertices();
-  for( int i=0; i<nVx; ++i ) 
+  for( int i=0; i<nVx; ++i )
   {
     if( !dgf.isCubeGrid() )
       mgb.InsertUniqueVertex( dgf.vertex( i )[0], dgf.vertex( i )[1], 0, i+1 );
@@ -52,25 +52,25 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
         element[ 5 ] = 2*dgf.element( el )[ 1 ]+1;
         element[ 6 ] = 2*dgf.element( el )[ 3 ]+1;
         element[ 7 ] = 2*dgf.element( el )[ 2 ]+1;
-        
+
       mgb.InsertUniqueHexa( element );
     }
-    else 
+    else
     {
      // typedef Dune::ElementTopologyMapping< Dune::tetra > ElementTopologyMappingType;
       int element[ 4 ];
-      //element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex 
+      //element[ ElementTopologyMappingType::dune2aluVertex( 0 ) ] = 0; // the fake vertex
       //const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
       element[ 0 ] = 0;
       element[ 1 ] = dgf.element( el )[ 0 ]+1;
       element[ 3 ] = dgf.element( el )[ 1 ]+1;
       element[ 2 ] = dgf.element( el )[ 2 ]+1;
-      
+
       mgb.InsertUniqueTetra( element, (el % 2) );
     }
   }
 
-  // TODO insert boundary faces 
+  // TODO insert boundary faces
 }
 
 #endif

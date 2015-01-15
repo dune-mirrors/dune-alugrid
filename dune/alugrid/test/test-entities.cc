@@ -1,7 +1,7 @@
 //***********************************************************************
 //
-//  test geometry implementation of ALUGrid. 
-//  Author: Robert Kloefkorn 
+//  test geometry implementation of ALUGrid.
+//  Author: Robert Kloefkorn
 //
 //***********************************************************************
 #include <config.h>
@@ -10,7 +10,7 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 
-// include serial part of ALUGrid 
+// include serial part of ALUGrid
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/common/objectfactory.hh>
@@ -38,8 +38,8 @@ typedef ALUGrid::Gitter::vertex_STI    HVertexType;  // Interface Element
 typedef ALUGrid::Gitter::hbndseg       HGhostType;
 
 
-template < class Grid > 
-void checkGeom( HElemType* item ) 
+template < class Grid >
+void checkGeom( HElemType* item )
 {
   typedef Dune :: ALU3dGridGeometry< Grid::dimension, Grid::dimensionworld, const Grid > GeometryImpl;
   typedef typename GeometryImpl :: IMPLElementType IMPLElementType ;
@@ -48,7 +48,7 @@ void checkGeom( HElemType* item )
   typedef typename GeometryImpl :: GEOVertexType     GEOVertexType;
   const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
 
-  GeometryImpl geometry ; 
+  GeometryImpl geometry ;
   geometry.buildGeom( elem );
   // perform geometry check
   checkGeometry( geometry );
@@ -68,9 +68,9 @@ void checkGeom( HElemType* item )
   }
 
   /*
-  // check edges 
+  // check edges
   const int nEdges = 6;
-  if( Grid::dimension > 2 ) 
+  if( Grid::dimension > 2 )
   {
     for( int i=0; i<nEdges; ++i )
     {
@@ -104,14 +104,14 @@ void printGeometry(const GeometryType geo)
   for(int i=0; i<geo.corners(); ++i)
   {
     std::cout << " corner " << i << " ";
-    std::cout << "{" << geo.corner(i) << "}"; 
+    std::cout << "{" << geo.corner(i) << "}";
     std::cout << std::endl;
   }
   std::cout << "} \n";
 }
 
-template < class Grid > 
-void checkEntity( HElemType* item ) 
+template < class Grid >
+void checkEntity( HElemType* item )
 {
   // call geometry check
   // checkGeom< Grid >( item );
@@ -123,48 +123,48 @@ void checkEntity( HElemType* item )
 
   std::string name;
   Grid grid( name, Dune::ALUGridNoComm(), nullptr, nullptr, Dune::nonconforming );
-  
+
   const int dim = Grid::dimension;
 
-  EntityImpl entity( grid.factory(), item->level() ); 
+  EntityImpl entity( grid.factory(), item->level() );
   entity.setElement( elem );
 
   checkGeometry( entity.geometry() );
   printGeometry( entity.geometry() );
 
   const int faces = entity.subEntities( 1 );
-  for( int i=0; i<faces; ++i ) 
+  for( int i=0; i<faces; ++i )
     {
       std::cout << "SubFace: " << i << std::endl;
-      checkGeometry( entity.template subEntity<1>( i )->geometry() ); 
+      checkGeometry( entity.template subEntity<1>( i )->geometry() );
       printGeometry( entity.template subEntity<1>( i )->geometry() );
       std::cout << "face index: " << entity.template getSubIndex<1>( i ) << std::endl;
-      //std::cout << "face index: " << entity.subIndex( i, 1) << std::endl; 
+      //std::cout << "face index: " << entity.subIndex( i, 1) << std::endl;
     }
 
 
   const int vertices = entity.subEntities( dim );
-    for( int i=0; i<vertices; ++i ) 
+    for( int i=0; i<vertices; ++i )
     {
       std::cout << "SubVertex: " << i << std::endl;
-      checkGeometry( entity.template subEntity<dim>( i )->geometry() ); 
-      printGeometry( entity.template subEntity<dim>( i )->geometry() ); 
+      checkGeometry( entity.template subEntity<dim>( i )->geometry() );
+      printGeometry( entity.template subEntity<dim>( i )->geometry() );
       std::cout << "vertex index: " << entity.template getSubIndex<dim>( i ) << std::endl;
-      //std::cout << "vertex index: " << entity.subIndex( i, 2) << std::endl; 
+      //std::cout << "vertex index: " << entity.subIndex( i, 2) << std::endl;
     }
 }
 
-template <class Gitter> 
-void checkGeometries( Gitter& grid ) 
+template <class Gitter>
+void checkGeometries( Gitter& grid )
 {
-  // get LeafIterator which iterates over all leaf elements of the grid 
+  // get LeafIterator which iterates over all leaf elements of the grid
   ALUGrid::LeafIterator < HElemType > w (grid) ;
   int numberofelement = 0;
   for (w->first () ; ! w->done () ; w->next ())
   {
     HElemType* item =  &w->item ();
-    // mark element for refinement 
-    std::cout<< "ELEMENT: " << numberofelement << std::endl;   
+    // mark element for refinement
+    std::cout<< "ELEMENT: " << numberofelement << std::endl;
     if( item->type() == ALUGrid::tetra )
     {
       {
@@ -176,7 +176,7 @@ void checkGeometries( Gitter& grid )
         checkEntity< Grid >( item );
       }
     }
-    else 
+    else
     {
       {
         typedef Dune::ALU3dGrid< 2, 2, Dune::hexa, Dune::ALUGridNoComm > Grid ;
@@ -191,21 +191,21 @@ void checkGeometries( Gitter& grid )
   }
 }
 
-// exmaple on read grid, refine global and print again 
-int main (int argc, char ** argv, const char ** envp) 
+// exmaple on read grid, refine global and print again
+int main (int argc, char ** argv, const char ** envp)
 {
 #if HAVE_MPI
-  //Dune :: MPIHelper& mpi = 
+  //Dune :: MPIHelper& mpi =
   Dune :: MPIHelper :: instance(argc,argv);
 #endif
   std::string filename;
 
-  if (argc < 2) 
+  if (argc < 2)
   {
     filename = "reference.tetra";
     std::cout << "usage: "<< argv[0] << " <macro grid> <opt: maxlevel> <opt: global refinement>\n";
   }
-  else 
+  else
   {
     filename = argv[ 1 ];
   }
@@ -215,7 +215,7 @@ int main (int argc, char ** argv, const char ** envp)
   std::ifstream input( filename );
   if( DGFParser::isDuneGridFormat( input ) )
   {
-    DGFParser dgf( Dune::cube, 2, 2 ); 
+    DGFParser dgf( Dune::cube, 2, 2 );
     if( !dgf.readDuneGrid( input, 2, 2 ) )
     {
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
@@ -224,7 +224,7 @@ int main (int argc, char ** argv, const char ** envp)
     gridPtr = new ALUGrid::GitterDuneImpl();
     insertGrid( dgf, gridPtr );
   }
-  else 
+  else
   {
     gridPtr = new ALUGrid::GitterDuneImpl(filename.c_str());
   }
