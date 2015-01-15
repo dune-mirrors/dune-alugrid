@@ -18,7 +18,7 @@ namespace Dune
 {
 
   // Forward declarations
-  template<int cd, int dim, class GridImp> 
+  template<int cd, int dim, class GridImp>
   class ALU3dGridEntity;
   template<int cd, class GridImp >
   class ALU3dGridEntityPointer;
@@ -33,36 +33,36 @@ namespace Dune
   class ALU3dGridIntersectionIterator;
 
   template <int cdim>
-  class MyALUGridGeometryImplementation 
+  class MyALUGridGeometryImplementation
   {
-  public:  
+  public:
     typedef FieldVector<alu3d_ctype, cdim> CoordinateVectorType;
 
     static const signed char invalid      = -1; // means geometry is not meaningful
     static const signed char updated      =  0; // means the point values have been set
-    static const signed char buildmapping =  1; // means updated and mapping was build 
+    static const signed char buildmapping =  1; // means updated and mapping was build
 
-    template <int dim, int corners, class Mapping> 
+    template <int dim, int corners, class Mapping>
     class GeometryImplBase
     {
     private:
       // prohibited due to reference counting
       GeometryImplBase( const GeometryImplBase& );
 
-    protected:  
-      //! number of corners 
+    protected:
+      //! number of corners
       static const int corners_ = corners ;
 
-      //! the vertex coordinates 
+      //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners , cdim>  CoordinateMatrixType;
 
-      template <int dummy, int dimused> 
+      template <int dummy, int dimused>
       struct CoordTypeExtractorType
       {
         typedef CoordinateMatrixType Type;
       };
 
-      template <int dummy> 
+      template <int dummy>
       struct CoordTypeExtractorType< dummy, 3 >
       {
         typedef CoordinateMatrixType* Type;
@@ -70,26 +70,26 @@ namespace Dune
 
       typedef typename CoordTypeExtractorType< 0, dim > :: Type CoordinateStorageType ;
 
-      //! the type of the mapping 
+      //! the type of the mapping
       typedef Mapping     MappingType;
 
-      //! to coordinates 
+      //! to coordinates
       CoordinateStorageType coord_ ;
-     
-      //! the mapping 
+
+      //! the mapping
       MappingType map_;
 
-      //! volume of element 
+      //! volume of element
       double volume_ ;
 
-      //! the reference counter 
+      //! the reference counter
       mutable unsigned int refCount_;
 
-      //! the status (see different status above) 
+      //! the status (see different status above)
       signed char status_ ;
-    public:  
-      //! default constructor 
-      GeometryImplBase() 
+    public:
+      //! default constructor
+      GeometryImplBase()
         : coord_( 0 ),
           map_(),
           volume_( 1.0 )
@@ -97,95 +97,95 @@ namespace Dune
         reset();
       }
 
-      //! reset status and reference count 
-      void reset() 
+      //! reset status and reference count
+      void reset()
       {
-        // reset reference counter 
+        // reset reference counter
         refCount_ = 1;
-        // reset status 
+        // reset status
         status_   = invalid ;
       }
 
-      //! increase reference count 
+      //! increase reference count
       void operator ++ () { ++ refCount_; }
 
-      //! decrease reference count 
+      //! decrease reference count
       void operator -- () { alugrid_assert ( refCount_ > 0 ); --refCount_; }
 
-      //! return true if object has no references anymore 
+      //! return true if object has no references anymore
       bool operator ! () const { return refCount_ == 0; }
 
-      //! return true if there exists more then on reference 
+      //! return true if there exists more then on reference
       bool stillUsed () const { return refCount_ > 1 ; }
 
-      // copy coordinate vector from field vector or alu3d_ctype[cdim] 
+      // copy coordinate vector from field vector or alu3d_ctype[cdim]
       template <class CoordPtrType>
       static inline void copy(const CoordPtrType& p,
                               CoordinateVectorType& c)
-      { 
+      {
         // we have either 2d or 3d vectors
         alugrid_assert( cdim > 1 );
         c[0] = p[0];
         c[1] = p[1];
-        if( cdim > 2 ) 
+        if( cdim > 2 )
           c[2] = p[2];
       }
 
       template <class CoordPtrType>
-      void update(const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType& ) const 
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
-      } 
+      }
 
       template <class CoordPtrType>
-      void update(const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType& ) const 
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
-      } 
+      }
 
       template <class CoordPtrType>
-      void update(const CoordPtrType&, 
-                  const CoordPtrType&, 
-                  const CoordPtrType& ) const 
+      void update(const CoordPtrType&,
+                  const CoordPtrType&,
+                  const CoordPtrType& ) const
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
-      } 
+      }
 
       template <class CoordPtrType>
-      void update(const CoordPtrType&, 
-                  const CoordPtrType& ) const 
+      void update(const CoordPtrType&,
+                  const CoordPtrType& ) const
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
-      } 
-      
+      }
+
       template <class CoordPtrType>
-      void update(const CoordPtrType& ) const 
+      void update(const CoordPtrType& ) const
       {
         DUNE_THROW(InvalidStateException,"This method should not be called!");
-      } 
+      }
 
       // update geometry in father coordinates (default impl)
       template <class GeometryImp>
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
       {
-        // this version is only for the 2d elements 
+        // this version is only for the 2d elements
         alugrid_assert( dim == 2 );
 
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
-          // calculate coordinate 
+          // calculate coordinate
           coord_[i] = fatherGeom.local( myGeom.corner( i ) );
 
           // to avoid rounding errors
@@ -198,28 +198,28 @@ namespace Dune
         status_ = updated ;
       }
 
-      // set status to invalid 
+      // set status to invalid
       void invalidate () { status_ = invalid ; }
 
-      // return true if geometry is valid 
+      // return true if geometry is valid
       bool valid () const { return status_ != invalid ; }
 
-      // set volume 
+      // set volume
       void setVolume( const double volume ) { volume_ = volume ; }
 
-      // return volume 
+      // return volume
       double volume() const { return volume_; }
     };
 
-    //! general type of geometry implementation 
-    template <int dummy, int dim, 
+    //! general type of geometry implementation
+    template <int dummy, int dim,
               ALU3dGridElementType eltype> class GeometryImpl;
-  public:  
-    // geometry implementation for edges and vertices 
-    template <int dummy, int dim, ALU3dGridElementType eltype> 
+  public:
+    // geometry implementation for edges and vertices
+    template <int dummy, int dim, ALU3dGridElementType eltype>
     class GeometryImpl : public GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> >
     {
-    protected:  
+    protected:
       typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
       using BaseType :: corners_ ;
@@ -233,7 +233,7 @@ namespace Dune
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      // return coordinate vector 
+      // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
         alugrid_assert ( valid() );
@@ -241,8 +241,8 @@ namespace Dune
         return coord_[i];
       }
 
-      inline MappingType& mapping() 
-      { 
+      inline MappingType& mapping()
+      {
         alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
@@ -251,23 +251,23 @@ namespace Dune
         return map_;
       }
 
-      // update vertex 
+      // update vertex
       template <class CoordPtrType>
       inline void update(const CoordPtrType& p0)
       {
         alugrid_assert ( corners_ == 1 );
         copy( p0, coord_[0] );
-        // we need to update the mapping 
+        // we need to update the mapping
         status_ = updated ;
       }
     };
 
-    // geometry implementation for edges and vertices 
-    template <int dummy, ALU3dGridElementType eltype> 
-    class GeometryImpl<dummy,1,eltype> 
+    // geometry implementation for edges and vertices
+    template <int dummy, ALU3dGridElementType eltype>
+    class GeometryImpl<dummy,1,eltype>
       : public GeometryImplBase< 1, 2, LinearMapping<cdim, 1> >
     {
-    protected:  
+    protected:
       enum { dim = 1 };
       typedef GeometryImplBase< dim, dim+1, LinearMapping<cdim, dim> > BaseType;
 
@@ -282,7 +282,7 @@ namespace Dune
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      // return coordinate vector 
+      // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
         alugrid_assert ( valid() );
@@ -290,8 +290,8 @@ namespace Dune
         return coord_[i];
       }
 
-      inline MappingType& mapping() 
-      { 
+      inline MappingType& mapping()
+      {
         alugrid_assert ( valid() );
         if( status_ == buildmapping ) return map_;
 
@@ -300,7 +300,7 @@ namespace Dune
         return map_;
       }
 
-      // update edge  
+      // update edge
       template <class CoordPtrType>
       inline void update(const CoordPtrType& p0,
                          const CoordPtrType& p1)
@@ -314,11 +314,11 @@ namespace Dune
 
     // geom impl for simplex faces (triangles)
     template <int dummy>
-    class GeometryImpl<dummy, 2, tetra> 
+    class GeometryImpl<dummy, 2, tetra>
       : public GeometryImplBase< 2, 3, LinearMapping<cdim, 2> >
     {
-    protected:  
-      // dim = 2, corners = 3 
+    protected:
+      // dim = 2, corners = 3
       typedef GeometryImplBase< 2, 3, LinearMapping<cdim, 2> > BaseType;
 
       using BaseType :: corners_ ;
@@ -332,7 +332,7 @@ namespace Dune
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      // return coordinate vector 
+      // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
         alugrid_assert ( valid() );
@@ -340,7 +340,7 @@ namespace Dune
         return coord_[i];
       }
 
-      // update geometry coordinates 
+      // update geometry coordinates
       template <class CoordPtrType>
       inline void update(const CoordPtrType& p0,
                          const CoordPtrType& p1,
@@ -366,17 +366,17 @@ namespace Dune
 
     ///////////////////////////////////////////////////////////////
     //
-    //  hexa specializations 
+    //  hexa specializations
     //
     ///////////////////////////////////////////////////////////////
 
     // geom impl for quadrilaterals (also hexa faces)
     template <int dummy>
-    class GeometryImpl<dummy, 2, hexa> 
-      : public GeometryImplBase< 2, 4, BilinearMapping< cdim > > 
+    class GeometryImpl<dummy, 2, hexa>
+      : public GeometryImplBase< 2, 4, BilinearMapping< cdim > >
     {
-    protected:  
-      // dim = 2, corners = 4 
+    protected:
+      // dim = 2, corners = 4
       typedef GeometryImplBase< 2, 4, BilinearMapping< cdim > > BaseType;
 
       using BaseType :: corners_ ;
@@ -390,7 +390,7 @@ namespace Dune
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      // return coordinate vector 
+      // return coordinate vector
       inline const CoordinateVectorType& operator [] (const int i) const
       {
         alugrid_assert ( valid() );
@@ -398,7 +398,7 @@ namespace Dune
         return coord_[i];
       }
 
-      // update geometry coordinates 
+      // update geometry coordinates
       template <class CoordPtrType>
       inline void update(const CoordPtrType& p0,
                   const CoordPtrType& p1,
@@ -424,12 +424,12 @@ namespace Dune
       }
     };
 
-    // geometry impl for hexahedrons 
+    // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, hexa> 
+    class GeometryImpl<dummy,3, hexa>
       : public GeometryImplBase< 3, 8, TrilinearMapping >
     {
-    protected:  
+    protected:
       // dim = 3, corners = 8
       typedef GeometryImplBase< 3, 8, TrilinearMapping > BaseType;
 
@@ -442,15 +442,15 @@ namespace Dune
       typedef typename BaseType :: MappingType  MappingType ;
       typedef typename BaseType :: CoordinateMatrixType CoordinateMatrixType;
 
-      typedef alu3d_ctype CoordPtrType[cdim]; 
+      typedef alu3d_ctype CoordPtrType[cdim];
 
-      // coordinate pointer vector  
+      // coordinate pointer vector
       const alu3d_ctype* coordPtr_[ corners_ ];
     public:
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      //! constructor creating geo impl 
+      //! constructor creating geo impl
       GeometryImpl() : BaseType()
       {
         // set initialize coord pointers
@@ -458,29 +458,29 @@ namespace Dune
           coordPtr_[ i ] = 0;
       }
 
-      // desctructor 
+      // desctructor
       ~GeometryImpl()
       {
         if( coord_ ) delete coord_;
-      } 
+      }
 
-      const alu3d_ctype* point( const int i ) const 
+      const alu3d_ctype* point( const int i ) const
       {
         alugrid_assert ( valid() );
         alugrid_assert ( i>=0 && i<corners_ );
         alugrid_assert ( coordPtr_[i] );
         return coordPtr_[ i ];
       }
-        
-      // return coordinates 
+
+      // return coordinates
       inline CoordinateVectorType operator [] (const int i) const
-      { 
+      {
         CoordinateVectorType coord ;
         copy( point( i ), coord );
         return coord ;
       }
 
-      // update geometry coordinates 
+      // update geometry coordinates
       inline void update(const CoordPtrType& p0,
                          const CoordPtrType& p1,
                          const CoordPtrType& p2,
@@ -501,7 +501,7 @@ namespace Dune
         status_ = updated;
       }
 
-      // update geometry in father coordinates 
+      // update geometry in father coordinates
       template <class GeometryImp>
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
@@ -515,10 +515,10 @@ namespace Dune
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
-          // calculate coordinate 
+          // calculate coordinate
           coord[i] = fatherGeom.local( myGeom.corner( i ) );
 
-          // set pointer 
+          // set pointer
           coordPtr_[i] = (&(coord[i][0]));
 
           // to avoid rounding errors
@@ -544,17 +544,17 @@ namespace Dune
         return map_;
       }
 
-      // set status to invalid 
+      // set status to invalid
       void invalidate () { status_ = invalid ; }
 
-      // return true if geometry is valid 
+      // return true if geometry is valid
       bool valid () const { return status_ != invalid ; }
     };
 
 
-    // geometry impl for hexahedrons 
+    // geometry impl for hexahedrons
     template <int dummy>
-    class GeometryImpl<dummy,3, tetra> 
+    class GeometryImpl<dummy,3, tetra>
       : public GeometryImplBase< 3, 4, LinearMapping<cdim, cdim> >
     {
       // dim = 3, corners = 8
@@ -569,27 +569,27 @@ namespace Dune
       typedef typename BaseType :: MappingType  MappingType ;
       typedef typename BaseType :: CoordinateMatrixType CoordinateMatrixType;
 
-      typedef alu3d_ctype CoordPtrType[cdim]; 
+      typedef alu3d_ctype CoordPtrType[cdim];
 
-      // coordinate pointer vector  
+      // coordinate pointer vector
       const alu3d_ctype* coordPtr_[ corners_ ];
     public:
       using BaseType :: update ;
       using BaseType :: valid ;
 
-      // default constructor 
-      GeometryImpl() : BaseType() 
+      // default constructor
+      GeometryImpl() : BaseType()
       {
         // set initialize coord pointers
         for( int i=0; i<corners_; ++i )
           coordPtr_[ i ] = 0;
       }
 
-      // destructor  
+      // destructor
       ~GeometryImpl()
       {
         if( coord_ ) delete coord_;
-      } 
+      }
 
       const alu3d_ctype* point( const int i ) const
       {
@@ -598,16 +598,16 @@ namespace Dune
         alugrid_assert ( coordPtr_[ i ] );
         return coordPtr_[ i ];
       }
-        
-      // return coordinate vector 
+
+      // return coordinate vector
       inline CoordinateVectorType operator [] (const int i) const
-      { 
+      {
         CoordinateVectorType coord ;
         copy( point( i ), coord );
         return coord ;
       }
 
-      // update geometry coordinates 
+      // update geometry coordinates
       inline void update(const CoordPtrType& p0,
                          const CoordPtrType& p1,
                          const CoordPtrType& p2,
@@ -620,7 +620,7 @@ namespace Dune
         status_ = updated;
       }
 
-      // update geometry in father coordinates 
+      // update geometry in father coordinates
       template <class GeometryImp>
       inline void updateInFather(const GeometryImp &fatherGeom ,
                           const GeometryImp & myGeom)
@@ -634,10 +634,10 @@ namespace Dune
         // compute the local coordinates in father refelem
         for(int i=0; i < myGeom.corners() ; ++i)
         {
-          // calculate coordinate 
+          // calculate coordinate
           coord[i] = fatherGeom.local( myGeom.corner( i ) );
 
-          // set pointer 
+          // set pointer
           coordPtr_[i] = (&(coord[i][0]));
 
           // to avoid rounding errors
@@ -665,8 +665,8 @@ namespace Dune
   }; // end of class ALUGridGeometryImplementation
 
   template <int mydim, int cdim, class GridImp>
-  class ALU3dGridGeometry : 
-    public GeometryDefaultImplementation<mydim, cdim, GridImp, ALU3dGridGeometry> 
+  class ALU3dGridGeometry :
+    public GeometryDefaultImplementation<mydim, cdim, GridImp, ALU3dGridGeometry>
   {
     static const ALU3dGridElementType elementType = GridImp::elementType;
 
@@ -675,24 +675,24 @@ namespace Dune
     //friend class ALU3dGridIntersectionIterator<GridImp>;
     typedef ALU3dImplTraits< elementType, Comm > ALU3dImplTraitsType ;
 
-  public:  
+  public:
     typedef typename ALU3dImplTraitsType::IMPLElementType IMPLElementType;
     typedef typename ALU3dImplTraitsType::GEOFaceType     GEOFaceType;
     typedef typename ALU3dImplTraitsType::GEOEdgeType     GEOEdgeType;
     typedef typename ALU3dImplTraitsType::GEOVertexType   GEOVertexType;
 
-    // interface types 
+    // interface types
     typedef typename ALU3dImplTraitsType::HFaceType   HFaceType;
-    typedef typename ALU3dImplTraitsType::HEdgeType   HEdgeType; 
-    typedef typename ALU3dImplTraitsType::VertexType  VertexType; 
+    typedef typename ALU3dImplTraitsType::HEdgeType   HEdgeType;
+    typedef typename ALU3dImplTraitsType::VertexType  VertexType;
 
 
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
 
     enum { corners_      = (elementType == hexa) ? StaticPower<2,(mydim> -1) ? mydim : 0 >::power : mydim+1 };
-      
-    // type of specialized geometry implementation 
+
+    // type of specialized geometry implementation
     typedef typename MyALUGridGeometryImplementation<cdim> ::
       template GeometryImpl<0, mydim, elementType > GeometryImplType;
 
@@ -711,127 +711,127 @@ namespace Dune
     //! type of jacobian transposed
     typedef FieldMatrix< ctype, mydim, cdim > JacobianTransposed;
 
-    // type of coordinate matrix for faces 
-    typedef FieldMatrix<ctype, 
+    // type of coordinate matrix for faces
+    typedef FieldMatrix<ctype,
             GridImp::dimension == 3 ? EntityCount< elementType > :: numVerticesPerFace : 2 , cdim> FaceCoordinatesType;
 
-    //! for makeRefGeometry == true a Geometry with the coordinates of the 
-    //! reference element is made 
+    //! for makeRefGeometry == true a Geometry with the coordinates of the
+    //! reference element is made
     ALU3dGridGeometry();
 
-    //! copy constructor copying pointer and increasing reference count 
+    //! copy constructor copying pointer and increasing reference count
     ALU3dGridGeometry( const ALU3dGridGeometry& );
 
-    //! copy constructor copying pointer and increasing reference count 
+    //! copy constructor copying pointer and increasing reference count
     ALU3dGridGeometry& operator = ( const ALU3dGridGeometry& );
 
-    //! destructor decreasing reference count and freeing object 
+    //! destructor decreasing reference count and freeing object
     ~ALU3dGridGeometry( );
 
     //! return the element type identifier
-    //! line , triangle or tetrahedron, depends on dim 
+    //! line , triangle or tetrahedron, depends on dim
     GeometryType type () const;
 
     //! return the number of corners of this element. Corners are numbered 0..n-1
     int corners () const;
-  
-    //! access to coordinates of corners. Index is the number of the corner 
+
+    //! access to coordinates of corners. Index is the number of the corner
     GlobalCoordinate corner (int i) const;
 
-    //! maps a local coordinate within reference element to 
-    //! global coordinate in element 
+    //! maps a local coordinate within reference element to
+    //! global coordinate in element
     GlobalCoordinate global (const LocalCoordinate& local) const;
-  
-    //! maps a global coordinate within the element to a 
+
+    //! maps a global coordinate within the element to a
     //! local coordinate in its reference element
     LocalCoordinate local (const GlobalCoordinate& global) const;
 
-    //! A(l) , see grid.hh 
+    //! A(l) , see grid.hh
     ctype integrationElement (const LocalCoordinate& local) const;
 
     //! can only be called for dim=dimworld! (Trivially true, since there is no
     //! other specialization...)
     const JacobianInverseTransposed &jacobianInverseTransposed (const LocalCoordinate& local) const;
 
-    //! jacobian transposed 
+    //! jacobian transposed
     const JacobianTransposed& jacobianTransposed (const LocalCoordinate& local) const;
 
-    //! returns true if mapping is affine 
+    //! returns true if mapping is affine
     inline bool affine () const;
 
-    //! returns volume of geometry 
+    //! returns volume of geometry
     ctype volume () const;
 
     //***********************************************************************
     //!  Methods that not belong to the Interface, but have to be public
     //***********************************************************************
-    //! generate the geometry out of a given ALU3dGridElement  
+    //! generate the geometry out of a given ALU3dGridElement
     bool buildGeom(const IMPLElementType & item);
     bool buildGeom(const HFaceType & item, int twist, int faceNum);
     bool buildGeom(const HEdgeType & item, int twist, int);
     bool buildGeom(const VertexType & item, int twist, int);
- 
-    // this method is used by the intersection iterator 
+
+    // this method is used by the intersection iterator
     bool buildGeom(const FaceCoordinatesType& coords);
 
-    // this method is used by the intersection iterator 
+    // this method is used by the intersection iterator
     template <class coord_t>
     bool buildGeom(const coord_t& p0,
                    const coord_t& p1,
                    const coord_t& p2,
                    const coord_t& p3);
 
-    // this method is used by the intersection iterator 
+    // this method is used by the intersection iterator
     template <class coord_t>
     bool buildGeom(const coord_t& p0,
                    const coord_t& p1,
                    const coord_t& p2);
-                   
-    // this method is used by the intersection iterator 
+
+    // this method is used by the intersection iterator
     template <class coord_t>
     bool buildGeom(const coord_t& p0,
-                   const coord_t& p1); 
+                   const coord_t& p1);
 
-    //! build geometry of local coordinates relative to father 
+    //! build geometry of local coordinates relative to father
     template <class GeometryType>
     bool buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom);
-        
+
     //! print internal data
     //! no interface method
     void print (std::ostream& ss) const;
 
-    //! invalidate geometry implementation to avoid errors 
+    //! invalidate geometry implementation to avoid errors
     void invalidate () ;
 
-    //! invalidate geometry implementation to avoid errors 
+    //! invalidate geometry implementation to avoid errors
     bool valid () const ;
 
-    // type of object provider 
+    // type of object provider
     typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
 
-    //! return storage provider for geometry objects 
-    static GeometryProviderType& geoProvider() 
+    //! return storage provider for geometry objects
+    static GeometryProviderType& geoProvider()
     {
       static GeometryProviderType storage;
       return storage;
     }
 
   protected:
-    //! assign pointer 
+    //! assign pointer
     void assign( const ALU3dGridGeometry& other );
     //! remove pointer object
     void removeObj();
     //! get a new pointer object
     void getObject();
 
-    // return reference to geometry implementation 
-    GeometryImplType& geoImpl() const 
-    { 
-      alugrid_assert ( geoImpl_ ); 
+    // return reference to geometry implementation
+    GeometryImplType& geoImpl() const
+    {
+      alugrid_assert ( geoImpl_ );
       return *geoImpl_;
     }
 
-    // implementation of the coordinates and mapping 
+    // implementation of the coordinates and mapping
     GeometryImplType* geoImpl_;
   };
 

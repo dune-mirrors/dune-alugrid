@@ -1,6 +1,6 @@
-// (c) Robert Kloefkorn 2010 
+// (c) Robert Kloefkorn 2010
 #include <config.h>
- 
+
 #include "gitter_hexa_top_pll.h"
 #include "../serial/gitter_hexa_top.cc"
 
@@ -13,12 +13,12 @@ namespace ALUGrid
   {
     if(gpair.first)
     {
-      _ghostPair = gpair; 
+      _ghostPair = gpair;
       alugrid_assert ( _ghostPair.first );
       // copy indices from internal boundry to myhface(.) of ghost
       _ghostPair.first->setIndicesAndBndId( *this->myhface(0), _ghostPair.second );
     }
-    else 
+    else
     {
       _ghostPair.first  =  0;
       _ghostPair.second = -1;
@@ -26,7 +26,7 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX >
-  void Hbnd4PllInternal < A, X, MX >::HbndPll:: 
+  void Hbnd4PllInternal < A, X, MX >::HbndPll::
   splitGhost ( GhostChildrenInfo_t & info )
   {
     if(_ghostPair.first)
@@ -34,12 +34,12 @@ namespace ALUGrid
       typedef typename Gitter::Geometric::hexa_GEO  hexa_GEO;
       typedef typename Gitter::Geometric::hface4_GEO hface4_GEO;
 
-      hexa_GEO & ghost = static_cast<hexa_GEO &> (*(_ghostPair.first)); 
+      hexa_GEO & ghost = static_cast<hexa_GEO &> (*(_ghostPair.first));
       if(!ghost.down())
       {
         ghost.tagForGlobalRefinement();
         ghost.refine();
-      } 
+      }
 
       int gFaceNum = _ghostPair.second;
       alugrid_assert ( gFaceNum >= 0 );
@@ -48,11 +48,11 @@ namespace ALUGrid
       hface4_GEO * face = ghost.myhface( gFaceNum );
       alugrid_assert ( face );
 
-      int count = 0; 
+      int count = 0;
       for(face = face->down(); face; face = face->next() )
       {
         alugrid_assert (face);
-        hexa_GEO * ghch = 0; 
+        hexa_GEO * ghch = 0;
 
         typedef std::pair< Gitter::Geometric::hasFace4 *, int > neigh_t;
         neigh_t neighbour = face->nb.front();
@@ -73,41 +73,41 @@ namespace ALUGrid
         alugrid_assert (ghch);
         alugrid_assert (ghch->up() == &ghost );
 
-        // set element pointer and local face number 
+        // set element pointer and local face number
         info.setGhostPair( ghostpair_STI( ghch, neighbour.second ) , count );
 
         ++count;
       }
     }
   }
-   
+
   template < class A, class X, class MX >
   void Hbnd4PllInternal < A, X, MX >::HbndPll ::
   removeDescendents( helement_STI & elem )
   {
-    elem.resetRefinementRequest(); 
+    elem.resetRefinementRequest();
 
-    // check all children first 
+    // check all children first
     for( helement_STI * child = elem.down(); child; child = child->next() )
-    { 
-      // if child is not leaf coarse childs first 
+    {
+      // if child is not leaf coarse childs first
       if( ! child->leaf() )
         removeDescendents( *child );
-      
-      // if something went wrong, return ghosts are removed later 
+
+      // if something went wrong, return ghosts are removed later
       if( ! child->leaf () ) return;
-      
-      // mark child for coarsening 
+
+      // mark child for coarsening
       child->tagForGlobalCoarsening();
-    } 
-      
-    // if element is not already leaf call coarse 
+    }
+
+    // if element is not already leaf call coarse
     if( ! elem.leaf () )
     {
       elem.coarse();
     }
   }
-   
+
   template < class A, class X, class MX >
   void Hbnd4PllInternal < A, X, MX >::HbndPll:: coarseGhost ()
   {
@@ -116,7 +116,7 @@ namespace ALUGrid
       helement_STI & ghost = (*_ghostPair.first);
       if( ghost.leaf() ) return;
 
-      // remove all descendents if possible 
+      // remove all descendents if possible
       removeDescendents( ghost );
     }
   }
@@ -138,12 +138,12 @@ namespace ALUGrid
     {
       int bfake;
       os.readObject (bfake);
-#ifdef ALUGRIDDEBUG 
+#ifdef ALUGRIDDEBUG
       Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
       alugrid_assert ( b == Gitter::hbndseg::closure );
 #endif
 
-      // read global graph vertex index 
+      // read global graph vertex index
       int ldbVertexIndex = -1;
       int master = -1;
       os.readObject( ldbVertexIndex );
@@ -155,19 +155,19 @@ namespace ALUGrid
       os.readObject (v[2]);
       os.readObject (v[3]);
 
-      int readPoint = 0; 
-      os.readObject( readPoint ); 
-      
-      // the following makes only sense if information has been transmitted 
-      if( readPoint != MacroGridMoverIF::POINTTRANSMITTED ) 
+      int readPoint = 0;
+      os.readObject( readPoint );
+
+      // the following makes only sense if information has been transmitted
+      if( readPoint != MacroGridMoverIF::POINTTRANSMITTED )
       {
         std::cerr << "ERROR (fatal): No point transmitted, building ghost cells impossible." << std::endl;
         abort();
       }
 
-      // create macro ghost cell     
+      // create macro ghost cell
       {
-        // create ghost info and read from stream 
+        // create ghost info and read from stream
         MacroGhostInfoHexa* ghInfo = new MacroGhostInfoHexa( os );
 
         myhface4_t * f = this->myhface(0);
@@ -184,13 +184,13 @@ namespace ALUGrid
   }
 
 
-  // template instantiation 
+  // template instantiation
   typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
   template class Hbnd4PllInternal < Hbnd4DefaultType ,
                                     BndsegPllBaseXClosure < Hbnd4DefaultType > ,
                                     BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >;
 
-  // from serial part with different template argument 
+  // from serial part with different template argument
   template class Hedge1Top< GitterBasisPll::ObjectsPll::Hedge1EmptyPll >;
   template class Hface4Top< GitterBasisPll::ObjectsPll::Hface4EmptyPll >;
   template class HexaTop< GitterBasisPll::ObjectsPll::HexaEmptyPll >;

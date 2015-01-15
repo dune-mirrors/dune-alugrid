@@ -1,14 +1,14 @@
 #ifndef DUNE_FEM_DG_RUNFILE_HH
 #define DUNE_FEM_DG_RUNFILE_HH
 
-#include <dune/common/timer.hh>        
+#include <dune/common/timer.hh>
 
 #include <dune/alugrid/impl/serial/myalloc.h>
 
 //#define PRINT_IDENTIFICATION_TIMES
 
-#ifdef PRINT_IDENTIFICATION_TIMES 
-namespace ALUGrid { 
+#ifdef PRINT_IDENTIFICATION_TIMES
+namespace ALUGrid {
   extern double identU2;
   extern double identU3;
   extern double identU4;
@@ -25,10 +25,10 @@ namespace Dune {
   class Diagnostics
   {
     typedef typename GridType :: Traits :: CollectiveCommunication CommunicatorType;
-    const CommunicatorType& comm_; 
+    const CommunicatorType& comm_;
     const std::string runFileName_;
-    const int writeDiagnostics_; // 0 don't, 1 only speedup file, 2 write all runfiles 
-                                 // 3 only write 0, others at end, 4 all files at end 
+    const int writeDiagnostics_; // 0 don't, 1 only speedup file, 2 write all runfiles
+                                 // 3 only write 0, others at end, 4 all files at end
     std::ostream* diagnosticsFile_;
 
     std::vector< double > times_ ;
@@ -42,9 +42,9 @@ namespace Dune {
       return (size_t (t * 1e3));
     }
 
-    void writeHeader(std::ostream& runfile) 
+    void writeHeader(std::ostream& runfile)
     {
-      // write header 
+      // write header
       runfile << "# Time          ";
       runfile << "   dt         ";
       runfile << "  Elements   ";
@@ -59,33 +59,33 @@ namespace Dune {
       runfile.flush();
     }
 
-    std::string runFileName(const int rank) const 
+    std::string runFileName(const int rank) const
     {
       std::stringstream runfile;
-      runfile << "./diagnostics." << rank; 
+      runfile << "./diagnostics." << rank;
       return runfile.str();
     }
 
-    std::ostream* createDiagnostics( const int rank, 
-                                     const int writeId, 
-                                     const bool newStart ) 
+    std::ostream* createDiagnostics( const int rank,
+                                     const int writeId,
+                                     const bool newStart )
     {
       // in case of no writing or only speedup table don't create runfile
       if( writeId <= 1 ) return 0;
 
       bool writeAtOnce = ( writeId > 2 );
-      // when writeId == 2 then only for rank 0 write file every time step 
+      // when writeId == 2 then only for rank 0 write file every time step
       // this is for monitoring issues
       if( rank == 0 && writeId == 3 ) writeAtOnce = false ;
 
-      if( writeAtOnce ) 
+      if( writeAtOnce )
       {
         return new std::stringstream();
       }
-      else 
+      else
       {
         std::ofstream* file = new std::ofstream( runFileName_.c_str(), ( newStart ) ? std::ios::out : std::ios::app );
-        if( ! file ) 
+        if( ! file )
         {
           std::cerr << "Couldn't open run file <"<<runFileName_<<">, ciao!" << std::endl;
           abort();
@@ -93,25 +93,25 @@ namespace Dune {
         return file;
       }
     }
-  public:  
+  public:
     Diagnostics( const CommunicatorType& comm, const int writeDiagnostics )
       : comm_( comm )
       , runFileName_( runFileName( comm_.rank() ) )
       , writeDiagnostics_( writeDiagnostics )
-      , diagnosticsFile_( createDiagnostics( comm_.rank(), writeDiagnostics_, false ) ) 
-      , times_() 
+      , diagnosticsFile_( createDiagnostics( comm_.rank(), writeDiagnostics_, false ) )
+      , times_()
       , elements_( 0.0 )
       , maxDofs_( 0.0 )
       , timesteps_( 0 )
     {
-      if( diagnosticsFile_ ) 
+      if( diagnosticsFile_ )
       {
         writeHeader( *diagnosticsFile_ );
       }
     }
 
-    //! destructor 
-    ~Diagnostics() 
+    //! destructor
+    ~Diagnostics()
     {
       delete diagnosticsFile_;
     }
@@ -119,11 +119,11 @@ namespace Dune {
 
   protected:
     template <class T>
-    void writeVectors(std::ostream& file, 
-                      const std::string& descr, 
+    void writeVectors(std::ostream& file,
+                      const std::string& descr,
                       const std::vector< T >& avgTimes,
                       const std::vector< T >& maxTimes,
-                      const std::vector< T >& minTimes ) const 
+                      const std::vector< T >& minTimes ) const
     {
       const size_t size = avgTimes.size();
       file.precision(6);
@@ -149,7 +149,7 @@ namespace Dune {
       file << std::endl;
     }
 
-#ifdef PRINT_IDENTIFICATION_TIMES 
+#ifdef PRINT_IDENTIFICATION_TIMES
     void printIdentificationTimes() const
     {
       std::vector<double> times;
@@ -158,15 +158,15 @@ namespace Dune {
       times.push_back( ::ALUGrid::identU2 );
       // request linkage
       times.push_back( ::ALUGrid::identU3 );
-      // identify 
+      // identify
       times.push_back( ::ALUGrid::identU4 );
 
-      // calculate partitioning 
+      // calculate partitioning
       times.push_back( ::ALUGrid::ldbTimerU2 );
 
       // load-balaning
       times.push_back( ::ALUGrid::ldbTimerU3 );
-      // identification 
+      // identification
       times.push_back( ::ALUGrid::ldbTimerU4 );
 
       const int timerSize = times.size();
@@ -174,11 +174,11 @@ namespace Dune {
       std::vector<double> maxTimes( times );
       std::vector<double> minTimes( times );
 
-      // sum, max, and min for all procs 
+      // sum, max, and min for all procs
       comm_.max( &maxTimes[ 0 ], timerSize );
       comm_.min( &minTimes[ 0 ], timerSize );
 
-      if( comm_.rank() == 0 )  
+      if( comm_.rank() == 0 )
       {
         for(int i=0; i<timerSize; ++i )
         {
@@ -188,13 +188,13 @@ namespace Dune {
     }
 #endif
 
-  public:  
+  public:
     void flush() const
     {
-      // if write is > 0 then create speedup file 
+      // if write is > 0 then create speedup file
       if( writeDiagnostics_ )
       {
-#ifdef PRINT_IDENTIFICATION_TIMES 
+#ifdef PRINT_IDENTIFICATION_TIMES
         printIdentificationTimes();
 #endif
 
@@ -206,7 +206,7 @@ namespace Dune {
         std::vector< double > maxTimes ( times );
         std::vector< double > minTimes ( times );
 
-        // sum, max, and min for all procs 
+        // sum, max, and min for all procs
         comm_.sum( &avgTimes[ 0 ], size );
         comm_.min( &minTimes[ 0 ], size );
 
@@ -216,14 +216,14 @@ namespace Dune {
         const double maxDofs = maxTimes.back();
         maxTimes.pop_back();
 
-        if( comm_.rank() == 0 && timesteps_ > 0 ) 
+        if( comm_.rank() == 0 && timesteps_ > 0 )
         {
-          const int maxThreads = 1; 
+          const int maxThreads = 1;
           const double tasks   = comm_.size() * maxThreads ;
 
           const double ts_1 = 1.0 / double( timesteps_ );
 
-          { // adjust elements to be the average element number  
+          { // adjust elements to be the average element number
             size_t i = size - 1 ;
             avgTimes[ i ] *= ts_1;
             maxTimes[ i ] *= ts_1;
@@ -231,9 +231,9 @@ namespace Dune {
           }
 
           std::stringstream runfile;
-          runfile << "./speedup." << comm_.size(); 
+          runfile << "./speedup." << comm_.size();
           std::ofstream file ( runfile.str().c_str() );
-          if( file ) 
+          if( file )
           {
             const double averageElements = avgTimes[ size - 1 ] / tasks ;
 
@@ -244,13 +244,13 @@ namespace Dune {
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
             file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     ALUGrid-MEMORY (MB)" << std::endl ;
 
-            // multiply avgTimes with maxThhreads since the sum would be to small otherwise 
+            // multiply avgTimes with maxThhreads since the sum would be to small otherwise
             for(size_t i=0; i<size; ++i)
             {
               avgTimes[ i ] *= maxThreads / tasks ;
             }
 
-            // devide by timesteps 
+            // devide by timesteps
             for(size_t i=0; i<size; ++i)
             {
               avgTimes[ i ] *= ts_1;
@@ -263,16 +263,16 @@ namespace Dune {
               writeVectors( file, descr, avgTimes, maxTimes, minTimes );
             }
           }
-        } // end speedup file 
+        } // end speedup file
 
-        if( diagnosticsFile_ ) 
+        if( diagnosticsFile_ )
         {
-          std::stringstream* str = dynamic_cast< std::stringstream* > (diagnosticsFile_); 
-          if( str ) 
+          std::stringstream* str = dynamic_cast< std::stringstream* > (diagnosticsFile_);
+          if( str )
           {
             std::ofstream file( runFileName_.c_str() );
 
-            if( ! file ) 
+            if( ! file )
             {
               std::cerr << "Couldn't open run file <"<<runFileName_<<">, ciao!" << std::endl;
               abort();
@@ -286,9 +286,9 @@ namespace Dune {
       }
     }
 
-    //! write timestep data 
-    inline void write( const double t, 
-                       const double ldt, 
+    //! write timestep data
+    inline void write( const double t,
+                       const double ldt,
                        const size_t nElements,
                        const size_t maxDofs,
                        const double dgOperatorTime,
@@ -299,7 +299,7 @@ namespace Dune {
                        const std::vector<double>& extraSteps = std::vector<double>() )
     {
       std::vector< double > times( 5 + extraSteps.size(), 0.0 );
-      times[ 0 ] = dgOperatorTime ; 
+      times[ 0 ] = dgOperatorTime ;
       times[ 1 ] = odeSolve ;
       times[ 2 ] = adaptTime ;
       times[ 3 ] = lbTime ;
@@ -314,38 +314,38 @@ namespace Dune {
       write( t, ldt, nElements, times );
     }
 
-    //! clone of write method 
-    inline void write( const double t, 
-                       const double ldt, 
+    //! clone of write method
+    inline void write( const double t,
+                       const double ldt,
                        const size_t nElements,
-                       const std::vector<double>& times) 
+                       const std::vector<double>& times)
     {
-      if( writeDiagnostics_ ) 
+      if( writeDiagnostics_ )
       {
         const size_t size = times.size() ;
         const size_t oldsize = times_.size();
         if( oldsize < size  )
         {
-          times_.resize( size ); 
-          for( size_t i=oldsize; i<size; ++i) 
+          times_.resize( size );
+          for( size_t i=oldsize; i<size; ++i)
             times_[ i ] = 0;
         }
 
         elements_ += double( nElements );
 
-        for(size_t i=0; i<size; ++i ) 
-          times_[ i ] += times[ i ] ; 
+        for(size_t i=0; i<size; ++i )
+          times_[ i ] += times[ i ] ;
 
         ++timesteps_ ;
 
-        if( diagnosticsFile_ ) 
+        if( diagnosticsFile_ )
         {
           std::ostream& runfile = (*diagnosticsFile_);
           const int space = 12;
           runfile << std::scientific << t  << "  ";
           runfile << std::setw(space) << ldt << "  ";
           runfile << std::setw(space) << nElements << " ";
-          for(size_t i=0; i<size; ++i) 
+          for(size_t i=0; i<size; ++i)
             runfile << std::setw(space) << inMS( times[ i ] ) << " ";
           runfile << std::endl;
 
@@ -356,17 +356,17 @@ namespace Dune {
 
   }; // end class Diagnostics
 
-} // end namespace Dune 
+} // end namespace Dune
 
-//! get memory in MB 
+//! get memory in MB
 std::vector<double> getMemoryUsage()
 {
   std::vector<double> memUsage;
-#if HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC 
-  // dune-grid + alugrid version (1.52) with dlmalloc memory patch 
+#if HAVE_ALUGRID && defined ALUGRID_USES_DLMALLOC
+  // dune-grid + alugrid version (1.52) with dlmalloc memory patch
   memUsage.push_back(double(ALUGridSpace::MyAlloc::allocatedMemory())/1024.0/1024.0);
-#else 
-  // dune-alugrid version 
+#else
+  // dune-alugrid version
   memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #endif
   /*

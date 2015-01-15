@@ -11,7 +11,7 @@
 namespace Dune
 {
   template< class GridImp, class GeometryImpl, int nChild >
-  class ALULocalGeometryStorage 
+  class ALULocalGeometryStorage
   {
     typedef ALULocalGeometryStorage< GridImp, GeometryImpl, nChild > ThisType;
 
@@ -20,22 +20,22 @@ namespace Dune
 
     // count local geometry creation
     int count_;
-  
-    // true if geoms have been initialized 
+
+    // true if geoms have been initialized
     bool initialized_;
 
-    // type of grid impl 
-    typedef typename GridImp :: ctype ctype; 
+    // type of grid impl
+    typedef typename GridImp :: ctype ctype;
     enum{ dimension       = GridImp :: dimension };
     enum{ dimensionworld  = GridImp :: dimensionworld };
 
-    template <int dummy, int dim, int dimworld, int > 
+    template <int dummy, int dim, int dimworld, int >
     struct CreateGeometries;
 
-    template <int dummy, int dimworld> 
+    template <int dummy, int dimworld>
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE triangle >
     {
-      template <class Storage> 
+      template <class Storage>
       static void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
@@ -61,12 +61,12 @@ namespace Dune
                                    const GeometryType& type,
                                    const bool nonConform )
       {
-        if( nonConform ) 
+        if( nonConform )
         {
           typedef ALUGrid< 2, dimworld, simplex, nonconforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
         }
-        else 
+        else
         {
           typedef ALUGrid< 2, dimworld, simplex, conforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
@@ -89,7 +89,7 @@ namespace Dune
         }
         /*
          // TODO, implement this for refinement of all edges (conforming)
-        else 
+        else
         {
           typedef ALUGrid< 3, 3, simplex, conforming, ALUGridNoComm > Grid;
           storage.template createGeometries< Grid > (type);
@@ -114,11 +114,11 @@ namespace Dune
       }
     };
 
-    template <int dummy, int dimworld> 
+    template <int dummy, int dimworld>
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE hexa >
     {
-      template <class Storage> 
-      static void createGeometries(Storage& storage, 
+      template <class Storage>
+      static void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
       {
@@ -146,15 +146,15 @@ namespace Dune
       }
     };
 
-  public:  
+  public:
     // create empty storage
     ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
     : count_( 0 ), initialized_( false )
     {
-      // nullify geometries 
+      // nullify geometries
       geoms_.fill( (GeometryImpl *) 0 );
 
-      // initialize geometries 
+      // initialize geometries
       initialize( type, nonConform );
     }
 
@@ -162,21 +162,21 @@ namespace Dune
     ALULocalGeometryStorage ()
     : count_( 0 ), initialized_( false )
     {
-      // nullify geometries 
+      // nullify geometries
       geoms_.fill( (GeometryImpl *) 0 );
     }
 
-    //! initialize local geometries 
+    //! initialize local geometries
     bool initialize( const GeometryType type, const bool nonConform )
     {
-      if( ! initialized_ ) 
+      if( ! initialized_ )
       {
-        // first set flag, because this method might be called again during 
+        // first set flag, because this method might be called again during
         // creation of local geometries and then result in an infinite loop
         initialized_ = true ;
 
         // the idea is to create a grid containing the reference element,
-        // refine once and the store the father - child relations 
+        // refine once and the store the father - child relations
         CreateGeometries<0, dimension, dimensionworld, GridImp :: elementType >
           ::createGeometries(*this, type, nonConform);
         return true;
@@ -197,26 +197,26 @@ namespace Dune
     }
 
     template < class Grid >
-    void createGeometries(const GeometryType& type) 
+    void createGeometries(const GeometryType& type)
     {
-    
+
       static bool firstCall = true ;
-      if( firstCall ) 
+      if( firstCall )
       {
         firstCall = false ;
-        // create factory without verbosity 
+        // create factory without verbosity
         GridFactory< Grid > factory( false );
 
         const Dune::ReferenceElement< ctype, dimension > &refElem
           = Dune::ReferenceElements< ctype, dimension >::general( type );
 
-        // insert vertices 
+        // insert vertices
         FieldVector<ctype, dimensionworld> pos( 0 );
-        const int vxSize = refElem.size(dimension);  
+        const int vxSize = refElem.size(dimension);
         for(int i=0; i<vxSize; ++i)
         {
           FieldVector<ctype, dimension> position = refElem.position(i, dimension );
-          // copy position 
+          // copy position
           for(int d = 0; d<dimension; ++d )
             pos[ d ] = position[ d ];
 
@@ -230,19 +230,19 @@ namespace Dune
 
         // save original sbuf
         std::streambuf* cerr_sbuf = std::cerr.rdbuf();
-        std::stringstream tempout; 
-        // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors 
-        std::cerr.rdbuf(tempout.rdbuf()); 
+        std::stringstream tempout;
+        // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors
+        std::cerr.rdbuf(tempout.rdbuf());
 
         Grid* gridPtr = factory.createGrid();
-        Grid& grid    = *gridPtr; 
+        Grid& grid    = *gridPtr;
 
         // restore the original stream buffer
-        std::cerr.rdbuf(cerr_sbuf); 
+        std::cerr.rdbuf(cerr_sbuf);
 
         //std::cerr = savecerr;
-        
-        // refine once to get children 
+
+        // refine once to get children
         const int level = 1;
         grid.globalRefine( level );
 
@@ -251,9 +251,9 @@ namespace Dune
           MacroGridView macroView = grid.template levelView< All_Partition > ( 0 );
           typedef typename MacroGridView :: template Codim< 0 > :: Iterator Iterator;
 
-          Iterator it = macroView.template begin<0> (); 
+          Iterator it = macroView.template begin<0> ();
 
-          if( it == macroView.template end<0>() ) 
+          if( it == macroView.template end<0>() )
             DUNE_THROW(InvalidStateException,"Empty Grid, should contain at least 1 element");
 
           typedef typename Iterator :: Entity EntityType;
@@ -264,23 +264,23 @@ namespace Dune
           const HierarchicIteratorType end = entity.hend( level );
 
           int childNum = 0;
-          for( HierarchicIteratorType child = entity.hbegin( level ); 
-               child != end; ++child, ++childNum ) 
+          for( HierarchicIteratorType child = entity.hbegin( level );
+               child != end; ++child, ++childNum )
           {
             create( geo, child->geometry(), childNum );
           }
         }
 
-        // delete grid 
+        // delete grid
         delete gridPtr;
       }
-      
+
     }
 
     // create local geometry
     template< class Geometry >
-    void create ( const Geometry &father, 
-                  const Geometry &son, 
+    void create ( const Geometry &father,
+                  const Geometry &son,
                   const int child )
     {
       alugrid_assert ( !geomCreated( child ) );
@@ -295,19 +295,19 @@ namespace Dune
 
   public:
     // desctructor deleteing geometries
-    ~ALULocalGeometryStorage () 
+    ~ALULocalGeometryStorage ()
     {
       for(size_t i=0; i<geoms_.size(); ++i)
         if(geoms_[i]) delete geoms_[i];
     }
 
-    //! access local geometry storage 
+    //! access local geometry storage
     static const ThisType& storage( const GeometryType type, const bool nonConforming )
     {
-      if( type.isSimplex() ) 
+      if( type.isSimplex() )
       {
         // create static variable on heap
-        static ThisType simplexGeoms; 
+        static ThisType simplexGeoms;
         // initialize (only done once)
         if( simplexGeoms.initialize( type, nonConforming ) )
         {
@@ -316,15 +316,15 @@ namespace Dune
         }
         return simplexGeoms ;
       }
-      else 
+      else
       {
-        // should be a cube geometry a this point 
+        // should be a cube geometry a this point
         alugrid_assert( type.isCube() );
 
         // create static variable on heap
         static ThisType cubeGeoms;
         // initialize (only done once)
-        if( cubeGeoms.initialize( type, nonConforming ) ) 
+        if( cubeGeoms.initialize( type, nonConforming ) )
         {
           if( type != cubeGeoms[ 0 ].type() )
             DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
@@ -333,18 +333,18 @@ namespace Dune
       }
     }
 
-    //! access local geometries 
-    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child ) 
+    //! access local geometries
+    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
     {
       // this method is not thread safe yet
       assert( GridImp :: thread() == 0 );
       // create static variable on heap
       static ThisType instance( type, nonConforming );
-      // make sure the geometry type is the same 
+      // make sure the geometry type is the same
       alugrid_assert ( type == instance[ child ].type() );
       return instance[ child ];
     }
-  };  
+  };
 
 } // namespace Dune
 

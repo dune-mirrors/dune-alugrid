@@ -64,7 +64,7 @@ namespace ALUGrid
     return ;
   }
 
-  namespace 
+  namespace
     sdt{
   inline void* set(std::ostream& o)
   { return (void *)( &o == &std::cerr ? 0:&o);

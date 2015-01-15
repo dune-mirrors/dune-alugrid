@@ -20,32 +20,32 @@ namespace Dune {
     typedef typename GridImp::InStreamType     InStreamType;
     typedef typename GridImp::OutStreamType    OutStreamType;
   };
-  
+
   //! Helper template (explicit specialisation if GridImp doesn't export an
   //! object stream -> DefaultImplementation is exported)
   template <class GridImp, class DefaultImp>
   struct GridObjectStreamOrDefaultHelper<false, GridImp, DefaultImp> {
     typedef DefaultImp InStreamType;
-    typedef DefaultImp OutStreamType; 
+    typedef DefaultImp OutStreamType;
   };
 
   //! Template to choose right Object stream type for a given class
   template <class GridImp, class DefaultImp>
-  struct GridObjectStreamOrDefault 
+  struct GridObjectStreamOrDefault
   {
     typedef GridObjectStreamOrDefaultHelper<
-                Conversion<GridImp, HasObjectStream>::exists, 
-                GridImp, 
-                DefaultImp> GridObjectStreamTraits; 
-    
+                Conversion<GridImp, HasObjectStream>::exists,
+                GridImp,
+                DefaultImp> GridObjectStreamTraits;
+
     typedef typename GridObjectStreamTraits :: InStreamType   InStreamType;  //  read  stream
-    typedef typename GridObjectStreamTraits :: OutStreamType  OutStreamType; //  write stream 
+    typedef typename GridObjectStreamTraits :: OutStreamType  OutStreamType; //  write stream
   };
 
-  //! Tagging interface to indicate that class is of Type DofManager 
+  //! Tagging interface to indicate that class is of Type DofManager
   struct IsDofManager {};
 
-  //! Tagging interface to indicate that Grid has HierarchicIndexSet  
+  //! Tagging interface to indicate that Grid has HierarchicIndexSet
   struct HasHierarchicIndexSet {};
 
 } // end namespace Dune

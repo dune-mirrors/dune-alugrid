@@ -5,10 +5,10 @@
 #include <config.h>
 #endif
 
-#include "alu3dinclude.hh" 
-#include "iterator.hh" 
+#include "alu3dinclude.hh"
+#include "iterator.hh"
 
-#ifndef alu_inline 
+#ifndef alu_inline
 #define alu_inline inline
 #endif
 
@@ -22,14 +22,14 @@ namespace Dune {
  #       #        #  #   #       #          #       #    #       #   #
  ######  ######    ##    ######  ######     #       #    ######  #    #
 *************************************************************************/
-//--LevelIterator 
-// Constructor for begin iterator 
+//--LevelIterator
+// Constructor for begin iterator
 template<int codim, PartitionIteratorType pitype, class GridImp >
-alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
+alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const FactoryType& factory, int level, bool )
   : ALU3dGridEntityPointer<codim,GridImp> (factory,level)
   , level_(level)
-  , iter_ (0) 
+  , iter_ (0)
 {
   const GridImp& grid = factory.grid();
   iter_  = new IteratorType ( grid, level_, grid.nlinks() );
@@ -37,54 +37,54 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   this->firstItem( grid, *this, level_);
 }
 
-// Constructor for end iterator 
+// Constructor for end iterator
 template<int codim, PartitionIteratorType pitype, class GridImp >
-alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
+alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const FactoryType& factory, int level)
   : ALU3dGridEntityPointer<codim,GridImp> (factory ,level)
   , level_(level)
-  , iter_ (0) 
+  , iter_ (0)
 {
   this->done();
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> :: 
-  ALU3dGridLevelIterator(const ThisType & org ) 
+alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
+  ALU3dGridLevelIterator(const ThisType & org )
   : ALU3dGridEntityPointer<codim,GridImp> ( org.factory_ , org.level_ )
   , level_( org.level_ )
-  , iter_(0) 
+  , iter_(0)
 {
   assign(org);
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLevelIterator<codim, pitype, GridImp> :: 
-~ALU3dGridLevelIterator () 
+alu_inline ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+~ALU3dGridLevelIterator ()
 {
   removeIter();
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp>
-alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> :: 
-removeIter () 
+alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
+removeIter ()
 {
   this->done();
-  if(iter_) 
+  if(iter_)
   {
-    delete iter_; 
+    delete iter_;
     iter_ = 0;
   }
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp>
-alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> :: 
+alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
 assign(const ThisType & org)
 {
   alugrid_assert ( iter_ == 0 );
   ALU3dGridEntityPointer <codim,GridImp> :: clone (org);
   level_ = org.level_;
-  if( org.iter_ ) 
+  if( org.iter_ )
   {
     iter_ = new IteratorType ( *(org.iter_) );
     alugrid_assert ( iter_ );
@@ -94,14 +94,14 @@ assign(const ThisType & org)
       alugrid_assert ( this->equals(org) );
     }
   }
-  else 
+  else
   {
     this->done();
   }
 }
 template<int codim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLevelIterator<codim, pitype, GridImp> & 
-ALU3dGridLevelIterator<codim, pitype, GridImp> :: 
+alu_inline ALU3dGridLevelIterator<codim, pitype, GridImp> &
+ALU3dGridLevelIterator<codim, pitype, GridImp> ::
 operator = (const ThisType & org)
 {
   removeIter();
@@ -110,59 +110,59 @@ operator = (const ThisType & org)
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
-alu_inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment () 
+alu_inline void ALU3dGridLevelIterator<codim,pitype,GridImp> :: increment ()
 {
   this->incrementIterator(this->grid(),*this,level_);
   return ;
 }
 
-template<int cdim, PartitionIteratorType pitype, class GridImp> 
+template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline typename ALU3dGridLevelIterator<cdim, pitype, GridImp> :: Entity &
-ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const 
-{ 
-#ifdef ALUGRIDDEBUG 
+ALU3dGridLevelIterator<cdim, pitype, GridImp> :: dereference () const
+{
+#ifdef ALUGRIDDEBUG
   const ALU3dGridLevelIterator<cdim, pitype, GridImp> endIterator ( this->factory_,level_);
-  // assert that iterator not equals end iterator 
+  // assert that iterator not equals end iterator
   alugrid_assert ( ! this->equals(endIterator) );
 #endif
-  
-  // don't dereference empty entity pointer 
+
+  // don't dereference empty entity pointer
   alugrid_assert ( this->seed_.item() );
   alugrid_assert ( this->entity_ );
   alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
-} 
+}
 
 //*******************************************************************
 //
-//  LEAFITERATOR 
+//  LEAFITERATOR
 //
-//--LeafIterator 
+//--LeafIterator
 //*******************************************************************
-// constructor for end iterators 
+// constructor for end iterators
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
-ALU3dGridLeafIterator( const FactoryType& factory, int level ) 
-  : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level ) 
-  , iter_ (0) 
+alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+ALU3dGridLeafIterator( const FactoryType& factory, int level )
+  : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level )
+  , iter_ (0)
   , walkLevel_(level)
-{ 
-  this->done(); 
+{
+  this->done();
 }
-  
+
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
-ALU3dGridLeafIterator(const FactoryType& factory, int level , 
-                      bool isBegin) 
-  : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level ) 
-  , iter_ (0) 
+alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+ALU3dGridLeafIterator(const FactoryType& factory, int level ,
+                      bool isBegin)
+  : ALU3dGridEntityPointer <cdim,GridImp> ( factory, level )
+  , iter_ (0)
   , walkLevel_(level)
 {
   const GridImp& grid = factory.grid();
-  // create interior iterator 
+  // create interior iterator
   iter_ = new IteratorType ( grid , level , grid.nlinks() );
   alugrid_assert ( iter_ );
-  // -1 to identify as leaf iterator 
+  // -1 to identify as leaf iterator
   this->firstItem(grid,*this,-1);
 }
 
@@ -170,35 +170,35 @@ template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 ALU3dGridLeafIterator(const ThisType & org)
  : ALU3dGridEntityPointer <cdim,GridImp> ( org.factory_, org.walkLevel_ )
- , iter_(0) 
+ , iter_(0)
  , walkLevel_(org.walkLevel_)
-{ 
-  // assign iterator without cloning entity pointer again  
+{
+  // assign iterator without cloning entity pointer again
   assign(org);
 }
-    
+
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
-~ALU3dGridLeafIterator() 
+alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+~ALU3dGridLeafIterator()
 {
   removeIter();
 }
 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
-removeIter () 
+alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
+removeIter ()
 {
   this->done();
-  if(iter_) 
-  { 
-    delete iter_; 
+  if(iter_)
+  {
+    delete iter_;
     iter_ = 0;
   }
 }
 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> & 
-ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
+alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> &
+ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 operator = (const ThisType & org)
 {
   removeIter();
@@ -207,14 +207,14 @@ operator = (const ThisType & org)
 }
 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
-alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: 
+alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 assign (const ThisType & org)
 {
   alugrid_assert ( iter_ == 0 );
   ALU3dGridEntityPointer <cdim,GridImp> :: clone (org);
 
-  if( org.iter_ ) 
-  { 
+  if( org.iter_ )
+  {
     alugrid_assert ( !org.iter_->done() );
     iter_ = new IteratorType ( *(org.iter_) );
     alugrid_assert ( iter_ );
@@ -223,12 +223,12 @@ assign (const ThisType & org)
     {
       alugrid_assert ( !iter_->done());
       alugrid_assert ( !org.iter_->done() );
-      // -1 to identify leaf iterator 
+      // -1 to identify leaf iterator
       this->setItem( this->grid(),*this, *iter_,-1);
       alugrid_assert ( this->equals(org) );
     }
   }
-  else 
+  else
   {
     this->done();
   }
@@ -236,30 +236,30 @@ assign (const ThisType & org)
   walkLevel_ = org.walkLevel_;
 }
 
-template<int cdim, PartitionIteratorType pitype, class GridImp> 
-alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment () 
+template<int cdim, PartitionIteratorType pitype, class GridImp>
+alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
 {
-  // -1 to identify leaf iterator 
+  // -1 to identify leaf iterator
   this->incrementIterator(this->grid(), *this,-1);
   return ;
 }
 
-template<int cdim, PartitionIteratorType pitype, class GridImp> 
+template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline typename ALU3dGridLeafIterator<cdim, pitype, GridImp> :: Entity &
-ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const 
-{ 
-#ifdef ALUGRIDDEBUG 
+ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const
+{
+#ifdef ALUGRIDDEBUG
   const ALU3dGridLeafIterator<cdim, pitype, GridImp> endIterator (this->factory_, this->grid().maxLevel());
-  // assert that iterator not equals end iterator 
+  // assert that iterator not equals end iterator
   alugrid_assert ( ! this->equals(endIterator) );
 #endif
-  
-  // don't dereference empty entity pointer 
+
+  // don't dereference empty entity pointer
   alugrid_assert ( this->seed_.item() );
   alugrid_assert ( this->entity_ );
   alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
-} 
+}
 
 
 /************************************************************************************
@@ -271,62 +271,62 @@ ALU3dGridLeafIterator<cdim, pitype, GridImp> :: dereference () const
 #     #     #    #       #   #      #       #    #       #   #
 #     #     #    ######  #    #     #       #    ######  #    #
 ************************************************************************************/
-// --HierarchicIterator 
+// --HierarchicIterator
 template <class GridImp>
-alu_inline ALU3dGridHierarchicIterator<GridImp> :: 
-  ALU3dGridHierarchicIterator(const FactoryType& factory, 
+alu_inline ALU3dGridHierarchicIterator<GridImp> ::
+  ALU3dGridHierarchicIterator(const FactoryType& factory,
    const HElementType & elem, int maxlevel ,bool end)
-  : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel ) 
-  , elem_(&elem) 
+  : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel )
+  , elem_(&elem)
   , ghostElem_( )
-  , maxlevel_(maxlevel) 
+  , maxlevel_(maxlevel)
 {
-  if (!end) 
+  if (!end)
   {
     HElementType * item = const_cast<HElementType *> (elem.down());
-    if(item && item->level() <= maxlevel_)  
+    if(item && item->level() <= maxlevel_)
     {
-      // we have children and they lie in the disired level range 
+      // we have children and they lie in the disired level range
       this->updateEntityPointer( item );
       return ;
     }
   }
 
-  // otherwise 
+  // otherwise
   this->done();
 }
 
 template <class GridImp>
-alu_inline ALU3dGridHierarchicIterator<GridImp> :: 
-  ALU3dGridHierarchicIterator(const FactoryType& factory, 
-                              const HBndSegType& ghost, 
+alu_inline ALU3dGridHierarchicIterator<GridImp> ::
+  ALU3dGridHierarchicIterator(const FactoryType& factory,
+                              const HBndSegType& ghost,
                               int maxlevel,
                               bool end)
-  : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel ) 
-  , elem_( 0 ) 
+  : ALU3dGridEntityPointer<0,GridImp> ( factory, maxlevel )
+  , elem_( 0 )
   , ghostElem_( ghost )
-  , maxlevel_(maxlevel) 
+  , maxlevel_(maxlevel)
 {
-  if( ! end ) 
+  if( ! end )
   {
     ghostElem_ = const_cast<HBndSegType *> (ghost.down());
 
-    // we have children and they lie in the disired level range 
+    // we have children and they lie in the disired level range
     if( ghostElem_ != 0 && ghostElem_->ghostLevel() <= maxlevel_)
     {
       this->updateGhostPointer( *ghostElem_ );
       return ;
     }
-    else 
+    else
       ghostElem_ = 0;
   }
-   
-  // otherwise do nothing 
+
+  // otherwise do nothing
   this->done();
 }
 
 template <class GridImp>
-alu_inline ALU3dGridHierarchicIterator<GridImp> :: 
+alu_inline ALU3dGridHierarchicIterator<GridImp> ::
 ALU3dGridHierarchicIterator(const ThisType& org)
   : ALU3dGridEntityPointer<0,GridImp> ( org.factory_, org.maxlevel_ )
 {
@@ -334,8 +334,8 @@ ALU3dGridHierarchicIterator(const ThisType& org)
 }
 
 template <class GridImp>
-alu_inline ALU3dGridHierarchicIterator<GridImp> & 
-ALU3dGridHierarchicIterator<GridImp> :: 
+alu_inline ALU3dGridHierarchicIterator<GridImp> &
+ALU3dGridHierarchicIterator<GridImp> ::
 operator = (const ThisType& org)
 {
   assign( org );
@@ -343,62 +343,62 @@ operator = (const ThisType& org)
 }
 
 template <class GridImp>
-alu_inline void 
-ALU3dGridHierarchicIterator<GridImp> :: 
-assign(const ThisType& org) 
+alu_inline void
+ALU3dGridHierarchicIterator<GridImp> ::
+assign(const ThisType& org)
 {
-  // copy my data 
+  // copy my data
   elem_      = org.elem_;
   ghostElem_ = org.ghostElem_;
   maxlevel_  = org.maxlevel_;
 
-  // copy entity pointer 
-  // this method will probably free entity 
+  // copy entity pointer
+  // this method will probably free entity
   ALU3dGridEntityPointer<0,GridImp> :: clone(org);
 }
 
 template <class GridImp>
-alu_inline int 
+alu_inline int
 ALU3dGridHierarchicIterator<GridImp>::
-getLevel(const HBndSegType* face) const 
+getLevel(const HBndSegType* face) const
 {
-  // return ghost level 
+  // return ghost level
   alugrid_assert ( face );
-  return face->ghostLevel();      
+  return face->ghostLevel();
 }
 
 template <class GridImp>
-alu_inline int 
+alu_inline int
 ALU3dGridHierarchicIterator<GridImp>::
-getLevel(const HElementType * item) const 
+getLevel(const HElementType * item) const
 {
-  // return normal level 
+  // return normal level
   alugrid_assert ( item );
   return item->level();
 }
 template <class GridImp>
-template <class HItemType>  
-alu_inline HItemType* 
+template <class HItemType>
+alu_inline HItemType*
 ALU3dGridHierarchicIterator<GridImp>::
-goNextElement(const HItemType* startElem, HItemType * oldelem ) 
+goNextElement(const HItemType* startElem, HItemType * oldelem )
 {
   // strategy is:
-  // - go down as far as possible and then over all children 
-  // - then go to father and next and down again 
-  
+  // - go down as far as possible and then over all children
+  // - then go to father and next and down again
+
   HItemType * nextelem = oldelem->down();
   if(nextelem)
   {
-    // use getLevel method 
+    // use getLevel method
     if( getLevel(nextelem) <= maxlevel_)
       return nextelem;
   }
-    
+
   nextelem = oldelem->next();
-  if(nextelem) 
+  if(nextelem)
   {
-    // use getLevel method 
-    if( getLevel(nextelem) <= maxlevel_) 
+    // use getLevel method
+    if( getLevel(nextelem) <= maxlevel_)
       return nextelem;
   }
 
@@ -417,14 +417,14 @@ goNextElement(const HItemType* startElem, HItemType * oldelem )
 }
 
 template <class GridImp>
-alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment () 
+alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
 {
   alugrid_assert (this->seed_.item() != 0);
 
-  if( ghostElem_.valid() ) 
+  if( ghostElem_.valid() )
   {
     ghostElem_ = goNextElement( ghostElem_.ghost(), ghostElem_.nextGhost() );
-    if( ! ghostElem_ ) 
+    if( ! ghostElem_ )
     {
       this->done();
       return ;
@@ -432,10 +432,10 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
 
     this->updateGhostPointer( *ghostElem_ );
   }
-  else 
+  else
   {
     HElementType * nextItem = goNextElement( elem_, this->seed_.item() );
-    if( ! nextItem) 
+    if( ! nextItem)
     {
       this->done();
       return ;
@@ -447,689 +447,689 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
 }
 
 template <class GridImp>
-alu_inline typename ALU3dGridHierarchicIterator<GridImp> :: Entity &  
-ALU3dGridHierarchicIterator<GridImp> :: dereference () const 
-{ 
-  // don't dereference empty entity pointer 
+alu_inline typename ALU3dGridHierarchicIterator<GridImp> :: Entity &
+ALU3dGridHierarchicIterator<GridImp> :: dereference () const
+{
+  // don't dereference empty entity pointer
   alugrid_assert ( this->seed_.item() );
   alugrid_assert ( this->entity_ );
   alugrid_assert ( this->seed_.item() == & this->entityImp().getItem() );
   return (*this->entity_);
-} 
+}
 
-#if COMPILE_ALUGRID_LIB 
+#if COMPILE_ALUGRID_LIB
   // Instantiation 3-3
   template class ALU3dGrid<3, 3, hexa, ALUGridNoComm >;
   template class ALU3dGrid<3, 3, tetra, ALUGridNoComm >;
 
-  // Instantiation without MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  // Instantiation without MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
   // Instantiation
   template class ALU3dGrid<3, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid<3, 3, tetra, ALUGridMPIComm >;
 
-  // Instantiation with MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  // Instantiation with MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >; 
-  
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+
    // Instantiation 2-3
   template class ALU3dGrid<2, 3, hexa, ALUGridNoComm >;
   template class ALU3dGrid<2, 3, tetra, ALUGridNoComm >;
 
-  // Instantiation without MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  // Instantiation without MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
   // Instantiation
   template class ALU3dGrid<2, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid<2, 3, tetra, ALUGridMPIComm >;
 
-  // Instantiation with MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  // Instantiation with MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >; 
-  
-  
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+
+
    // Instantiation 2-2
   template class ALU3dGrid<2, 2, hexa, ALUGridNoComm >;
   template class ALU3dGrid<2, 2, tetra, ALUGridNoComm >;
 
-  // Instantiation without MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  // Instantiation without MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >; 
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
   // Instantiation
   template class ALU3dGrid<2, 2, hexa, ALUGridMPIComm >;
   template class ALU3dGrid<2, 2, tetra, ALUGridMPIComm >;
 
-  // Instantiation with MPI 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  // Instantiation with MPI
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 0, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 1, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >; 
-  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >; 
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
 #endif // end COMPILE_ALUGRID_LIB
 

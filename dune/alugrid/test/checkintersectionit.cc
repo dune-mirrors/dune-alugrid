@@ -110,7 +110,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
   const int dimension = Intersection::dimension;
   const int mydimension = Intersection::mydimension;
-  
+
 
   // check consistency of exported types
 
@@ -126,7 +126,7 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
   // cache some information on the intersection
 
   const int indexInInside = intersection.indexInInside();
-  
+
 
 
   const LocalGeometry geometryInInside = intersection.geometryInInside();
@@ -414,9 +414,9 @@ void checkIntersectionIterator ( const GridViewType &view,
   for( IntersectionIterator iIt = view.ibegin( *eIt ); iIt != iend; ++iIt )
   {
     std::cout << "entering  face: "  << index <<std::endl;
-    
+
     ++index;
-    
+
     const Intersection &intersection = *iIt;
 
     // perform intersection check
@@ -488,21 +488,21 @@ void checkIntersectionIterator ( const GridViewType &view,
         called = true;
       }
     }
-    
+
     std::cout << "symmetry check finished" <<std::endl;
     // check consistency of conforming intersection
     std::cout << "check consistency of conforming intersection" << std::endl;
-    
+
     if( intersection.conforming() && intersection.neighbor() && !intersection.boundary() )
     {
       EntityPointer pOutside = intersection.outside();
       const Entity &outside = *pOutside;
-      
+
 
       const int indexInInside = intersection.indexInInside();
       const int indexInOutside = intersection.indexInOutside();
 
-      
+
       const typename GridViewType::IndexSet &indexSet = view.indexSet();
       if( indexSet.subIndex( *eIt, indexInInside, 1 ) != indexSet.subIndex( outside, indexInOutside, 1 ) )
       {
@@ -512,7 +512,7 @@ void checkIntersectionIterator ( const GridViewType &view,
                   << ", outside index = " << indexSet.subIndex( outside, indexInOutside, 1 ) << std::endl;
         assert( false );
       }
-      
+
 
       const typename GridType::LocalIdSet &localIdSet = view.grid().localIdSet();
       if( localIdSet.subId( *eIt, indexInInside, 1 ) != localIdSet.subId( outside, indexInOutside, 1 ) )
@@ -536,7 +536,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
     }
         std::cout << "check consistency of conforming intersection finished" << std::endl;
-    
+
     // update variables for element checks
 
     if( intersection.boundary() )

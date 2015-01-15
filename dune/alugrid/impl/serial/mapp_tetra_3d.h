@@ -29,8 +29,8 @@ namespace ALUGrid
       void map2world (const alucoord_t , const alucoord_t , const alucoord_t, const alucoord_t, alucoord_t (&)[3]) const ;
       void world2map (const alucoord_t (&)[3], alucoord_t (&)[4]) ;
 
-      static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], 
-                                    const alucoord_t (&p2)[3], const alucoord_t (&p3)[3], 
+      static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3],
+                                    const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
                                     alucoord_t (&barycenter)[3])
       {
         barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
@@ -75,8 +75,8 @@ namespace ALUGrid
       struct arg {
         alucoord_t (*f)(const alucoord_t (&)[4], LinearMapping &, void *) ;
         void *user ;
-        arg () { abort() ; } 
-        arg ( alucoord_t (*p)(const alucoord_t (&)[4], LinearMapping &, void * ), void *a ) : f(p), user(a) {} 
+        arg () { abort() ; }
+        arg ( alucoord_t (*p)(const alucoord_t (&)[4], LinearMapping &, void * ), void *a ) : f(p), user(a) {}
       };
       typedef alucoord_t val_t ;
       typedef arg arg_t ;
@@ -137,7 +137,7 @@ namespace ALUGrid
   } ;
   /*********** INLINES ********************************************************/
 
-  inline LinearMapping :: LinearMapping(const alucoord_t (&x0)[3], const alucoord_t (&x1)[3], const alucoord_t (&x2)[3], const alucoord_t (&x3)[3]) 
+  inline LinearMapping :: LinearMapping(const alucoord_t (&x0)[3], const alucoord_t (&x1)[3], const alucoord_t (&x2)[3], const alucoord_t (&x3)[3])
     : p0(x0), p1(x1), p2(x2), p3(x3) {
     a[0][0] = p3[0] ;
     a[0][1] = p3[1] ;
@@ -151,14 +151,14 @@ namespace ALUGrid
     Df [2][0] = a[3][0] = p2[0] - p3[0] ;
     Df [2][1] = a[3][1] = p2[1] - p3[1] ;
     Df [2][2] = a[3][2] = p2[2] - p3[2] ;
-    DetDf = - (Df[0][0] * Df[1][1] * Df[2][2] - Df[0][0] * Df[1][2] * Df[2][1] - 
-               Df[1][0] * Df[0][1] * Df[2][2] + Df[1][0] * Df[0][2] * Df[2][1] + 
+    DetDf = - (Df[0][0] * Df[1][1] * Df[2][2] - Df[0][0] * Df[1][2] * Df[2][1] -
+               Df[1][0] * Df[0][1] * Df[2][2] + Df[1][0] * Df[0][2] * Df[2][1] +
                Df[2][0] * Df[0][1] * Df[1][2] - Df[2][0] * Df[0][2] * Df[1][1]) ;
     return ;
   }
 
   inline LinearMapping ::LinearMapping (const LinearMapping & map)
-    : p0 (map.p0), p1 (map.p1), p2 (map.p2), p3 (map.p3), DetDf (map.DetDf) { 
+    : p0 (map.p0), p1 (map.p1), p2 (map.p2), p3 (map.p3), DetDf (map.DetDf) {
     memcpy (a, map.a, sizeof(alucoord_t[4][3])) ;
     memcpy (Df, map.Df, sizeof (alucoord_t [3][3])) ;
     return ;
@@ -181,34 +181,34 @@ namespace ALUGrid
     return ;
   }
 
-  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate1 (val_t base, const arg_t & x) {								
+  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate1 (val_t base, const arg_t & x) {
     val_t t = A()( _p1 , _map, x) ;
     base += (t *= ( _map.det () / 6.0)) ;
     return base ;
   }
 
-  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate2 (val_t base, const arg_t & x) {		
-    for(int i = 0 ; i < 4 ; i ++) {					
+  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate2 (val_t base, const arg_t & x) {
+    for(int i = 0 ; i < 4 ; i ++) {
       val_t t = A()( _p2 [i], _map, x) ;
       base += (t *= ( _w2 [i] * _map.det ())) ;
-    }						
+    }
     return base ;
   }
 
-  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate7 (val_t base, const arg_t & x) {		
+  template < class A > inline typename quadraturTetra3D < A > :: val_t quadraturTetra3D < A > :: integrate7 (val_t base, const arg_t & x) {
     for(int i = 0 ; i < 64 ; i ++) {
       val_t t = A()( _p7 [i], _map, x) ;
       base += (t *= ( _w7 [i] * _map.det ())) ;
-    }						
+    }
     return base ;
   }
 
   inline FunctionWrapper :: val_t FunctionWrapper :: operator () (const alucoord_t (&coord)[4], LinearMapping &map, const arg_t &func ) {
-    return (*(func.f))(coord, map, func.user) ; 
+    return (*(func.f))(coord, map, func.user) ;
   }
 
-  inline LinearSurfaceMapping :: LinearSurfaceMapping (const alucoord_t (&x0)[3], 
-      const alucoord_t (&x1)[3], const alucoord_t (&x2)[3]) 
+  inline LinearSurfaceMapping :: LinearSurfaceMapping (const alucoord_t (&x0)[3],
+      const alucoord_t (&x1)[3], const alucoord_t (&x2)[3])
     : _p0 (x0), _p1 (x1), _p2 (x2) {
     _b[0][0] = _p0[0] ;
     _b[0][1] = _p0[1] ;
@@ -228,7 +228,7 @@ namespace ALUGrid
     _n[0] = -0.5 * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2])) ;
     _n[1] = -0.5 * ((_p1[2]-_p0[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p0[0])) ;
     _n[2] = -0.5 * ((_p1[0]-_p0[0]) *(_p2[1]-_p1[1]) - (_p2[0]-_p1[0]) *(_p1[1]-_p0[1])) ;
-    
+
     return ;
   }
 
@@ -264,14 +264,14 @@ namespace ALUGrid
     return ;
   }
 
-  template < class A > inline typename quadraturTriang2D < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D < A > :: val_t
   quadraturTriang2D < A > :: integrate1 (val_t base, const arg_t & x) {
     alucoord_t n [3] ;
     _map.normal (n) ;
     return base + A ()(_p1, n, x)  ;
   }
 
-  template < class A > inline typename quadraturTriang2D < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D < A > :: val_t
   quadraturTriang2D < A > :: integrate3 (val_t base, const arg_t & x) {
     alucoord_t n [3] ;
     _map.normal (n) ;
@@ -282,7 +282,7 @@ namespace ALUGrid
     return base  ;
   }
 
-  template < class A > inline typename quadraturTriang2D < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D < A > :: val_t
   quadraturTriang2D < A > :: integrate5 (val_t base, const arg_t & x) {
     alucoord_t n [3] ;
     _map.normal (n) ;
@@ -293,7 +293,7 @@ namespace ALUGrid
     return base  ;
   }
 
-  template < class A > inline typename quadraturTriang2D < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D < A > :: val_t
   quadraturTriang2D < A > :: integrate7 (val_t base, const arg_t & x) {
     alucoord_t n [3] ;
     _map.normal (n) ;
@@ -304,12 +304,12 @@ namespace ALUGrid
     return base  ;
   }
 
-  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t
   quadraturTriang2D_1 < A > :: integrate1 (val_t base, const arg_t & x) {
     return base + A ()(_p1, _map, x)  ;
   }
 
-  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t
   quadraturTriang2D_1 < A > :: integrate3 (val_t base, const arg_t & x) {
     for (int i = 0 ; i < 7 ; i++) {
       val_t t = A ()(_p3 [i], _map, x) ;
@@ -318,7 +318,7 @@ namespace ALUGrid
     return base  ;
   }
 
-  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t
   quadraturTriang2D_1 < A > :: integrate5 (val_t base, const arg_t & x) {
     for (int i = 0 ; i < 7 ; i++) {
       val_t t = A ()(_p5 [i], _map, x) ;
@@ -327,7 +327,7 @@ namespace ALUGrid
     return base  ;
   }
 
-  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t 
+  template < class A > inline typename quadraturTriang2D_1 < A > :: val_t
   quadraturTriang2D_1 < A > :: integrate7 (val_t base, const arg_t & x) {
     for (int i = 0 ; i < 16 ; i++) {
       val_t t = A ()(_p7 [i], _map, x) ;

@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modifications for Dune Interface
+// (c) Robert Kloefkorn 2004 - 2005
 #include <config.h>
 
 #include <sstream>
@@ -20,10 +20,10 @@ namespace ALUGrid
       result.first->second = myBuilder().insert_vertex( x, y, z, i );
     return std::make_pair( result.first->second, result.second );
   }
-   
+
   std::pair< Gitter::Geometric::hedge1_GEO *, bool > MacroGridBuilder::
   InsertUniqueHedge (int l, int r) {
-    if (l > r) { 
+    if (l > r) {
       int i = l; l = r; r = i;
     }
     edgeKey_t key (l,r);
@@ -34,7 +34,7 @@ namespace ALUGrid
 
       alugrid_assert ( a != _vertexMap.end() );
       alugrid_assert ( b != _vertexMap.end() );
-      
+
       result.first->second = myBuilder ().insert_hedge1 ((*a).second,(*b).second);
     }
     return std::make_pair( result.first->second, result.second );
@@ -64,11 +64,11 @@ namespace ALUGrid
     if( result.second )
     {
       hedge1_GEO * edge [4];
-      int dire [4]; 
+      int dire [4];
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
       edge [1] = InsertUniqueHedge (v[1],v[2]).first;
       edge [2] = InsertUniqueHedge (v[2],v[3]).first;
-      edge [3] = InsertUniqueHedge (v[3],v[0]).first;  
+      edge [3] = InsertUniqueHedge (v[3],v[0]).first;
       dire [0] = v[0] < v[1] ? 0 : 1;
       dire [1] = v[1] < v[2] ? 0 : 1;
       dire [2] = v[2] < v[3] ? 0 : 1;
@@ -79,7 +79,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
-  InsertUniqueTetra (int (&v)[4], int orientation) 
+  InsertUniqueTetra (int (&v)[4], int orientation)
   {
     elementKey_t key (v [0], v [1], v [2], v [3]);
     std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
@@ -87,7 +87,7 @@ namespace ALUGrid
     {
       hface3_GEO * face [4];
       int twst [4];
-      for (int fce = 0; fce < 4; ++fce ) 
+      for (int fce = 0; fce < 4; ++fce )
       {
         int x [3];
         x [0] = v [Tetra::prototype [fce][0]];
@@ -102,7 +102,7 @@ namespace ALUGrid
     return std::make_pair( static_cast< tetra_GEO * >( result.first->second ), result.second );
   }
 
-  std::pair< Gitter::Geometric::hexa_GEO *, bool > MacroGridBuilder::InsertUniqueHexa (int (&v)[8]) 
+  std::pair< Gitter::Geometric::hexa_GEO *, bool > MacroGridBuilder::InsertUniqueHexa (int (&v)[8])
   {
     elementKey_t key (v [0], v [1], v [3], v[4]);
     std::pair< elementMap_t::iterator, bool > result = _hexaMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
@@ -110,7 +110,7 @@ namespace ALUGrid
     {
       hface4_GEO * face [6];
       int twst [6];
-      for (int fce = 0; fce < 6; ++fce) 
+      for (int fce = 0; fce < 6; ++fce)
       {
         int x [4];
         x [0] = v [Hexa::prototype [fce][0]];
@@ -126,21 +126,21 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master) 
+  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master)
   {
     int twst = cyclicReorder (v,v+3);
     faceKey_t key (v [0], v [1], v [2]);
-    if (bt == Gitter::hbndseg_STI::closure) 
+    if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
         hface3_GEO * face =  InsertUniqueHface (v).first;
         _hbnd3Int [key] = new Hbnd3IntStorage (face, twst, ldbVertexIndex, master);
         return true;
       }
-    } 
-    else 
+    }
+    else
     {
-      if (_hbnd3Map.find (key) == _hbnd3Map.end ()) 
+      if (_hbnd3Map.find (key) == _hbnd3Map.end ())
       {
         hface3_GEO * face  = InsertUniqueHface (v).first;
         hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt);
@@ -154,21 +154,21 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master ) 
+  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master )
   {
     int twst = cyclicReorder (v,v+4);
     faceKey_t key (v [0], v [1], v [2]);
-    if (bt == Gitter::hbndseg_STI::closure) 
+    if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
         hface4_GEO * face =  InsertUniqueHface (v).first;
         _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master );
         return true;
       }
-    } 
-    else 
+    }
+    else
     {
-      if (_hbnd4Map.find (key) == _hbnd4Map.end ()) 
+      if (_hbnd4Map.find (key) == _hbnd4Map.end ())
       {
         hface4_GEO * face =  InsertUniqueHface (v).first;
         hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt);
@@ -182,7 +182,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::periodic3_GEO *, bool > MacroGridBuilder::
-  InsertUniquePeriodic (int (&v)[6], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )  
+  InsertUniquePeriodic (int (&v)[6], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
   {
 
     // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -195,7 +195,7 @@ namespace ALUGrid
     if (hit == _periodic3Map.end ()) {
       hface3_GEO * face [2];
       int twst [2];
-      for (int fce = 0; fce < 2; ++fce ) 
+      for (int fce = 0; fce < 2; ++fce )
       {
         int x [3];
         x [0] = v [Periodic3::prototype [fce][0]];
@@ -214,7 +214,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::periodic4_GEO *, bool > MacroGridBuilder::
-  InsertUniquePeriodic (int (&v)[8], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] ) 
+  InsertUniquePeriodic (int (&v)[8], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
   {
 
     // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -227,7 +227,7 @@ namespace ALUGrid
     if (hit == _periodic4Map.end ()) {
       hface4_GEO * face [2];
       int twst [2];
-      for (int fce = 0; fce < 2; ++fce ) 
+      for (int fce = 0; fce < 2; ++fce )
       {
         int x [4];
         x [0] = v [Periodic4::prototype [fce][0]];
@@ -241,15 +241,15 @@ namespace ALUGrid
       alugrid_assert (t);
       _periodic4Map [key] = t;
       return std::pair< periodic4_GEO *, bool > (t,true);
-    } 
-    else 
+    }
+    else
     {
       return std::pair< periodic4_GEO *, bool > ((periodic4_GEO *)(*hit).second,false);
     }
   }
   // Ende - Neu am 23.5.02 (BS)
 
-  void MacroGridBuilder::removeElement (const elementKey_t & k, const bool realElement ) 
+  void MacroGridBuilder::removeElement (const elementKey_t & k, const bool realElement )
   {
     // Der Schl"ussel sollte nur in genau einer Map vorliegen.
 
@@ -258,10 +258,10 @@ namespace ALUGrid
           + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
           + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1);
 
-    if( realElement ) 
+    if( realElement )
     {
       elementMap_t::iterator hit = _tetraMap.find (k);
-      if (hit != _tetraMap.end ()) 
+      if (hit != _tetraMap.end ())
       {
         tetra_GEO * tr = (tetra_GEO *)(*hit).second;
         int ldbVertexIndex = tr->ldbVertexIndex();
@@ -269,29 +269,29 @@ namespace ALUGrid
 
         typedef hbnd3intMap_t::iterator iterator;
         const iterator end = _hbnd3Int.end();
-        for (int i = 0; i < 4; ++i) 
+        for (int i = 0; i < 4; ++i)
         {
-          // for periodic neighbours we do not create internal storages 
-          if( tr->myneighbour( i ).first->isperiodic() ) 
+          // for periodic neighbours we do not create internal storages
+          if( tr->myneighbour( i ).first->isperiodic() )
             continue;
 
           hface3_GEO* face = tr->myhface3 (i);
-          faceKey_t key (face->myvertex (0)->ident (), 
-                         face->myvertex (1)->ident (), 
+          faceKey_t key (face->myvertex (0)->ident (),
+                         face->myvertex (1)->ident (),
                          face->myvertex (2)->ident ());
 
-          // if the face does not exist in the map of internal boundaries 
-          // we need to insert this 
+          // if the face does not exist in the map of internal boundaries
+          // we need to insert this
           iterator hbndit = _hbnd3Int.find( key );
-          if( hbndit == end ) 
+          if( hbndit == end )
           {
-            Hbnd3IntStorage* hbnd = 
+            Hbnd3IntStorage* hbnd =
               new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, master, tr , i );
             _hbnd3Int.insert( std::make_pair( key, hbnd ) );
           }
-          // if the face already exists this means we can delete it, 
-          // since both adjacent element will disappear 
-          else 
+          // if the face already exists this means we can delete it,
+          // since both adjacent element will disappear
+          else
           {
             Hbnd3IntStorage* hbnd = (*hbndit).second;
             _hbnd3Int.erase( hbndit );
@@ -306,7 +306,7 @@ namespace ALUGrid
       }
 
       hit = _hexaMap.find (k);
-      if (hit != _hexaMap.end ()) 
+      if (hit != _hexaMap.end ())
       {
         hexa_GEO * hx = (hexa_GEO *)(*hit).second;
         int ldbVertexIndex = hx->ldbVertexIndex();
@@ -314,30 +314,30 @@ namespace ALUGrid
 
         typedef hbnd4intMap_t::iterator iterator;
         const iterator end = _hbnd4Int.end();
-        for (int i = 0; i < 6; ++i) 
+        for (int i = 0; i < 6; ++i)
         {
-          // for periodic neighbours we do not create internal storages 
-          if( hx->myneighbour( i ).first->isperiodic() ) 
+          // for periodic neighbours we do not create internal storages
+          if( hx->myneighbour( i ).first->isperiodic() )
             continue;
 
           hface4_GEO* face = hx->myhface4 (i);
-          faceKey_t key (face->myvertex (0)->ident (), 
-                         face->myvertex (1)->ident (), 
+          faceKey_t key (face->myvertex (0)->ident (),
+                         face->myvertex (1)->ident (),
                          face->myvertex (2)->ident ());
 
           iterator hbndit = _hbnd4Int.find( key );
-          // if the face does not exist in the map of internal boundaries 
-          // we need to insert this 
-          if( hbndit == end ) 
+          // if the face does not exist in the map of internal boundaries
+          // we need to insert this
+          if( hbndit == end )
           {
-            Hbnd4IntStorage* hbnd = 
+            Hbnd4IntStorage* hbnd =
               new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, master, hx, i );
 
             _hbnd4Int.insert( std::make_pair( key, hbnd ) );
           }
-          // if the face already exists this means we can delete it, 
-          // since both adjacent element will disappear 
-          else 
+          // if the face already exists this means we can delete it,
+          // since both adjacent element will disappear
+          else
           {
             Hbnd4IntStorage* hbnd = (*hbndit).second;
             _hbnd4Int.erase( hbndit );
@@ -351,10 +351,10 @@ namespace ALUGrid
         return;
       }
     }
-    else 
+    else
     {
       elementMap_t::iterator hit = _periodic3Map.find (k);
-      if (hit != _periodic3Map.end ()) 
+      if (hit != _periodic3Map.end ())
       {
         periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second;
 
@@ -365,7 +365,7 @@ namespace ALUGrid
       }
 
       hit = _periodic4Map.find (k);
-      if (hit != _periodic4Map.end ()) 
+      if (hit != _periodic4Map.end ())
       {
         periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second;
 
@@ -381,24 +381,24 @@ namespace ALUGrid
   }
 
   // default of init == true
-  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, const bool init) 
-   : _initialized(false) 
-   , _finalized(false) 
-   , _mgb (b) 
+  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, const bool init)
+   : _initialized(false)
+   , _finalized(false)
+   , _mgb (b)
   {
     if(init) initialize();
   }
 
-  // deprecated constructor, project vertex has been removed 
-  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, ProjectVertex* ) 
-   : _initialized(false) 
-   , _finalized(false) 
-   , _mgb (b) 
+  // deprecated constructor, project vertex has been removed
+  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, ProjectVertex* )
+   : _initialized(false)
+   , _finalized(false)
+   , _mgb (b)
   {
     initialize();
   }
 
-  void MacroGridBuilder::initialize () 
+  void MacroGridBuilder::initialize ()
   {
     {
       BuilderIF::vertexlist_t& _vertexList = myBuilder ()._vertexList;
@@ -460,12 +460,12 @@ namespace ALUGrid
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) {
           _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
-        } 
-        else 
+        }
+        else
         {
           _hbnd4Map [key] = (*i);
         }
-      } 
+      }
       // clear list
       clear( _hbndseg4List );
     }
@@ -477,12 +477,12 @@ namespace ALUGrid
       for ( iterator i = _hbndseg3List.begin (); i != hbndseg3ListEnd; ++i )
       {
         faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ());
-        if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) 
+        if ((*i)->bndtype () == Gitter::hbndseg_STI::closure)
         {
           _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
-        } 
-        else 
+        }
+        else
         {
           _hbnd3Map [key] = (*i);
         }
@@ -495,9 +495,9 @@ namespace ALUGrid
       typedef BuilderIF::tetralist_t::iterator  iterator;
       const iterator tetraListEnd = _tetraList.end ();
       // copy entries to map
-      for ( iterator i = _tetraList.begin (); i != tetraListEnd; ++i ) 
+      for ( iterator i = _tetraList.begin (); i != tetraListEnd; ++i )
       {
-        _tetraMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+        _tetraMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
                                   (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
       }
       // clear list
@@ -508,9 +508,9 @@ namespace ALUGrid
       typedef BuilderIF::periodic3list_t::iterator iterator;
       const iterator periodic3ListEnd = _periodic3List.end ();
       // copy entries to map
-      for ( iterator i = _periodic3List.begin (); i != periodic3ListEnd; ++i ) 
+      for ( iterator i = _periodic3List.begin (); i != periodic3ListEnd; ++i )
       {
-        _periodic3Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
+        _periodic3Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (),
                                       (*i)->myvertex (2)->ident (), -((*i)->myvertex (3)->ident ())-1)] = (*i);
       }
       // clear list
@@ -523,7 +523,7 @@ namespace ALUGrid
       // copy entries to map
       for ( iterator i = _periodic4List.begin (); i != periodic4ListEnd; ++i )
       {
-        _periodic4Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (), 
+        _periodic4Map [elementKey_t ( (*i)->myvertex (0)->ident (),  (*i)->myvertex (1)->ident (),
                                       (*i)->myvertex (3)->ident (), -((*i)->myvertex (4)->ident ())-1)] = (*i);
       }
       // clear list
@@ -535,19 +535,19 @@ namespace ALUGrid
       const iterator  hexaListEnd = _hexaList.end ();
       // copy entries to map
       for ( iterator i = _hexaList.begin (); i != hexaListEnd; ++i )
-        _hexaMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (), 
+        _hexaMap [elementKey_t ( (*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
                                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
       // clear list
       clear( _hexaList );
     }
 
     _initialized = true;
-    return; 
+    return;
   }
 
-  MacroGridBuilder::~MacroGridBuilder () 
+  MacroGridBuilder::~MacroGridBuilder ()
   {
-    // _finalized is true if the method was called in inherited classes 
+    // _finalized is true if the method was called in inherited classes
     if(!_finalized) finalize();
   }
 
@@ -563,29 +563,29 @@ namespace ALUGrid
     elementMapToList( elementMap, elemList, setIndex );
   }
 
-  template< class elemlist_t > 
+  template< class elemlist_t >
   void MacroGridBuilder::
   elementMapToList( elementMap_t& elementMap, elemlist_t& elemList, const bool setIndex  )
   {
-    // elem_GEO_ptr is either hexa_GEO* or tetra_GEO* 
-    typedef typename elemlist_t :: value_type elem_GEO_ptr; 
+    // elem_GEO_ptr is either hexa_GEO* or tetra_GEO*
+    typedef typename elemlist_t :: value_type elem_GEO_ptr;
     {
-      // sort by element numbering which is unique for macro elements 
+      // sort by element numbering which is unique for macro elements
       typedef std::map< int, elem_GEO_ptr > elemmap_t;
       elemmap_t elemMap;
       {
         typedef typename elementMap_t::iterator  iterator;
         const iterator elementMapEnd = elementMap.end();
-        for (iterator i = elementMap.begin (); 
+        for (iterator i = elementMap.begin ();
              i != elementMapEnd; elementMap.erase (i++) )
         {
           elem_GEO_ptr elem = (elem_GEO_ptr)(*i).second;
           // if ldbVertexIndex still needs to be set (in case of initial read)
-          if( setIndex ) 
+          if( setIndex )
           {
             elem->setLoadBalanceVertexIndex( elem->getIndex() );
           }
-          // ldbVertexIndex provides the unique index of the element across processes 
+          // ldbVertexIndex provides the unique index of the element across processes
           elemMap[ elem->ldbVertexIndex() ] = elem;
         }
       }
@@ -600,25 +600,25 @@ namespace ALUGrid
         for ( iterator i = elemMap.begin (); i != iend; ++ i, ++elemCount )
         {
           elem_GEO_ptr elem = (elem_GEO_ptr)(*i).second;
-          // make sure that the insertion order 
-          // in the list is reflected by getIndex 
+          // make sure that the insertion order
+          // in the list is reflected by getIndex
           alugrid_assert ( setIndex ? (elem->getIndex() == elemCount) : true );
-          // insert into macro element list 
+          // insert into macro element list
           elemList.push_back ( elem );
         }
       }
     }
   }
 
-  // clean the map tables 
-  void MacroGridBuilder::finalize () 
+  // clean the map tables
+  void MacroGridBuilder::finalize ()
   {
     alugrid_assert (_initialized);
-    
-    // copy elements from hexa map to hexa list respecting the insertion order 
+
+    // copy elements from hexa map to hexa list respecting the insertion order
     hexaMapToList( _hexaMap, myBuilder()._hexaList, true );
 
-    // copy elements from tetra map to tetra list respecting the insertion order 
+    // copy elements from tetra map to tetra list respecting the insertion order
     tetraMapToList( _tetraMap, myBuilder()._tetraList, true );
 
     {
@@ -632,7 +632,7 @@ namespace ALUGrid
       // clear mpa
       _periodic3Map.clear();
     }
-    
+
     {
       // reserve memory for container in case it's vector
       reserve( myBuilder ()._periodic4List, _periodic4Map.size() );
@@ -653,12 +653,12 @@ namespace ALUGrid
       const iterator hbnd4MapEnd =  _hbnd4Map.end ();
       for (faceMap_t::iterator i = _hbnd4Map.begin (); i != hbnd4MapEnd; )
       {
-        if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1) 
+        if (((hbndseg4_GEO *)(*i).second)->myhface4 (0)->ref == 1)
         {
           delete (hbndseg4_GEO *)(*i).second;
           _hbnd4Map.erase (i++);
-        } 
-        else 
+        }
+        else
         {
           myBuilder ()._hbndseg4List.push_back ((hbndseg4_GEO *)(*i ++).second);
         }
@@ -677,8 +677,8 @@ namespace ALUGrid
         if (((hbndseg3_GEO *)(*i).second)->myhface3 (0)->ref == 1) {
           delete (hbndseg3_GEO *)(*i).second;
           _hbnd3Map.erase (i++);
-        } 
-        else 
+        }
+        else
         {
           myBuilder ()._hbndseg3List.push_back ((hbndseg3_GEO *)(*i ++).second);
         }
@@ -690,34 +690,34 @@ namespace ALUGrid
 
       typedef hbnd4intMap_t::iterator iterator;
       const iterator hbnd4IntEnd = _hbnd4Int.end ();
-      for (hbnd4intMap_t::iterator i = _hbnd4Int.begin (); i != hbnd4IntEnd; ++i) 
+      for (hbnd4intMap_t::iterator i = _hbnd4Int.begin (); i != hbnd4IntEnd; ++i)
       {
         const Hbnd4IntStorage & p = * ((*i).second);
-        if (p.first()->ref == 1) 
+        if (p.first()->ref == 1)
         {
-          hbndseg4_GEO * hb4 = 
-             myBuilder ().insert_hbnd4 (p.first(), p.second(), 
+          hbndseg4_GEO * hb4 =
+             myBuilder ().insert_hbnd4 (p.first(), p.second(),
                                         Gitter::hbndseg_STI::closure);
           myBuilder ()._hbndseg4List.push_back (hb4);
         }
         delete (*i).second;
-      } 
+      }
     }
 
-    // here the internal boundary elements are created 
+    // here the internal boundary elements are created
     {
       // reserve memory for container in case it's vector
       reserve( myBuilder ()._hbndseg3List, _hbnd3Int.size() );
 
       typedef hbnd3intMap_t::iterator  iterator;
       const iterator hbnd3IntEnd = _hbnd3Int.end ();
-      for (hbnd3intMap_t::iterator i = _hbnd3Int.begin (); i != hbnd3IntEnd; ++i) 
+      for (hbnd3intMap_t::iterator i = _hbnd3Int.begin (); i != hbnd3IntEnd; ++i)
       {
         const Hbnd3IntStorage & p = * ((*i).second);
-        if (p.first()->ref == 1) 
+        if (p.first()->ref == 1)
         {
-          hbndseg3_GEO * hb3 = 
-            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure);    
+          hbndseg3_GEO * hb3 =
+            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure);
           myBuilder ()._hbndseg3List.push_back (hb3);
         }
         delete (*i).second;
@@ -730,12 +730,12 @@ namespace ALUGrid
       typedef faceMap_t::iterator iterator;
       const iterator face4MapEnd = _face4Map.end ();
       for (faceMap_t::iterator i = _face4Map.begin (); i != face4MapEnd; )
-      if (!((hface4_GEO *)(*i).second)->ref) 
+      if (!((hface4_GEO *)(*i).second)->ref)
       {
         delete (hface4_GEO *)(*i).second;
         _face4Map.erase (i++);
-      } 
-      else 
+      }
+      else
       {
         alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
         myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
@@ -747,14 +747,14 @@ namespace ALUGrid
 
       typedef faceMap_t::iterator iterator;
       const iterator face3MapEnd = _face3Map.end ();
-      for (faceMap_t::iterator i = _face3Map.begin (); i != face3MapEnd; ) 
+      for (faceMap_t::iterator i = _face3Map.begin (); i != face3MapEnd; )
       {
-        if (!((hface3_GEO *)(*i).second)->ref) 
+        if (!((hface3_GEO *)(*i).second)->ref)
         {
           delete (hface3_GEO *)(*i).second;
           _face3Map.erase (i++);
-        } 
-        else 
+        }
+        else
         {
           alugrid_assert (((hface3_GEO *)(*i).second)->ref == 2);
           myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second );
@@ -769,12 +769,12 @@ namespace ALUGrid
       const iterator edgeMapEnd = _edgeMap.end ();
       for (edgeMap_t::iterator i = _edgeMap.begin (); i != edgeMapEnd; )
       {
-        if (!(*i).second->ref) 
+        if (!(*i).second->ref)
         {
           delete (*i).second;
           _edgeMap.erase (i++);
-        } 
-        else 
+        }
+        else
         {
           alugrid_assert ((*i).second->ref >= 1);
           myBuilder ()._hedge1List.push_back ((*i ++).second);
@@ -789,11 +789,11 @@ namespace ALUGrid
       const iterator vertexMapEnd = _vertexMap.end ();
       for (vertexMap_t::iterator i = _vertexMap.begin (); i != vertexMapEnd; )
       {
-        if (!(*i).second->ref) 
+        if (!(*i).second->ref)
         {
           delete (*i).second;
           _vertexMap.erase (i++);
-        } 
+        }
         else {
           alugrid_assert ((*i).second->ref >= 2);
           myBuilder ()._vertexList.push_back ((*i ++).second);
@@ -804,7 +804,7 @@ namespace ALUGrid
     return;
   }
 
-  void initialize () 
+  void initialize ()
   {
     // careful with changes here, you'll get what you deserve
     const char str
@@ -814,15 +814,15 @@ namespace ALUGrid
   }
 
   void MacroGridBuilder::
-  computeVertexElementLinkage( elementMap_t& elementMap, 
-                               Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage ) 
+  computeVertexElementLinkage( elementMap_t& elementMap,
+                               Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage )
   {
     typedef elementMap_t::iterator  iterator;
     const iterator elementMapEnd = elementMap.end();
     for (iterator i = elementMap.begin (); i != elementMapEnd; ++i )
     {
       Gitter::helement_STI* elem = (Gitter::helement_STI*) (*i).second;
-      elem->computeVertexLinkage( vxElemLinkage ); 
+      elem->computeVertexLinkage( vxElemLinkage );
     }
   }
 
@@ -832,7 +832,7 @@ namespace ALUGrid
     const int start = clock ();
     int nv = 0;
     in >> nv;
-    for (int i = 0; i < nv; ++i ) 
+    for (int i = 0; i < nv; ++i )
     {
       int id;
       double x, y, z;
@@ -849,7 +849,7 @@ namespace ALUGrid
     if( type == HEXA_RAW )
     {
       int v [8];
-      for (int i = 0; i<ne; ++i ) 
+      for (int i = 0; i<ne; ++i )
       {
         for( int k=0; k<8; ++k )
         {
@@ -861,7 +861,7 @@ namespace ALUGrid
     else if( type == TETRA_RAW )
     {
       int v [4];
-      for (int i = 0; i < ne; ++i ) 
+      for (int i = 0; i < ne; ++i )
       {
         for( int j=0; j<4; ++j )
         {
@@ -875,13 +875,13 @@ namespace ALUGrid
     // read number of periodic and other boundary elements
     int nper;
     in >> nper ;
-    int nb ; 
+    int nb ;
     in >> nb ;
 
-    if( type == HEXA_RAW ) 
+    if( type == HEXA_RAW )
     {
       int vp[ 8 ];
-      for( int i=0; i<nper; ++i ) 
+      for( int i=0; i<nper; ++i )
       {
         for( int j=0; j<8; ++j )
           in >> vp[ j ] ;
@@ -895,10 +895,10 @@ namespace ALUGrid
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
-        int k = 0 ; 
-        if( bt < 0 ) // exterior bnd 
+        int k = 0 ;
+        if( bt < 0 ) // exterior bnd
         {
-          bt = -bt; // use positive value 
+          bt = -bt; // use positive value
           if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
           {
             std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -911,8 +911,8 @@ namespace ALUGrid
           bt = Gitter::hbndseg_STI::closure ;
         }
 
-        // read remaining vertices 
-        for( ; k<4; ++k ) 
+        // read remaining vertices
+        for( ; k<4; ++k )
         {
           in >> v[ k ];
         }
@@ -920,10 +920,10 @@ namespace ALUGrid
         InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt));
       }
     }
-    else if ( type == TETRA_RAW ) 
+    else if ( type == TETRA_RAW )
     {
       int vp[ 6 ];
-      for( int i=0; i<nper; ++i ) 
+      for( int i=0; i<nper; ++i )
       {
         for( int j=0; j<6; ++j )
           in >> vp[ j ] ;
@@ -939,9 +939,9 @@ namespace ALUGrid
         in >> bt ;
         int k = 0 ;
 
-        if( bt < 0 ) // exterior bnd 
+        if( bt < 0 ) // exterior bnd
         {
-          bt = -bt; // use positive value 
+          bt = -bt; // use positive value
           if( !Gitter::hbndseg_STI::bndRangeCheck( bt ) )
           {
             std::cerr << "ERROR (fatal): Boundary id = " << bt << " out of range (valid are " << Gitter::hbndseg_STI::validRanges() << ")." << std::endl;
@@ -955,7 +955,7 @@ namespace ALUGrid
         }
 
         // read remaining vertices
-        for( ; k<3; ++k ) 
+        for( ; k<3; ++k )
         {
           in >> v[ k ];
         }
@@ -966,25 +966,25 @@ namespace ALUGrid
 
     int linkagePatternSize ;
     in >> linkagePatternSize ;
-    // is special situations we need to set linkagePatternSize 
+    // is special situations we need to set linkagePatternSize
     if(retur ()) linkagePatternSize = 1;
 
     // if linkage was writte, restore vertex linkage
-    if( linkagePatternSize > 0 ) 
+    if( linkagePatternSize > 0 )
     {
       ++linkagePatternSize ; // include null pattern (which is the first entry)
 
       // mark linkage as computed (to avoid costly rebuild)
       myBuilder().linkageComputed();
 
-      // read linkage combinations 
-      std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() ); 
+      // read linkage combinations
+      std::vector< linkagePattern_t > patterns( linkagePatternSize, linkagePattern_t() );
       // don't read null pattern (i=1)
       for( int i=1; i<linkagePatternSize; ++i )
       {
         int n;
-        in >> n; 
-        if( n ) 
+        in >> n;
+        if( n )
         {
           linkagePattern_t& pattern = patterns[ i ];
           pattern.resize( n );
@@ -998,13 +998,13 @@ namespace ALUGrid
       }
 
       int hasElementLink = 0 ;
-      in >> hasElementLink ; 
+      in >> hasElementLink ;
       const bool hasElementLinkage = (hasElementLink == 1);
 
       typedef Gitter :: ElementPllXIF :: vertexelementlinkage_t vertexelementlinkage_t;
       vertexelementlinkage_t vxElemLinkage ;
 
-      if( hasElementLinkage ) 
+      if( hasElementLinkage )
       {
         // compuate vertex-element linkage for hexas and tetras
         computeVertexElementLinkage( _hexaMap,  vxElemLinkage );
@@ -1015,17 +1015,17 @@ namespace ALUGrid
       }
 
       int idx = 0;
-      // read position in linkage vector 
-      int vxId; 
-      in >> vxId; 
-      // set vertex linkage according to stores position 
+      // read position in linkage vector
+      int vxId;
+      in >> vxId;
+      // set vertex linkage according to stores position
       vertexMap_t::iterator i = _vertexMap.begin ();
-      while( vxId != -1 ) 
+      while( vxId != -1 )
       {
         // advance iterator until pos is reached
         while( idx != vxId )
         {
-          ++i; 
+          ++i;
           ++idx ;
         }
 
@@ -1033,15 +1033,15 @@ namespace ALUGrid
         in >> pos;
         alugrid_assert( pos < int(patterns.size()) );
 
-        // vertex pointer 
-        Gitter::vertex_STI* vertex = (*i).second; 
+        // vertex pointer
+        Gitter::vertex_STI* vertex = (*i).second;
 
-        if( hasElementLinkage ) 
+        if( hasElementLinkage )
         {
-          std::set<int> elements; 
+          std::set<int> elements;
           int size ;
-          in >> size; 
-          for( int k=0; k<size; ++k ) 
+          in >> size;
+          for( int k=0; k<size; ++k )
           {
             int el;
             in >> el;
@@ -1049,7 +1049,7 @@ namespace ALUGrid
           }
           vertex->insertLinkedElements( elements );
 
-          // erase computed linkage to avoid reinsertion 
+          // erase computed linkage to avoid reinsertion
           vxElemLinkage.erase( vertex );
         }
 
@@ -1057,16 +1057,16 @@ namespace ALUGrid
         if( patterns[ pos ].size() )
           vertex->setLinkageSorted( patterns[ pos ] );
 
-        // read position in linkage vector 
-        in >> vxId; 
+        // read position in linkage vector
+        in >> vxId;
       } // end while( vxId != -1 )
 
-      if( hasElementLinkage ) 
+      if( hasElementLinkage )
       {
         // insert vertex-element linkage for remaining vertices (interior)
         typedef vertexelementlinkage_t :: iterator iterator ;
-        const iterator end = vxElemLinkage.end(); 
-        for( iterator i = vxElemLinkage.begin(); i != end; ++ i ) 
+        const iterator end = vxElemLinkage.end();
+        for( iterator i = vxElemLinkage.begin(); i != end; ++ i )
         {
           (*i).first->insertLinkedElements( (*i).second );
         }
@@ -1099,7 +1099,7 @@ namespace ALUGrid
         ALUGrid::readBinary( in, os, header );
         mm.inflateMacroGrid( os, type );
       }
-      else if( header.byteOrder() == MacroFileHeader::bigendian ) 
+      else if( header.byteOrder() == MacroFileHeader::bigendian )
       {
         BigEndianObjectStream os;
         ALUGrid::readBinary( in, os, header );
@@ -1111,7 +1111,7 @@ namespace ALUGrid
         ALUGrid::readBinary( in, os, header );
         mm.inflateMacroGrid( os, type );
       }
-      else 
+      else
       {
         std::cerr << "ERROR (fatal): byte order not available" << std::endl;
         std::abort();

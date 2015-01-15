@@ -1,6 +1,6 @@
 // (c) bernhard schupp 1997 - 1998
-// modifications for Dune Interface 
-// (c) Robert Kloefkorn 2004 - 2005 
+// modifications for Dune Interface
+// (c) Robert Kloefkorn 2004 - 2005
 #include <config.h>
 
 #include <fstream>
@@ -18,7 +18,7 @@ namespace ALUGrid
   Refcount::Globalcount Refcount::_g;
 
   Refcount::Globalcount::~Globalcount () {
-    alugrid_assert (_c ? (std::cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c 
+    alugrid_assert (_c ? (std::cerr << "**WARNING Refcount::Globalcount::~Globalcount() " << _c
              << " objects have not been removed correctly!" << std::endl, 1) : 1);
     return;
   }
@@ -27,19 +27,19 @@ namespace ALUGrid
 
   int __STATIC_myrank = -1;
 
-  typedef Wrapper < AccessIterator < Gitter::vertex_STI >::Handle, 
+  typedef Wrapper < AccessIterator < Gitter::vertex_STI >::Handle,
     Gitter::InternalVertex >              leaf_vertex__macro_vertex__iterator;
 
-  typedef Insert < AccessIterator < Gitter::hedge_STI >::Handle, 
+  typedef Insert < AccessIterator < Gitter::hedge_STI >::Handle,
     TreeIterator < Gitter::hedge_STI, is_leaf < Gitter::hedge_STI > > >   leaf_edge__macro_edge__iterator;
 
-  typedef Insert < AccessIterator < Gitter::hface_STI >::Handle, 
+  typedef Insert < AccessIterator < Gitter::hface_STI >::Handle,
     TreeIterator < Gitter::hface_STI, is_leaf < Gitter::hface_STI > > >   leaf_face__macro_face__iterator;
 
-  typedef Insert < AccessIterator < Gitter::hbndseg_STI >::Handle, 
+  typedef Insert < AccessIterator < Gitter::hbndseg_STI >::Handle,
     TreeIterator < Gitter::hbndseg_STI, is_leaf < Gitter::hbndseg_STI> > >  leaf_bnd__macro_bnd__iterator;
 
-  typedef Insert < AccessIterator < Gitter::helement_STI >::Handle, 
+  typedef Insert < AccessIterator < Gitter::helement_STI >::Handle,
     TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > leaf_element__macro_element__iterator;
 
   IteratorSTI < Gitter::vertex_STI > * Gitter::iterator (const Gitter::vertex_STI *) {
@@ -48,9 +48,9 @@ namespace ALUGrid
     {
       _iterators.push_back ( new AccessIterator < vertex_STI >::Handle (container ()));
     }
-    Insert < AccessIterator < hedge_STI >::Handle, 
+    Insert < AccessIterator < hedge_STI >::Handle,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > dw (container ());
-    _iterators.push_back ( new Wrapper < Insert < AccessIterator < hedge_STI >::Handle, 
+    _iterators.push_back ( new Wrapper < Insert < AccessIterator < hedge_STI >::Handle,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (dw));
     {
       Insert < AccessIterator < hface_STI >::Handle,
@@ -65,15 +65,15 @@ namespace ALUGrid
     TreeIterator < helement_STI, has_int_vertex < helement_STI > > >, InternalVertex > (ew));
     }
     {
-      Insert < AccessIterator < hface_STI >::Handle, 
+      Insert < AccessIterator < hface_STI >::Handle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > > fw (container ());
-      Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < hface_STI >::Handle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > df (fw);
-      Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
-    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+      Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle,
+    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > dif (df);
-      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
-    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle,
+    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (dif));
     }
     {
@@ -82,41 +82,41 @@ namespace ALUGrid
       Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > de (ew);
       Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
-    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > die (de);
       _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
-    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (die));
     }
     {
-      Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ());
-      Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew);
-      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
-    TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
+    TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_vertex < hface_STI > > > fie (fe);
-      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (fie));
     }
     {
-      Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ());
-      Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew);
-      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fe);
-      Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfie (fie);
-      Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > difie (dfie);
-      _iterators.push_back (new Wrapper < Insert < Wrapper < Insert < Wrapper < 
-    Insert < AccessIterator < helement_STI >::Handle, 
+      _iterators.push_back (new Wrapper < Insert < Wrapper < Insert < Wrapper <
+    Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (difie));
@@ -124,43 +124,43 @@ namespace ALUGrid
     return new VectorAlign < vertex_STI > (_iterators);
   }
 
-  IteratorSTI < Gitter::hedge_STI > * Gitter::iterator (const hedge_STI * e) 
+  IteratorSTI < Gitter::hedge_STI > * Gitter::iterator (const hedge_STI * e)
   {
-    is_leaf< hedge_STI > rule; 
+    is_leaf< hedge_STI > rule;
     return this->createIterator(e, rule);
   }
 
-  IteratorSTI < Gitter::hface_STI > * Gitter::iterator (const hface_STI * f) 
+  IteratorSTI < Gitter::hface_STI > * Gitter::iterator (const hface_STI * f)
   {
-    is_leaf< hface_STI > rule; 
+    is_leaf< hface_STI > rule;
     return this->createIterator(f, rule);
   }
 
-  IteratorSTI < Gitter::hbndseg_STI > * Gitter::iterator (const hbndseg_STI * bnd) 
+  IteratorSTI < Gitter::hbndseg_STI > * Gitter::iterator (const hbndseg_STI * bnd)
   {
     is_leaf <hbndseg_STI> rule;
     return this->createIterator(bnd, rule);
   }
 
-  IteratorSTI < Gitter::helement_STI > * Gitter::iterator (const helement_STI *el) 
+  IteratorSTI < Gitter::helement_STI > * Gitter::iterator (const helement_STI *el)
   {
     is_leaf <helement_STI> rule;
     return this->createIterator(el, rule);
   }
 
   //**************************************************************************
-  // all the level iterators 
-  //************************************************************************** 
+  // all the level iterators
+  //**************************************************************************
   IteratorSTI < Gitter::vertex_STI > * Gitter::
-  levelIterator (const Gitter::vertex_STI * a, const any_has_level< vertex_STI > & vhl) 
+  levelIterator (const Gitter::vertex_STI * a, const any_has_level< vertex_STI > & vhl)
   {
     std::vector< IteratorSTI < vertex_STI > * > _iterators;
     {
       _iterators.push_back ( new AccessIterator < vertex_STI >::Handle (container ()));
     }
-    Insert < AccessIterator < hedge_STI >::Handle, 
+    Insert < AccessIterator < hedge_STI >::Handle,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > dw (container ());
-    _iterators.push_back ( new Wrapper < Insert < AccessIterator < hedge_STI >::Handle, 
+    _iterators.push_back ( new Wrapper < Insert < AccessIterator < hedge_STI >::Handle,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (dw));
     {
       Insert < AccessIterator < hface_STI >::Handle,
@@ -175,15 +175,15 @@ namespace ALUGrid
     TreeIterator < helement_STI, has_int_vertex < helement_STI > > >, InternalVertex > (ew));
     }
     {
-      Insert < AccessIterator < hface_STI >::Handle, 
+      Insert < AccessIterator < hface_STI >::Handle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > > fw (container ());
-      Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < hface_STI >::Handle,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > df (fw);
-      Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
-    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+      Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle,
+    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > dif (df);
-      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle, 
-    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >, 
+      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < hface_STI >::Handle,
+    TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (dif));
     }
     {
@@ -192,41 +192,41 @@ namespace ALUGrid
       Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge > de (ew);
       Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
-    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > > die (de);
       _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
-    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >, 
+    TreeIterator < helement_STI, has_int_edge < helement_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, unary_not < is_leaf < hedge_STI > > > >, InternalVertex > (die));
     }
     {
-      Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ());
-      Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew);
-      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
-    TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >, 
+      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
+    TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_vertex < hface_STI > > > fie (fe);
-      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      _iterators.push_back ( new Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_vertex < hface_STI > > >, InternalVertex > (fie));
     }
     {
-      Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > > ew (container ());
-      Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace > fe (ew);
-      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > > fie (fe);
-      Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge > dfie (fie);
-      Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle, 
+      Insert < Wrapper < Insert < Wrapper < Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > > difie (dfie);
-      _iterators.push_back (new Wrapper < Insert < Wrapper < Insert < Wrapper < 
-    Insert < AccessIterator < helement_STI >::Handle, 
+      _iterators.push_back (new Wrapper < Insert < Wrapper < Insert < Wrapper <
+    Insert < AccessIterator < helement_STI >::Handle,
     TreeIterator < helement_STI, has_int_face < helement_STI > > >, InternalFace >,
     TreeIterator < hface_STI, has_int_edge < hface_STI > > >, InternalEdge >,
     TreeIterator < hedge_STI, has_int_vertex < hedge_STI > > >, InternalVertex > (difie));
@@ -234,36 +234,36 @@ namespace ALUGrid
     return new VectorAlign < vertex_STI > (_iterators);
   }
 
-  // create level edge iterator 
-  IteratorSTI < Gitter::hedge_STI > * Gitter::levelIterator (const hedge_STI * e, const any_has_level<hedge_STI> & ahl) 
+  // create level edge iterator
+  IteratorSTI < Gitter::hedge_STI > * Gitter::levelIterator (const hedge_STI * e, const any_has_level<hedge_STI> & ahl)
   {
     any_has_level<hedge_STI> rule(ahl);
     return this->createIterator(e,rule);
   }
 
-  // create level face iterator 
+  // create level face iterator
   IteratorSTI < Gitter::hface_STI > * Gitter::
-  levelIterator (const hface_STI * f , const any_has_level<hface_STI> & ahl ) 
+  levelIterator (const hface_STI * f , const any_has_level<hface_STI> & ahl )
   {
     any_has_level< hface_STI > rule(ahl);
     return this->createIterator(f, rule);
   }
 
-  // create level element iterator 
-  IteratorSTI < Gitter::helement_STI > * Gitter::levelIterator (const helement_STI * el, const any_has_level<helement_STI> & ahl) 
+  // create level element iterator
+  IteratorSTI < Gitter::helement_STI > * Gitter::levelIterator (const helement_STI * el, const any_has_level<helement_STI> & ahl)
   {
     any_has_level <helement_STI> rule(ahl);
     return this->createIterator(el, rule);
   }
 
-  IteratorSTI < Gitter::hbndseg_STI > * Gitter::levelIterator (const hbndseg_STI * bnd, const any_has_level<hbndseg_STI> & ahl) 
+  IteratorSTI < Gitter::hbndseg_STI > * Gitter::levelIterator (const hbndseg_STI * bnd, const any_has_level<hbndseg_STI> & ahl)
   {
     any_has_level<hbndseg_STI> rule(ahl);
     return this->createIterator(bnd, rule);
   }
 
   //*******************************************
-  //  other methods on class Gitter 
+  //  other methods on class Gitter
   //*******************************************
   void Gitter::fullIntegrityCheck ()
   {
@@ -308,7 +308,7 @@ namespace ALUGrid
   int adaptstep = 0;
   int stepnumber = 0;
 #endif
-  bool Gitter::refine () 
+  bool Gitter::refine ()
   {
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterDuneBasis::refine ()" << std::endl, 1) : 1);
     bool x = true;
@@ -329,36 +329,36 @@ namespace ALUGrid
   bool Gitter::markForConformingClosure()
   {
     bool needConformingClosure = false;
-    // if bisection refinement was enabled we need to check 
-    // for the conforming closure 
-    if( conformingClosureNeeded() ) 
+    // if bisection refinement was enabled we need to check
+    // for the conforming closure
+    if( conformingClosureNeeded() )
     {
       leaf_element__macro_element__iterator i ( container () );
-      for( i.first(); ! i.done(); i.next()) 
-      { 
-        // this should only be called for tetra 
+      for( i.first(); ! i.done(); i.next())
+      {
+        // this should only be called for tetra
         // (although default impl for other elements exists and
         //  returns false )
         alugrid_assert ( i.item ().type() == tetra );
-        // stores the result if it is true 
+        // stores the result if it is true
         needConformingClosure |= i.item ().markForConformingClosure();
       }
     }
     return needConformingClosure;
   }
 
-  bool Gitter::markEdgeCoarsening () 
+  bool Gitter::markEdgeCoarsening ()
   {
-    if( conformingClosureNeeded() ) 
+    if( conformingClosureNeeded() )
     {
-      // reset all edge flags 
+      // reset all edge flags
       resetEdgeCoarsenFlags ();
 
       // now check for each tetra whether it could really be coarsened
       leaf_element__macro_element__iterator i (container ());
-      for( i.first(); ! i.done(); i.next() ) 
+      for( i.first(); ! i.done(); i.next() )
       {
-        // mark coarsening will unset some edge flags 
+        // mark coarsening will unset some edge flags
         i.item().markEdgeCoarsening();
       }
       return true;
@@ -366,36 +366,36 @@ namespace ALUGrid
     return false;
   }
 
-  void Gitter::resetEdgeCoarsenFlags () 
+  void Gitter::resetEdgeCoarsenFlags ()
   {
-    // reset all edge flags 
+    // reset all edge flags
     {
-      // iterate over all edges in the hierarchy 
-      is_def_true< hedge_STI > stoprule; 
+      // iterate over all edges in the hierarchy
+      is_def_true< hedge_STI > stoprule;
       IteratorSTI < hedge_STI >* edges = createIterator( (hedge_STI *) 0 , stoprule );
 
-      // reset coarsening flag for all edges 
-      for( edges->first(); ! edges->done(); edges->next() ) 
+      // reset coarsening flag for all edges
+      for( edges->first(); ! edges->done(); edges->next() )
       {
         edges->item().resetCoarsenFlag();
       }
-      // delete iterator 
+      // delete iterator
       delete edges;
     }
   }
 
 
-  void Gitter::doCoarse() 
+  void Gitter::doCoarse()
   {
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO Gitter::coarse ()" << std::endl, 1) : 1);
     {
       AccessIterator < helement_STI >::Handle i (container ());
-      for( i.first(); ! i.done(); i.next() ) 
+      for( i.first(); ! i.done(); i.next() )
       {
-        i.item ().coarse (); 
+        i.item ().coarse ();
       }
     }
-    
+
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
     std::ostringstream ss;
     int filenr = adaptstep*100+stepnumber;
@@ -406,7 +406,7 @@ namespace ALUGrid
 
   }
 
-  void Gitter::coarse() 
+  void Gitter::coarse()
   {
     markEdgeCoarsening();
     doCoarse();
@@ -415,10 +415,10 @@ namespace ALUGrid
   template<class element_t, class bndseg>
   void Gitter::tovtkImpl( const std::string &fn,
                             const int elementVertices,
-                            const element_t*, const bndseg* ) 
+                            const element_t*, const bndseg* )
   {
     const bool showbnd = false;
-    // only show faces for bisection grids 
+    // only show faces for bisection grids
     const bool showface = conformingClosureNeeded();
 
     const int nFaceVertices = ( elementVertices == 4 ) ? 3 : 4;
@@ -426,7 +426,7 @@ namespace ALUGrid
     // openfile
     std::ofstream vtuFile;
     vtuFile.open( fn.c_str() );
-      
+
     // header info
     vtuFile << "<?xml version=\"1.0\"?>" << std::endl;
     vtuFile << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"" << RestoreInfo::byteOrderString () << "\">" << std::endl;
@@ -456,14 +456,14 @@ namespace ALUGrid
       for (w->first (); ! w->done (); w->next ())
       {
         element_t* item = ((element_t *) &w->item ());
-        // store vertices 
+        // store vertices
         for (int i=0; i < elementVertices; ++i )
         {
           Vertex v(3);
           const myvertex_t* vx = item->myvertex( i );
           alugrid_assert ( vx );
           const alucoord_t (&coord)[ 3 ] = vx->Point();
-          // copy coordinates  
+          // copy coordinates
           for (int k=0;k<3;++k) v[k] = coord[ k ];
           vertexList[ vx->getIndex() ] = make_pair(-1,v);
         }
@@ -641,21 +641,21 @@ namespace ALUGrid
       vtuFile << "        <DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">" << std::endl;
       vtuFile << "         ";
 
-      // 10 for tetrahedra, 12 for hexahedron  
+      // 10 for tetrahedra, 12 for hexahedron
       const int elemId = ( elementVertices == 4 ) ? 10 : 12;
       for( int i = 0; i < nCells; ++i )
       {
-        vtuFile << " " << elemId; 
+        vtuFile << " " << elemId;
       }
-      // 5 for triangle, 9 for quadrilateral 
+      // 5 for triangle, 9 for quadrilateral
       const int faceId = ( nFaceVertices == 3 ) ? 5 : 9;
       for( int i = 0; i < nBnd; ++i )
       {
-        vtuFile << " " << faceId; 
+        vtuFile << " " << faceId;
       }
       for( int i = 0; i < nFaces; ++i )
       {
-        vtuFile << " " << faceId; 
+        vtuFile << " " << faceId;
       }
       vtuFile << std::endl;
 
@@ -675,17 +675,17 @@ namespace ALUGrid
     typedef LeafIterator< Gitter::helement_STI > Iterator;
     Iterator w (*this);
     w->first();
-    if( ! w->done() && w->item().type() == hexa ) 
+    if( ! w->done() && w->item().type() == hexa )
     {
       tovtkImpl( filename, 8, (Geometric::hexa_GEO *) 0, (Geometric::hbndseg4_GEO * ) 0 );
     }
-    else 
+    else
     {
       tovtkImpl( filename, 4, (Geometric::tetra_GEO *) 0, (Geometric::tetra_GEO * ) 0 );
     }
   }
 
-  bool Gitter::adapt () 
+  bool Gitter::adapt ()
   {
     alugrid_assert (debugOption (20) ? (std::cout << "**INFO Gitter::adapt ()" << std::endl, 1) : 1);
     alugrid_assert (! iterators_attached ());
@@ -693,21 +693,21 @@ namespace ALUGrid
     bool needConformingClosure = false;
     bool refined = true;
     do {
-      // refine the grid 
+      // refine the grid
       refined &= refine ();
 
       // check for conformity
       needConformingClosure = markForConformingClosure();
     }
-    while( needConformingClosure ); 
+    while( needConformingClosure );
 
     if( !refined )
       std::cerr << "WARNING (ignored): Incomplete refinement (This option should only be used by the parallel refiner)." << std::endl;
 
-    // now call coarsen once 
+    // now call coarsen once
     coarse();
 
-    // make sure that no non-conforming element are present in case of bisection 
+    // make sure that no non-conforming element are present in case of bisection
     alugrid_assert ( !markForConformingClosure() );
 
 #ifdef ENABLE_ALUGRID_VTK_OUTPUT
@@ -732,74 +732,74 @@ namespace ALUGrid
   void Gitter::backupHierarchy ( stream_t& out )
   {
     char bisection = char(conformingClosureNeeded());
-    // store whether we have bisection refinement 
+    // store whether we have bisection refinement
     out.put( bisection );
 
     char ghosts = char(ghostCellsEnabled());
-    // store whether ghost cells are enabled 
+    // store whether ghost cells are enabled
     out.put( ghosts );
 
-    // backupHierarchy of edges 
+    // backupHierarchy of edges
     {
       AccessIterator <hedge_STI>::Handle fw (container ());
-      for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out); 
+      for (fw.first(); !fw.done(); fw.next()) fw.item ().backup (out);
     }
-    // backupHierarchy of faces 
+    // backupHierarchy of faces
     {
       AccessIterator <hface_STI>::Handle fw (container ());
-      for (fw.first (); ! fw.done (); fw.next ()) fw.item().backup(out); 
+      for (fw.first (); ! fw.done (); fw.next ()) fw.item().backup(out);
     }
-    // backupHierarchy of elements 
+    // backupHierarchy of elements
     {
       AccessIterator <helement_STI>::Handle ew (container ());
-      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out); 
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out);
     }
-    // backup periodic elements 
+    // backup periodic elements
     {
       AccessIterator <hperiodic_STI>::Handle ew (container ());
-      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out); 
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backup (out);
     }
   }
 
-  template <class stream_t> 
-  void Gitter ::restoreHierarchy ( stream_t& in, const bool restoreBndFaces ) 
+  template <class stream_t>
+  void Gitter ::restoreHierarchy ( stream_t& in, const bool restoreBndFaces )
   {
-    // store whether we have bisection refinement 
+    // store whether we have bisection refinement
     const char bisection = in.get();
     if( bisection ) enableConformingClosure();
 
-    // store whether ghost cells are enabled 
+    // store whether ghost cells are enabled
     const char ghostCells = in.get();
     if( ! ghostCells )
       disableGhostCells();
 
-    // restoreHierarchy edges 
+    // restoreHierarchy edges
     {
       AccessIterator < hedge_STI >::Handle ew (container ());
-      for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in); 
+      for (ew.first (); !ew.done (); ew.next ()) ew.item ().restore (in);
     }
-    // restoreHierarchy faces 
+    // restoreHierarchy faces
     {
       AccessIterator < hface_STI >:: Handle fw(container());
-      for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in); 
+      for ( fw.first(); !fw.done (); fw.next()) fw.item().restore (in);
     }
-    // restoreHierarchy elements 
+    // restoreHierarchy elements
     {
       AccessIterator < helement_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in);
     }
-    // restoreHierarchy periodic elements 
+    // restoreHierarchy periodic elements
     {
       AccessIterator < hperiodic_STI >:: Handle ew(container());
-      for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in); 
+      for ( ew.first(); !ew.done(); ew.next()) ew.item().restore (in);
     }
-      
+
     // since the faces have been refined before the elements
     // the boundary faces might not habe benn refined at all
     if( restoreBndFaces )
     {
       AccessIterator < hbndseg_STI >::Handle bw (container ());
-      for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace (); 
+      for (bw.first (); ! bw.done (); bw.next ()) bw.item ().restoreFollowFace ();
     }
   }
 
@@ -828,8 +828,8 @@ namespace ALUGrid
     {
       {
         leaf_element__macro_element__iterator w (container ());
-        for (w.first (); ! w.done (); w.next ()) 
-          if( drand48 () < p )  w.item ().tagForGlobalRefinement (); 
+        for (w.first (); ! w.done (); w.next ())
+          if( drand48 () < p )  w.item ().tagForGlobalRefinement ();
       }
       adapt ();
       if( debugOption( 2 ) )
@@ -839,7 +839,7 @@ namespace ALUGrid
       std::cerr << "WARNING (ignored): Argument p of Gitter::refineRandom( p = " << p << " ) must be between 0 and 1." << std::endl;
   }
 
-  void Gitter::markForBallRefinement( const alucoord_t (&center)[3], double radius, int limit ) 
+  void Gitter::markForBallRefinement( const alucoord_t (&center)[3], double radius, int limit )
   {
     if( radius >= .0 )
     {
@@ -852,7 +852,7 @@ namespace ALUGrid
       if( debugOption( 2 ) )
         std::cout << "INFO: Gitter::refineBall() used " << (double)(clock () - start)/(double)(CLOCKS_PER_SEC) << " s." << std::endl;
     }
-    else 
+    else
       std::cerr << "WARNING (ignored) Gitter::refineBall ( center = ?, radius = " << radius << " ) radius must be non-negative." << std::endl;
   }
 
@@ -872,7 +872,7 @@ namespace ALUGrid
 
   int Gitter::Makrogitter::iterators_attached () const
   {
-    return AccessIterator < vertex_STI >::ref + AccessIterator < hedge_STI >::ref + 
+    return AccessIterator < vertex_STI >::ref + AccessIterator < hedge_STI >::ref +
      AccessIterator < hface_STI >::ref + AccessIterator < helement_STI >::ref +
      AccessIterator < hbndseg_STI >::ref;
   }

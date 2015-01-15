@@ -27,7 +27,7 @@ using namespace std;
 */
 
     /** \brief A simple stop watch
-    
+
   This class reports the elapsed user-time, i.e. time spent computing,
   after the last call to Timer::reset(). The results are seconds and
   fractional seconds. Note that the resolution of the timing depends
@@ -46,7 +46,7 @@ public:
 	}
 
 	//! Reset timer
-	inline void reset() 
+	inline void reset()
 	{
 #ifdef TIMER_USE_STD_CLOCK
 	  cstart = std::clock();
@@ -58,7 +58,7 @@ public:
 	}
 
 	//! Get elapsed user-time in seconds
-	inline double elapsed () const 
+	inline double elapsed () const
   {
 #ifdef TIMER_USE_STD_CLOCK
 	  return (std::clock()-cstart) / static_cast<double>(CLOCKS_PER_SEC);
@@ -67,23 +67,23 @@ public:
     getrusage(RUSAGE_SELF, &ru);
 	  return 1.0 * (ru.ru_utime.tv_sec - cstart.tv_sec) + (ru.ru_utime.tv_usec - cstart.tv_usec) / (1000.0 * 1000.0);
 #endif
-    
+
 	}
 
-  //! return elapsed in milli seconds 
+  //! return elapsed in milli seconds
   inline double convElapsed() const
   {
     size_t time = (size_t) (1e3 * elapsed());
     return (double) time;
   }
-    
+
 private:
 #ifdef TIMER_USE_STD_CLOCK
   clock_t cstart;
 #else
   struct timeval cstart;
 #endif
-}; // end class Timer 
+}; // end class Timer
 
 /** @} end documentation */
 

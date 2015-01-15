@@ -95,7 +95,7 @@ namespace ALU2DGrid
       alugrid_assert (plnb);
       alugrid_assert (prnb);
     }
-    
+
     ~Vtx_btree() {
       if( head ) delete head;
     }
@@ -106,9 +106,9 @@ namespace ALU2DGrid
     thinelement_t *getrnb() { return head->rnb; }
 
     void insert(vertex_t *invtx, thinelement_t *plnb, thinelement_t *prnb);
-    
+
     void splitTree(Vtx_btree*& inleft, Vtx_btree*& inright);
-    
+
     void merge(Vtx_btree* inleft, Vtx_btree* inright);
 
     void nbconnect ( int, thinelement_t *, int );
@@ -119,7 +119,7 @@ namespace ALU2DGrid
     }
 
     int count () const { return head->count(); }
-    
+
     bool remove(Vertex < N > *vtx) {
       alugrid_assert (head->prev || head->next);
       return (head->remove(vtx)==1);

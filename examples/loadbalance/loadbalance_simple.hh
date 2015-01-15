@@ -18,16 +18,16 @@ struct SimpleLoadBalanceHandle
   /** this method is called before invoking the re-partition
       method on the grid, to check if the user defined
       partitioning needs to be readjusted */
-  bool repartition () 
-  { 
+  bool repartition ()
+  {
     angle_ += 2.*M_PI/50.;
     return true;
   }
 
-  /** This is the method, called from the grid for each macro element. 
+  /** This is the method, called from the grid for each macro element.
       It returns the rank to which the element is to be moved. */
-  int operator()( const Element &element ) const 
-  { 
+  int operator()( const Element &element ) const
+  {
     typedef typename Element::Geometry::GlobalCoordinate Coordinate;
     Coordinate w = element.geometry().center();
     w -= Coordinate(0.5);
@@ -70,11 +70,11 @@ struct SimpleLoadBalanceWeights
     : grid_( grid )
   {}
 
-  /** This method is called for each macro element to determine the weight 
-      in the dual graph. Here, we compute the number of tree elements underneeth 
+  /** This method is called for each macro element to determine the weight
+      in the dual graph. Here, we compute the number of tree elements underneeth
       the macro element. */
-  long int operator()( const Element &element ) const 
-  { 
+  long int operator()( const Element &element ) const
+  {
     const int mxl = grid_.maxLevel();
     const HierarchicIterator end = element.hend( mxl );
     int leafElements = 1 ;

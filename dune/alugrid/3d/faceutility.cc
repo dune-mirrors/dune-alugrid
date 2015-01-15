@@ -11,8 +11,8 @@ namespace Dune
   typename ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::SurfaceMappingType *
   ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
   {
-    return new SurfaceMappingType( fieldVector2alu3d_ctype(coords[0]) , 
-                                   fieldVector2alu3d_ctype(coords[1]) , 
+    return new SurfaceMappingType( fieldVector2alu3d_ctype(coords[0]) ,
+                                   fieldVector2alu3d_ctype(coords[1]) ,
                                    fieldVector2alu3d_ctype(coords[2]) );
   }
 
@@ -38,9 +38,9 @@ namespace Dune
   ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, hexa, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
   {
     typedef FaceTopologyMapping< hexa > FaceTopo;
-    // this is the new implementation using FieldVector 
-    // see mappings.hh 
-    // we have to swap the vertices, because 
+    // this is the new implementation using FieldVector
+    // see mappings.hh
+    // we have to swap the vertices, because
     // local face numbering in Dune is different to ALUGrid (see topology.cc)
     return new SurfaceMappingType(
         face.myvertex( FaceTopo::dune2aluVertex(0) )->Point(),
@@ -98,28 +98,24 @@ namespace Dune
 
     delete referenceElementMapping;
   }
-  
+
   template<  int actualDimw, ALU3dGridElementType type, class Comm >
   void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, LocalCoordinateType &result ) const
   {
     //TODO use connector.face.nChild and (maybe twist)    referenceElementCoordinatesRefined ( side, cornerCoords )
-    
+
     // get the parent's face coordinates on the reference element (Dune reference element)
     LocalCoordinateType cornerCoords;
     referenceElementCoordinatesRefined ( side, cornerCoords );
-    
+
     // this is a dune face index
-    const int faceIndex = 
-      (side == INNER ? 
-       ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()) :
-       ElementTopo::alu2duneFace(connector_.outerALUFaceIndex()));
-    const int faceTwist = 
+    const int faceTwist =
       (side == INNER ?
        connector_.innerTwist() :
        connector_.outerTwist());
-    
-    
+
+
     if(connector_.face().nChild() == (faceTwist < 0 ? 1 : 0)){
       result[0] = cornerCoords[0];
       result[1] =  ( cornerCoords[1] + cornerCoords[0] );
@@ -129,11 +125,11 @@ namespace Dune
     {
       result[0] = ( cornerCoords[1] + cornerCoords[0] );
       result[0] *= 0.5;
-      result[1] = cornerCoords[1];     
+      result[1] = cornerCoords[1];
     }
     else
       std::cerr << "Trying to access more than two children on one face" << std::endl;
-    
+
   }
 
 
@@ -152,7 +148,7 @@ namespace Dune
 
   template class ALU3dGridGeometricFaceInfoBase< 2,2,tetra, ALUGridMPIComm >;
   template class ALU3dGridGeometricFaceInfoBase< 2,2,hexa, ALUGridMPIComm >;
-  
+
     template struct ALU3dGridSurfaceMappingFactory< 2,3,tetra, ALUGridNoComm >;
   template struct ALU3dGridSurfaceMappingFactory< 2,3,hexa, ALUGridNoComm >;
 
@@ -164,7 +160,7 @@ namespace Dune
 
   template class ALU3dGridGeometricFaceInfoBase< 2,3,tetra, ALUGridMPIComm >;
   template class ALU3dGridGeometricFaceInfoBase< 2,3,hexa, ALUGridMPIComm >;
-  
+
     template struct ALU3dGridSurfaceMappingFactory< 3,3,tetra, ALUGridNoComm >;
   template struct ALU3dGridSurfaceMappingFactory< 3,3,hexa, ALUGridNoComm >;
 

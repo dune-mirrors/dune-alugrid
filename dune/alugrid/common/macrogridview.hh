@@ -67,7 +67,7 @@ namespace Dune
 
 
   template< class GridImp, PartitionIteratorType pitype >
-  class MacroGridView 
+  class MacroGridView
   {
     typedef MacroGridView< GridImp, pitype > ThisType;
 
@@ -92,7 +92,7 @@ namespace Dune
     /** \brief Codim Structure */
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
- 
+
     enum { conforming = Traits :: conforming };
 
     MacroGridView ( const Grid &grid )
@@ -112,7 +112,7 @@ namespace Dune
     {
       return grid().levelIndexSet( level_ );
     }
-    
+
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
@@ -180,7 +180,7 @@ namespace Dune
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
-    int ghostSize(int codim) const 
+    int ghostSize(int codim) const
     {
       return grid().ghostSize(level_, codim);
     }
@@ -218,14 +218,14 @@ namespace Dune
       return Grid::getRealImplementation( entity ).weight();
     }
 
-    /** \brief return weight associated with the macro intersection, 
+    /** \brief return weight associated with the macro intersection,
                i.e. the graph edge between the two neighboring entities */
     int weight ( const Intersection &intersection ) const
     {
       return Grid::getRealImplementation( intersection ).weight();
     }
 
-    DUNE_DEPRECATED 
+    DUNE_DEPRECATED
     int weight ( const IntersectionIterator &intersectionIterator ) const // should perhaps be intersection but that class a default is used...
     {
       return weight( *intersectionIterator );

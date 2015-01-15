@@ -38,26 +38,26 @@ public:
   }
 
   std::string gridFile ( const std::string &path, const int mpiSize ) const
-  { 
+  {
     std::ostringstream dgfFileName;
     dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
-  RangeType boundaryValue ( const DomainType &x, double time ) const                       
-  {                                                                                        
-    return initial( x );                                                               
-  }                                                                                        
-                                                                                           
-  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  RangeType boundaryValue ( const DomainType &x, double time ) const
   {
-    return 1; 
+    return initial( x );
   }
 
-  double saveInterval () const                                                             
-  {                                                                                        
-    return 0.05;                                                                           
-  }                                                                                        
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
+  {
+    return 1;
+  }
+
+  double saveInterval () const
+  {
+    return 0.05;
+  }
 
   //! \copydoc ProblemData::refineTol
   double refineTol () const
@@ -66,10 +66,10 @@ public:
   }
   //! \copydoc ProblemData::adaptationIndicator
   double adaptationIndicator ( const DomainType& x, double time,
-                               const RangeType &uLeft, const RangeType &uRight ) const 
-  { 
+                               const RangeType &uLeft, const RangeType &uRight ) const
+  {
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] );
-  } 
+  }
 };
 
 /**
@@ -104,36 +104,36 @@ public:
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
-  { 
+  {
     std::ostringstream dgfFileName;
     dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
   }
 
-  RangeType boundaryValue ( const DomainType &x, double time ) const                       
-  {                                                                                        
-    return initial( x );                                                               
-  }                                                                                        
-                                                                                           
-  int bndType( const DomainType &normal, const DomainType &x, const double time) const 
+  RangeType boundaryValue ( const DomainType &x, double time ) const
   {
-    return 1; 
+    return initial( x );
   }
 
-  double saveInterval () const                                                             
-  {                                                                                        
-    return 0.05;                                                                           
-  }                                                                                        
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
+  {
+    return 1;
+  }
+
+  double saveInterval () const
+  {
+    return 0.05;
+  }
   //! \copydoc ProblemData::refineTol
   double refineTol () const
   {
     return 0.1;
   }
   double adaptationIndicator ( const DomainType& x, double time,
-                               const RangeType &uLeft, const RangeType &uRight ) const 
-  { 
+                               const RangeType &uLeft, const RangeType &uRight ) const
+  {
     return std::abs( uLeft[ 0 ] - uRight[ 0 ] );
-  } 
+  }
 };
 
 // TransportModel
@@ -162,8 +162,8 @@ struct TransportModel
   static const int dimRange = Problem::dimRange;
   static const bool hasFlux = true;
 
-  /** \brief constructor 
-   *  \param problem switch between different data settings 
+  /** \brief constructor
+   *  \param problem switch between different data settings
    */
   TransportModel ( int problem )
   {
@@ -240,15 +240,15 @@ struct TransportModel
    *
    *  \returns the maximum wave speed
    */
-  double boundaryFlux ( const DomainType &normal, 
+  double boundaryFlux ( const DomainType &normal,
                         const double time,
                         const DomainType &xGlobal,
                         const RangeType& uLeft,
                         RangeType &flux ) const
   {
     // exact solution is u0(x-ta)
-    DomainType x0( xGlobal );                                                                    
-    x0.axpy( -time, velocity_ );                                                           
+    DomainType x0( xGlobal );
+    x0.axpy( -time, velocity_ );
     RangeType uRight = problem().boundaryValue( x0, time );
     return numericalFlux( normal, time, xGlobal, uLeft, uRight, flux );
   }
@@ -266,7 +266,7 @@ struct TransportModel
   double indicator ( const DomainType &normal,
                      const double time,
                      const DomainType &xGlobal,
-                     const RangeType &uLeft, const RangeType &uRight) const 
+                     const RangeType &uLeft, const RangeType &uRight) const
   {
     return problem().adaptationIndicator( xGlobal, time, uLeft, uRight );
   }
@@ -280,13 +280,13 @@ struct TransportModel
    *
    *  \return value of indicator
    */
-  double boundaryIndicator ( const DomainType &normal, 
+  double boundaryIndicator ( const DomainType &normal,
                              const double time,
                              const DomainType &xGlobal,
                              const RangeType& uLeft) const
   {
-    DomainType x0( xGlobal );                                                                    
-    x0.axpy( -time, velocity_ );                                                           
+    DomainType x0( xGlobal );
+    x0.axpy( -time, velocity_ );
     return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(x0,time) );
   }
 

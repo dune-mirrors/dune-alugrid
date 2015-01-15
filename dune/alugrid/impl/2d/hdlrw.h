@@ -54,7 +54,7 @@ namespace ALU2DGrid
                     << std::endl;
           abort();
         }
-      } 
+      }
       else if( str != std::string( "Triangles" ) )
       {
         std::cerr << "Error in Hmesh :: asciireadtriang: "
@@ -66,16 +66,16 @@ namespace ALU2DGrid
     hmesh_basic_t::asciireadtriang(in, isbackup);
     return isbackup;
   }
-   
+
   template< int N, int NV >
   void Hmesh_basic< N, NV >::asciireadtriang ( std::istream &in, const bool verbose )
   {
     // read vertices
     int nv = 0;
     in >> nv;
-      
+
 #ifdef ALUGRIDDEBUG
-    if( verbose ) 
+    if( verbose )
       std::cerr << "    Number of Vertices:             " << nv << std::endl;
 #endif
 
@@ -93,7 +93,7 @@ namespace ALU2DGrid
     in >> ne;
 
 #ifdef ALUGRIDDEBUG
-    if( verbose ) 
+    if( verbose )
       std::cerr << "    Number of MacroElements:        " << ne << std::endl;
 #endif
 
@@ -107,7 +107,7 @@ namespace ALU2DGrid
     // read boundaries
     {
       std::string line;
-      // read line and skip empty lines 
+      // read line and skip empty lines
       while( in && line.empty() )
       {
         std::getline(in, line);
@@ -119,7 +119,7 @@ namespace ALU2DGrid
       int nb = 0;
       linein >> nb;
 
-#ifdef ALUGRIDDEBUG 
+#ifdef ALUGRIDDEBUG
       if( verbose )
         std::cerr << "    Number of BoundarySegments:     " << nb << std::endl;
 #endif
@@ -135,7 +135,7 @@ namespace ALU2DGrid
       axis_struct *y_axis = new axis_struct[nb];
       int y_card = 0, x_card = 0, x_ok = 0, y_ok = 0;
 
-      for( int i = 0; i < nb; ++i ) 
+      for( int i = 0; i < nb; ++i )
       {
         getline( in, line );
         std::istringstream linein( line );
@@ -239,7 +239,7 @@ namespace ALU2DGrid
               y_card++;
             }
           }
-          else 
+          else
           {
             alugrid_assert (fabs(b->vertex(0)->coord()[1]-b->vertex(1)->coord()[1])<EPS);
 
@@ -284,8 +284,8 @@ namespace ALU2DGrid
       if( verbose )
         std::cerr << "    Number of periodic boundaries:  " << npb << std::endl;
 #endif
-    
-    }       
+
+    }
 
 #ifdef ALUGRIDDEBUG
     if( verbose )
@@ -303,11 +303,11 @@ namespace ALU2DGrid
         triang_t &tr=( (triang_t &)(*walk.getitem()) );
         for (int l=0;l<tr.numfaces();l++) {
           alugrid_assert ( tr.neighbour(l) );
-          if (!tr.normaldir(l)) 
+          if (!tr.normaldir(l))
           {
             tr.setnormdir(l,1);
             if (tr.neighbour(l)->thinis(thinelement_t::element_like))
-              tr.nbel(l)->setnormdir(tr.opposite(l),-1); 
+              tr.nbel(l)->setnormdir(tr.opposite(l),-1);
           }
           if (tr.neighbour(l)->edge(tr.opposite(l))) {
             tr.edgeconnect(l,tr.neighbour(l)->edge(tr.opposite(l)));
@@ -322,7 +322,7 @@ namespace ALU2DGrid
   }
 
   template <int N,int NV>
-  void Hmesh_basic<N,NV> :: setorientation() 
+  void Hmesh_basic<N,NV> :: setorientation()
   {
     Listwalk_impl < macroelement_t > walkel(mel);
     if (N == 2)
@@ -379,13 +379,13 @@ namespace ALU2DGrid
     std::cerr << filename << "\n" << std::endl;
 #endif
 
-    // create stream 
+    // create stream
     std::ofstream out( filename.c_str(), std::ios::out | std::ios::trunc );
 
-    // call write triang with stream 
+    // call write triang with stream
     hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
   }
-   
+
   template <int N,int NV>
   void
   Hmesh_basic<N,NV> :: asciiwritetriang(std::ostream &out,
@@ -395,7 +395,7 @@ namespace ALU2DGrid
     vl.renumber();
 
     out.setf( std::ios::fixed, std::ios::floatfield );
-    
+
     out << std::scientific;
     out.precision(16);
 
@@ -404,36 +404,36 @@ namespace ALU2DGrid
     out << nconfDeg << " " << refinement_rule << std::endl;
 
     {
-   
+
       Listwalk_impl < vertex_t > walk(vl);
-    
+
 #ifdef ALUGRIDDEBUG
       std::cerr << "    Number of Vertices:       " << walk.size() << std::endl;
 #endif
-      
+
       int nr = 0;
-      
+
       for( walk.first(); ! walk.done(); walk.next() ) {
-      
+
         vertex_t & v = walk.getitem();
 
         if (v.isMacro()) ++nr;
-                
+
       }
 
       out << nr << std::endl;
 
       for( walk.first(); ! walk.done(); walk.next() ) {
-      
+
         vertex_t & v = walk.getitem();
 
         if (v.isMacro())
           v.write(out);
-      
+
       }
-      
+
     }
-    
+
     {
 
       Listwalk_impl < macroelement_t > walk(mel);
@@ -445,11 +445,11 @@ namespace ALU2DGrid
 #ifdef ALUGRIDDEBUG
       std::cerr << "    Number of macro Elements:  " << numMacroElements << std::endl;
 #endif
-      
+
       out << numMacroElements << std::endl;
-      
+
       for( walk.first(); ! walk.done(); walk.next() ) {
-      
+
         walk.getitem()->write(out);
 
         count += walk.getitem()->count();
@@ -460,7 +460,7 @@ namespace ALU2DGrid
       std::cerr << "    Number of Elements:       " << count << std::endl;
 #endif
     }
-    
+
     {
       Listwalk_impl < macrobndel_t > walk(mbl);
       const int numMacroBoundaryElements = walk.size();
@@ -491,26 +491,26 @@ namespace ALU2DGrid
       std::cerr << "    Number of boundary Elements:       " << count << std::endl;
 #endif
     }
-    
+
 #ifdef ALUGRIDDEBUG
     std::cerr << "\n  -------------------------- closed.\n" << std::endl;
 #endif
-   
+
   }
 
   template< int N, int NV >
   void Hmesh< N, NV >::storeGrid ( const std::string &filename, double time, unsigned long int nbr )
   {
-    // create outstream 
+    // create outstream
     std::ofstream out ( filename.c_str(), std::ios::out | std::ios::trunc );
 
-    if( !out ) 
+    if( !out )
     {
       std::cerr << "ERROR: could not open file " << filename << std::endl << std::endl;
       return;
     }
 
-    // call stream version of store grid 
+    // call stream version of store grid
     storeGrid( out, time, nbr );
   }
 
@@ -518,64 +518,64 @@ namespace ALU2DGrid
   void Hmesh<N,NV>::
   storeGrid(std::ostream &out, double time, unsigned long int nbr)
   {
-    // write macro triangulation 
+    // write macro triangulation
     hmesh_basic_t::asciiwritetriang(out, time, nbr, _nconfDeg, refinement_rule);
 
     // Status des Gitters sichern
-    for( int level = 0;; level++ ) 
+    for( int level = 0;; level++ )
     {
       Levelwalk < element_t > walk(mel, level);
-      if( ! walk.size() ) 
+      if( ! walk.size() )
       {
         break;
-      } 
-      else 
+      }
+      else
       {
         for( walk.first(); !walk.done(); walk.next() )
           out.put(walk.getitem().splitrule());
       }
     }
 
-    // write indices 
+    // write indices
     storeIndicies(out);
   }
 
   template <int N,int NV>
   void
-  Hmesh<N,NV>::storeIndicies(std::ostream &out) 
+  Hmesh<N,NV>::storeIndicies(std::ostream &out)
   {
-    // backup index managers 
-    for (int i=0;i<numOfIndexManager2d; ++i) 
+    // backup index managers
+    for (int i=0;i<numOfIndexManager2d; ++i)
     {
       indexmanager[i].backupIndexSet(out);
     }
 
-    // backup vertex indices 
+    // backup vertex indices
     {
       Listwalk_impl < vertex_t > walk(vl);
-      for( walk.first(); ! walk.done(); walk.next() ) 
+      for( walk.first(); ! walk.done(); walk.next() )
       {
         int idx=walk.getitem().getIndex();
         out.write( ((const char *) &idx ), sizeof(int) );
       }
     }
-    
-    // backup element and edge indices 
+
+    // backup element and edge indices
     {
       Levelwalk < element_t > walk(mel, 0);
-      for( walk.first(); !walk.done(); walk.next() ) 
+      for( walk.first(); !walk.done(); walk.next() )
       {
         SubtreeIterator < element_t > hier(&(walk.getitem()));
-        for (hier.first(); !hier.done(); hier.next() ) 
+        for (hier.first(); !hier.done(); hier.next() )
         {
-          // element 
+          // element
           {
                   int idx=hier.getitem().getIndex();
                   out.write( ((const char *) &idx ), sizeof(int) );
           }
 
-          // edges 
-                for (int e=0;e<hier.getitem().numfaces(); ++e) 
+          // edges
+                for (int e=0;e<hier.getitem().numfaces(); ++e)
           {
                   int idx=hier.getitem().edge(e)->getIndex();
                   out.write( ((const char *) &idx ), sizeof(int) );
@@ -592,17 +592,17 @@ namespace ALU2DGrid
     int compwarn = 0;
 
     // Gitter wiederherstellen
-    for( int level = 0;; level++ ) 
+    for( int level = 0;; level++ )
     {
       {
         Levelwalk < element_t > walk(mel, level);
         if( !walk.size() )
           break;
-        for( walk.first(); !walk.done(); walk.next() ) 
+        for( walk.first(); !walk.done(); walk.next() )
         {
           char flag;
           in.get(flag);
-          switch (flag) 
+          switch (flag)
           {
             case thinelement_t::unsplit:
               break;
@@ -615,7 +615,7 @@ namespace ALU2DGrid
             case thinelement_t::triang_conf2:
               walk.getitem().mark(Refco::ref_1);
               break;
-            case thinelement_t::triang_quarter:          
+            case thinelement_t::triang_quarter:
               walk.getitem().mark(Refco::quart);
               break;
             case thinelement_t::compatibility:
@@ -639,66 +639,66 @@ namespace ALU2DGrid
       refine();
     }
 
-    // read indices 
+    // read indices
     recoverIndicies(in);
-   
+
     return true;
   }
 
   template <int N,int NV>
   void
-  Hmesh<N,NV>::recoverIndicies(std::istream &in) 
+  Hmesh<N,NV>::recoverIndicies(std::istream &in)
   {
     // use the systems byte order (otherwise store byte order in storeIndices)
     RestoreInfo restoreInfo ( RestoreInfo :: systemByteOrder () );
 
-    // reads maxIndex of Index Manager 
-    for (int i=0;i<numOfIndexManager2d; ++i) 
+    // reads maxIndex of Index Manager
+    for (int i=0;i<numOfIndexManager2d; ++i)
     {
       indexmanager[i].restoreIndexSet(in, restoreInfo);
     }
-    
+
     //////////////////////////////////////////
-    //  read vertices 
+    //  read vertices
     //////////////////////////////////////////
     {
       IndexManager2dType& vertexManager = indexmanager[IndexProvider::IM_Vertices];
       const int idxSize = vertexManager.getMaxIndex();
 
-      // create vector, all entries are marked true 
+      // create vector, all entries are marked true
       std::vector< bool > isHole( idxSize, true );
 
       Listwalk_impl < vertex_t > walk(vl);
-      for( walk.first(); ! walk.done(); walk.next() ) 
+      for( walk.first(); ! walk.done(); walk.next() )
       {
         vertex_t& vx = walk.getitem();
         in.read ( ((char *) &(vx.setIndex())), sizeof(int) );
         alugrid_assert ( vx.getIndex() < idxSize );
-        isHole[vx.getIndex()] = false;  
+        isHole[vx.getIndex()] = false;
       }
 
-      // all remaining indices are reinserted as holes 
+      // all remaining indices are reinserted as holes
       vertexManager.generateHoles( isHole );
     }
-    
+
     //////////////////////////////////////////
-    //  read elements and edges 
+    //  read elements and edges
     //////////////////////////////////////////
     {
       IndexManager2dType& elementManager = indexmanager[IndexProvider::IM_Elements];
       const int elSize = elementManager.getMaxIndex();
-      
+
       IndexManager2dType& edgeManager = indexmanager[IndexProvider::IM_Edges];
       const int edgeSize = edgeManager.getMaxIndex();
       // create vector, all entries are marked true
       std::vector< bool > elementIsHole ( elSize, true );
       std::vector< bool > edgeIsHole ( edgeSize, true );
-      
+
       Levelwalk < element_t > walk(mel, 0);
-      for( walk.first(); !walk.done(); walk.next() ) 
+      for( walk.first(); !walk.done(); walk.next() )
       {
         SubtreeIterator < element_t > hier(&(walk.getitem()));
-        for (hier.first(); !hier.done(); hier.next() ) 
+        for (hier.first(); !hier.done(); hier.next() )
         {
           element_t &elem = hier.getitem();
 
@@ -707,21 +707,21 @@ namespace ALU2DGrid
           in.read ( ((char *)&index), sizeof(int) );
           alugrid_assert ( elem.getIndex() < elSize );
           elementIsHole[elem.getIndex()] = false;
-          
-          // read edges 
-          for (int e=0; e<elem.numfaces(); ++e) 
+
+          // read edges
+          for (int e=0; e<elem.numfaces(); ++e)
           {
-            int edgeNum = -1; 
+            int edgeNum = -1;
                   in.read ( ((char *) &(edgeNum)), sizeof(int) );
             alugrid_assert ( edgeNum < edgeSize );
             edgeIsHole[edgeNum] = false;
-            // set edge index 
+            // set edge index
             elem.edge(e)->setIndex() = edgeNum;
                 }
         }
-      } 
+      }
 
-      // reinsert remaining indices as holes 
+      // reinsert remaining indices as holes
       elementManager.generateHoles( elementIsHole );
       edgeManager.generateHoles( edgeIsHole );
     }
