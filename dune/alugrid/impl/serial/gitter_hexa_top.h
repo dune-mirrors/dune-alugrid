@@ -404,15 +404,15 @@ namespace ALUGrid
       using A::myhedge;
       using A::myhface4;
 
-      typedef HexaTop < A >           innerhexa_t;
-      typedef typename A::innerface_t innerface_t;
-      typedef typename A::inneredge_t inneredge_t;
+      typedef HexaTop < A >             innerhexa_t;
+      typedef typename A::innerface_t   innerface_t;
+      typedef typename A::inneredge_t   inneredge_t;
       typedef typename A::innervertex_t innervertex_t;
       typedef typename A::myhface4_t    myhface4_t;
-      typedef typename A::myhedge_t  myhedge_t;
-      typedef typename A::myvertex_t  myvertex_t;
-      typedef typename A::myrule_t  myrule_t;
-      typedef typename A::balrule_t   balrule_t;
+      typedef typename A::myhedge_t     myhedge_t;
+      typedef typename A::myvertex_t    myvertex_t;
+      typedef typename A::myrule_t      myrule_t;
+      typedef typename A::balrule_t     balrule_t;
       typedef InnerStorage < InnerFaceStorage< innerhexa_t , true > > inner_t;
 
     protected:

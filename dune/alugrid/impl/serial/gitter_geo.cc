@@ -411,7 +411,7 @@ namespace ALUGrid
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalRefinement () {
-    return (request (myrule_t::iso8), 1);
+    return (request (myrule_t::regular), 1);
   }
 
   int Gitter::Geometric::Hexa::tagForGlobalCoarsening () {
@@ -461,7 +461,7 @@ namespace ALUGrid
         if (insideBall (p,center,radius)) { hit = true; break; }
       }
     }
-    return hit ? (level () < limit ? (request (myrule_t::iso8), 1)
+    return hit ? (level () < limit ? (request (myrule_t::regular), 1)
            : (request (myrule_t::nosplit), 0)) : (request (myrule_t::crs), 1);
   }
 
@@ -533,7 +533,7 @@ namespace ALUGrid
     if( this->myvertex(0)->myGrid()->conformingClosureNeeded() )
       return (request (myrule_t::bisect), 1);
     else
-      return (request (myrule_t::iso8), 1);
+      return (request (myrule_t::regular), 1);
   }
 
   int Gitter::Geometric::Tetra::tagForGlobalCoarsening () {

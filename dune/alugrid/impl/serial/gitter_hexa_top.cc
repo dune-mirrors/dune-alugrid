@@ -719,7 +719,7 @@ namespace ALUGrid
   template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j)
   {
     typedef typename myhface4_t::myrule_t  facerule_t ;
-    innerface_t * face = myhface4(i);
+    myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
                 face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
@@ -732,7 +732,7 @@ namespace ALUGrid
   //check subface routine  for regular 2d has to use twist
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
     typedef typename myhface4_t::myrule_t  facerule_t ;
-    const innerface_t * face = myhface4(i);
+    const myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
                 face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
