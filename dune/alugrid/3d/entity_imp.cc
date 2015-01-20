@@ -179,7 +179,7 @@ namespace Dune {
 
     // if the rule of the farher is not refine_element, it has to be bisection
     // this can only be true for tetrahedral elements
-    if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::template RefinementRules<dim>::refine_element_t) )
+    if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::RefinementRules::refine_element_t) )
     {
 
       static LocalGeometryImpl geom;

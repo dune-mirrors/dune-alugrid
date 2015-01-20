@@ -85,7 +85,6 @@ namespace Dune
   typedef double alu3d_ctype;
 
 
-
   // ALU3dBasicImplTraits
   // --------------------
 
@@ -155,24 +154,24 @@ namespace Dune
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
 
-    typedef typename GitterType::helement_STI InterfaceType;
-    typedef typename GitterType::Geometric::hasFace3 EntitySeedType;
-    typedef typename GitterImplType::Objects::tetra_IMPL ImplementationType;
-    typedef typename GitterType::hbndseg_STI GhostInterfaceType;
-    typedef typename GitterImplType::Objects::Hbnd3Default GhostImplementationType;
+    typedef typename GitterType::helement_STI                 InterfaceType;
+    typedef typename GitterType::Geometric::hasFace3          EntitySeedType;
+    typedef typename GitterImplType::Objects::tetra_IMPL      ImplementationType;
+    typedef typename GitterType::hbndseg_STI                  GhostInterfaceType;
+    typedef typename GitterImplType::Objects::Hbnd3Default    GhostImplementationType;
   };
 
   template< class Comm, int dim >
   struct ALU3dCodimImplTraits< hexa, Comm, dim, 0 >
   {
-    typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
+    typedef typename ALU3dBasicImplTraits< Comm >::GitterType     GitterType;
     typedef typename ALU3dBasicImplTraits< Comm >::GitterImplType GitterImplType;
 
-    typedef typename GitterType::helement_STI InterfaceType;
-    typedef typename GitterType::Geometric::hasFace4 EntitySeedType;
-    typedef typename GitterImplType::Objects::hexa_IMPL ImplementationType;
-    typedef typename GitterType::hbndseg_STI GhostInterfaceType;
-    typedef typename GitterImplType::Objects::Hbnd4Default GhostImplementationType;
+    typedef typename GitterType::helement_STI                 InterfaceType;
+    typedef typename GitterType::Geometric::hasFace4          EntitySeedType;
+    typedef typename GitterImplType::Objects::hexa_IMPL       ImplementationType;
+    typedef typename GitterType::hbndseg_STI                  GhostInterfaceType;
+    typedef typename GitterImplType::Objects::Hbnd4Default    GhostImplementationType;
   };
 
   template< class Comm, int dim >
@@ -180,9 +179,9 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::hface_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::hface3_GEO ImplementationType;
+    typedef typename GitterType::hface_STI                    InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::hface3_GEO        ImplementationType;
   };
 
   template< class Comm, int dim >
@@ -190,9 +189,9 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::hface_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::hface4_GEO ImplementationType;
+    typedef typename GitterType::hface_STI                    InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::hface4_GEO        ImplementationType;
   };
 
   template< ALU3dGridElementType elType, class Comm >
@@ -200,9 +199,9 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::hedge_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::hedge1_GEO ImplementationType;
+    typedef typename GitterType::hedge_STI                    InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::hedge1_GEO        ImplementationType;
   };
 
 
@@ -211,9 +210,9 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::vertex_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::VertexGeo ImplementationType;
+    typedef typename GitterType::vertex_STI                   InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::VertexGeo         ImplementationType;
   };
 
   template< ALU3dGridElementType elType, class Comm >
@@ -221,9 +220,9 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::vertex_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::VertexGeo ImplementationType;
+    typedef typename GitterType::vertex_STI                   InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::VertexGeo         ImplementationType;
   };
 
   template< ALU3dGridElementType elType, class Comm >
@@ -231,21 +230,20 @@ namespace Dune
   {
     typedef typename ALU3dBasicImplTraits< Comm >::GitterType GitterType;
 
-    typedef typename GitterType::vertex_STI InterfaceType;
-    typedef InterfaceType EntitySeedType;
-    typedef typename GitterType::Geometric::VertexGeo ImplementationType;
+    typedef typename GitterType::vertex_STI                   InterfaceType;
+    typedef InterfaceType                                     EntitySeedType;
+    typedef typename GitterType::Geometric::VertexGeo         ImplementationType;
   };
 
-    //Refinement rules in general
-  template< class MarkRuleType, ALU3dGridElementType elType, int dim>
-  struct ALU3dRefinementTraits
-  {};
+  //Refinement rules in general
+  template< class MarkRuleType, ALU3dGridElementType elType >
+  struct ALU3dRefinementTraits {};
 
-  //Refinement rules for 3d tetra
+  //Refinement rules
   template< class MarkRuleType >
-  struct ALU3dRefinementTraits < MarkRuleType, tetra, 3 >
+  struct ALU3dRefinementTraits < MarkRuleType, tetra >
   {
-     // refinement and coarsening enum
+    // refinement and coarsening enum
     enum { bisect_element_t  = MarkRuleType::bisect  };
     enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
@@ -254,39 +252,14 @@ namespace Dune
 
   //Refinement rules for 3d hexa
   template< class MarkRuleType >
-  struct ALU3dRefinementTraits < MarkRuleType, hexa, 3 >
+  struct ALU3dRefinementTraits < MarkRuleType, hexa >
   {
-     // refinement and coarsening enum
+    // refinement and coarsening enum
     enum { bisect_element_t  = MarkRuleType::regular };
     enum { refine_element_t  = MarkRuleType::regular };
     enum { coarse_element_t  = MarkRuleType::crs     };
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
-
-
-  //Refinement rules for 2d tetra
-  template< class MarkRuleType>
-  struct ALU3dRefinementTraits < MarkRuleType, tetra, 2 >
-  {
-     // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::bisect  };
-    enum { refine_element_t  = MarkRuleType::regular };
-    enum { coarse_element_t  = MarkRuleType::crs     };
-    enum { nosplit_element_t = MarkRuleType::nosplit };
-  };
-
-    //Refinement rules for 2d hexa
-  template< class MarkRuleType>
-  struct ALU3dRefinementTraits < MarkRuleType, hexa, 2 >
-  {
-     // refinement and coarsening enum
-    enum { bisect_element_t  = MarkRuleType::regular };
-    enum { refine_element_t  = MarkRuleType::regular };
-    enum { coarse_element_t  = MarkRuleType::crs     };
-    enum { nosplit_element_t = MarkRuleType::nosplit };
-  };
-
-
 
 
   // ALU3dImplTraits
@@ -314,9 +287,8 @@ namespace Dune
 
     typedef typename GitterType::Geometric::TetraRule MarkRuleType;
 
-    template < int dim >
     struct RefinementRules
-    : public ALU3dRefinementTraits<MarkRuleType, tetra, dim>
+    : public ALU3dRefinementTraits<MarkRuleType, tetra>
     {};
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
@@ -354,9 +326,8 @@ namespace Dune
 
     typedef typename GitterType::Geometric::HexaRule MarkRuleType;
 
-    template < int dim >
     struct RefinementRules
-    : public ALU3dRefinementTraits<MarkRuleType, hexa, dim>
+    : public ALU3dRefinementTraits<MarkRuleType, hexa>
     {};
 
     typedef std::pair< GEOFaceType *, int > NeighbourFaceType;
@@ -509,14 +480,14 @@ namespace Dune
     getFace( const typename ALU3dImplTraits< tetra, Comm >::GEOElementType& elem, int index)
     {
       alugrid_assert (index >= 0 && index < 4);
-      return elem.myhface3( ElementTopologyMapping< tetra >::dune2aluFace(index) );
+      return elem.myhface( ElementTopologyMapping< tetra >::dune2aluFace(index) );
     }
 
     static const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType*
     getFace( const typename ALU3dImplTraits< hexa, Comm >::GEOElementType &elem, int index )
     {
       alugrid_assert (index >= 0 && index < 6);
-      return elem.myhface4( ElementTopologyMapping< hexa >::dune2aluFace(index) );
+      return elem.myhface( ElementTopologyMapping< hexa >::dune2aluFace(index) );
     }
   };
 
