@@ -14,8 +14,8 @@ namespace Dune
   // Implementation of ALU3dGrid
   // ---------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline ALU3dGrid< dim, dimworld, elType, Comm >
     ::ALU3dGrid ( const std::string &macroTriangFilename,
                   const MPICommunicatorType mpiComm,
                   const DuneBoundaryProjectionType *bndPrj,
@@ -59,9 +59,9 @@ namespace Dune
   } // end constructor
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  const typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::GeometryInFatherStorage&
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::makeGeometries()
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  const typename ALU3dGrid< dim, dimworld, elType, Comm >::GeometryInFatherStorage&
+  ALU3dGrid< dim, dimworld, elType, Comm >::makeGeometries()
   {
     alugrid_assert ( elType == tetra || elType == hexa );
 
@@ -90,8 +90,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline int ALU3dGrid< actualDim, actualDimw, elType, Comm >::global_size ( int codim ) const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline int ALU3dGrid< dim, dimworld, elType, Comm >::global_size ( int codim ) const
   {
     // return actual size of hierarchical index set
     // this is always up to date
@@ -100,24 +100,24 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline int ALU3dGrid< actualDim, actualDimw, elType, Comm >::hierSetSize ( int codim ) const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline int ALU3dGrid< dim, dimworld, elType, Comm >::hierSetSize ( int codim ) const
   {
     // return actual size of hierarchical index set
     return myGrid().indexManager(codim).getMaxIndex();
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline int ALU3dGrid< actualDim, actualDimw, elType, Comm >::maxLevel () const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline int ALU3dGrid< dim, dimworld, elType, Comm >::maxLevel () const
   {
     return maxlevel_;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::GitterImplType &
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::myGrid () const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::GitterImplType &
+  ALU3dGrid< dim, dimworld, elType, Comm >::myGrid () const
   {
     alugrid_assert ( mygrid_ );
     return *mygrid_;
@@ -125,10 +125,10 @@ namespace Dune
 
 
   // lbegin methods
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::lbegin ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::lbegin ( int level ) const
   {
     alugrid_assert ( level >= 0 );
     // if we dont have this level return empty iterator
@@ -139,10 +139,10 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::lend ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LevelIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::lend ( int level ) const
   {
     alugrid_assert ( level >= 0 );
     return ALU3dGridLevelIterator< cd, pitype, const ThisType >( factory(), level );
@@ -150,19 +150,19 @@ namespace Dune
 
 
   // lbegin methods
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::lbegin ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::lbegin ( int level ) const
   {
     return this->template lbegin<cd,All_Partition>( level );
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::lend ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< All_Partition >::LevelIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::lend ( int level ) const
   {
     alugrid_assert ( level >= 0 );
     return this->template lend<cd,All_Partition>( level );
@@ -174,63 +174,63 @@ namespace Dune
   // leaf methods , first all begin methods
   //
   //***********************************************************
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::createLeafIteratorBegin ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::createLeafIteratorBegin ( int level ) const
   {
     alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator< cd, pitype, const ThisType >( factory(), level, true );
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin ( int level ) const
   {
     return createLeafIteratorBegin<cd, pitype> (level) ;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin ( int level ) const
   {
     return createLeafIteratorBegin<cd, All_Partition> (level) ;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin () const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin () const
   {
     return createLeafIteratorBegin< cd, pitype > (maxlevel_) ;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin () const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin () const
   {
     return createLeafIteratorBegin< cd, All_Partition> (maxlevel_) ;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::LeafIteratorType
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin ( int level ) const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::LeafIteratorType
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin ( int level ) const
   {
     return createLeafIteratorBegin<0, All_Partition> (level) ;
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::LeafIteratorType
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafbegin () const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::LeafIteratorType
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin () const
   {
     return createLeafIteratorBegin<0, All_Partition> (maxlevel_) ;
   }
@@ -241,63 +241,63 @@ namespace Dune
   // all leaf end methods
   //
   //****************************************************************
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::createLeafIteratorEnd ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::createLeafIteratorEnd ( int level ) const
   {
     alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator<cd, pitype, const MyType> ( factory() , level);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend ( int level ) const
   {
     return createLeafIteratorEnd < cd, pitype> (level);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend ( int level ) const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend ( int level ) const
   {
     return createLeafIteratorEnd < cd, All_Partition> (level);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd, PartitionIteratorType pitype >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend () const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend () const
   {
     return createLeafIteratorEnd < cd, pitype> (maxlevel_);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< int cd >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::Traits::template Codim< cd >::LeafIterator
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend () const
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::LeafIterator
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend () const
   {
     return createLeafIteratorEnd < cd, All_Partition> (maxlevel_);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::LeafIteratorType
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend ( int level ) const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::LeafIteratorType
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend ( int level ) const
   {
     return createLeafIteratorEnd <0, All_Partition> (level);
   }
 
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline typename ALU3dGrid< actualDim, actualDimw, elType, Comm >::LeafIteratorType
-  ALU3dGrid< actualDim, actualDimw, elType, Comm >::leafend () const
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline typename ALU3dGrid< dim, dimworld, elType, Comm >::LeafIteratorType
+  ALU3dGrid< dim, dimworld, elType, Comm >::leafend () const
   {
     return createLeafIteratorEnd <0,All_Partition> (maxlevel_);
   }
@@ -306,8 +306,8 @@ namespace Dune
   //*****************************************************************
 
   // mark given entity
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline bool ALU3dGrid< dim, dimworld, elType, Comm >
     ::mark ( int ref, const typename Traits::template Codim< 0 >::Entity &entity )
   {
     bool marked = (this->getRealImplementation( entity )).mark(ref);
@@ -321,8 +321,8 @@ namespace Dune
 
 
   // get Mark of given entity
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline int ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline int ALU3dGrid< dim, dimworld, elType, Comm >
     ::getMark ( const typename Traits::template Codim< 0 >::Entity &entity ) const
   {
     return this->getRealImplementation( entity ).getMark();
@@ -330,10 +330,10 @@ namespace Dune
 
 
   // global refine
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< class GridImp, class DataHandle >
   inline
-  void ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  void ALU3dGrid< dim, dimworld, elType, Comm >
     ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
     alugrid_assert ( (refCount + maxLevel()) < MAXL );
@@ -350,10 +350,10 @@ namespace Dune
 
   // adapt grid
   // --adapt
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   template< class GridImp, class DataHandle >
   inline
-  bool ALU3dGrid< actualDim, actualDimw, elType, Comm >
+  bool ALU3dGrid< dim, dimworld, elType, Comm >
     ::adapt ( AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
@@ -406,8 +406,8 @@ namespace Dune
 
 
   // load balance grid ( lbData might be a pointer to NULL )
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline bool ALU3dGrid< actualDim, actualDimw, elType, Comm >::loadBalance( GatherScatterType* lbData )
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
   {
     if( comm().size() <= 1 )
         return false;
@@ -435,8 +435,8 @@ namespace Dune
     return changed;
   }
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline void ALU3dGrid< actualDim, actualDimw, elType, Comm >::finalizeGridCreation()
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline void ALU3dGrid< dim, dimworld, elType, Comm >::finalizeGridCreation()
   {
     // distribute the grid
     loadBalance();
@@ -453,8 +453,8 @@ namespace Dune
 
 
   // return Grid name
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
-  inline std::string ALU3dGrid< actualDim, actualDimw, elType, Comm >::name ()
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  inline std::string ALU3dGrid< dim, dimworld, elType, Comm >::name ()
   {
     if( elType == hexa )
       return "ALUCubeGrid";
