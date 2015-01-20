@@ -205,11 +205,8 @@ namespace Dune
   {
     using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
 
-    typedef ALU3dGridLocalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
-    typedef int GlobalId;
-
-    //typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
-    //typedef ALUGridId< ALUMacroKey > GlobalId;
+    typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
+    typedef ALUGridId< ALUMacroKey > GlobalId;
 
     typedef ALU3DSPACE GitterDunePll GitterImplType;
 
