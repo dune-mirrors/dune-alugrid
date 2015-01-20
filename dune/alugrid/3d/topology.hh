@@ -1,14 +1,15 @@
 #ifndef DUNE_ALU3DGRIDTOPOLOGY_HH
 #define DUNE_ALU3DGRIDTOPOLOGY_HH
 
-//- system includes
+#include <utility>
+
 #include <dune/alugrid/common/alugrid_assert.hh>
 
 namespace Dune {
 
   // types of the elementes,
   // i.e . tetra or hexa, mixed is not implemeneted
-  enum ALU3dGridElementType {tetra = 4, hexa = 7, mixed, error };
+  enum ALU3dGridElementType { tetra = 4, hexa = 7, mixed, error };
 
   template <ALU3dGridElementType type>
   struct EntityCount {};
@@ -85,6 +86,28 @@ namespace Dune {
     //! \return global vertex index in Dune reference element
     static int alu2duneFaceVertex(int face, int localVertex);
 
+    /**
+     * \brief obtain twist of ALU reference face with respect to DUNE reference face
+     *
+     * Applying this twist to the DUNE reference vertices, i.e.,
+     * - convert vertex number to ALU numbering,
+     * - apply returned twist,
+     * .
+     * equals the result of dune2aluFaceVertex
+     *
+     * The inverse of this twist, applied to ALU reference vertices, i.e.,
+     * - apply inverse twist
+     * - convert to DUNE numbering
+     * .
+     * yields alu2duneFaceVertex.
+     *
+     * \param[in]  face  face index (in DUNE reference element)
+     * \returns reference face twist
+     */
+    static int duneFaceTwist ( int face );
+
+    static std::pair< int, int > duneEdgeMap ( int edge );
+
     /** \brief Maps a local vertex on a face onto a global vertex
      *
      *  \param[in]  face   index of the face (with respect to ALU reference
@@ -114,6 +137,10 @@ namespace Dune {
 
     const static int dune2aluFaceVertex_[numFaces][numVerticesPerFace];
     const static int alu2duneFaceVertex_[numFaces][numVerticesPerFace];
+
+    static const int duneFaceTwist_[ numFaces ];
+
+    static const int duneEdgeMap_[ numEdges ][ 2 ];
 
     static const int faceVertex_[ numFaces ][ numVerticesPerFace ];
   };
@@ -254,6 +281,20 @@ namespace Dune {
     alugrid_assert (face >= 0 && face < numFaces);
     alugrid_assert (localVertex >= 0 && localVertex < numVerticesPerFace);
     return alu2duneFaceVertex_[face][localVertex];
+  }
+
+  template< ALU3dGridElementType type >
+  inline int ElementTopologyMapping< type >::duneFaceTwist ( int face )
+  {
+    alugrid_assert( (face >= 0) && (face < numFaces) );
+    return duneFaceTwist_[ face ];
+  }
+
+  template< ALU3dGridElementType type >
+  inline std::pair< int, int > ElementTopologyMapping< type >::duneEdgeMap ( int edge )
+  {
+    alugrid_assert( (edge >= 0) && (edge < numEdges ) );
+    return std::make_pair( duneEdgeMap_[ edge ][ 0 ], duneEdgeMap_[ edge ][ 1 ] );
   }
 
   template< ALU3dGridElementType type >
