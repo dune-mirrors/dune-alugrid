@@ -246,6 +246,7 @@ namespace Dune
     {
       return Grid::getRealImplementation( entity ).getIndex();
     }
+
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
@@ -263,6 +264,7 @@ namespace Dune
         }
       }
     }
+
     virtual unsigned int
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
@@ -286,12 +288,15 @@ namespace Dune
       else
         return std::numeric_limits<unsigned int>::max();
     }
+
     virtual bool
     wasInserted ( const typename Grid::LeafIntersection &intersection ) const
     {
       return intersection.boundary() &&
              (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
+
+    const std::vector<int>& ordering () const { return ordering_; }
 
   private:
     void doInsertVertex ( const VertexInputType &pos, const VertexId globalId );
@@ -336,6 +341,8 @@ namespace Dune
     bool foundGlobalIndex_ ;
 
     MPICommunicatorType communicator_;
+
+    std::vector< int > ordering_;
   };
 
 

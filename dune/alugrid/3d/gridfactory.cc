@@ -362,10 +362,9 @@ namespace Dune
     typedef typename BoundaryIdMap :: iterator  BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
-    std::vector< int > ordering;
+    std::vector< int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
-
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
@@ -792,7 +791,7 @@ namespace Dune
                       //alugrid_assert(std::abs(activeFaces.find(face2)->second.second - twist2) == 1);
                       activeFaces.erase(face2);
                     }
-                  } 
+                  }
                   //break inner for loop, as we do not need it anymore
                   break;
                 }
@@ -809,9 +808,9 @@ namespace Dune
       }
       return;
     }
-    
+
     //for all other cases we orient the elements by having a positive 3d volume
-    
+
       const typename ElementVector::iterator elementEnd = elements_.end();
       for( typename ElementVector::iterator elementIt = elements_.begin();
            elementIt != elementEnd; ++elementIt )
