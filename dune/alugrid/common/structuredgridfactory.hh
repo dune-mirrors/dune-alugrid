@@ -289,7 +289,7 @@ namespace Dune
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
-#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+#if DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
       return entity.subEntities( codim );
 #else
       return entity.template count< codim > ();
