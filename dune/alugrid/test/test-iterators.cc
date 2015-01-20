@@ -16,11 +16,7 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-//#include <dune/grid/test/gridcheck.cc>
-
-//#include <dune/grid/test/checkgeometryinfather.cc>
-#include "checkintersectionit.cc"
-//#include <dune/grid/test/checkcommunicate.cc>
+#include <dune/grid/test/checkintersectionit.cc>
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>

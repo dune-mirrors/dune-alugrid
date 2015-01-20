@@ -221,12 +221,12 @@ int main (int argc, char ** argv, const char ** envp)
       std::cerr << "ERROR: Invalid DGF file." << std::endl;
       std::exit( 1 );
     }
-    gridPtr = new ALUGrid::GitterDuneImpl();
+    gridPtr = new ALUGrid::GitterDuneImpl( 2 );
     insertGrid( dgf, gridPtr );
   }
   else
   {
-    gridPtr = new ALUGrid::GitterDuneImpl(filename.c_str());
+    gridPtr = new ALUGrid::GitterDuneImpl(3, filename.c_str());
   }
   alugrid_assert( gridPtr );
 

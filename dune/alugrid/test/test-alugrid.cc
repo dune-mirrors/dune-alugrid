@@ -2,6 +2,11 @@
 
 #include <config.h>
 
+#ifndef NDEBUG
+#define DUNE_DEVEL_MODE
+#define DUNE_INTERFACECHECK
+#endif
+
 // #define NO_2D
 // #define NO_3D
 
@@ -18,15 +23,14 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-//#include <dune/grid/test/gridcheck.cc>
-#include "gridcheck.cc"
+#include <dune/grid/test/gridcheck.cc>
+//#include "gridcheck.cc"
 
 
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
 //#include "checkintersectionit.cc"
 #include <dune/grid/test/checkcommunicate.cc>
-//#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
@@ -37,12 +41,11 @@
 #define USE_PARALLEL_TEST 1
 #endif
 
-template<int dim, int dimw>
-struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimw, Dune::simplex, Dune::conforming > >
+template<int dim, int dimworld>
+struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimworld, Dune::simplex, Dune::conforming > >
 {
   static const bool v = false;
 };
-
 
 template <bool leafconform, class Grid>
 void checkCapabilities(const Grid& grid)
@@ -219,8 +222,8 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
 
   if( output )
   {
-    std::string twistIn( (neighbor) ? "twistInNeighbor()" : "twistInSelf" );
-    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside" );
+    std::string twistIn( (neighbor) ? "twistInOutside()" : "twistInInside()" );
+    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside()" );
     std::cout << "ERROR: Face "<< face << " : twist = "<< twistFound << std::endl;
     std::cout << "\nPut twist = "<< twistFound << " In TwistUtility::"<< twistIn << " for " << numberIn << " = " << face << " ! \n";
     std::cout << "******************************************\n";
@@ -397,7 +400,7 @@ void writeFile( const GridView& gridView, std::string filename )
 {
   //Dune::DGFWriter< GridView > writer( gridView );
  // writer.write( filename );
-  
+
   Dune::VTKWriter< GridView > vtkWriter ( gridView );
   vtkWriter.write( filename );
 }
@@ -420,7 +423,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
   {
     Dune::GrapeGridDisplay< GridType > grape( grid );
     grape.display();
-    writeFile( grid.leafGridView() , filename);  
+    writeFile( grid.leafGridView() , filename);
   }
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
@@ -458,7 +461,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
     {
       Dune::GrapeGridDisplay< GridType > grape( grid );
       grape.display();
-      writeFile( grid.leafGridView() , filename+"-refined");    
+      writeFile( grid.leafGridView() , filename+"-refined");
     }
   }
 
@@ -472,7 +475,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
   {
     Dune::GrapeGridDisplay< GridType > grape( grid );
     grape.display();
-    writeFile( grid.leafGridView() , filename+"-checkit");    
+    writeFile( grid.leafGridView() , filename+"-checkit");
   }
 
   std::cout << "  CHECKING: non-conform" << std::endl;
