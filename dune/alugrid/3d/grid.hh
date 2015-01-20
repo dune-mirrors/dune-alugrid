@@ -24,6 +24,7 @@
 #include <dune/alugrid/common/objectfactory.hh>
 #include <dune/alugrid/common/backuprestore.hh>
 #include <dune/alugrid/common/macrogridview.hh>
+#include <dune/alugrid/common/twists.hh>
 
 //- Local includes
 #include "alu3dinclude.hh"
@@ -272,35 +273,41 @@ namespace Dune
   // ALU3dGridTwist
   // --------------
 
-  template< ALU3dGridElementType elType, int codim >
+  template< int dim, ALU3dGridElementType elType, int codim >
   struct ALU3dGridTwists;
 
-  template<>
-  struct ALU3dGridTwists< tetra, 0 >
+  template<int dim>
+  struct ALU3dGridTwists< dim, tetra, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::SimplexTopology< 3 >::type::id, 3 > Type;
+    typedef TrivialTwists< GenericGeometry::SimplexTopology< dim >::type::id, dim > Type;
   };
 
-  template<>
-  struct ALU3dGridTwists< hexa, 0 >
+  template<int dim>
+  struct ALU3dGridTwists< dim, hexa, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::CubeTopology< 3 >::type::id, 3 > Type;
+    typedef TrivialTwists< GenericGeometry::CubeTopology< dim >::type::id, dim > Type;
+  };
+
+  template< int dim, ALU3dGridElementType elType >
+  struct ALU3dGridTwists< dim, elType, 1 >
+  {
+    typedef ALUTwists< dim == 2 ? 2 : ElementTopologyMapping< elType >::numVerticesPerFace, dim-1 > Type;
   };
 
   template< ALU3dGridElementType elType >
-  struct ALU3dGridTwists< elType, 1 >
-  {
-    typedef ALUTwists< ElementTopologyMapping< elType >::numVerticesPerFace, 2 > Type;
-  };
-
-  template< ALU3dGridElementType elType >
-  struct ALU3dGridTwists< elType, 2 >
+  struct ALU3dGridTwists< 3, elType, 2 >
   {
     typedef ALUTwists< 2, 1 > Type;
   };
 
   template< ALU3dGridElementType elType >
-  struct ALU3dGridTwists< elType, 3 >
+  struct ALU3dGridTwists< 2, elType, 2 >
+  {
+    typedef TrivialTwists< 0u, 0 > Type;
+  };
+
+  template< int dim, ALU3dGridElementType elType >
+  struct ALU3dGridTwists< dim, elType, 3 >
   {
     typedef TrivialTwists< 0u, 0 > Type;
   };
@@ -357,7 +364,7 @@ namespace Dune
       template< int cd >
       struct Codim
       {
-        typedef typename ALU3dGridTwists< elType, cd >::Type Twists;
+        typedef typename ALU3dGridTwists< dim, elType, cd >::Type Twists;
         typedef typename Twists::Twist Twist;
 
         // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
