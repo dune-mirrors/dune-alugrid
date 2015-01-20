@@ -272,6 +272,44 @@ namespace Dune
 
 
 
+  // ALU3dGridTwist
+  // --------------
+
+  template< ALU3dGridElementType elType, int codim >
+  struct ALU3dGridTwists;
+
+  template<>
+  struct ALU3dGridTwists< tetra, 0 >
+  {
+    typedef TrivialTwists< GenericGeometry::SimplexTopology< 3 >::type::id, 3 > Type;
+  };
+
+  template<>
+  struct ALU3dGridTwists< hexa, 0 >
+  {
+    typedef TrivialTwists< GenericGeometry::CubeTopology< 3 >::type::id, 3 > Type;
+  };
+
+  template< ALU3dGridElementType elType >
+  struct ALU3dGridTwists< elType, 1 >
+  {
+    typedef ALUTwists< ElementTopologyMapping< elType >::numVerticesPerFace, 2 > Type;
+  };
+
+  template< ALU3dGridElementType elType >
+  struct ALU3dGridTwists< elType, 2 >
+  {
+    typedef ALUTwists< 2, 1 > Type;
+  };
+
+  template< ALU3dGridElementType elType >
+  struct ALU3dGridTwists< elType, 3 >
+  {
+    typedef TrivialTwists< 0u, 0 > Type;
+  };
+
+
+
   // ALU3dGridFamily
   // ---------------
 
@@ -322,6 +360,9 @@ namespace Dune
       template< int cd >
       struct Codim
       {
+        typedef typename ALU3dGridTwists< elType, cd >::Type Twists;
+        typedef typename Twists::Twist Twist;
+
         // IMPORTANT: Codim<codim>::Geometry == Geometry<dim-codim,dimw>
         typedef ALU3dGridGeometry< dim-cd, dimworld, const Grid > GeometryImpl;
         typedef ALU3dGridGeometry< dim-cd, dim, const Grid > LocalGeometryImpl;

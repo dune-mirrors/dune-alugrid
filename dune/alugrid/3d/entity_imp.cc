@@ -173,7 +173,6 @@ namespace Dune {
     // this method should only be called if a father exists
     alugrid_assert ( item_->up() );
 
-
     // get child number
     const int child = item_->nChild();
 
@@ -181,11 +180,9 @@ namespace Dune {
     // this can only be true for tetrahedral elements
     if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::RefinementRules::refine_element_t) )
     {
-
       static LocalGeometryImpl geom;
       geom.buildGeomInFather( father()->geometry(), geometry() );
       return LocalGeometry( geom );
-
     }
     else
     {
@@ -194,7 +191,6 @@ namespace Dune {
       // get geometryInFather storage from grid and return childs geom
       return LocalGeometry( grid().nonConformingGeometryInFatherStorage()[ child ] );
     }
-
   }
 
   //********* begin method subIndex ********************
@@ -238,14 +234,14 @@ namespace Dune {
       if(dim == 3)
       {
         // get hedge1 corresponding to dune reference element and return number
-        return elem.myhedge1( ElemTopo::dune2aluEdge(i) )->getIndex();
+        return elem.myhedge( ElemTopo::dune2aluEdge(i) )->getIndex();
       }
       else if (dim == 2)
       {
         if (type == tetra)
         {
-              // We want vertices 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
-           i+=1;
+           // We want vertices 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
+           ++i;
         }
         // get vertex corresponding to dune reference element and return number
         return elem.myvertex( ElemTopo::dune2aluVertex(i) )->getIndex();
@@ -309,7 +305,11 @@ namespace Dune {
     return -1;
   }
 
-  //******** begin method entity ******************
+
+
+  // SubEntitites
+  // ------------
+
   template <class GridImp, int dim, int cd> struct SubEntities {};
 
   // specialisation for elements
@@ -319,15 +319,18 @@ namespace Dune {
     typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
 
-    static typename ALU3dGridEntity<0,dim,GridImp>::template Codim<0>::EntityPointer
-    entity (const FactoryType& factory,
-            const int level,
-            const EntityType & entity,
-            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
-            int i)
+    typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
+
+    typedef typename EntityType::template Codim< 0 >::Twist Twist;
+
+    // note: The subentity number i is in dune numbering.
+    static typename EntityType::template Codim< 0 >::EntityPointer
+    entity ( const FactoryType &factory, int level, const EntityType &entity, const Item &item, int i )
     {
       return ALU3dGridEntityPointer<0, GridImp>( entity );
     }
+
+    static Twist twist ( const Item &item, int i ) { return Twist(); }
   };
 
   // specialisation for faces
@@ -338,23 +341,29 @@ namespace Dune {
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
     typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
 
-    static typename ALU3dGridEntity<0,dim,GridImp> :: template Codim<1>:: EntityPointer
-    entity (const FactoryType& factory,
-            const int level,
-            const EntityType & en,
-            const typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType & item,
-            int duneFace)
+    typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
+
+    typedef typename EntityType::template Codim< 1 >::Twist Twist;
+
+    // note: The subentity number i is in dune numbering.
+    static typename EntityType::template Codim< 1 >::EntityPointer
+    entity ( const FactoryType &factory, int level, const EntityType &entity, const Item &item, int i )
     {
-      int aluFace = Topo::dune2aluFace(duneFace);
       return
         ALU3dGridEntityPointer<1,GridImp>
             (factory,
              level,
-             *(ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace(item, duneFace)), // getFace already constains dune2aluFace
-             item.twist(aluFace),
-             duneFace // we need the duneFace number here for the buildGeom method
+             *ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace( item, i ),
+             static_cast< int >( twist( item, i ) ),
+             i // we need the duneFace number here for the buildGeom method
             );
     }
+
+    static Twist twist ( const Item &item, int i )
+    {
+      return Twist( Topo::duneFaceTwist( i ) ) * Twist( item.twist( Topo::dune2aluFace( i ) ) );
+    }
+
   };
 
   // specialisation for edges
