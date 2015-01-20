@@ -52,31 +52,11 @@ namespace Dune
     {}
   };
 
-#if 0
-  template< int dim, int dimworld, ALU2DSPACE ElementType elType, class T >
-  class PersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
-  : public ALUGridPersistentContainer< ALU2dGrid< dim, dimworld, elType >, T >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm, class T >
+  class PersistentContainer< ALU3dGrid< dim, dimworld, elType, Comm >, T >
+  : public ALUGridPersistentContainer< ALU3dGrid< dim, dimworld, elType, Comm >, T >
   {
-    typedef ALUGridPersistentContainer< ALU2dGrid< dim, dimworld, elType >, T > Base;
-
-  public:
-    typedef typename Base::Grid Grid;
-    typedef typename Base::Value Value;
-
-    /** \brief \deprecated typedef of class Grid */
-    typedef typename Base::Grid GridType;
-
-    PersistentContainer ( const Grid &grid, int codim, const Value &value = Value() )
-    : Base( grid, codim, value )
-    {}
-  };
-#endif  //if 0
-
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm, class T >
-  class PersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T >
-  : public ALUGridPersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T >
-  {
-    typedef ALUGridPersistentContainer< ALU3dGrid< actualDim, actualDimw, elType, Comm >, T > Base;
+    typedef ALUGridPersistentContainer< ALU3dGrid< dim, dimworld, elType, Comm >, T > Base;
 
   public:
     typedef typename Base::Grid Grid;
