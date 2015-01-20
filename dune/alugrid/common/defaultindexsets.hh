@@ -61,7 +61,12 @@ namespace Dune
    */
   template < class GridImp, class IteratorImp >
   class DefaultIndexSet :
-    public IndexSet< GridImp, DefaultIndexSet <GridImp, IteratorImp>, unsigned int >
+    public IndexSet< GridImp, DefaultIndexSet <GridImp, IteratorImp>,
+                     unsigned int
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+    , std::vector< GeometryType >
+#endif
+      >
   {
     typedef GridImp GridType;
     enum { dim = GridType::dimension };
@@ -71,6 +76,8 @@ namespace Dune
 
     //! type of index
     typedef unsigned int IndexType;
+    //! type of geometry types
+    typedef std::vector< GeometryType > Types;
 
   private:
     //! type of iterator to generate index set
@@ -107,7 +114,7 @@ namespace Dune
         }
         else
         {
-#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           const int subEntities = entity.subEntities( codim );
 #else
           const int subEntities = entity.template count< codim > ();
@@ -217,7 +224,7 @@ namespace Dune
 #ifdef ALUGRIDDEBUG
       const int codim = cd;
       //const bool isLeaf = (codim == 0) ? en.isLeaf() : true ;
-      alugrid_assert ( (codim == dim) ? (1) : ( level_ < 0 ) || (level_ == en.level() ));
+      alugrid_assert ( (codim == dim) ? (true) : ( level_ < 0 ) || (level_ == en.level() ));
       alugrid_assert ( indexContainer( cd )[ en ].index() >= 0 );
 #endif
       return indexContainer( cd )[ en ].index();
@@ -298,6 +305,12 @@ namespace Dune
     const std::vector<GeometryType>& geomTypes (int codim) const
     {
       return grid_.geomTypes( codim );
+    }
+
+    //! deliver all geometry types used in this grid
+    Types types( const int codim ) const
+    {
+      return geomTypes( codim );
     }
 
     //! returns true if this set provides an index for given entity
