@@ -527,6 +527,14 @@ namespace Dune
     static const int dimension =      BaseType::dimension;
     static const int dimensionworld = BaseType::dimensionworld;
 
+    template< int codim >
+    struct Codim
+      : public BaseType::template Codim< codim >
+    {
+      typedef typename Traits::template Codim< codim >::Twists Twists;
+      typedef typename Twists::Twist Twist;
+    };
+
   protected:
     typedef MakeableInterfaceObject< typename Traits::template Codim< 0 >::Geometry > GeometryObject;
     friend class ALULocalGeometryStorage< const ThisType, GeometryObject, 8 >;
@@ -772,13 +780,15 @@ namespace Dune
 
     //! View for te macro grid with some alu specific methods
     template<PartitionIteratorType pitype>
-    typename Partition<pitype>::MacroGridView macroView() const {
+    typename Partition<pitype>::MacroGridView macroView() const
+    {
       typedef typename Traits::template Partition<pitype>::MacroGridView View;
       return View(*this);
     }
 
     //! View for te macro grid with some alu specific methods (All_Partition)
-    MacroGridView macroView() const {
+    MacroGridView macroView() const
+    {
       typedef MacroGridView View;
       return View(*this);
     }
@@ -793,6 +803,14 @@ namespace Dune
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
     {
       return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
+    }
+
+    template< int cd >
+    typename Codim< cd >::Twists twists ( GeometryType type ) const
+    {
+      assert( type.dim() == dimension - cd );
+      assert( elType == tetra ? type.isSimplex() : type.isCube() );
+      return typename Traits::template Codim< cd >::Twists();
     }
 
   protected:

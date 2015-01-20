@@ -460,7 +460,15 @@ namespace Dune {
   {
     return SubEntities<GridImp,dim,cc>::entity(factory_,level(),*this,*item_,i);
   }
-  //**** end method entity *********
+
+
+  template< int dim, class GridImp >
+  template< int codim >
+  typename ALU3dGridEntity< 0, dim, GridImp >::template Codim< codim >::Twist
+  ALU3dGridEntity< 0, dim, GridImp >::twist ( int i ) const
+  {
+    return SubEntities< GridImp, dim, codim >::twist( *item_, i );
+  }
 
   template<int dim, class GridImp>
   typename ALU3dGridEntity<0,dim,GridImp> :: EntityPointer
