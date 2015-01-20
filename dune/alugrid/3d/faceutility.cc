@@ -109,19 +109,14 @@ namespace Dune
     LocalCoordinateType cornerCoords;
     referenceElementCoordinatesRefined ( side, cornerCoords );
 
-    // this is a dune face index
-    const int faceTwist =
-      (side == INNER ?
-       connector_.innerTwist() :
-       connector_.outerTwist());
 
-
-    if(connector_.face().nChild() == (faceTwist < 0 ? 1 : 0)){
+    //for some reason the behavior for tetra and hexa is opposite    
+    if(connector_.face().nChild() == ( type == tetra) ? 1 : 0){
       result[0] = cornerCoords[0];
       result[1] =  ( cornerCoords[1] + cornerCoords[0] );
       result[1] *=0.5;
     }
-    else if(connector_.face().nChild() == (faceTwist < 0 ? 0 : 1))
+    else if(connector_.face().nChild() == ( type == tetra ) ? 0 : 1)
     {
       result[0] = ( cornerCoords[1] + cornerCoords[0] );
       result[0] *= 0.5;

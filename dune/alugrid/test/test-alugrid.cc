@@ -29,6 +29,7 @@
 //#include "checktwists.cc"
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/alugrid/dgf.hh>
 
@@ -392,14 +393,17 @@ void checkLevelIndexNonConform(GridType & grid)
 }
 
 template <class GridView>
-void writeFile( const GridView& gridView )
+void writeFile( const GridView& gridView, std::string filename )
 {
-  Dune::DGFWriter< GridView > writer( gridView );
-  writer.write( "dump.dgf" );
+  //Dune::DGFWriter< GridView > writer( gridView );
+ // writer.write( filename );
+  
+  Dune::VTKWriter< GridView > vtkWriter ( gridView );
+  vtkWriter.write( filename );
 }
 
 template <class GridType>
-void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
+void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, std::string filename = "dump")
 {
 
   //mxl = 0;
@@ -410,12 +414,13 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     delete gr;
   }
 
-  //writeFile( grid.leafGridView() );
+
 
   if( display )
   {
     Dune::GrapeGridDisplay< GridType > grape( grid );
     grape.display();
+    writeFile( grid.leafGridView() , filename);  
   }
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
@@ -443,7 +448,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
-            writeFile( grid.levelGridView(1) );
     gridcheck(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
@@ -454,11 +458,12 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
     {
       Dune::GrapeGridDisplay< GridType > grape( grid );
       grape.display();
+      writeFile( grid.leafGridView() , filename+"-refined");    
     }
   }
 
-  // check also non-conform grids
-  // makeNonConfGrid(grid,0,1);
+   //check also non-conform grids
+   makeNonConfGrid(grid,0,1);
 
   // check iterators
   checkIterators( grid );
@@ -467,6 +472,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
   {
     Dune::GrapeGridDisplay< GridType > grape( grid );
     grape.display();
+    writeFile( grid.leafGridView() , filename+"-checkit");    
   }
 
   std::cout << "  CHECKING: non-conform" << std::endl;
@@ -623,7 +629,7 @@ int main (int argc , char **argv) {
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr(filename);
         checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display);
+        checkALUSerial(*gridPtr, 2, display, filename);
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -635,7 +641,7 @@ int main (int argc , char **argv) {
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display );
+        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
 
       }
 
@@ -648,7 +654,7 @@ int main (int argc , char **argv) {
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display);
+        checkALUSerial(*gridPtr, 2, display, filename);
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -656,11 +662,11 @@ int main (int argc , char **argv) {
 
 
         typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming > SurfaceGridType;
-        std::string surfaceFilename( "./dgf/2-3-testgrid.dgf" );
+        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display );
+        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
 
       }
 
@@ -672,7 +678,7 @@ int main (int argc , char **argv) {
         //std::string filename( "./dgf/cube-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
         checkCapabilities< true >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display);
+        checkALUSerial(*gridPtr, 2, display, filename);
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -685,7 +691,7 @@ int main (int argc , char **argv) {
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         checkCapabilities< true >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display );
+        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
 
       }
 #endif // #ifndef NO_2D
