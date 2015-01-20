@@ -151,6 +151,14 @@ namespace Dune
                                                        {0, 2, 1},
                                                        {0, 1, 2}};
 
+  template<>
+  const int ElementTopologyMapping< tetra >::duneFaceTwist_[ numFaces ] = { 0, -1, 0, -1 };
+
+  template<>
+  const int ElementTopologyMapping< tetra >::duneEdgeMap_[ numEdges ][ 2 ]
+    = { { 3, 0 }, { 1, 0 }, { 3, 1 }, { 2, 0 }, { 0, 0 }, { 1, 1 } };
+
+
   //********************************************************************
   //
   //  local(inside) and global(outside) numbering of the face of a hexa
@@ -264,6 +272,14 @@ namespace Dune
                                                        {0, 1, 3, 2},  // ok
                                                        {1, 0, 2, 3},  // ok
                                                        {0, 2, 3, 1}}; // ok
+
+  template<>
+  const int ElementTopologyMapping< hexa >::duneFaceTwist_[ numFaces ] = { -1, 0, 0, -4, -1, 0 };
+
+  template<>
+  const int ElementTopologyMapping< hexa >::duneEdgeMap_[ numEdges ][ 2 ]
+    = { { 5, 0 }, { 2, 1 }, { 4, 1 }, { 3, 1 }, { 0, 0 }, { 3, 0 },
+        { 2, 0 }, { 0, 1 }, { 5, 1 }, { 1, 1 }, { 1, 0 }, { 4, 2 } };
 
   template<>
   const int ElementTopologyMapping< tetra >::faceVertex_[ numFaces ][ numVerticesPerFace ]
