@@ -11,7 +11,7 @@ namespace Dune {
   {
     typedef GridImp GridType;
     // type of double coordinate vector
-    typedef ctype coord_t[ 3 ];
+    typedef ctype coord_t[ GridType :: dimensionworld ];
   protected:
 
     //! reference to boundary projection implementation

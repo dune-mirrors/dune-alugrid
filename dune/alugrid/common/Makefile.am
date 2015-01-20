@@ -5,6 +5,7 @@ alucommon_HEADERS = alugrid_assert.hh \
 										capabilities.hh \
 										declaration.hh \
 										defaultindexsets.hh \
+                    fromtogridfactory.hh \
 										geostorage.hh \
                     hsfc.hh \
 										intersectioniteratorwrapper.hh \
@@ -16,6 +17,7 @@ alucommon_HEADERS = alugrid_assert.hh \
 										persistentcontainer.hh \
 										structuredgridfactory.hh \
 										transformation.hh \
-                    writeparalleldgf.hh
+										twists.hh \
+										writeparalleldgf.hh
 
 include $(top_srcdir)/am/global-rules

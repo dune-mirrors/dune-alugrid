@@ -835,7 +835,7 @@ namespace Dune
     GeometryImplType* geoImpl_;
   };
 
-#if ! DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+#if ! DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
   namespace FacadeOptions
   {
     //! geometry can be stored as an object
