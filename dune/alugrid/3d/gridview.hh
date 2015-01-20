@@ -41,6 +41,9 @@ namespace Dune
     template< int cd >
     struct Codim
     {
+      typedef typename Grid::Traits::template Codim< cd >::Twists Twists;
+      typedef typename Twists::Twist Twist;
+
       typedef typename Grid :: Traits
       :: template Codim< cd > :: template Partition< pitype > :: LevelIterator
       Iterator;
@@ -211,6 +214,12 @@ namespace Dune
       return grid().communicate( data, iftype, dir, level_ );
     }
 
+    template< int cd >
+    typename Codim< cd >::Twists twists ( GeometryType type ) const
+    {
+      return grid().template twists< cd >( type );
+    }
+
   private:
     const Grid *grid_;
     int level_;
@@ -240,6 +249,9 @@ namespace Dune
     template< int cd >
     struct Codim
     {
+      typedef typename Grid::Traits::template Codim< cd >::Twists Twists;
+      typedef typename Twists::Twist Twist;
+
       typedef typename Grid :: Traits
       :: template Codim< cd > :: template Partition< pitype > :: LeafIterator
       Iterator;
@@ -393,6 +405,12 @@ namespace Dune
                                                    CommunicationDirection dir ) const
     {
       return grid().communicate( data, iftype, dir );
+    }
+
+    template< int cd >
+    typename Codim< cd >::Twists twists ( GeometryType type ) const
+    {
+      return grid().template twists< cd >( type );
     }
 
   private:
