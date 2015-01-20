@@ -7,6 +7,7 @@
 #include <dune/grid/common/grid.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/alugrid/common/memory.hh>
+#include <dune/alugrid/common/twists.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
@@ -99,6 +100,9 @@ protected:
   typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
 public:
+  typedef ALUTwists< GridImp::elementType == tetra ? 3 : 4, dim-1 > Twists;
+  typedef typename Twists::Twist Twist;
+
   typedef typename GridImp::GridObjectFactoryType FactoryType;
 
   typedef typename GridImp::template Codim<0>::Entity Entity;
@@ -181,16 +185,10 @@ public:
   int indexInOutside () const;
 
   //! returns twist of face compared to inner element
-  int twistInSelf() const { return twistInInside(); }
+  Twist twistInInside () const;
 
   //! returns twist of face compared to outer element
-  int twistInNeighbor() const { return twistInOutside(); }
-
-  //! returns twist of face compared to inner element
-  int twistInInside() const;
-
-  //! returns twist of face compared to outer element
-  int twistInOutside() const;
+  Twist twistInOutside () const;
 
   //! return unit outer normal, this should be dependent on local
   //! coordinates for higher order boundary
