@@ -100,7 +100,7 @@ protected:
   typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
 
 public:
-  typedef ALUTwists< GridImp::elementType == tetra ? 3 : 4, dim-1 > Twists;
+  typedef ALUTwists< (dim == 3 ) ? GridImp::elementType == tetra ? 3 : 4 : 2, dim-1 > Twists;
   typedef typename Twists::Twist Twist;
 
   typedef typename GridImp::GridObjectFactoryType FactoryType;
