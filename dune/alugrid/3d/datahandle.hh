@@ -501,10 +501,8 @@ namespace ALUGrid
   protected:
     typedef typename GridType::MPICommunicatorType Comm;
 
-
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
     typedef typename ImplTraits::template Codim< 0 >::InterfaceType  HElementType;
-
 
     typedef typename GridType :: EntityObject                   EntityObjectType;
     typedef typename GridType :: template Codim< 0 > :: Entity  EntityType ;
@@ -823,7 +821,7 @@ namespace ALUGrid
     template <int codim>
     int subEntities( const EntityType &element ) const
     {
-#if DUNE_VERSION_NEWER_REV(DUNE_GRID,3,0,0)
+#if DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
       return element.subEntities( codim );
 #else
       return element.template count< codim > ();
