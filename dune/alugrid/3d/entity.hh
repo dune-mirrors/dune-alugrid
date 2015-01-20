@@ -6,6 +6,7 @@
 // Dune includes
 #include <dune/grid/common/entity.hh>
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
+#include <dune/alugrid/common/twists.hh>
 
 // Local includes
 #include "alu3dinclude.hh"
@@ -30,7 +31,7 @@ namespace Dune
   class ALU3dGridIntersectionIterator;
   template<int codim, PartitionIteratorType, class GridImp>
   class ALU3dGridLeafIterator;
-  template<int actualDim, int actualDimw, ALU3dGridElementType, class >
+  template<int dim, int dimworld, ALU3dGridElementType, class >
   class ALU3dGrid;
 
 /*!
@@ -262,6 +263,7 @@ public:
   template <int cd>
   struct Codim
   {
+    typedef typename GridImp::Traits::template Codim< cd >::Twists::Twist Twist;
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
   };
 
@@ -300,6 +302,9 @@ public:
   //!  are numbered 0 ... count<cc>()-1
   template< int codim >
   typename Codim< codim >::EntityPointer subEntity ( int i ) const;
+
+  template< int codim >
+  typename Codim< codim >::Twist twist ( int i ) const;
 
   /*! Access to intersection with neighboring elements that are leaf
    * elements. A neighbor is an entity of codimension 0
