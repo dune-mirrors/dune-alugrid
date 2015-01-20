@@ -1809,7 +1809,7 @@ namespace ALUGrid
 
       protected :
         Tetra (myhface_t *, int, myhface_t *, int,
-                      myhface_t *, int, myhface_t *, int);
+               myhface_t *, int, myhface_t *, int);
         int postRefinement ();
         int preCoarsening ();
       public :
