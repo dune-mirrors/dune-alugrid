@@ -214,10 +214,10 @@ public:
   typedef typename ImplTraits::IMPLElementType IMPLElementType;
   typedef typename ImplTraits::HBndSegType     HBndSegType;
 
-  enum { refine_element_t  = ImplTraits::template RefinementRules< dim >::refine_element_t  };
-  enum { bisect_element_t  = ImplTraits::template RefinementRules< dim >::bisect_element_t  };
-  enum { coarse_element_t  = ImplTraits::template RefinementRules< dim >::coarse_element_t  };
-  enum { nosplit_element_t = ImplTraits::template RefinementRules< dim >::nosplit_element_t };
+  enum { refine_element_t  = ImplTraits::RefinementRules::refine_element_t  };
+  enum { bisect_element_t  = ImplTraits::RefinementRules::bisect_element_t  };
+  enum { coarse_element_t  = ImplTraits::RefinementRules::coarse_element_t  };
+  enum { nosplit_element_t = ImplTraits::RefinementRules::nosplit_element_t };
 
   typedef typename ImplTraits::MarkRuleType MarkRuleType;
 

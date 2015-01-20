@@ -3,22 +3,21 @@
 
 #include <cassert>
 
+// this is only of interest when NDEBUG is not set
+// NOTE: defining NO_ALUGRID_DEBUG will disable all ALUGrid asserts
 #ifndef NDEBUG
+
+// enable ALUGrid debug mode by default unless NO_ALUGRID_DEBUG is set
+#ifndef NO_ALUGRID_DEBUG
 #define ALUGRIDDEBUG
-#define alugrid_assert(EX) assert(EX)
-#else
-#define alugrid_assert(EX) (static_cast<void>(0))
 #endif
-/*
+
+#endif // NDEBUG
+
 #ifndef ALUGRIDDEBUG
 # define alugrid_assert(EX) (static_cast<void>(0))
 #else
-#ifdef NDEBUG
-#warning defined ALUGRIDDEBUG and NDEBUG both leads to many warnings and is probably not reasonable...
-#endif
 # define alugrid_assert(EX) assert(EX)
 #endif
-*/
 
 #endif // ALUGRID_ASSERT_HH
-
