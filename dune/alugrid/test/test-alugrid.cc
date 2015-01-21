@@ -406,6 +406,22 @@ void writeFile( const GridView& gridView, std::string filename )
 }
 
 template <class GridType>
+void checkGrid( GridType& grid )
+{
+  try {
+    gridcheck(grid);
+  }
+  catch (const Dune::Exception& e )
+  {
+    std::cout << "Caught " << e.what() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "Caught unknown exception!" << std::endl;
+  }
+}
+
+template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, std::string filename = "dump")
 {
 
@@ -416,8 +432,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
     assert ( gr );
     delete gr;
   }
-
-
 
   if( display )
   {
@@ -430,7 +444,8 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
 
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
-  gridcheck(grid);
+  checkGrid(grid);
+
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
@@ -451,7 +466,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
-    gridcheck(grid);
+    checkGrid(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
     // if( checkTwist )
@@ -479,7 +494,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false, st
   }
 
   std::cout << "  CHECKING: non-conform" << std::endl;
-  gridcheck(grid);
+  checkGrid(grid);
   std::cout << "  CHECKING: twists " << std::endl;
   // if( checkTwist )
   //  checkTwists( grid.leafGridView(), NoMapTwist() );
