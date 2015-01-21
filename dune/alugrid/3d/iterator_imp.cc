@@ -364,6 +364,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
     inside().dereference().geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
     outerNormal *= inside().dereference().geometry().integrationElement( xInside );
+    if(connector_.conformanceState() == FaceInfoType::REFINED_OUTER) outerNormal *=0.5;
     return outerNormal;
   }
 
