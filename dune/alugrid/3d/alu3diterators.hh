@@ -182,21 +182,21 @@ namespace ALUGrid
 
     VertexListType & vxList_;
 
+    typedef typename IteratorElType< 3, Comm >::val_t val_t;
+    mutable val_t elem_;
+
     mutable int count_;
     const int size_;
     const int dim_;
 
   public:
-    typedef typename IteratorElType< 3, Comm >::val_t val_t;
-    mutable val_t elem_;
-
     // constructor creating iterator
     template< class GridImp >
     ALU3dGridLevelIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : vxList_ ( grid.getVertexList( level ) ),
+      elem_( (ElType *)0, (HBndSegType *)0 ),
       count_( 0 ),
       size_( vxList_.size() ),
-      elem_( (ElType *)0, (HBndSegType *)0 ),
       dim_( GridImp::dimension )
     {
       alugrid_assert ( vxList_.up2Date() );
@@ -204,8 +204,11 @@ namespace ALUGrid
 
     // copy constructor
     ALU3dGridLevelIteratorWrapper (const ALU3dGridLevelIteratorWrapper & org )
-      : vxList_(org.vxList_) , count_(org.count_) , size_(org.size_)
-      , elem_(org.elem_) , dim_(org.dim_)
+      : vxList_(org.vxList_),
+        elem_(org.elem_),
+        count_(org.count_),
+        size_(org.size_),
+        dim_(org.dim_)
     {
     }
 
@@ -431,23 +434,24 @@ namespace ALUGrid
     LeafVertexListType & vxList_;
     typedef typename LeafVertexListType :: IteratorType ListIteratorType;
 
+    typedef typename IteratorElType< 3, Comm >::val_t val_t;
+    mutable val_t elem_;
+
     mutable int count_;
     const int size_;
     const int dim_;
 
-  public:
-    typedef typename IteratorElType< 3, Comm >::val_t val_t;
-    mutable val_t elem_;
     const StopRule_t rule_;
 
+  public:
     // constructor creating iterator
     template< class GridImp >
     ALU3dGridLeafIteratorWrapper ( const GridImp &grid, int level, const int nlinks )
     : vxList_( grid.getLeafVertexList() ),
+      elem_( (ElType *)0, (HBndSegType *)0 ),
       count_( 0 ),
       size_( vxList_.size() ),
       dim_(GridImp::dimension),
-      elem_( (ElType *)0, (HBndSegType *)0 ),
       rule_()
     {
       alugrid_assert ( vxList_.up2Date() );
@@ -456,10 +460,10 @@ namespace ALUGrid
     // copy constructor
     ALU3dGridLeafIteratorWrapper (const ALU3dGridLeafIteratorWrapper & org )
       : vxList_(org.vxList_)
-      , count_(org.count_) , size_(org.size_)
       , elem_(org.elem_)
-      , rule_()
+      , count_(org.count_) , size_(org.size_)
       , dim_(org.dim_)
+      , rule_()
     {
     }
 

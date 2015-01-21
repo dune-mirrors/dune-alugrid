@@ -355,8 +355,8 @@ namespace Dune {
     typedef ALUGridId <  MacroKeyType > MacroIdType;
     enum { numCodim = 4 }; // we are always using the 3d grid here
 
-    // this means that only up to 300000000 entities are allowed
     typedef typename GridType::Traits::template Codim<0>::Entity EntityCodim0Type;
+
   private:
     mutable std::map< int , IdType > ids_[ numCodim ];
 
@@ -367,8 +367,6 @@ namespace Dune {
     const HierarchicIndexSetType & hset_;
 
     int vertexKey_[4];
-
-    int chunkSize_ ;
 
     enum { startOffSet_ = 0 };
 
@@ -381,7 +379,6 @@ namespace Dune {
     //! create id set, only allowed for ALU3dGrid
     ALU3dGridGlobalIdSet(const GridType & grid)
       : grid_(grid), hset_(grid.hierarchicIndexSet())
-      , chunkSize_(100)
     {
       if(elType == hexa)
       {
@@ -482,7 +479,6 @@ namespace Dune {
 
     void setChunkSize( int chunkSize )
     {
-      chunkSize_ = chunkSize;
     }
 
     // creates the id set
@@ -859,7 +855,7 @@ namespace Dune {
       const unsigned int codim = ( dim == cd ) ? 3 : cd ;
       //for simplices in 2d the relevant vertices of the 3d simplex
       // are 1,2,3, so we have to add 1
-      if(GridType::elementType == tetra && dim == 2 && cd == 2) ++i;
+      if( GridType::elementType == tetra && dim == 2 && cd == 2) ++i;
       const int hIndex = hset_.subIndex( e, i, codim );
       alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
       const IdType &macroId = ids_[ codim ][ hIndex ];
