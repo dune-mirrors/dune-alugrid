@@ -13,8 +13,8 @@ namespace Dune
   // Implementation of NonConformingFaceMapping
   // ------------------------------------------
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parent ( const CoordinateType &childCoordinates,
                      CoordinateType& parentCoordinates ) const
   {
@@ -41,9 +41,9 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >::CoordinateType
-  NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  typename NonConformingFaceMapping< dim, dimworld, tetra, Comm >::CoordinateType
+  NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const
   {
     CoordinateType childBary, parentBary;
@@ -55,8 +55,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parentNosplit ( const CoordinateType& childCoordinates,
                             CoordinateType& parentCoordinates ) const
   {
@@ -64,8 +64,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parentE01 ( const CoordinateType &childCoordinates,
                         CoordinateType &parentCoordinates ) const
   {
@@ -74,8 +74,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parentE12 ( const CoordinateType &childCoordinates,
                         CoordinateType &parentCoordinates ) const
   {
@@ -84,8 +84,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parentE20 ( const CoordinateType &childCoordinates,
                         CoordinateType &parentCoordinates ) const
   {
@@ -94,8 +94,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
     ::child2parentIso4 ( const CoordinateType &childCoordinates,
                          CoordinateType &parentCoordinates ) const
   {
@@ -189,8 +189,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, hexa, Comm >
     ::child2parent ( const CoordinateType &childCoordinates,
                      CoordinateType& parentCoordinates ) const
   {
@@ -208,9 +208,9 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >::CoordinateType
-  NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
+  template< int dim, int dimworld, class Comm >
+  typename NonConformingFaceMapping< dim, dimworld, hexa, Comm >::CoordinateType
+  NonConformingFaceMapping< dim, dimworld, hexa, Comm >
     ::child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const
   {
     CoordinateType parentCoordinates;
@@ -219,10 +219,8 @@ namespace Dune
   }
 
 
-
-
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, hexa, Comm >
     ::child2parentNosplit ( const CoordinateType& childCoordinates,
                             CoordinateType& parentCoordinates ) const
   {
@@ -230,8 +228,8 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  void NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
+  template< int dim, int dimworld, class Comm >
+  void NonConformingFaceMapping< dim, dimworld, hexa, Comm >
     ::child2parentIso4 ( const CoordinateType &childCoordinates,
                          CoordinateType &parentCoordinates ) const
   {
