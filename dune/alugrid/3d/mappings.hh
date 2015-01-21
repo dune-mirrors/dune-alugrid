@@ -20,7 +20,7 @@ namespace Dune {
   template<int mydim, int coorddim, class GridImp>
   class ALU3dGridGeometry;
 
-  template<int actualDim, int actualDimw, ALU3dGridElementType, class >
+  template<int dim, int dimworld, ALU3dGridElementType, class >
   class ALU3dGrid;
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
@@ -381,12 +381,12 @@ namespace Dune {
 
   //! General form of non-conforming face mapping
   //! This class is empty and needs to be specialised
-  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   class NonConformingFaceMapping;
 
   //! Non-conforming face mappings for tetrahedra
-  template< int actualDim, int actualDimw, class Comm >
-  class NonConformingFaceMapping< actualDim, actualDimw, tetra, Comm >
+  template< int dim, int dimworld, class Comm >
+  class NonConformingFaceMapping< dim, dimworld, tetra, Comm >
   {
   public:
     typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
@@ -418,8 +418,8 @@ namespace Dune {
   };
 
   //! Non-conforming face mappings for hexahedra
-  template< int actualDim, int actualDimw, class Comm >
-  class NonConformingFaceMapping< actualDim, actualDimw, hexa, Comm >
+  template< int dim, int dimworld, class Comm >
+  class NonConformingFaceMapping< dim, dimworld, hexa, Comm >
   {
   public:
     typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
