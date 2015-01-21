@@ -857,6 +857,9 @@ namespace Dune {
     IdType subId ( const EntityCodim0Type &e, int i, unsigned int cd ) const
     {
       const unsigned int codim = ( dim == cd ) ? 3 : cd ;
+      //for simplices in 2d the relevant vertices of the 3d simplex
+      // are 1,2,3, so we have to add 1
+      if(GridType::elementType == tetra && dim == 2 && cd == 2) ++i;
       const int hIndex = hset_.subIndex( e, i, codim );
       alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
       const IdType &macroId = ids_[ codim ][ hIndex ];
