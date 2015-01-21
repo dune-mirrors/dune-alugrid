@@ -3,8 +3,11 @@
 
 #include <dune/geometry/genericgeometry/topologytypes.hh>
 
+#include "grid.hh"
 #include "mappings.hh"
 #include "geometry.hh"
+#include <dune/alugrid/common/twists.hh>
+
 
 namespace Dune {
 // --Geometry
@@ -336,25 +339,32 @@ buildGeom(const IMPLElementType& item)
 template <int mydim, int cdim, class GridImp>
 inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HFaceType & item, int twist, int duneFace )
+buildGeom(const HFaceType & item, int t, int duneFace )
 {
-
   // get geo face
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
-  // if face was not set (when face comes from face iteration),
-  // then set it to zero
-  if( duneFace < 0 ) duneFace = 0;
+  const int numVertices = ElementTopo::numVerticesPerFace;
+  typedef ALUTwist< numVertices, 2 > Twist;
+  const Twist twist( t );
 
-  enum { numVertices = ElementTopo::numVerticesPerFace };
+  alugrid_assert( duneFace >= 0 );
+
+  // for all vertices of this face get rotatedIndex
+  int rotatedALUIndex[ 4 ];
+  for( int i = 0; i < numVertices; ++i )
+    rotatedALUIndex[ i ] = (elementType == tetra ? twist( i ) : twist( i ) ^ (twist( i ) >> 1));
+
+/*
   // for all vertices of this face get rotatedIndex
   int rotatedALUIndex[ 4 ];
   for (int i = 0; i < numVertices; ++i)
   {
     // Transform Dune index to ALU index and apply twist
     const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, twist);
+    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, t);
   }
+*/
 
   if( elementType == hexa )
   {
@@ -448,7 +458,7 @@ buildGeom(const FaceCoordinatesType& coords)
     if ( mydim == 2)
       return buildGeom( coords[0], coords[1], coords[2], coords[3] );
     else if ( mydim == 1 )
-      return buildGeom ( coords[0], coords[1] );
+      return buildGeom( coords[0], coords[1] );
   }
   else
   {
@@ -456,7 +466,7 @@ buildGeom(const FaceCoordinatesType& coords)
     if (mydim == 2 )
       return buildGeom( coords[0], coords[1], coords[2] );
     else if ( mydim == 1 )
-      return buildGeom ( coords[0], coords[1] );
+      return buildGeom( coords[0], coords[1] );
   }
 }
 
@@ -466,7 +476,6 @@ ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HEdgeType & item, int twist, int)
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
-
 
   if (mydim == 1) // edge
   {

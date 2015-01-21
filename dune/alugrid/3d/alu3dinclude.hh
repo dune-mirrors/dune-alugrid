@@ -235,11 +235,11 @@ namespace Dune
     typedef typename GitterType::Geometric::VertexGeo         ImplementationType;
   };
 
-  //Refinement rules in general
+  // Refinement rules in general
   template< class MarkRuleType, ALU3dGridElementType elType >
   struct ALU3dRefinementTraits {};
 
-  //Refinement rules
+  // Refinement rules for simplices
   template< class MarkRuleType >
   struct ALU3dRefinementTraits < MarkRuleType, tetra >
   {
@@ -250,7 +250,7 @@ namespace Dune
     enum { nosplit_element_t = MarkRuleType::nosplit };
   };
 
-  //Refinement rules for 3d hexa
+  // Refinement rules for cubes
   template< class MarkRuleType >
   struct ALU3dRefinementTraits < MarkRuleType, hexa >
   {
