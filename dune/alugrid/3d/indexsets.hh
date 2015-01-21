@@ -39,7 +39,6 @@ namespace Dune
     typedef ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm > This;
 
     typedef ALU3dGrid< dim, dimworld, elType, Comm > GridType;
-    enum { numCodim = GridType::dimension + 1 };
 
     friend class ALU3dGrid<dim, dimworld, elType, Comm >;
 
@@ -666,9 +665,8 @@ namespace Dune {
       return MacroIdType(key,1,  codim + startOffSet_ );
     }
 
-    template <int cd>
-    IdType createId(const typename ImplTraitsType::
-        template Codim<dim, cd>::InterfaceType & item , const IdType & creatorId , int nChild )
+    template <int cd, class Item>
+    IdType createId(const Item& item , const IdType& creatorId , int nChild )
     {
       alugrid_assert ( creatorId.isValid() );
 
@@ -788,12 +786,10 @@ namespace Dune {
     // build ids for all children of this edge
     void buildEdgeIds(const HEdgeType & edge, const IdType & fatherId , int inneredge)
     {
-      /*
       enum { codim = 2 };
       ids_[codim][edge.getIndex()] = createId<codim>(edge,fatherId,inneredge);
       const IdType & edgeId = ids_[codim][edge.getIndex()];
       buildInteriorEdgeIds(edge,edgeId);
-      */
     }
 
     void buildInteriorEdgeIds(const HEdgeType & edge, const IdType & edgeId)
@@ -839,7 +835,7 @@ namespace Dune {
     template <class EntityType>
     IdType id (const EntityType & ep) const
     {
-      enum { codim = ( dim == 2 && EntityType :: codimension == 2 ) ? 3 : EntityType :: codimension };
+      enum { codim = ( dim == EntityType :: codimension ) ? 3 : EntityType :: codimension };
       alugrid_assert ( ids_[codim].find( hset_.index(ep) ) != ids_[codim].end() );
       const IdType & macroId = ids_[codim][hset_.index(ep)];
       alugrid_assert ( macroId.isValid() );
@@ -850,7 +846,7 @@ namespace Dune {
     template <int cd>
     IdType id (const typename GridType:: template Codim<cd> :: Entity & ep) const
     {
-      const unsigned int codim = ( dim == 2 && cd == 2 ) ? 3 : cd ;
+      const unsigned int codim = ( dim == cd ) ? 3 : cd ;
       alugrid_assert ( ids_[codim].find( hset_.index(ep) ) != ids_[codim].end() );
       const IdType & macroId = ids_[codim][hset_.index(ep)];
       alugrid_assert ( macroId.isValid() );
@@ -860,7 +856,7 @@ namespace Dune {
     //! return subId of given entity
     IdType subId ( const EntityCodim0Type &e, int i, unsigned int cd ) const
     {
-      const unsigned int codim = ( dim == 2 && cd == 2 ) ? 3 : cd ;
+      const unsigned int codim = ( dim == cd ) ? 3 : cd ;
       const int hIndex = hset_.subIndex( e, i, codim );
       alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
       const IdType &macroId = ids_[ codim ][ hIndex ];
