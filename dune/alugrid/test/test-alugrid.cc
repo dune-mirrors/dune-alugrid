@@ -62,6 +62,7 @@ void checkCapabilities(const Grid& grid)
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
 
+   /*
    static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     Grid :: dimension == 3;
@@ -80,8 +81,7 @@ void checkCapabilities(const Grid& grid)
    static const bool canCommunicate = Dune::Capabilities::canCommunicate< Grid, 1 > :: v
      == reallyCanCommunicate;
    //static_assert ( canCommunicate, "canCommunicate is not set correctly");
-
-
+   */
 }
 
 template <class GridType>
@@ -327,8 +327,6 @@ void checkPersistentContainerCodim(GridType & grid)
   typedef typename GridType::template Codim<codim>::LeafIterator Iterator;
 
   typedef typename GridType::template Codim<codim>:: Entity   Entity;
-  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
-  typedef typename GridType:: ctype ctype;
 
   /** Loop only over the interior elements, not over ghost elements. */
   const Iterator endIterator = grid.template leafend<codim>();
