@@ -7,9 +7,9 @@ namespace Dune
   // Implementation of ALU3dGridSurfaceMappingFactory
   // ------------------------------------------------
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::SurfaceMappingType *
-  ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
+  template< int dim, int dimworld, class Comm >
+  typename ALU3dGridSurfaceMappingFactory< dim, dimworld, tetra, Comm >::SurfaceMappingType *
+  ALU3dGridSurfaceMappingFactory< dim, dimworld, tetra, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
   {
     return new SurfaceMappingType( fieldVector2alu3d_ctype(coords[0]) ,
                                    fieldVector2alu3d_ctype(coords[1]) ,
@@ -17,25 +17,25 @@ namespace Dune
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, hexa, Comm >::SurfaceMappingType *
-  ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, hexa, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
+  template< int dim, int dimworld, class Comm >
+  typename ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::SurfaceMappingType *
+  ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::buildSurfaceMapping ( const CoordinateType &coords ) const
   {
     return new SurfaceMappingType( coords[0], coords[1], coords[2], coords[3] );
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::SurfaceMappingType *
-  ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, tetra, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
+  template< int dim, int dimworld, class Comm >
+  typename ALU3dGridSurfaceMappingFactory< dim, dimworld, tetra, Comm >::SurfaceMappingType *
+  ALU3dGridSurfaceMappingFactory< dim, dimworld, tetra, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
   {
     return new SurfaceMappingType( face.myvertex(0)->Point(), face.myvertex(1)->Point(), face.myvertex(2)->Point() );
   }
 
 
-  template< int actualDim, int actualDimw, class Comm >
-  typename ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, hexa, Comm >::SurfaceMappingType *
-  ALU3dGridSurfaceMappingFactory< actualDim, actualDimw, hexa, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
+  template< int dim, int dimworld, class Comm >
+  typename ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::SurfaceMappingType *
+  ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
   {
     typedef FaceTopologyMapping< hexa > FaceTopo;
     // this is the new implementation using FieldVector
@@ -75,8 +75,8 @@ namespace Dune
 
 
   //- class ALU3dGridGeometricFaceInfoBase
-  template< int actualDim, int actualDimw, ALU3dGridElementType type, class Comm >
-  void ALU3dGridGeometricFaceInfoBase< actualDim, actualDimw, type, Comm >
+  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
+  void ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, CoordinateType &result ) const
   {
     // get the parent's face coordinates on the reference element (Dune reference element)
@@ -99,8 +99,8 @@ namespace Dune
     delete referenceElementMapping;
   }
 
-  template<  int actualDimw, ALU3dGridElementType type, class Comm >
-  void ALU3dGridGeometricFaceInfoBase< 2, actualDimw, type, Comm >
+  template<  int dimworld, ALU3dGridElementType type, class Comm >
+  void ALU3dGridGeometricFaceInfoBase< 2, dimworld, type, Comm >
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, LocalCoordinateType &result ) const
   {
     //TODO use connector.face.nChild and (maybe twist)    referenceElementCoordinatesRefined ( side, cornerCoords )
@@ -110,7 +110,7 @@ namespace Dune
     referenceElementCoordinatesRefined ( side, cornerCoords );
 
 
-    //for some reason the behavior for tetra and hexa is opposite    
+    //for some reason the behavior for tetra and hexa is opposite
     if(connector_.face().nChild() == ( type == tetra) ? 1 : 0){
       result[0] = cornerCoords[0];
       result[1] =  ( cornerCoords[1] + cornerCoords[0] );
