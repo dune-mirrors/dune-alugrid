@@ -765,11 +765,11 @@ void readDGF ( stream_t &input,
     }
     for( int j = 0; j < Element< rawId >::numVertices; ++j )
       elements[ i ].vertices[ DuneTopologyMapping::dune2aluVertex( j ) ] = dgf.element( i )[ j ];
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
     for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, dgf.element( i ) ); ++j )
-#else // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#else
     for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, const_cast< std::vector< unsigned int > & >( dgf.element( i ) ) ); ++j )
-#endif // #else // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif
     {
       const DGFParser::facemap_t::const_iterator pos = dgf.facemap().find( Dune::ElementFaceUtil::generateFace( 3, dgf.element( i ), j ) );
       if( pos != dgf.facemap().end() )
