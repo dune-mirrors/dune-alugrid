@@ -1041,6 +1041,7 @@ namespace ALUGrid
           }
           _req = myrule_t::nosplit;
           refineImmediate ( myrule_t::regular );
+          break;
         case balrule_t::iso2:
           for( int i = 0; i < 2; ++i)
             if (i != fce)
@@ -1052,6 +1053,7 @@ namespace ALUGrid
                 return false;
           _req = myrule_t::nosplit;
           refineImmediate ( myrule_t::regular );
+          break;
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << getrule() << "]." << std::endl;
           return false;
