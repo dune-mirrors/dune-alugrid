@@ -24,7 +24,7 @@ namespace ALUGrid
   : public GatherScatter
   {
   protected:
-    enum {dim = GridType::dimension};
+    enum { dim = GridType::dimension };
     const GridType & grid_;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -141,7 +141,7 @@ namespace ALUGrid
   {
   protected:
     enum { codim = 0 };
-    enum { dim = GridType::dimension};
+    enum { dim = GridType::dimension };
     const GridType & grid_;
     typedef typename GridType::template Codim<0>::Entity       EntityType;
     typedef typename GridType::EntityObject                    MakeableEntityType ;
@@ -357,7 +357,7 @@ namespace ALUGrid
   class GatherScatterLevelData
   : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
   {
-    enum {dim = GridType::dimension};
+    enum { dim = GridType::dimension };
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -414,7 +414,7 @@ namespace ALUGrid
   : public GatherScatterBaseImpl<GridType,DataCollectorType,0>
   {
     enum { codim = 0 };
-    enum {dim  = GridType:: dimension};
+    enum { dim  = GridType:: dimension };
     typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
