@@ -180,9 +180,11 @@ namespace ALUGrid
     typedef Dune::ALU3dGridVertexList< Comm > VertexListType;
     typedef typename VertexListType::IteratorType IteratorType;
 
-    VertexListType & vxList_;
-
+  public:
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
+
+  protected:
+    VertexListType & vxList_;
     mutable val_t elem_;
 
     mutable int count_;
@@ -431,10 +433,13 @@ namespace ALUGrid
     typedef typename LeafVertexListType::ItemType VxItemType;
     typedef typename LeafStopRule< ElType, pitype, Comm >::StopRule_t StopRule_t;
 
-    LeafVertexListType & vxList_;
     typedef typename LeafVertexListType :: IteratorType ListIteratorType;
 
+  public:
     typedef typename IteratorElType< 3, Comm >::val_t val_t;
+
+  protected:
+    LeafVertexListType & vxList_;
     mutable val_t elem_;
 
     mutable int count_;
