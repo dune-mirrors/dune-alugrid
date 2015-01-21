@@ -16,11 +16,6 @@
 #include <dune/alugrid/3d/alugrid.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
-// 2d version
-// will now be included in 3d
-//#include <dune/alugrid/2d/alugrid.hh>
-//#include <dune/alugrid/2d/gridfactory.hh>
-
 #include <dune/alugrid/common/persistentcontainer.hh>
 #include <dune/alugrid/common/backuprestore.hh>
 
