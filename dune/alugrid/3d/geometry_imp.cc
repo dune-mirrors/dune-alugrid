@@ -348,8 +348,6 @@ buildGeom(const HFaceType & item, int t, int duneFace )
   typedef ALUTwist< numVertices, 2 > Twist;
   const Twist twist( t );
 
-  alugrid_assert( duneFace >= 0 );
-
   // for all vertices of this face get rotatedIndex
   int rotatedALUIndex[ 4 ];
   for( int i = 0; i < numVertices; ++i )
