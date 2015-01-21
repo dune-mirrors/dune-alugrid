@@ -197,7 +197,7 @@ namespace ALUGrid
       count_( 0 ),
       size_( vxList_.size() ),
       elem_( (ElType *)0, (HBndSegType *)0 ),
-      dim_(GridImp::dimension)
+      dim_( GridImp::dimension )
     {
       alugrid_assert ( vxList_.up2Date() );
     }
@@ -946,7 +946,7 @@ namespace ALUGrid
 
     static ItemType *getItem ( HElementType &el, int i )
     {
-      return static_cast< GEOElementType & >( el ).myhedge1( i );
+      return static_cast< GEOElementType & >( el ).myhedge( i );
     }
 
     static int numItems ()
@@ -1483,7 +1483,7 @@ namespace ALUGrid
         alugrid_assert ( elem );
         for(int e=0; e<numEdges; ++e)
         {
-          ElType * edge = elem->myhedge1(e);
+          ElType * edge = elem->myhedge(e);
           if( edge->isGhost() ) continue;
 
           int idx = edge->getIndex();
