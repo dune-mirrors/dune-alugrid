@@ -1,12 +1,13 @@
 #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
+#include <dune/common/exceptions.hh>
+
 #include <dune/grid/common/grid.hh>
 #include <dune/grid/common/gridfactory.hh>
 
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
-//#include <dune/alugrid/2d/alu2dinclude.hh>
 
 namespace Dune
 {
@@ -166,6 +167,72 @@ namespace Dune
       geoms_.fill( (GeometryImpl *) 0 );
     }
 
+    // desctructor deleteing geometries
+    ~ALULocalGeometryStorage ()
+    {
+      for(size_t i=0; i<geoms_.size(); ++i)
+        if(geoms_[i]) delete geoms_[i];
+    }
+
+    // return reference to local geometry
+    const GeometryImpl& operator [] (int child) const
+    {
+      alugrid_assert ( geomCreated(child) );
+      // this method is not thread safe yet
+      assert( GridImp :: thread() == 0 );
+      return *(geoms_[child]);
+    }
+
+    //! access local geometries
+    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
+    {
+      // this method is not thread safe yet
+      assert( GridImp :: thread() == 0 );
+      // create static variable on heap
+      static ThisType instance( type, nonConforming );
+      // make sure the geometry type is the same
+      alugrid_assert ( type == instance[ child ].type() );
+      return instance[ child ];
+    }
+
+    //! access local geometry storage
+    static const ThisType& storage( const GeometryType type, const bool nonConforming )
+    {
+      if( type.isSimplex() )
+      {
+        // create static variable on heap
+        static ThisType simplexGeoms;
+        // initialize (only done once), note that this is called recursively during initialize
+        // so only check geoms when they were actually really created
+        if( simplexGeoms.initialize( type, nonConforming ) )
+        {
+          if( type != simplexGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
+        return simplexGeoms ;
+      }
+      else
+      {
+        // should be a cube geometry a this point
+        alugrid_assert( type.isCube() );
+
+        // create static variable on heap
+        static ThisType cubeGeoms;
+        // initialize (only done once), note that this is called recursively during initialize
+        // so only check geoms when they were actually really created
+        if( cubeGeoms.initialize( type, nonConforming ) )
+        {
+          if( type != cubeGeoms[ 0 ].type() )
+            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        }
+        return cubeGeoms ;
+      }
+    }
+
+  protected:
+    // check if geometry has been created
+    bool geomCreated(int child) const { return geoms_[child] != 0; }
+
     //! initialize local geometries
     bool initialize( const GeometryType type, const bool nonConform )
     {
@@ -182,18 +249,6 @@ namespace Dune
         return true;
       }
       return false;
-    }
-
-    // check if geometry has been created
-    bool geomCreated(int child) const { return geoms_[child] != 0; }
-
-    // return reference to local geometry
-    const GeometryImpl& operator [] (int child) const
-    {
-      alugrid_assert ( geomCreated(child) );
-      // this method is not thread safe yet
-      assert( GridImp :: thread() == 0 );
-      return *(geoms_[child]);
     }
 
     template < class Grid >
@@ -293,57 +348,6 @@ namespace Dune
       geoms_[ child ]->buildGeomInFather( father, son );
     }
 
-  public:
-    // desctructor deleteing geometries
-    ~ALULocalGeometryStorage ()
-    {
-      for(size_t i=0; i<geoms_.size(); ++i)
-        if(geoms_[i]) delete geoms_[i];
-    }
-
-    //! access local geometry storage
-    static const ThisType& storage( const GeometryType type, const bool nonConforming )
-    {
-      if( type.isSimplex() )
-      {
-        // create static variable on heap
-        static ThisType simplexGeoms;
-        // initialize (only done once)
-        if( simplexGeoms.initialize( type, nonConforming ) )
-        {
-          if( type != simplexGeoms[ 0 ].type() )
-            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
-        }
-        return simplexGeoms ;
-      }
-      else
-      {
-        // should be a cube geometry a this point
-        alugrid_assert( type.isCube() );
-
-        // create static variable on heap
-        static ThisType cubeGeoms;
-        // initialize (only done once)
-        if( cubeGeoms.initialize( type, nonConforming ) )
-        {
-          if( type != cubeGeoms[ 0 ].type() )
-            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
-        }
-        return cubeGeoms ;
-      }
-    }
-
-    //! access local geometries
-    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
-    {
-      // this method is not thread safe yet
-      assert( GridImp :: thread() == 0 );
-      // create static variable on heap
-      static ThisType instance( type, nonConforming );
-      // make sure the geometry type is the same
-      alugrid_assert ( type == instance[ child ].type() );
-      return instance[ child ];
-    }
   };
 
 } // namespace Dune
