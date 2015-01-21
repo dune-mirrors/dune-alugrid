@@ -18,13 +18,13 @@ namespace Dune
   // Internal Forward Declaration
   // ----------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   struct ALUCommunication;
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALULeafCommunication;
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALULevelCommunication;
 
 
@@ -32,7 +32,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType, class Comm >
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALU3dGrid;
 
 
@@ -40,10 +40,10 @@ namespace Dune
   // ALUCommunication for ALUGridNoComm
   // ----------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  struct ALUCommunication< actualDim, actualDimw, elType, ALUGridNoComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  struct ALUCommunication< dim, dimworld, elType, ALUGridNoComm >
   {
-    typedef ALU3dGrid< actualDim, actualDimw, elType, ALUGridNoComm > Grid;
+    typedef ALU3dGrid< dim, dimworld, elType, ALUGridNoComm > Grid;
 
     bool pending () const { return false; }
 
@@ -55,11 +55,11 @@ namespace Dune
   // ALULeafCommunication for ALUGridNoComm
   // --------------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  class ALULeafCommunication< actualDim, actualDimw, elType, ALUGridNoComm >
-    : public ALUCommunication< actualDim, actualDimw, elType, ALUGridNoComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  class ALULeafCommunication< dim, dimworld, elType, ALUGridNoComm >
+    : public ALUCommunication< dim, dimworld, elType, ALUGridNoComm >
   {
-    typedef ALUCommunication< actualDim, actualDimw, elType, ALUGridNoComm > Base;
+    typedef ALUCommunication< dim, dimworld, elType, ALUGridNoComm > Base;
 
   public:
     typedef typename Base::Grid Grid;
@@ -75,11 +75,11 @@ namespace Dune
   // ALULevelCommunication for ALUGridNoComm
   // ---------------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  class ALULevelCommunication< actualDim, actualDimw, elType, ALUGridNoComm >
-    : public ALUCommunication< actualDim, actualDimw, elType, ALUGridNoComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  class ALULevelCommunication< dim, dimworld, elType, ALUGridNoComm >
+    : public ALUCommunication< dim, dimworld, elType, ALUGridNoComm >
   {
-    typedef ALUCommunication< actualDim, actualDimw, elType, ALUGridNoComm > Base;
+    typedef ALUCommunication< dim, dimworld, elType, ALUGridNoComm > Base;
 
   public:
     typedef typename Base::Grid Grid;
@@ -95,10 +95,10 @@ namespace Dune
   // ALUCommunication for ALUGridMPIComm
   // -----------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  struct ALUCommunication< actualDim, actualDimw, elType, ALUGridMPIComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  struct ALUCommunication< dim, dimworld, elType, ALUGridMPIComm >
   {
-    typedef ALU3dGrid< actualDim, actualDimw, elType, ALUGridMPIComm > Grid;
+    typedef ALU3dGrid< dim, dimworld, elType, ALUGridMPIComm > Grid;
     typedef ALU3DSPACE GatherScatter GatherScatter;
 
   protected:
@@ -190,11 +190,11 @@ namespace Dune
   // ALULeafCommunication for ALUGridMPIComm
   // ---------------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  class ALULeafCommunication< actualDim, actualDimw, elType, ALUGridMPIComm >
-    : public ALUCommunication< actualDim, actualDimw, elType, ALUGridMPIComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  class ALULeafCommunication< dim, dimworld, elType, ALUGridMPIComm >
+    : public ALUCommunication< dim, dimworld, elType, ALUGridMPIComm >
   {
-    typedef ALUCommunication< actualDim, actualDimw, elType, ALUGridMPIComm > Base;
+    typedef ALUCommunication< dim, dimworld, elType, ALUGridMPIComm > Base;
 
   public:
     typedef typename Base::Grid Grid;
@@ -255,11 +255,11 @@ namespace Dune
   // ALULevelCommunication for ALUGridMPIComm
   // ----------------------------------------
 
-  template< int actualDim, int actualDimw, ALU3dGridElementType elType >
-  class ALULevelCommunication< actualDim, actualDimw, elType, ALUGridMPIComm >
-    : public ALUCommunication< actualDim, actualDimw, elType, ALUGridMPIComm >
+  template< int dim, int dimworld, ALU3dGridElementType elType >
+  class ALULevelCommunication< dim, dimworld, elType, ALUGridMPIComm >
+    : public ALUCommunication< dim, dimworld, elType, ALUGridMPIComm >
   {
-    typedef ALUCommunication< actualDim, actualDimw, elType, ALUGridMPIComm > Base;
+    typedef ALUCommunication< dim, dimworld, elType, ALUGridMPIComm > Base;
 
   public:
     typedef typename Base::Grid Grid;
