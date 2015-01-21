@@ -850,15 +850,13 @@ namespace Dune {
     }
 
     //! return subId of given entity
-    IdType subId ( const EntityCodim0Type &e, int i, unsigned int cd ) const
+    IdType subId ( const EntityCodim0Type &e, int i, unsigned int codim ) const
     {
-      const unsigned int codim = ( dim == cd ) ? 3 : cd ;
-      //for simplices in 2d the relevant vertices of the 3d simplex
-      // are 1,2,3, so we have to add 1
-      if( GridType::elementType == tetra && dim == 2 && cd == 2) ++i;
       const int hIndex = hset_.subIndex( e, i, codim );
-      alugrid_assert ( ids_[ codim ].find( hIndex ) != ids_[ codim ].end() );
-      const IdType &macroId = ids_[ codim ][ hIndex ];
+      // idCodim is the codim used in the id storage which relates to the 3d grid
+      const unsigned int idCodim = ( dim == codim ) ? 3 : codim ;
+      alugrid_assert ( ids_[ idCodim ].find( hIndex ) != ids_[ idCodim ].end() );
+      const IdType &macroId = ids_[ idCodim ][ hIndex ];
       alugrid_assert ( macroId.isValid() );
       return getId( macroId );
     }
