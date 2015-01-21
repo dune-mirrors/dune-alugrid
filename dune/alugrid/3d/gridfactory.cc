@@ -673,10 +673,6 @@ namespace Dune
     // orientable surface.
     if(dimension ==2 && dimensionworld == 3 && elementType == tetra)
     {
-      //do everything in 2d - meaning just use vertices 1,2,3
-      //a flag to see if we have an orientable surface
-      bool orientable = true;
-
       // A 2d face type, as we want to work in 2d
       typedef std::array<unsigned int, 2>  Face2Type;
 
@@ -688,7 +684,6 @@ namespace Dune
 
       //The Faces already worked on
       std::set< Face2Type > doneFaces;
-
 
       //get first element
       ElementType &element = elements_[0];
