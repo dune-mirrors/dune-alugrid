@@ -65,7 +65,7 @@ namespace Dune
 
     //for the 2d tetra case set the index 0 of the validList to false
     //index 0 is the one global vertex, that we ignore
-    if( elType == tetra && dim == 2 )
+    if( elType == tetra && dim == 2 && validList.size() > 0)
     {
       validList[0] = false;
     }
@@ -104,7 +104,7 @@ namespace Dune
 
         const int idx = vx->getIndex();
         //in the 2d hexa case items are only valid, if the local ALU index is below 4
-        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;
+        if( elType == hexa && dim == 2 && i > 3 ) { alugrid_assert(idx<validList.size()); validList[idx] = false; }
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);
@@ -156,7 +156,7 @@ namespace Dune
     const int dim = GridType:: dimension;
 
     //for the 2d tetra case set the index 0 of the validList to false
-    if(elType == tetra && dim == 2)
+    if(elType == tetra && dim == 2 && validList.size() > 0)
     {
       validList[0] = false;
     }
@@ -199,7 +199,7 @@ namespace Dune
         const int idx = vx->getIndex();
         ItemType & vxpair = vxList[idx];
         //in the 2d hexa case items are only valid, if the local index is below 4
-        if(  elType == hexa && dim == 2 && i > 3 ) validList[idx] = false;
+        if(  elType == hexa && dim == 2 && i > 3 ) { alugrid_assert( idx < validList.size()); validList[idx] = false; }
         if( vxpair.first == 0 )
         {
           vxpair.first  = vx;
