@@ -646,38 +646,36 @@ namespace Dune
     if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
       DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
-
-    for( int n = 0; n < dgf_.nofvtx; ++n )
+    if (rank == 0)
     {
-      FieldVector< double, dimworld > pos;
-      for( int i = 0; i < dimworld; ++i )
-        pos[ i ] = dgf_.vtx[ n ][ i ];
-      factory_.insertVertex( pos );
-    }
-
-    GeometryType elementType( (eltype == simplex) ?
-                               GeometryType::simplex :
-                               GeometryType::cube, dimgrid );
-
-    const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
-    for( int n = 0; n < dgf_.nofelements; ++n )
-    {
-
-
-      factory_.insertElement( elementType, dgf_.elements[n] );
-      for( int face = 0; face <nFaces; ++face )
+      for( int n = 0; n < dgf_.nofvtx; ++n )
       {
-        typedef typename DuneGridFormatParser::facemap_t::key_type Key;
-        typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
+        FieldVector< double, dimworld > pos;
+        for( int i = 0; i < dimworld; ++i )
+          pos[ i ] = dgf_.vtx[ n ][ i ];
+        factory_.insertVertex( pos );
+      }
 
-        const Key key = ElementFaceUtil::generateFace( dimension, dgf_.elements[n], face );
-        const Iterator it = dgf_.facemap.find( key );
-        if( it != dgf_.facemap.end() )
-          factory_.insertBoundary( n, face, it->second.first );
+      GeometryType elementType( (eltype == simplex) ?
+                                 GeometryType::simplex :
+                                 GeometryType::cube, dimgrid );
+
+      const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
+      for( int n = 0; n < dgf_.nofelements; ++n )
+      {
+        factory_.insertElement( elementType, dgf_.elements[n] );
+        for( int face = 0; face <nFaces; ++face )
+        {
+          typedef typename DuneGridFormatParser::facemap_t::key_type Key;
+          typedef typename DuneGridFormatParser::facemap_t::iterator Iterator;
+
+          const Key key = ElementFaceUtil::generateFace( dimension, dgf_.elements[n], face );
+          const Iterator it = dgf_.facemap.find( key );
+          if( it != dgf_.facemap.end() )
+            factory_.insertBoundary( n, face, it->second.first );
+        }
       }
     }
-
-
 
 
     dgf::ProjectionBlock projectionBlock( file, dimworld );
@@ -716,10 +714,15 @@ namespace Dune
       factory_.insertFaceTransformation( matrix, shift );
     }
 
+    int addMissingBoundariesLocal = (dgf_.nofelements > 0) && dgf_.facemap.empty();
+    int addMissingBoundariesGlobal = addMissingBoundariesLocal;
+#if ALU3DGRID_PARALLEL
+    MPI_Allreduce( &addMissingBoundariesLocal, &addMissingBoundariesGlobal, 1, MPI_INT, MPI_MAX, communicator );
+#endif
     if ( ! parameter.dumpFileName().empty() && (rank == 0) )
       grid_ = factory_.createGrid( dgf_.facemap.empty(), false, parameter.dumpFileName() );
     else
-      grid_ = factory_.createGrid( dgf_.facemap.empty(), true, filename );
+      grid_ = factory_.createGrid( addMissingBoundariesGlobal, true, filename );
     return true;
   }
 
