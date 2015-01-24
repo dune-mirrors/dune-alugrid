@@ -297,6 +297,7 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
@@ -314,6 +315,7 @@ namespace ALUGrid
       catch( ObjectStream::EOFException )
       {
         std::cerr << "ERROR (fatal): EdgePllBaseXMacro< A >::unpackSelf EOF encountered." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
@@ -553,6 +555,7 @@ namespace ALUGrid
     {
       // something wrong
       alugrid_assert (false);
+      alugrid_assert(0);
       abort ();
     }
 
@@ -578,6 +581,7 @@ namespace ALUGrid
     catch( ObjectStream::OutOfMemoryException )
     {
       std::cerr << "ERROR (fatal): Out of memory." << std::endl;
+      alugrid_assert(0);
       abort();
     }
 
@@ -595,6 +599,7 @@ namespace ALUGrid
     catch( Parallel::AccessPllException )
     {
       std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+      alugrid_assert(0);
       abort();
     }
     return true;
@@ -625,6 +630,7 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
@@ -640,6 +646,7 @@ namespace ALUGrid
       catch( ObjectStream::EOFException )
       {
         std::cerr << "ERROR (fatal): FacePllBaseXMacro < A >::unpackSelf EOF encountered." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
@@ -677,6 +684,7 @@ namespace ALUGrid
     catch( ObjectStream::EOFException )
     {
       std::cerr << "ERROR (fatal): EOF encountered in BndsegPllBaseXClosure::setRefinementRequest( ... )" << std::endl;
+      alugrid_assert(0);
       abort();
     }
     balrule_t rule ( ru ) ;
@@ -705,11 +713,12 @@ namespace ALUGrid
           // sollte die Situation im isotropen Fall nicht auftreten.
 
           std::cerr << "ERROR (fatal): Refinement inhibited on inner boundary." << std::endl;
+          alugrid_assert(0);
           abort();
         }
       }
     }
-    return (abort (), false);
+    return (alugrid_assert(0), abort (), false);
   }
 
   template < class A > void BndsegPllBaseXClosure < A >::
@@ -764,6 +773,7 @@ namespace ALUGrid
     {
       return;
       std::cerr << "ERROR (fatal): BndsegPllBaseXClosure < A >::readDynamicState EOF encountered." << std::endl;
+      alugrid_assert(0);
       abort();
     }
   }
@@ -780,6 +790,7 @@ namespace ALUGrid
     catch (ObjectStream :: EOFException)
     {
       std::cerr << "**ERROR (fatal): BndsegPllBaseXMacroClosure < A >::readStaticState EOF encountered." << std::endl ;
+      alugrid_assert(0);
       abort () ;
     }
     alugrid_assert (_ldbVertexIndex >= 0) ;
@@ -797,6 +808,7 @@ namespace ALUGrid
     else
     {
       std::cerr << "ERROR (fatal): Wrong face type in BndsegPllBaseXMacroClosure::packAsBnd." << std::endl;
+      alugrid_assert(0);
       abort();
     }
 
@@ -1161,6 +1173,7 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
 
@@ -1174,6 +1187,7 @@ namespace ALUGrid
     else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
+      alugrid_assert(0);
       abort();
     }
   }
@@ -1349,12 +1363,14 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
     else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
+      alugrid_assert(0);
       abort();
     }
   }
@@ -1523,12 +1539,14 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
     }
     else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
+      alugrid_assert(0);
       abort();
     }
   }
@@ -1871,6 +1889,7 @@ namespace ALUGrid
       if( c != ObjectStream::ENDOFSTREAM )
       {
         std::cerr << "ERROR (fatal): c != ENDOFSTREAM." << std::endl;
+        alugrid_assert(0);
         abort();
       }
 
@@ -1881,6 +1900,7 @@ namespace ALUGrid
     else
     {
       std::cerr << "ERROR (fatal): i == false, should be true." << std::endl;
+      alugrid_assert(0);
       abort();
     }
   }
