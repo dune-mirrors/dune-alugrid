@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <iostream>
+#if HAVE_MPI
+#include <mpi.h>
+#endif
 
 // combination of suggestions made in
 // http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
