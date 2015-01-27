@@ -15,7 +15,7 @@
 #endif // NDEBUG
 
 #ifndef ALUGRIDDEBUG
-# define alugrid_assert(EX) ((void)sizeof(EX))
+# define alugrid_assert(EX) (static_cast<void>(0)) // ((void)sizeof(EX))
 #else
 # define alugrid_assert(EX) dune_assert(EX)
 #endif
