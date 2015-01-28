@@ -635,6 +635,7 @@ namespace ALUGrid
     //std::cout << a << b << std::endl;
     alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
+    if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
     return;
   }
 
@@ -649,6 +650,7 @@ namespace ALUGrid
     alugrid_assert ( _child == 0 || _child == 1 );
     alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
+    if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
     return;
   }
 
@@ -903,6 +905,7 @@ namespace ALUGrid
     _nChild(0)
   {
     this->setIndexAnd2dFlag( indexManager() );
+    if( !( e0->is2d() ) ) this->reset2dFlag();    
   }
 
   template < class A > inline Hface4Top < A >::Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1,
@@ -914,6 +917,7 @@ namespace ALUGrid
     _nChild(nChild)
   {
     this->setIndexAnd2dFlag( indexManager() );
+    if( !( e0->is2d() ) ) this->reset2dFlag();
   }
 
   template < class A > Hface4Top < A >::~Hface4Top ()

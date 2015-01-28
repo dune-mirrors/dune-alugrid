@@ -358,6 +358,7 @@ namespace ALUGrid
 
   inline GitterBasis::Objects::VertexEmpty::VertexEmpty (int l, double x, double y, double z, VertexGeo & vx )
     : GitterBasis::VertexGeo (l,x,y,z,vx) {
+    if( vx.is2d() ) this->set2dFlag();
     return;
   }
 
@@ -371,6 +372,7 @@ namespace ALUGrid
   inline GitterBasis::Objects::VertexEmptyMacro::VertexEmptyMacro (double x,double y,double z,int i, IndexManagerStorageType &ims)
   : GitterBasis::Objects::VertexEmpty (0,x,y,z,ims), _idn (i)
   {
+    if(ims.dimension() == 2 && i%2 ) this->set2dFlag();
     return;
   }
 

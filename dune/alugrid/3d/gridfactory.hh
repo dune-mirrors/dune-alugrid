@@ -49,6 +49,7 @@ namespace Dune
     };
 
     typedef unsigned int VertexId;
+    typedef unsigned int GlobalIdType;
 
     typedef ALUGridTransformation< ctype, dimensionworld > Transformation;
 
@@ -82,7 +83,7 @@ namespace Dune
 
     struct FaceLess;
 
-    typedef std::vector< std::pair< VertexType, VertexId > > VertexVector;
+    typedef std::vector< std::pair< VertexType, GlobalIdType > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::pair< FaceType, int > BndPair ;
     typedef std::map< FaceType,  int > BoundaryIdMap;
@@ -260,7 +261,7 @@ namespace Dune
         }
         else if(elementType == tetra)
         {
-          return Grid::getRealImplementation( entity ).getIndex() - 1;
+          return Grid::getRealImplementation( entity ).getIndex()/2;
         }
       }
     }
@@ -299,10 +300,10 @@ namespace Dune
     const std::vector<int>& ordering () const { return ordering_; }
 
   private:
-    void doInsertVertex ( const VertexInputType &pos, const VertexId globalId );
+    void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
     void doInsertBoundary ( int element, int face, int boundaryId );
 
-    size_t globalId ( const VertexId &id ) const
+    GlobalIdType globalId ( const VertexId &id ) const
     {
       alugrid_assert ( id < vertices_.size() );
       return vertices_[ id ].second;
