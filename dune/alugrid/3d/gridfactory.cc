@@ -513,25 +513,8 @@ namespace Dune
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
         const VertexType &vertex = position( vxIdx );
-        if(dimensionworld == 3)
-        {
           // insert vertex
           mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
-        }
-        else if (dimensionworld == 2 && elementType == hexa)
-        {
-          if(globalId (vxIdx) % 2 == 0 )
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );
-          else
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );
-        }
-        else if (dimensionworld == 2 && elementType ==tetra)
-        {
-          if(globalId(vxIdx) == 0)
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 1., globalId( vxIdx ) );
-          else
-            mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], 0., globalId( vxIdx ) );
-        }
       }
 
       const size_t elemSize = elements_.size();
