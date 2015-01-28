@@ -856,7 +856,7 @@ namespace ALUGrid
     _rule (myrule_t :: nosplit)
   {
     this->setIndexAnd2dFlag( indexManager() );
-
+    if( !( e0->is2d() ) ) this->reset2dFlag();
   #if 0 // NDEBUG
     double n[ 3 ];
     LinearSurfaceMapping( myvertex( 0 )->Point(),
@@ -885,6 +885,7 @@ namespace ALUGrid
     _rule (myrule_t :: nosplit)
   {
     this->setIndexAnd2dFlag( indexManager() );
+    if( !( e0->is2d() ) ) this->reset2dFlag();
     alugrid_assert ( checkFace( this, nChild() ) );
   }
 

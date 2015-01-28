@@ -2078,8 +2078,10 @@ namespace ALUGrid
 
 
       //we refine everything with iso4, but first unset is2d on the face 0, so it gets treated as a 3d face
-      if(myhface(0)->is2d())
-        myhface (0)->reset2dFlag();
+      //we set the is2d() flag correct in the constructor
+          
+      //if(myhface(0)->is2d())
+       // myhface (0)->reset2dFlag();
 
       {
         for (int i = 0 ; i < 4 ; ++i)
@@ -2129,8 +2131,10 @@ namespace ALUGrid
           case myrule_t::regular :
             {
               //we refine everything with rule iso4 but in 2d face 0 gets treated as a 3d face and therefore will be refined differently
-              if(myhface(0)->is2d())
-                myhface (0)->reset2dFlag();
+              //we set the is2d flag correct in the constructor
+              
+              //if(myhface(0)->is2d())
+                //myhface (0)->reset2dFlag();
               for (int i = 0 ; i < 4 ; ++i )
                 //rotate should do nothing on iso4
                 if (!myhface (i)->refine (face3rule_t (face3rule_t::iso4).rotate (twist (i)), twist (i))) return false ;
@@ -2173,8 +2177,10 @@ namespace ALUGrid
           if (! myhface (fce)->leaf ())
           {
             //we refine everything with iso4 and set myhface to be a 3d face so it gets treated differently
-            if( myhface(0)->is2d())
-              myhface(0)->reset2dFlag();
+            //we set the is2d flag corre3ct in the constructor.
+            
+            //if( myhface(0)->is2d())
+              //myhface(0)->reset2dFlag();
             for (int i = 0 ; i < 4 ; ++i)
             {
               if (i != fce)

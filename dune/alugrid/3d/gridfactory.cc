@@ -71,15 +71,20 @@ namespace Dune
       {
         if(vertices_.size() == 0)
           vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
-
-        vertices_.push_back( std::make_pair( pos, globalId+1 ) );
+        //setting the global id to odd is convenience
+        //we are then able to set the is2d() flag in the
+        //alugrid implementation just by checking the index
+        
+        vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
       }
       else if(elementType == hexa)
       {
-        vertices_.push_back( std::make_pair( pos, 2*globalId ) );
+        //it is here important, that the fake vertices
+        // are of globalId +1 to the real ones
+        vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
         VertexType pos1 (pos);
           pos1[2] += 1.0 ;
-        vertices_.push_back( std::make_pair( pos1, 2*globalId+1 ) );
+        vertices_.push_back( std::make_pair( pos1, 2*globalId+2 ) );
       }
     }
   }
@@ -513,8 +518,8 @@ namespace Dune
       for( int vxIdx = 0; vxIdx < vxSize ; ++vxIdx )
       {
         const VertexType &vertex = position( vxIdx );
-          // insert vertex
-          mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
+        // insert vertex
+        mgb.InsertUniqueVertex( vertex[ 0 ], vertex[ 1 ], vertex[ 2 ], globalId( vxIdx ) );
       }
 
       const size_t elemSize = elements_.size();
