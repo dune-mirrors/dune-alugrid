@@ -244,7 +244,6 @@ namespace Dune
     typedef ReferenceElement<alu3d_ctype, 2> ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
-    enum { dimworldorld = 3 }; // ALU is a pure 3d grid
     enum { numVerticesPerFace =
            EntityCount<type>::numVerticesPerFace };
 
@@ -252,7 +251,7 @@ namespace Dune
     typedef FieldVector<alu3d_ctype, 3> NormalType;
     typedef FieldMatrix<alu3d_ctype,
                         numVerticesPerFace,
-                        dimworldorld> CoordinateType;
+                        dimworld> CoordinateType;
 
     typedef typename ALU3dGridFaceInfo< dim, dimworld, type, Comm >::GEOFaceType GEOFaceType;
 
@@ -428,14 +427,13 @@ namespace Dune
     typedef ReferenceElement<alu3d_ctype, 1> ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
-    enum { dimworldorld = dimworld };
     enum { numVerticesPerFace = 2 }; // A face in 2d is an edge
 
     //- public typedefs
-    typedef FieldVector<alu3d_ctype, dimworldorld> NormalType;
+    typedef FieldVector<alu3d_ctype, dimworld> NormalType;
     typedef FieldMatrix<alu3d_ctype,
                         numVerticesPerFace,
-                        dimworldorld> CoordinateType;
+                        dimworld> CoordinateType;
      typedef FieldMatrix<alu3d_ctype,
                         numVerticesPerFace,
                         2> LocalCoordinateType;
