@@ -98,31 +98,20 @@ namespace Dune
   class ALU3dGrid;
 #endif // #else // #if ALU3DGRID_PARALLEL
 
-  template < class Comm >
-  struct ALUGridBaseGrid< 3, 3, cube, Comm >
-  {
-    typedef ALU3dGrid< 3, 3, hexa, Comm >  BaseGrid ;
-  };
-
-  template < class Comm>
-  struct ALUGridBaseGrid< 3, 3, simplex, Comm >
-  {
-    typedef ALU3dGrid< 3, 3, tetra, Comm >  BaseGrid ;
-  };
 
   // Internal Forward Declarations
   // -----------------------------
 
-  template < int dimw, class Comm >
-  struct ALUGridBaseGrid< 2, dimw, cube, Comm >
+  template < int dim, int dimw, class Comm >
+  struct ALUGridBaseGrid< dim, dimw, cube, Comm >
   {
-    typedef ALU3dGrid< 2, dimw, hexa, Comm >  BaseGrid ;
+    typedef ALU3dGrid< dim, dimw, hexa, Comm >  BaseGrid ;
   };
 
-  template < int dimw, class Comm >
-  struct ALUGridBaseGrid< 2, dimw, simplex, Comm >
+  template < int dim, int dimw, class Comm >
+  struct ALUGridBaseGrid< dim, dimw, simplex, Comm >
   {
-    typedef ALU3dGrid< 2, dimw, tetra, Comm >  BaseGrid ;
+    typedef ALU3dGrid< dim, dimw, tetra, Comm >  BaseGrid ;
   };
 
 
