@@ -372,6 +372,7 @@ namespace ALUGrid
   inline GitterBasis::Objects::VertexEmptyMacro::VertexEmptyMacro (double x,double y,double z,int i, IndexManagerStorageType &ims)
   : GitterBasis::Objects::VertexEmpty (0,x,y,z,ims), _idn (i)
   {
+    // if vertex identifier is odd then it's a 2d vertex if the grid is 2d
     if(ims.dimension() == 2 && i%2 ) this->set2dFlag();
     return;
   }
