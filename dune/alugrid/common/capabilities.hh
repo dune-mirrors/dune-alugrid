@@ -52,8 +52,8 @@ namespace Dune
     /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< 3, 3, eltype, refinementtype,  ALUGridMPIComm > >
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
+    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype,  ALUGridMPIComm > >
     {
       static const bool v = true;
     };
@@ -70,8 +70,8 @@ namespace Dune
     /** \brief ALUGrid can communicate
     \ingroup ALUGrid
     */
-    template< ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
-    struct canCommunicate< ALUGrid< 3, 3, eltype, refinementtype, ALUGridMPIComm >, codim >
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, int codim >
+    struct canCommunicate< ALUGrid< dim, dimworld, eltype, refinementtype, ALUGridMPIComm >, codim >
     {
       static const bool v = true;
     };
