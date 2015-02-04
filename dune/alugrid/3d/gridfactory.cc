@@ -118,6 +118,9 @@ namespace Dune
           element[ i ]    = vertices[ i ] * 2;
           element[ i+4 ]  = element [ i ] + 1;
         }
+        elements_.push_back(element);
+        insertBoundary(elements_.size()-1,4,999);
+        insertBoundary(elements_.size()-1,5,999);
       }
       else if ( elementType == tetra )
       {
@@ -128,8 +131,9 @@ namespace Dune
         element[1] = vertices[ 0 ] + 1;
         element[2] = vertices[ 1 ] + 1;
         element[3] = vertices[ 2 ] + 1;
+        elements_.push_back(element);
+        insertBoundary(elements_.size()-1,3,999);
       }
-      elements_.push_back(element);
     }
   }
 
@@ -374,7 +378,7 @@ namespace Dune
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
 
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
+    if( addMissingBoundaries || ! faceTransformations_.empty())
       recreateBoundaryIds();
 
 
@@ -992,10 +996,10 @@ namespace Dune
       faceMap.erase( pos );
     }
 
-
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
-    CollectiveCommunication< MPICommunicatorType > comm( communicator_ );
+    // CollectiveCommunication< MPICommunicatorType > comm( communicator_ );
+    typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
     int numBoundariesMine = faceMap.size();
     std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
