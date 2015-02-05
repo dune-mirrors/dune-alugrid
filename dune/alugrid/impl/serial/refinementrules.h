@@ -51,7 +51,7 @@ namespace ALUGrid
 
     struct Hface4Rule
     {
-      enum rule_enum { nosplit=1, iso2=3, iso4=5,  undefined=-2 };
+      enum rule_enum { nosplit=1, iso4=5,  undefined=-2 };
       typedef signed char rule_t;
 
       explicit Hface4Rule ( const rule_t & );
@@ -279,7 +279,7 @@ namespace ALUGrid
   }
 
   inline bool RefinementRules :: Hface4Rule :: isValid (const rule_t& r) {
-    return r == nosplit || r == iso2 || r == iso4 ;
+    return r == nosplit ||  r == iso4 ;
   }
 
   inline bool RefinementRules :: Hface4Rule :: isValid () const {
@@ -291,8 +291,6 @@ namespace ALUGrid
     switch (_r) {
     case nosplit :
       return Hface4Rule (nosplit) ;
-    case iso2 :
-      return Hface4Rule (iso2) ;
     case iso4 :
       return Hface4Rule (iso4) ;
     default :
@@ -308,8 +306,6 @@ namespace ALUGrid
     {
       case RefinementRules :: Hface4Rule :: nosplit:
         return out << "nosplit";
-      case RefinementRules :: Hface4Rule :: iso2:
-        return out << "iso2";
       case RefinementRules :: Hface4Rule :: iso4:
         return out << "iso4";
       case RefinementRules :: Hface4Rule :: undefined:
