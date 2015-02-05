@@ -644,8 +644,10 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr(filename);
-        checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display, filename);
+        GridType &grid = *gridPtr;
+        grid.loadBalance();
+        checkCapabilities< false >( grid );
+        checkALUSerial( grid, 2, display, filename);
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -656,8 +658,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
+        SurfaceGridType &surfaceGrid = *surfaceGridPtr;
+        surfaceGrid.loadBalance();
+        checkCapabilities< false >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
 
       }
 
@@ -669,8 +673,11 @@ int main (int argc , char **argv) {
         //std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
-        checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display, filename);
+        GridType &grid = *gridPtr;
+        grid.loadBalance();
+        checkCapabilities< false >( grid );
+        checkALUSerial( grid, 2, display, filename);
+
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -681,8 +688,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
+        SurfaceGridType &surfaceGrid = *surfaceGridPtr;
+        surfaceGrid.loadBalance();
+        checkCapabilities< false >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
 
       }
 
@@ -693,8 +702,11 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
         //std::string filename( "./dgf/cube-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
-        checkCapabilities< true >( *gridPtr );
-        checkALUSerial(*gridPtr, 2, display, filename);
+        GridType &grid = *gridPtr;
+        grid.loadBalance();
+        checkCapabilities< true >( grid );
+        checkALUSerial( grid, 2, display, filename);
+
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -706,8 +718,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< true >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1, display, surfaceFilename );
+        SurfaceGridType &surfaceGrid = *surfaceGridPtr;
+        surfaceGrid.loadBalance();
+        checkCapabilities< true >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
 
       }
 #endif // #ifndef NO_2D
