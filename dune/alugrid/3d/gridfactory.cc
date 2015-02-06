@@ -37,6 +37,9 @@ namespace Dune
   alu_inline
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexInputType &pos )
   {
+    if (dimension == 2 && elementType == hexa)
+    doInsertVertex( pos, vertices_.size()/2 );
+    else 
     doInsertVertex( pos, vertices_.size() );
   }
 
@@ -792,7 +795,7 @@ namespace Dune
             doneFaces.insert( currentFace )  ;
             //remove face from activeFaces
             activeFaces.erase(currentFace);
-      }
+      } //end while
       return;
     }
 
