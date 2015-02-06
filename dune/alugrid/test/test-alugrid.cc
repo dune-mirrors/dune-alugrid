@@ -647,7 +647,7 @@ int main (int argc , char **argv) {
         GridType &grid = *gridPtr;
         grid.loadBalance();
         checkCapabilities< false >( grid );
-        checkALUSerial( grid, 2, display, filename);
+        checkALUSerial( grid, 2, display, filename.substr(6));
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -661,7 +661,7 @@ int main (int argc , char **argv) {
         SurfaceGridType &surfaceGrid = *surfaceGridPtr;
         surfaceGrid.loadBalance();
         checkCapabilities< false >( surfaceGrid );
-        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename.substr(6) );
 
       }
 
@@ -676,7 +676,7 @@ int main (int argc , char **argv) {
         GridType &grid = *gridPtr;
         grid.loadBalance();
         checkCapabilities< false >( grid );
-        checkALUSerial( grid, 2, display, filename);
+        checkALUSerial( grid, 2, display, filename.substr(6));
 
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -691,7 +691,7 @@ int main (int argc , char **argv) {
         SurfaceGridType &surfaceGrid = *surfaceGridPtr;
         surfaceGrid.loadBalance();
         checkCapabilities< false >( surfaceGrid );
-        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename.substr(6) );
 
       }
 
@@ -705,7 +705,7 @@ int main (int argc , char **argv) {
         GridType &grid = *gridPtr;
         grid.loadBalance();
         checkCapabilities< true >( grid );
-        checkALUSerial( grid, 2, display, filename);
+        checkALUSerial( grid, 2, display, filename.substr(6));
 
 
         //CircleBoundaryProjection<2> bndPrj;
@@ -721,7 +721,7 @@ int main (int argc , char **argv) {
         SurfaceGridType &surfaceGrid = *surfaceGridPtr;
         surfaceGrid.loadBalance();
         checkCapabilities< true >( surfaceGrid );
-        checkALUSerial( surfaceGrid, 1, display, surfaceFilename );
+        checkALUSerial( surfaceGrid, 1, display, surfaceFilename.substr(6) );
 
       }
 #endif // #ifndef NO_2D
