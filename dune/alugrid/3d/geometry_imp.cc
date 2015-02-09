@@ -377,8 +377,9 @@ buildGeom(const HFaceType & item, int t, int duneFace )
     else if ( mydim == 1) //edge
     {
       //update geometry implementation
-      geoImpl().update( face.myvertex(rotatedALUIndex[0])->Point(),
-                        face.myvertex(rotatedALUIndex[1])->Point() );
+      //we cannot use the rotatedALUIndex here, because for the codimiterator we get the wrong twist
+      geoImpl().update( face.myvertex(t < 0 ? 0 : 3)->Point(),
+                        face.myvertex(t < 0 ? 3 : 0)->Point() );
     }
   }
   else if ( elementType == tetra )

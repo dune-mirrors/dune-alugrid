@@ -274,7 +274,6 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
 template <int codim, class GridType>
 void checkIteratorCodim(GridType & grid)
 {
-#ifdef NO_2D
   typedef typename GridType::template Codim<codim>::
      template Partition<Dune::InteriorBorder_Partition>::LeafIterator
         IteratorInteriorBorder;
@@ -290,7 +289,7 @@ void checkIteratorCodim(GridType & grid)
     const Geometry& geo = iter->geometry();
     if( geo.corners() > 1 )
     {
-      Dune::FieldVector<ctype, GridType::dimension>
+      Dune::FieldVector<ctype, GridType::dimensionworld>
         diff( geo.corner(0) - geo.corner(1) );
       if( diff.two_norm() < 1e-8 )
       {
@@ -299,7 +298,6 @@ void checkIteratorCodim(GridType & grid)
       }
     }
   }
-#endif // #ifdef NO_2D
 }
 
 template <class GridType>
