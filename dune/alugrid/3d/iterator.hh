@@ -537,18 +537,8 @@ private:
               elem = dynamic_cast<GEOElementType *> (item.first);
           else if( item.second )
               elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
-          if(GridImp::elementType == tetra)
-          {
-             //face of tetra - valid if first corner has index zero
-              return (elem->myvertex(0)->getIndex() == 0);
-          }
-          else if (GridImp::elementType == hexa)
-          {
-
-            ALU3dGridLeafVertexList< typename GridImp::MPICommunicatorType > & vxList = grid.getLeafVertexList();
-           //face of hexa - valid if the vx 0 is valid and vx 1  is not valid
-            return (vxList.isValid(elem->myvertex(0)->getIndex()) && !vxList.isValid(elem->myvertex(1)->getIndex())) ;
-          }
+          //face is valid if the 2d flag is set
+          return elem->is2d();
        }
        return false;
      }
