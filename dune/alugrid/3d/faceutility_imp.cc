@@ -964,7 +964,7 @@ namespace Dune
         referenceElementCoordinatesRefined(INNER, coordsSelfLocal_);
         // generate outer local geometry only when not at boundary
         // * in the parallel case, this needs to be altered for the ghost cells
-        if (!connector_.outerBoundary()) {
+        if (!connector_.outerBoundary() && !(connector_.conformingRefinement() && connector_.ghostBoundary())) {
           referenceElementCoordinatesRefined(OUTER, coordsNeighborLocal_);
         } // end if
         break;
@@ -1031,7 +1031,6 @@ namespace Dune
        connector_.outerTwist());
 
     const ReferenceElementType& refElem = getReferenceElement();
-
 
     for (int i = 0; i < numVerticesPerFace; ++i)
     {
