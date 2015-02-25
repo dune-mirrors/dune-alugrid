@@ -73,12 +73,15 @@ namespace Dune
       if( elementType == tetra )
       {
         if(vertices_.size() == 0)
+        {
           vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
+          vertices_.push_back( std::make_pair( pos, globalId+1 ) );
+        }
         //setting the global id to odd is convenience
         //we are then able to set the is2d() flag in the
         //alugrid implementation just by checking the index
-        
-        vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
+        else
+          vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
       }
       else if(elementType == hexa)
       {
@@ -122,8 +125,8 @@ namespace Dune
           element[ i+4 ]  = element [ i ] + 1;
         }
         elements_.push_back(element);
-        insertBoundary(elements_.size()-1,4,999);
-        insertBoundary(elements_.size()-1,5,999);
+        insertBoundary(elements_.size()-1,4,1);
+        insertBoundary(elements_.size()-1,5,1);
       }
       else if ( elementType == tetra )
       {
@@ -135,7 +138,7 @@ namespace Dune
         element[2] = vertices[ 1 ] + 1;
         element[3] = vertices[ 2 ] + 1;
         elements_.push_back(element);
-        insertBoundary(elements_.size()-1,3,999);
+        insertBoundary(elements_.size()-1,3,1);
       }
     }
   }
