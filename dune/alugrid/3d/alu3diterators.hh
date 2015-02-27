@@ -189,7 +189,6 @@ namespace ALUGrid
 
     mutable int count_;
     const int size_;
-    const int dim_;
 
   public:
     // constructor creating iterator
@@ -198,8 +197,7 @@ namespace ALUGrid
     : vxList_ ( grid.getVertexList( level ) ),
       elem_( (ElType *)0, (HBndSegType *)0 ),
       count_( 0 ),
-      size_( vxList_.size() ),
-      dim_( GridImp::dimension )
+      size_( vxList_.size() )
     {
       alugrid_assert ( vxList_.up2Date() );
     }
@@ -209,8 +207,7 @@ namespace ALUGrid
       : vxList_(org.vxList_),
         elem_(org.elem_),
         count_(org.count_),
-        size_(org.size_),
-        dim_(org.dim_)
+        size_(org.size_)
     {
     }
 
@@ -221,14 +218,12 @@ namespace ALUGrid
     void next ()
     {
       ++count_;
-      goNextValid();
       return ;
     }
 
     void first()
     {
       count_ = 0;
-      goNextValid();
     }
     int done () const { return (count_ >= size_) ? 1 : 0; }
     val_t & item () const
@@ -245,25 +240,6 @@ namespace ALUGrid
       alugrid_assert ( ! done () );
       elem_.first = vxList_.getItemList()[count_];
       return elem_;
-    }
-   void goNextValid()
-    {
-      if( done() ) return ;
-      if (!isValid())
-      {
-        ++count_;
-        goNextValid();
-      }
-    }
-    bool isValid()
-    {
-      //for 3d all vertices are valid
-      if(dim_ == 3) return true;
-      //cast to VertexGeo to get access to the index - getItem to actually have the item, otherwise elem_ is 0
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;
-      GEOVertexType * vx = static_cast<GEOVertexType *> (getItem().first);
-      int idx = vx->getIndex();
-      return vxList_.isValid(idx);
     }
   };
 
@@ -444,7 +420,6 @@ namespace ALUGrid
 
     mutable int count_;
     const int size_;
-    const int dim_;
 
     const StopRule_t rule_;
 
@@ -456,7 +431,6 @@ namespace ALUGrid
       elem_( (ElType *)0, (HBndSegType *)0 ),
       count_( 0 ),
       size_( vxList_.size() ),
-      dim_(GridImp::dimension),
       rule_()
     {
       alugrid_assert ( vxList_.up2Date() );
@@ -467,7 +441,6 @@ namespace ALUGrid
       : vxList_(org.vxList_)
       , elem_(org.elem_)
       , count_(org.count_) , size_(org.size_)
-      , dim_(org.dim_)
       , rule_()
     {
     }
@@ -511,11 +484,6 @@ namespace ALUGrid
         ++count_;
         goNextValid();
       }
-      else if (!isValid())
-      {
-        ++count_;
-        goNextValid();
-      }
       else
       {
         alugrid_assert ( elem_.first );
@@ -525,18 +493,6 @@ namespace ALUGrid
           goNextValid();
         }
       }
-    }
-    bool isValid()
-    {
-      //for 3d all vertices are valid
-      if(dim_ == 3) return true;
-      //we assume that elem_ is no ghost - already checked for elem_.first
-      alugrid_assert(elem_.first);
-      //cast to VertexGeo to get access to the index
-      typedef typename Dune::ALU3dBasicImplTraits< Comm >::GitterType::Geometric::VertexGeo GEOVertexType;
-      GEOVertexType * vx = static_cast<GEOVertexType *> (elem_.first);
-      int idx = vx->getIndex();
-      return vxList_.isValid(idx);
     }
   };
 

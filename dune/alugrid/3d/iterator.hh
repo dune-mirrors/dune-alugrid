@@ -511,75 +511,38 @@ protected:
 
 private:
 
-  // in 2d check if item is valid
   template <int codim, class GridImp>
   struct ValidItem
-  {
-    bool operator()(const GridImp & grid, InternalIteratorType & iter)
-    {
-      return true;
-    }
-  };
-
-  template <class GridImp>
-  struct ValidItem<1, GridImp>
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
       if(GridImp::dimension ==3 || iter.done())  return true;
       else if (GridImp::dimension == 2)
       {
-          typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 1>::ImplementationType GEOElementType;
-          val_t & item = iter.item();
-          alugrid_assert ( item.first || item.second );
-          GEOElementType * elem  = 0;
-          if( item.first )
-              elem = dynamic_cast<GEOElementType *> (item.first);
-          else if( item.second )
-              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
-          //face is valid if the 2d flag is set
-          return elem->is2d();
-       }
-       return false;
-     }
+        typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, codim>::ImplementationType GEOElementType;
+        val_t & item = iter.item();
+        alugrid_assert ( item.first || item.second );
+        GEOElementType * elem  = 0;
+        if( item.first )
+          elem = dynamic_cast<GEOElementType *> (item.first);
+        else if( item.second )
+          elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
+        //an element is valid if the 2d flag is set
+        return elem->is2d();
+      }
+      return false;
+    }
   };
-
-
+  // in 2d check if item is valid
   template <class GridImp>
-  struct ValidItem<2, GridImp>
+  struct ValidItem<0, GridImp>
   {
     bool operator()(const GridImp & grid, InternalIteratorType & iter)
     {
       return true;
-
-      //The check whether vertices are valid is done in alu3diterators.hh
-      // see class ALU3dGridLevelIteratorWrapper<3 , ... > and ALU3dGridLeafIteratorWrapper <3, ...>
-
-    /*  if(GridImp::dimension ==3 ) return true;
-      else if (GridImp::dimension == 2)
-      {
-          typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, 2>::ImplementationType GEOElementType;
-          val_t & item = iter.item();
-          alugrid_assert ( item.first || item.second );
-          GEOElementType * elem  = 0;
-          if( item.first )
-              elem = dynamic_cast<GEOElementType *> (item.first);
-          else if( item.second )
-              elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
-          if(GridImp::elementType == tetra)
-          {
-             //vertex of tetra - valid if not index zero
-              return (elem->getIndex() != 0) ;
-          }
-          else if (GridImp::elementType == hexa)
-          {
-             //vertex of hexa - valid if even
-              return !(elem->getIndex() % 2);
-          }
-        }
-      return false;*/
     }
   };
+
 };
 
 //**********************************************************************
