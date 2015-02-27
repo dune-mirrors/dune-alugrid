@@ -49,26 +49,8 @@ namespace Dune
 
     vxList.resize(0);
 
-    std::vector< bool > & validList = validateList_;
-
-    if( validList.capacity() < vxsize) validList.reserve(vxsize);
-    validList.resize(vxsize);
-
-    //set all values to true
-    for(size_t i=0; i<vxsize; ++i)
-       validList[i] = true;
-
-
-
     const ALU3dGridElementType elType = GridType:: elementType;
     const int dim = GridType:: dimension;
-
-    //for the 2d tetra case set the index 0 of the validList to false
-    //index 0 is the one global vertex, that we ignore
-    if( elType == tetra && dim == 2 && validList.size() > 0)
-    {
-      validList[0] = false;
-    }
 
     typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIteratorType;
     typedef typename ElementLevelIteratorType :: val_t val_t;
@@ -103,8 +85,6 @@ namespace Dune
         if( vx->isGhost() ) continue;
 
         const int idx = vx->getIndex();
-        //in the 2d hexa case items are only valid, if the local ALU index is below 4
-        if( elType == hexa && dim == 2 && i > 3 ) { alugrid_assert(idx<validList.size()); validList[idx] = false; }
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);
@@ -142,24 +122,7 @@ namespace Dune
       vx.second = -1;
     }
 
-
-    std::vector< bool > & validList = validateList_;
-
-    if( validList.capacity() < vxsize) validList.reserve(vxsize);
-    validList.resize(vxsize);
-
-    //set all values to true
-    for(size_t i=0; i<vxsize; ++i)
-      validList[i] = true;
-
     const ALU3dGridElementType elType = GridType:: elementType;
-    const int dim = GridType:: dimension;
-
-    //for the 2d tetra case set the index 0 of the validList to false
-    if(elType == tetra && dim == 2 && validList.size() > 0)
-    {
-      validList[0] = false;
-    }
 
     typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, Dune::All_Partition, Comm > ElementIteratorType;
     typedef typename ElementIteratorType :: val_t val_t;
@@ -198,8 +161,6 @@ namespace Dune
 
         const int idx = vx->getIndex();
         ItemType & vxpair = vxList[idx];
-        //in the 2d hexa case items are only valid, if the local index is below 4
-        if(  elType == hexa && dim == 2 && i > 3 ) { alugrid_assert( idx < validList.size()); validList[idx] = false; }
         if( vxpair.first == 0 )
         {
           vxpair.first  = vx;

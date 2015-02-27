@@ -376,15 +376,11 @@ namespace Dune
 
     VertexListType & getItemList() { return vertexList_; }
 
-    bool isValid( int index ) const { return validateList_[index] ; }
-    bool isValid( VertexType &vx) const {return isValid( vx.getIndex() ) ; }
-
   private:
     bool up2Date_;
      //careful: due to the setupVxList structure the ordering of vertexList_ and validateList_ differ in the level Case
      //for validateList_ we want the ALUGrid Index as ordering, as we want to use it for faces
     VertexListType vertexList_;
-    std::vector< bool > validateList_;
   };
 
 
@@ -429,14 +425,9 @@ namespace Dune
         return p.second;
     }
 
-
-    bool isValid( int index ) const { return validateList_[index] ; }
-    bool isValid( VertexType &vx ) const { return isValid( vx.getIndex() ) ; }
-
   private:
     bool up2Date_;
     VertexListType vertexList_;
-    std::vector< bool > validateList_;
   };
 
 
