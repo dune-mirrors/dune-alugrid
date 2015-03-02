@@ -496,7 +496,6 @@ protected:
     do{
       iter.next();
 
-
       if(iter.done())
       {
         it.removeIter();
@@ -510,7 +509,7 @@ protected:
   }
 
 private:
-
+  // in 2d check if item is valid
   template <int codim, class GridImp>
   struct ValidItem
   {
@@ -522,18 +521,21 @@ private:
         typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::template Codim<GridImp::dimension, codim>::ImplementationType GEOElementType;
         val_t & item = iter.item();
         alugrid_assert ( item.first || item.second );
-        GEOElementType * elem  = 0;
         if( item.first )
-          elem = dynamic_cast<GEOElementType *> (item.first);
-        else if( item.second )
-          elem = dynamic_cast<GEOElementType *> (item.second->getGhost().first);
-        //an element is valid if the 2d flag is set
-        return elem->is2d();
+        {
+          GEOElementType* elem = static_cast<GEOElementType*> (item.first);
+          //an element is valid if the 2d flag is set
+          return elem->is2d();
+        }
+        //if we have a ghost entity, it is the right one, as we did not insert non-2d elements into the ghostlist
+        // see alu3diterators.hh method updateGhostlist         
+        else if( item.second ) 
+          return true;
       }
       return false;
     }
   };
-  // in 2d check if item is valid
+
   template <class GridImp>
   struct ValidItem<0, GridImp>
   {
