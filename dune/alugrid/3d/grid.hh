@@ -1249,8 +1249,10 @@ namespace Dune
 
     mutable VertexListType vertexList_[MAXL];
 
-    mutable ALU3dGridItemListType ghostLeafList_[ dimension ];
-    mutable ALU3dGridItemListType ghostLevelList_[ dimension ][MAXL];
+    //the ghostleaf list is used in alu3diterators, where we use the internal aluIterators
+    // the vertex codim there is 3, so the list has to fulfill that
+    mutable ALU3dGridItemListType ghostLeafList_[ 3 ];
+    mutable ALU3dGridItemListType ghostLevelList_[ 3 ][MAXL];
 
     mutable ALU3dGridItemListType levelEdgeList_[MAXL];
 

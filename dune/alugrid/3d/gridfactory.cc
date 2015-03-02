@@ -133,6 +133,7 @@ namespace Dune
         element.resize( 4 );
 
         // construct element following the DUNE reference tetrahedron
+        // do not rotate the vertices - otherwise the boundaries wont fit anymore
         element[0] = 0;
         element[1] = vertices[ 0 ] + 1;
         element[2] = vertices[ 1 ] + 1;
