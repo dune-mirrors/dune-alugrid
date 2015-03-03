@@ -370,7 +370,9 @@ namespace Dune
 
     if( comm().size() > 1 )
     {
-      for( int i = 0; i < dimension; ++i )
+      //here dimension has to be 3, as this is used ALU internally
+      //  was    for( int i = 0; i < dimension; ++i )
+      for( int i = 0; i < 3; ++i )
       {
         ghostLeafList_[i].unsetUp2Date();
         for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();

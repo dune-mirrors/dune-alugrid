@@ -957,11 +957,11 @@ namespace ALUGrid
     typedef typename IteratorElType< codim, Dune::ALUGridMPIComm >::val_t val_t;
 
   private:
-    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType, int cd >
+    template< Dune::ALU3dGridElementType elType, int cd >
     struct SelectVector;
 
-    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
-    struct SelectVector< actualDim, actualDimw, elType, 1 >
+    template< Dune::ALU3dGridElementType elType >
+    struct SelectVector< elType, 1 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
 
@@ -971,8 +971,8 @@ namespace ALUGrid
       }
     };
 
-    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
-    struct SelectVector< actualDim, actualDimw, elType, 2 >
+    template< Dune::ALU3dGridElementType elType >
+    struct SelectVector< elType, 2 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector( int face )
@@ -981,8 +981,8 @@ namespace ALUGrid
       }
     };
 
-    template< int actualDim, int actualDimw, Dune::ALU3dGridElementType elType >
-    struct SelectVector< actualDim, actualDimw, elType, 3 >
+    template< Dune::ALU3dGridElementType elType >
+    struct SelectVector< elType, 3 >
     {
       typedef typename Dune::ALU3dImplTraits< elType, Dune::ALUGridMPIComm >::GEOElementType GEOElementType;
       static const std::vector< int > &getNotOnItemVector ( int face )
@@ -1055,7 +1055,7 @@ namespace ALUGrid
         ++count;
       }
 
-      const int numItems = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::getNotOnItemVector(0).size();
+      const int numItems = SelectVector< GridImp::elementType, codim >::getNotOnItemVector(0).size();
       const int maxSize = numItems * count;
 
       ghList.getItemList().reserve(maxSize);
@@ -1066,7 +1066,7 @@ namespace ALUGrid
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
-        const std::vector<int> & notOnFace = SelectVector<GridImp::dimension, GridImp::dimensionworld, GridImp::elementType,codim>::
+        const std::vector<int> & notOnFace = SelectVector< GridImp::elementType, codim >::
                                           getNotOnItemVector(ghPair.second);
         for(int i=0; i<numItems; ++i)
         {
