@@ -646,6 +646,15 @@ int main (int argc , char **argv) {
         grid.loadBalance();
         checkCapabilities< false >( grid );
         checkALUSerial( grid, 2, display, filename.substr(6));
+        
+         // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -676,6 +685,15 @@ int main (int argc , char **argv) {
         checkCapabilities< false >( grid );
         checkALUSerial( grid, 2, display, filename.substr(6));
 
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
+
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -705,6 +723,15 @@ int main (int argc , char **argv) {
         checkCapabilities< true >( grid );
         checkALUSerial( grid, 2, display, filename.substr(6));
 
+
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
