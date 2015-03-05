@@ -1159,10 +1159,16 @@ namespace ALUGrid
     // und zwar dann wenn sie "on the top" sind (= die gelesene
     // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
 
+
+
       for (int i = 0; i < 6; i ++) {
         myhface4_t & f (*(myhface4 (i)));
         if (!f.leaf ()) {
-          for (int j = 0; j < 4; j ++) f.subface (j)->nb.complete (f.nb);
+          //For 2d we have to take into account that the number of subfaces is just 2
+          if(f.is2d())
+            for (int j = 0; j < 2; j ++) f.subface (j)->nb.complete (f.nb);
+          else
+            for (int j = 0; j < 4; j ++) f.subface (j)->nb.complete (f.nb);
         }
       }
     }
