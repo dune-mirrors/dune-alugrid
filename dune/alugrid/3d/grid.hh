@@ -459,19 +459,19 @@ namespace Dune
     friend class ALU3dGridEntity< 0, dim, const ThisType>;
     friend class ALU3dGridEntity< 1, dim, const ThisType>;
     friend class ALU3dGridEntity< 2, dim, const ThisType>;
-    friend class ALU3dGridEntity< 3, dim, const ThisType>;
+    friend class ALU3dGridEntity< dim, dim, const ThisType>;
 
     friend class ALU3dGridIntersectionIterator< ThisType >;
 
     friend class ALU3dGridEntityPointerBase< 0, const ThisType >;
     friend class ALU3dGridEntityPointerBase< 1, const ThisType >;
     friend class ALU3dGridEntityPointerBase< 2, const ThisType >;
-    friend class ALU3dGridEntityPointerBase< 3, const ThisType >;
+    friend class ALU3dGridEntityPointerBase< dim, const ThisType >;
 
     friend class ALU3dGridEntityPointer< 0, const ThisType >;
     friend class ALU3dGridEntityPointer< 1, const ThisType >;
     friend class ALU3dGridEntityPointer< 2, const ThisType >;
-    friend class ALU3dGridEntityPointer< 3, const ThisType >;
+    friend class ALU3dGridEntityPointer< dim, const ThisType >;
 
     friend class ALU3dGridIntersectionIterator< const ThisType >;
     friend class ALU3dGridHierarchicIterator< const ThisType >;
