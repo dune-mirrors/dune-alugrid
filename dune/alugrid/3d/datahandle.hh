@@ -62,8 +62,26 @@ namespace ALUGrid
     {
     }
 
-    //! returns contains of dc_
-    bool contains(int dim, int cd) const { return dc_.contains(dim,cd); }
+    //This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
+    //So we have to adapt things to the user view, that writes it with 
+    // 2,codimension
+    // return true if dim,codim combination is contained in data set
+    bool contains(int dimension, int cd) const
+    {
+    
+      //dim is GridImp::dimension
+      //
+      if(dim == 2)
+      {
+        //We do not want to transmit edge data in 2d
+        if(cd == 2)
+          return false;
+        if (cd == 3)
+          return dc_.contains( 2 , 2 );
+      }
+      //this is the original call
+      return dc_.contains(dim,cd);
+    }
 
     // returns true, if element is contained in set of comm interface
     // this method must be overlaoded by the impl classes
@@ -313,7 +331,7 @@ namespace ALUGrid
       // make sure that vertex list is up2date
       // but only do this, if vertex data contained,
       // because the list update is expensive
-      if( (codim == 3) && dc.contains(dim,codim) )
+      if( (codim == dim) && dc.contains(dim,codim) )
       {
         // call of this method forces update of list,
         // if list is not up to date
@@ -403,6 +421,87 @@ namespace ALUGrid
     void setElement(const HElementType & elem)
     {
       this->realEntity_.setElement(elem,level_);
+    }
+
+  };
+  
+  //! the corresponding interface class is defined in bsinclude.hh
+  // this class is for the 2d grid - it masks out the edgeGatherScatter  
+  template <class GridType, class DataCollectorType , int codim >
+  class GatherScatterNoData
+  : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
+  {
+    enum { dim = GridType::dimension };
+    typedef GatherScatterBaseImpl<GridType,DataCollectorType,codim> BaseType;
+    typedef typename GridType::template Codim<codim>::Entity EntityType;
+    typedef Dune :: MakeableInterfaceObject<
+      typename GridType::template Codim<codim>::Entity> MakeableEntityType;
+    typedef typename MakeableEntityType :: ImplementationType RealEntityType;
+
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+
+    typedef typename ImplTraits::template Codim< 2, codim >::ImplementationType IMPLElementType;
+    typedef typename ImplTraits::template Codim< 2, codim >::InterfaceType HElementType;
+    //We want to have the real 3d no data gatherscatter so set dim to 3 here
+    typedef typename ImplTraits::template Codim< 3, codim >::ImplementationType RealIMPLElementType;
+    typedef typename ImplTraits::template Codim< 3, codim >::InterfaceType RealHElementType;
+
+    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
+
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dim, 0 >::GhostImplementationType ImplGhostType;
+
+    typedef typename ImplTraits::PllElementType PllElementType;
+
+    typedef typename GridType::LevelIndexSetImp LevelIndexSetImp;
+
+  public:
+    // use containsItem for ghost element from BaseType
+    using BaseType :: containsItem ;
+
+    //! Level Constructor
+    GatherScatterNoData(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc,
+        const LevelIndexSetImp & levelSet, const int level)
+      : BaseType(grid,en,realEntity,dc) 
+    {
+    }
+    
+    //! Leaf Constructor
+    GatherScatterNoData(const GridType & grid, MakeableEntityType & en,
+        RealEntityType & realEntity , DataCollectorType & dc)
+      : BaseType(grid,en,realEntity,dc) 
+    {
+    }
+
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const HElementType & elem) const
+    {
+      return false;
+    }
+    
+    // returns true, if element is contained in set of comm interface
+    bool containsItem (const RealHElementType & elem) const
+    {
+      return false;
+    }
+    
+    // set elem to realEntity
+    void setElement(const HElementType & elem)
+    {
+      //we should not get here hopefully
+      alugrid_assert(false);
+      return;
+    }
+
+    // set elem to realEntity
+    void setElement(const RealHElementType & elem)
+    {
+      //we should not get here hopefully
+      alugrid_assert(false);
+      return;
     }
 
   };

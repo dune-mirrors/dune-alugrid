@@ -102,7 +102,7 @@ namespace Dune
     typedef ALU3DSPACE GatherScatter GatherScatter;
 
   protected:
-    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 3 >::Entity > VertexObject;
+    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< dim >::Entity > VertexObject;
     typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 2 >::Entity > EdgeObject;
     typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 1 >::Entity > FaceObject;
     typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 0 >::Entity > ElementObject;
@@ -206,6 +206,10 @@ namespace Dune
       : Base::Storage
     {
       typedef Dune::CommDataHandleIF< DataHandle, Data > CommDataHandleIF;
+      typedef typename std::conditional<dim == 2,
+                                ALU3DSPACE GatherScatterNoData< Grid, CommDataHandleIF, 2 >,
+                                ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, 2 >
+                                >::type EdgeGatherScatterType;
 
       Storage ( const Grid &grid, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, grid.maxLevel() ),
@@ -226,8 +230,8 @@ namespace Dune
       using Base::Storage::face;
       using Base::Storage::element;
 
-      ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, 3 > vertexGatherScatter_;
-      ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, 2 > edgeGatherScatter_;
+      ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, dim > vertexGatherScatter_;
+      EdgeGatherScatterType edgeGatherScatter_;
       ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, 1 > faceGatherScatter_;
       ALU3DSPACE GatherScatterLeafData< Grid, CommDataHandleIF, 0 > elementGatherScatter_;
     };
@@ -271,6 +275,10 @@ namespace Dune
       : Base::Storage
     {
       typedef Dune::CommDataHandleIF< DataHandle, Data > CommDataHandleIF;
+      typedef typename std::conditional<dim == 2,
+                                ALU3DSPACE GatherScatterNoData< Grid, CommDataHandleIF, 2 >,
+                                ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 2 >
+                                >::type EdgeGatherScatterType;
 
       Storage ( const Grid &grid, int level, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, level ),
@@ -299,8 +307,8 @@ namespace Dune
       using Base::Storage::element;
 
       std::pair< typename Grid::LevelIndexSetImp *, bool > indexSet_;
-      ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 3 > vertexGatherScatter_;
-      ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 2 > edgeGatherScatter_;
+      ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, dim > vertexGatherScatter_;
+      EdgeGatherScatterType edgeGatherScatter_;
       ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 1 > faceGatherScatter_;
       ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 0 > elementGatherScatter_;
     };
