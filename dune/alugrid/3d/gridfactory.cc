@@ -384,8 +384,14 @@ namespace Dune
 
     correctElementOrientation();
     numFacesInserted_ = boundaryIds_.size();
-
-    if( addMissingBoundaries || ! faceTransformations_.empty())
+    
+    //We need dimension == 2 here, because it is correcting the face orientation
+    //as the 2d faces are not necesarrily orientated the right way, we cannot
+    //guerantee beforehand to have the right 3d face orientation
+    //
+    //Another way would be to store faces as element number + local face index and 
+    // create them AFTER correctelementorientation was called!!
+    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
       recreateBoundaryIds();
 
 
