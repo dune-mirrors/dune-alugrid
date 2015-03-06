@@ -601,7 +601,7 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< 0 >::InterfaceType  HElementType;
+    typedef typename ImplTraits::template Codim< GridType::dimension,  0 >::InterfaceType  HElementType;
 
     typedef typename GridType :: EntityObject                   EntityObjectType;
     typedef typename GridType :: template Codim< 0 > :: Entity  EntityType ;
@@ -746,7 +746,7 @@ namespace ALUGrid
 
     typedef typename GridType::MPICommunicatorType Comm;
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< 0 >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< GridType::dimension, 0 >::InterfaceType HElementType;
 
     typedef typename BaseType :: EntityType  EntityType ;
 
@@ -900,7 +900,8 @@ namespace ALUGrid
       // now call all higher codims
       inlineCodimData< 1 >( stream, element );
       inlineCodimData< 2 >( stream, element );
-      inlineCodimData< 3 >( stream, element );
+      if(dimension == 3)
+      inlineCodimData< dimension >( stream, element );
     }
 
     void xtractElementData ( ObjectStreamType &stream, const EntityType &element )
@@ -914,7 +915,8 @@ namespace ALUGrid
       // now call all higher codims
       xtractCodimData< 1 >( stream, element );
       xtractCodimData< 2 >( stream, element );
-      xtractCodimData< 3 >( stream, element );
+      if(dimension == 3)
+      xtractCodimData< dimension >( stream, element );
     }
 
     template <int codim>
