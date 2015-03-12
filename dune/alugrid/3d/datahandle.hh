@@ -342,25 +342,25 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HElementType & elem) const
     {
-      return elem.isLeafEntity();
+      return (dim == 2 ? elem.is2d() : true) && elem.isLeafEntity();
     }
 
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HGhostType & ghost) const
     {
-      return ghost.isLeafEntity();
+      return (dim == 2 ? ghost.is2d() : true) && ghost.isLeafEntity();
     }
 
     // returns true, if interior element is contained in set of comm interface
     bool containsInterior (const HFaceType & face, PllElementType & pll) const
     {
-      return face.isInteriorLeaf();
+      return (dim == 2 ? face.is2d() : true) && face.isInteriorLeaf();
     }
 
     // returns true, if ghost is contianed in set of comm interface
     bool containsGhost (const HFaceType & face , PllElementType & pll) const
     {
-      return pll.ghostLeaf();
+      return (dim == 2 ? face.is2d() : true) && pll.ghostLeaf();
     }
 
     // set elem to realEntity
