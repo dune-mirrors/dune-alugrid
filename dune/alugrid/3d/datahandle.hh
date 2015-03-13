@@ -24,7 +24,7 @@ namespace ALUGrid
   : public GatherScatter
   {
   protected:
-    enum { dim = GridType::dimension };
+    enum { dimension = GridType::dimension };
     const GridType & grid_;
     typedef typename GridType::template Codim<codim>::Entity EntityType;
     typedef Dune :: MakeableInterfaceObject<
@@ -34,8 +34,8 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
-    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::InterfaceType HElementType;
 
     EntityType  & entity_;
     RealEntityType & realEntity_;
@@ -66,21 +66,31 @@ namespace ALUGrid
     //So we have to adapt things to the user view, that writes it with 
     // 2,codimension
     // return true if dim,codim combination is contained in data set
-    bool contains(int dimension, int cd) const
+    bool contains(int dim, int cd) const
     {
-    
-      //dim is GridImp::dimension
-      //
-      if(dim == 2)
+      //dimension is GridImp::dimension
+      if(dim == dimension)
       {
-        //We do not want to transmit edge data in 2d
+        //the original call
+        return dc_.contains(dim,cd);
+      }
+      //adaptation for 2d
+      else if(dimension == 2)
+      {
+        //we do not want to transmit edge data
         if(cd == 2)
           return false;
-        if (cd == 3)
-          return dc_.contains( 2 , 2 );
+        else if (cd == 3)
+          return dc_.contains(dimension, 2);
+        else
+          return dc_.contains(dimension, cd);        
       }
-      //this is the original call
-      return dc_.contains(dim,cd);
+      //
+      else
+      {
+        std::cerr << "DataHandle.contains called with non-matching dim and codim" << std::endl;
+        return false;
+      }
     }
 
     // returns true, if element is contained in set of comm interface
@@ -348,6 +358,7 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HGhostType & ghost) const
     {
+      std::cout << ghost.is2d() << " ";
       return (dim == 2 ? ghost.is2d() : true) && ghost.isLeafEntity();
     }
 
@@ -414,7 +425,7 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HElementType & elem) const
     {
-      return levelSet_.containsIndex(codim, elem.getIndex() );
+      return (dim == 2 ? elem.is2d() : true) && levelSet_.containsIndex(codim, elem.getIndex() );
     }
 
     // set elem to realEntity
@@ -820,9 +831,31 @@ namespace ALUGrid
     }
 
     // return true if dim,codim combination is contained in data set
-    bool contains(int dim, int codim) const
+    bool contains(int dim, int cd) const
     {
-      return dataHandle_.contains( dim, codim );
+      //dimension is GridImp::dimension
+      if(dim == dimension)
+      {
+        //the original call
+        return dataHandle_.contains(dim,cd);
+      }
+      //adaptation for 2d
+      else if(dimension == 2)
+      {
+        //we do not want to transmit edge data
+        if(cd == 2)
+          return false;
+        else if (cd == 3)
+          return dataHandle_.contains(dimension, 2);
+        else
+          return dataHandle_.contains(dimension, cd);        
+      }
+      //
+      else
+      {
+        std::cerr << "DataHandle.contains called with non-matching dim and codim" << std::endl;
+        return false;
+      }
     }
 
     // return true if user dataHandle is present which is the case here
