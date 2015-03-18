@@ -16,6 +16,9 @@ namespace ALUGrid
   void GitterBasis::Objects::TetraEmpty::
   os2VertexData ( ObjectStream &os, GatherScatterType &gs, int borderFace )
   {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements  
+    if(!is2d() || myvertex(borderFace)->is2d())
     // only one opposite vertex for tetras
     gs.setData( os, *myvertex( borderFace ) );
   }
@@ -42,6 +45,9 @@ namespace ALUGrid
     alugrid_assert ( numFaces == 3 );
     for (int i = 0; i <numFaces; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements
+      if( !is2d() ||myhface3( facesNotOnFace[i] )->is2d())   
       gs.setData( os, *myhface3( facesNotOnFace[i] ) );
     }
   }
@@ -53,6 +59,9 @@ namespace ALUGrid
   VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
   {
     // only send one vertex
+    //for the 2d case we do not want to transmit data for 
+    //non-2d elements
+    if(!is2d() || myvertex(borderFace)->is2d())
     gs.sendData( os, *myvertex(borderFace) );
   }
 
@@ -78,6 +87,9 @@ namespace ALUGrid
     alugrid_assert ( numFaces == 3 );
     for (int i = 0; i <numFaces; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements
+      if( !is2d() ||myhface3( facesNotOnFace[i] )->is2d())       
       gs.sendData( os,  *myhface3( facesNotOnFace[i] ) );
     }
   }
@@ -211,6 +223,9 @@ namespace ALUGrid
     alugrid_assert ( numVertices == 4 );
     for (int i = 0; i <numVertices; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements
+      if(!is2d() || myvertex(verticesNotOnFace[i])->is2d() )
       gs.setData( os, *myvertex( verticesNotOnFace[i] ) );
     }
   }
@@ -239,6 +254,9 @@ namespace ALUGrid
     alugrid_assert ( numFaces == 5 );
     for (int i = 0; i <numFaces; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements
+      if(!is2d() || myhface4( facesNotOnFace[i])->is2d())   
       gs.setData( os, *myhface4( facesNotOnFace[i] ) );
     }
   }
@@ -255,6 +273,9 @@ namespace ALUGrid
     alugrid_assert ( numVertices == 4 );
     for (int i = 0; i <numVertices; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements    
+      if(!is2d() || myvertex(verticesNotOnFace[i])->is2d())   
       gs.sendData( os, *myvertex( verticesNotOnFace[i] ) );
     }
   }
@@ -281,6 +302,9 @@ namespace ALUGrid
     alugrid_assert ( numFaces == 5 );
     for (int i = 0; i < numFaces; ++i)
     {
+      //for the 2d case we do not want to transmit data for 
+      //non-2d elements    
+      if( !is2d() ||myhface4( facesNotOnFace[i] )->is2d())   
       gs.sendData( os, *myhface4( facesNotOnFace[i] ) );
     }
   }
