@@ -685,6 +685,8 @@ namespace Dune
       typedef std::array<unsigned int, 2>  Face2Type;
 
       const int numFaces = (elementType == tetra) ? 3 : 4;
+      //the nextIndex denotes the indices of the 2d element
+      //inside the 3d element in circular order
       std::vector <unsigned int> nextIndex ({1,2,3});
       if(elementType == hexa)
       {

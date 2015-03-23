@@ -72,11 +72,11 @@ namespace Dune
     //! returns true if outerEntity casts into a helement
     bool isElementLike() const;
 
+  public:
+    //- queries
     //! returns true if inside is a ghost entity
     bool innerBoundary() const;
 
-  public:
-    //- queries
     //! returns true if the face lies on the domain boundary
     //! and is not a periodic boundary
     bool outerBoundary() const;
