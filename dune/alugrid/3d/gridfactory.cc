@@ -378,11 +378,12 @@ namespace Dune
     typedef typename BoundaryIdMap :: iterator  BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
+    correctElementOrientation();
+
     std::vector< int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
-
-    correctElementOrientation();
+    
     numFacesInserted_ = boundaryIds_.size();
     
     //We need dimension == 2 here, because it is correcting the face orientation
