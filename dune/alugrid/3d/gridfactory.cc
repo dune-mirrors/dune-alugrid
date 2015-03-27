@@ -125,8 +125,8 @@ namespace Dune
           element[ i+4 ]  = element [ i ] + 1;
         }
         elements_.push_back(element);
-        insertBoundary(elements_.size()-1,4,1);
-        insertBoundary(elements_.size()-1,5,1);
+        insertBoundary(elements_.size()-1,4,boundaryId2d);
+        insertBoundary(elements_.size()-1,5,boundaryId2d); 
       }
       else if ( elementType == tetra )
       {
@@ -139,7 +139,7 @@ namespace Dune
         element[2] = vertices[ 1 ] + 1;
         element[3] = vertices[ 2 ] + 1;
         elements_.push_back(element);
-        insertBoundary(elements_.size()-1,3,1);
+        insertBoundary(elements_.size()-1,3,boundaryId2d);
       }
     }
   }
@@ -253,11 +253,35 @@ namespace Dune
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     alugrid_assert ( type.isCube() || type.isSimplex() );
 
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
+    std::vector<VertexId > face (vertices);
 
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+    //if the dimension is 2, we have to adjust the 
+    //vertex indices according to the transformation in
+    //insertBoundary
+    if(dimension == 2 && face.size() == 2)
+    {
+      if(elementType == tetra)
+      {
+        face.resize(3,0);      
+        face[2] = vertices[1]+1;
+        face[1] = vertices[0]+1;
+        face[0] = 0;
+      }
+      else if(elementType == hexa)
+      {
+        face.resize(4,0);
+        face[0] = 2*vertices[0];
+        face[3] = 2*vertices[1];
+        face[1] = face[0]+1;
+        face[2] = face[3]+1;
+      }
+    }
+
+    FaceType faceId;
+    copyAndSort( face, faceId );
+
+    if( face.size() != numFaceCorners )
+      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << face.size() << "." );
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
@@ -473,12 +497,12 @@ namespace Dune
       out << int(0) << std::endl;
 
       out.close();
-    }
+    } // if( allowGridGeneration_ && !temporary )
 
     const size_t boundarySegments = boundaryIds_.size();
 
     const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 )
+    if( bndProjectionSize > 0 || dimension == 2)
     {
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
@@ -494,7 +518,7 @@ namespace Dune
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
         // if no projection given we use global projection, otherwise identity
-        if( ! projection && globalProjection_ )
+        if( ! projection && !(it->second == boundaryId2d) && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
@@ -506,7 +530,7 @@ namespace Dune
         // copy pointer
         (*bndProjections)[ segmentIndex ] = projection;
       }
-    } // if( allowGridGeneration_ && !temporary )
+    }
 
     // free memory
     boundaryProjections_.clear();

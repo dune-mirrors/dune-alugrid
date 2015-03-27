@@ -512,7 +512,7 @@ namespace Dune
         GeometryType type( (eltype == simplex) ?
                                GeometryType::simplex :
                                GeometryType::cube,
-                            dimworld-1);
+                            dimgrid-1);
 
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection

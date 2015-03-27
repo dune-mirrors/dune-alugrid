@@ -17,7 +17,6 @@
 
 namespace Dune
 {
-
   /** \brief Factory class for 3d ALUGrids */
   template< class ALUGrid >
   class ALU3dGridFactory
@@ -68,6 +67,8 @@ namespace Dune
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
     static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
+
+    static const unsigned int boundaryId2d = 87;
 
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
