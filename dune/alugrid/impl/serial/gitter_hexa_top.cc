@@ -457,7 +457,7 @@ namespace ALUGrid
         // refine myself
         if(myhface4(0)->is2d())
           splitISO2() ;
-        else  
+        else
           splitISO4 ();
       }
       else
@@ -709,7 +709,7 @@ namespace ALUGrid
     return ( facerule == facerule_t::iso4 ) ?
             ( myhface4(i)->is2d() ) ?
               ((twist(i) < 0) ? face->subface((j+1)%2): face->subface(j) )
-              : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :   
+              : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
               (abort (), (myhface4_t *)0);
   }
 
@@ -721,7 +721,7 @@ namespace ALUGrid
     return ( facerule == facerule_t::iso4 ) ?
             ( myhface4(i)->is2d() ) ?
               ((twist(i) < 0) ? face->subface((j+1)%2): face->subface(j) )
-              : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :   
+              : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
               (abort (), (myhface4_t *)0);
   }
 
@@ -946,7 +946,7 @@ namespace ALUGrid
         splitISO4 ();
       else
         splitISO8();
-    
+
     // call post refinement method (default is empty)
     this->postRefinement();
   }
@@ -1303,7 +1303,7 @@ namespace ALUGrid
        // if( hexa->myhface(fce)->myvertex(1)->Point()[2] != 1 && hexa->myhface(fce)->myvertex(2)->Point()[2])
        // std::cout << "Local face: " << fce << "of Hexa" << hexa->getIndex() << hexa->myhface(fce) << "is not fake 2d" << std::endl;
       // make sure neighbor is something meaningful
-      alugrid_assert ( tetra->myneighbour( fce ).first->isRealObject() );
+      alugrid_assert ( hexa->myneighbour( fce ).first->isRealObject() );
 
     }
 
