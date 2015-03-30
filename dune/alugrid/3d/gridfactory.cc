@@ -38,9 +38,9 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid > :: insertVertex ( const VertexInputType &pos )
   {
     if (dimension == 2 && elementType == hexa)
-    doInsertVertex( pos, vertices_.size()/2 );
-    else 
-    doInsertVertex( pos, vertices_.size() );
+      doInsertVertex( pos, vertices_.size()/2 );
+    else
+      doInsertVertex( pos, vertices_.size() );
   }
 
 
@@ -126,7 +126,7 @@ namespace Dune
         }
         elements_.push_back(element);
         insertBoundary(elements_.size()-1,4,boundaryId2d);
-        insertBoundary(elements_.size()-1,5,boundaryId2d); 
+        insertBoundary(elements_.size()-1,5,boundaryId2d);
       }
       else if ( elementType == tetra )
       {
@@ -255,14 +255,14 @@ namespace Dune
 
     std::vector<VertexId > face (vertices);
 
-    //if the dimension is 2, we have to adjust the 
+    //if the dimension is 2, we have to adjust the
     //vertex indices according to the transformation in
     //insertBoundary
     if(dimension == 2 && face.size() == 2)
     {
       if(elementType == tetra)
       {
-        face.resize(3,0);      
+        face.resize(3,0);
         face[2] = vertices[1]+1;
         face[1] = vertices[0]+1;
         face[0] = 0;
@@ -325,13 +325,16 @@ namespace Dune
         return ;
       }
 
-      VertexType maxCoord;
-      VertexType minCoord;
+      VertexInputType maxCoord;
+      VertexInputType minCoord;
       const size_t vertexSize = vertices.size();
       if( vertexSize > 0 )
       {
-        maxCoord = vertices[ 0 ].first;
-        minCoord = vertices[ 0 ].first;
+        for( unsigned int d=0; d<dimension; ++d )
+        {
+          maxCoord[d] = vertices[ 0 ].first[d];
+          minCoord[d] = vertices[ 0 ].first[d];
+        }
       }
 
       for( size_t i=0; i<vertexSize; ++i )
@@ -345,14 +348,14 @@ namespace Dune
       }
 
       // get element's center to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexType > sfc( minCoord, maxCoord, comm );
+      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
 
       typedef std::map< double, int > hsfc_t;
       hsfc_t hsfc;
 
       for( size_t i=0; i<elemSize; ++i )
       {
-        VertexType center( 0 );
+        VertexInputType center( 0 );
         // compute barycenter
         const int vxSize = elements[ i ].size();
         for( int vx = 0; vx<vxSize; ++vx )
@@ -407,14 +410,14 @@ namespace Dune
     std::vector< int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
-    
+
     numFacesInserted_ = boundaryIds_.size();
-    
+
     //We need dimension == 2 here, because it is correcting the face orientation
-    //as the 2d faces are not necesarrily orientated the right way, we cannot
+    //as the 2d faces are not necessarily orientated the right way, we cannot
     //guerantee beforehand to have the right 3d face orientation
     //
-    //Another way would be to store faces as element number + local face index and 
+    //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
     if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
       recreateBoundaryIds();
@@ -502,7 +505,7 @@ namespace Dune
     const size_t boundarySegments = boundaryIds_.size();
 
     const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 || dimension == 2)
+    if( bndProjectionSize > 0 )
     {
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
@@ -698,7 +701,7 @@ namespace Dune
   {
     //if there are no elements, do not correct Orientation
     if(elements_.begin() == elements_.end()) return;
-    
+
     //for 2,3 we orient the surface -
     // we choose the orientation on one element
     // and then set the orientation on the neighbour to be the same
@@ -727,7 +730,7 @@ namespace Dune
       typedef std::map< Face2Type, int > FaceMap ;
       typedef FaceMap::iterator FaceIterator;
       FaceMap activeFaces;
-      
+
       //returns true if element is done
       std::vector<bool> doneElements(elements_.size(), false);
 
@@ -813,7 +816,7 @@ namespace Dune
                 int twist = face[0] < face[1] ? 0 : -1;
                 std::sort(face.begin(),face.end());
                 if(face == currentFace) continue;
-                
+
                 //check that it is not in doneFaces
                 if(doneFaces.find(face) == doneFaces.end())
                 {
@@ -835,7 +838,7 @@ namespace Dune
 
           //break element for loop if we found the element
           //and set doneElements true
-          if(found) 
+          if(found)
           {
             doneElements[cnt] = true;
             break;
