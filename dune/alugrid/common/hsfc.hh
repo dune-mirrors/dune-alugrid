@@ -5,8 +5,6 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
-#define DISABLE_ZOLTAN_HSFC_ORDERING
-
 // to disable Zoltans HSFC ordering of the macro elements define
 // DISABLE_ZOLTAN_HSFC_ORDERING on the command line
 #if HAVE_ZOLTAN && HAVE_MPI
@@ -22,6 +20,7 @@
 
 extern "C" {
   extern double Zoltan_HSFC_InvHilbert3d (Zoltan_Struct *zz, double *coord);
+  extern double Zoltan_HSFC_InvHilbert2d (Zoltan_Struct *zz, double *coord);
 }
 
 namespace Dune {
@@ -33,7 +32,7 @@ namespace Dune {
     typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
-    static const int dimension = 3 ;
+    static const int dimension = Coordinate::dimension;
 
     Coordinate lower_;
     Coordinate length_;
@@ -63,7 +62,20 @@ namespace Dune {
       for( int d=0; d<dimension; ++d )
         center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
 
-      return Zoltan_HSFC_InvHilbert3d(zz_.Get_C_Handle(), &center[ 0 ] );
+      if( dimension == 3 )
+      {
+        return Zoltan_HSFC_InvHilbert3d(zz_.Get_C_Handle(), &center[ 0 ] );
+      }
+      else if ( dimension == 2 )
+      {
+        std::cout << "2 dim version of hsfc" << std::endl;
+        return Zoltan_HSFC_InvHilbert2d(zz_.Get_C_Handle(), &center[ 0 ] );
+      }
+      else
+      {
+        DUNE_THROW(NotImplemented,"Zoltan_HSFC_InvHilbert" << dimension << "d not available!");
+        return 0.0;
+      }
     }
   };
 
