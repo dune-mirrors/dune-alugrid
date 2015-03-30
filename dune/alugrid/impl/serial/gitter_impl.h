@@ -352,14 +352,14 @@ namespace ALUGrid
     //
 
   inline GitterBasis::Objects::VertexEmpty::VertexEmpty (int l, double x, double y, double z, IndexManagerStorageType & ims)
-    : GitterBasis::VertexGeo (l,x,y,z,ims) {
-    return;
+    : GitterBasis::VertexGeo (l,x,y,z,ims)
+  {
   }
 
   inline GitterBasis::Objects::VertexEmpty::VertexEmpty (int l, double x, double y, double z, VertexGeo & vx )
-    : GitterBasis::VertexGeo (l,x,y,z,vx) {
+    : GitterBasis::VertexGeo (l,x,y,z,vx)
+  {
     if( vx.is2d() ) this->set2dFlag();
-    return;
   }
 
   inline int GitterBasis::Objects::VertexEmpty::ident () const
