@@ -400,15 +400,19 @@ namespace ALUGrid
     const std::vector< int >& l1 ( myhface ().myhedge (1)->estimateLinkage () );
     const std::vector< int >& l2 ( myhface ().myhedge (2)->estimateLinkage () );
 
+    const size_t t1size = std::min( l0.size(), l1.size() );
+    t1.reserve( t1size );
     set_intersection( l0.begin(), l0.end(), l1.begin(), l1.end(), std::back_inserter( t1 ) );
     // for tetras we don't need the forth linkage
     if( A::polygonlength == 4 )
     {
-      const std::vector< int >& l3 ( (A::polygonlength == 4) ? myhface ().myhedge (3)->estimateLinkage () : l2 );
+      const std::vector< int >& l3 (myhface ().myhedge (3)->estimateLinkage ());
+      t2temp.reserve( std::min( l3.size(), l2.size() ) );
       set_intersection( l2.begin(), l2.end(), l3.begin(), l3.end(), std::back_inserter( t2temp ) );
     }
     const std::vector<int>& t2 = (A::polygonlength == 4) ? t2temp : l2 ;
 
+    est.reserve( std::min( t1size, t2.size() ) );
     set_intersection( t1.begin(), t1.end(), t2.begin(), t2.end(), std::back_inserter( est ) );
     return est;
   }
