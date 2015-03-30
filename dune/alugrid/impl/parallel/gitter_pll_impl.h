@@ -50,6 +50,7 @@ namespace ALUGrid
       virtual LinkedObject::Identifier getIdentifier () const;
 
     protected :
+      bool doSetLinkageSorted ( const std::vector< int >& );
       inline linkagePatternMap_t& linkagePatterns () { return this->indexManagerStorage().linkagePatterns();  }
       const linkagePatternMap_t& linkagePatterns () const { return this->indexManagerStorage().linkagePatterns();  }
       bool doPackLink (const int link, ObjectStream& os );

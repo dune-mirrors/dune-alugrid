@@ -913,6 +913,12 @@ namespace ALUGrid
 
       // return true if item belongs to a 2d grid
       bool is2d() const { return isSet( flagIs2d ); }
+
+      // indicate that vertex is a fake vertex (ie vertex in a 2d grid that is not used)
+      void setFlagFakeVertex() { set( flagNoCoarsen ); }
+
+      // return true if vertex is a fake vertex (ie vertex in a 2d grid that is not used)
+      bool isFakeVertex () const { return isSet( flagNoCoarsen ); }
     };
 
   public :
@@ -1537,7 +1543,6 @@ namespace ALUGrid
         // index manager
         IndexManagerStorageType & _indexManagerStorage; // 8 byte
 
-        //int _idn;
         // the level of creation
         unsigned char _lvl; // 1 byte (adds up to 8)
       public :
