@@ -32,10 +32,15 @@ namespace Dune {
     typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
+    // type of Zoltan HSFC ordering function
+    typedef double zoltan_hsfc_inv_t(Zoltan_Struct *zz, double *coord);
+
     static const int dimension = Coordinate::dimension;
 
     Coordinate lower_;
     Coordinate length_;
+
+    const zoltan_hsfc_inv_t* hsfcInv_;
 
     mutable Zoltan zz_;
 
@@ -46,6 +51,7 @@ namespace Dune {
                                CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
+        hsfcInv_( dimension == 3 ? Zoltan_HSFC_InvHilbert3d : Zoltan_HSFC_InvHilbert2d ),
         zz_( comm )
     {
       // compute length
@@ -62,19 +68,8 @@ namespace Dune {
       for( int d=0; d<dimension; ++d )
         center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
 
-      if( dimension == 3 )
-      {
-        return Zoltan_HSFC_InvHilbert3d(zz_.Get_C_Handle(), &center[ 0 ] );
-      }
-      else if ( dimension == 2 )
-      {
-        return Zoltan_HSFC_InvHilbert2d(zz_.Get_C_Handle(), &center[ 0 ] );
-      }
-      else
-      {
-        DUNE_THROW(NotImplemented,"Zoltan_HSFC_InvHilbert" << dimension << "d not available!");
-        return 0.0;
-      }
+      // return hsfc index in interval [0,1]
+      return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
     }
   };
 
