@@ -28,6 +28,12 @@ namespace ALUGrid
       _moveTo ( 0 )
   {
     doClearLinkage();
+
+    // ident == 0 only appears for the fake vertex in a triangle grid
+    if( (this->indexManagerStorage().dimension() == 2) && (this->ident() == 0) )
+    {
+      this->setFlagFakeVertex();
+    }
   }
 
   template < class A >
@@ -85,17 +91,28 @@ namespace ALUGrid
   template < class A >
   bool VertexPllBaseX< A >::setLinkage ( const std::vector< int >& newLinkage )
   {
+    if( this->isFakeVertex() ) return true;
+
     std::vector< int > lp ( newLinkage );
     std::sort( lp.begin(), lp.end() );
-    return setLinkageSorted( lp );
+    return doSetLinkageSorted( lp );
   }
 
   template < class A >
   bool VertexPllBaseX< A >::setLinkageSorted ( const std::vector< int >& slp )
   {
+    if( this->isFakeVertex() ) return true;
+    return doSetLinkageSorted( slp );
+  }
+
+  template < class A >
+  bool VertexPllBaseX< A >::doSetLinkageSorted ( const std::vector< int >& slp )
+  {
+    alugrid_assert( ! isFakeVertex() );
+
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
-    typename linkagePatternMap_t::iterator pos = _map.find ( slp);
+    typename linkagePatternMap_t::iterator pos = _map.find ( slp );
     _lpn = (pos != _map.end ()) ? pos : _map.insert (make_pair( slp, int(0) )).first;
     ++ (*_lpn).second;
     return true;
@@ -201,9 +218,23 @@ namespace ALUGrid
   template < class A >
   std::vector< int > EdgePllBaseXMacro< A >::estimateLinkage () const
   {
+    const typename Gitter::vertex_STI* v0 = myhedge().myvertex(0);
+    const typename Gitter::vertex_STI* v1 = myhedge().myvertex(1);
+
+    // check for fake vertex to make sure we get the right linkage estimate
+    if( v0->isFakeVertex() )
+      return v1->estimateLinkage ();
+    if( v1->isFakeVertex() )
+      return v0->estimateLinkage ();
+
+    // otherwise compute linkage estimate as usual
     std::vector< int > est;
-    const std::vector< int > l0 ( myhedge ().myvertex(0)->estimateLinkage () );
-    const std::vector< int > l1 ( myhedge ().myvertex(1)->estimateLinkage () );
+    const std::vector< int > l0 ( v0->estimateLinkage () );
+    const std::vector< int > l1 ( v1->estimateLinkage () );
+
+    // reserve memory for est elements
+    est.reserve( std::min( l0.size(), l1.size() ) );
+
     set_intersection( l0.begin(), l0.end(), l1.begin(), l1.end(), std::back_inserter( est ) );
     return est;
   }
@@ -364,14 +395,20 @@ namespace ALUGrid
     // ist, kann man auch einfach aller log. Teilgiternummern in einem
     // Vektor zur"uckgeben. Dann geht die Identifikation eben langsam.
 
-    std::vector< int > t1, t2, est;
+    std::vector< int > t1, t2temp, est;
     const std::vector< int >& l0 ( myhface ().myhedge (0)->estimateLinkage () );
     const std::vector< int >& l1 ( myhface ().myhedge (1)->estimateLinkage () );
     const std::vector< int >& l2 ( myhface ().myhedge (2)->estimateLinkage () );
-    // for tetras we don't need the forth linkage
-    const std::vector< int >& l3 ( (A::polygonlength == 4) ? myhface ().myhedge (3)->estimateLinkage () : l2 );
+
     set_intersection( l0.begin(), l0.end(), l1.begin(), l1.end(), std::back_inserter( t1 ) );
-    set_intersection( l2.begin(), l2.end(), l3.begin(), l3.end(), std::back_inserter( t2 ) );
+    // for tetras we don't need the forth linkage
+    if( A::polygonlength == 4 )
+    {
+      const std::vector< int >& l3 ( (A::polygonlength == 4) ? myhface ().myhedge (3)->estimateLinkage () : l2 );
+      set_intersection( l2.begin(), l2.end(), l3.begin(), l3.end(), std::back_inserter( t2temp ) );
+    }
+    const std::vector<int>& t2 = (A::polygonlength == 4) ? t2temp : l2 ;
+
     set_intersection( t1.begin(), t1.end(), t2.begin(), t2.end(), std::back_inserter( est ) );
     return est;
   }
