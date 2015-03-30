@@ -24,6 +24,18 @@
 #include "diagnostics.hh"
 #include "paralleldgf.hh"
 
+  template <class Grid>
+  inline void printSpaceFillingCurve( const Grid& grid, std::ostream& out )
+  {
+    const auto& gridView = grid.leafGridView();
+    for( auto it = gridView.template begin<0>(), end = gridView.template end<0>();
+         it != end; ++it )
+    {
+      out << (*it).geometry().center() << std::endl;
+    }
+  }
+
+
 // method
 // ------
 void method ( int problem, int startLvl, int maxLvl,
@@ -50,6 +62,12 @@ void method ( int problem, int startLvl, int maxLvl,
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 
   Grid &grid = *gridPtr;
+
+  if( grid.comm().rank() == 0 )
+  {
+    std::ofstream file( "curve.gnu" );
+    printSpaceFillingCurve( grid, file );
+  }
 
 #ifndef BALL
   if ( grid.comm().size() > 1 &&
