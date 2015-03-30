@@ -3,7 +3,7 @@
 GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_SIMPLEX
 #GRIDTYPE = ALUGRID_CONFORM
-GRIDDIM = 3
+GRIDDIM = 2
 
 SUBDIRS = callback loadbalance dgf backuprestore communication testEfficiency
 
