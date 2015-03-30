@@ -15,7 +15,8 @@ namespace Dune
   {
     static GridPtr< Grid > create( const std::string& filename )
     {
-      std::cout << "Reading the grid onto a single processor" << std::endl;
+      if( Grid::dimension > 2 )
+        std::cout << "Reading the grid onto a single processor" << std::endl;
       return GridPtr< Grid >( filename );
     }
   };
