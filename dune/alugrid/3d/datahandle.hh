@@ -63,7 +63,7 @@ namespace ALUGrid
     }
 
     //This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
-    //So we have to adapt things to the user view, that writes it with 
+    //So we have to adapt things to the user view, that writes it with
     // 2,codimension
     // return true if dim,codim combination is contained in data set
     bool contains(int dim, int cd) const
@@ -83,7 +83,7 @@ namespace ALUGrid
         else if (cd == 3)
           return dc_.contains(dimension, 2);
         else
-          return dc_.contains(dimension, cd);        
+          return dc_.contains(dimension, cd);
       }
       //
       else
@@ -358,7 +358,6 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HGhostType & ghost) const
     {
-      std::cout << ghost.is2d() << " ";
       return (dim == 2 ? ghost.is2d() : true) && ghost.isLeafEntity();
     }
 
@@ -435,9 +434,9 @@ namespace ALUGrid
     }
 
   };
-  
+
   //! the corresponding interface class is defined in bsinclude.hh
-  // this class is for the 2d grid - it masks out the edgeGatherScatter  
+  // this class is for the 2d grid - it masks out the edgeGatherScatter
   template <class GridType, class DataCollectorType , int codim >
   class GatherScatterNoData
   : public GatherScatterBaseImpl<GridType,DataCollectorType,codim>
@@ -476,14 +475,14 @@ namespace ALUGrid
     GatherScatterNoData(const GridType & grid, MakeableEntityType & en,
         RealEntityType & realEntity , DataCollectorType & dc,
         const LevelIndexSetImp & levelSet, const int level)
-      : BaseType(grid,en,realEntity,dc) 
+      : BaseType(grid,en,realEntity,dc)
     {
     }
-    
+
     //! Leaf Constructor
     GatherScatterNoData(const GridType & grid, MakeableEntityType & en,
         RealEntityType & realEntity , DataCollectorType & dc)
-      : BaseType(grid,en,realEntity,dc) 
+      : BaseType(grid,en,realEntity,dc)
     {
     }
 
@@ -492,13 +491,13 @@ namespace ALUGrid
     {
       return false;
     }
-    
+
     // returns true, if element is contained in set of comm interface
     bool containsItem (const RealHElementType & elem) const
     {
       return false;
     }
-    
+
     // set elem to realEntity
     void setElement(const HElementType & elem)
     {
@@ -848,7 +847,7 @@ namespace ALUGrid
         else if (cd == 3)
           return dataHandle_.contains(dimension, 2);
         else
-          return dataHandle_.contains(dimension, cd);        
+          return dataHandle_.contains(dimension, cd);
       }
       //
       else
