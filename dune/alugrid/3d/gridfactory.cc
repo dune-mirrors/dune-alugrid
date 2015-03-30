@@ -505,7 +505,7 @@ namespace Dune
     const size_t boundarySegments = boundaryIds_.size();
 
     const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 )
+    if( bndProjectionSize > 0 || (globalProjection_ && dimension == 2) )
     {
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
