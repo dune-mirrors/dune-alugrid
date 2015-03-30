@@ -75,7 +75,7 @@ namespace Dune
         if(vertices_.size() == 0)
         {
           vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
-          vertices_.push_back( std::make_pair( pos, globalId+1 ) );
+          vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
         }
         //setting the global id to odd is convenience
         //we are then able to set the is2d() flag in the
