@@ -68,7 +68,6 @@ namespace Dune {
       }
       else if ( dimension == 2 )
       {
-        std::cout << "2 dim version of hsfc" << std::endl;
         return Zoltan_HSFC_InvHilbert2d(zz_.Get_C_Handle(), &center[ 0 ] );
       }
       else
