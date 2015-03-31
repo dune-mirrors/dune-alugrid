@@ -1072,8 +1072,8 @@ namespace ALUGrid
         {
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
           int idx = item->getIndex();
-          //For the 2d grid do not write non-2d items in ghost list
-          if( GridImp::dimension == 2 && !(item->is2d()) ) continue;
+          //For the 2d grid do not write non-2d vertices in ghost list
+          if( GridImp::dimension == 2 && codim == 3 && !(item->is2d())  ) continue;
           if( visited.find(idx) == visitedEnd )
           {
             ghList.getItemList().push_back( (void *) item );
