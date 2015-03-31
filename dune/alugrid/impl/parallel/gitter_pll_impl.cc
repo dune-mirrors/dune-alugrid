@@ -108,7 +108,7 @@ namespace ALUGrid
   template < class A >
   bool VertexPllBaseX< A >::doSetLinkageSorted ( const std::vector< int >& slp )
   {
-    alugrid_assert( ! isFakeVertex() );
+    alugrid_assert( ! this->isFakeVertex() );
 
     -- (*_lpn).second;
     linkagePatternMap_t& _map = linkagePatterns();
