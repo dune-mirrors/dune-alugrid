@@ -87,7 +87,8 @@ namespace ALUGrid
 
           ++count;
         }
-        alugrid_assert ( ghost->getrule().bisection() ? count == 2 : count == 4);
+        //this assert fails for 2d, because iso2 is not a bisection refinement
+        alugrid_assert ( (ghost->getrule().bisection() || ghost->is2d() ) ? count == 2 : count == 4);
       }
     }
   }

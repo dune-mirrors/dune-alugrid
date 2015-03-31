@@ -1299,16 +1299,13 @@ namespace ALUGrid
         std::cout << "Neighbour(type="<<hexa->isInterior() << ") " << fce << " of Hexa " << hexa->getIndex()  << " is wrong " << std::endl;
         std::cout << "Check face " << hexa->myhface4( fce ) ;
       }
-      //if( fce > 1)
-       // if( hexa->myhface(fce)->myvertex(1)->Point()[2] != 1 && hexa->myhface(fce)->myvertex(2)->Point()[2])
-       // std::cout << "Local face: " << fce << "of Hexa" << hexa->getIndex() << hexa->myhface(fce) << "is not fake 2d" << std::endl;
       // make sure neighbor is something meaningful
-      alugrid_assert ( hexa->myneighbour( fce ).first->isRealObject() );
+      //alugrid_assert ( hexa->myneighbour( fce ).first->isRealObject() );
 
     }
 
     // make sure we have only 8 different vertices
-  //  alugrid_assert ( verticesFound.size() == 8 );
+    alugrid_assert ( verticesFound.size() == 8 );
 
     return twistOk;
   }
