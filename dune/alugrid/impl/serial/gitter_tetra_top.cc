@@ -1971,6 +1971,7 @@ namespace ALUGrid
     innertetra_t * h3 = new innertetra_t (l, subface(0, 3), twist(0) < 0 ? twist(0)%3-1 : twist(0), f2, 0, f1, 0, f0, 0, this, 3 , childVolume) ;
 
 #ifdef ALUGRIDDEBUG
+    //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
    // std::cout << h0 ;
     checkTetra(h0,0);
    // std::cout << h1 ;

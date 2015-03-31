@@ -907,6 +907,7 @@ namespace ALUGrid
 
     alugrid_assert (h0 && h1 && h2 && h3 );
 
+    //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
     alugrid_assert( checkHexa( h0, 0 ) );
     alugrid_assert( checkHexa( h1, 1 ) );
     alugrid_assert( checkHexa( h2, 2 ) );
