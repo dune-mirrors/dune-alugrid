@@ -1511,7 +1511,7 @@ namespace ALUGrid
         // return coordinates of vertex
         const alucoord_t (& Point () const) [3] { return _c; }
         // return level of vertex
-        int level () const { return _lvl; }
+        int level () const { return lvl(); }
 
         // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
         virtual void project(const ProjectVertexPair &pv);
@@ -1543,11 +1543,14 @@ namespace ALUGrid
         // index manager
         IndexManagerStorageType & _indexManagerStorage; // 8 byte
 
+        // use the refcount from DuneIndexProvider for level storage (to avoid +8 byte)
         // the level of creation
-        unsigned char _lvl; // 1 byte (adds up to 8)
+        unsigned char& lvl() { return DuneIndexProvider::ref._c; }
+        const unsigned char lvl() const { return DuneIndexProvider::ref._c; }
       public :
-        // reference counter
-        using DuneIndexProvider::ref; // 8 byte from DuneIndexProvider + 8 vtable = 56 byte
+        // reference counter (here unsigned int to avoid overflow)
+        RefcountUnsignedInt ref;
+        //using DuneIndexProvider::ref; // 8 byte from DuneIndexProvider + 8 vtable = 56 byte
       } vertex_GEO;
 
       typedef class hedge1 : public hedge_STI , public MyAlloc
@@ -2709,65 +2712,6 @@ namespace ALUGrid
     return std::pair< int, int > (a.first += b.first, a.second += b.second);
   }
 
-#ifdef ALUGRIDDEBUG
-#ifdef DEBUG_ALUGRID
-  inline Refcount::Globalcount::Globalcount () : _c (0) {
-    return;
-  }
-
-  inline void Refcount::Globalcount::operator ++ (int) const {
-    // ! cast around const
-    ++ (int &) _c;
-    return;
-  }
-
-  inline void Refcount::Globalcount::operator -- (int) const {
-    -- (int &) _c;
-    return;
-  }
-
-  inline Refcount::Refcount () : _c (0) {
-    _g ++;
-    return;
-  }
-
-  inline Refcount::~Refcount () {
-    _g --;
-    return;
-  }
-#else // else DEBUG_ALUGRID
-  inline Refcount::Refcount () : _c (0) { return; }
-  inline Refcount::~Refcount () {  return;}
-#endif
-#else
-  inline Refcount::Refcount () : _c (0) { return; }
-  inline Refcount::~Refcount () {  return;}
-#endif
-
-  inline int Refcount::operator ++ (int) const {
-    return _c++;
-  }
-
-  inline int Refcount ::operator ++ () const {
-    return ++_c;
-  }
-
-  inline int Refcount::operator -- (int) const {
-    return _c--;
-  }
-
-  inline int Refcount::operator -- () const {
-    return --_c;
-  }
-
-  inline bool Refcount::operator ! () const {
-    return !_c;
-  }
-
-  inline Refcount::operator int () const {
-    return _c;
-  }
-
   //////////////////////////////////////////////////////////////////
   //
   // Empty Iterator
@@ -3152,8 +3096,8 @@ namespace ALUGrid
 
   inline Gitter::Geometric::VertexGeo::VertexGeo (int l, double x, double y, double z, IndexManagerStorageType & ims)
     : _indexManagerStorage (ims)
-    , _lvl (l)
   {
+    lvl() = l;
     _c [0] = x; _c [1] = y; _c [2] = z;
     this->setIndex( indexManager().getIndex() );
     //cout << "Create " << this << endl;
@@ -3162,8 +3106,8 @@ namespace ALUGrid
 
   inline Gitter::Geometric::VertexGeo::VertexGeo (int l, double x, double y, double z, VertexGeo & vx)
     : _indexManagerStorage ( vx._indexManagerStorage )
-    , _lvl (l)
   {
+    lvl() = l;
     _c [0] = x; _c [1] = y; _c [2] = z;
     this->setIndex( indexManager().getIndex() );
     //cout << "Create " << this << endl;
