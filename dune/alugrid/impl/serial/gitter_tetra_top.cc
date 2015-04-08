@@ -1973,13 +1973,13 @@ namespace ALUGrid
 #ifdef ALUGRIDDEBUG
     //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
    // std::cout << h0 ;
-    checkTetra(h0,0);
+    //checkTetra(h0,0);
    // std::cout << h1 ;
-    checkTetra(h1,1);
+    //checkTetra(h1,1);
    // std::cout << h2;
-    checkTetra(h2,2);
+    //checkTetra(h2,2);
    // std::cout << h3;
-    alugrid_assert(checkTetra(h3,3));
+    //alugrid_assert(checkTetra(h3,3));
 #endif
 
 
