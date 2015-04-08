@@ -1,16 +1,11 @@
 Features of old 2d grid, that do not yet work:
 
-BoundaryProjections and FaceTransformations
+FaceTransformations
 Periodic Grids
-Correct RefinementEdge
-
-
 
 Improvements to the parallel 2d grid:
 
-Disable linkage creation for super Vertex 
 Test parallel reading of mesh files
-
 
 Other:
 
