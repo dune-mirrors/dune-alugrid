@@ -50,7 +50,6 @@ namespace Dune
     vxList.resize(0);
 
     const ALU3dGridElementType elType = GridType:: elementType;
-    const int dim = GridType:: dimension;
 
     typedef ALU3DSPACE ALU3dGridLevelIteratorWrapper< 0, Dune::All_Partition, Comm > ElementLevelIteratorType;
     typedef typename ElementLevelIteratorType :: val_t val_t;

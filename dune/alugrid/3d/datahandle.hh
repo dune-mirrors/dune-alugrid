@@ -358,7 +358,9 @@ namespace ALUGrid
     // returns true, if element is contained in set of comm interface
     bool containsItem (const HGhostType & ghost) const
     {
-      return (dim == 2 ? ghost.is2d() : true) && ghost.isLeafEntity();
+      //in 2d ghosts are always 2d, as they are codim 0
+      //so we do not need to adapt the switch
+      return ghost.isLeafEntity();
     }
 
     // returns true, if interior element is contained in set of comm interface
