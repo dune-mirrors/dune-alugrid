@@ -667,13 +667,14 @@ namespace Dune {
       alugrid_assert ( creatorId.isValid() );
 
       // we have up to 12 internal hexa faces, therefore need 100 offset
-      enum { childOffSet = ((cd == 1) && (elType == hexa)) ? 16 : 8 };
+      enum { childOffSet = (dim == 2) ? 4 : ((cd == 1) && (elType == hexa)) ? 16 : 8 };
       enum { codimOffSet = 4 };
 
       alugrid_assert ( nChild < childOffSet );
 
       int newChild = (creatorId.nChild() * childOffSet ) + nChild;
-      int newCodim = (creatorId.codim()  * codimOffSet ) + ( cd + startOffSet_ );
+      int level = ((creatorId.codim()-startOffSet_)/codimOffSet) +1;
+      int newCodim = (codimOffSet * level  + cd +startOffSet_);
 
       IdType newId( creatorId.getKey() , newChild , newCodim );
       alugrid_assert ( newId != creatorId );
