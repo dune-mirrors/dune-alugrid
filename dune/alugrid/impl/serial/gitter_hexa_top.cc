@@ -430,7 +430,7 @@ namespace ALUGrid
         // sich selbst, weil die Anforderung durch die Fl"ache kam, und
         // dahinter keine Balancierung stattfinden muss.
 
-        myhface_t& face (*(myhface(0));
+        myhface4_t& face (*(myhface4(0)));
         // refine face
         face.refineImmediate (r);
         // refine myself
@@ -494,21 +494,23 @@ namespace ALUGrid
         switch (r)
         {
         case balrule_t::iso4 :
-          myhface4_t & face (*(myhface4 (0)));
-          if (! face.refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
+          {
+            myhface4_t &face (*(myhface4 (0)));
+            if (! face.refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
 
-          // call refinement method
-          if( face.is2d())
-            splitISO2 ();
-          else
-            splitISO4 ();
+            // call refinement method
+            if( face.is2d())
+              splitISO2 ();
+            else
+              splitISO4 ();
 
-          // postRefinement () gibt die M"oglichkeit auf dem Niveau des
-          // Template-Arguments eine Methode aufzurufen, um eventuelle
-          // Operationen auf dem verfeinerten Randst"uck aufzurufen.
-          this->postRefinement ();
+            // postRefinement () gibt die M"oglichkeit auf dem Niveau des
+            // Template-Arguments eine Methode aufzurufen, um eventuelle
+            // Operationen auf dem verfeinerten Randst"uck aufzurufen.
+            this->postRefinement ();
 
-          return true;
+            return true;
+          }
 
         default:
           std::cerr << "WARNING (ignored): Invalid refinement rule [" << r << "]." << std::endl;
@@ -525,19 +527,18 @@ namespace ALUGrid
     // bestehenden Fl"achenbaum wiederherzustellen durch die
     // entsprechende Verfeinerung.
 
-    myhface4_t & f (*(myhface4 (0)));
-    if (!f.leaf ())
+    myhface4_t & face (*(myhface4 (0)));
+    if (! face.leaf ())
     {
-      balrule_t r = f.getrule ();
+      balrule_t r = face.getrule ();
       switch (r)
       {
       case myrule_t::iso4:
-        if( f.is2d())
+        if( face.is2d())
           splitISO2 ();
         else
           splitISO4 ();
         break;
-
 
       default:
         std::cerr << "ERROR (fatal): Cannot apply refinement rule " << r << " on boundary segment." << std::endl;

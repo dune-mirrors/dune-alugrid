@@ -905,7 +905,7 @@ namespace ALUGrid
     _nChild(0)
   {
     this->setIndexAnd2dFlag( indexManager() );
-    if( !( e0->is2d() ) ) this->reset2dFlag();    
+    if( !( e0->is2d() ) ) this->reset2dFlag();
   }
 
   template < class A > inline Hface4Top < A >::Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1,
