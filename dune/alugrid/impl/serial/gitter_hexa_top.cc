@@ -430,13 +430,14 @@ namespace ALUGrid
         // sich selbst, weil die Anforderung durch die Fl"ache kam, und
         // dahinter keine Balancierung stattfinden muss.
 
+        myhface_t& face (*(myhface(0));
         // refine face
-        myhface4 (0)->refineImmediate (r);
+        face.refineImmediate (r);
         // refine myself
-        if(myhface4(0)->is2d())
-          splitISO2() ;
+        if( face.is2d() )
+          splitISO2();
         else
-          splitISO4 ();
+          splitISO4();
       }
       else
       {
@@ -493,10 +494,11 @@ namespace ALUGrid
         switch (r)
         {
         case balrule_t::iso4 :
-          if (! myhface4 (0)->refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
+          myhface4_t & face (*(myhface4 (0)));
+          if (! face.refine(balrule_t (balrule_t::iso4).rotate (twist (0)), twist (0))) return false;
 
           // call refinement method
-          if(myhface4(0)->is2d())
+          if( face.is2d())
             splitISO2 ();
           else
             splitISO4 ();
@@ -530,7 +532,7 @@ namespace ALUGrid
       switch (r)
       {
       case myrule_t::iso4:
-        if(myhface4(0)->is2d())
+        if( f.is2d())
           splitISO2 ();
         else
           splitISO4 ();
@@ -542,6 +544,7 @@ namespace ALUGrid
         abort();
         break;
       }
+
       // do post refinement
       this->postRefinement();
       for( innerbndseg_t *b = down(); b; b = b->next() )
@@ -685,7 +688,7 @@ namespace ALUGrid
     myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
-            ( myhface4(i)->is2d() ) ?
+            ( face->is2d() ) ?
               ((twist(i) < 0) ? face->subface((j+1)%2): face->subface(j) )
               : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
               (abort (), (myhface4_t *)0);
@@ -697,7 +700,7 @@ namespace ALUGrid
     const myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
-            ( myhface4(i)->is2d() ) ?
+            ( face->is2d() ) ?
               ((twist(i) < 0) ? face->subface((j+1)%2): face->subface(j) )
               : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
               (abort (), (myhface4_t *)0);
@@ -1578,7 +1581,7 @@ namespace ALUGrid
           {
           case balrule_t::iso4:
             {
-              const int nSubFaces = myhface4(0)->is2d() ? 2 : 4;
+              const int nSubFaces = f.is2d() ? 2 : 4;
               for( int j = 0; j < nSubFaces; ++j )
                 f.subface( j )->nb.complete( f.nb );
               break;
