@@ -260,46 +260,22 @@ namespace ALUGrid
       {
         case myrule_t::iso4:
         {
-          if(!this->is2d())
+          const bool a = (twist < 0)
+                  ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
+                  : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
+          if( a )
           {
-            const bool a = (twist < 0)
-                    ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                    : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
-            if( a )
+            if( getrule() == myrule_t::nosplit )
             {
-              if( getrule() == myrule_t::nosplit )
-              {
-                refineImmediate( r );
-                // assign my neighbor info to child faces for initialization
-                for( innerface_t *f = dwnPtr(); f; f = f->next() )
-                  f->nb.assign( this->nb );
-              }
-              else
-                alugrid_assert ( getrule() == myrule_t::iso4 );
+              refineImmediate( r );
+              // assign my neighbor info to child faces for initialization
+              for( innerface_t *f = dwnPtr(); f; f = f->next() )
+                f->nb.assign( this->nb );
             }
-            return a;
+            else
+              alugrid_assert ( getrule() == myrule_t::iso4 );
           }
-          else if(this->is2d())
-          {
-
-            const bool a = (twist < 0)
-                    ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
-                    : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
-
-            if( a )
-            {
-              if( getrule() == myrule_t::nosplit )
-              {
-                refineImmediate( r );
-                // assign my neighbor info to child faces for initialization
-                for( innerface_t *f = dwnPtr(); f; f = f->next() )
-                  f->nb.assign( this->nb );
-              }
-              else
-                alugrid_assert ( getrule() == myrule_t::iso4 );
-            }
-            return a;
-          }
+          return a;
         }
         default :
           std::cerr << "WARNUNG (ignored): Invalid refinement rule [" << r << "]" << std::endl;
@@ -309,7 +285,8 @@ namespace ALUGrid
     return true;
   }
 
-  template< class A > bool Hface4Top < A >::coarse () {
+  template< class A > bool Hface4Top < A >::coarse ()
+  {
     innerface_t * f = down();
     if (!f) return false;
     bool x = true;
@@ -328,17 +305,18 @@ namespace ALUGrid
         x = false;
       }
     } while ( (f = f->next()) );
-    if (x) {
 
-    // Hier wird tats"achlich vergr"obert, d.h. alle Kinder
-    // werden beseitigt, und das Bezugsobjekt wird zum neuen
-    // Blatt im Baum.
+    if (x)
+    {
+      // Hier wird tats"achlich vergr"obert, d.h. alle Kinder
+      // werden beseitigt, und das Bezugsobjekt wird zum neuen
+      // Blatt im Baum.
 
       delete _inner;
       _inner = 0;
 
       _rule = myrule_t::nosplit;
-      {for (int i = 0; i < 4; i ++ ) myhedge (i)->coarse (); }
+      {for (int i = 0; i < 4; ++i ) myhedge (i)->coarse (); }
     }
     return x;
   }
