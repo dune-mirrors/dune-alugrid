@@ -419,7 +419,7 @@ namespace Dune
     {
       // reset size and things
       // maxLevel does not need to be recalculated
-      calcExtras();
+      calcExtras( true );
 
       // build new Id Set. Only do that after calcExtras, because here
       // the item lists are needed
