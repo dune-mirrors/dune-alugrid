@@ -350,7 +350,7 @@ namespace Dune
   // --calcExtras
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   alu_inline
-  void ALU3dGrid< dim, dimworld, elType, Comm >::calcExtras ()
+  void ALU3dGrid< dim, dimworld, elType, Comm >::calcExtras ( const bool recomputeMacroIndexSet )
   {
     // make sure maxLevel is the same on all processes ????
     //alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));
@@ -378,16 +378,26 @@ namespace Dune
       }
     }
 
+    if( recomputeMacroIndexSet && levelIndexVec_[0])
+    {
+      (*(levelIndexVec_[0])).calcNewIndex( this->template lbegin<0>( 0 ),
+                                           this->template lend<0>( 0 ) );
+    }
+
     // update all index set that are already in use
-    for(size_t i=0; i<levelIndexVec_.size(); ++i)
+    for(size_t i=1; i<levelIndexVec_.size(); ++i)
     {
       if(levelIndexVec_[i])
+      {
         (*(levelIndexVec_[i])).calcNewIndex( this->template lbegin<0>( i ),
                                              this->template lend<0>( i ) );
+      }
     }
 
     if(leafIndexSet_)
+    {
       leafIndexSet_->calcNewIndex( this->template leafbegin<0>(), this->template leafend<0>() );
+    }
 
     // build global ID set new (to be revised)
     if( globalIdSet_ ) globalIdSet_->updateIdSet();

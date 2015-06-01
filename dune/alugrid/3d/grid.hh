@@ -1136,7 +1136,7 @@ namespace Dune
     const ThisType &operator= ( const ThisType & );
 
     //! reset size and global size, update Level- and LeafIndexSet, if they exist
-    void calcExtras();
+    void calcExtras( const bool recomputeMacroIndexSet = false );
 
     //! calculate maxlevel
     void calcMaxLevel();
@@ -1200,7 +1200,7 @@ namespace Dune
     // return true if ghost cells are available
     bool ghostCellsEnabled () const
     {
-      return myGrid().ghostCellsEnabled();
+      return comm().size() > 1 && myGrid().ghostCellsEnabled();
     }
 
     //! return current thread number
