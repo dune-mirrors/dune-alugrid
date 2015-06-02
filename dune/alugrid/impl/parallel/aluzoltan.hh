@@ -313,7 +313,7 @@ namespace ALUGridZoltan
 #if HAVE_PARMETIS
       if (method == PARMETIS)
         zz->Set_Param( "GRAPH_PACKAGE","PARMETIS");
-#elif HAVE_SCOTCH
+#elif defined(HAVE_SCOTCH)
       zz->Set_Param( "GRAPH_PACKAGE","SCOTCH");
 #endif
       zz->Set_Param( "CHECK_GRAPH", "0");
