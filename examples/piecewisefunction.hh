@@ -594,7 +594,8 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
   //! evaluate function (comp<ncomps) on entity for local coordinate xi
   double evaluate ( int comp, const Entity &e, const DomainType &xi ) const
   {
-    return data_[ e ][ comp ];
+    assert( comp < ncomps() );
+    return data_[ e ][ comp_ ];
   }
 
   //! name for this function
@@ -606,23 +607,23 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
   }
 
   //! add a PiecewiseFunction to the VTKWriter
-  static void addTo ( const Data &data, Dune::VTKWriter< GridView > &vtkWriter )
+  static void addTo ( const Data &data, Dune::VTKSequenceWriter< GridView > &vtkWriter )
   {
     /* the vtk-Writer class takes ownership of the function added - VTKData
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
       vtkWriter.addCellData( new This( data, i, "data" ) );
   }
-  //! add a PiecewiseFunction to the VTKWriter
-  static void addTo ( const Data &data, const std::string &name, Dune::VTKWriter< GridView > &vtkWriter )
+  //! add a PiecewiseFunction to the VTKSequenceWriter
+  static void addTo ( const Data &data, const std::string &name, Dune::VTKSequenceWriter< GridView > &vtkWriter )
   {
     /* the vtk-Writer class takes ownership of the function added - VTKData
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
-      vtkWriter.addCellData( new This( data, i,name ) );
+      vtkWriter.addCellData( new This( data, i, name ) );
   }
   //! add rank function for visualization of the partitioning
-  static void addPartitioningData( const int rank, Dune::VTKWriter< GridView > &vtkWriter )
+  static void addPartitioningData( const int rank, Dune::VTKSequenceWriter< GridView > &vtkWriter )
   {
     vtkWriter.addCellData( new VolumeData< GridView >() );
     vtkWriter.addCellData( new PartitioningData< GridView >(rank) );
