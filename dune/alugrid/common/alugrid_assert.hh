@@ -2,28 +2,22 @@
 #define ALUGRID_ASSERT_HH
 
 #include <cassert>
-#include "duneassert.hh"
-
-#define ALUGRIDDEBUG
-#define alugrid_assert(EX) assert((EX))
-#if 0
 
 // this is only of interest when NDEBUG is not set
 // NOTE: defining NO_ALUGRID_DEBUG will disable all ALUGrid asserts
 #ifndef NDEBUG
 
 // enable ALUGrid debug mode by default unless NO_ALUGRID_DEBUG is set
-#if defined(NO_ALUGRID_DEBUG) && defined(ALUGRIDDEBUG)
-#undef ALUGRIDDEBUG
+#ifndef NO_ALUGRID_DEBUG
+#define ALUGRIDDEBUG
 #endif
 
 #endif // NDEBUG
 
 #ifndef ALUGRIDDEBUG
-# define alugrid_assert(EX) (static_cast<void>(0)) // ((void)sizeof(EX))
+# define alugrid_assert(EX) (static_cast<void>(0))
 #else
-# define alugrid_assert(EX) dune_assert(EX)
-#endif
+# define alugrid_assert(EX) assert(EX)
 #endif
 
 #endif // ALUGRID_ASSERT_HH
