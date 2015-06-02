@@ -37,6 +37,4 @@ aluthreadsafety_LDFLAGS = $(AM_LDFLAGS) -fopenmp
 
 include $(top_srcdir)/am/global-rules
 
-CXXFLAGS=-g 
-
 CLEANFILES=file.*
