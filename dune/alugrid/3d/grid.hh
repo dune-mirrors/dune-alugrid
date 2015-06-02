@@ -82,8 +82,6 @@ namespace Dune
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild>
   class ALULocalGeometryStorage;
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  struct ALU3dGridCommHelper;
 
 
 
@@ -362,13 +360,19 @@ namespace Dune
         typedef Dune::Geometry< dim-cd, dimworld, const Grid, ALU3dGridGeometry > Geometry;
         typedef Dune::Geometry< dim-cd, dim, const Grid, ALU3dGridGeometry > LocalGeometry;
 
-        typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;
+        typedef ALU3dGridEntity< cd, dim, const Grid > EntityImp;
+        typedef Dune::Entity< cd, dim, const Grid, EntityImp > Entity;
 
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
+        typedef EntityImp EntityPointerImpl;
+        typedef Entity    EntityPointer;
+#else
         typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
         typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
+#endif
 
         template< PartitionIteratorType pitype >
         struct Partition
@@ -485,8 +489,6 @@ namespace Dune
 
     friend class Conversion< ThisType, HasHierarchicIndexSet >;
     friend class Conversion< const ThisType, HasHierarchicIndexSet >;
-
-    friend struct ALU3dGridCommHelper< dim, dimworld, elType, Comm >;
 
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
