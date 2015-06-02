@@ -1,4 +1,5 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
+#define DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE 1
 
 #include <config.h>
 
@@ -646,7 +647,7 @@ int main (int argc , char **argv) {
         grid.loadBalance();
         checkCapabilities< false >( grid );
         checkALUSerial( grid, 2, display, filename.substr(6));
-        
+
          // perform parallel check only when more then one proc
         if(mysize > 1)
         {
