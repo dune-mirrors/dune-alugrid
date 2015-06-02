@@ -105,21 +105,6 @@ namespace Dune
         level_( level )
     {}
 
-    // use default implementation of copy constructor and assignment operator
-#if 0
-    ALU3dLevelGridView ( const ThisType &other )
-      : grid_( other.grid_ ),
-        level_( other.level_ )
-    {}
-
-    /** \brief assignment from other GridView on the same grid */
-    ThisType &operator= ( const ThisType & other)
-    {
-      grid_ = other.grid_;
-      level_ = other.level_;
-    }
-#endif
-
     /** \brief obtain a const reference to the underlying hierarchic grid */
     const Grid &grid () const
     {
@@ -177,14 +162,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ilevelbegin();
+      return grid().ilevelbegin( entity );
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ilevelend();
+      return grid().ilevelend( entity );
     }
 
     /** \brief obtain collective communication object */
@@ -370,14 +355,14 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ileafbegin();
+      return grid().ileafbegin( entity );
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ileafend();
+      return grid().ileafend( entity );
     }
 
     /** \brief obtain collective communication object */

@@ -361,7 +361,7 @@ namespace Dune
         typedef Dune::Geometry< dim-cd, dim, const Grid, ALU3dGridGeometry > LocalGeometry;
 
         typedef ALU3dGridEntity< cd, dim, const Grid > EntityImp;
-        typedef Dune::Entity< cd, dim, const Grid, EntityImp > Entity;
+        typedef Dune::Entity< cd, dim, const Grid, ALU3dGridEntity > Entity;
 
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
@@ -677,6 +677,41 @@ namespace Dune
     typename Traits::template Codim<cd>::
     template Partition<All_Partition>::LevelIterator
     lend (int level) const;
+
+    typedef LeafIntersectionIteratorWrapper  < const ThisType > LefInterItWrapperType;
+    typedef LevelIntersectionIteratorWrapper < const ThisType > LvlInterItWrapperType;
+
+    typename Traits::LeafIntersectionIterator
+    ileafbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
+    {
+      return LefInterItWrapperType( factory(),
+                                    getRealImplementation( entity ),
+                                    entity.level(), false );
+    }
+
+    typename Traits::LeafIntersectionIterator
+    ileafend( const typename Traits::template Codim< 0 >::Entity& entity ) const
+    {
+      return LefInterItWrapperType( factory(),
+                                    getRealImplementation( entity ),
+                                    entity.level(), true );
+    }
+
+    typename Traits::LevelIntersectionIterator
+    ilevelbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
+    {
+      return LvlInterItWrapperType( factory(),
+                                    getRealImplementation( entity ),
+                                    entity.level(), false );
+    }
+
+    typename Traits::LevelIntersectionIterator
+    ilevelend( const typename Traits::template Codim< 0 >::Entity& entity ) const
+    {
+      return LvlInterItWrapperType( factory(),
+                                    getRealImplementation( entity ),
+                                    entity.level(), true );
+    }
 
   private:
     //! General definiton for a leaf iterator
