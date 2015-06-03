@@ -1,4 +1,4 @@
-#ifndef DUNE_ASSERY_HH
+#ifndef DUNE_ASSERT_HH
 #define DUNE_ASSERT_HH
 
 #include <cstdlib>
