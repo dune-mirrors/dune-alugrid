@@ -30,9 +30,6 @@ namespace Dune
     , globalIdSet_( 0 )
     , localIdSet_( *this )
     , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-    , referenceElement_( elType == tetra
-        ? ReferenceElements< alu3d_ctype, dimension > :: simplex()
-        : ReferenceElements< alu3d_ctype, dimension > :: cube() )
     , sizeCache_ ( 0 )
     , factory_( *this )
     , lockPostAdapt_( false )
@@ -41,7 +38,6 @@ namespace Dune
     , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
-    , nonConformingGeoInFatherStorage_( makeGeometries() )
   {
     // check macro grid file for keyword
     checkMacroGridFile( macroTriangFilename );
@@ -60,7 +56,7 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  const typename ALU3dGrid< dim, dimworld, elType, Comm >::GeometryInFatherStorage&
+  void
   ALU3dGrid< dim, dimworld, elType, Comm >::makeGeometries()
   {
     alugrid_assert ( elType == tetra || elType == hexa );
@@ -83,12 +79,7 @@ namespace Dune
     ALU3dGridGeometry< 1, dimension, const ThisType> :: geoProvider();
     ALU3dGridGeometry< 2, dimension, const ThisType> :: geoProvider();
     ALU3dGridGeometry< dimension, dimension, const ThisType> :: geoProvider();
-
-    // return non-conforming geometryInFather storage
-    // true == non-conforming
-    return GeometryInFatherStorage :: storage( geomTypes_[ 0 ][ 0 ], true );
   }
-
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   inline int ALU3dGrid< dim, dimworld, elType, Comm >::global_size ( int codim ) const

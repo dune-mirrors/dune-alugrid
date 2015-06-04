@@ -5,8 +5,6 @@
 #include <vector>
 
 //- Dune includes
-#include <dune/common/version.hh>
-
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
@@ -1110,15 +1108,27 @@ namespace Dune
     }
 
     //! return reference to Dune reference element according to elType
-    const ReferenceElementType & referenceElement() const { return referenceElement_; }
+    static const ReferenceElementType & referenceElement()
+    {
+      return ( elType == tetra ) ?
+          ReferenceElements< alu3d_ctype, dimension > :: simplex()
+        : ReferenceElements< alu3d_ctype, dimension > :: cube();
+    }
 
     template < class EntitySeed >
     typename Traits :: template Codim< EntitySeed :: codimension > :: EntityPointer
     entityPointer( const EntitySeed& seed ) const
     {
       enum { codim = EntitySeed :: codimension };
-      typedef ALU3dGridEntityPointer < codim, const ThisType > ALUPointer ;
-      return ALUPointer( factory(), seed ) ;
+      return typename Traits :: template Codim< codim > :: EntityPointerImpl( seed );
+    }
+
+    template < class EntitySeed >
+    typename Traits :: template Codim< EntitySeed :: codimension > :: Entity
+    entity( const EntitySeed& seed ) const
+    {
+      typedef typename Traits :: template Codim< EntitySeed :: codimension > :: Entity  Entity;
+      return Entity( typename Traits :: template Codim< EntitySeed :: codimension > :: EntityImp( seed ) );
     }
 
     // number of links to other processors, for internal use only
@@ -1177,7 +1187,7 @@ namespace Dune
     const ThisType &operator= ( const ThisType & );
 
     //! reset size and global size, update Level- and LeafIndexSet, if they exist
-    void calcExtras( const bool recomputeMacroIndexSet = false );
+    void calcExtras( const bool recomputeMacroIndexSet = false  );
 
     //! calculate maxlevel
     void calcMaxLevel();
@@ -1213,12 +1223,8 @@ namespace Dune
       return *communications_;
     }
 
-    // geometry in father storage
-    typedef ALULocalGeometryStorage< const ThisType, typename Traits::template Codim< 0 >::LocalGeometryImpl, 8 > GeometryInFatherStorage ;
-    // return geometryInFather for non-conforming grids
-    const GeometryInFatherStorage& nonConformingGeometryInFatherStorage() const { return nonConformingGeoInFatherStorage_; }
     // initialize geometry types and return correct geometryInFather storage
-    const GeometryInFatherStorage& makeGeometries();
+    void makeGeometries();
 
   public:
     const GridObjectFactoryType &factory () const { return factory_; }
@@ -1285,9 +1291,6 @@ namespace Dune
     // the leaf index set
     mutable LeafIndexSetImp * leafIndexSet_;
 
-    // the reference element
-    const ReferenceElementType& referenceElement_;
-
     mutable VertexListType vertexList_[MAXL];
 
     //the ghostleaf list is used in alu3diterators, where we use the internal aluIterators
@@ -1322,9 +1325,6 @@ namespace Dune
 
     // refinement type (nonconforming or conforming)
     const ALUGridRefinementType refinementType_ ;
-
-    // local geometry storage for geometries in father
-    const GeometryInFatherStorage& nonConformingGeoInFatherStorage_ ;
   }; // end class ALU3dGrid
 
 
