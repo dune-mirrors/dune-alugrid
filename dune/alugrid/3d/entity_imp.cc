@@ -508,7 +508,7 @@ namespace Dune {
 
   // Adaptation methods
   template<int dim, class GridImp>
-  bool ALU3dGridEntity<0,dim,GridImp> :: mark (const GridImp& grid, const int ref ) const
+  bool ALU3dGridEntity<0,dim,GridImp> :: mark ( const int ref, const bool conformingRefinement ) const
   {
     alugrid_assert (item_ != 0);
 
@@ -531,7 +531,7 @@ namespace Dune {
     {
       // for tetrahedral elements check whether to use bisection
       if( GridImp :: elementType == tetra &&
-          grid.conformingRefinement() )
+          conformingRefinement )
       {
         item_->request( bisect_element_t );
       }

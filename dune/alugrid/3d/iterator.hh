@@ -528,8 +528,8 @@ private:
           return elem->is2d();
         }
         //if we have a ghost entity, it is the right one, as we did not insert non-2d elements into the ghostlist
-        // see alu3diterators.hh method updateGhostlist         
-        else if( item.second ) 
+        // see alu3diterators.hh method updateGhostlist
+        else if( item.second )
           return true;
       }
       return false;
