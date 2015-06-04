@@ -343,7 +343,7 @@ public:
   //! marks an element for refCount refines. if refCount is negative the
   //! element is coarsend -refCount times
   //! mark returns true if element was marked, otherwise false
-  bool mark( const GridImp& grid, const int refCount ) const;
+  bool mark( const int refCount, const bool conformingRefinement ) const;
 
   //! \brief return current adaptation mark for this entity
   int getMark() const;

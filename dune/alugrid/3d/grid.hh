@@ -5,6 +5,8 @@
 #include <vector>
 
 //- Dune includes
+#include <dune/common/version.hh>
+
 #include <dune/grid/utility/grapedataioformattypes.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
@@ -366,7 +368,7 @@ namespace Dune
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         typedef EntityImp EntityPointerImpl;
         typedef Entity    EntityPointer;
 #else
@@ -526,6 +528,8 @@ namespace Dune
     struct Codim
       : public BaseType::template Codim< codim >
     {
+      typedef typename Traits::template Codim< codim >::EntityImp         EntityImp;
+      typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
       typedef typename Traits::template Codim< codim >::Twists Twists;
       typedef typename Twists::Twist Twist;
     };

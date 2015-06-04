@@ -59,9 +59,9 @@ namespace Dune {
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const HItemType & item, const int level, int twist , int face )
+  setElement(const HItemType & item, const int level, int twist ) //, int face )
   {
-    setElement( EntitySeed( item, level, twist, face ) );
+    setElement( EntitySeed( item, level, twist ) );
   }
 
   template<int cd, int dim, class GridImp>
@@ -473,7 +473,7 @@ namespace Dune {
   typename ALU3dGridEntity<0,dim,GridImp>::template Codim<cc>:: EntityPointer
   ALU3dGridEntity<0,dim,GridImp> :: subEntity (int i) const
   {
-    return SubEntities<GridImp,dim,cc>::entity(factory_,level(),*this,*item_,i);
+    return SubEntities<GridImp,dim,cc>::entity(level(), *this, *item_, i);
   }
 
 
