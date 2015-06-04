@@ -25,66 +25,51 @@ namespace Dune {
   // --Entity
   template <int cd, int dim, class GridImp>
   ALU3dGridEntity<cd,dim,GridImp> ::
-  ALU3dGridEntity(const FactoryType& factory, int level) :
-    factory_( factory ),
-    item_(0),
-    level_(0),
-    gIndex_(-1),
-    twist_(0),
-    face_(-1),
-    partitionType_(InteriorEntity)
+  ALU3dGridEntity() : seed_()
   {}
 
   // --Entity
   template <int cd, int dim, class GridImp>
-  alu_inline ALU3dGridEntity<cd,dim,GridImp> ::
-  ALU3dGridEntity(const ALU3dGridEntity<cd,dim,GridImp> & org) :
-    factory_(org.factory_),
-    item_(org.item_),
-    level_(org.level_),
-    gIndex_(org.gIndex_),
-    twist_(org.twist_),
-    face_(org.face_),
-    partitionType_(org.partitionType_)
-  {}
+  ALU3dGridEntity<cd,dim,GridImp> ::
+  ALU3dGridEntity( const EntitySeed& seed )
+    : seed_( seed )
+  {
+  }
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setEntity(const ALU3dGridEntity<cd,dim,GridImp> & org)
   {
-    item_   = org.item_;
-    gIndex_ = org.gIndex_;
-    twist_  = org.twist_;
-    level_  = org.level_;
-    face_   = org.face_;
-    partitionType_ = org.partitionType_;
+    setElement( org.seed_ );
   }
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const HItemType & item)
   {
-    setElement(item,GetLevel<GridImp,cd>::getLevel(grid(),item));
+    setElement( item, item.level() );
   }
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
-  setElement(const EntitySeed& seed )
+  setElement(const HItemType & item, const GridImp& grid)
   {
-    setElement(*seed.item(), seed.level(), seed.twist(), seed.face());
+    setElement( item, GetLevel<GridImp,cd>::getLevel(grid,item) );
   }
 
   template<int cd, int dim, class GridImp>
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const HItemType & item, const int level, int twist , int face )
   {
-    // cast interface to implementation
-    item_   = static_cast<const ItemType *> (&item);
-    gIndex_ = (*item_).getIndex();
-    twist_  = twist;
-    level_  = level;
-    face_   = face;
-    partitionType_ = this->convertBndId( *item_ );
+    setElement( EntitySeed( item, level, twist, face ) );
+  }
+
+  template<int cd, int dim, class GridImp>
+  alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
+  setElement(const EntitySeed& seed )
+  {
+    // copy seed
+    seed_ = seed;
 
     // reset geometry information
     geo_.invalidate();
@@ -124,7 +109,7 @@ namespace Dune {
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     if( ! geo_.valid() )
-      geo_.buildGeom( *item_, twist_, face_ );
+      geo_.buildGeom( getItem(), seed_.twist() );
     return Geometry( geo_ );
   }
 
@@ -137,23 +122,29 @@ namespace Dune {
 
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
-  ALU3dGridEntity(const FactoryType &factory, int wLevel)
-    : factory_( factory )
-    , item_( 0 )
-    , ghost_( 0 )
-    , level_(-1)
-    , isLeaf_ (false)
-  {  }
+  ALU3dGridEntity() : item_( 0 ), ghost_( 0 )
+  {}
 
   template<int dim, class GridImp>
   alu_inline ALU3dGridEntity<0,dim,GridImp> ::
-  ALU3dGridEntity(const ALU3dGridEntity<0,dim,GridImp> & org)
-    : factory_(org.factory_)
-    , item_(org.item_)
-    , ghost_( org.ghost_ )
-    , level_(org.level_)
-    , isLeaf_ (org.isLeaf_)
-  {  }
+  ALU3dGridEntity( const EntitySeed& seed )
+  {
+    setElement( seed );
+  }
+
+  template<int dim, class GridImp>
+  alu_inline ALU3dGridEntity<0,dim,GridImp> ::
+  ALU3dGridEntity( const HElementType& element )
+  {
+    setElement( const_cast< HElementType& > (element ) );
+  }
+
+  template<int dim, class GridImp>
+  alu_inline ALU3dGridEntity<0,dim,GridImp> ::
+  ALU3dGridEntity( const HBndSegType& ghost )
+  {
+    setGhost( const_cast< HBndSegType& > (ghost) );
+  }
 
   template< int dim, class GridImp >
   alu_inline typename ALU3dGridEntity< 0, dim, GridImp >::Geometry
@@ -180,16 +171,22 @@ namespace Dune {
     // this can only be true for tetrahedral elements
     if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::RefinementRules::refine_element_t) )
     {
-      static LocalGeometryImpl geom;
+      LocalGeometryImpl geom;
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      geom.buildGeomInFather( father().geometry(), geometry() );
+#else
       geom.buildGeomInFather( father()->geometry(), geometry() );
+#endif
+
       return LocalGeometry( geom );
     }
     else
     {
-      // make sure the types match
-      alugrid_assert( grid().nonConformingGeometryInFatherStorage()[ child ].type() == type() );
+      typedef ALULocalGeometryStorage< GridImp, LocalGeometryImpl, 8 > GeometryInFatherStorage ;
+      const GeometryInFatherStorage& geometryStorage =
+        GeometryInFatherStorage :: storage( type(), true );
       // get geometryInFather storage from grid and return childs geom
-      return LocalGeometry( grid().nonConformingGeometryInFatherStorage()[ child ] );
+      return LocalGeometry( geometryStorage[ child ] );
     }
   }
 
@@ -316,18 +313,19 @@ namespace Dune {
   template <class GridImp, int dim>
   struct SubEntities<GridImp, dim, 0>
   {
-    typedef typename GridImp::GridObjectFactoryType FactoryType;
-    typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
+    typedef ALU3dGridEntity<0,dim,GridImp> ElementType;
+    typedef typename GridImp::template Codim< 0 >:: EntityPointer     EntityPointer;
+    typedef typename GridImp::template Codim< 0 >:: EntityPointerImpl EntityPointerImpl;
 
     typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
 
-    typedef typename EntityType::template Codim< 0 >::Twist Twist;
+    typedef typename ElementType::template Codim< 0 >::Twist Twist;
 
     // note: The subentity number i is in dune numbering.
-    static typename EntityType::template Codim< 0 >::EntityPointer
-    entity ( const FactoryType &factory, int level, const EntityType &entity, const Item &item, int i )
+    static EntityPointer
+    entity ( int level, const ElementType &entity, const Item &item, int i )
     {
-      return ALU3dGridEntityPointer<0, GridImp>( entity );
+      return EntityPointerImpl( entity );
     }
 
     static Twist twist ( const Item &item, int i ) { return Twist(); }
@@ -337,53 +335,58 @@ namespace Dune {
   template <class GridImp, int dim>
   struct SubEntities<GridImp,dim,1>
   {
-    typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
-    typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
+    typedef ALU3dGridEntity<0,dim,GridImp> ElementType;
+
+    typedef typename GridImp::template Codim< 1 >:: EntitySeed        EntitySeed;
+    typedef typename GridImp::template Codim< 1 >:: EntityPointer     EntityPointer;
+    typedef typename GridImp::template Codim< 1 >:: EntityPointerImpl EntityPointerImpl;
 
     typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
 
-    typedef typename EntityType::template Codim< 1 >::Twist Twist;
+    typedef typename ElementType::template Codim< 1 >::Twist Twist;
 
     // note: The subentity number i is in dune numbering.
-    static typename EntityType::template Codim< 1 >::EntityPointer
-    entity ( const FactoryType &factory, int level, const EntityType &entity, const Item &item, int i )
+    static EntityPointer
+    entity ( int level, const ElementType &entity, const Item &item, int i )
     {
-      return
-        ALU3dGridEntityPointer<1,GridImp>
-            (factory,
-             level,
-             *ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace( item, i ),
-             static_cast< int >( twist( item, i ) ),
-             i // we need the duneFace number here for the buildGeom method (in the 2d case)
-            );
+      return EntityPointerImpl( EntitySeed(
+               *ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace( item, i ),
+               level, static_cast< int >( twist( item, i ) ),
+               i // we need the duneFace number here for the buildGeom method (in the 2d case)
+               )
+             );
     }
 
     static Twist twist ( const Item &item, int i )
     {
       return Twist( Topo::duneFaceTwist( i ) ) * Twist( item.twist( Topo::dune2aluFace( i ) ) );
     }
-
   };
 
   // specialisation for edges
   template <class GridImp>
   struct SubEntities<GridImp,3,2>
   {
-    typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
-    typedef ALU3dGridEntity<0,3,GridImp> EntityType;
-    typedef typename GridImp::ctype coordType;
+    typedef ALU3dGridEntity<0,3,GridImp>   ElementType;
 
+    typedef typename GridImp::template Codim< 2 >:: EntitySeed         EntitySeed;
+    typedef typename GridImp::template Codim< 2 >:: EntityPointer      EntityPointer;
+    typedef typename GridImp::template Codim< 2 >:: EntityPointerImpl  EntityPointerImpl;
+
+    typedef typename GridImp::ctype coordType;
     typedef typename GridImp :: ReferenceElementType ReferenceElementType;
+
     typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
     typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::GEOFaceType     Face;
     //typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::GEOEdgeType GEOEdgeType;
 
-    typedef typename EntityType::template Codim< 2 >::Twist Twist;
+    typedef typename ElementType::template Codim< 2 >::Twist Twist;
 
-    static typename EntityType::template Codim<2>:: EntityPointer
-    entity (const FactoryType& factory, const int level, const EntityType & entity, const Item& item, int i)
+    // note: The subentity number i is in dune numbering.
+    static EntityPointer
+    entity ( int level, const ElementType &entity, const Item &item, int i )
     {
       typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType Edge;
       typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOFaceType Face;
@@ -395,30 +398,12 @@ namespace Dune {
       const Edge &edge = *face.myhedge( j );
       const int twist = (int( !faceTwist.positive() )^face.twist( j ));
 
-      return ALU3dGridEntityPointer< 2, GridImp >( factory, level, edge, twist );
-#if 0
-       // get reference element
-       const ReferenceElementType & refElem = factory.grid().referenceElement();
-
-       // get first local vertex number of edge i
-       const int localNum = refElem.subEntity(i, /* codim = */ 2 , /* vxNum = */ 0 , /* dim = */ 3 );
-
-       // get number of first vertex on edge
-       const int v = entity.template getSubIndex<3> (localNum);
-
-       // get the hedge object
-       const GEOEdgeType& edge = *(item.myhedge( Topo::dune2aluEdge(i) ));
-
-       const int vx = edge.myvertex(0)->getIndex();
-
-       // check whether vertex numbers are equal, otherwise twist is 1
-       const int twst = (v != vx) ? 1 : 0;
-       return ALU3dGridEntityPointer<2,GridImp> (factory, level, edge, twst );
-#endif
+      return EntityPointerImpl( EntitySeed( edge, level, twist ) );
     }
 
     static Twist twist ( const Item &item, int i )
     {
+      typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOFaceType Face;
 
       ALUTwist< Topo::numVerticesPerFace, 2 > faceTwist( item.twist( Topo::duneEdgeMap( i ).first ) );
       const Face &face = *item.myhface( Topo::duneEdgeMap( i ).first );
@@ -461,21 +446,27 @@ namespace Dune {
   template <class GridImp, int dim>
   struct SubEntities<GridImp,dim,3>
   {
-    typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
-    typedef ALU3dGridEntity<0,dim,GridImp> EntityType;
-    typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType Item;
+    typedef ALU3dGridEntity<0,dim,GridImp> ElementType;
 
-    typedef typename EntityType::template Codim< 3 >::Twist Twist;
+    typedef typename GridImp::template Codim< 3 >:: EntitySeed        EntitySeed;
+    typedef typename GridImp::template Codim< 3 >:: EntityPointer     EntityPointer;
+    typedef typename GridImp::template Codim< 3 >:: EntityPointerImpl EntityPointerImpl;
 
-    static typename EntityType::template Codim< 3 >::EntityPointer
-    entity (const FactoryType& factory, const int level, const EntityType & entity, const Item& item, int i)
+    typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType >::IMPLElementType Item;
+
+    typedef typename GridImp::template Codim< 3 >::Twist Twist;
+
+    // note: The subentity number i is in dune numbering.
+    static EntityPointer
+    entity ( int level, const ElementType &entity, const Item &item, int i )
     {
-      return ALU3dGridEntityPointer<3,GridImp> (factory, level, *item.myvertex( Topo::dune2aluVertex(i) ));
+      return EntityPointerImpl( EntitySeed( *item.myvertex(Topo::dune2aluVertex(i)), level ) );
     }
 
     static Twist twist ( const Item &item, int i ) { return Twist(); }
   };
+
 
   template<int dim, class GridImp>
   template<int cc>
@@ -494,28 +485,30 @@ namespace Dune {
     return SubEntities< GridImp, dim, codim >::twist( *item_, i );
   }
 
+
   template<int dim, class GridImp>
   typename ALU3dGridEntity<0,dim,GridImp> :: EntityPointer
   ALU3dGridEntity<0,dim,GridImp> :: father() const
   {
+    typedef typename GridImp :: template Codim< 0 > :: EntityPointerImpl  EntityPointerImpl;
     HElementType* up = item_->up();
     if( ! up )
     {
       std::cerr << "ALU3dGridEntity<0," << dim << "," << dimworld << "> :: father() : no father of entity globalid = " << getIndex() << "\n";
-      return ALU3dGridEntityPointer<0,GridImp> (factory_, static_cast<HElementType &> (*item_));
+      return EntityPointerImpl( static_cast<HElementType &> (*item_) );
     }
 
     if( isGhost () )
     {
-      return ALU3dGridEntityPointer<0,GridImp> (factory_, static_cast<const HBndSegType &> (*(getGhost().up())));
+      return EntityPointerImpl( static_cast<const HBndSegType &> (*(getGhost().up())));
     }
 
-    return ALU3dGridEntityPointer<0,GridImp> (factory_, static_cast<HElementType &> ( *up ));
+    return EntityPointerImpl( static_cast<HElementType &> ( *up ));
   }
 
   // Adaptation methods
   template<int dim, class GridImp>
-  bool ALU3dGridEntity<0,dim,GridImp> :: mark (int ref) const
+  bool ALU3dGridEntity<0,dim,GridImp> :: mark (const GridImp& grid, const int ref ) const
   {
     alugrid_assert (item_ != 0);
 
@@ -538,7 +531,7 @@ namespace Dune {
     {
       // for tetrahedral elements check whether to use bisection
       if( GridImp :: elementType == tetra &&
-          grid().conformingRefinement() )
+          grid.conformingRefinement() )
       {
         item_->request( bisect_element_t );
       }
