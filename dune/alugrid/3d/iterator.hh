@@ -108,13 +108,13 @@ public:
   typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
+  typedef typename GridImp::template Codim<0>::EntityPointerImpl EntityPointerImpl;
 
   typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
   //! type of the intersection
   typedef Dune::Intersection< GridImp, Dune::ALU3dGridIntersectionIterator< GridImp > > Intersection;
 
   typedef FieldVector<alu3d_ctype, dimworld> NormalType;
-  typedef ALU3dGridEntityPointer<0,GridImp> EntityPointer;
 
   typedef ALUMemoryProvider< ThisType > StorageType;
 
@@ -139,10 +139,10 @@ public:
   void increment ();
 
   //! access neighbor
-  EntityPointer outside() const;
+  EntityPointerImpl outside() const;
 
   //! access entity where iteration started
-  EntityPointer inside() const;
+  EntityPointerImpl inside() const;
 
   //! return true if intersection is with boundary.
   bool boundary () const;
@@ -269,9 +269,6 @@ protected:
   mutable FaceInfoType      connector_;
   mutable GeometryInfoType  geoProvider_; // need to initialise
 
-  // reference to factory
-  const FactoryType& factory_;
-
   //! current element from which we started the intersection iterator
   const IMPLElementType* item_;
 
@@ -282,8 +279,8 @@ protected:
   mutable int index_;
 
   mutable GeometryImpl intersectionGlobal_;
-  mutable LocalGeometryImpl intersectionSelfLocal_;
-  mutable LocalGeometryImpl intersectionNeighborLocal_;
+  mutable GeometryImpl intersectionSelfLocal_;
+  mutable GeometryImpl intersectionNeighborLocal_;
 
   // unit outer normal
   mutable NormalType unitOuterNormal_;
@@ -334,7 +331,6 @@ protected:
   using BaseType :: index_;
   using BaseType :: connector_;
   using BaseType :: geoProvider_;
-  using BaseType :: factory_;
   using BaseType :: boundary;
   using BaseType :: done ;
   using BaseType :: getFace;
@@ -571,6 +567,7 @@ class ALU3dGridLevelIterator
   friend class ALU3dGrid< dim, dimworld, GridImp::elementType, Comm >;
 
   friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > >;
+  typedef ALU3dGridEntityPointer< cd, GridImp > BaseType;
 
 public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
@@ -600,9 +597,6 @@ public:
   //! prefix increment
   void increment ();
 
-  //! dereference Entity, faster then the entity pointersmethod
-  Entity & dereference () const;
-
   //! release entity
   void releaseEntity () {}
 
@@ -612,11 +606,14 @@ private:
   //! do assignment
   void assign (const ThisType & org);
 
-  // actual level
-  int level_;
+  // reference to factory class (ie grid)
+  const FactoryType& factory_;
 
   // the internal iterator
   IteratorType * iter_ ;
+
+  // actual level
+  int level_;
 
   // deletes iter_
   void removeIter ();
@@ -647,6 +644,8 @@ class ALU3dGridLeafIterator
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
+  typedef ALU3dGridEntityPointer< cdim, GridImp > BaseType;
+
 public:
   typedef typename GridImp::GridObjectFactoryType FactoryType;
 
@@ -675,9 +674,6 @@ public:
   //! prefix increment
   void increment ();
 
-  //! dereference Entity, faster then the entity pointersmethod
-  Entity & dereference () const;
-
   //! release entity
   void releaseEntity () {}
 
@@ -685,11 +681,11 @@ public:
   ThisType & operator = (const ThisType & org);
 
 private:
+  // reference to factory class (ie grid)
+  const FactoryType& factory_;
+
   // the internal iterator
   IteratorType * iter_;
-
-  // max level for iteration
-  int walkLevel_ ;
 
   //! do assignment
   void assign (const ThisType & org);
@@ -783,13 +779,11 @@ public:
   typedef typename GridImp::ctype ctype;
 
   //! the normal Constructor
-  ALU3dGridHierarchicIterator(const FactoryType& factory,
-                              const HElementType & elem,
+  ALU3dGridHierarchicIterator(const HElementType & elem,
                               int maxlevel, bool end );
 
   //! start constructor for ghosts
-  ALU3dGridHierarchicIterator(const FactoryType& factory,
-                              const HBndSegType& ghost,
+  ALU3dGridHierarchicIterator(const HBndSegType& ghost,
                               int maxlevel,
                               bool end);
 
@@ -798,9 +792,6 @@ public:
 
   //! increment
   void increment();
-
-  //! dereference Entity, faster then the entity pointersmethod
-  Entity & dereference () const;
 
   //! release entity
   void releaseEntity () {}
