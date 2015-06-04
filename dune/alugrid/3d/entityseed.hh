@@ -86,8 +86,7 @@ public:
   //! type of Entity
   typedef typename GridImp::template Codim<codimension>::Entity   Entity;
   //! underlying EntityImplementation
-  typedef MakeableInterfaceObject<Entity> EntityObject;
-  typedef typename EntityObject :: ImplementationType EntityImp;
+  typedef typename GridImp::template Codim<codimension>::EntityImp  EntityImp;
 
   //! typedef of my type
   typedef ThisType ALU3dGridEntitySeedType;
@@ -193,7 +192,12 @@ public:
     item_ = toKey( &ghostFace );
   }
 
-  int level () const { return defaultValue; }
+  int level () const
+  {
+    alugrid_assert( isValid() );
+    return item()->level();
+  }
+
   int twist () const { return defaultTwist; }
   int face  () const { return defaultValue; }
 
@@ -245,9 +249,9 @@ public:
 
   //! Constructor for EntitySeed that points to an element
   ALU3dGridEntitySeed(const HElementType & item,
-                     const int level,
-                     const int twist = defaultTwist,
-                     const int duneFace = defaultValue
+                      const int level,
+                      const int twist = defaultTwist,
+                      const int duneFace = defaultValue
                     );
 
   //! Constructor for EntitySeed that points to an element
