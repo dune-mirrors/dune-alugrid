@@ -353,13 +353,19 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 
   if(GridImp::dimension == 2 && GridImp::dimensionworld == 3 && GridImp::elementType == hexa)
   {
-    static NormalType outerNormal;
+    typedef typename LocalGeometry::GlobalCoordinate Coordinate;
+    typedef typename GridImp::template Codim<0>::Geometry ElementGeometry;
+
+    NormalType outerNormal;
     const ReferenceElement< alu3d_ctype, dim > &refElement =
        ReferenceElements< alu3d_ctype, dim >::cube();
-    typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
-    typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
-    inside().dereference().geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
-    outerNormal *= inside().dereference().geometry().integrationElement( xInside );
+
+    Coordinate xInside = geometryInInside().global( local );
+    Coordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
+
+    const ElementGeometry insideGeom = inside().geometry();
+    insideGeom.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
+    outerNormal *= insideGeom.integrationElement( xInside );
     if(connector_.conformanceState() == FaceInfoType::REFINED_OUTER) outerNormal *=0.5;
     return outerNormal;
   }

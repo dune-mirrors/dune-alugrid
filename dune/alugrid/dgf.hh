@@ -158,7 +158,7 @@ namespace Dune
       for( int i=0; i < corners; ++i )
       {
         const int k =  refElem.subEntity( face, 1, i, dimension );
-        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
+        bound[ i ] = factory_.insertionIndex( entity.template subEntity< dimension >( k ) );
       }
 
       DuneGridFormatParser::facemap_t::key_type key( bound, false );
@@ -185,7 +185,7 @@ namespace Dune
       for( int i=0; i < corners; ++i )
       {
         const int k =  refElem.subEntity( face, 1, i, dimension );
-        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
+        bound[ i ] = factory_.insertionIndex( entity.template subEntity< dimension >( k ) );
       }
 
       DuneGridFormatParser::facemap_t::key_type key( bound, false );
@@ -345,7 +345,7 @@ namespace Dune
     bool generate( std::istream &file, MPICommunicatorType comm, const std::string &filename = "" );
   };
 
- 
+
   namespace dgf
   {
 

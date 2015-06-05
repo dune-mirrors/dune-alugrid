@@ -39,6 +39,9 @@ namespace Dune
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
   {
+    // generate goemetry storage and geometry type vector
+    makeGeometries();
+
     // check macro grid file for keyword
     checkMacroGridFile( macroTriangFilename );
 

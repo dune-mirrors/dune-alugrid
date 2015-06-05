@@ -96,8 +96,8 @@ class ALU3dGridIntersectionIterator
 protected:
   enum IntersectionIteratorType { IntersectionLeaf , IntersectionLevel, IntersectionBoth };
 
-  typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl GeometryImpl;
-  typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl LocalGeometryImpl;
+  typedef typename GridImp::Traits::template Codim< 1 >::GeometryImpl       GeometryImpl;
+  typedef typename GridImp::Traits::template Codim< 1 >::LocalGeometryImpl  LocalGeometryImpl;
 
 public:
   typedef ALUTwists< (dim == 3 ) ? GridImp::elementType == tetra ? 3 : 4 : 2, dim-1 > Twists;
@@ -105,10 +105,10 @@ public:
 
   typedef typename GridImp::GridObjectFactoryType FactoryType;
 
-  typedef typename GridImp::template Codim<0>::Entity Entity;
-  typedef typename GridImp::template Codim<1>::Geometry Geometry;
-  typedef typename GridImp::template Codim<1>::LocalGeometry LocalGeometry;
-  typedef typename GridImp::template Codim<0>::EntityPointerImpl EntityPointerImpl;
+  typedef typename GridImp::template Codim<0>::Entity             Entity;
+  typedef typename GridImp::template Codim<1>::Geometry           Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry      LocalGeometry;
+  typedef typename GridImp::template Codim<0>::EntityPointerImpl  EntityPointerImpl;
 
   typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
   //! type of the intersection
@@ -278,9 +278,9 @@ protected:
   mutable int innerLevel_;
   mutable int index_;
 
-  mutable GeometryImpl intersectionGlobal_;
-  mutable GeometryImpl intersectionSelfLocal_;
-  mutable GeometryImpl intersectionNeighborLocal_;
+  mutable GeometryImpl      intersectionGlobal_;
+  mutable LocalGeometryImpl intersectionSelfLocal_;
+  mutable LocalGeometryImpl intersectionNeighborLocal_;
 
   // unit outer normal
   mutable NormalType unitOuterNormal_;
