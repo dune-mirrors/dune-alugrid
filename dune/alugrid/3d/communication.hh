@@ -102,23 +102,23 @@ namespace Dune
     typedef ALU3DSPACE GatherScatter GatherScatter;
 
   protected:
-    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< dim >::Entity > VertexObject;
-    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 2 >::Entity > EdgeObject;
-    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 1 >::Entity > FaceObject;
-    typedef MakeableInterfaceObject< typename Grid::Traits::template Codim< 0 >::Entity > ElementObject;
+    typedef typename Grid::Traits::template Codim< dim >::Entity   VertexObject;
+    typedef typename Grid::Traits::template Codim< 2 >::Entity     EdgeObject;
+    typedef typename Grid::Traits::template Codim< 1 >::Entity     FaceObject;
+    typedef typename Grid::Traits::template Codim< 0 >::Entity     ElementObject;
 
-    typedef typename VertexObject::ImplementationType VertexImpl;
-    typedef typename EdgeObject::ImplementationType EdgeImpl;
-    typedef typename FaceObject::ImplementationType FaceImpl;
-    typedef typename ElementObject::ImplementationType ElementImpl;
+    typedef typename Grid::Traits::template Codim< dim >::EntityImp  VertexImpl;
+    typedef typename Grid::Traits::template Codim< 2 >::EntityImp    EdgeImpl;
+    typedef typename Grid::Traits::template Codim< 1 >::EntityImp    FaceImpl;
+    typedef typename Grid::Traits::template Codim< 0 >::EntityImp    ElementImpl;
 
     struct Storage
     {
       Storage ( const Grid &grid, int level )
-        : vertex( VertexImpl( grid.factory(), level ) ),
-          edge( EdgeImpl( grid.factory(), level ) ),
-          face( FaceImpl( grid.factory(), level ) ),
-          element( ElementImpl( grid.factory(), level ) )
+        : vertex( VertexImpl() ),
+          edge( EdgeImpl() ),
+          face( FaceImpl() ),
+          element( ElementImpl() )
       {}
 
       virtual ~Storage () {}
@@ -129,9 +129,9 @@ namespace Dune
       virtual GatherScatter &elementGatherScatter () = 0;
 
     protected:
-      VertexObject vertex;
-      EdgeObject edge;
-      FaceObject face;
+      VertexObject  vertex;
+      EdgeObject    edge;
+      FaceObject    face;
       ElementObject element;
     };
 

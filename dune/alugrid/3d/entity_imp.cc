@@ -109,7 +109,7 @@ namespace Dune {
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     if( ! geo_.valid() )
-      geo_.buildGeom( getItem(), seed_.twist() );
+      geo_.buildGeom( getItem(), seed_.twist(), -1 );
     return Geometry( geo_ );
   }
 
@@ -413,30 +413,32 @@ namespace Dune {
     }
   };
 
-   // specialisation for vertices
+   // specialisation for vertices in 2d
   template <class GridImp>
-  struct SubEntities<GridImp,2,2>
+  struct SubEntities<GridImp, 2, 2>
   {
-    typedef typename GridImp::GridObjectFactoryType FactoryType;
     typedef ElementTopologyMapping<GridImp::elementType> Topo;
-    typedef ALU3dGridEntity<0,2,GridImp> EntityType;
+    typedef ALU3dGridEntity<0, 2, GridImp>          ElementType;
     typedef typename GridImp::ctype coordType;
 
-    typedef typename GridImp :: ReferenceElementType ReferenceElementType;
+    typedef typename GridImp::template Codim< 2 >:: EntitySeed        EntitySeed;
+    typedef typename GridImp::template Codim< 2 >:: EntityPointer     EntityPointer;
+    typedef typename GridImp::template Codim< 2 >:: EntityPointerImpl EntityPointerImpl;
+
     typedef typename ALU3dImplTraits<GridImp::elementType, typename GridImp::MPICommunicatorType>::IMPLElementType Item;
 
-    typedef typename EntityType::template Codim< 2 >::Twist Twist;
+    typedef typename GridImp::template Codim< 2 >::Twist Twist;
 
-    static typename EntityType::template Codim< 2 >::EntityPointer
-    entity (const FactoryType& factory, const int level, const EntityType & entity, const Item& item, int i)
+    static EntityPointerImpl
+    entity (const int level, const ElementType & entity, const Item& item, int i)
     {
-      if (GridImp::elementType == tetra)
+      if( GridImp::elementType == tetra )
       {
         // we want vertices 1,2,3 (in DUNE numbering) for tetra and 0,1,2,3 for hexa
         ++i;
       }
-      return ALU3dGridEntityPointer<2,GridImp>
-        (factory, level, *item.myvertex( Topo::dune2aluVertex(i) )); // element topo
+      return
+        EntityPointerImpl( EntitySeed( *item.myvertex( Topo::dune2aluVertex(i) ), level )); // element topo
     }
 
     static Twist twist ( const Item &item, int i ) { return Twist(); }
