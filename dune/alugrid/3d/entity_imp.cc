@@ -109,7 +109,7 @@ namespace Dune {
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     if( ! geo_.valid() )
-      geo_.buildGeom( getItem(), seed_.twist(), -1 );
+      geo_.buildGeom( getItem(), seed_.twist() );
     return Geometry( geo_ );
   }
 
