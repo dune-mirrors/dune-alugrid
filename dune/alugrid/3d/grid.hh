@@ -1187,7 +1187,7 @@ namespace Dune
     const ThisType &operator= ( const ThisType & );
 
     //! reset size and global size, update Level- and LeafIndexSet, if they exist
-    void calcExtras( const bool recomputeMacroIndexSet = false  );
+    void calcExtras();
 
     //! calculate maxlevel
     void calcMaxLevel();
