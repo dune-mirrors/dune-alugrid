@@ -174,8 +174,12 @@ namespace Dune
       boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      const typename Intersection::Entity& entity = intersection.inside();
+#else
       typename Intersection::EntityPointer inside = intersection.inside();
-      const typename Intersection::Entity & entity = *inside;
+      const typename Intersection::Entity& entity = *inside;
+#endif
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > & refElem =
