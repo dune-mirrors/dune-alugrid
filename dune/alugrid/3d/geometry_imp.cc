@@ -339,7 +339,7 @@ buildGeom(const IMPLElementType& item)
 template <int mydim, int cdim, class GridImp>
 inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HFaceType & item, int t, int duneFace )
+buildGeom(const HFaceType & item, int t)
 {
   // get geo face
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
@@ -352,17 +352,6 @@ buildGeom(const HFaceType & item, int t, int duneFace )
   int rotatedALUIndex[ 4 ];
   for( int i = 0; i < numVertices; ++i )
     rotatedALUIndex[ i ] = (elementType == tetra ? twist( i ) : twist( i ) ^ (twist( i ) >> 1));
-
-/*
-  // for all vertices of this face get rotatedIndex
-  int rotatedALUIndex[ 4 ];
-  for (int i = 0; i < numVertices; ++i)
-  {
-    // Transform Dune index to ALU index and apply twist
-    const int localALUIndex = ElementTopo::dune2aluFaceVertex(duneFace,i);
-    rotatedALUIndex[ i ] = FaceTopo::twist(localALUIndex, t);
-  }
-*/
 
   if( elementType == hexa )
   {
@@ -472,7 +461,7 @@ buildGeom(const FaceCoordinatesType& coords)
 template <int mydim, int cdim, class GridImp> // for edges
 inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HEdgeType & item, int twist, int)
+buildGeom(const HEdgeType & item, int twist)
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
 
@@ -501,7 +490,7 @@ buildGeom(const HEdgeType & item, int twist, int)
 template <int mydim, int cdim, class GridImp> // for Vertices ,i.e. Points
 inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const VertexType & item, int twist, int)
+buildGeom(const VertexType & item, int twist)
 {
   // update geometry implementation
   geoImpl().update( static_cast<const GEOVertexType &> (item).Point() );
