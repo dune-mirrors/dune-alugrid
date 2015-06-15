@@ -352,9 +352,7 @@ namespace Dune {
     {
       return EntityPointerImpl( EntitySeed(
                *ALU3dGridFaceGetter< typename GridImp::MPICommunicatorType >::getFace( item, i ),
-               level, static_cast< int >( twist( item, i ) ),
-               i // we need the duneFace number here for the buildGeom method (in the 2d case)
-               )
+               level, static_cast< int >( twist( item, i ) ) )
              );
     }
 

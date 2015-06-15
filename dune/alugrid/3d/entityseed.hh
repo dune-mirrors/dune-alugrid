@@ -199,7 +199,6 @@ public:
   }
 
   int twist () const { return defaultTwist; }
-  int face  () const { return defaultValue; }
 
 protected:
   // pointer to item
@@ -250,18 +249,19 @@ public:
   //! Constructor for EntitySeed that points to an element
   ALU3dGridEntitySeed(const HElementType & item,
                       const int level,
-                      const int twist = defaultTwist,
-                      const int duneFace = defaultValue
+                      const int twist = defaultTwist
                     );
 
   //! Constructor for EntitySeed that points to an element
   ALU3dGridEntitySeed()
-    : BaseType(), level_(defaultValue), twist_(defaultTwist), face_(defaultValue) {}
+    : BaseType(), level_(defaultValue), twist_(defaultTwist)
+  {}
 
   //! Constructor for EntitySeed that points to given entity
   ALU3dGridEntitySeed(const ALU3dGridEntityType& entity)
     : ALU3dGridEntitySeedBase<cd,GridImp> (entity.getItem()),
-   level_(entity.level()), twist_(defaultTwist), face_(defaultValue)
+      level_(entity.level()),
+      twist_(defaultTwist)
   {}
 
   //! copy constructor
@@ -284,8 +284,6 @@ public:
   int level () const { return level_ ; }
   //! return twist
   int twist () const { return twist_ ; }
-  //! return face
-  int face  () const { return face_ ; }
 
   using BaseType :: set ;
 
@@ -311,8 +309,6 @@ protected:
   int level_;
   // twist of face, for codim 1 only
   int twist_;
-  // face number, for codim 1 only
-  int face_;
 };
 
 //! ALUGridEntitySeed points to an entity
@@ -363,7 +359,7 @@ public:
     : ALU3dGridEntitySeedBase<cd,GridImp> (item) {}
 
   //! Constructor for EntitySeed that points to an interior element
-  ALU3dGridEntitySeed(const HElementType& item, int , int , int )
+  ALU3dGridEntitySeed(const HElementType& item, int , int )
     : ALU3dGridEntitySeedBase<cd,GridImp> (item) {}
 
   //! Constructor for EntitySeed that points to an ghost
@@ -448,12 +444,10 @@ template<int codim, class GridImp >
 inline ALU3dGridEntitySeed<codim,GridImp> ::
 ALU3dGridEntitySeed(const HElementType &item,
                    const int level,
-                   const int twist,
-                   const int duneFace )
+                   const int twist )
   : ALU3dGridEntitySeedBase<codim,GridImp> (item)
   , level_(level)
   , twist_ (twist)
-  , face_(duneFace) // duneFace can be -1 when face was created by Face Iterator
 {
 }
 
@@ -463,7 +457,6 @@ ALU3dGridEntitySeed(const ALU3dGridEntitySeedType & org)
   : ALU3dGridEntitySeedBase<codim,GridImp>(org)
   , level_(org.level_)
   , twist_(org.twist_)
-  , face_(org.face_)
 {
 }
 
@@ -478,7 +471,6 @@ operator = (const ALU3dGridEntitySeedType & org)
   // clone other stuff
   level_ = org.level_;
   twist_ = org.twist_;
-  face_  = org.face_;
   return *this;
 }
 
@@ -489,7 +481,6 @@ ALU3dGridEntitySeed<codim,GridImp>::clear ()
   BaseType :: clear();
   level_ = defaultValue ;
   twist_ = defaultTwist ;
-  face_  = defaultValue ;
 }
 
 } // end namespace Dune
