@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 
+#include <dune/common/version.hh>
 #include <dune/common/tupleutility.hh>
 #include <dune/common/tuples.hh>
 #include <dune/common/parallel/mpihelper.hh>
@@ -24,14 +25,17 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+#include <dune/grid/test/gridcheck.hh>
+#include <dune/grid/test/checkgeometryinfather.hh>
+#include <dune/grid/test/checkintersectionit.hh>
+#include <dune/grid/test/checkcommunicate.hh>
+#else
 #include <dune/grid/test/gridcheck.cc>
-//#include "gridcheck.cc"
-
-
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
-//#include "checkintersectionit.cc"
 #include <dune/grid/test/checkcommunicate.cc>
+#endif
 
 #include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
