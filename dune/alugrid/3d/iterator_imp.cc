@@ -356,7 +356,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     typedef typename LocalGeometry::GlobalCoordinate Coordinate;
     typedef typename GridImp::template Codim<0>::Geometry ElementGeometry;
 
-    NormalType outerNormal;
+    static NormalType outerNormal;
     const ReferenceElement< alu3d_ctype, dim > &refElement =
        ReferenceElements< alu3d_ctype, dim >::cube();
 
