@@ -147,8 +147,12 @@ namespace Dune
     int boundaryId ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
-      typename Intersection::EntityPointer inside = intersection.inside();
-      const typename Intersection::Entity & entity = *inside;
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      const typename Intersection::Entity & entity = intersection.inside();
+#else
+       typename Intersection::EntityPointer inside = intersection.inside();
+       const typename Intersection::Entity & entity = *inside;
+#endif
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > & refElem =
@@ -175,10 +179,10 @@ namespace Dune
     {
       typedef Dune::Intersection< GG, II > Intersection;
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-      const typename Intersection::Entity& entity = intersection.inside();
+      const typename Intersection::Entity & entity = intersection.inside();
 #else
-      typename Intersection::EntityPointer inside = intersection.inside();
-      const typename Intersection::Entity& entity = *inside;
+       typename Intersection::EntityPointer inside = intersection.inside();
+       const typename Intersection::Entity & entity = *inside;
 #endif
       const int face = intersection.indexInInside();
 
