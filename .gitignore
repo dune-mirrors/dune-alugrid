@@ -4,8 +4,7 @@
 /compile
 /configure
 /config.guess
-/config.h
-/config.h.in
+/config.*
 /config.lt
 /config.status
 /config.sub
