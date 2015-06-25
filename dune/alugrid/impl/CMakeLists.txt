@@ -1,6 +1,6 @@
 set(impldir  ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/impl)
 set(impl_HEADERS  binaryio.hh byteorder.hh indexstack.h macrofileheader.hh projectvertex.h)
-set(SUBDIRS  serial parallel duneinterface 2d test)
+set(SUBDIRS  serial parallel duneinterface test)
 set(EXTRA_DIST  binaryio.cc macrofileheader.cc)
 # include not needed for CMake
 # include $(top_srcdir)/am/global-rules
