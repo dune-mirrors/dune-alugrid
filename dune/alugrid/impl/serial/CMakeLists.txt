@@ -1,4 +1,4 @@
-set(serialdir  dune/alugrid/impl/serial)
+set(serialdir  ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/impl/serial)
 set(serial_HEADERS  gatherscatter.hh ghost_elements.h ghost_info.h
                  gitter_hexa_top.h gitter_impl.h gitter_mgb.h gitter_sti.h
                  gitter_tetra_top.h iterator_sti.h key.h lock.h mapp_cube_3d.h

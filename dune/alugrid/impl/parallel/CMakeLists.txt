@@ -1,4 +1,4 @@
-set(paralleldir  dune/alugrid/impl/parallel)
+set(paralleldir  ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/impl/parallel)
 set(parallel_HEADERS  alumetis.hh alusfc.hh aluzoltan.hh
                         gitter_hexa_top_pll.h gitter_pll_impl.h
                         gitter_pll_ldb.h gitter_pll_mgb.h
