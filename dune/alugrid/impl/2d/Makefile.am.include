@@ -1,2 +1,0 @@
-alu = alu2d
-alu2dhdrs= 2d/grid.h 2d/handle.h 2d/listwalk.h 2d/triang.h 2d/vmmap.h 2d/vtx_btree.h 2d/grid_imp.cc 2d/vtxprojection.h
