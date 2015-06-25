@@ -107,12 +107,10 @@ endif(SIONLIB_FOUND)
 #set HAVE_SIONLIB for config.h
 set(HAVE_SIONLIB ${SIONLIB_FOUND})
 
-#add all sionlib related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_sionlib_flags
+# register package flags
 if(SIONLIB_FOUND)
-  set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "${SIONLIB_DUNE_COMPILE_FLAGS}")
-  foreach(dir "${SIONLIB_INCLUDE_DIRS}")
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-  endforeach()
+  dune_register_package_flags(INCLUDE_DIRS ${SIONLIB_INLUDE_DIRS}
+                              COMPILE_DEFINITIONS ${SIONLIB_DUNE_COMPILE_FLAGS})
 endif()
 
 
