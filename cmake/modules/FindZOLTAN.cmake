@@ -13,6 +13,10 @@
 
 set(ZOLTAN_ROOT "" CACHE PATH "Path list to search for ZOLTAN")
 
+# Make sure we have checked for the underlying partitioners.
+find_package(PTScotch)
+find_package(ParMETIS)
+
 #look for header files at positions given by the user
 find_path(ZOLTAN_INCLUDE_DIR zoltan.h
   PATHS ${ZOLTAN_ROOT} 
@@ -28,12 +32,14 @@ message("Zoltan Dir: ${ZOLTAN_INCLUDE_DIR}")
   #set(ZOLTAN_INCLUDEDIR "${ZOLTAN_INCLUDE_DIR}" CACHE PATH "directory with ZOLTAN headers inside")
   set(ZOLTAN_LIBDIR "${ZOLTAN_ROOT}/lib") # CACHE PATH "directory with ZOLTAN libraries inside")
   
+if(ZOLTAN_INCLUDE_DIR)
   # check header usability
   include(CMakePushCheckState)
   cmake_push_check_state()
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} ${MPI_DUNE_COMPILE_FLAGS} -DENABLE_ZOLTAN")
-  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${MPI_DUNE_INCLUDE_PATH} ${ZOLTAN_INCLUDE_DIR})
-  set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} ${PARMETIS_LIBRARIES} -L${ZOLTAN_LIBDIR}")
+  set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${MPI_DUNE_INCLUDE_PATH} ${ZOLTAN_INCLUDE_DIR}
+    ${PTSCOTCH_INCLUDE_DIRS} ${PARMETIS_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" ${PTSCOTCH_LIBRARIES} ${PARMETIS_LIBRARIES} -L${ZOLTAN_LIBDIR} ${MPI_DUNE_LIBRARIES})
 
   # include necessary checks 
   include(CheckIncludeFileCXX)
@@ -56,6 +62,7 @@ message("Zoltan Dir: ${ZOLTAN_INCLUDE_DIR}")
   #endif(ZOLTAN_LIBRARY)
   
   cmake_pop_check_state()
+endif()
   
   # behave like a CMake module is supposed to behave
   include(FindPackageHandleStandardArgs)
@@ -71,8 +78,10 @@ message("Zoltan Dir: ${ZOLTAN_INCLUDE_DIR}")
   
   # if both headers and library are found, store results
   if(ZOLTAN_FOUND)
-    set(ZOLTAN_INCLUDE_DIRS ${ZOLTAN_INCLUDE_DIR})
-    set(ZOLTAN_LIBRARIES ${ZOLTAN_LIBRARY})
+    set(ZOLTAN_INCLUDE_DIRS ${ZOLTAN_INCLUDE_DIR} ${PARMETIS_INCLUDE_DIRS}
+      ${PTSCOTCH_INCLUDE_DIRS})
+    set(ZOLTAN_LIBRARIES ${ZOLTAN_LIBRARY} ${PARMETIS_LIBRARIES} ${PTSCOTCH_LIBRARIES})
+    set(ZOLTAN_LINK_FLAGS ${PARMETIS_LINK_FLAGS} ${PTSCOTCH_LINK_FLAGS} ${DUNE_MPI_LINK_FLAGS})
 
     message("Using: ${ZOLTAN_INCLUDE_DIRS} ${ZOLTAN_LIBRARIES}")
 
@@ -95,14 +104,10 @@ message("Zoltan Dir: ${ZOLTAN_INCLUDE_DIR}")
   
   #set HAVE_ZOLTAN for config.h
   set(HAVE_ZOLTAN ${ZOLTAN_FOUND})
-  
-  #add all zoltan related flags to ALL_PKG_FLAGS, this must happen regardless of a target using add_dune_zoltan_flags
-  if(ZOLTAN_FOUND)
-    set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "${ZOLTAN_DUNE_COMPILE_FLAGS}")
-    include_directories( ${ZOLTAN_INCLUDE_DIRS} )
-    foreach(dir "${ZOLTAN_INCLUDE_DIRS}")
-      set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-I${dir}")
-    endforeach()
-  endif()
 
-  #endif()
+  # register the flags
+  if(ZOLTAN_FOUND)
+    dune_register_package_flags(INCLUDE_DIRS ${ZOLTAN_INCLUDE_DIRS}
+                                LIBRARIES ${ZOLTAN_LIBRARIES}
+                                COMPILE_DEFINITIONS ${ZOLTAN_DUNE_COMPILE_FLAGS})
+  endif()

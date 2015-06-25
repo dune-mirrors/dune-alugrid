@@ -8,8 +8,6 @@
 # DLMALLOC_FOUND          True if DLMALLOC was found and usable
 # HAVE_DLMALLOC           True if DLMALLOC was found and usable
 # DLMALLOC_INCLUDE_DIRS   Path to the DLMALLOC include dirs
-# DLMALLOC_LIBRARIES      Name of the DLMALLOC libraries
-#
 
 #set(DLMALLOC_ROOT "" CACHE PATH "Path list to search for DLMALLOC")
 
@@ -59,3 +57,8 @@ endif(DLMALLOC_FOUND)
 
 #set HAVE_DLMALLOC for config.h
 set(HAVE_DLMALLOC ${DLMALLOC_FOUND})
+
+# register package
+if(DLMALLOC_FOUND)
+  dune_register_package_flags(INCLUDE_DIRS ${DLMALLOC_SOURCE_INCLUDE})
+endif()
