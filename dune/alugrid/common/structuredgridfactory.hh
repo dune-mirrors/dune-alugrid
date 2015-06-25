@@ -374,7 +374,11 @@ namespace Dune
           if( isec.boundary() )
             factory.insertBoundary( elementIndex, faceNumber );
           // insert process boundary if the neighboring element has a different rank
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+          if( isec.neighbor() && (partitioner.rank( isec.outside() ) != myrank) )
+#else
           if( isec.neighbor() && (partitioner.rank( *isec.outside() ) != myrank) )
+#endif
             factory.insertProcessBorder( elementIndex, faceNumber );
         }
       }
