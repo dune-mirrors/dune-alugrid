@@ -286,8 +286,12 @@ inline void FiniteVolumeScheme< V, Model >
     if( intersection.neighbor() )
     {
       // access neighbor
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      const Entity &neighbor = intersection.outside();
+#else
       const EntityPointer outside = intersection.outside();
       const Entity &neighbor = *outside;
+#endif
 
       // compute flux from one side only
       if( update.visitElement( neighbor ) )
@@ -382,8 +386,12 @@ inline size_t FiniteVolumeScheme< V, Model >
       else
       {
         // access neighbor
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+        const Entity &neighbor = intersection.outside();
+#else
         const EntityPointer outside = intersection.outside();
         const Entity &neighbor = *outside;
+#endif
         const RangeType &uRight = solution[ neighbor ];
 
         const GlobalType point = intersectionGeometry.center();
