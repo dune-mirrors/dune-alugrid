@@ -19,7 +19,7 @@ find_package(ParMETIS)
 
 #look for header files at positions given by the user
 find_path(ZOLTAN_INCLUDE_DIR zoltan.h
-  PATHS ${ZOLTAN_ROOT} 
+  PATHS ${ZOLTAN_ROOT}
   PATH_SUFFIXES "include"
   NO_DEFAULT_PATH
 )
@@ -31,7 +31,7 @@ message("Zoltan Dir: ${ZOLTAN_INCLUDE_DIR}")
 
   #set(ZOLTAN_INCLUDEDIR "${ZOLTAN_INCLUDE_DIR}" CACHE PATH "directory with ZOLTAN headers inside")
   set(ZOLTAN_LIBDIR "${ZOLTAN_ROOT}/lib") # CACHE PATH "directory with ZOLTAN libraries inside")
-  
+
 if(ZOLTAN_INCLUDE_DIR)
   # check header usability
   include(CMakePushCheckState)
@@ -41,7 +41,7 @@ if(ZOLTAN_INCLUDE_DIR)
     ${PTSCOTCH_INCLUDE_DIRS} ${PARMETIS_INCLUDE_DIRS})
   set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" ${PTSCOTCH_LIBRARIES} ${PARMETIS_LIBRARIES} -L${ZOLTAN_LIBDIR} ${MPI_DUNE_LIBRARIES})
 
-  # include necessary checks 
+  # include necessary checks
   include(CheckIncludeFileCXX)
   check_include_files(zoltan.h ZOLTAN_HEADER_USABLE)
 
@@ -49,7 +49,7 @@ if(ZOLTAN_INCLUDE_DIR)
   find_library(ZOLTAN_LIBRARY
     NAMES "zoltan"
     PATHS ${ZOLTAN_ROOT}
-    PATH_SUFFIXES "lib/.libs" "lib" 
+    PATH_SUFFIXES "lib/.libs" "lib"
     NO_DEFAULT_PATH
   )
 
@@ -60,10 +60,10 @@ if(ZOLTAN_INCLUDE_DIR)
   #  set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} -L${ZOLTAN_LIBDIR}")
   #  check_library_exists(zoltan Zoltan_LB_Partition ${ZOLTAN_LIBRARY} ZOLTAN_LIB_WORKS)
   #endif(ZOLTAN_LIBRARY)
-  
+
   cmake_pop_check_state()
 endif()
-  
+
   # behave like a CMake module is supposed to behave
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(
@@ -73,9 +73,9 @@ endif()
     ZOLTAN_LIBRARY
     ZOLTAN_HEADER_USABLE
   )
-  
+
   mark_as_advanced(ZOLTAN_INCLUDE_DIR ZOLTAN_LIBRARY ZOLTAN_LIB_WORKS ZOLTAN_HEADER_USABLE)
-  
+
   # if both headers and library are found, store results
   if(ZOLTAN_FOUND)
     set(ZOLTAN_INCLUDE_DIRS ${ZOLTAN_INCLUDE_DIR} ${PARMETIS_INCLUDE_DIRS}
@@ -92,7 +92,7 @@ endif()
       "Library directory: ${ZOLTAN_LIBRARIES}\n\n")
     set(ZOLTAN_DUNE_COMPILE_FLAGS "-I${ZOLTAN_INCLUDE_DIRS}"
       CACHE STRING "Compile Flags used by DUNE when compiling with ZOLTAN programs")
-    set(ZOLTAN_DUNE_LIBRARIES ${ZOLTAN_LIBRARIES} 
+    set(ZOLTAN_DUNE_LIBRARIES ${ZOLTAN_LIBRARIES}
       CACHE STRING "Libraries used by DUNE when linking ZOLTAN programs")
   else(ZOLTAN_FOUND)
     # log errornous result
@@ -101,7 +101,7 @@ endif()
       "Include directory: ${ZOLTAN_INCLUDE_DIRS}\n"
       "Library directory: ${ZOLTAN_LIBRARIES}\n\n")
   endif(ZOLTAN_FOUND)
-  
+
   #set HAVE_ZOLTAN for config.h
   set(HAVE_ZOLTAN ${ZOLTAN_FOUND})
 
