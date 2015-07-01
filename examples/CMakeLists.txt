@@ -1,7 +1,3 @@
-set(GRIDTYPE  ALUGRID_CUBE)
-set(GRIDDIM  3)
-set(WORLDDIM  3)
-
 set(SUBDIRS callback loadbalance backuprestore communication testEfficiency)
 
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
@@ -20,11 +16,10 @@ set(EXAMPLES main_transport
              main_ball 
              main_euler)
 
-
-
-add_definitions("-D${GRIDTYPE}")
-add_definitions("-DGRIDDIM=${GRIDDIM}")
-add_definitions("-DWORLDDIM=${WORLDDIM}")
+# set default grid type and dimensions
+add_definitions("-DALUGRID_CUBE")
+add_definitions("-DGRIDDIM=3")
+add_definitions("-DWORLDDIM=3")
 
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
