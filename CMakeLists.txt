@@ -27,9 +27,6 @@ list(APPEND CMAKE_MODULE_PATH ${dune-grid_MODULE_PATH}
 #include the dune macros
 include(DuneMacros)
 include(GridType) 
-include(OverloadCompilerFlags) 
-
-initialize_compiler_script()
 
 # start a dune project with information from dune.module
 dune_project()
@@ -48,5 +45,3 @@ add_subdirectory(cmake/modules)
 
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
-
-finalize_compiler_script()
