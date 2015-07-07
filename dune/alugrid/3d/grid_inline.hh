@@ -352,10 +352,6 @@ namespace Dune
   {
     typedef AdaptDataHandleInterface< GridImp, DataHandle > AdaptDataHandle;
 
-    typedef typename EntityObject::ImplementationType EntityImp;
-    EntityObject father( EntityImp( factory(), this->maxLevel() ) );
-    EntityObject son   ( EntityImp( factory(), this->maxLevel() ) );
-
     // true if at least one element was marked for coarsening
     bool mightCoarse = preAdapt();
 
@@ -366,8 +362,6 @@ namespace Dune
       // prolongation process
       ALU3DSPACE AdaptRestrictProlongGlSet< MyType, AdaptDataHandle, GlobalIdSetImp >
       rp(*this,
-         father,this->getRealImplementation(father),
-         son,   this->getRealImplementation(son),
          handle,
          *globalIdSet_);
 
@@ -377,8 +371,6 @@ namespace Dune
     {
        ALU3DSPACE AdaptRestrictProlongImpl< MyType, AdaptDataHandle >
        rp(*this,
-          father,this->getRealImplementation(father),
-          son,   this->getRealImplementation(son),
           handle);
 
       refined = myGrid().duneAdapt(rp); // adapt grid
