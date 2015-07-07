@@ -18,7 +18,6 @@ AC_CONFIG_FILES([
   dune/alugrid/3d/Makefile
   dune/alugrid/common/Makefile
   dune/alugrid/impl/Makefile
-  dune/alugrid/impl/2d/Makefile
   dune/alugrid/impl/duneinterface/Makefile
   dune/alugrid/impl/parallel/Makefile
   dune/alugrid/impl/serial/Makefile
