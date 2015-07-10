@@ -12,37 +12,31 @@ set(examples_HEADERS adaptation.hh
                      problem-euler.hh  
                      problem.hh)
 
-set(EXAMPLES main_transport 
-             main_ball 
-             main_euler)
-
-# set default grid type and dimensions
-add_definitions("-DALUGRID_CUBE")
-add_definitions("-DGRIDDIM=3")
-add_definitions("-DWORLDDIM=3")
-
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
+foreach( variant ball euler transport )
+  string( TOUPPER ${variant} variant_upper )
+  set( prog "main_${variant}" )
+  add_executable( ${prog} main.cc )
+  target_compile_definitions( ${prog} PRIVATE "${variant_upper}" )
+  target_compile_definitions( ${prog} PUBLIC "ALUGRID_CUBE" "GRIDDIM=3" "WORLDDIM=3" )
+  add_dune_mpi_flags( ${prog} )
+  dune_target_link_libraries( ${prog} "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}" )
 
-add_executable(main_transport main.cc)
-add_dune_mpi_flags(main_transport )
-dune_target_link_libraries(main_transport "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_transport APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT" )
-
-add_executable(main_ball main.cc)
-add_dune_mpi_flags(main_ball )
-dune_target_link_libraries(main_ball "${DUNE_LIBS};${LIBRARIES};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_ball APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL" )
-
-add_executable(main_euler main.cc)
-add_dune_mpi_flags(main_euler )
-dune_target_link_libraries(main_euler "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_euler APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER" )
+  foreach( type cube simplex )
+    string( TOUPPER ${type} type_upper )
+    foreach( dim RANGE 2 3 )
+      set( prog "main_${variant}_${type}_${dim}d" )
+      add_executable( ${prog} EXCLUDE_FROM_ALL main.cc )
+      target_compile_definitions( ${prog} PRIVATE "${variant_upper}" "ALUGRID_${type_upper}" "GRIDDIM=${dim}" "WORLDDIM=${dim}" )
+      add_dune_mpi_flags( ${prog} )
+      dune_target_link_libraries( ${prog} "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}" )
+    endforeach()
+  endforeach()
+endforeach()
 
 install(FILES ${examples_HEADERS} DESTINATION ${examplesdir})
+
 foreach(i ${SUBDIRS})
   if(${i} STREQUAL "test")
     set(opt EXCLUDE_FROM_ALL)
