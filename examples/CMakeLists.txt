@@ -1,4 +1,4 @@
-set(SUBDIRS callback loadbalance backuprestore communication testEfficiency)
+set(SUBDIRS callback dgf loadbalance backuprestore communication testEfficiency)
 
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
 set(examples_HEADERS adaptation.hh  
