@@ -17,14 +17,26 @@ namespace ALUGridSFC
   {
     typedef I Index;
 
-    template< class Coordinate >
-    ZCurve ( const Coordinate &a, const Coordinate &b )
+    template <class Coordinate>
+    void init( const Coordinate &a, const Coordinate &b )
     {
       for( int i = 0; i < dim; ++i )
       {
         o_[ i ] = std::min( double( a[ i ] ), double( b[ i ] ) );
         h_[ i ] = 1.0 / (std::max( double( a[ i ] ), double( b[ i ] ) ) - o_[ i ]);
       }
+    }
+
+    template< class Coordinate>
+    ZCurve ( const Coordinate &a, const Coordinate &b )
+    {
+      init( a, b );
+    }
+
+    template< class Coordinate, class Comm >
+    ZCurve ( const Coordinate &a, const Coordinate &b, const Comm&  )
+    {
+      init( a, b );
     }
 
     template< class Coordinate >
