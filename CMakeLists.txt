@@ -16,15 +16,20 @@ endif()
 
 #find dune-common and set the module path
 find_package(dune-common REQUIRED)
+
 list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH}
+  "${PROJECT_SOURCE_DIR}/cmake/modules")
+
+find_package(dune-grid)
+list(APPEND CMAKE_MODULE_PATH ${dune-grid_MODULE_PATH}
   "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 #include the dune macros
 include(DuneMacros)
+include(GridType) 
 
 # start a dune project with information from dune.module
 dune_project()
-
 set(SUBDIRS
   dune
   lib

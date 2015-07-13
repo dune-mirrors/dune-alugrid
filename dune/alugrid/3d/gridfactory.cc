@@ -18,6 +18,8 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
+#include <dune/alugrid/impl/parallel/zcurve.hh>
+
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline
 #else
@@ -309,7 +311,7 @@ namespace Dune
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#if USE_ALUGRID_SFC_ORDERING
     // the serial version do not special ordering
     // since no load balancing has to be done
     {
@@ -318,10 +320,10 @@ namespace Dune
 
       // if we are in parallel insertion mode we need communication
       const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
-      if( foundGlobalIndex )
+      if( foundGlobalIndex && comm.size() > 1 )
       {
         if( comm.rank() == 0 )
-          std::cerr << "WARNING: Hilbert space filling curve ordering does not work for parallel grid factory yet!" << std::endl;
+          std::cerr << "WARNING: Space filling curve ordering does not work for parallel grid factory, yet!" << std::endl;
         return ;
       }
 
@@ -350,7 +352,7 @@ namespace Dune
       // get element's center to hilbert index mapping
       SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
 
-      typedef std::map< double, int > hsfc_t;
+      typedef std::map< double, long int > hsfc_t;
       hsfc_t hsfc;
 
       for( size_t i=0; i<elemSize; ++i )
@@ -366,8 +368,8 @@ namespace Dune
         }
         center /= double(vxSize);
 
-        // generate hilbert index from element's center and store index
-        hsfc[ sfc.hilbertIndex( center ) ] = i;
+        // generate sfc index from element's center and store index
+        hsfc[ sfc.index( center ) ] = i;
       }
 
       typedef typename hsfc_t :: iterator iterator;
@@ -379,7 +381,6 @@ namespace Dune
       }
     }
 #endif
-
   }
 
   template< class ALUGrid >

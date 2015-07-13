@@ -4,8 +4,7 @@
 /compile
 /configure
 /config.guess
-/config.h
-/config.h.in
+/config.*
 /config.lt
 /config.status
 /config.sub
@@ -20,6 +19,7 @@
 /stamp-h1
 /test-driver
 
+config.*
 Makefile
 Makefile.in
 .deps
