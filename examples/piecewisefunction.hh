@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <fstream>
+#include <memory>
 
 #include <dune/common/dynvector.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
@@ -612,7 +613,15 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
     /* the vtk-Writer class takes ownership of the function added - VTKData
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
-      vtkWriter.addCellData( new This( data, i, "data" ) );
+    {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      std::shared_ptr< This >
+#else
+      This*
+#endif
+        ptr( new This( data, i, "data" ) );
+      vtkWriter.addCellData( ptr );
+    }
   }
   //! add a PiecewiseFunction to the VTKSequenceWriter
   static void addTo ( const Data &data, const std::string &name, Dune::VTKSequenceWriter< GridView > &vtkWriter )
@@ -620,13 +629,26 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
     /* the vtk-Writer class takes ownership of the function added - VTKData
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
-      vtkWriter.addCellData( new This( data, i, name ) );
+    {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      std::shared_ptr< This >
+#else
+      This*
+#endif
+        ptr( new This( data, i, "data" ) );
+      vtkWriter.addCellData( ptr );
+    }
   }
   //! add rank function for visualization of the partitioning
   static void addPartitioningData( const int rank, Dune::VTKSequenceWriter< GridView > &vtkWriter )
   {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+    vtkWriter.addCellData( std::shared_ptr< VolumeData< GridView > > ( new VolumeData< GridView >() ) );
+    vtkWriter.addCellData( std::shared_ptr< PartitioningData< GridView > > ( new PartitioningData< GridView >(rank) ) );
+#else
     vtkWriter.addCellData( new VolumeData< GridView >() );
     vtkWriter.addCellData( new PartitioningData< GridView >(rank) );
+#endif
   }
 
 private:

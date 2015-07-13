@@ -1,5 +1,4 @@
 set(SUBDIRS
-  2d
   3d
   common
   impl

@@ -17,6 +17,7 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
+#include <dune/alugrid/3d/topology.hh>
 
 #include <dune/alugrid/impl/binaryio.hh>
 #include <dune/alugrid/impl/byteorder.hh>
