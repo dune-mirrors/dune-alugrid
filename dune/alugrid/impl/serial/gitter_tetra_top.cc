@@ -401,6 +401,11 @@ namespace ALUGrid
                   f->nb.assign( this->nb ) ;
                 }
               }
+              //for bisection we want no hanging nodes
+              if(r.bisection()&& this->is2d())
+              {
+                neigh.first->refineBalance (r, neigh.second);
+              }
             }
             else
             {
@@ -697,6 +702,7 @@ namespace ALUGrid
           //std::cout << "refLikeEl: e01 " << std::endl;
           // if (!myhface (0)->refine (balrule_t (balrule_t::e01).rotate (twist (0)), twist (0))) return false ;
           if (! face.refine (r, twist (0))) return false ;
+
           split_bisection() ;
           break;
         case balrule_t::iso4 :
@@ -2159,7 +2165,10 @@ namespace ALUGrid
 
         // Vorsicht: Im Fall eines konformen Verfeinerers mu"s hier die entstandene Verfeinerung
         // untersucht werden und dann erst das Element danach verfeinert werden.
-        refineImmediate (r) ;
+        //
+        // getrule can have changed because of reucrsive nature of bisection refinement
+        if(r != getrule ())
+          refineImmediate (r) ;
         return true ;
       }
     }
@@ -2191,10 +2200,10 @@ namespace ALUGrid
         // if face is a leaf face
         if (! myhface (fce)->leaf ())
         {
-          _req = myrule_t::nosplit ;
+          _req = suggestRule() ;
 
-          if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
-            refineImmediate( myrule_t::bisect );
+          //if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
+            refine();
         }
       }
     }

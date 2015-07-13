@@ -61,6 +61,9 @@ namespace ALUGrid
       static inline bool isValid (const rule_t &) ;
       inline Hface4Rule rotate (int) const ;
 
+      // return true if rule is one of the bisection rules
+      bool bisection () const { return false; }
+
     private :
       rule_t _r ;
     } ;
