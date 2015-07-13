@@ -72,7 +72,7 @@ namespace Dune
       typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#ifdef USE_ALUGRID_SFC_ORDERING
       typedef SpaceFillingCurveOrdering< VertexType >  SpaceFillingCurveOrderingType;
 #endif
 
@@ -84,7 +84,7 @@ namespace Dune
         indexSet_( gridView_.indexSet() ),
         pSize_( comm_.size() ),
         elementCuts_( pSize_, -1 ),
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#ifdef USE_ALUGRID_SFC_ORDERING
         sfc_( lowerLeft, upperRight, comm_ ),
 #endif
         maxIndex_( double(indexSet_.size(0)-1) )
@@ -98,11 +98,11 @@ namespace Dune
       int rank( const Entity &entity ) const
       {
         alugrid_assert ( Entity::codimension == 0 );
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#ifdef USE_ALUGRID_SFC_ORDERING
         // get center of entity's geometry
         VertexType center = entity.geometry().center();
         // get hilbert index in [0,1]
-        const double hidx = sfc_.hilbertIndex( center );
+        const double hidx = sfc_.index( center );
         // transform to element index
         const long int index = (hidx * maxIndex_);
 #else
@@ -187,7 +187,7 @@ namespace Dune
       const int pSize_;
       std::vector< long int > elementCuts_ ;
 
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#ifdef USE_ALUGRID_SFC_ORDERING
       // get element to hilbert index mapping
       SpaceFillingCurveOrdering< VertexType > sfc_;
 #endif
@@ -289,7 +289,7 @@ namespace Dune
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
-#if DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       return entity.subEntities( codim );
 #else
       return entity.template count< codim > ();

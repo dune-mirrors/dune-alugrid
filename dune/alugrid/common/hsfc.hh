@@ -5,31 +5,36 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
+#ifndef DISABLE_ALUGRID_SFC_ORDERING
+#define USE_ALUGRID_SFC_ORDERING 1
+#else
+#warning "ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING"
+#endif
+
 // to disable Zoltans HSFC ordering of the macro elements define
 // DISABLE_ZOLTAN_HSFC_ORDERING on the command line
 #if HAVE_ZOLTAN && HAVE_MPI
-#ifndef DISABLE_ZOLTAN_HSFC_ORDERING
-#define USE_ZOLTAN_HSFC_ORDERING
-#else
-#warning "ZOLTAN_HSFC_ORDERING disabled by DISABLE_ZOLTAN_HSFC_ORDERING"
-#endif
+#define USE_ZOLTAN_SFC_ORDERING 1
 #endif
 
-#ifdef USE_ZOLTAN_HSFC_ORDERING
+#include <dune/alugrid/impl/parallel/zcurve.hh>
+#if HAVE_ZOLTAN
 #include <dune/alugrid/impl/parallel/aluzoltan.hh>
 
 extern "C" {
   extern double Zoltan_HSFC_InvHilbert3d (Zoltan_Struct *zz, double *coord);
   extern double Zoltan_HSFC_InvHilbert2d (Zoltan_Struct *zz, double *coord);
 }
+#endif
 
-namespace Dune {
+namespace ALUGridSFC {
 
+#if USE_ZOLTAN_SFC_ORDERING
   template <class Coordinate>
-  class SpaceFillingCurveOrdering
+  class ZoltanSpaceFillingCurveOrdering
   {
     // type of communicator
-    typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
+    typedef Dune :: CollectiveCommunication< typename Dune :: MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
 
     // type of Zoltan HSFC ordering function
@@ -45,10 +50,10 @@ namespace Dune {
     mutable Zoltan zz_;
 
   public:
-    SpaceFillingCurveOrdering( const Coordinate& lower,
-                               const Coordinate& upper,
-                               const CollectiveCommunication& comm =
-                               CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
+    ZoltanSpaceFillingCurveOrdering( const Coordinate& lower,
+                                     const Coordinate& upper,
+                                     const CollectiveCommunication& comm =
+                                     CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
         hsfcInv_( dimension == 3 ? Zoltan_HSFC_InvHilbert3d : Zoltan_HSFC_InvHilbert2d ),
@@ -71,10 +76,63 @@ namespace Dune {
       // return hsfc index in interval [0,1]
       return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
     }
+
+    // return unique hilbert index in interval [0,1] given an element's center
+    double index( const Coordinate& point ) const
+    {
+      assert( point.size() == (unsigned int)dimension );
+
+      Coordinate center ;
+      // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
+      for( int d=0; d<dimension; ++d )
+        center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
+
+      // return hsfc index in interval [0,1]
+      return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
+    }
+  };
+#endif // if HAVE_ZOLTAN
+}
+
+namespace Dune {
+
+  template <class Coordinate>
+  class SpaceFillingCurveOrdering : public
+#if USE_ZOLTAN_SFC_ORDERING
+    ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate >
+#else
+#warning "(Zoltan && MPI) not found, using ALUGrid's ZCurve ordering"
+    ::ALUGridSFC::ZCurve< long int, Coordinate::dimension>
+#endif
+  {
+
+#if USE_ZOLTAN_SFC_ORDERING
+    typedef ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate > BaseType;
+#else
+    typedef ::ALUGridSFC::ZCurve< long int, Coordinate::dimension> BaseType;
+#endif
+
+    // type of communicator
+    typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
+        CollectiveCommunication ;
+
+  public:
+    SpaceFillingCurveOrdering( const Coordinate& lower,
+                               const Coordinate& upper,
+                               const CollectiveCommunication& comm =
+                               CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
+      : BaseType( lower, upper, comm )
+    {
+    }
+
+    // return unique hilbert index in interval [0,1] given an element's center
+    double index( const Coordinate& point ) const
+    {
+      return double( BaseType :: index( point ) );
+    }
   };
 
 } // end namespace Dune
 
-#endif // #ifdef USE_ZOLTAN_HSFC_ORDERING
-
+#undef USE_ZOLTAN_SFC_ORDERING
 #endif // #ifndef DUNE_ALU3DGRID_HSFC_HH
