@@ -4,6 +4,8 @@
 #include <dune/common/timer.hh>
 
 #include <dune/alugrid/impl/serial/myalloc.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 //#define PRINT_IDENTIFICATION_TIMES
 
@@ -369,12 +371,10 @@ std::vector<double> getMemoryUsage()
   // dune-alugrid version
   memUsage.push_back(double(ALUGrid::MyAlloc::allocatedMemory())/1024.0/1024.0);
 #endif
-  /*
   struct rusage info;
   getrusage( RUSAGE_SELF, &info );
   // convert to KB
   memUsage.push_back(double(info.ru_maxrss)/ 1024.0);
-  */
   return memUsage;
 }
 
