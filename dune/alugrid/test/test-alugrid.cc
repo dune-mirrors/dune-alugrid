@@ -111,17 +111,14 @@ struct SimplePartition
   /** this method is called before invoking the re-partition
       method on the grid, to check if the user defined
       partitioning needs to be readjusted */
-  bool repartition ()
-  {
-    return true;
-  }
+  bool repartition () { return true; }
 
   /** This method is called for each macro element to determine the new process number */
   int operator()( const Element &element ) const
   {
     const int id = macroView_.macroId( element );
     // return rank destination number
-    return id % grid_.comm().size();
+    return 0;///id % grid_.comm().size();
   }
 
   // recompute imported ranks
@@ -140,11 +137,16 @@ void makeNonConfGrid(GridType &grid,int level,int adapt)
   int myrank = grid.comm().rank();
 
   // test user specified load balance
+  /*
   {
     typedef SimplePartition<GridType> Partitioner;
     Partitioner ldb(grid);
     grid.repartition( ldb );
   }
+  */
+
+  // wait for lb to finish
+  grid.comm().barrier();
 
   // switch back to default
   grid.loadBalance();
