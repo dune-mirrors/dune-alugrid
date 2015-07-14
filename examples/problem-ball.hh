@@ -22,7 +22,7 @@ struct BallData
 
   const static int dimDomain = DomainType::dimension;
 
-  explicit BallData (const int problem) : c_(0.5), r0_(0.3), problem_( problem )
+  explicit BallData (const int problem) : c_(0.5), r0_(0.3), problem_( dimDomain == 3 ? problem : 0)
   {}
 
   //! \copydoc ProblemData::gridFile
