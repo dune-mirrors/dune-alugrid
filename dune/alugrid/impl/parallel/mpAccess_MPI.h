@@ -169,23 +169,6 @@ namespace ALUGrid
 
 // include inline implementation
 #include <dune/alugrid/impl/parallel/mpAccess_MPI_inline.h>
-
-namespace ALUGrid
-{
-  inline int isMaterRank() { int r=0;
-    MPI_Initialized( &r );
-    if( r ) MPI_Comm_rank( MPI_COMM_WORLD, &r);
-    return r == 0 ;
-  }
-}
-
-#else  // #if HAVE_MPI
-
-namespace ALUGrid
-{
-  inline int isMaterRank() { return 1; }
-}
-
 #endif // #if HAVE_MPI
 
 #endif // #ifndef MPACCESS_MPI_H_INCLUDED

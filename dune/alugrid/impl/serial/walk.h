@@ -654,8 +654,6 @@ namespace ALUGrid
     else return (C &) _walk1.A::item ();
   }
 
-  void initialize ();
-
   ////////////////////////////////////////////////////////////////////////////////
   //
   //  --VectorAlign

@@ -805,11 +805,6 @@ namespace ALUGrid
     return;
   }
 
-  void initialize ()
-  {
-    Gitter::Makrogitter::_msg.dump();
-  }
-
   void MacroGridBuilder::
   computeVertexElementLinkage( elementMap_t& elementMap,
                                Gitter::ElementPllXIF::vertexelementlinkage_t& vxElemLinkage )

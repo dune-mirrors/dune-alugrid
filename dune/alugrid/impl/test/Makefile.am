@@ -1,5 +1,9 @@
 EXTRA_PROGRAMS = adapt backuprestore sizes checkrefinement aluthreadsafety
 
+AM_CPPFLAGS += $(DUNEMPICPPFLAGS)
+AM_LDFLAGS += $(DUNEMPILDFLAGS)
+LDADD += $(DUNEMPILIBS)
+
 ALUSOURCES = \
   $(top_srcdir)/dune/alugrid/impl/binaryio.cc \
   $(top_srcdir)/dune/alugrid/impl/macrofileheader.cc \

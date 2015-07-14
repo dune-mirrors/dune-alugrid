@@ -2223,6 +2223,9 @@ namespace ALUGrid
       _mpaccess(mpa), _macrogitter (0) , _ppv( 0 )
   {
     _macrogitter = new MacroGitterBasisPll (dim, this);
+
+    dumpInfo();
+
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
@@ -2285,6 +2288,8 @@ namespace ALUGrid
     // create empty macro gitter
     if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this);
 
+    dumpInfo();
+
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
@@ -2299,6 +2304,9 @@ namespace ALUGrid
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << &in << "\" ...)" << std::endl, 1) : 1);
 
     _macrogitter = new MacroGitterBasisPll (dim, this, in);
+
+    dumpInfo();
+
     alugrid_assert ( _macrogitter );
     notifyMacroGridChanges ();
   }
