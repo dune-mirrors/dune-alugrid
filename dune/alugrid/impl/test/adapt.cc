@@ -290,9 +290,9 @@ int main (int argc, char ** argv, const char ** envp)
 
     {
 #if HAVE_MPI
-      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(macroname.c_str(),mpa);
+      ALUGrid::GitterDunePll* gridPtr = new ALUGrid::GitterDunePll(3, macroname.c_str(),mpa);
 #else
-      ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(macroname.c_str());
+      ALUGrid::GitterDuneImpl* gridPtr = new ALUGrid::GitterDuneImpl(3, macroname.c_str());
 #endif
       bool closure = needConformingClosure( *gridPtr, useClosure );
 #if HAVE_MPI
