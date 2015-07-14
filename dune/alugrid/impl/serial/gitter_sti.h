@@ -10,7 +10,6 @@
 #include "../macrofileheader.hh"
 #include "../indexstack.h"
 #include "../parallel/gitter_pll_ldb.h"
-#include "../parallel/mpAccess_MPI.h"
 #include "../projectvertex.h"
 
 #include "myalloc.h"
@@ -1396,7 +1395,6 @@ namespace ALUGrid
                         public AccessIterator < helement_STI >, public AccessIterator < hperiodic_STI >
     {
     protected :
-      Makrogitter ();
       virtual ~Makrogitter ();
     public :
       struct MkGitName
@@ -1404,18 +1402,20 @@ namespace ALUGrid
         std::string name;
         bool ptr;
         MkGitName( const std::string& n ) : name( n ), ptr( false ){}
-        void dump()
+        template <class T>
+        inline void dump( T t )
         {
 #ifdef _OPENMP
 #pragma omp critical
 #endif
           {
-            if( isMaterRank() )
-              if( ! ptr ) { std::cout << std::endl << name; ptr = true ; }
+            if( ! ptr ) { std::cerr << std::endl << name; ptr = true ; }
           }
-        } ~MkGitName() { if( ptr ) std::cerr << std::endl << name ; }
+        } ~MkGitName() { if( ptr ) std::cout << std::endl << name ; }
       };
       static MkGitName _msg;
+
+      virtual void dumpInfo() const { _msg.dump( 1 ); }
 
       virtual int iterators_attached () const;
       virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;

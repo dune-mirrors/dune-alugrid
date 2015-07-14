@@ -876,11 +876,6 @@ namespace ALUGrid
      AccessIterator < hbndseg_STI >::ref;
   }
 
-  Gitter::Makrogitter::Makrogitter ()
-  {
-    initialize();
-  }
-
   Gitter::Makrogitter::~Makrogitter ()
   {
     if( iterators_attached() )
