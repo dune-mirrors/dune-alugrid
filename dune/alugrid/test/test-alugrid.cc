@@ -680,9 +680,26 @@ int main (int argc , char **argv) {
         typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
         std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
-        Dune::GridPtr< GridType > gridPtr(filename);
-        checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2);
+        Dune::GridPtr< GridType > gridPtr( filename );
+        GridType & grid = *gridPtr;
+        grid.loadBalance();
+
+        checkCapabilities< false >( grid );
+
+        {
+          std::cout << "Check serial grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+        }
+
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -692,8 +709,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1 );
+        SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
+        surfaceGrid.loadBalance();
+        checkCapabilities< false >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1 );
       }
 
       // check non-conform ALUGrid for 2d
@@ -703,9 +722,25 @@ int main (int argc , char **argv) {
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
-        checkCapabilities< false >( *gridPtr );
-        checkALUSerial(*gridPtr, 2);
+        GridType & grid = *gridPtr;
+        grid.loadBalance();
 
+        checkCapabilities< false >( grid );
+
+        {
+          std::cout << "Check serial grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+        }
+
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
@@ -714,8 +749,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< false >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1 );
+        SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
+        surfaceGrid.loadBalance();
+        checkCapabilities< false >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1 );
       }
 
       // check conform ALUGrid for 2d
@@ -724,8 +761,25 @@ int main (int argc , char **argv) {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
-        checkCapabilities< true >( *gridPtr );
-        checkALUSerial(*gridPtr, 2);
+        GridType & grid = *gridPtr;
+        grid.loadBalance();
+
+        checkCapabilities< true >( grid );
+
+        {
+          std::cout << "Check serial grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+        }
+
+        // perform parallel check only when more then one proc
+        if(mysize > 1)
+        {
+          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+          checkALUParallel(grid,1,0);
+          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+          checkALUParallel(grid,0,2);
+        }
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
@@ -736,8 +790,10 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
-        checkCapabilities< true >( *surfaceGridPtr );
-        checkALUSerial( *surfaceGridPtr, 1 );
+        SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
+        surfaceGrid.loadBalance();
+        checkCapabilities< true >( surfaceGrid );
+        checkALUSerial( surfaceGrid, 1 );
       }
 #endif // #ifndef NO_2D
 
