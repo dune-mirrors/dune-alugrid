@@ -6,12 +6,14 @@
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
 #else
 
+// include grid first to avoid includes from dune-grid/grid/alugrid
+#include <dune/alugrid/grid.hh>
+
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/parser.hh>
 #include <dune/grid/io/file/dgfparser/blocks/projection.hh>
 
-#include <dune/alugrid/grid.hh>
 
 namespace Dune
 {
