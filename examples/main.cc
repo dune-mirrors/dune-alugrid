@@ -63,7 +63,7 @@ void method ( int problem, int startLvl, int maxLvl,
 
   Grid &grid = *gridPtr;
 
-  if( grid.comm().rank() == 0 )
+  if( grid.comm().size() == 1 )
   {
     std::ofstream file( "curve.gnu" );
     printSpaceFillingCurve( grid, file );
