@@ -258,7 +258,7 @@ namespace Dune
                           const std::string &filename );
 
 
-    static Grid* callDirectly( const char* gridname,
+    static Grid* callDirectly( const std::string& gridname,
                                const int rank,
                                const char *filename,
                                MPICommunicatorType communicator )
@@ -356,7 +356,11 @@ namespace Dune
         fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
-        grid_ = callDirectly( "ALUGrid< " << dim << ", " << dimw << ", eltype, ref, comm >", this->rank( comm ), filename.c_str(), comm );
+      {
+        std::stringstream gridname;
+        gridname << "ALUGrid< " << dim << ", " << dimw << ", eltype, ref, comm >";
+        grid_ = callDirectly( gridname.str(), this->rank( comm ), filename.c_str(), comm );
+      }
     }
 
   protected:
