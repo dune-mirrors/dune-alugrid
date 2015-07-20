@@ -356,7 +356,7 @@ namespace Dune
         fileFound = generate( input, comm, filename );
 
       if( ! fileFound )
-        grid_ = callDirectly( "ALUGrid< 3, 3, eltype, ref, comm >", this->rank( comm ), filename.c_str(), comm );
+        grid_ = callDirectly( "ALUGrid< " << dim << ", " << dimw << ", eltype, ref, comm >", this->rank( comm ), filename.c_str(), comm );
     }
 
   protected:
