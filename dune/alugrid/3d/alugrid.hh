@@ -46,6 +46,9 @@ namespace Dune
   class ALUGrid
   : public ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid
   {
+    // the cube version of ALUGrid only works with nonconforming refinement
+    static_assert( elType == cube ? refineType == nonconforming : true, "cube only works with nonconforming refinement");
+
     typedef ALUGrid< dim, dimworld, elType, refineType, Comm > This;
     typedef typename ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid  BaseType;
 
