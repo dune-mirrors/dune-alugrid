@@ -1,6 +1,7 @@
 #ifndef ALUGRID_PARALLEL_DGF_HH
 #define ALUGRID_PARALLEL_DGF_HH
 
+#include <dune/alugrid/common/structuredgridfactory.hh>
 #include <dune/grid/io/file/dgfparser/dgfs.hh>
 
 #if ! HAVE_ALUGRID
@@ -31,7 +32,7 @@ namespace Dune
     static GridPtr< Grid > create( const std::string& filename )
     {
       typedef StructuredGridFactory< Grid > SGF;
-      return SGF :: createCubeGrid( filename );
+      return GridPtr< Grid >( SGF :: createCubeGrid( filename ).release() ) ;
     }
   };
 #endif // if ! HAVE_ALUGRID
