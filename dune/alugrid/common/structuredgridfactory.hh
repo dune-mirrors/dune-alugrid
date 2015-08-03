@@ -41,6 +41,9 @@ namespace Dune
   {
   public:
     typedef ALUGrid< dim, dimworld, eltype, refineType, Comm > Grid;
+    // mygrid_ptr in GridPtr is a derived from std::shared_ptr and implements a method release
+    typedef typename Dune::GridPtr< Grid > :: mygrid_ptr  SharedPtrType;
+
   protected:
     typedef StructuredGridFactory< Grid > This;
 
@@ -202,7 +205,7 @@ namespace Dune
     typedef Dune :: CollectiveCommunication< MPICommunicatorType >
         CollectiveCommunication ;
 
-    static GridPtr< Grid >
+    static SharedPtrType
     createCubeGrid( const std::string& filename,
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
@@ -214,7 +217,7 @@ namespace Dune
       return createCubeGrid( file, filename, mpiComm );
     }
 
-    static GridPtr< Grid >
+    static SharedPtrType
     createCubeGrid( std::istream& input,
                     const std::string& name,
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
@@ -257,7 +260,8 @@ namespace Dune
       if( ! sgridCreated )
       {
         // use traditional DGF method
-        return GridPtr< Grid >( input, mpiComm );
+        GridPtr< Grid > grid( input, mpiComm );
+        return SharedPtrType ( grid.release() );
       }
       else
       {
@@ -274,7 +278,31 @@ namespace Dune
     }
 
     template < class int_t >
-    static GridPtr< Grid >
+    static SharedPtrType
+    createSimplexGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
+                        const FieldVector<ctype,dimworld>& upperRight,
+                        const array< int_t, dim>& elements,
+                        MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
+    {
+      // create DGF interval block and use DGF parser to create simplex grid
+      std::stringstream dgfstream;
+      dgfstream << "DGF" << std::endl;
+      dgfstream << "Interval" << std::endl;
+      dgfstream << lowerLeft  << std::endl;
+      dgfstream << upperRight << std::endl;
+      for( int i=0; i<dim; ++ i)
+        dgfstream << elements[ i ] << " ";
+      dgfstream << std::endl;
+      dgfstream << "#" << std::endl;
+      dgfstream << "Simplex" << std::endl;
+      dgfstream << "#" << std::endl;
+
+      Dune::GridPtr< Grid > grid( dgfstream, mpiComm );
+      return std::make_shared( grid.release() );
+    }
+
+    template < class int_t >
+    static SharedPtrType
     createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                      const FieldVector<ctype,dimworld>& upperRight,
                      const array< int_t, dim>& elements,
@@ -297,7 +325,7 @@ namespace Dune
     }
 
     template < class int_t >
-    static GridPtr< Grid >
+    static SharedPtrType
     createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
                          const FieldVector<ctype,dimworld>& upperRight,
                          const array< int_t, dim>& elements,
@@ -383,8 +411,8 @@ namespace Dune
         }
       }
 
-      // create grid pointer (behaving like a shared_ptr)
-      return GridPtr< Grid> ( factory.createGrid( true, true, name ) );
+      // create shared grid pointer
+      return SharedPtrType( factory.createGrid( true, true, name ) );
     }
   };
 
