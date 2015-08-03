@@ -1,9 +1,3 @@
-set(GRIDTYPE  ALUGRID_CUBE)
-set(GRIDDIM  3)
-set(WORLDDIM  3)
-
-set(SUBDIRS callback loadbalance dgf backuprestore communication testEfficiency)
-
 set(exampleslbdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/loadbalanacing)
 set(exampleslb_HEADERS adaptation.hh  
                        diagnostics.hh  
@@ -22,11 +16,8 @@ set(EXAMPLES main_transport_lb
              main_ball_lb 
              main_euler_lb)
 
-
-
-add_definitions("-D${GRIDTYPE}")
-add_definitions("-DGRIDDIM=${GRIDDIM}")
-add_definitions("-DWORLDDIM=${WORLDDIM}")
+add_definitions("-DALUGRID_CUBE")
+add_definitions("-DGRIDDIM=3")
 
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
