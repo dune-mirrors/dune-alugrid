@@ -4,7 +4,9 @@
 #include <config.h>
 
 #ifndef NDEBUG
+#ifndef DUNE_DEVEL_MODE
 #define DUNE_DEVEL_MODE
+#endif
 #define DUNE_INTERFACECHECK
 #endif
 
