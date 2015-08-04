@@ -1546,7 +1546,7 @@ namespace ALUGrid
         // use the refcount from DuneIndexProvider for level storage (to avoid +8 byte)
         // the level of creation
         unsigned char& lvl() { return DuneIndexProvider::ref._c; }
-        const unsigned char lvl() const { return DuneIndexProvider::ref._c; }
+        unsigned char lvl() const { return DuneIndexProvider::ref._c; }
       public :
         // reference counter (here unsigned int to avoid overflow)
         RefcountUnsignedInt ref;
