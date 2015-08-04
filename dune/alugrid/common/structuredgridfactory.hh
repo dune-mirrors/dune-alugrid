@@ -19,8 +19,13 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 // include DGF parser implementation for YaspGrid
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
+#else
+// include DGF parser implementation for SGrid
+#include <dune/grid/io/file/dgfparser/dgfs.hh>
+#endif
 
 namespace Dune
 {
@@ -223,7 +228,9 @@ namespace Dune
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
+#endif
 
       Dune::dgf::IntervalBlock intervalBlock( input );
       if( !intervalBlock.isactive() )
@@ -323,18 +330,26 @@ namespace Dune
     {
       const int myrank = comm.rank();
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 #if HAVE_MPI
       CollectiveCommunication   commSelf( MPI_COMM_SELF );
 #else
       CollectiveCommunication&  commSelf = comm;
 #endif
-
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
       std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
 
       // create YaspGrid to partition and insert elements that belong to process directly
       CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
+#else
+      typedef SGrid< dim, dimworld, double > CartesianGridType ;
+      FieldVector< int, dim > dims;
+      for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
+
+      // create SGrid to partition and insert elements that belong to process directly
+      CartesianGridType sgrid( dims, lowerLeft, upperRight );
+#endif
 
       typedef typename CartesianGridType :: LeafGridView GridView ;
       typedef typename GridView  :: IndexSet  IndexSet ;
