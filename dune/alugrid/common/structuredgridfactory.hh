@@ -331,15 +331,11 @@ namespace Dune
       const int myrank = comm.rank();
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-#if HAVE_MPI
-      CollectiveCommunication   commSelf( MPI_COMM_SELF );
-#else
-      CollectiveCommunication&  commSelf = comm;
-#endif
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
       std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
 
+      CollectiveCommunication commSelf( MPIHelper :: getLocalCommunicator() );
       // create YaspGrid to partition and insert elements that belong to process directly
       CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
 #else
