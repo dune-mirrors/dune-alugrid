@@ -3,7 +3,6 @@
 // (c) Robert Kloefkorn 2004 - 2005
 #include <config.h>
 
-#include <atomic>
 #include <sstream>
 
 #include <dune/alugrid/impl/macrofileheader.hh>
