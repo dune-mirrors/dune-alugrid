@@ -19,8 +19,8 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
-// include DGF parser implementation for SGrid
-#include <dune/grid/io/file/dgfparser/dgfs.hh>
+// include DGF parser implementation for YaspGrid
+#include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 
 namespace Dune
 {
@@ -223,58 +223,47 @@ namespace Dune
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
-      const int myrank = comm.rank();
+      static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
 
-      typedef SGrid< dim, dimworld, ctype > SGridType ;
+      Dune::dgf::IntervalBlock intervalBlock( input );
+      if( !intervalBlock.isactive() )
+        DUNE_THROW( Dune::DGFException, "No interval block found." );
+
+      if( intervalBlock.numIntervals() != 1 )
+        DUNE_THROW( Dune::DGFException, "YaspGrid can only handle 1 interval block." );
+
+      if( intervalBlock.dimw() != dim )
+      {
+        DUNE_THROW( DGFException,
+                    "Cannot read an interval of dimension " << intervalBlock.dimw()
+                                                            << " into a YaspGrid< " << dim << " >." );
+      }
+
+      const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
+
       // only work for the new ALUGrid version
       // if creation of SGrid fails the DGF file does not contain a proper
       // IntervalBlock, and thus we cannot create the grid parallel,
       // we will use the standard technique
-      bool sgridCreated = true ;
-      array<int, dim> dims;
-      FieldVector<ctype, dimworld> lowerLeft ( 0 );
-      FieldVector<ctype, dimworld> upperRight( 0 );
-      if( myrank == 0 )
+      std::array<int, dim> dims;
+      FieldVector<ctype, dimworld> lowerLeft;
+      FieldVector<ctype, dimworld> upperRight;
+      for( int i=0; i<dim; ++i )
       {
-        GridPtr< SGridType > sPtr;
-        try
-        {
-          sPtr = GridPtr< SGridType >( input, mpiComm );
-        }
-        catch ( DGFException & e )
-        {
-          sgridCreated = false ;
-          std::cout << "Caught DGFException on creation of SGrid, trying default DGF method!" << std::endl;
-        }
-        if( sgridCreated )
-        {
-          SGridType& sgrid = *sPtr ;
-          dims = sgrid.dims( 0 );
-          lowerLeft  = sgrid.lowerLeft();
-          upperRight = sgrid.upperRight();
-        }
+        dims[ i ]       = interval.n[ i ] ;
+        lowerLeft[ i ]  = interval.p[ 0 ][ i ];
+        upperRight[ i ] = interval.p[ 1 ][ i ];
       }
 
-      // get global min to be on the same path
-      sgridCreated = comm.min( sgridCreated );
-      if( ! sgridCreated )
-      {
-        // use traditional DGF method
-        GridPtr< Grid > grid( input, mpiComm );
-        return SharedPtrType ( grid.release() );
-      }
-      else
-      {
-        // broadcast array values
-        comm.broadcast( &dims[ 0 ], dim, 0 );
-        comm.broadcast( &lowerLeft [ 0 ], dim, 0 );
-        comm.broadcast( &upperRight[ 0 ], dim, 0 );
-      }
+      // broadcast array values
+      comm.broadcast( &dims[ 0 ], dim, 0 );
+      comm.broadcast( &lowerLeft [ 0 ], dim, 0 );
+      comm.broadcast( &upperRight[ 0 ], dim, 0 );
 
-      std::string nameS( name );
-      nameS += " via SGrid";
+      std::string nameYasp( name );
+      nameYasp += " via YaspGrid";
       typedef StructuredGridFactory< Grid > SGF;
-      return SGF :: createCubeGridImpl( lowerLeft, upperRight, dims, comm, nameS );
+      return SGF :: createCubeGridImpl( lowerLeft, upperRight, dims, comm, nameYasp );
     }
 
     template < class int_t >
@@ -334,14 +323,20 @@ namespace Dune
     {
       const int myrank = comm.rank();
 
-      typedef SGrid< dim, dimworld, ctype > SGridType ;
-      FieldVector< int, dim > dims;
+#if HAVE_MPI
+      CollectiveCommunication   commSelf( MPI_COMM_SELF );
+#else
+      CollectiveCommunication&  commSelf = comm;
+#endif
+
+      typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
+      std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
 
-      // create SGrid to partition and insert elements that belong to process directly
-      SGridType sgrid( dims, lowerLeft, upperRight );
+      // create YaspGrid to partition and insert elements that belong to process directly
+      CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
 
-      typedef typename SGridType :: LeafGridView GridView ;
+      typedef typename CartesianGridType :: LeafGridView GridView ;
       typedef typename GridView  :: IndexSet  IndexSet ;
       typedef typename IndexSet  :: IndexType IndexType ;
       typedef typename GridView  :: template Codim< 0 > :: Iterator ElementIterator ;
@@ -365,8 +360,6 @@ namespace Dune
       std::vector< unsigned int > vertices( numVertices );
 
       int nextElementIndex = 0;
-      //const auto end = gridView.template end< 0 >();
-      //for( auto it = gridView.template begin< 0 >(); it != end; ++it )
       const ElementIterator end = gridView.template end< 0 >();
       for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
       {

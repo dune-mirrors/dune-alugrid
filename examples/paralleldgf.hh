@@ -2,7 +2,6 @@
 #define ALUGRID_PARALLEL_DGF_HH
 
 #include <dune/alugrid/common/structuredgridfactory.hh>
-#include <dune/grid/io/file/dgfparser/dgfs.hh>
 
 #if ! HAVE_ALUGRID
 #include <dune/alugrid/dgf.hh>
