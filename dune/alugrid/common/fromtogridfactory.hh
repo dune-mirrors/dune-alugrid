@@ -7,7 +7,6 @@
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
-#include <dune/grid/io/file/dgfparser/gridptr.hh>
 
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <dune/alugrid/common/declaration.hh>
