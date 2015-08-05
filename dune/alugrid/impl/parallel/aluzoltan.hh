@@ -40,8 +40,12 @@
 #endif
 
 #ifdef HAVE_MPI_WAS_UNDEFED_HERE
+#ifdef ENABLE_MPI
 // redefine our definition of HAVE_MPI if it was undef'd before
 #define HAVE_MPI ENABLE_MPI
+#else
+#define HAVE_MPI 1
+#endif
 #undef HAVE_MPI_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_MPI_WAS_UNDEFED_HERE
 
