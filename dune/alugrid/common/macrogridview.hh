@@ -157,14 +157,16 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ilevelbegin();
+      // return Grid::getRealImplementation( entity ).ilevelbegin();
+      return grid().ilevelbegin( entity );
     }
 
     /** \brief obtain end intersection iterator with respect to this view */
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).ilevelend();
+      // return Grid::getRealImplementation( entity ).ilevelend();
+      return grid().ilevelend( entity );
     }
 
     /** \brief obtain collective communication object */
