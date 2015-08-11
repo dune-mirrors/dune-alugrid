@@ -157,7 +157,6 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      // return Grid::getRealImplementation( entity ).ilevelbegin();
       return grid().ilevelbegin( entity );
     }
 
@@ -165,7 +164,6 @@ namespace Dune
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      // return Grid::getRealImplementation( entity ).ilevelend();
       return grid().ilevelend( entity );
     }
 
