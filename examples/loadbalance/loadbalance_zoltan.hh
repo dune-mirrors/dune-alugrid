@@ -82,6 +82,7 @@ public:
 
   // this method is called before invoking the repartition method on the
   // grid, to check if the user defined partitioning needs to be readjusted
+  // So it is not part of the interface
   bool repartition ()
   {
     int elements = grid_.size(0);

@@ -17,7 +17,7 @@ struct SimpleLoadBalanceHandle
 
   /** this method is called before invoking the re-partition
       method on the grid, to check if the user defined
-      partitioning needs to be readjusted */
+      partitioning needs to be readjusted  - so it's not part of the interface */
   bool repartition ()
   {
     angle_ += 2.*M_PI/50.;
@@ -79,7 +79,7 @@ struct SimpleLoadBalanceWeights
     const HierarchicIterator end = element.hend( mxl );
     int leafElements = 1 ;
     for( HierarchicIterator it = element.hbegin( mxl ); it != end; ++it )
-      ++ leafElements ;
+      leafElements += std::pow(2,it->level());    // weight each child with its level (i.e. smaller time step size required)
     return leafElements ;
   }
 

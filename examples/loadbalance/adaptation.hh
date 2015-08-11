@@ -214,7 +214,7 @@ inline void LeafAdaptation< Grid, Vector, LoadBalanceHandle > ::finalize()
     grid_.repartition( ldb_, dataHandle );
   }
 #else
-  grid_.loadBalance( dataHandle );
+  grid_.loadBalance( ldb_, dataHandle );
 #endif
   lbTime_ = lbTimer.elapsed();
 

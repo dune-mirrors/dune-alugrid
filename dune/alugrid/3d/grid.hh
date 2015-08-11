@@ -915,7 +915,7 @@ namespace Dune
     bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
-            < ThisType, GatherScatterType, DataHandleImpl, Data > DataHandleType;
+            < ThisType, GatherScatterType, DataHandleImpl, Data, false > DataHandleType;
       DataHandleType dataHandle( *this, dataHandleIF );
 
       // call the above loadBalance method with general GatherScatterType
@@ -936,11 +936,18 @@ namespace Dune
                        CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
-            < ThisType, LBWeights, DataHandleImpl, Data > DataHandleType;
+            < ThisType, LBWeights, DataHandleImpl, Data, false > DataHandleType;
       DataHandleType dataHandle( *this, dataHandleIF, weights );
 
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
+    }
+    template< class LBWeights >
+    bool loadBalance ( LBWeights &weights )
+    {
+      typedef ALU3DSPACE GatherScatterLoadBalance < ThisType, LBWeights, false > LoadBalanceHandleType;
+      LoadBalanceHandleType loadBalanceHandle( *this, weights );
+      return loadBalance( &loadBalanceHandle );
     }
 
     /** \brief Distribute the grid based on a user defined partitioning.
@@ -954,8 +961,8 @@ namespace Dune
     template< class LBDestinations >
     bool repartition ( LBDestinations &destinations )
     {
-      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBDestinations > LoadBalanceHandleType ;
-      LoadBalanceHandleType loadBalanceHandle( *this, destinations, true );
+      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBDestinations, true > LoadBalanceHandleType ;
+      LoadBalanceHandleType loadBalanceHandle( *this, destinations );
       return loadBalance( &loadBalanceHandle );
     }
 
@@ -973,8 +980,8 @@ namespace Dune
     bool repartition ( LBDestinations &destinations,
                        CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
-      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data > DataHandleType;
-      DataHandleType dataHandle( *this, dataHandleIF, destinations, true );
+      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data, true > DataHandleType;
+      DataHandleType dataHandle( *this, dataHandleIF, destinations );
 
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
