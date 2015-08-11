@@ -598,6 +598,15 @@ namespace ALUGrid
   template <class GridType, class LoadBalanceHandleType, bool useExternal>
   class GatherScatterLoadBalance : public GatherScatter
   {
+  protected:
+    typedef typename GridType::MPICommunicatorType Comm;
+
+    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
+    typedef typename ImplTraits::template Codim< GridType::dimension,  0 >::InterfaceType  HElementType;
+
+    typedef typename GridType :: template Codim< 0 > :: Entity     EntityType ;
+    typedef typename GridType :: template Codim< 0 > :: EntityImp  EntityImpType ;
+
     template < bool useHandlerOpts, typename D = void>
     struct UseExternalHandlerOpts
     {
@@ -606,17 +615,15 @@ namespace ALUGrid
       {
         return lb.importRanks( ranks );
       }
-      template <class Entity>
       int destination( const LoadBalanceHandleType &lb,
-                       const Entity& entity ) const
+                       const EntityType& entity ) const
       {
         return lb( entity );
       }
-      template <class Entity>
       int loadWeight( const LoadBalanceHandleType &lb,
-                      const Entity& entity ) const
+                      const EntityType& entity ) const
       {
-        return -1;
+        return lb( entity );
       }
     };
     template <typename D>
@@ -627,32 +634,25 @@ namespace ALUGrid
       {
         return false;
       }
-      template <class Entity>
       int destination( const LoadBalanceHandleType &lb,
-                       const Entity& entity ) const
+                       const EntityType& entity ) const
       {
         std::abort();
         return -1;
       }
-      template <class Entity>
       int loadWeight( const LoadBalanceHandleType &lb,
-                      const Entity& entity ) const
+                      const EntityType& entity ) const
       {
         std::abort();
         return -1;
       }
     };
+
+  private:
     // no copying
     GatherScatterLoadBalance( const GatherScatterLoadBalance& );
+
   protected:
-    typedef typename GridType::MPICommunicatorType Comm;
-
-    typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< GridType::dimension,  0 >::InterfaceType  HElementType;
-
-    typedef typename GridType :: template Codim< 0 > :: Entity     EntityType ;
-    typedef typename GridType :: template Codim< 0 > :: EntityImp  EntityImpType ;
-
     GridType & grid_;
 
     EntityType entity_;
@@ -734,7 +734,8 @@ namespace ALUGrid
       // make sure userDefinedLoadWeights is enabled
       alugrid_assert( userDefinedLoadWeights() );
       alugrid_assert ( elem.level() == 0 );
-      return UseExternalHandlerOpts< std::is_same<LoadBalanceHandleType, GatherScatter> ::value >().loadWeight( ldbHandle(), setEntity( elem ) );
+      static const bool useWeights = std::is_same<LoadBalanceHandleType, GatherScatter> :: value == false ;
+      return UseExternalHandlerOpts< useWeights >().loadWeight( ldbHandle(), setEntity( elem ) );
     }
 
   protected:
