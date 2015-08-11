@@ -522,7 +522,7 @@ namespace Dune
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
         // if no projection given we use global projection, otherwise identity
-        if( ! projection && !(it->second == boundaryId2d) && globalProjection_ )
+        if( ! projection && !(it->second == int(boundaryId2d)) && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
@@ -744,7 +744,7 @@ namespace Dune
       //build oriented faces and add to list of active faces
       for(int i = 0; i < numFaces ; ++i)
       {
-        Face2Type face = {element[ nextIndex[i] ], element[ nextIndex[ (i+1)%numFaces ] ]} ;
+        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%numFaces ] ]}};
         //this is the twist with respect to the global face orientation
         // we need it once from each side
         int twist = face[0] < face[1] ? 0 : -1;
@@ -813,7 +813,7 @@ namespace Dune
               //build the faces of outerElement with twists
               for (int f = 0 ; f< numFaces ; ++f)
               {
-                Face2Type face =  { outerElement[ nextIndex[ f%numFaces ] ],outerElement[nextIndex[(f+1)%numFaces]] } ;
+                Face2Type face =  {{ outerElement[ nextIndex[ f%numFaces ] ],outerElement[nextIndex[(f+1)%numFaces]] }} ;
                 int twist = face[0] < face[1] ? 0 : -1;
                 std::sort(face.begin(),face.end());
                 if(face == currentFace) continue;
