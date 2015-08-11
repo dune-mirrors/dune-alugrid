@@ -18,6 +18,8 @@
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
 
+#include <dune/alugrid/common/typetraits.hh>
+
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/alugrid/common/bndprojection.hh>
@@ -951,7 +953,7 @@ namespace Dune
         \return true if grid has changed
     */
     template< class LBWeights >
-    bool loadBalance ( LBWeights &weights )
+    typename std::enable_if< !IsDataHandle< LBWeights >::value, bool >::type loadBalance ( LBWeights &weights )
     {
       typedef ALU3DSPACE GatherScatterLoadBalance < ThisType, LBWeights, false > LoadBalanceHandleType;
       LoadBalanceHandleType loadBalanceHandle( *this, weights );
