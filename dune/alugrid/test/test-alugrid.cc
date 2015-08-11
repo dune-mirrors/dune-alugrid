@@ -460,8 +460,12 @@ void checkGrid( GridType& grid )
   try {
     gridcheck(grid);
     checkIterators( grid.leafGridView() );
-    for( int level = 0; level <= grid.maxLevel(); ++level )
-      checkIterators( grid.levelGridView( level ) );
+    checkIterators( grid.levelGridView(0) );
+    if( ! grid.conformingRefinement() )
+    {
+      for( int level = 1; level <= grid.maxLevel(); ++level )
+        checkIterators( grid.levelGridView( level ) );
+    }
   }
   catch (const Dune::Exception& e )
   {
