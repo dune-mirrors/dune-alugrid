@@ -111,7 +111,7 @@ void method ( int problem, int startLvl, int maxLvl,
   // ALUGrid internal load balancing, weights are the number of leaf elements
   // that are underneeth one macro element, see also adaptation.hh
   // Weights can only be passed together with a data handle.
-  grid.loadBalance();
+  grid.loadBalance( ldb );
 #endif
 
   typedef LeafAdaptation< Grid, DataType, LoadBalancer > AdaptationType;
