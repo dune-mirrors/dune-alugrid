@@ -135,7 +135,7 @@ public:
 	  std::vector<int> elementGID(NUM_GID_ENTRIES);
     // GIdType id = globalIdSet_.id(element);
     // id.getKey().extractKey(elementGID);
-	  elementGID[0] = grid_.macroView().macroId(element); //   element.impl().macroID();
+	  elementGID[0] = grid_.macroGridView().macroId(element); //   element.impl().macroID();
 
     // add one to the GIDs, so that they match the ones from Zoltan
     transform(elementGID.begin(), elementGID.end(), elementGID.begin(), bind2nd(std::plus<int>(), 1));
@@ -296,7 +296,7 @@ generateHypergraph()
   // (ALU can only partition on the macro level)
   const Dune::PartitionIteratorType partition = Dune::Interior_Partition;
   typedef typename Grid::MacroGridView GridView;
-  const GridView &gridView = grid_.macroView();
+  const GridView &gridView = grid_.macroGridView();
   typedef typename GridView::template Codim< 0 >::template Partition< partition >::Iterator Iterator;
   typedef typename Codim< 0 >::Entity Entity;
   typedef typename Entity::EntityPointer EntityPointer;
@@ -343,8 +343,12 @@ generateHypergraph()
       const Intersection &intersection = *iit;
       if( intersection.neighbor() )
 	    {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+		    const Entity &neighbor = intersection.outside();
+#else
         const EntityPointer pOutside = intersection.outside();
 		    const Entity &neighbor = *pOutside;
+#endif
 		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
         // use special ALU method that returns a pure integer tuple which is a
         // unique id on the macrolevel

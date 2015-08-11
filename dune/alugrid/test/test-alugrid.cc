@@ -189,36 +189,6 @@ void checkIteratorAssignment(GridType & grid)
     IteratorType it = grid.template lbegin<dim>(0);
     if( grid.maxLevel() > 0 ) it = grid.template lbegin<dim>(1);
   }
-
-  /*
-  {
-    enum { dim = GridType :: dimension };
-    typedef typename GridType :: template Codim<dim> :: LevelIterator
-      IteratorType;
-    typedef typename GridType::Traits::template Codim<dim>::EntityPointer EntityPointerType;
-
-    IteratorType it = grid.template lbegin<dim>(0);
-
-    if( it != grid.template lend<dim>(0) )
-    {
-      //assert ( it->level() == 0 );
-      EntityPointerType p( it );
-
-      //assert ( p->level() == 0 );
-
-      if( grid.maxLevel() > 0 ) // maxLevel is updated over all grids and could still be zero on this partition
-      {
-        it = grid.template lbegin<dim>(1);
-        if (grid.size(1,0)>0)
-        {
-          p = it;
-          //assert( it->level() == 1 );
-          //assert( p->level()  == 1 );
-        }
-      }
-    }
-  }
-  */
 }
 
 
@@ -344,26 +314,27 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
   }
 }
 
-template <int codim, class GridType>
-void checkIteratorCodim(GridType & grid)
+template <int codim, class GridView>
+void checkIteratorCodim(const GridView & gridView)
 {
-#ifdef NO_2D
-  typedef typename GridType::template Codim<codim>::
-     template Partition<Dune::InteriorBorder_Partition>::LeafIterator
+  typedef typename GridView::template Codim<codim>::
+     template Partition<Dune::InteriorBorder_Partition>::Iterator
         IteratorInteriorBorder;
 
-  typedef typename GridType::template Codim<codim>:: Geometry Geometry ;
-  typedef typename GridType:: ctype ctype;
+  typedef typename GridView::Grid::template Codim<codim>:: Geometry Geometry ;
+  typedef typename GridView::Grid::template Codim<codim>:: Entity   Entity;
+  typedef typename GridView::Grid:: ctype ctype;
 
   /** Loop only over the interior elements, not over ghost elements. */
-  const IteratorInteriorBorder endIterator = grid.template leafend< codim, Dune::InteriorBorder_Partition >();
-  for( IteratorInteriorBorder iter = grid.template leafbegin< codim, Dune::InteriorBorder_Partition >(); iter != endIterator; ++iter )
+  const IteratorInteriorBorder endIterator = gridView.template end< codim, Dune::InteriorBorder_Partition >();
+  for( IteratorInteriorBorder iter = gridView.template begin< codim, Dune::InteriorBorder_Partition >(); iter != endIterator; ++iter )
   {
+    const Entity& entity = *iter ;
     /** Provide geometry type of element. */
-    const Geometry& geo = iter->geometry();
+    const Geometry& geo = entity.geometry();
     if( geo.corners() > 1 )
     {
-      Dune::FieldVector<ctype, GridType::dimension>
+      Dune::FieldVector<ctype, GridView::Grid::dimensionworld>
         diff( geo.corner(0) - geo.corner(1) );
       if( diff.two_norm() < 1e-8 )
       {
@@ -372,16 +343,25 @@ void checkIteratorCodim(GridType & grid)
       }
     }
   }
-#endif // #ifdef NO_2D
+  // check intersection iterator
+  if( codim == 0 )
+    checkViewIntersectionIterator( gridView );
 }
 
 template <class GridType>
 void checkIterators( GridType& grid )
 {
-  checkIteratorCodim< 0 > ( grid );
-  checkIteratorCodim< 1 > ( grid );
-  checkIteratorCodim< 2 > ( grid );
-  checkIteratorCodim< GridType :: dimension > ( grid );
+  checkIteratorCodim< 0 > ( grid.leafGridView() );
+  checkIteratorCodim< 1 > ( grid.leafGridView() );
+  checkIteratorCodim< 2 > ( grid.leafGridView() );
+  if(  GridType :: dimension > 2 )
+    checkIteratorCodim< GridType :: dimension > ( grid.leafGridView() );
+
+  //checkIteratorCodim< 0 > ( grid.macroGridView() );
+  checkIteratorCodim< 1 > ( grid.macroGridView() );
+  checkIteratorCodim< 2 > ( grid.macroGridView() );
+  if(  GridType :: dimension > 2 )
+    checkIteratorCodim< GridType :: dimension > ( grid.macroGridView() );
 }
 
 template <int codim, class GridType>
