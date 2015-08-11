@@ -21,12 +21,7 @@ exampleslb_HEADERS = \
 
 # this does not compile with the old ALUGrid version
 if ! ALUGRID 
-
-if ZOLTAN
-ZOLTAN_PROG=main_zoltan
-endif
-check_PROGRAMS = main_internal main_weights main_simple $(ZOLTAN_PROG)
-
+check_PROGRAMS = main_internal main_weights main_simple main_zoltan 
 
 main_internal_SOURCES = main.cc
 main_internal_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) 
@@ -37,11 +32,8 @@ main_weights_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -D
 main_simple_SOURCES = main.cc
 main_simple_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_SIMPLELB=1 
 
-if ZOLTAN
 main_zoltan_SOURCES = main.cc
 main_zoltan_CPPFLAGS = $(AM_CPPFLAGS) $(DUNEMPICPPFLAGS) $(GRIDDIM_CPPFLAGS) -DUSE_ZOLTANLB=1
-endif
-
 endif
 
 dataclean:
