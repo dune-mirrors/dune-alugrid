@@ -595,9 +595,27 @@ namespace ALUGrid
   // --GatherScatterLoadBalance: ALU data handle implementation for user defined load balance
   //
   ////////////////////////////////////////////////////////////////////////////////////////////
-  template <class GridType, class LoadBalanceHandleType>
+  template <class GridType, class LoadBalanceHandleType,bool useExternal>
   class GatherScatterLoadBalance : public GatherScatter
   {
+    template <bool externalLB,typename D = void>
+    struct ExternalLB
+    {
+      bool importRank( const LoadBalanceHandleType &lb,
+                       std::set<int>& ranks ) const
+      {
+        return lb.importRanks( ranks );
+      }
+    };
+    template <typename D>
+    struct ExternalLB<false,D>
+    {
+      bool importRank( const LoadBalanceHandleType &lb,
+                       std::set<int>& ranks ) const
+      {
+        return false;
+      }
+    };
     // no copying
     GatherScatterLoadBalance( const GatherScatterLoadBalance& );
   protected:
@@ -618,25 +636,21 @@ namespace ALUGrid
 
     // true if userDefinedPartitioning is used, false if loadWeights is used
     // both are disabled if ldbHandle_ is NULL
-    const bool useExternal_ ;
 
   public:
     //! Constructor
     GatherScatterLoadBalance( GridType & grid,
-                              LoadBalanceHandleType& ldb,
-                              const bool useExternal )
+                              LoadBalanceHandleType& ldb)
       : grid_(grid),
         entity_( EntityImpType() ),
-        ldbHandle_( &ldb ),
-        useExternal_( useExternal )
+        ldbHandle_( &ldb )
     {}
 
     //! Constructor
     explicit GatherScatterLoadBalance( GridType & grid )
       : grid_(grid),
         entity_( EntityImpType() ),
-        ldbHandle_( 0 ),
-        useExternal_( false )
+        ldbHandle_( 0 )
     {}
 
     // return false, since no user dataHandle is present
@@ -645,19 +659,19 @@ namespace ALUGrid
     // return true if user defined partitioning methods should be used
     bool userDefinedPartitioning () const
     {
-      return useExternal_ && ldbHandle_ ;
+      return useExternal && ldbHandle_ ;
     }
 
     // return true if user defined load balancing weights are provided
     bool userDefinedLoadWeights () const
     {
-      return ! useExternal_ && ldbHandle_ ;
+      return ! useExternal && ldbHandle_ ;
     }
 
     // returns true if user defined partitioning needs to be readjusted
     bool repartition ()
     {
-      return userDefinedPartitioning(); // && ldbHandle().repartition();
+      return userDefinedPartitioning(); // Note: user calls repartition() before calling loadBalance on the grid
     }
 
     // return set of ranks data is imported from during load balance
@@ -665,7 +679,7 @@ namespace ALUGrid
     bool importRanks( std::set<int>& ranks ) const
     {
       alugrid_assert( userDefinedPartitioning() );
-      return ldbHandle().importRanks( ranks );
+      return ExternalLB<useExternal>().importRank( ldbHandle(), ranks );
     }
 
     // return set of ranks data is exported to during load balance
@@ -723,14 +737,14 @@ namespace ALUGrid
   // --GatherScatterLoadBalance: ALU data handle implementation for CommDataHandleIF
   //
   ////////////////////////////////////////////////////////////////////////////////////////
-  template <class GridType, class LoadBalanceHandleType, class DataHandleImpl, class Data>
+  template <class GridType, class LoadBalanceHandleType, class DataHandleImpl, class Data, bool useExternal>
   class GatherScatterLoadBalanceDataHandle
-    : public GatherScatterLoadBalance< GridType, LoadBalanceHandleType >
+    : public GatherScatterLoadBalance< GridType, LoadBalanceHandleType, useExternal >
   {
     // no copying
     GatherScatterLoadBalanceDataHandle( const GatherScatterLoadBalanceDataHandle& );
 
-    typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType > BaseType ;
+    typedef GatherScatterLoadBalance< GridType, LoadBalanceHandleType, useExternal > BaseType ;
   protected:
     static const int dimension = GridType :: dimension ;
     typedef typename GridType :: Traits :: HierarchicIterator HierarchicIterator;
@@ -802,9 +816,8 @@ namespace ALUGrid
     //! Constructor taking load balance handle and data handle
     GatherScatterLoadBalanceDataHandle( GridType & grid,
                                         DataHandleType& dh,
-                                        LoadBalanceHandleType& ldb,
-                                        const bool useExternal = false )
-      : BaseType( grid, ldb, useExternal ),
+                                        LoadBalanceHandleType& ldb)
+      : BaseType( grid, ldb ),
         dataHandle_( dh )
     {
       alugrid_assert( maxLevelConsistency() );
