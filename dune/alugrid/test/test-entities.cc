@@ -117,7 +117,9 @@ void checkEntity( HElemType* item )
   // checkGeom< Grid >( item );
 
   typedef Dune :: ALU3dGridEntity< 0, Grid::dimension, const Grid > EntityImpl;
-  typedef typename EntityImpl :: IMPLElementType  IMPLElementType ;
+  typedef Dune :: ALU3dImplTraits< Grid::elementType, typename Grid::MPICommunicatorType > ImplTraits;
+  typedef typename ImplTraits::IMPLElementType    IMPLElementType;
+
   const IMPLElementType& elem = *(dynamic_cast<IMPLElementType *> (item));
   Dune::ALUGridNoComm comm;
 
@@ -126,7 +128,7 @@ void checkEntity( HElemType* item )
 
   const int dim = Grid::dimension;
 
-  EntityImpl entity( grid.factory(), item->level() );
+  EntityImpl entity;
   entity.setElement( elem );
 
   checkGeometry( entity.geometry() );
