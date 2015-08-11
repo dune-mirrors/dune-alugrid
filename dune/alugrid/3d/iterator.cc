@@ -29,10 +29,10 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const FactoryType& factory, int level, bool )
   : ALU3dGridEntityPointer<codim,GridImp> ()
   , factory_( &factory )
-  , iter_( nullptr )
+  , iter_()
   , level_(level)
 {
-  iter_ = new IteratorType( grid(), level_, grid().nlinks() );
+  iter_.reset(new IteratorType( grid(), level_, grid().nlinks() ));
   alugrid_assert( iter_ );
   this->firstItem( grid(), *this, level_);
 }
@@ -43,7 +43,7 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const FactoryType& factory, int level)
   : ALU3dGridEntityPointer<codim,GridImp> ()
   , factory_( &factory )
-  , iter_( nullptr )
+  , iter_()
   , level_(level)
 {
   this->done();
@@ -54,7 +54,7 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   ALU3dGridLevelIterator(const ThisType & org )
   : ALU3dGridEntityPointer<codim,GridImp> ( org )
   , factory_( org.factory_ )
-  , iter_( nullptr )
+  , iter_()
   , level_( org.level_ )
 {
   assign(org);
@@ -72,11 +72,7 @@ alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
 removeIter ()
 {
   this->done();
-  if(iter_)
-  {
-    delete iter_;
-    iter_ = nullptr;
-  }
+  iter_.reset();
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -89,7 +85,7 @@ assign(const ThisType & org)
   level_ = org.level_;
   if( org.iter_ )
   {
-    iter_ = new IteratorType ( *(org.iter_) );
+    iter_.reset( new IteratorType ( *(org.iter_) ) );
     alugrid_assert ( iter_ );
     if(!(iter_->done()))
     {
@@ -131,7 +127,7 @@ alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 ALU3dGridLeafIterator( const FactoryType& factory, int level )
   : ALU3dGridEntityPointer <cdim,GridImp> ()
   , factory_( &factory )
-  , iter_( nullptr )
+  , iter_()
 {
   this->done();
 }
@@ -142,10 +138,10 @@ ALU3dGridLeafIterator(const FactoryType& factory, int level ,
                       bool isBegin)
   : ALU3dGridEntityPointer <cdim,GridImp> ()
   , factory_( &factory )
-  , iter_( nullptr )
+  , iter_()
 {
   // create interior iterator
-  iter_ = new IteratorType ( grid(), level , grid().nlinks() );
+  iter_.reset( new IteratorType ( grid(), level , grid().nlinks() ) );
   alugrid_assert ( iter_ );
   // -1 to identify as leaf iterator
   this->firstItem( grid(), *this, -1 );
@@ -156,7 +152,7 @@ alu_inline ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 ALU3dGridLeafIterator(const ThisType & org)
  : ALU3dGridEntityPointer <cdim,GridImp> ()
  , factory_( org.factory_ )
- , iter_( nullptr )
+ , iter_()
 {
   // assign iterator without cloning entity pointer again
   assign(org);
@@ -174,11 +170,7 @@ alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 removeIter ()
 {
   this->done();
-  if(iter_)
-  {
-    delete iter_;
-    iter_ = nullptr;
-  }
+  iter_.reset();
 }
 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -202,7 +194,7 @@ assign (const ThisType & org)
   if( org.iter_ )
   {
     alugrid_assert ( !org.iter_->done() );
-    iter_ = new IteratorType ( *(org.iter_) );
+    iter_.reset( new IteratorType ( *(org.iter_) ) );
     alugrid_assert ( iter_ );
 
     if( !(iter_->done() ))
