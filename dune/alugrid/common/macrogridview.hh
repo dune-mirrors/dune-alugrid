@@ -157,6 +157,7 @@ namespace Dune
     IntersectionIterator
     ibegin ( const typename Codim< 0 > :: Entity &entity ) const
     {
+      assert( entity.level() == level_ );
       return grid().ilevelbegin( entity );
     }
 
@@ -164,6 +165,7 @@ namespace Dune
     IntersectionIterator
     iend ( const typename Codim< 0 > :: Entity &entity ) const
     {
+      assert( entity.level() == level_ );
       return grid().ilevelend( entity );
     }
 

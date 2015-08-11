@@ -812,6 +812,22 @@ namespace Dune
 
     //! View for te macro grid with some alu specific methods
     template<PartitionIteratorType pitype>
+    typename Partition<pitype>::MacroGridView macroGridView() const
+    {
+      typedef typename Traits::template Partition<pitype>::MacroGridView View;
+      return View(*this);
+    }
+
+    //! View for te macro grid with some alu specific methods (All_Partition)
+    MacroGridView macroGridView() const
+    {
+      typedef MacroGridView View;
+      return View(*this);
+    }
+
+    //! View for te macro grid with some alu specific methods
+    template<PartitionIteratorType pitype>
+    DUNE_DEPRECATED_MSG("macroView is deprecated, use macroGridView")
     typename Partition<pitype>::MacroGridView macroView() const
     {
       typedef typename Traits::template Partition<pitype>::MacroGridView View;
@@ -819,6 +835,7 @@ namespace Dune
     }
 
     //! View for te macro grid with some alu specific methods (All_Partition)
+    DUNE_DEPRECATED_MSG("macroView is deprecated, use macroGridView")
     MacroGridView macroView() const
     {
       typedef MacroGridView View;
