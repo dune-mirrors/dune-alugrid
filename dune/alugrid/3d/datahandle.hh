@@ -595,10 +595,10 @@ namespace ALUGrid
   // --GatherScatterLoadBalance: ALU data handle implementation for user defined load balance
   //
   ////////////////////////////////////////////////////////////////////////////////////////////
-  template <class GridType, class LoadBalanceHandleType,bool useExternal>
+  template <class GridType, class LoadBalanceHandleType, bool useExternal>
   class GatherScatterLoadBalance : public GatherScatter
   {
-    template <bool externalLB,typename D = void>
+    template < bool externalLB, typename D = void>
     struct ExternalLB
     {
       bool importRank( const LoadBalanceHandleType &lb,
@@ -608,7 +608,7 @@ namespace ALUGrid
       }
     };
     template <typename D>
-    struct ExternalLB<false,D>
+    struct ExternalLB< false, D>
     {
       bool importRank( const LoadBalanceHandleType &lb,
                        std::set<int>& ranks ) const

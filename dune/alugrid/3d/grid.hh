@@ -942,6 +942,14 @@ namespace Dune
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
     }
+
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
+               the partitioning can be optimized by providing weights for each element on the macro grid.
+               The specific load balancing algorithm is selected from a file alugrid.cfg.
+        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element
+                which the includes in its internal loadbalancing process - for ALUGrid these are all macro elements.
+        \return true if grid has changed
+    */
     template< class LBWeights >
     bool loadBalance ( LBWeights &weights )
     {
