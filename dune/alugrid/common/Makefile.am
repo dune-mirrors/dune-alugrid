@@ -18,6 +18,7 @@ alucommon_HEADERS = alugrid_assert.hh \
                     persistentcontainer.hh \
                     structuredgridfactory.hh \
                     transformation.hh \
+		    typetraits.hh \
                     twists.hh \
                     writeparalleldgf.hh
 
