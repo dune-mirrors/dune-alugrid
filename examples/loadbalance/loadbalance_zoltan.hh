@@ -300,7 +300,6 @@ generateHypergraph()
   const GridView &gridView = grid_.macroGridView();
   typedef typename GridView::template Codim< 0 >::template Partition< partition >::Iterator Iterator;
   typedef typename Codim< 0 >::Entity Entity;
-  typedef typename Entity::EntityPointer EntityPointer;
 
   typedef typename GridView::IntersectionIterator IntersectionIterator;
   typedef typename IntersectionIterator::Intersection Intersection;
@@ -347,7 +346,7 @@ generateHypergraph()
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 		    const Entity &neighbor = intersection.outside();
 #else
-        const EntityPointer pOutside = intersection.outside();
+        const  typename Entity::EntityPointer pOutside = intersection.outside();
 		    const Entity &neighbor = *pOutside;
 #endif
 		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
@@ -387,7 +386,7 @@ generateHypergraph()
 	  element_count++;
   }
 
-  assert( tempNumMyVertices >= element_count );
+  assert( tempNumMyVertices >= (int)element_count );
 
   // now copy into hypergraph structure
   hg_.numMyVertices = element_count;    // How many global elements there are
