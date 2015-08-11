@@ -9,40 +9,17 @@
 namespace Dune
 {
 
-  // HasDataType
+  // IsDataHandle
   // -----------
 
-  template< class T >
-  std::true_type __HasDataType ( const T &, typename T::DataType * = nullptr );
+  template< class Impl, class Data >
+  std::true_type __IsDataHandle ( const CommDataHandleIF< Impl, Data > & );
 
-  std::false_type __HasDataType ( ... );
-
-  template< class T >
-  struct HasDataType
-    : public decltype( __HasDataType( std::declval< T >() ) )
-  {};
-
-
-
-  // IsDataHandle
-  // ------------
-
-  template< class T, bool >
-  struct __IsDataHandle;
+  std::false_type __IsDataHandle ( ... );
 
   template< class T >
-  struct __IsDataHandle< T, true >
-    : public std::is_base_of< CommDataHandleIF< T, typename T::DataType >, T >
-  {};
-
-  template< class T >
-  struct __IsDataHandle< T, false >
-    : std::false_type
-  {};
-
-  template< class T, bool = HasDataType< T >::value >
   struct IsDataHandle
-    : public __IsDataHandle< typename std::decay< T >::type, HasDataType< T >::value >
+    : public decltype( __IsDataHandle( std::declval< T >() ) )
   {};
 
 } // namespace Dune
