@@ -598,22 +598,48 @@ namespace ALUGrid
   template <class GridType, class LoadBalanceHandleType, bool useExternal>
   class GatherScatterLoadBalance : public GatherScatter
   {
-    template < bool externalLB, typename D = void>
-    struct ExternalLB
+    template < bool useHandlerOpts, typename D = void>
+    struct UseExternalHandlerOpts
     {
       bool importRank( const LoadBalanceHandleType &lb,
                        std::set<int>& ranks ) const
       {
         return lb.importRanks( ranks );
       }
+      template <class Entity>
+      int destination( const LoadBalanceHandleType &lb,
+                       const Entity& entity ) const
+      {
+        return lb( entity );
+      }
+      template <class Entity>
+      int loadWeight( const LoadBalanceHandleType &lb,
+                      const Entity& entity ) const
+      {
+        return -1;
+      }
     };
     template <typename D>
-    struct ExternalLB< false, D>
+    struct UseExternalHandlerOpts< false, D >
     {
       bool importRank( const LoadBalanceHandleType &lb,
                        std::set<int>& ranks ) const
       {
         return false;
+      }
+      template <class Entity>
+      int destination( const LoadBalanceHandleType &lb,
+                       const Entity& entity ) const
+      {
+        std::abort();
+        return -1;
+      }
+      template <class Entity>
+      int loadWeight( const LoadBalanceHandleType &lb,
+                      const Entity& entity ) const
+      {
+        std::abort();
+        return -1;
       }
     };
     // no copying
@@ -679,7 +705,7 @@ namespace ALUGrid
     bool importRanks( std::set<int>& ranks ) const
     {
       alugrid_assert( userDefinedPartitioning() );
-      return ExternalLB<useExternal>().importRank( ldbHandle(), ranks );
+      return UseExternalHandlerOpts<useExternal>().importRank( ldbHandle(), ranks );
     }
 
     // return set of ranks data is exported to during load balance
@@ -699,7 +725,7 @@ namespace ALUGrid
       // make sure userDefinedPartitioning is enabled
       alugrid_assert ( elem.level () == 0 );
       alugrid_assert ( userDefinedPartitioning() );
-      return ldbHandle()( setEntity( elem ) );
+      return UseExternalHandlerOpts<useExternal>().destination( ldbHandle(), setEntity( elem ) );
     }
 
     // return load weight of given element
@@ -708,7 +734,7 @@ namespace ALUGrid
       // make sure userDefinedLoadWeights is enabled
       alugrid_assert( userDefinedLoadWeights() );
       alugrid_assert ( elem.level() == 0 );
-      return ldbHandle()( setEntity( elem ) );
+      return UseExternalHandlerOpts< std::is_same<LoadBalanceHandleType, GatherScatter> ::value >().loadWeight( ldbHandle(), setEntity( elem ) );
     }
 
   protected:
