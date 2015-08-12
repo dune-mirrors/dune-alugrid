@@ -19,7 +19,6 @@ fi
 # NOTE: Zoltan has to be downloaded separately from
 
 #change appropriately, i.e. 2.3 or empty (which refers to master)
-#DUNEVERSION=
 DUNEVERSION=2.3
 
 # use of cmake is not recommended, since it might not work
@@ -47,7 +46,6 @@ WITH_ZLIB=
 # Zoltan has to be downloaded from
 # http://www.cs.sandia.gov/zoltan/
 #WITH_ZOLTAN="--with-zoltan=$WORKDIR/zoltan"
-#WITH_ZOLTAN=--with-zoltan=$HOME/work/Dune/modules/zoltan
 WITH_ZOLTAN=
 
 # SIONlib 1.5p1 has to be downloaded from
