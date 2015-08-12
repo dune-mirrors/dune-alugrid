@@ -26,8 +26,8 @@ namespace Dune {
 template<class GridImp>
 inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const FactoryType& factory,
-                              int wLevel) :
-  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
+                              int wLevel, bool levelIntersectionIterator) :
+  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled(), levelIntersectionIterator ),
   geoProvider_(connector_),
   item_(0),
   ghost_(0),
@@ -40,8 +40,8 @@ template<class GridImp>
 inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const FactoryType& factory,
                               HElementType *el,
-                              int wLevel,bool end) :
-  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled() ),
+                              int wLevel,bool end, bool levelIntersectionIterator) :
+  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled(), levelIntersectionIterator ),
   geoProvider_(connector_),
   item_(0),
   ghost_(0),
@@ -510,7 +510,7 @@ template<class GridImp>
 inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                    int wLevel)
-  : ALU3dGridIntersectionIterator<GridImp>(factory,wLevel)
+  : ALU3dGridIntersectionIterator<GridImp>(factory,wLevel,true)
   , levelNeighbor_(false)
   , isLeafItem_(false)
 {
@@ -522,7 +522,7 @@ inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
                                    HElementType *el,
                                    int wLevel,bool end)
-  : ALU3dGridIntersectionIterator<GridImp>(factory,el,wLevel,end)
+  : ALU3dGridIntersectionIterator<GridImp>(factory,el,wLevel,end, true)
   , levelNeighbor_(false)
   , isLeafItem_(false)
 {

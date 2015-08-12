@@ -359,7 +359,7 @@ void checkALUIterators( GridType& grid )
   if(  GridType :: dimension > 2 )
     checkIteratorCodim< GridType :: dimension > ( grid.leafGridView() );
 
-  //checkIteratorCodim< 0 > ( grid.macroGridView() );
+  checkIteratorCodim< 0 > ( grid.macroGridView() );
   checkIteratorCodim< 1 > ( grid.macroGridView() );
   checkIteratorCodim< 2 > ( grid.macroGridView() );
   if(  GridType :: dimension > 2 )

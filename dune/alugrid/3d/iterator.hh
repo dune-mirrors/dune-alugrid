@@ -122,9 +122,9 @@ public:
   //! neighbours
   ALU3dGridIntersectionIterator(const FactoryType& factory,
                                 HElementType *el,
-                                int wLevel,bool end=false);
+                                int wLevel,bool end=false, bool levelIntersectionIterator = false);
 
-  ALU3dGridIntersectionIterator(const FactoryType& factory, int wLevel);
+  ALU3dGridIntersectionIterator(const FactoryType& factory, int wLevel, bool levelIntersectionIterator = false);
 
   //! The copy constructor
   ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org);
