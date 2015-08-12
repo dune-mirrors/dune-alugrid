@@ -110,27 +110,16 @@ namespace Dune
       alugrid_assert (innerTwist == innerEntity().twist(innerFaceNumber_));
       innerTwist_ = innerTwist;
     }
-    
+
     //in the case of a levelIntersectionIterator and conforming elements
     //we assume the macro grid view. So we go up to level 0
     //after that we have to get new twist and facenumbers
     if(levelIntersection_ && conformingRefinement_ && ! (innerElement_->isboundary() ) )
     {
-      
-        const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
-        while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
-       /* 
-        //may be needed if it turns out that the inner face numbers of parents are different.
-        //but it should not be        
-        for(int i=0; i<EntityCount<type>::numFaces ; ++i)
-        {
-          if(face_ == inner->myhface(i)) {innerFaceNumber_ =i; break;}    
-        }
-        */
-        innerElement_ = static_cast<const HasFaceType *> (inner);
-        
-        
-        innerTwist_ = innerEntity().twist(innerFaceNumber_);
+      const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
+      while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
+      innerElement_ = static_cast<const HasFaceType *> (inner);
+      innerTwist_ = innerEntity().twist(innerFaceNumber_);
     }
 
     if( outerElement_->isboundary() )
@@ -226,25 +215,16 @@ namespace Dune
       // get outer twist
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
     }
-    
+
     //in the case of a levelIntersectionIterator and conforming elements
     //we assume the macro grid view. So we go up to level 0
     //after that we have to get new twist and facenumbers
     if(levelIntersection_ && conformingRefinement_ && !  (outerElement_->isboundary() ) )
     {
-      
-        const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
-        while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
-        outerElement_ = static_cast<const HasFaceType *> (outer);
-       /* 
-        //may be needed if it turns out that the inner face numbers of parents are different.
-        //but it should not be
-        for(int i=0; i<EntityCount<type>::numFaces ; ++i)
-        {
-          if(face_ == outer->myhface(i)) {std::cout << i << ", " << outerFaceNumber_ << std::endl; outerFaceNumber_ =i; break;}    
-        }
-        */
-        outerTwist_ = outerEntity().twist(outerFaceNumber_);
+      const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
+      while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
+      outerElement_ = static_cast<const HasFaceType *> (outer);
+      outerTwist_ = outerEntity().twist(outerFaceNumber_);
     }
 
     // make sure we got boundary id correctly
