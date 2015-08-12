@@ -1,9 +1,7 @@
-#GRIDTYPE = YASPGRID
-#GRIDTYPE = SGRID
 GRIDTYPE = ALUGRID_CUBE
 #GRIDTYPE = ALUGRID_SIMPLEX
 #GRIDTYPE = ALUGRID_CONFORM
-GRIDDIM = 2
+GRIDDIM = 3
 
 SUBDIRS = callback loadbalance dgf backuprestore communication testEfficiency
 
