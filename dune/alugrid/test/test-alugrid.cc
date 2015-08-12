@@ -460,6 +460,7 @@ void checkGrid( GridType& grid )
   try {
     gridcheck(grid);
     checkIterators( grid.leafGridView() );
+    checkIterators( grid.macroGridView() );
     checkIterators( grid.levelGridView(0) );
     if( ! grid.conformingRefinement() )
     {

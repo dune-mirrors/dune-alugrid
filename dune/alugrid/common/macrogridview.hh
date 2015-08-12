@@ -72,6 +72,8 @@ namespace Dune
     typedef MacroGridView< GridImp, pitype > ThisType;
 
   public:
+
+
     typedef MacroGridViewTraits< GridImp, pitype > Traits;
 
     /** \brief type of the grid */
@@ -93,7 +95,21 @@ namespace Dune
     template< int cd >
     struct Codim : public Traits :: template Codim<cd> {};
 
-    enum { conforming = Traits :: conforming };
+    enum {
+      //! \brief Export if this grid view is conforming */
+      conforming = Traits :: conforming
+    };
+
+    /** \brief type used for coordinates in grid */
+    typedef typename Grid::ctype ctype;
+
+    enum { //! \brief The dimension of the grid
+      dimension = Grid :: dimension
+    };
+
+    enum { //! \brief The dimension of the world the grid lives in.
+      dimensionworld = Grid :: dimensionworld
+    };
 
     MacroGridView ( const Grid &grid )
     : grid_( &grid ),
