@@ -54,7 +54,7 @@ namespace Dune
 
   public:
     //! constructor creating empty face info
-    ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled );
+    ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled, const bool levelIntersection = false );
     void updateFaceInfo(const GEOFaceType& face, int innerLevel, int innerTwist);
 
     //- constructors and destructors
@@ -172,6 +172,7 @@ namespace Dune
     ConformanceState conformanceState_;
     const bool conformingRefinement_ ; // true if conforming refinement is enabled
     const bool ghostCellsEnabled_ ;    // true if ghost cells are present
+    const bool levelIntersection_ ;    // true if called from a levelintersection iterator
   };
 
 
