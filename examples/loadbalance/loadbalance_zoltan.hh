@@ -205,14 +205,14 @@ ZoltanLoadBalanceHandle(const Grid &grid)
 , globalIdSet_( grid.globalIdSet() )
 , first_(true)
 , ldbUnder_(0), ldbOver_(1.2)
-, fix_bnd_(true)
+, fix_bnd_(false)
 {
   zz_ = Zoltan_Create(MPI_COMM_WORLD);
 
   // General parameters
   Zoltan_Set_Param(zz_, "DEBUG_LEVEL", "0");
   if (!fix_bnd_) // fixing element requires using hypergraph partitioning (which is perhaps better anyway?)
-    Zoltan_Set_Param(zz_, "LB_METHOD", "GRAPH");        /* partitioning method */
+    Zoltan_Set_Param(zz_, "LB_METHOD", "GRAPH");             /* partitioning method */
   else
     Zoltan_Set_Param(zz_, "LB_METHOD", "HYPERGRAPH");        /* partitioning method */
   Zoltan_Set_Param(zz_, "HYPERGRAPH_PACKAGE", "PHG"); /* version of method */
