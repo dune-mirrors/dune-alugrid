@@ -78,7 +78,6 @@ public:
 
   typedef typename GridView::template Codim< 0 >::Entity Entity;
   typedef typename Entity::Geometry Geometry;
-  typedef typename Geometry::LocalCoordinate DomainType;
   typedef typename Geometry::GlobalCoordinate GlobalType;
 
   /* vector of all dofs on an codim 0 entity */
@@ -127,9 +126,9 @@ public:
   /** \brief evaluate the discrete function at an arbitrary point on the
    *         reference element
    *  \param entity the entity on which the function is to be evaluated
-   *  \param x      point on entity in local coordinate system
+   *  \param x      point on entity in global coordinate system
    */
-  RangeType evaluate ( const Entity &entity, const DomainType &x ) const
+  RangeType evaluate ( const Entity &entity, const GlobalType &x ) const
   {
     return (*this)[ entity ];
   }
