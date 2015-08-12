@@ -7,7 +7,7 @@ namespace Dune
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
-  ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled ) :
+  ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled , const bool levelIntersection ) :
     face_(0),
     innerElement_(0),
     outerElement_(0),
@@ -20,7 +20,8 @@ namespace Dune
     bndType_( noBoundary ),
     conformanceState_(UNDEFINED),
     conformingRefinement_( conformingRefinement ),
-    ghostCellsEnabled_( ghostCellsEnabled )
+    ghostCellsEnabled_( ghostCellsEnabled ),
+    levelIntersection_( levelIntersection )
   {
   }
 
@@ -108,6 +109,21 @@ namespace Dune
       // set inner twist
       alugrid_assert (innerTwist == innerEntity().twist(innerFaceNumber_));
       innerTwist_ = innerTwist;
+    }
+    
+    //in the case of a levelIntersectionIterator and conforming elements
+    //we assume the macro grid view. So we go up to level 0
+    //after that we have to get new twist and facenumbers
+    if(levelIntersection_ && conformingRefinement_ && ! (innerElement_->isboundary() ) )
+    {
+      
+        const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
+        while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
+        innerElement_ = static_cast<const HasFaceType *> (inner);
+        
+        
+        
+        innerTwist_ = innerEntity().twist(innerFaceNumber_);
     }
 
     if( outerElement_->isboundary() )
@@ -202,6 +218,21 @@ namespace Dune
     {
       // get outer twist
       outerTwist_ = outerEntity().twist(outerALUFaceIndex());
+    }
+    
+    //in the case of a levelIntersectionIterator and conforming elements
+    //we assume the macro grid view. So we go up to level 0
+    //after that we have to get new twist and facenumbers
+    if(levelIntersection_ && conformingRefinement_ && !  (outerElement_->isboundary() ) )
+    {
+      
+        const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
+        while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
+        outerElement_ = static_cast<const HasFaceType *> (outer);
+        
+        
+        
+        outerTwist_ = outerEntity().twist(outerFaceNumber_);
     }
 
     // make sure we got boundary id correctly
