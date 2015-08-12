@@ -119,8 +119,15 @@ namespace Dune
       
         const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
         while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
+       /* 
+        //may be needed if it turns out that the inner face numbers of parents are different.
+        //but it should not be        
+        for(int i=0; i<EntityCount<type>::numFaces ; ++i)
+        {
+          if(face_ == inner->myhface(i)) {innerFaceNumber_ =i; break;}    
+        }
+        */
         innerElement_ = static_cast<const HasFaceType *> (inner);
-        
         
         
         innerTwist_ = innerEntity().twist(innerFaceNumber_);
@@ -229,9 +236,14 @@ namespace Dune
         const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
         while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
         outerElement_ = static_cast<const HasFaceType *> (outer);
-        
-        
-        
+       /* 
+        //may be needed if it turns out that the inner face numbers of parents are different.
+        //but it should not be
+        for(int i=0; i<EntityCount<type>::numFaces ; ++i)
+        {
+          if(face_ == outer->myhface(i)) {std::cout << i << ", " << outerFaceNumber_ << std::endl; outerFaceNumber_ =i; break;}    
+        }
+        */
         outerTwist_ = outerEntity().twist(outerFaceNumber_);
     }
 
