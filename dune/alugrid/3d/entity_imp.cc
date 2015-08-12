@@ -588,9 +588,8 @@ namespace Dune {
       const HasFaceType * outerElement = face.nb.front().first;
       // if we got our own element, get other side
       // the above is a bad test, as it does not take into account
-      // the situation of conforming refinement 
+      // the situation of conforming refinement
       // it is better to directly test the face twist
-     // if(item_ == outerElement)
       if( item_->twist(ElementTopologyMapping< GridImp::elementType >::dune2aluFace(i) ) > -1 )
       {
         outerElement = face.nb.rear().first;

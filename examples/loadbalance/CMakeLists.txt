@@ -12,9 +12,10 @@ set(exampleslb_HEADERS adaptation.hh
                        problem-euler.hh  
                        problem.hh)
 
-set(EXAMPLES main_transport_lb 
-             main_ball_lb 
-             main_euler_lb)
+set(EXAMPLES main_internal
+             main_weights 
+             main_simple 
+             main_zoltan)
 
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
@@ -22,23 +23,29 @@ add_definitions("-DGRIDDIM=3")
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
 
-add_executable(main_transport_lb main.cc)
-add_dune_mpi_flags(main_transport_lb )
-dune_target_link_libraries(main_transport_lb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_transport_lb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT" )
-
-add_executable(main_ball_lb main.cc)
-add_dune_mpi_flags(main_ball_lb )
-dune_target_link_libraries(main_ball_lb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_ball APPEND PROPERTY 
+add_executable(main_internal main.cc)
+add_dune_mpi_flags(main_internal )
+dune_target_link_libraries(main_internal "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+set_property(TARGET main_internal APPEND PROPERTY 
   COMPILE_DEFINITIONS "BALL" )
 
-add_executable(main_euler_lb main.cc)
-add_dune_mpi_flags(main_euler_lb )
-dune_target_link_libraries(main_euler_lb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_euler_lb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER" )
+add_executable(main_weights main.cc)
+add_dune_mpi_flags(main_weights )
+dune_target_link_libraries(main_weights "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+set_property(TARGET main_weights APPEND PROPERTY 
+  COMPILE_DEFINITIONS "BALL;USE_WEIGHTS=1" )
+
+add_executable(main_simple main.cc)
+add_dune_mpi_flags(main_simple )
+dune_target_link_libraries(main_simple "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+set_property(TARGET main_simple APPEND PROPERTY 
+  COMPILE_DEFINITIONS "BALL;USE_SIMPLELB=1" )
+
+add_executable(main_zoltan main.cc)
+add_dune_mpi_flags(main_zoltan )
+dune_target_link_libraries(main_zoltan "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+set_property(TARGET main_zoltan APPEND PROPERTY 
+  COMPILE_DEFINITIONS "BALL;USE_ZOLTANLB=1" )
 
 install(FILES ${exampleslb_HEADERS} DESTINATION ${exampleslbdir})
 
