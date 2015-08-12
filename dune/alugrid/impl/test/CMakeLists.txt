@@ -1,6 +1,6 @@
-set(IMPLTESTS adapt 
-              backuprestore 
-              sizes)
+set(TESTS adapt 
+          backuprestore 
+          sizes)
 set(ALUSOURCES
   ${dune-alugrid_SOURCE_DIR}/dune/alugrid/impl/binaryio.cc
   ${dune-alugrid_SOURCE_DIR}/dune/alugrid/impl/macrofileheader.cc
@@ -34,17 +34,13 @@ add_executable(sizes sizes.cc ${ALUSOURCES})
 add_executable(adapt adapt.cc ${ALUSOURCES})
 add_executable(backuprestore backuprestore.cc ${ALUSOURCES})
 
-# include not needed for CMake
-# include $(top_srcdir)/am/global-rules
-foreach(i ${IMPLTESTS})
+foreach(i ${TESTS})
   target_link_libraries(${i} ${DUNE_LIBS} dunealugrid ${ZLIB_LIBRARIES})
   # libdunalugrid needs symbols from zoltan. Therefore we need to link
   # to Zoltan afterwards.
   add_dune_zoltan_flags(${i})
-  add_test(${i} ${i})
-endforeach(i ${IMPLTESTS})
+endforeach(i ${TESTS})
 # We do not want want to build the tests during make all
 # but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${IMPLTESTS} ${COMPILE_XFAIL_TESTS})
-
+# We also don't want to build them when make test is called
+add_dependencies(${_test_target} ${TESTS} ${COMPILE_XFAIL_TESTS})
