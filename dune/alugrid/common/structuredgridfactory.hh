@@ -240,13 +240,15 @@ namespace Dune
       }
 
       if( intervalBlock.numIntervals() != 1 )
-        DUNE_THROW( Dune::DGFException, "ALUGrid creation from YaspGrid can only handle 1 interval block." );
+      {
+        std::cerr << "ALUGrid creation from YaspGrid can only handle 1 interval block, using default DGF method to create ALUGrid!" << std::endl;
+        return SharedPtrType( GridPtr< Grid > (input, mpiComm ).release());
+      }
 
       if( intervalBlock.dimw() != dim )
       {
-        DUNE_THROW( DGFException,
-                    "Cannot read an interval of dimension " << intervalBlock.dimw()
-                                                            << " into a YaspGrid< " << dim << " >." );
+        std::cerr << "ALUGrid creation from YaspGrid only works for dim == dimworld, using default DGF method to create ALUGrid!" << std::endl;
+        return SharedPtrType( GridPtr< Grid > (input, mpiComm ).release());
       }
 
       const dgf::IntervalBlock::Interval &interval = intervalBlock.get( 0 );
