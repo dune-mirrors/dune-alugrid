@@ -31,11 +31,13 @@
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkintersectionit.hh>
+#include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
 #else
 #include <dune/grid/test/gridcheck.cc>
 #include <dune/grid/test/checkgeometryinfather.cc>
 #include <dune/grid/test/checkintersectionit.cc>
+#include <dune/grid/test/checkiterators.cc>
 #include <dune/grid/test/checkcommunicate.cc>
 #endif
 //#include "checktwists.cc"
@@ -349,7 +351,7 @@ void checkIteratorCodim(const GridView & gridView)
 }
 
 template <class GridType>
-void checkIterators( GridType& grid )
+void checkALUIterators( GridType& grid )
 {
   checkIteratorCodim< 0 > ( grid.leafGridView() );
   checkIteratorCodim< 1 > ( grid.leafGridView() );
@@ -457,6 +459,13 @@ void checkGrid( GridType& grid )
 {
   try {
     gridcheck(grid);
+    checkIterators( grid.leafGridView() );
+    checkIterators( grid.levelGridView(0) );
+    if( ! grid.conformingRefinement() )
+    {
+      for( int level = 1; level <= grid.maxLevel(); ++level )
+        checkIterators( grid.levelGridView( level ) );
+    }
   }
   catch (const Dune::Exception& e )
   {
@@ -518,7 +527,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   makeNonConfGrid(grid,0,1);
 
   // check iterators
-  checkIterators( grid );
+  checkALUIterators( grid );
 
   std::cout << "  CHECKING: non-conform" << std::endl;
   checkGrid(grid);
@@ -556,7 +565,7 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   makeNonConfGrid(grid,gref,mxl);
 
   // check iterators
-  checkIterators( grid );
+  checkALUIterators( grid );
 
   // -1 stands for leaf check
   checkCommunication(grid, -1, std::cout);

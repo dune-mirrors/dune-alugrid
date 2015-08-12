@@ -16,6 +16,7 @@ set(alucommon_HEADERS alugrid_assert.hh
                       persistentcontainer.hh
                       structuredgridfactory.hh
                       transformation.hh
+                      typetraits.hh
                       writeparalleldgf.hh
    )
 # installation of the header files                  

@@ -72,7 +72,7 @@ void checkGeom( HElemType* item )
     typedef Dune :: ALU3dGridGeometry< Grid::dimension-1, Grid::dimensionworld, const Grid > FaceGeometry;
     FaceGeometry faceGeom;
     const GEOFaceType* face = elem.myhface( i );
-    faceGeom.buildGeom( *face, elem.twist( i ), i );
+    faceGeom.buildGeom( *face, elem.twist( i ) );
     std::cout << "FACE: " << i << std::endl;
     // perform geometry check
     checkGeometry( faceGeom );
@@ -89,7 +89,7 @@ void checkGeom( HElemType* item )
       typedef Dune :: ALU3dGridGeometry< Grid::dimension-2, Grid::dimensionworld, const Grid > EdgeGeometry;
       EdgeGeometry edgeGeom;
       const GEOEdgeType* edge = elem.myhedge( i );
-      edgeGeom.buildGeom( *edge, elem.twist( i ), i );
+      edgeGeom.buildGeom( *edge, elem.twist( i ) );
       // perform geometry check
       checkGeometry( edgeGeom );
       edgeGeom.print( std::cout );
@@ -102,7 +102,7 @@ void checkGeom( HElemType* item )
     typedef Dune :: ALU3dGridGeometry< 0, Grid::dimensionworld, const Grid > PointGeometry;
     PointGeometry point ;
     const GEOVertexType* vertex = static_cast<const GEOVertexType*> (elem.myvertex( i ));
-    point.buildGeom( *vertex,0,0 );
+    point.buildGeom( *vertex, 0 );
     // perform geometry check
     checkGeometry( point );
     point.print( std::cout );
