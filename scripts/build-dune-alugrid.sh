@@ -81,8 +81,7 @@ if [ "$DUNEVERSION" != "" ] ; then
   DUNEBRANCH="-b releases/$DUNEVERSION"
 fi
 
-#ALUGRIDBRANCH="-b papers/main"
-ALUGRIDBRANCH="-b paramerge"
+ALUGRIDBRANCH="-b papers/main"
 # get all dune modules necessary
 for MOD in $DUNEMODULES ; do
   if [ "$MOD" == "dune-alugrid" ] ; then
