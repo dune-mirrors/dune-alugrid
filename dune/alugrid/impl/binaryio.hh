@@ -12,7 +12,7 @@ namespace ALUGrid
 
   enum BinaryFormat { rawBinary, zlibCompressed };
 
-  void readBinary ( std::istream &stream, void *data, uint64_t size, BinaryFormat format );
+  void readBinary ( std::istream &stream,  void *data, uint64_t size, BinaryFormat format );
   void writeBinary ( std::ostream &stream, const void *data, uint64_t size, BinaryFormat format );
 
   template <class Traits>
@@ -37,13 +37,13 @@ namespace ALUGrid
   inline void writeBinary ( std::ostream &stream, const BasicObjectStream< Traits >& data )
   {
     uint64_t size = data.size();
-    stream.write( (char *) &size, sizeof(uint64_t) );
+    stream.write( (char *) &size, sizeof( uint64_t ) );
 
     writeBinary( stream, data.raw(), size, zlibCompressed );
   }
 
   template <class Traits, class MacroFileHeader>
-  inline void readBinary ( std::istream &stream, BasicObjectStream< Traits >& data, const MacroFileHeader& header )
+  inline void readBinary ( std::istream &stream,  BasicObjectStream< Traits >& data, const MacroFileHeader& header )
   {
     // reserve memory, size is determined by header
     data.reserve( header.size() );

@@ -1409,7 +1409,7 @@ namespace ALUGrid
 #pragma omp critical
 #endif
           {
-            if( ! ptr ) { std::cerr << std::endl << name; ptr = true ; }
+            //if( ! ptr ) { std::cerr << std::endl << name; ptr = true ; }
           }
         } ~MkGitName() { if( ptr ) std::cout << std::endl << name ; }
       };

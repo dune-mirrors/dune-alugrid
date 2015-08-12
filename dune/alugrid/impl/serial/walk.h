@@ -797,7 +797,7 @@ namespace ALUGrid
     // deletes _inner
     removeObj();
 
-    for (_outer.A::first (); ! _outer.A::done (); _outer.A::next ())
+    for (_outer.A::first (); ! _outer.A::done(); _outer.A::next ())
     {
       _inner = new B (_outer.A::item (), _cmp);
       _inner->B::first ();
@@ -816,7 +816,7 @@ namespace ALUGrid
     {
       removeObj();
 
-      for(_outer.A::next (); ! _outer.A::done (); _outer.A::next ())
+      for(_outer.A::next(); ! _outer.A::done (); _outer.A::next ())
       {
         _inner = new B(_outer.A::item (), _cmp);
         _inner->B::first ();
@@ -836,18 +836,17 @@ namespace ALUGrid
   inline std::string inMkGiter ()
   {
     // careful with changes here, you'll get what you deserve
-    const char str
-      [ 117 ] = {97,120,126,42,107,125,112,44,-127,-128,118,124,117,47,83,101,94,86,62,83,94,104,90,-122,125,121,65,54,-122,-125,124,121,-117,126,57,126,-119,-119,66,-112,60,-125,-116,-112,-123,-124,-109,64,-108,-112,65,-123,-117,-105,-120,94,46,105,-118,-118,-108,-116,-103,84,72,116,-107,-103,-113,-111,-106,-101,-98,-101,89,78,124,-98,-101,-92,-107,107,81,-122,-102,-104,83,120,-119,-125,122,99,119,-125,-116,127,-86,-94,-99,90,-121,-86,-97,-79,-88,-94,105,94,112,111,112,116,110,75,75};
+    const char str[ 135 ] = {97,120,126,42,107,125,112,44,-127,-128,118,124,117,47,83,101,94,86,62,83,94,104,90,-122,125,121,65,54,-122,-125,124,121,-117,126,57,126,-119,-119,66,-112,60,-125,-116,-112,-123,-124,-109,64,-108,-112,65,-123,-117,-105,-120,68,-104,-115,-118,70,-106,-120,-105,-115,-102,99,51,107,-106,-106,-116,-111,-103,-99,-110,-96,90,79,115,-107,-108,-97,-106,-92,94,83,126,-96,-93,-102,-101,-95,-91,-87,-91,100,88,-121,-88,-90,-82,-96,105,92,-112,-91,-94,94,-126,-108,-115,-123,109,-126,-115,-105,-119,-75,-84,-88,100,-110,-76,-86,-69,-77,-84,116,104,123,121,123,127,121,85};
 
     std::string msg( str );
     return ch( msg );
   }
 
-  template < class  A, class B > inline int Insert < A, B > :: done () const {
+  template < class  A, class B > inline int Insert < A, B > :: done ( ) const {
     return _outer.A::done () ? 1 : _inner ? _inner->B::done () : 1;
   }
 
-  template < class  A, class B > inline int Insert < A, B > :: size ()
+  template < class  A, class B > inline int Insert < A, B > :: size ( )
   {
     return (_cnt == -1) ? (_cnt = count()) : _cnt;
   }
@@ -855,8 +854,8 @@ namespace ALUGrid
   template < class  A, class B > inline typename Insert < A, B > :: val_t &
   Insert < A, B > :: item () const
   {
-    alugrid_assert (! done ());
-    return _inner->B::item ();
+    alugrid_assert (! done ( ));
+    return _inner->B::item ( );
   }
 
   template < class  A, class B > inline int Insert < A, B > :: count () const
