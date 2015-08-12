@@ -582,6 +582,9 @@ public:
   typedef IteratorType InternalIteratorType;
   typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, Comm >::val_t val_t;
 
+  /** \brief default constructor */
+  ALU3dGridLevelIterator () : factory_( nullptr ), iter_(), level_( 0 ) {}
+
   //! Constructor for begin iterator
   ALU3dGridLevelIterator(const FactoryType& factory, int level, bool);
 
@@ -606,11 +609,13 @@ private:
   //! do assignment
   void assign (const ThisType & org);
 
+  const GridImp &grid () const { alugrid_assert( factory_ ); return factory_->grid(); }
+
   // reference to factory class (ie grid)
-  const FactoryType& factory_;
+  const FactoryType *factory_;
 
   // the internal iterator
-  IteratorType * iter_ ;
+  std::unique_ptr< IteratorType > iter_ ;
 
   // actual level
   int level_;
@@ -659,6 +664,9 @@ public:
 
   typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
+  /** \brief default constructor */
+  ALU3dGridLeafIterator () : factory_( nullptr ), iter_() {}
+
   //! Constructor for end iterators
   ALU3dGridLeafIterator(const FactoryType& factory, int level);
 
@@ -681,11 +689,13 @@ public:
   ThisType & operator = (const ThisType & org);
 
 private:
+  const GridImp &grid () const { alugrid_assert( factory_ ); return factory_->grid(); }
+
   // reference to factory class (ie grid)
-  const FactoryType& factory_;
+  const FactoryType *factory_;
 
   // the internal iterator
-  IteratorType * iter_;
+  std::unique_ptr< IteratorType > iter_;
 
   //! do assignment
   void assign (const ThisType & org);

@@ -18,6 +18,8 @@
 #include <dune/alugrid/common/intersectioniteratorwrapper.hh>
 #include <dune/grid/common/datahandleif.hh>
 
+#include <dune/alugrid/common/typetraits.hh>
+
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/alugrid/common/bndprojection.hh>
@@ -915,7 +917,7 @@ namespace Dune
     bool loadBalance ( CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
-            < ThisType, GatherScatterType, DataHandleImpl, Data > DataHandleType;
+            < ThisType, GatherScatterType, DataHandleImpl, Data, false > DataHandleType;
       DataHandleType dataHandle( *this, dataHandleIF );
 
       // call the above loadBalance method with general GatherScatterType
@@ -936,11 +938,26 @@ namespace Dune
                        CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
       typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle
-            < ThisType, LBWeights, DataHandleImpl, Data > DataHandleType;
+            < ThisType, LBWeights, DataHandleImpl, Data, false > DataHandleType;
       DataHandleType dataHandle( *this, dataHandleIF, weights );
 
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );
+    }
+
+    /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method,
+               the partitioning can be optimized by providing weights for each element on the macro grid.
+               The specific load balancing algorithm is selected from a file alugrid.cfg.
+        \param  weights class with double operator()(const Entity<0>&) returning a weight for each element
+                which the includes in its internal loadbalancing process - for ALUGrid these are all macro elements.
+        \return true if grid has changed
+    */
+    template< class LBWeights >
+    typename std::enable_if< !IsDataHandle< LBWeights >::value, bool >::type loadBalance ( LBWeights &weights )
+    {
+      typedef ALU3DSPACE GatherScatterLoadBalance < ThisType, LBWeights, false > LoadBalanceHandleType;
+      LoadBalanceHandleType loadBalanceHandle( *this, weights );
+      return loadBalance( &loadBalanceHandle );
     }
 
     /** \brief Distribute the grid based on a user defined partitioning.
@@ -954,8 +971,8 @@ namespace Dune
     template< class LBDestinations >
     bool repartition ( LBDestinations &destinations )
     {
-      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBDestinations > LoadBalanceHandleType ;
-      LoadBalanceHandleType loadBalanceHandle( *this, destinations, true );
+      typedef ALU3DSPACE GatherScatterLoadBalance< ThisType, LBDestinations, true > LoadBalanceHandleType ;
+      LoadBalanceHandleType loadBalanceHandle( *this, destinations );
       return loadBalance( &loadBalanceHandle );
     }
 
@@ -973,8 +990,8 @@ namespace Dune
     bool repartition ( LBDestinations &destinations,
                        CommDataHandleIF< DataHandleImpl, Data > &dataHandleIF )
     {
-      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data > DataHandleType;
-      DataHandleType dataHandle( *this, dataHandleIF, destinations, true );
+      typedef ALU3DSPACE GatherScatterLoadBalanceDataHandle< ThisType, LBDestinations, DataHandleImpl, Data, true > DataHandleType;
+      DataHandleType dataHandle( *this, dataHandleIF, destinations );
 
       // call the above loadBalance method with general GatherScatterType
       return loadBalance( &dataHandle );

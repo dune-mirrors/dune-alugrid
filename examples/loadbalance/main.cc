@@ -5,8 +5,8 @@
 /** standard headers **/
 #include <iostream>
 
-#if HAVE_ZOLTAN && USE_ZOLTANLB && ! HAVE_MPI
-#warning "Zoltan cannot be used because MPI is not available"
+#if USE_ZOLTANLB && (! HAVE_ZOLTAN || ! HAVE_MPI)
+#warning "Zoltan and/or MPI cannot not found, therefore Zoltan cannot be used"
 #undef USE_ZOLTANLB
 #define USE_ZOLTANLB 0
 #endif
@@ -104,14 +104,16 @@ void method ( int problem, int startLvl, int maxLvl,
 #endif
 
 #if USE_ZOLTANLB || USE_SIMPLELB
+  /*
   // use defined repartitioning, see also adaptation.hh
   if ( ldb.repartition() )
     grid.repartition( ldb );
+    */
 #else
   // ALUGrid internal load balancing, weights are the number of leaf elements
   // that are underneeth one macro element, see also adaptation.hh
   // Weights can only be passed together with a data handle.
-  grid.loadBalance();
+  grid.loadBalance( ldb );
 #endif
 
   typedef LeafAdaptation< Grid, DataType, LoadBalancer > AdaptationType;
