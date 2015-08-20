@@ -342,7 +342,7 @@ namespace Dune
       for( size_t i=0; i<vertexSize; ++i )
       {
         const VertexType& vx = vertices[ i ].first;
-        for( unsigned int d=0; d<dimension; ++d )
+        for( unsigned int d=0; d<vx.size(); ++d )
         {
           maxCoord[ d ] = std::max( maxCoord[ d ], vx[ d ] );
           minCoord[ d ] = std::min( minCoord[ d ], vx[ d ] );
@@ -352,7 +352,7 @@ namespace Dune
       // get element's center to hilbert index mapping
       SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
 
-      typedef std::map< double, long int > hsfc_t;
+      typedef std::multimap< double, long int > hsfc_t;
       hsfc_t hsfc;
 
       for( size_t i=0; i<elemSize; ++i )
@@ -363,13 +363,14 @@ namespace Dune
         for( int vx = 0; vx<vxSize; ++vx )
         {
           const VertexType& vertex = vertices[ elements[ i ][ vx ] ].first;
-          for( unsigned int d=0; d<dimension; ++d )
+          for( unsigned int d=0; d<vertex.size(); ++d )
             center[ d ] += vertex[ d ];
         }
         center /= double(vxSize);
 
         // generate sfc index from element's center and store index
-        hsfc[ sfc.index( center ) ] = i;
+        // hsfc[ sfc.index( center ) ] = i;
+        hsfc.insert( std::make_pair( sfc.index( center ) , i ) );
       }
 
       typedef typename hsfc_t :: iterator iterator;
@@ -422,7 +423,6 @@ namespace Dune
     // create them AFTER correctelementorientation was called!!
     if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
       recreateBoundaryIds();
-
 
     // if dump file should be written
     if( allowGridGeneration_ && !temporary )
