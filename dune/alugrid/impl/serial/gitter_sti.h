@@ -678,7 +678,9 @@ namespace ALUGrid
         flagNoCoarsen = 3,
         // if set item belongs to 2d grid (same as edge coarsen which is only set for
         // edges, whereas flagIs2d is only set for elements and faces)
-        flagIs2d = 4
+        flagIs2d = 4,
+        // isNew flag to tag newly created elements
+        isNew = 5
       };
 
     protected:
@@ -1039,17 +1041,20 @@ namespace ALUGrid
     public:
       // abuse ref to refined tag
       using DuneIndexProvider::ref;
-    protected:
       Dune_helement ()
       {
-        // mark as new element by increasing reference counter
-        ++ ref;
+        // set is new element flag
+        DuneIndexProvider::set( DuneIndexProvider::isNew );
       }
     public:
       // reset the _refinedTag to false
-      void resetRefinedTag();
+      void resetRefinedTag()
+      {
+        DuneIndexProvider::unset( DuneIndexProvider::isNew );
+      }
+
       // true if element was refined this adaptation step
-      bool hasBeenRefined () const;
+      bool hasBeenRefined () const { return DuneIndexProvider::isSet( DuneIndexProvider::isNew ); }
     };
 
 
@@ -2951,16 +2956,6 @@ namespace ALUGrid
 
   inline int Gitter::helement::leaf () const {
     return ! down ();
-  }
-
-  // Dune extensions
-  inline void Gitter::Dune_helement::resetRefinedTag () {
-    assert( ! isGhost() );
-    ref.reset ();
-  }
-
-  inline bool Gitter::Dune_helement::hasBeenRefined () const {
-    return ref.positive();
   }
 
   inline int Gitter::hbndseg::leaf () const {
