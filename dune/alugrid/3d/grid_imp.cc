@@ -369,8 +369,6 @@ namespace Dune
 
     if( comm().size() > 1 )
     {
-      //here dimension has to be 3, as this is used ALU internally
-      //  was    for( int i = 0; i < dimension; ++i )
       for( int codim = 0; codim < dimension+1; ++codim )
       {
         ghostLeafList_[codim].unsetUp2Date();
