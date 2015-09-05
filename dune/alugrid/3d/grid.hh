@@ -1192,14 +1192,14 @@ namespace Dune
     ALU3dGridItemListType & getGhostLeafList(int codim) const
     {
       alugrid_assert ( codim >= 0 );
-      alugrid_assert ( codim <  dimension+1 );
+      alugrid_assert ( codim <= dimension+1 );
       return ghostLeafList_[codim];
     }
 
     ALU3dGridItemListType & getGhostLevelList(int codim, int level) const
     {
       alugrid_assert ( codim >= 0 );
-      alugrid_assert ( codim <  dimension+1 );
+      alugrid_assert ( codim <= dimension+1 );
 
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
