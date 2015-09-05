@@ -371,10 +371,10 @@ namespace Dune
     {
       //here dimension has to be 3, as this is used ALU internally
       //  was    for( int i = 0; i < dimension; ++i )
-      for( int i = 0; i < 3; ++i )
+      for( int codim = 0; codim < dimension+1; ++codim )
       {
-        ghostLeafList_[i].unsetUp2Date();
-        for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();
+        ghostLeafList_[codim].unsetUp2Date();
+        for(size_t l=0; l<MAXL; ++l) ghostLevelList_[codim][l].unsetUp2Date();
       }
     }
 

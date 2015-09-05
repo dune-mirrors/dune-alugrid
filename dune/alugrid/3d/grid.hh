@@ -1191,19 +1191,19 @@ namespace Dune
 
     ALU3dGridItemListType & getGhostLeafList(int codim) const
     {
-      alugrid_assert ( codim >= 1 );
-      alugrid_assert ( codim <= 3 );
-      return ghostLeafList_[codim-1];
+      alugrid_assert ( codim >= 0 );
+      alugrid_assert ( codim <  dimension+1 );
+      return ghostLeafList_[codim];
     }
 
     ALU3dGridItemListType & getGhostLevelList(int codim, int level) const
     {
-      alugrid_assert ( codim >= 1 );
-      alugrid_assert ( codim <= 3 );
+      alugrid_assert ( codim >= 0 );
+      alugrid_assert ( codim <  dimension+1 );
 
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
-      return ghostLevelList_[codim-1][level];
+      return ghostLevelList_[codim][level];
     }
 
     ALU3dGridItemListType & getEdgeList(int level) const
@@ -1329,8 +1329,8 @@ namespace Dune
 
     //the ghostleaf list is used in alu3diterators, where we use the internal aluIterators
     // the vertex codim there is 3, so the list has to fulfill that
-    mutable ALU3dGridItemListType ghostLeafList_[ 3 ];
-    mutable ALU3dGridItemListType ghostLevelList_[ 3 ][MAXL];
+    mutable ALU3dGridItemListType ghostLeafList_ [ dimension+1 ];
+    mutable ALU3dGridItemListType ghostLevelList_[ dimension+1 ][MAXL];
 
     mutable ALU3dGridItemListType levelEdgeList_[MAXL];
 
