@@ -113,10 +113,11 @@ namespace ALUGrid
 #endif
       mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
-    alugrid_assert ( wasNewlyInserted );
-
     // InsertUniqueHexa gets the global vertex numbers
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
+    assert( ghost );
+    // increase refcounter since ghost element can exist more than once
+    ghost->ref++;
 
     // set ghost and number
     _ghostPair.first = ghost;
@@ -153,6 +154,10 @@ namespace ALUGrid
     }
 
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first;
+    assert( ghost );
+    // increase refcounter since ghost element can exist more than once
+    ghost->ref++;
+
     _ghostPair.first = ghost;
     alugrid_assert ( _ghostPair.first );
     _ghostPair.second = ghInfo.internalFace();
@@ -169,38 +174,54 @@ namespace ALUGrid
     // store all sub items of the ghost element before deleting it
     tetra_GEO* tetra = (tetra_GEO *) _ghostPair.first;
     alugrid_assert ( tetra );
+    tetra->ref--;
 
-    VertexGeo* vertices[ 4 ] = {
-      tetra->myvertex(0),
-      tetra->myvertex(1),
-      tetra->myvertex(2),
-      tetra->myvertex(3) };
+    if( tetra->ref == 0 )
+    {
+      VertexGeo* vertices[ 4 ] = {
+        tetra->myvertex(0),
+        tetra->myvertex(1),
+        tetra->myvertex(2),
+        tetra->myvertex(3) };
 
-    hedge1_GEO* edges[ 6 ] = {
-      tetra->myhedge(0),
-      tetra->myhedge(1),
-      tetra->myhedge(2),
-      tetra->myhedge(3),
-      tetra->myhedge(4),
-      tetra->myhedge(5)
-    };
+      hedge1_GEO* edges[ 6 ] = {
+        tetra->myhedge(0),
+        tetra->myhedge(1),
+        tetra->myhedge(2),
+        tetra->myhedge(3),
+        tetra->myhedge(4),
+        tetra->myhedge(5)
+      };
 
-    hface3_GEO* faces[ 4 ] = {
-      tetra->myhface( 0 ),
-      tetra->myhface( 1 ),
-      tetra->myhface( 2 ),
-      tetra->myhface( 3 )
-    };
+      hface3_GEO* faces[ 4 ] = {
+        tetra->myhface( 0 ),
+        tetra->myhface( 1 ),
+        tetra->myhface( 2 ),
+        tetra->myhface( 3 )
+      };
 
-    // delete element
-    delete tetra;
+      // delete element
+      delete tetra;
 
-    // delete faces
-    for( int i=0; i<4; ++i ) delete faces[ i ];
-    // delete edges
-    for( int i=0; i<6; ++i ) delete edges[ i ];
-    // detele vertices
-    for( int i=0; i<4; ++i ) delete vertices[ i ];
+      // delete faces
+      for( int i=0; i<4; ++i )
+      {
+        if( faces[ i ]->ref == 0 )
+          delete faces[ i ];
+      }
+      // delete edges
+      for( int i=0; i<6; ++i )
+      {
+        if( edges[ i ]->ref == 0 )
+          delete edges[ i ];
+      }
+      // detele vertices
+      for( int i=0; i<4; ++i )
+      {
+        if( vertices[ i ]->ref == 0 )
+          delete vertices[ i ];
+      }
+    }
 
     alugrid_assert ( _ghInfoPtr );
     delete _ghInfoPtr;
@@ -250,17 +271,10 @@ namespace ALUGrid
     }
 
     // InsertUniqueHexa gets the global vertex numbers
-    std::pair< hexa_GEO*, bool > uniqueGhost = mgb.InsertUniqueHexa ( ghInfo.vertices() );
-    hexa_GEO* ghost = uniqueGhost.first;
+    hexa_GEO* ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
     alugrid_assert ( ghost );
-
-    // uniqueGhost.second == false means that element existed already,
-    // so simply increase the reference counter
-    if( ! uniqueGhost.second )
-    {
-      // increase refcounter;
-      ghost->ref++;
-    }
+    // increase refcounter since ghost element can exist more than once
+    ghost->ref++;
 
     // set ghost values
     _ghostPair.first  = ghost;
