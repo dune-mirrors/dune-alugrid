@@ -107,11 +107,7 @@ namespace ALUGrid
     alugrid_assert ( found );
 #endif
     const alucoord_t (&px)[3] = p[0];
-    //cout << "Insert new point " << oppVerts[0] << endl;
-#ifdef ALUGRIDDEBUG
-    bool wasNewlyInserted =
-#endif
-      mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
+    mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
     // InsertUniqueHexa gets the global vertex numbers
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
@@ -263,11 +259,7 @@ namespace ALUGrid
     for(int i=0; i<4; ++i)
     {
       const alucoord_t (&px)[3] = p[i];
-#ifdef ALUGRIDDEBUG
-      bool wasNewlyInserted =
-#endif
-        mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
-      // alugrid_assert ( wasNewlyInserted );
+      mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
     }
 
     // InsertUniqueHexa gets the global vertex numbers
