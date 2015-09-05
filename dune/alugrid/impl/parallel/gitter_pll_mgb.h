@@ -5,6 +5,7 @@
 
 #include "../serial/serialize.h"
 #include "../serial/gitter_mgb.h"
+#include "../serial/ghost_elements.h"
 
 #include "gitter_pll_sti.h"
 #include "gitter_pll_ldb.h"
@@ -58,7 +59,14 @@ namespace ALUGrid
       // void unpackAll (std::vector< ObjectStream > &, GatherScatterType* );
 
       ~ParallelGridMover ();
+
+      // return reference to macro ghost builder
+      virtual MacroGhostBuilder* macroGhostBuilder () { return &_macroGhostBuilder; }
+
     protected:
+      // macro grid builder for ghost elements
+      MacroGhostBuilder _macroGhostBuilder;
+
       using MacroGridBuilder :: reserve ;
       using MacroGridBuilder :: clear ;
   };

@@ -1181,6 +1181,9 @@ namespace ALUGrid
       // exchange gathered data
       osv = mpAccess ().exchange (osv);
 
+      // create macro ghost builder
+      MacroGhostBuilder mgb( containerPll() );
+
       // unpack all data on internal boundary and create
       // ghost cells
       {
@@ -1196,7 +1199,7 @@ namespace ALUGrid
             for (outer.first (); ! outer.done (); outer.next ())
             {
               std::pair< ElementPllXIF_t *, int > p = outer.item ().accessOuterPllX ();
-              p.first->insertGhostCell(os, p.second);
+              p.first->insertGhostCell(mgb, os, p.second);
             }
           }
           {
@@ -1204,7 +1207,7 @@ namespace ALUGrid
             for (inner.first (); ! inner.done (); inner.next ())
             {
               std::pair< ElementPllXIF_t *, int > p = inner.item ().accessOuterPllX ();
-              p.first->insertGhostCell(os, p.second);
+              p.first->insertGhostCell(mgb, os, p.second);
             }
           }
 

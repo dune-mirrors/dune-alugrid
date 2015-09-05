@@ -15,7 +15,9 @@
 namespace ALUGrid
 {
 
-  template< class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end)
+  // overloaded cyclicRecorder function
+  template< class RandomAccessIterator >
+  inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end)
   {
     RandomAccessIterator middle = std::min_element( begin,end );
     int pos = (middle == begin ? 0 : (std::rotate( begin, middle, end ), end - middle));

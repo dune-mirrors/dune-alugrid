@@ -614,7 +614,7 @@ namespace ALUGrid
       virtual void packAsBnd (int,int,ObjectStream &, const bool) const;
 
       // unpack ghost information and insert ghost cell
-      virtual void insertGhostCell(ObjectStream &,int);
+      virtual void insertGhostCell(MacroGhostBuilder&, ObjectStream &,int);
 
     private :
       const MacroGhostInfo_STI * _ghInfo;
@@ -846,12 +846,12 @@ namespace ALUGrid
           // insert hbnd_int without ghost hexa
           virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
           // insert hbnd_int with ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoHexa* );
 
           // normal insert hbnd3 version
           virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t);
           // version that get point and create ghost macro
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoTetra* );
           // version that created internal boundary on ghost elements
           virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
           hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int );

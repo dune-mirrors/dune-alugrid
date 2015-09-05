@@ -32,6 +32,8 @@ namespace ALUGrid
   // forward declaration, see ghost_info.h
   class MacroGhostInfoHexa;
   class MacroGhostInfoTetra;
+  // forward declaration, see ghost_elements.h
+  class MacroGhostBuilder;
 
 
   // enternal parameter for to be used
@@ -556,7 +558,7 @@ namespace ALUGrid
         virtual void packAsGhost(ObjectStream &,int) const {}
 
         // unpack as ghost data and insert ghost cell, default does nothing
-        virtual void insertGhostCell(ObjectStream &,int) {}
+        virtual void insertGhostCell(MacroGhostBuilder&, ObjectStream &,int) {}
 
       public :
         virtual bool ldbUpdateGraphVertex ( LoadBalancer::DataBase &, GatherScatter * )
@@ -1034,9 +1036,10 @@ namespace ALUGrid
     // class with all extensions for helement
     class Dune_helement : public DuneIndexProvider
     {
-    protected:
+    public:
       // abuse ref to refined tag
       using DuneIndexProvider::ref;
+    protected:
       Dune_helement ()
       {
         // mark as new element by increasing reference counter
@@ -2416,12 +2419,14 @@ namespace ALUGrid
 
         // insert ghost element
         virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t,
+                                              MacroGhostBuilder&,
                                               MacroGhostInfoTetra* ) = 0;
 
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t) = 0;
 
         // method to insert internal boundary with ghost
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t,
+                                              MacroGhostBuilder&,
                                               MacroGhostInfoHexa* ) = 0;
 
         IteratorSTI < vertex_STI >    *iterator (const vertex_STI *) const;
@@ -2950,6 +2955,7 @@ namespace ALUGrid
 
   // Dune extensions
   inline void Gitter::Dune_helement::resetRefinedTag () {
+    assert( ! isGhost() );
     ref.reset ();
   }
 

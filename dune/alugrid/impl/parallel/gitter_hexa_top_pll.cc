@@ -128,7 +128,7 @@ namespace ALUGrid
   ////////////////////////////////////////////////////////////////////
   template < class A, class X, class MX >
   const MacroGhostInfo_STI* Hbnd4PllInternal < A, X, MX > ::
-  HbndPllMacro::buildGhostCell(ObjectStream& os, int fce)
+  HbndPllMacro::buildGhostCell(MacroGhostBuilder& mgb, ObjectStream& os, int fce)
   {
     alugrid_assert ( _gm == 0 );
     int code = MacroGridMoverIF::ENDMARKER;
@@ -174,7 +174,7 @@ namespace ALUGrid
         alugrid_assert ( f );
 
         // ghInfo is stored inside MacroGhostHexa
-        _gm = new MacroGhostHexa( _mgb , ghInfo, f );
+        _gm = new MacroGhostHexa( mgb, ghInfo, f );
         this->setGhost ( _gm->getGhost() );
       }
     }

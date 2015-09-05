@@ -65,7 +65,7 @@ namespace ALUGrid
             }
 
             // default implementation returns 0
-            virtual const MacroGhostInfo* buildGhostCell(ObjectStream&, int) { return 0; }
+            virtual const MacroGhostInfo* buildGhostCell(MacroGhostBuilder&, ObjectStream&, int) { return 0; }
         };
         typedef Hbnd3Top < Hbnd3Default > hbndseg3_IMPL;
 
@@ -92,7 +92,7 @@ namespace ALUGrid
             }
 
             // default implementation returns 0
-            virtual const MacroGhostInfo * buildGhostCell(ObjectStream&, int) { return 0; }
+            virtual const MacroGhostInfo * buildGhostCell(MacroGhostBuilder&, ObjectStream&, int) { return 0; }
         };
         typedef Hbnd4Top < Hbnd4Default > hbndseg4_IMPL;
 
@@ -295,9 +295,9 @@ namespace ALUGrid
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t)      ;
       // version with point , returns insert_hbnd3 here
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoTetra* );
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoHexa* );
       virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int);
       virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);
 

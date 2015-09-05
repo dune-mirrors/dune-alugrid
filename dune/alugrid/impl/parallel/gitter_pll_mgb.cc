@@ -15,7 +15,8 @@ namespace ALUGrid
 {
 
   ParallelGridMover::ParallelGridMover ( BuilderIF &b )
-    : MacroGridBuilder( b, false )
+    : MacroGridBuilder( b, false ),
+     _macroGhostBuilder( b )
   {
     // lock MyAlloc so that objects are not freed
     // because we want to reuse them
@@ -427,7 +428,9 @@ namespace ALUGrid
 
           hbndseg4_GEO * hb4 = myBuilder ().
                 insert_hbnd4 (p->first(), p->second(),
-                              Gitter::hbndseg_STI::closure, ghInfo );
+                              Gitter::hbndseg_STI::closure,
+                              _macroGhostBuilder,
+                              ghInfo );
           hb4->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
           hb4->setMaster( p->master() );
           _hbndseg4List.push_back (hb4);
@@ -454,6 +457,7 @@ namespace ALUGrid
 
           hbndseg3_GEO * hb3 = myBuilder().insert_hbnd3( p->first(), p->second(),
                                                          Gitter::hbndseg_STI::closure,
+                                                         _macroGhostBuilder,
                                                          ghInfo );
           alugrid_assert ( p->ldbVertexIndex() >= 0 );
           hb3->setLoadBalanceVertexIndex( p->ldbVertexIndex() );
