@@ -78,7 +78,7 @@ namespace ALUGrid
     // copy constructor (prohibited)
     MacroGhostTetra(const MacroGhostTetra& );
   public:
-    MacroGhostTetra( BuilderIF & bi,
+    MacroGhostTetra( MacroGhostBuilder & mgb,
                      MacroGhostInfoTetra * allp,
                      const hface3_GEO * face);
 
@@ -86,7 +86,7 @@ namespace ALUGrid
     //Raendern haengen
     //sign = +/- 1  und ist dafuer da, um den Vektor
     //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
-    MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
+    MacroGhostTetra( MacroGhostBuilder & mgb, MacroGhostInfoTetra * allp,
         Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) ;
 
     // desctructor deleting ghost element and _ghInforPtr
@@ -138,7 +138,7 @@ namespace ALUGrid
     MacroGhostHexa (const MacroGhostHexa& );
   public:
     // constructor
-    MacroGhostHexa( BuilderIF & bi,
+    MacroGhostHexa( MacroGhostBuilder & mgb,
                     MacroGhostInfoHexa* allp, const hface4_GEO * face);
 
     // desctructor deleting ghost element and _ghInforPtr

@@ -110,8 +110,8 @@ namespace ALUGrid
           virtual bool lockedAgainstCoarsening () const ;
         public :
           HbndPllMacro (myhface3_t *,int, const bnd_t bt ,
-                        BuilderIF& , MacroGhostInfoTetra* ) ;
-          HbndPllMacro (myhface3_t *,int, const bnd_t bt, BuilderIF& ) ;
+                        MacroGhostBuilder& , MacroGhostInfoTetra* ) ;
+          HbndPllMacro (myhface3_t *,int, const bnd_t bt) ;
          ~HbndPllMacro () ;
           ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
           const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
@@ -125,11 +125,10 @@ namespace ALUGrid
           void setLoadBalanceVertexIndex ( int ldbVx ) { alugrid_assert ( _mxt ); _mxt->setLoadBalanceVertexIndex( ldbVx ); }
           void setMaster ( int master ) { alugrid_assert ( _mxt ); _mxt->setMaster( master ); }
 
-          virtual const MacroGhostInfo_STI* buildGhostCell(ObjectStream& os, int fce);
+          virtual const MacroGhostInfo_STI* buildGhostCell(MacroGhostBuilder& mgb, ObjectStream& os, int fce);
 
         private :
           mypllx_t * _mxt ;
-          BuilderIF& _mgb;
           MacroGhost * _gm;
       } ;
       typedef class HbndPllMacro macro_t ;
@@ -229,12 +228,11 @@ namespace ALUGrid
   Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
   HbndPllMacro (myhface3_t * f, int t,
                 const bnd_t bt,
-                BuilderIF& mgb ,
+                MacroGhostBuilder& mgb ,
                 MacroGhostInfoTetra* ghInfo)
    : Hbnd3Top < micro_t > (0,f,t,bt)
    , _mxt(0)
-   , _mgb(mgb)
-   , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) )
+   , _gm( new MacroGhostTetra( mgb , ghInfo, f ) )
   {
     alugrid_assert ( _gm );
     this->setGhost ( _gm->getGhost() );
@@ -247,11 +245,9 @@ namespace ALUGrid
   template < class A, class X, class MX >
   Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
   HbndPllMacro (myhface3_t * f, int t,
-                const bnd_t bt,
-                BuilderIF& mgb )
+                const bnd_t bt)
    : Hbnd3Top < micro_t > (0,f,t,bt)
    , _mxt ( new MX (*this) )
-   , _mgb(mgb)
    , _gm( 0 )
   {
     alugrid_assert ( _mxt );

@@ -67,14 +67,14 @@ namespace ALUGrid
   ////////////////////////////////////////////////////////////////
 
   MacroGhostTetra ::
-  MacroGhostTetra( BuilderIF & bi,
+  MacroGhostTetra( MacroGhostBuilder& mgb,
                    MacroGhostInfoTetra * allp,
                    const hface3_GEO * face) :
     _ghInfoPtr( allp ),
     _ghostPair( (GhostElement_t *)0 , -1)
   {
     //create macro ghost builder to create ghost element
-    MacroGhostBuilder mgb( bi );
+    // MacroGhostBuilder mgb( bi );
 
     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
 
@@ -134,13 +134,13 @@ namespace ALUGrid
   //sign = +/- 1  und ist dafuer da, um den Vektor
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
   MacroGhostTetra::
-  MacroGhostTetra( BuilderIF & bi, MacroGhostInfoTetra * allp,
+  MacroGhostTetra( MacroGhostBuilder & mgb, MacroGhostInfoTetra * allp,
       Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) :
     _ghInfoPtr(allp),
     _ghostPair( (GhostElement_t *)0, -1)
   {
     //create macro ghost builder to create ghost element
-    MacroGhostBuilder mgb( bi );
+    // MacroGhostBuilder mgb( bi );
 
     MacroGhostInfoTetra& ghInfo = *_ghInfoPtr;
 
@@ -214,12 +214,12 @@ namespace ALUGrid
 
   // constructor
   MacroGhostHexa::
-  MacroGhostHexa( BuilderIF & bi, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
+  MacroGhostHexa( MacroGhostBuilder& mgb, MacroGhostInfoHexa* allp, const hface4_GEO * face) :
     _ghInfoPtr(allp),
     _ghostPair( (GhostElement_t *)0 , -1)
   {
     //create macro ghost builder to create ghost element
-    MacroGhostBuilder mgb( bi );
+    //MacroGhostBuilder mgb( _mgb.myBuilder() );
 
     MacroGhostInfoHexa& ghInfo = *_ghInfoPtr;
 
@@ -246,12 +246,21 @@ namespace ALUGrid
       bool wasNewlyInserted =
 #endif
         mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[i]);
-      alugrid_assert ( wasNewlyInserted );
+      // alugrid_assert ( wasNewlyInserted );
     }
 
     // InsertUniqueHexa gets the global vertex numbers
-    hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
+    std::pair< hexa_GEO*, bool > uniqueGhost = mgb.InsertUniqueHexa ( ghInfo.vertices() );
+    hexa_GEO* ghost = uniqueGhost.first;
     alugrid_assert ( ghost );
+
+    // uniqueGhost.second == false means that element existed already,
+    // so simply increase the reference counter
+    if( ! uniqueGhost.second )
+    {
+      // increase refcounter;
+      ghost->ref++;
+    }
 
     // set ghost values
     _ghostPair.first  = ghost;
@@ -266,52 +275,72 @@ namespace ALUGrid
   {
     // store all sub items of the ghost element before deleting it
     hexa_GEO* hexa = (hexa_GEO *) _ghostPair.first;
-    alugrid_assert ( hexa );
 
-    VertexGeo* vertices[ 8 ] = {
-      hexa->myvertex(0),
-      hexa->myvertex(1),
-      hexa->myvertex(2),
-      hexa->myvertex(3),
-      hexa->myvertex(4),
-      hexa->myvertex(5),
-      hexa->myvertex(6),
-      hexa->myvertex(7)
-    };
+    // decrease reference counter
+    hexa->ref--;
 
-    hedge1_GEO* edges[ 12 ] = {
-      hexa->myhedge(0),
-      hexa->myhedge(1),
-      hexa->myhedge(2),
-      hexa->myhedge(3),
-      hexa->myhedge(4),
-      hexa->myhedge(5),
-      hexa->myhedge(6),
-      hexa->myhedge(7),
-      hexa->myhedge(8),
-      hexa->myhedge(9),
-      hexa->myhedge(10),
-      hexa->myhedge(11),
-    };
+    // if no more references exist, delete hexa
+    if( hexa->ref == 0 )
+    {
+      alugrid_assert ( hexa );
 
-    hface4_GEO* faces[ 6 ] = {
-      hexa->myhface( 0 ),
-      hexa->myhface( 1 ),
-      hexa->myhface( 2 ),
-      hexa->myhface( 3 ),
-      hexa->myhface( 4 ),
-      hexa->myhface( 5 )
-    };
+      VertexGeo* vertices[ 8 ] = {
+        hexa->myvertex(0),
+        hexa->myvertex(1),
+        hexa->myvertex(2),
+        hexa->myvertex(3),
+        hexa->myvertex(4),
+        hexa->myvertex(5),
+        hexa->myvertex(6),
+        hexa->myvertex(7)
+      };
 
-    // delete element
-    delete hexa;
+      hedge1_GEO* edges[ 12 ] = {
+        hexa->myhedge(0),
+        hexa->myhedge(1),
+        hexa->myhedge(2),
+        hexa->myhedge(3),
+        hexa->myhedge(4),
+        hexa->myhedge(5),
+        hexa->myhedge(6),
+        hexa->myhedge(7),
+        hexa->myhedge(8),
+        hexa->myhedge(9),
+        hexa->myhedge(10),
+        hexa->myhedge(11),
+      };
 
-    // delete faces
-    for( int i=0; i<6; ++i ) delete faces[ i ];
-    // delete edges
-    for( int i=0; i<12; ++i ) delete edges[ i ];
-    // detele vertices
-    for( int i=0; i<8; ++i ) delete vertices[ i ];
+      hface4_GEO* faces[ 6 ] = {
+        hexa->myhface( 0 ),
+        hexa->myhface( 1 ),
+        hexa->myhface( 2 ),
+        hexa->myhface( 3 ),
+        hexa->myhface( 4 ),
+        hexa->myhface( 5 )
+      };
+
+      // delete element
+      delete hexa;
+
+      // delete faces
+      for( int i=0; i<6; ++i )
+      {
+        if( faces[ i ]->ref == 0 )
+          delete faces[ i ];
+      }
+      // delete edges
+      for( int i=0; i<12; ++i )
+      {
+        if( edges[ i ]->ref == 0 )
+          delete edges[ i ];
+      }
+      // detele vertices
+      for( int i=0; i<8; ++i )
+      {
+        if( vertices[ i ]->ref == 0 )
+          delete vertices[ i ];
+      }
+    }
 
     alugrid_assert ( _ghInfoPtr );
     delete _ghInfoPtr;

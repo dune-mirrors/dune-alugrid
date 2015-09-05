@@ -865,7 +865,7 @@ namespace ALUGrid
         os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ());
     }
 
-    if(_ghInfo) // is stored ghost point exists
+    if(_ghInfo) // if stored ghost point exists
     {
       os.writeObject ( MacroGridMoverIF::POINTTRANSMITTED );
       // see ghost_info.h for implementation of this functions
@@ -880,10 +880,10 @@ namespace ALUGrid
   }
 
   template < class A > inline void BndsegPllBaseXMacroClosure < A >::
-  insertGhostCell(ObjectStream & os, int fce)
+  insertGhostCell(MacroGhostBuilder& mgb, ObjectStream & os, int fce)
   {
     alugrid_assert ( _ghInfo == 0 );
-    _ghInfo = this->myhbnd().buildGhostCell(os , fce);
+    _ghInfo = this->myhbnd().buildGhostCell(mgb, os , fce);
     alugrid_assert ( _ghInfo );
   }
 
@@ -2141,7 +2141,7 @@ namespace ALUGrid
     {
       // internal face always get dummy index manager
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
-            BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::macro_t (f,t, b, *this );
+            BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::macro_t (f,t, b);
     }
     else
     {
@@ -2153,6 +2153,7 @@ namespace ALUGrid
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd4 (hface4_GEO * f, int t,
                 Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostBuilder& mgb,
                 MacroGhostInfoHexa* ghInfo)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
@@ -2165,12 +2166,12 @@ namespace ALUGrid
       alugrid_assert ( ghInfo );
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::
-            macro_t (f,t, b, *this, ghInfo );
+            macro_t (f, t, b, mgb, ghInfo);
     }
     else
     {
       return new Hbnd4PllExternal < Hbnd4DefaultType ,
-          BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg4_GEO > > (f, t, b);
     }
   }
 
@@ -2178,6 +2179,7 @@ namespace ALUGrid
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd3 (hface3_GEO * f, int t,
                 Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostBuilder& mgb,
                 MacroGhostInfoTetra * ghInfo)
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
@@ -2190,12 +2192,12 @@ namespace ALUGrid
       // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
       return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::
-                macro_t (f,t, b, *this, ghInfo );
+                macro_t (f,t, b, mgb, ghInfo );
     }
     else
     {
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-          BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg3_GEO > > (f, t, b);
     }
   }
 
@@ -2209,12 +2211,12 @@ namespace ALUGrid
     {
       // here we have a ghost of the ghost, therefor we need the element index manager
       return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
-            BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::macro_t (f,t, b, *this );
+            BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::macro_t (f, t, b);
     }
     else
     {
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-             BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+             BndsegPllBaseXMacro < hbndseg3_GEO > > (f, t, b);
     }
   }
 

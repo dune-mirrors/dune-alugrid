@@ -539,7 +539,9 @@ namespace ALUGrid
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd3 (hface3_GEO * f, int i,
-                Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoTetra* )
+                Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostBuilder&,
+                MacroGhostInfoTetra* )
   {
     return insert_hbnd3(f,i,b);
   }
@@ -552,7 +554,9 @@ namespace ALUGrid
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd4 (hface4_GEO * f, int i,
-                Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoHexa* )
+                Gitter::hbndseg_STI::bnd_t b,
+                MacroGhostBuilder&,
+                MacroGhostInfoHexa* )
   {
     return insert_hbnd4 (f,i,b);
   }
