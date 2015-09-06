@@ -327,8 +327,8 @@ namespace Dune
         return ;
       }
 
-      VertexInputType maxCoord;
-      VertexInputType minCoord;
+      VertexInputType maxCoord ( std::numeric_limits<double>::min() );
+      VertexInputType minCoord ( std::numeric_limits<double>::max() );
       const size_t vertexSize = vertices.size();
       if( vertexSize > 0 )
       {
