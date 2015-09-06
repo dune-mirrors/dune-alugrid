@@ -68,8 +68,8 @@ namespace ALUGridSFC {
     {
       assert( point.size() == (unsigned int)dimension );
 
-      Coordinate center ;
-      // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
+      Coordinate center( 0 ) ;
+      // scale center into [0,1]^d box which is needed by Zoltan_HSFC_InvHilbert{2,3}d
       for( int d=0; d<dimension; ++d )
         center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
 
@@ -80,15 +80,7 @@ namespace ALUGridSFC {
     // return unique hilbert index in interval [0,1] given an element's center
     double index( const Coordinate& point ) const
     {
-      assert( point.size() == (unsigned int)dimension );
-
-      Coordinate center ;
-      // scale center into [0,1]^3 box which is needed by Zoltan_HSFC_InvHilbert3d
-      for( int d=0; d<dimension; ++d )
-        center[ d ] = (point[ d ] - lower_[ d ]) / length_[ d ];
-
-      // return hsfc index in interval [0,1]
-      return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
+      return hilbertIndex( point );
     }
   };
 #endif // if HAVE_ZOLTAN
