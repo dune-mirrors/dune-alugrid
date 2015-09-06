@@ -327,12 +327,12 @@ namespace Dune
         return ;
       }
 
-      VertexInputType maxCoord;
-      VertexInputType minCoord;
+      VertexInputType maxCoord ( std::numeric_limits<double>::min() );
+      VertexInputType minCoord ( std::numeric_limits<double>::max() );
       const size_t vertexSize = vertices.size();
       if( vertexSize > 0 )
       {
-        for( unsigned int d=0; d<dimension; ++d )
+        for( unsigned int d=0; d<dimensionworld; ++d )
         {
           maxCoord[d] = vertices[ 0 ].first[d];
           minCoord[d] = vertices[ 0 ].first[d];
@@ -342,7 +342,7 @@ namespace Dune
       for( size_t i=0; i<vertexSize; ++i )
       {
         const VertexType& vx = vertices[ i ].first;
-        for( unsigned int d=0; d<vx.size(); ++d )
+        for( unsigned int d=0; d<dimensionworld; ++d )
         {
           maxCoord[ d ] = std::max( maxCoord[ d ], vx[ d ] );
           minCoord[ d ] = std::min( minCoord[ d ], vx[ d ] );
@@ -363,7 +363,7 @@ namespace Dune
         for( int vx = 0; vx<vxSize; ++vx )
         {
           const VertexType& vertex = vertices[ elements[ i ][ vx ] ].first;
-          for( unsigned int d=0; d<vertex.size(); ++d )
+          for( unsigned int d=0; d<dimensionworld; ++d )
             center[ d ] += vertex[ d ];
         }
         center /= double(vxSize);
