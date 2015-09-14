@@ -130,7 +130,7 @@ namespace Dune
     {}
 
     explicit DGFBaseFactory ( MPICommunicatorType comm )
-      : factory_(),
+      : factory_(comm),
         dgf_( rank(comm), size(comm) )
     {}
 

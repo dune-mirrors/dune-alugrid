@@ -413,7 +413,7 @@ namespace Dune
     template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
     GridFactory ( const bool realGrid,
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+                  const MPICommunicatorType &communicator) 
     : BaseType( realGrid, communicator )
     {}
   };
