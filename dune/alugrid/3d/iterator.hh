@@ -185,15 +185,15 @@ public:
 
   //! return unit outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
+  NormalType unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
 
   //! return outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return level of iterator (level of item)
   int level () const;

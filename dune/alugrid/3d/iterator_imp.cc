@@ -322,7 +322,7 @@ ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType &
+inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 integrationOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
@@ -330,7 +330,7 @@ integrationOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType &
+inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
@@ -341,7 +341,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     typedef typename LocalGeometry::GlobalCoordinate Coordinate;
     typedef typename GridImp::template Codim<0>::Geometry ElementGeometry;
 
-    static NormalType outerNormal;
+    NormalType outerNormal;
     const ReferenceElement< alu3d_ctype, dim > &refElement =
        ReferenceElements< alu3d_ctype, dim >::cube();
 
@@ -363,7 +363,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType &
+inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 unitOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
