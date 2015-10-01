@@ -1,6 +1,8 @@
 #ifndef DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
+#include <array>
+
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -17,7 +19,7 @@ namespace Dune
     typedef ALULocalGeometryStorage< GridImp, GeometryImpl, nChild > ThisType;
 
     // array with pointers to the geometries
-    Dune::array< GeometryImpl *, nChild > geoms_;
+    std::array< GeometryImpl*, nChild > geoms_;
 
     // count local geometry creation
     int count_;
@@ -153,7 +155,7 @@ namespace Dune
     : count_( 0 ), initialized_( false )
     {
       // nullify geometries
-      geoms_.fill( (GeometryImpl *) 0 );
+      geoms_.fill( nullptr );
 
       // initialize geometries
       initialize( type, nonConform );
@@ -164,7 +166,7 @@ namespace Dune
     : count_( 0 ), initialized_( false )
     {
       // nullify geometries
-      geoms_.fill( (GeometryImpl *) 0 );
+      geoms_.fill( nullptr );
     }
 
     // desctructor deleteing geometries
@@ -179,17 +181,14 @@ namespace Dune
     {
       alugrid_assert ( geomCreated(child) );
       // this method is not thread safe yet
-      assert( GridImp :: thread() == 0 );
       return *(geoms_[child]);
     }
 
     //! access local geometries
     static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
     {
-      // this method is not thread safe yet
-      assert( GridImp :: thread() == 0 );
-      // create static variable on heap
-      static ThisType instance( type, nonConforming );
+      // create static variable for this thread
+      static thread_local ThisType instance( type, nonConforming );
       // make sure the geometry type is the same
       alugrid_assert ( type == instance[ child ].type() );
       return instance[ child ];
@@ -200,8 +199,8 @@ namespace Dune
     {
       if( type.isSimplex() )
       {
-        // create static variable on heap
-        static ThisType simplexGeoms;
+        // create static variable for this thread
+        static thread_local ThisType simplexGeoms;
         // initialize (only done once), note that this is called recursively during initialize
         // so only check geoms when they were actually really created
         if( simplexGeoms.initialize( type, nonConforming ) )
@@ -216,8 +215,8 @@ namespace Dune
         // should be a cube geometry a this point
         alugrid_assert( type.isCube() );
 
-        // create static variable on heap
-        static ThisType cubeGeoms;
+        // create static variable
+        static thread_local ThisType cubeGeoms;
         // initialize (only done once), note that this is called recursively during initialize
         // so only check geoms when they were actually really created
         if( cubeGeoms.initialize( type, nonConforming ) )
@@ -254,11 +253,11 @@ namespace Dune
     template < class Grid >
     void createGeometries(const GeometryType& type)
     {
-
-      static bool firstCall = true ;
+      static thread_local bool firstCall = true ;
       if( firstCall )
       {
         firstCall = false ;
+
         // create factory without verbosity
         GridFactory< Grid > factory( false );
 
@@ -284,26 +283,26 @@ namespace Dune
         factory.insertElement(type, vertices);
 
         // save original sbuf
-        std::streambuf* cerr_sbuf = std::cerr.rdbuf();
-        std::stringstream tempout;
+        //std::streambuf* cerr_sbuf = std::cerr.rdbuf();
+        //std::stringstream tempout;
         // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors
-        std::cerr.rdbuf(tempout.rdbuf());
+        //std::cerr.rdbuf(tempout.rdbuf());
 
         Grid* gridPtr = factory.createGrid();
         Grid& grid    = *gridPtr;
 
         // restore the original stream buffer
-        std::cerr.rdbuf(cerr_sbuf);
+        //std::cerr.rdbuf(cerr_sbuf);
 
         //std::cerr = savecerr;
 
-        // refine once to get children
+        // refine once to get children in the reference element
         const int level = 1;
         grid.globalRefine( level );
 
         {
-          typedef typename Grid :: template Partition< All_Partition >:: LevelGridView MacroGridView;
-          MacroGridView macroView = grid.template levelView< All_Partition > ( 0 );
+          typedef typename Grid :: MacroGridView MacroGridView;
+          MacroGridView macroView = grid.template macroGridView< All_Partition > ();
           typedef typename MacroGridView :: template Codim< 0 > :: Iterator Iterator;
 
           Iterator it = macroView.template begin<0> ();
@@ -329,7 +328,6 @@ namespace Dune
         // delete grid
         delete gridPtr;
       }
-
     }
 
     // create local geometry
