@@ -404,16 +404,14 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename,
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+    explicit GridFactory ( const std::string &filename,
+                           const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
     {}
 
-  protected:
-    template< class, class, int > friend class ALULocalGeometryStorage;
     /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid,
-                  const MPICommunicatorType &communicator) 
+    explicit GridFactory ( const bool realGrid,
+                           const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( realGrid, communicator )
     {}
   };
