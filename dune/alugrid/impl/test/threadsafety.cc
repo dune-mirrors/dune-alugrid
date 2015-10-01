@@ -12,6 +12,12 @@
 #include <iostream>
 #include <fstream>
 
+#if HAVE_DLMALLOC
+#if _OPENMP
+#error DLMALLOC cannot be used with DLMALLOC
+#endif
+#endif
+
 #define ENABLE_ALUGRID_VTK_OUTPUT
 
 // include serial part of ALUGrid
