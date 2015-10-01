@@ -812,7 +812,7 @@ namespace Dune
     //! return storage provider for geometry objects
     static GeometryProviderType& geoProvider()
     {
-      static GeometryProviderType storage;
+      static thread_local GeometryProviderType storage;
       return storage;
     }
 
