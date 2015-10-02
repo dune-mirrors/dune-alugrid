@@ -5,7 +5,9 @@
 #include <vector>
 
 //- Dune includes
+#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 #include <dune/grid/utility/grapedataioformattypes.hh>
+#endif // #if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
@@ -394,6 +396,9 @@ namespace Dune
         typedef Dune::GridView< ALU3dLeafGridViewTraits< const Grid, pitype > > LeafGridView;
         typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
+
+      typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
+      typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
       typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
 
       //! Type of the level index set
