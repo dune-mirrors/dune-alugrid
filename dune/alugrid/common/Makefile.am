@@ -14,11 +14,10 @@ alucommon_HEADERS = alugrid_assert.hh \
                     ldbhandleif.hh \
                     macrogridview.hh \
                     memory.hh \
-                    objectfactory.hh \
                     persistentcontainer.hh \
                     structuredgridfactory.hh \
                     transformation.hh \
-		    typetraits.hh \
+                    typetraits.hh \
                     twists.hh \
                     writeparalleldgf.hh
 

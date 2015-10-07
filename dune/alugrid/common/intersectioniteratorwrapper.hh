@@ -6,6 +6,8 @@
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/alugrid/common/macrogridview.hh>
 
+#include <dune/alugrid/common/memory.hh>
+
 /** @file
  @author Robert Kloefkorn
  @brief Provides proxy classes for IntersectionsIterators
@@ -25,11 +27,8 @@ class IntersectionIteratorWrapper
 
   typedef IntersectionIteratorImpl IntersectionIteratorImp;
 
-  typedef typename IntersectionIteratorImp :: StorageType IntersectionIteratorProviderType;
-
+  typedef ALUMemoryProvider< IntersectionIteratorImpl > IntersectionIteratorProviderType ;
 public:
-  typedef typename GridImp :: GridObjectFactoryType   FactoryType;
-
   //! dimension
   enum { dimension      = dim };
   //! dimensionworld
@@ -54,66 +53,72 @@ public:
   typedef typename IntersectionIteratorImpl::Twists Twists;
   typedef typename Twists::Twist Twist;
 
-  IntersectionIteratorWrapper () : factory_( nullptr ), it_( nullptr ) {}
+  IntersectionIteratorWrapper () : it_( nullptr ) {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  IntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end)
-    : factory_( &factory )
-    , it_( &factory.getIntersection(wLevel, (IntersectionIteratorImpl *) 0) )
+  IntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end)
+    : it_( provider().getEmptyObject() )
   {
     if(end)
       it().done( en );
     else
-      it().first(en,wLevel);
+      it().first( en, wLevel, grid.conformingRefinement(), grid.ghostCellsEnabled() );
   }
 
   //! The copy constructor
   IntersectionIteratorWrapper(const ThisType & org)
-    : factory_( org.factory_ )
+    : it_( nullptr )
   {
-    if( factory_ )
+    assign( org );
+  }
+
+  //! the assignment operator
+  void assign(const ThisType & org)
+  {
+    if( ! org.it_  )
     {
-      it_ = &factory().getIntersection( -1, static_cast< IntersectionIteratorImpl * >( nullptr ) );
-      it_->assign( org.it() );
+      removeObj();
+      return;
+    }
+
+    if( ! it_ )
+    {
+      it_ = provider().getEmptyObject();
+    }
+
+    // copy intersection
+    it().assign( org.it() );
+  }
+
+  void removeObj()
+  {
+    if( it_ )
+    {
+      provider().freeObject( it_ );
+      it_ = nullptr ;
     }
   }
 
   //! the assignment operator
   ThisType & operator = (const ThisType & org)
   {
-    if( factory_ )
-    {
-      if( !org.factory_ )
-      {
-        factory_->freeIntersection( *it_ );
-        factory_ = nullptr;
-      }
-      else
-        it_->assign( *org.it_ );
-    }
-    else if( org.factory_ )
-    {
-      factory_ = org.factory_;
-      it_ = &factory().getIntersection( -1, static_cast< IntersectionIteratorImpl * >( nullptr ) );
-      it_->assign( *org.it_ );
-    }
-    return *this;
+    assign( org );
+    return *this ;
   }
 
   //! The Destructor puts internal object back to stack
   ~IntersectionIteratorWrapper()
   {
-    if( factory_ )
-      factory_->freeIntersection( *it_ );
+    removeObj();
   }
 
-  operator bool () const { return bool( factory_ ); }
+  operator bool () const { return bool( it_ ); }
 
   //! the equality method
   bool equals ( const ThisType &other ) const
   {
-    return (factory_ == other.factory_) && (!factory_ || it().equals( other.it() ));
+    return (it_ && other.it_ ) ? it().equals( other.it() ) : false ;
   }
 
   //! increment iterator
@@ -238,9 +243,13 @@ public:
   }
 
 private:
-  const FactoryType &factory () const { assert( factory_ ); return *factory_; }
+  static IntersectionIteratorProviderType&
+  provider()
+  {
+    static thread_local IntersectionIteratorProviderType provider ;
+    return provider ;
+  }
 
-  const FactoryType *factory_ ;
   IntersectionIteratorImp *it_;
 }; // end class IntersectionIteratorWrapper
 
@@ -251,13 +260,12 @@ class LeafIntersectionWrapper
   typedef LeafIntersectionWrapper<GridImp> ThisType;
   typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
 public:
-  typedef typename BaseType::FactoryType FactoryType;
   LeafIntersectionWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LeafIntersectionWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-    : BaseType(factory,en,wLevel,end)
+  LeafIntersectionWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+    : BaseType( grid, en, wLevel, end )
   {
   }
 
@@ -278,7 +286,6 @@ class LeafIntersectionIteratorWrapper
   typedef LeafIntersectionWrapper<GridImp> IntersectionImp;
 
 public:
-  typedef typename IntersectionImp::FactoryType FactoryType;
   typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
   //! dimension
@@ -302,12 +309,13 @@ public:
   //! type of normal vector
   typedef FieldVector<ctype , dimensionworld> NormalType;
 
+  //! default constructor
   LeafIntersectionIteratorWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LeafIntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-  : intersection_( IntersectionImp(factory,en,wLevel,end) )
+  LeafIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+  : intersection_( IntersectionImp( grid, en, wLevel, end) )
   {}
 
   //! The copy constructor
@@ -355,13 +363,12 @@ class LevelIntersectionWrapper
   typedef LevelIntersectionWrapper<GridImp> ThisType;
   typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
 public:
-  typedef typename BaseType::FactoryType FactoryType;
   LevelIntersectionWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LevelIntersectionWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-    : BaseType(factory,en,wLevel,end)
+  LevelIntersectionWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+    : BaseType( grid, en, wLevel, end )
   {
   }
 
@@ -379,7 +386,6 @@ class LevelIntersectionIteratorWrapper
 {
   typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
   typedef LevelIntersectionWrapper<GridImp> IntersectionImp;
-  typedef typename IntersectionImp::FactoryType FactoryType;
 public:
   typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
@@ -408,8 +414,8 @@ public:
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LevelIntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-  : intersection_( IntersectionImp(factory,en,wLevel,end) )
+  LevelIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+  : intersection_( IntersectionImp( grid, en, wLevel, end ) )
   {}
 
   //! The copy constructor

@@ -12,7 +12,7 @@
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "mappings.hh"
-#include <dune/alugrid/common/objectfactory.hh>
+#include <dune/alugrid/common/memory.hh>
 
 namespace Dune
 {

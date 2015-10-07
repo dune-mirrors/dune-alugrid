@@ -25,36 +25,13 @@ namespace Dune {
 // --IntersectionIterator
 template<class GridImp>
 inline ALU3dGridIntersectionIterator<GridImp> ::
-ALU3dGridIntersectionIterator(const FactoryType& factory,
-                              int wLevel, bool levelIntersectionIterator) :
-  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled(), levelIntersectionIterator ),
+ALU3dGridIntersectionIterator(const bool levelIntersectionIterator) :
+  connector_( levelIntersectionIterator ),
   geoProvider_(connector_),
   item_(0),
   ghost_(0),
   index_(-1)
 {
-}
-
-// --IntersectionIterator
-template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> ::
-ALU3dGridIntersectionIterator(const FactoryType& factory,
-                              HElementType *el,
-                              int wLevel,bool end, bool levelIntersectionIterator) :
-  connector_( factory.grid().conformingRefinement(), factory.grid().ghostCellsEnabled(), levelIntersectionIterator ),
-  geoProvider_(connector_),
-  item_(0),
-  ghost_(0),
-  index_(-1)
-{
-  if( ! end )
-  {
-    setFirstItem(*el,wLevel);
-  }
-  else
-  {
-    done();
-  }
 }
 
 template<class GridImp>
@@ -108,13 +85,18 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
 template<class GridImp>
 template <class EntityType>
 inline void ALU3dGridIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel)
+first (const EntityType & en, int wLevel,
+       const bool conformingRefinement,
+       const bool ghostCellsEnabled )
 {
   if( ! en.isLeaf() && en.level()>0)
   {
     done();
     return ;
   }
+
+  // adjust connector flags
+  connector_.setFlags( conformingRefinement, ghostCellsEnabled );
 
   innerLevel_ = en.level();
   index_  = 0;
@@ -163,13 +145,16 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
 {
   if(org.item_)
   {
+    // adjust connector flags
+    connector_.setFlags( org.connector_.conformingRefinement(), org.connector_.ghostCellsEnabled() );
+
     // else it's a end iterator
     item_       = org.item_;
     ghost_      = org.ghost_;
     innerLevel_ = org.innerLevel_;
     index_      = org.index_;
     connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
-        item_->twist(ElementTopo::dune2aluFace(index_)));
+                              item_->twist(ElementTopo::dune2aluFace(index_)));
     geoProvider_.resetFaceGeom();
   }
   else {
@@ -508,21 +493,8 @@ level() const {
 // --IntersectionIterator
 template<class GridImp>
 inline ALU3dGridLevelIntersectionIterator<GridImp> ::
-ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
-                                   int wLevel)
-  : ALU3dGridIntersectionIterator<GridImp>(factory,wLevel,true)
-  , levelNeighbor_(false)
-  , isLeafItem_(false)
-{
-}
-
-// --IntersectionIterator
-template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> ::
-ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
-                                   HElementType *el,
-                                   int wLevel,bool end)
-  : ALU3dGridIntersectionIterator<GridImp>(factory,el,wLevel,end, true)
+ALU3dGridLevelIntersectionIterator()
+  : ALU3dGridIntersectionIterator<GridImp>( true )
   , levelNeighbor_(false)
   , isLeafItem_(false)
 {
@@ -531,8 +503,11 @@ ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
 template<class GridImp>
 template <class EntityType>
 inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel)
+first (const EntityType & en, int wLevel,
+       const bool conformingRefinement, const bool ghostCellsEnabled )
 {
+  connector_.setFlags( conformingRefinement, ghostCellsEnabled );
+
   // if given Entity is not leaf, we create an end iterator
   index_  = 0;
   isLeafItem_   = en.isLeaf();
@@ -645,7 +620,8 @@ setNewFace(const GEOFaceType& newFace)
   connector_.updateFaceInfo(newFace, innerLevel_,
               ( ImplTraits::isGhost( ghost_ ) ) ?
                  ghost_->twist(0) :
-                 item_->twist(ElementTopo::dune2aluFace( index_ )));
+                 item_->twist(ElementTopo::dune2aluFace( index_ ))
+              );
   geoProvider_.resetFaceGeom();
 
   // check again level neighbor because outer element might be coarser then

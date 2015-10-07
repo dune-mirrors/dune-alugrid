@@ -7,7 +7,7 @@ namespace Dune
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
-  ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled , const bool levelIntersection ) :
+  ALU3dGridFaceInfo( const bool levelIntersection ) :
     face_(0),
     innerElement_(0),
     outerElement_(0),
@@ -19,10 +19,21 @@ namespace Dune
     bndId_( -1 ),
     bndType_( noBoundary ),
     conformanceState_(UNDEFINED),
-    conformingRefinement_( conformingRefinement ),
-    ghostCellsEnabled_( ghostCellsEnabled ),
+    conformingRefinement_( false ),
+    ghostCellsEnabled_( false ),
     levelIntersection_( levelIntersection )
   {
+  }
+
+  // points face from inner element away?
+  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
+  inline void
+  ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
+  setFlags(const bool conformingRefinement,
+           const bool ghostCellsEnabled )
+  {
+    conformingRefinement_ = conformingRefinement;
+    ghostCellsEnabled_    = ghostCellsEnabled;
   }
 
   // points face from inner element away?
