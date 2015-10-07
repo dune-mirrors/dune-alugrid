@@ -393,11 +393,9 @@ namespace Dune
         typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
 
-      typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
-      typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
-      typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
-      typedef typename Partition< All_Partition > :: LeafGridView  LeafGridView;
-      typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
+      typedef typename Partition< All_Partition > :: MacroGridView   MacroGridView;
+      typedef typename Partition< All_Partition > :: LeafGridView    LeafGridView;
+      typedef typename Partition< All_Partition > :: LevelGridView   LevelGridView;
 
       //! Type of the level index set
       typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
