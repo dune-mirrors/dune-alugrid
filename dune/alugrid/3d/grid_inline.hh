@@ -75,12 +75,6 @@ namespace Dune
 
       geomTypes_[ codim ].push_back( tmpType );
     }
-
-    // initialize static storage variables
-    ALU3dGridGeometry< 0, dimension, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< 1, dimension, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< 2, dimension, const ThisType> :: geoProvider();
-    ALU3dGridGeometry< dimension, dimension, const ThisType> :: geoProvider();
   }
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
