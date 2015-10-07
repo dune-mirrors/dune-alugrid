@@ -5,9 +5,6 @@
 #include <vector>
 
 //- Dune includes
-#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
-#include <dune/grid/utility/grapedataioformattypes.hh>
-#endif // #if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
@@ -25,7 +22,6 @@
 // bnd projection stuff
 #include <dune/grid/common/boundaryprojection.hh>
 #include <dune/alugrid/common/bndprojection.hh>
-#include <dune/alugrid/common/objectfactory.hh>
 #include <dune/alugrid/common/backuprestore.hh>
 #include <dune/alugrid/common/macrogridview.hh>
 #include <dune/alugrid/common/twists.hh>
@@ -393,13 +389,15 @@ namespace Dune
       struct Partition
       {
         typedef Dune::GridView< ALU3dLevelGridViewTraits< const Grid, pitype > > LevelGridView;
-        typedef Dune::GridView< ALU3dLeafGridViewTraits< const Grid, pitype > > LeafGridView;
+        typedef Dune::GridView< ALU3dLeafGridViewTraits< const Grid, pitype > >  LeafGridView;
         typedef Dune::MacroGridView<const Grid, pitype> MacroGridView;
       }; // struct Partition
 
       typedef typename Partition< All_Partition >::LevelGridView LevelGridView;
       typedef typename Partition< All_Partition >::LeafGridView LeafGridView;
       typedef typename Partition< All_Partition > :: MacroGridView MacroGridView;
+      typedef typename Partition< All_Partition > :: LeafGridView  LeafGridView;
+      typedef typename Partition< All_Partition > :: LevelGridView LevelGridView;
 
       //! Type of the level index set
       typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
@@ -585,14 +583,6 @@ namespace Dune
     typedef ALULeafCommunication< dim, dimworld, elType, Comm > LeafCommunication;
     typedef ALULevelCommunication< dim, dimworld, elType, Comm > LevelCommunication;
 
-  public:
-    typedef MakeableInterfaceObject<typename Traits::template Codim<0>::Entity> EntityObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<1>::Entity> FaceObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<2>::Entity> EdgeObject;
-    typedef MakeableInterfaceObject<typename Traits::template Codim<3>::Entity> VertexObject;
-
-    typedef ALUGridObjectFactory< ThisType >  GridObjectFactoryType;
-
   protected:
     friend class ALUGridBoundaryProjection< ThisType, alu3d_ctype >;
     // type of ALUGrid boundary projection wrapper
@@ -693,7 +683,7 @@ namespace Dune
     typename Traits::LeafIntersectionIterator
     ileafbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
-      return LefInterItWrapperType( factory(),
+      return LefInterItWrapperType( *this,
                                     getRealImplementation( entity ),
                                     entity.level(), false );
     }
@@ -701,7 +691,7 @@ namespace Dune
     typename Traits::LeafIntersectionIterator
     ileafend( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
-      return LefInterItWrapperType( factory(),
+      return LefInterItWrapperType( *this,
                                     getRealImplementation( entity ),
                                     entity.level(), true );
     }
@@ -709,7 +699,7 @@ namespace Dune
     typename Traits::LevelIntersectionIterator
     ilevelbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
-      return LvlInterItWrapperType( factory(),
+      return LvlInterItWrapperType( *this,
                                     getRealImplementation( entity ),
                                     entity.level(), false );
     }
@@ -717,7 +707,7 @@ namespace Dune
     typename Traits::LevelIntersectionIterator
     ilevelend( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
-      return LvlInterItWrapperType( factory(),
+      return LvlInterItWrapperType( *this,
                                     getRealImplementation( entity ),
                                     entity.level(), true );
     }
@@ -1266,8 +1256,6 @@ namespace Dune
     void makeGeometries();
 
   public:
-    const GridObjectFactoryType &factory () const { return factory_; }
-
     std::pair< LevelIndexSetImp *, bool > getLevelIndexSet ( int level ) const
     {
       assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
@@ -1344,8 +1332,6 @@ namespace Dune
     // the type of our size cache
     typedef SizeCache<MyType> SizeCacheType;
     SizeCacheType * sizeCache_;
-
-    GridObjectFactoryType factory_;
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;

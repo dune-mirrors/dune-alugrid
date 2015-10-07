@@ -31,7 +31,6 @@ namespace Dune
     , localIdSet_( *this )
     , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
     , sizeCache_ ( 0 )
-    , factory_( *this )
     , lockPostAdapt_( false )
     , bndPrj_ ( bndPrj )
     , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )
@@ -129,7 +128,7 @@ namespace Dune
     if( level > maxlevel_ )
       return this->template lend<cd,pitype> (level);
 
-    return ALU3dGridLevelIterator< cd, pitype, const ThisType >( factory(), level, true );
+    return ALU3dGridLevelIterator< cd, pitype, const ThisType >( *this, level, true );
   }
 
 
@@ -139,7 +138,7 @@ namespace Dune
   ALU3dGrid< dim, dimworld, elType, Comm >::lend ( int level ) const
   {
     alugrid_assert ( level >= 0 );
-    return ALU3dGridLevelIterator< cd, pitype, const ThisType >( factory(), level );
+    return ALU3dGridLevelIterator< cd, pitype, const ThisType >( *this, level );
   }
 
 
@@ -174,7 +173,7 @@ namespace Dune
   ALU3dGrid< dim, dimworld, elType, Comm >::createLeafIteratorBegin ( int level ) const
   {
     alugrid_assert ( level >= 0 );
-    return ALU3dGridLeafIterator< cd, pitype, const ThisType >( factory(), level, true );
+    return ALU3dGridLeafIterator< cd, pitype, const ThisType >( *this, level, true );
   }
 
 
@@ -241,7 +240,7 @@ namespace Dune
   ALU3dGrid< dim, dimworld, elType, Comm >::createLeafIteratorEnd ( int level ) const
   {
     alugrid_assert ( level >= 0 );
-    return ALU3dGridLeafIterator<cd, pitype, const MyType> ( factory() , level);
+    return ALU3dGridLeafIterator<cd, pitype, const MyType> ( *this, level);
   }
 
 
