@@ -9,8 +9,7 @@
 # HAVE_DLMALLOC           True if DLMALLOC was found and usable
 # DLMALLOC_INCLUDE_DIRS   Path to the DLMALLOC include dirs
 
-#set(DLMALLOC_ROOT "" CACHE PATH "Path list to search for DLMALLOC")
-
+set(DLMALLOC_ROOT "" CACHE PATH "Path list to search for DLMALLOC")
 mark_as_advanced(DLMALLOC_ROOT)
 
 #message("dlmalloc: ${DLMALLOC_ROOT}")
@@ -23,7 +22,7 @@ find_path(DLMALLOC_INCLUDE_DIR malloc.c
 
 IF(DLMALLOC_INCLUDE_DIR)
   set(DLMALLOC_SOURCE_INCLUDE "\"${DLMALLOC_INCLUDE_DIR}/malloc.c\"")
-ELSE()  
+ELSE()
   #look for header files at positions given by the user
   find_path(DLMALLOC_INCLUDE_DIR malloc-2.8.6.c
     PATHS ${DLMALLOC_DIR} ${DLMALLOC_ROOT}
@@ -35,7 +34,7 @@ ELSE()
 ENDIF()
 
 # check if dlmalloc can be compiled
-CHECK_C_SOURCE_COMPILES( "#include ${DLMALLOC_SOURCE_INCLUDE} 
+CHECK_C_SOURCE_COMPILES( "#include ${DLMALLOC_SOURCE_INCLUDE}
                           int main () { return 0; }" DLMALLOC_SOURCE_USABLE )
 
 
