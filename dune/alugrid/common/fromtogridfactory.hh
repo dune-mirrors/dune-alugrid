@@ -1,6 +1,7 @@
 #ifndef DUNE_ALUGRID_FROMTOGRIDFACTORY_HH
 #define DUNE_ALUGRID_FROMTOGRIDFACTORY_HH
 
+#include <map>
 #include <vector>
 
 #include <dune/common/version.hh>
