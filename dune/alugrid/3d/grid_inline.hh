@@ -61,6 +61,11 @@ namespace Dune
   void
   ALU3dGrid< dim, dimworld, elType, Comm >::makeGeometries()
   {
+    ALU3dGridGeometry< 0,   dimworld, const ThisType > :: geoProvider();
+    ALU3dGridGeometry< 1,   dimworld, const ThisType > :: geoProvider();
+    ALU3dGridGeometry< 2,   dimworld, const ThisType > :: geoProvider();
+    ALU3dGridGeometry< dim, dimworld, const ThisType > :: geoProvider();
+
     alugrid_assert ( elType == tetra || elType == hexa );
 
     geomTypes_.clear();

@@ -2,6 +2,7 @@
 #define DUNE_ALUGRIDGEOMETRYSTORAGE_HH
 
 #include <array>
+#include <memory>
 
 #include <dune/common/exceptions.hh>
 
@@ -19,7 +20,7 @@ namespace Dune
     typedef ALULocalGeometryStorage< GridImp, GeometryImpl, nChild > ThisType;
 
     // array with pointers to the geometries
-    std::array< GeometryImpl*, nChild > geoms_;
+    std::array< GeometryImpl, nChild > geoms_;
 
     // count local geometry creation
     int count_;
@@ -154,9 +155,6 @@ namespace Dune
     ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
     : count_( 0 ), initialized_( false )
     {
-      // nullify geometries
-      geoms_.fill( nullptr );
-
       // initialize geometries
       initialize( type, nonConform );
     }
@@ -165,15 +163,6 @@ namespace Dune
     ALULocalGeometryStorage ()
     : count_( 0 ), initialized_( false )
     {
-      // nullify geometries
-      geoms_.fill( nullptr );
-    }
-
-    // desctructor deleteing geometries
-    ~ALULocalGeometryStorage ()
-    {
-      for(size_t i=0; i<geoms_.size(); ++i)
-        if(geoms_[i]) delete geoms_[i];
     }
 
     // return reference to local geometry
@@ -181,17 +170,7 @@ namespace Dune
     {
       alugrid_assert ( geomCreated(child) );
       // this method is not thread safe yet
-      return *(geoms_[child]);
-    }
-
-    //! access local geometries
-    static const GeometryImpl& geom( const GeometryType type, const bool nonConforming, const int child )
-    {
-      // create static variable for this thread
-      static thread_local ThisType instance( type, nonConforming );
-      // make sure the geometry type is the same
-      alugrid_assert ( type == instance[ child ].type() );
-      return instance[ child ];
+      return geoms_[child];
     }
 
     //! access local geometry storage
@@ -200,14 +179,14 @@ namespace Dune
       if( type.isSimplex() )
       {
         // create static variable for this thread
-        static thread_local ThisType simplexGeoms;
+        thread_local static ThisType simplexGeoms( type, nonConforming );
         // initialize (only done once), note that this is called recursively during initialize
         // so only check geoms when they were actually really created
-        if( simplexGeoms.initialize( type, nonConforming ) )
-        {
-          if( type != simplexGeoms[ 0 ].type() )
-            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
-        }
+        //if( simplexGeoms.initialize( type, nonConforming ) )
+        //{
+        //  if( type != simplexGeoms[ 0 ].type() )
+        //    DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
+        //}
         return simplexGeoms ;
       }
       else
@@ -216,7 +195,7 @@ namespace Dune
         alugrid_assert( type.isCube() );
 
         // create static variable
-        static thread_local ThisType cubeGeoms;
+        thread_local static ThisType cubeGeoms;
         // initialize (only done once), note that this is called recursively during initialize
         // so only check geoms when they were actually really created
         if( cubeGeoms.initialize( type, nonConforming ) )
@@ -230,7 +209,7 @@ namespace Dune
 
   protected:
     // check if geometry has been created
-    bool geomCreated(int child) const { return geoms_[child] != 0; }
+    bool geomCreated(int child) const { return geoms_[child].valid(); }
 
     //! initialize local geometries
     bool initialize( const GeometryType type, const bool nonConform )
@@ -282,19 +261,8 @@ namespace Dune
         for(size_t i=0; i<vertices.size(); ++i) vertices[ i ] = i;
         factory.insertElement(type, vertices);
 
-        // save original sbuf
-        //std::streambuf* cerr_sbuf = std::cerr.rdbuf();
-        //std::stringstream tempout;
-        // redirect 'cerr' to a 'fout' to avoid unnecessary output in constructors
-        //std::cerr.rdbuf(tempout.rdbuf());
-
-        Grid* gridPtr = factory.createGrid();
-        Grid& grid    = *gridPtr;
-
-        // restore the original stream buffer
-        //std::cerr.rdbuf(cerr_sbuf);
-
-        //std::cerr = savecerr;
+        std::unique_ptr< Grid > gridPtr( factory.createGrid() );
+        Grid& grid = *gridPtr;
 
         // refine once to get children in the reference element
         const int level = 1;
@@ -324,9 +292,6 @@ namespace Dune
             create( geo, child->geometry(), childNum );
           }
         }
-
-        // delete grid
-        delete gridPtr;
       }
     }
 
@@ -342,8 +307,7 @@ namespace Dune
       alugrid_assert ( (count_ < nChild) );
       ++count_;
 
-      geoms_[ child ] = new GeometryImpl();
-      geoms_[ child ]->buildGeomInFather( father, son );
+      geoms_[ child ].buildGeomInFather( father, son );
     }
 
   };
