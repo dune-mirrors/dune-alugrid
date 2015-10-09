@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDGEOMETRY_HH
 
 // System includes
+#include <memory>
 
 // Dune includes
 #include <dune/common/version.hh>
@@ -56,19 +57,11 @@ namespace Dune
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners , cdim>  CoordinateMatrixType;
 
-      template <int dummy, int dimused>
-      struct CoordTypeExtractorType
-      {
-        typedef CoordinateMatrixType Type;
-      };
-
-      template <int dummy>
-      struct CoordTypeExtractorType< dummy, 3 >
-      {
-        typedef CoordinateMatrixType* Type;
-      };
-
-      typedef typename CoordTypeExtractorType< 0, dim > :: Type CoordinateStorageType ;
+      // select coordinate storage for coord_ (pointer for dim == 3)
+      typedef typename std::conditional<
+          dim == 3,
+          std::unique_ptr< CoordinateMatrixType >,
+          CoordinateMatrixType >:: type CoordinateStorageType;
 
       //! the type of the mapping
       typedef Mapping     MappingType;
@@ -90,7 +83,7 @@ namespace Dune
     public:
       //! default constructor
       GeometryImplBase()
-        : coord_( 0 ),
+        : coord_(),
           map_(),
           volume_( 1.0 )
       {
@@ -458,12 +451,6 @@ namespace Dune
           coordPtr_[ i ] = 0;
       }
 
-      // desctructor
-      ~GeometryImpl()
-      {
-        if( coord_ ) delete coord_;
-      }
-
       const alu3d_ctype* point( const int i ) const
       {
         alugrid_assert ( valid() );
@@ -506,9 +493,9 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
       {
-        if( coord_ == 0 )
+        if( ! coord_ )
         {
-          coord_ = new CoordinateMatrixType();
+          coord_.reset( new CoordinateMatrixType() );
         }
 
         CoordinateMatrixType& coord = *coord_;
@@ -585,12 +572,6 @@ namespace Dune
           coordPtr_[ i ] = 0;
       }
 
-      // destructor
-      ~GeometryImpl()
-      {
-        if( coord_ ) delete coord_;
-      }
-
       const alu3d_ctype* point( const int i ) const
       {
         alugrid_assert ( valid() );
@@ -625,9 +606,9 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                           const GeometryImp & myGeom)
       {
-        if( coord_ == 0 )
+        if( ! coord_ )
         {
-          coord_ = new CoordinateMatrixType();
+          coord_.reset(new CoordinateMatrixType());
         }
 
         CoordinateMatrixType& coord = *coord_;
@@ -812,7 +793,8 @@ namespace Dune
     //! return storage provider for geometry objects
     static GeometryProviderType& geoProvider()
     {
-      static thread_local GeometryProviderType storage;
+      //static thread_local GeometryProviderType storage;
+      static GeometryProviderType storage;
       return storage;
     }
 
