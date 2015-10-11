@@ -179,14 +179,7 @@ namespace Dune
       if( type.isSimplex() )
       {
         // create static variable for this thread
-        thread_local static ThisType simplexGeoms( type, nonConforming );
-        // initialize (only done once), note that this is called recursively during initialize
-        // so only check geoms when they were actually really created
-        //if( simplexGeoms.initialize( type, nonConforming ) )
-        //{
-        //  if( type != simplexGeoms[ 0 ].type() )
-        //    DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
-        //}
+        static ThisType simplexGeoms( type, nonConforming );
         return simplexGeoms ;
       }
       else
@@ -195,14 +188,7 @@ namespace Dune
         alugrid_assert( type.isCube() );
 
         // create static variable
-        thread_local static ThisType cubeGeoms;
-        // initialize (only done once), note that this is called recursively during initialize
-        // so only check geoms when they were actually really created
-        if( cubeGeoms.initialize( type, nonConforming ) )
-        {
-          if( type != cubeGeoms[ 0 ].type() )
-            DUNE_THROW(InvalidStateException,"Local geometries were not initialized");
-        }
+        static ThisType cubeGeoms( type, nonConforming );
         return cubeGeoms ;
       }
     }
@@ -232,7 +218,7 @@ namespace Dune
     template < class Grid >
     void createGeometries(const GeometryType& type)
     {
-      static thread_local bool firstCall = true ;
+      static bool firstCall = true ;
       if( firstCall )
       {
         firstCall = false ;

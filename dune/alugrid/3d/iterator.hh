@@ -114,8 +114,6 @@ public:
 
   typedef FieldVector<alu3d_ctype, dimworld> NormalType;
 
-  typedef ALUMemoryProvider< ThisType > StorageType;
-
   //! The default Constructor
   explicit ALU3dGridIntersectionIterator( const bool levelIntersectionIterator = false );
 
