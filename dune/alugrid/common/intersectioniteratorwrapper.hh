@@ -53,7 +53,6 @@ public:
   typedef typename IntersectionIteratorImpl::Twists Twists;
   typedef typename Twists::Twist Twist;
 
-  //! default constructor creating empty intersection
   IntersectionIteratorWrapper() : itPtr_() {}
 
   //! constructor called from the ibegin and iend method
@@ -61,7 +60,9 @@ public:
   IntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end)
     : itPtr_()
   {
-    if( ! end )
+    if(end)
+      it().done( en );
+    else
       it().first( en, wLevel, grid.conformingRefinement(), grid.ghostCellsEnabled() );
   }
 
@@ -84,15 +85,10 @@ public:
     else
     {
       // otherwise make a copy and assign the same intersection
-      // and then increment the now unique intersection
-
-      // make shallow copy of pointer
+      // and then increment
       ALU3DSPACE SharedPointer< IntersectionIteratorImp > copy( itPtr_ );
-      // get a new pointer
       itPtr_.invalidate();
-      // copy the data
       it().assign( *copy );
-      // and now increment
       it().increment();
     }
   }
@@ -234,6 +230,13 @@ public:
     : BaseType( grid, en, wLevel, end )
   {
   }
+
+  //! The copy constructor
+  LeafIntersectionWrapper(const ThisType & org)
+    : BaseType(org)
+  {
+  }
+
 };
 
 //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
@@ -277,6 +280,18 @@ public:
   : intersection_( IntersectionImp( grid, en, wLevel, end) )
   {}
 
+  //! The copy constructor
+  LeafIntersectionIteratorWrapper(const ThisType & org)
+  : intersection_( IntersectionImp( org.impl() ) )
+  {}
+
+  //! the f*cking assignment operator
+  ThisType & operator = (const ThisType & org)
+  {
+    impl() = org.impl();
+    return *this;
+  }
+
   //! return reference to intersection
   const Intersection &dereference () const
   {
@@ -319,6 +334,11 @@ public:
   {
   }
 
+  //! The copy constructor
+  LevelIntersectionWrapper(const ThisType & org)
+    : BaseType(org)
+  {
+  }
 };
 
 //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
@@ -359,6 +379,18 @@ public:
   LevelIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
   : intersection_( IntersectionImp( grid, en, wLevel, end ) )
   {}
+
+  //! The copy constructor
+  LevelIntersectionIteratorWrapper(const ThisType & org)
+  : intersection_( IntersectionImp( org.impl() ) )
+  {}
+
+  //! the f*cking assignment operator
+  ThisType & operator = (const ThisType & org)
+  {
+    impl() = org.impl();
+    return *this;
+  }
 
   //! return reference to intersection
   const Intersection &dereference () const

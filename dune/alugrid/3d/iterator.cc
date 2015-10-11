@@ -46,7 +46,7 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   , iter_()
   , level_(level)
 {
-  this->invalidate();
+  this->done();
 }
 
 template<int codim, PartitionIteratorType pitype, class GridImp >
@@ -71,7 +71,7 @@ template<int codim, PartitionIteratorType pitype, class GridImp>
 alu_inline void ALU3dGridLevelIterator<codim, pitype, GridImp> ::
 removeIter ()
 {
-  this->invalidate();
+  this->done();
   iter_.reset();
 }
 
@@ -95,7 +95,7 @@ assign(const ThisType & org)
   }
   else
   {
-    this->invalidate();
+    this->done();
   }
 }
 template<int codim, PartitionIteratorType pitype, class GridImp>
@@ -129,7 +129,7 @@ ALU3dGridLeafIterator( const GridImp& grid, int level )
   , grid_( &grid )
   , iter_()
 {
-  this->invalidate();
+  this->done();
 }
 
 template<int cdim, PartitionIteratorType pitype, class GridImp>
@@ -169,7 +169,7 @@ template<int cdim, PartitionIteratorType pitype, class GridImp>
 alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> ::
 removeIter ()
 {
-  this->invalidate();
+  this->done();
   iter_.reset();
 }
 
@@ -208,7 +208,7 @@ assign (const ThisType & org)
   }
   else
   {
-    this->invalidate();
+    this->done();
   }
 }
 
@@ -250,7 +250,7 @@ alu_inline ALU3dGridHierarchicIterator<GridImp> ::
   }
 
   // otherwise
-  this->invalidate();
+  this->done();
 }
 
 template <class GridImp>
@@ -278,7 +278,7 @@ alu_inline ALU3dGridHierarchicIterator<GridImp> ::
   }
 
   // otherwise do nothing
-  this->invalidate();
+  this->done();
 }
 
 template <class GridImp>
@@ -382,7 +382,7 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
     ghostElem_ = goNextElement( ghostElem_.ghost(), ghostElem_.nextGhost() );
     if( ! ghostElem_ )
     {
-      this->invalidate();
+      this->done();
       return ;
     }
 
@@ -393,7 +393,7 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
     HElementType * nextItem = goNextElement( elem_, this->seed_.item() );
     if( ! nextItem)
     {
-      this->invalidate();
+      this->done();
       return ;
     }
 

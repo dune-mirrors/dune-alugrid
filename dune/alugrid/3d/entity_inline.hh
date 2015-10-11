@@ -273,12 +273,12 @@ namespace Dune {
     }
     else // otherwise mark as finished (iterators)
     {
-      this->invalidate();
+      this->done();
     }
   }
 
   template<int codim, class GridImp >
-  inline void ALU3dGridEntityPointerBase<codim,GridImp>::invalidate ()
+  inline void ALU3dGridEntityPointerBase<codim,GridImp>::done ()
   {
     seed_.clear();
   }

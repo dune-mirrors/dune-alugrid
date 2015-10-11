@@ -523,7 +523,7 @@ protected:
   void clone (const ALU3dGridEntityPointerType & org);
 
   //! has to be called when iterator is finished
-  void invalidate ();
+  void done ();
 
   // update underlying item pointer and set ghost entity
   void updateGhostPointer( HBndSegType & ghostFace );

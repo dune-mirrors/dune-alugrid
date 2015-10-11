@@ -80,7 +80,7 @@ namespace Dune
 
     public:
       //! reference counter used by SharedPointer
-      unsigned int useCount_;
+      unsigned int refCount_;
 
       //! default constructor
       GeometryImplBase()
