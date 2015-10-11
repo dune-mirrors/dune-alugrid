@@ -376,6 +376,12 @@ namespace ALUGrid
       return *this;
     }
 
+    operator bool () const { return bool( ptr_ ); }
+
+    bool operator == (const SharedPointer& other ) const { return ptr_ == other.ptr_; }
+
+    bool unique () const { return ptr().unique(); }
+
     // dereferencing
           ObjectType& operator* ()       { return ptr().object(); }
     const ObjectType& operator* () const { return ptr().object(); }
