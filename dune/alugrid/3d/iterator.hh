@@ -213,11 +213,10 @@ public:
     return this->getItem().weight();
   }
 
-protected:
   // set interator to end iterator
-  void done () ;
-  template< class EntityType > void done ( const EntityType &en ) { done(); }
+  void invalidate () ;
 
+protected:
   // reset IntersectionIterator to first neighbour
   void setFirstItem(const HElementType & elem, int wLevel);
 
@@ -279,10 +278,8 @@ protected:
   mutable NormalType unitOuterNormal_;
 
 public:
-  // used by SharedPointer
-  void invalidate() {}
   // refCount used by SharedPointer
-  unsigned int refCount_;
+  unsigned int useCount_;
 };
 
 template<class GridImp>
@@ -331,11 +328,12 @@ protected:
   using BaseType :: connector_;
   using BaseType :: geoProvider_;
   using BaseType :: boundary;
-  using BaseType :: done ;
   using BaseType :: getFace;
   using BaseType :: neighbor ;
 
 public:
+  using BaseType :: invalidate ;
+
   //! The default Constructor
   ALU3dGridLevelIntersectionIterator();
 

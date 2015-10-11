@@ -248,36 +248,42 @@ namespace ALUGrid
     // object (e.g. geometry impl or intersection impl)
     ObjectType object_;
 
-    unsigned int& refCount() { return object_.refCount_; }
-    const unsigned int& refCount() const { return object_.refCount_; }
+    unsigned int& useCount() { return object_.useCount_; }
+    const unsigned int& useCount() const { return object_.useCount_; }
 
   public:
     //! reset status and reference count
     void reset()
     {
       // reset reference counter
-      refCount() = 1;
+      useCount() = 1;
 
       // reset status of object
       object_.invalidate();
     }
 
-    //! increase reference count
-    void operator ++ () { ++ refCount(); }
+    //! increase use count
+    void operator ++ () { ++ useCount(); }
 
-    //! decrease reference count
-    void operator -- () { alugrid_assert ( refCount() > 0 ); --refCount(); }
+    //! decrease use count
+    void operator -- () { alugrid_assert ( useCount() > 0 ); --useCount(); }
 
     //! return true if object has no references anymore
-    bool operator ! () const { return refCount() == 0; }
+    bool operator ! () const { return useCount() == 0; }
 
     //! return true if there exists more then on reference
-    bool unique () const { return refCount() == 1 ; }
+    bool unique () const { return useCount() == 1 ; }
 
+    //! return reference to stored object
     const ObjectType& object() const { return object_; }
+    //! return reference to stored object
           ObjectType& object()       { return object_; }
   };
 
+  //! implementation of a shared pointer similar to std::shared_ptr
+  //! the difference is that we use a different allocator
+  //! and the use count is directly stored in the object
+  //! this implemented is for use with ALUGrid objects only
   template <class ObjectImp>
   class SharedPointer
   {
@@ -296,15 +302,14 @@ namespace ALUGrid
     // default constructor
     SharedPointer()
     {
-      /*
       static bool first = true ;
       if( first )
       {
+        std::cout << typeid( ObjectType ).name() << std::endl;
         std::cout << "Memory object = " << sizeof( ObjectType ) << " "
                   << sizeof( ReferenceCountedObjectType ) << std::endl;
         first = false;
       }
-      */
       getObject();
     }
 

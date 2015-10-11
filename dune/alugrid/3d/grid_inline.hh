@@ -66,6 +66,8 @@ namespace Dune
     ALU3dGridGeometry< 1,   dimworld, const ThisType >();
     ALU3dGridGeometry< 2,   dimworld, const ThisType >();
     ALU3dGridGeometry< dim, dimworld, const ThisType >();
+    LeafIntersectionWrapper < const ThisType > ();
+    LevelIntersectionWrapper< const ThisType > ();
 
     alugrid_assert ( elType == tetra || elType == hexa );
 

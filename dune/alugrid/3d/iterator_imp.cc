@@ -36,7 +36,7 @@ ALU3dGridIntersectionIterator(const bool levelIntersectionIterator) :
 
 template<class GridImp>
 inline void
-ALU3dGridIntersectionIterator<GridImp> :: done ()
+ALU3dGridIntersectionIterator<GridImp> :: invalidate ()
 {
   item_  = 0;
   ghost_ = 0;
@@ -91,7 +91,7 @@ first (const EntityType & en, int wLevel,
 {
   if( ! en.isLeaf() && en.level()>0)
   {
-    done();
+    invalidate();
     return ;
   }
 
@@ -133,7 +133,7 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
   }
   else
   {
-    done();
+    invalidate();
   }
 }
 
@@ -158,7 +158,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     geoProvider_.resetFaceGeom();
   }
   else {
-    done();
+    invalidate();
   }
   alugrid_assert ( equals(org) );
 }
@@ -211,7 +211,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   // for ghost elements here is finito
   if (index_ >= numFaces || ghost_ )
   {
-    done();
+    invalidate();
     return;
   }
 
@@ -593,7 +593,7 @@ inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
   // can have, we've reached the end...
   if ( index_ >= numFaces || ImplTraits::isGhost( ghost_ ) )
   {
-    done();
+    invalidate();
     return;
   }
 
