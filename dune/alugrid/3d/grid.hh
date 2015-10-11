@@ -1276,10 +1276,10 @@ namespace Dune
     }
 
     //! return current thread number
-    static int thread () { return ALUMemoryProvider< int > :: thread(); }
+    static int thread () { return ALU3DSPACE ALUMemoryProvider< int > :: thread(); }
 
     //! return max number of threads
-    static int maxThreads () { return ALUMemoryProvider< int > :: maxThreads(); }
+    static int maxThreads () { return ALU3DSPACE ALUMemoryProvider< int > :: maxThreads(); }
   protected:
     /////////////////////////////////////////////////////////////////
     //
