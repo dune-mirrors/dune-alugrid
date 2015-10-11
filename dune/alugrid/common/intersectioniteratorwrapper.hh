@@ -53,12 +53,12 @@ public:
   typedef typename IntersectionIteratorImpl::Twists Twists;
   typedef typename Twists::Twist Twist;
 
-  IntersectionIteratorWrapper () : it_( nullptr ) {}
+  IntersectionIteratorWrapper() : itPtr_() {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
   IntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end)
-    : it_( provider().getEmptyObject() )
+    : itPtr_()
   {
     if(end)
       it().done( en );
@@ -66,63 +66,32 @@ public:
       it().first( en, wLevel, grid.conformingRefinement(), grid.ghostCellsEnabled() );
   }
 
-  //! The copy constructor
-  IntersectionIteratorWrapper(const ThisType & org)
-    : it_( nullptr )
-  {
-    assign( org );
-  }
-
-  //! the assignment operator
-  void assign(const ThisType & org)
-  {
-    if( ! org.it_  )
-    {
-      removeObj();
-      return;
-    }
-
-    if( ! it_ )
-    {
-      it_ = provider().getEmptyObject();
-    }
-
-    // copy intersection
-    it().assign( org.it() );
-  }
-
-  void removeObj()
-  {
-    if( it_ )
-    {
-      provider().freeObject( it_ );
-      it_ = nullptr ;
-    }
-  }
-
-  //! the assignment operator
-  ThisType & operator = (const ThisType & org)
-  {
-    assign( org );
-    return *this ;
-  }
-
-  //! The Destructor puts internal object back to stack
-  ~IntersectionIteratorWrapper()
-  {
-    removeObj();
-  }
-
-  operator bool () const { return bool( it_ ); }
+  operator bool () const { return bool( itPtr_ ); }
 
   //! the equality method
   bool equals ( const ThisType &other ) const
   {
-    return (it_ && other.it_ ) ? it().equals( other.it() ) : false ;
+    return (itPtr_ && other.itPtr_ ) ? it().equals( other.it() ) : itPtr_ == other.itPtr_;
   }
 
   //! increment iterator
-  void increment () { it().increment(); }
+  void increment ()
+  {
+    // if the shared pointer is unique we can increment
+    if( itPtr_.unique() )
+    {
+      it().increment();
+    }
+    else
+    {
+      // otherwise make a copy and assign the same intersection
+      // and then increment
+      ALU3DSPACE SharedPointer< IntersectionIteratorImp > copy( itPtr_ );
+      itPtr_.invalidate();
+      it().assign( *copy );
+      it().increment();
+    }
+  }
 
   //! access neighbor
   EntityPointer outside() const { return it().outside(); }
@@ -233,8 +202,8 @@ public:
   bool conforming () const { return it().conforming(); }
 
   //! returns reference to underlying intersection iterator implementation
-  IntersectionIteratorImp & it() { assert( *this ); return *it_; }
-  const IntersectionIteratorImp & it() const { assert( *this ); return *it_; }
+  IntersectionIteratorImp & it() { return *itPtr_; }
+  const IntersectionIteratorImp & it() const { return *itPtr_; }
 
   //! return weight associated with graph edge between the neighboring elements
   int weight() const
@@ -243,14 +212,7 @@ public:
   }
 
 private:
-  static IntersectionIteratorProviderType&
-  provider()
-  {
-    static thread_local IntersectionIteratorProviderType provider ;
-    return provider ;
-  }
-
-  IntersectionIteratorImp *it_;
+  mutable ALU3DSPACE SharedPointer< IntersectionIteratorImp > itPtr_;
 }; // end class IntersectionIteratorWrapper
 
 template <class GridImp>

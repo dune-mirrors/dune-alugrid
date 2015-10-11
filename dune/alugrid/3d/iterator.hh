@@ -277,6 +277,12 @@ protected:
 
   // unit outer normal
   mutable NormalType unitOuterNormal_;
+
+public:
+  // used by SharedPointer
+  void invalidate() {}
+  // refCount used by SharedPointer
+  unsigned int refCount_;
 };
 
 template<class GridImp>
