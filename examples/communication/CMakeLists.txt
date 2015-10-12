@@ -1,7 +1,3 @@
-set(GRIDTYPE  ALUGRID_CUBE)
-set(GRIDDIM  3)
-set(WORLDDIM  3)
-
 set(communicationdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/communication)
 set(communication_HEADERS adaptation.hh  
                           diagnostics.hh  
@@ -18,11 +14,9 @@ set(EXAMPLES main_transport_comm
              main_ball_comm 
              main_euler_comm)
 
-
-
-add_definitions("-D${GRIDTYPE}")
-add_definitions("-DGRIDDIM=${GRIDDIM}")
-add_definitions("-DWORLDDIM=${WORLDDIM}")
+add_definitions("-DALUGRID_CUBE")
+add_definitions("-DGRIDDIM=3")
+add_definitions("-DWORLDDIM=3")
 
 configure_file(check-communication.sh ${CMAKE_CURRENT_BINARY_DIR}/check-communication.sh COPYONLY)
 

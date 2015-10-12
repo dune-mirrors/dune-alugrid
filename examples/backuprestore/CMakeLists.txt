@@ -1,18 +1,12 @@
-set(GRIDTYPE  ALUGRID_CUBE)
-set(GRIDDIM  3)
-set(WORLDDIM  3)
-
 set(examplesbrdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/backuprestore)
 set(examplesbr_HEADERS sionlib.hh 
                        paralleldgf.hh)
 
 set(EXAMPLES main_br )
 
-
-
-add_definitions("-D${GRIDTYPE}")
-add_definitions("-DGRIDDIM=${GRIDDIM}")
-add_definitions("-DWORLDDIM=${WORLDDIM}")
+add_definitions("-DALUGRID_CUBE")
+add_definitions("-DGRIDDIM=3")
+add_definitions("-DWORLDDIM=3")
 
 if( NOT HAVE_ALUGRID )
   add_executable(main_br main.cc)
