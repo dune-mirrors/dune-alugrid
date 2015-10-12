@@ -146,7 +146,7 @@ namespace Dune
         auto macroView = newgrid->levelGridView( 0 );
         size_t idx = 0;
         for( auto it = macroView.template begin<0>(), end = macroView.template end<0>();
-             it != end; ++iti, ++idx )
+             it != end; ++it, ++idx )
         {
           const int insertionIndex = factory.insertionIndex( *it );
           cellData[ idx ] = oldCellData[ insertionIndex ] ;
