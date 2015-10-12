@@ -253,9 +253,13 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
-      if(dimension == 2)
+      if(dimension == 2 && elementType == hexa )
+        // for quadrilaterals we simply half the number, see gridfactory.cc doInsertVertex
         return Grid::getRealImplementation( entity ).getIndex()/2;
-      else  // dimension == 3
+      else if ( dimension == 2 && elementType == tetra )
+        // for triangles we have to substract 1, see gridfactory.cc doInsertVertex
+        return Grid::getRealImplementation( entity ).getIndex() - 1;
+      else  // dimension 3
         return Grid::getRealImplementation( entity ).getIndex();
     }
 
