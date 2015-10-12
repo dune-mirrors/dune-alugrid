@@ -434,7 +434,6 @@ namespace ALUGrid
   {
     _macrogitter = new MacroGitterBasis ( dim, this );
     alugrid_assert (_macrogitter);
-    _macrogitter->dumpInfo();
     notifyMacroGridChanges ();
     return;
   }
