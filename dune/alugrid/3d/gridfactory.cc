@@ -1083,15 +1083,22 @@ namespace Dune
     if( numBoundariesMax == 0 ) return ;
 
     // get internal boundaries from each process
-    std::vector< std::vector< int > > boundariesEach;
+    std::vector< std::vector< int > > boundariesEach( comm.size() );
 
 #if HAVE_MPI
-    // collect data from all processes (use MPI_COMM_WORLD here) since in this case the
-    // grid must be parallel if we reaced this point
-    boundariesEach = ALU3DSPACE MpAccessMPI( Dune::MPIHelper::getCommunicator() ).gcollect( boundariesMine );
-#else
-    boundariesEach.resize( comm.size() );
+    if( comm.size() > 1 )
+    {
+      ALU3DSPACE MpAccessMPI mpAccess( Dune::MPIHelper::getCommunicator() );
+      // collect data from all processes (use MPI_COMM_WORLD here) since in this case the
+      // grid must be parallel if we reaced this point
+      boundariesEach = mpAccess.gcollect( boundariesMine );
+#ifndef NDEBUG
+      // make sure everybody is on the same page
+      mpAccess.barrier();
 #endif
+    }
+#endif // #if HAVE_MPI
+
     boundariesMine.clear();
 
     for( int p = 0; p < comm.size(); ++p )
