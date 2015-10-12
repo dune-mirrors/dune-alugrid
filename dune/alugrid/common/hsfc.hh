@@ -117,6 +117,16 @@ namespace Dune {
     {
     }
 
+    template <class OtherComm>
+    SpaceFillingCurveOrdering( const Coordinate& lower,
+                               const Coordinate& upper,
+                               const OtherComm& otherComm )
+      : BaseType( lower, upper,
+                  otherComm.size() > 1 ? CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) :
+                                         CollectiveCommunication( Dune::MPIHelper::getLocalCommunicator() ) )
+    {
+    }
+
     // return unique hilbert index in interval [0,1] given an element's center
     double index( const Coordinate& point ) const
     {
