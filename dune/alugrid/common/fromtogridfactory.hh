@@ -170,9 +170,6 @@ namespace Dune
       return convert( fromGrid, cellData, ordering_ );
     }
 
-    tempalte <class Entity>
-    unsigned int insertionIndex( const Entity& <F11>/
-
   protected:
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
