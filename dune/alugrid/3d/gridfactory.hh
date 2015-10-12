@@ -383,7 +383,7 @@ namespace Dune
     }
   }
 
-  /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
+  /** \brief Specialization of the generic GridFactory for ALUGrid
    *  \ingroup GridFactory
    */
   template<int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
@@ -412,10 +412,32 @@ namespace Dune
     /** \brief constructor taking verbosity flag */
     // Note: cannot use a default for communicator in this case because the single
     // bool argument is too atractive for C++ - any pointer can implicitely
-    // cast into a bool - so const char* for example but even the MPICommunicatorType 
+    // cast into a bool - so const char* for example but even the MPICommunicatorType
     explicit GridFactory ( const bool realGrid,
-                           const MPICommunicatorType &communicator ) 
+                           const MPICommunicatorType &communicator )
     : BaseType( realGrid, communicator )
+    {}
+  };
+
+  template< class Grid >
+  class ReferenceGridFactory;
+
+  // Specialization of the ReferenceGridFactory for ALUGrid
+  template<int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
+  class ReferenceGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
+  : public ALU3dGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
+  {
+    typedef ReferenceGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > > ThisType;
+    typedef ALU3dGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > > BaseType;
+
+  public:
+    typedef typename BaseType::Grid Grid;
+
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
+
+    /** \brief Default constructor */
+    ReferenceGridFactory()
+      : BaseType(false, Grid::defaultCommunicator() )
     {}
   };
 

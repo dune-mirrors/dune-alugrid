@@ -12,6 +12,8 @@
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
+#include <dune/alugrid/3d/gridfactory.hh>
+
 namespace Dune
 {
   template< class GridImp, class GeometryImpl, int nChild >
@@ -223,8 +225,8 @@ namespace Dune
       {
         firstCall = false ;
 
-        // create factory without verbosity
-        GridFactory< Grid > factory( false );
+        // create factory for the reference element grid
+        ReferenceGridFactory< Grid > factory;
 
         const Dune::ReferenceElement< ctype, dimension > &refElem
           = Dune::ReferenceElements< ctype, dimension >::general( type );
