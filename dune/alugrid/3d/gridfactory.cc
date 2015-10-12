@@ -304,7 +304,7 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::sortElements( const VertexVector& vertices,
                     const ElementVector& elements,
-                    std::vector< int >& ordering )
+                    std::vector< unsigned int >& ordering )
   {
     const size_t elemSize = elements.size();
     ordering.resize( elemSize );
@@ -368,7 +368,8 @@ namespace Dune
         center /= double(vxSize);
 
         // generate sfc index from element's center and store index
-        // hsfc[ sfc.index( center ) ] = i;
+        // make sure that the mapping is unique
+        alugrid_assert( hsfc.find( sfc.index( center ) ) == hsfc.end() );
         hsfc.insert( std::make_pair( sfc.index( center ) , i ) );
       }
 
@@ -408,7 +409,7 @@ namespace Dune
 
     correctElementOrientation();
 
-    std::vector< int >& ordering = ordering_;
+    std::vector< unsigned int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
