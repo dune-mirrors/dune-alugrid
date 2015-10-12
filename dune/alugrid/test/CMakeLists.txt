@@ -22,7 +22,7 @@ endforeach(i ${SUBDIRS})
 
 foreach(i ${TESTS})
   add_dune_mpi_flags(${i})
-  target_link_libraries(${i} ${DUNE_LIBS} dunealugrid ${ZLIB_LIBRARIES})
+  target_link_libraries(${i} ${DUNE_LIBS} dunealugrid ${ZLIB_LIBRARIES} ${ZOLTAN_LIBRARIES})
   add_test(${i} ${i})
 endforeach(i ${TESTS})
 
