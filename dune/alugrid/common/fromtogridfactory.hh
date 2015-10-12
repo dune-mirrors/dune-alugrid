@@ -148,7 +148,8 @@ namespace Dune
         for( auto it = macroView.template begin<0>(), end = macroView.template end<0>();
              it != end; ++it, ++idx )
         {
-          const int insertionIndex = factory.insertionIndex( *it );
+          const int insertionIndex = ordering.empty() ?
+            factory.insertionIndex( *it ) : ordering[ factory.insertionIndex( *it ) ];                                                        ;
           cellData[ idx ] = oldCellData[ insertionIndex ] ;
         }
       }
