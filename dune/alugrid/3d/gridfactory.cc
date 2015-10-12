@@ -315,8 +315,7 @@ namespace Dune
     // the serial version do not special ordering
     // since no load balancing has to be done
     {
-      typedef MPIHelper :: MPICommunicator MPICommunicator;
-      CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+      typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
       // if we are in parallel insertion mode we need communication
       const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
@@ -350,7 +349,7 @@ namespace Dune
       }
 
       // get element's center to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
+      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord );
 
       typedef std::multimap< double, long int > hsfc_t;
       hsfc_t hsfc;
@@ -1055,7 +1054,6 @@ namespace Dune
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
-    // CollectiveCommunication< MPICommunicatorType > comm( communicator_ );
     typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
     int numBoundariesMine = faceMap.size();

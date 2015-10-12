@@ -114,6 +114,10 @@ namespace Dune
       return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
     }
 
+  protected:
+    /** \brief constructor taking verbose flag */
+    explicit ALU3dGridFactory ( const bool verbose, const MPICommunicatorType &communicator );
+
   public:
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator(),
@@ -122,9 +126,6 @@ namespace Dune
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
                                 const MPICommunicatorType &communicator = Grid::defaultCommunicator() );
-
-    /** \brief constructor taking verbose flag */
-    explicit ALU3dGridFactory ( const bool verbose, const MPICommunicatorType &communicator );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
