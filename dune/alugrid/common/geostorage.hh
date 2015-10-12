@@ -12,10 +12,12 @@
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/3d/alu3dinclude.hh>
 
-#include <dune/alugrid/3d/gridfactory.hh>
-
 namespace Dune
 {
+  template< class Grid >
+  class ReferenceGridFactory;
+
+
   template< class GridImp, class GeometryImpl, int nChild >
   class ALULocalGeometryStorage
   {
