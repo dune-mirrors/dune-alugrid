@@ -311,9 +311,12 @@ namespace Dune
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
+    // only apply sfc ordering for real grids, avoid this for reference grids
+    if( ! realGrid_ ) return ;
+
 #if USE_ALUGRID_SFC_ORDERING
-    // the serial version do not special ordering
-    // since no load balancing has to be done
+    // apply space filling curve orderung to the inserted elements
+    // see common/hsfc.hh for details
     {
       typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
