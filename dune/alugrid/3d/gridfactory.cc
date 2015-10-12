@@ -311,9 +311,6 @@ namespace Dune
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
-    // only apply sfc ordering for real grids, avoid this for reference grids
-    if( ! realGrid_ ) return ;
-
 #if USE_ALUGRID_SFC_ORDERING
     // apply space filling curve orderung to the inserted elements
     // see common/hsfc.hh for details
@@ -352,7 +349,7 @@ namespace Dune
       }
 
       // get element's center to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord );
+      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
 
       typedef std::multimap< double, long int > hsfc_t;
       hsfc_t hsfc;
