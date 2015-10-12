@@ -58,6 +58,6 @@ endif(DLMALLOC_FOUND)
 set(HAVE_DLMALLOC ${DLMALLOC_FOUND})
 
 # register package
-if(DLMALLOC_FOUND)
-  dune_register_package_flags(INCLUDE_DIRS ${DLMALLOC_SOURCE_INCLUDE})
-endif()
+#if(DLMALLOC_FOUND)
+#  dune_register_package_flags(INCLUDE_DIRS ${DLMALLOC_SOURCE_INCLUDE})
+#endif()

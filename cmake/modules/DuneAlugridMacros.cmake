@@ -49,10 +49,7 @@ if(ZLIB_FOUND)
 endif()
 
 find_package(SIONlib)
-include(AddSIONlibFlags)
 find_package(DLMalloc)
 find_package(ZOLTAN)
-include(AddZOLTANFlags)
-include(AddDuneAluGridFlags)
 
 message(AUTHOR_WARNING "TODO: Improve module test.")
