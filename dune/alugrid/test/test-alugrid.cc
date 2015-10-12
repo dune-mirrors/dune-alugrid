@@ -33,6 +33,8 @@
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
+#include <dune/grid/test/checkgridfactory.hh>
+#include <dune/grid/test/mesh.hh>
 #else
 #include <dune/grid/test/gridcheck.cc>
 #include <dune/grid/test/checkgeometryinfather.cc>
@@ -660,12 +662,20 @@ int main (int argc , char **argv) {
       {
         Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > grid;
         checkALUSerial( grid );
+
+        Dune::Kuhn3dSimplexMesh mesh;
+        std::cout<<"Checking GridFactory for Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming >....."<<std::endl;
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > >( mesh );
       }
 
       if( testALU3dConform )
       {
         Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > grid;
         checkALUSerial( grid );
+
+        Dune::Kuhn3dSimplexMesh mesh;
+        std::cout<<"Checking GridFactory for Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming >....."<<std::endl;
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( mesh );
       }
 #endif
 
@@ -715,6 +725,11 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
+
+        Dune::Kuhn2dSimplexMesh mesh;
+        std::cout<<"Checking GridFactory for Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming >....."<<std::endl;
+        Dune::checkGridFactory< GridType >( mesh );
+
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
@@ -755,6 +770,11 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
+
+        Dune::Kuhn2dSimplexMesh mesh;
+        std::cout<<"Checking GridFactory for Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming >....."<<std::endl;
+        Dune::checkGridFactory< GridType >( mesh );
+
         std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
         Dune::GridPtr<GridType> gridPtr( filename );
         GridType & grid = *gridPtr;
