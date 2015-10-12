@@ -21,11 +21,7 @@ foreach(i ${SUBDIRS})
 endforeach(i ${SUBDIRS})
 
 foreach(i ${TESTS})
-  add_dune_mpi_flags(${i})
-  target_link_libraries(${i} ${DUNE_LIBS} dunealugrid ${ZLIB_LIBRARIES})
-  if( ZOLTAN_LIBRARIES )
-    target_link_libraries( ${i} ${ZOLTAN_LIBRARIES} )
-  endif()
+  dune_target_enable_all_packages( ${i} )
   add_test(${i} ${i})
 endforeach(i ${TESTS})
 

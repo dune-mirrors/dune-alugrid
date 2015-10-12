@@ -28,20 +28,20 @@ configure_file(check-adaptation.sh ${CMAKE_CURRENT_BINARY_DIR}/check-adaptation.
 
 
 add_executable(main_transport_cb main.cc)
-add_dune_mpi_flags(main_transport_cb )
-dune_target_link_libraries(main_transport_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+dune_target_enable_all_packages(main_transport_cb )
+#dune_target_link_libraries(main_transport_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_transport_cb APPEND PROPERTY 
   COMPILE_DEFINITIONS "TRANSPORT" )
 
 add_executable(main_ball_cb main.cc)
-add_dune_mpi_flags(main_ball_cb )
-dune_target_link_libraries(main_ball_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+dune_target_enable_all_packages(main_ball_cb )
+#dune_target_link_libraries(main_ball_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_ball_cb APPEND PROPERTY 
   COMPILE_DEFINITIONS "BALL" )
 
 add_executable(main_euler_cb main.cc)
-add_dune_mpi_flags(main_euler_cb )
-dune_target_link_libraries(main_euler_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+dune_target_enable_all_packages(main_euler_cb )
+#dune_target_link_libraries(main_euler_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_euler_cb APPEND PROPERTY 
   COMPILE_DEFINITIONS "EULER" )
 
