@@ -38,7 +38,7 @@ namespace Dune
 
   public:
     template <class FromGrid, class Vector>
-    Grid* convert( const FromGrid& grid, Vector& cellData, std::vector<int>& ordering )
+    Grid* convert( const FromGrid& grid, Vector& cellData, std::vector<unsigned int>& ordering )
     {
       int rank = 0;
 #if HAVE_MPI
