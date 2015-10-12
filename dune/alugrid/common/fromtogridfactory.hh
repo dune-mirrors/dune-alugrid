@@ -34,9 +34,11 @@ namespace Dune
   protected:
     typedef FromToGridFactory< Grid > This;
 
+    std::vector< unsigned int > ordering_ ;
+
   public:
-    template <class FromGrid>
-    static Grid* convert( const FromGrid& grid, std::vector<unsigned int>& ordering )
+    template <class FromGrid, class Vector>
+    Grid* convert( const FromGrid& grid, Vector& cellData, std::vector<int>& ordering )
     {
       int rank = 0;
 #if HAVE_MPI
@@ -138,6 +140,23 @@ namespace Dune
       // create grid pointer (behaving like a shared_ptr)
       Grid* newgrid = factory.createGrid( true, true, std::string("FromToGrid") );
 
+      if( ! cellData.empty() )
+      {
+        Vector oldCellData( cellData );
+        auto macroView = newgrid->levelGridView( 0 );
+        size_t idx = 0;
+        for( auto it = macroView.template begin<0>(), end = macroView.template end<0>();
+             it != end; ++iti, ++idx )
+        {
+          const int insertionIndex = factory.insertionIndex( *it );
+          cellData[ idx ] = oldCellData[ insertionIndex ] ;
+        }
+      }
+
+      // store the ordering from the factory, if it was not provided
+      if( ordering.empty() )
+        ordering = factory.ordering();
+
 #if HAVE_MPI
       MPI_Barrier( MPI_COMM_WORLD );
 #endif
@@ -145,12 +164,14 @@ namespace Dune
       return newgrid;
     }
 
-    template <class FromGrid>
-    static Grid* convert( const FromGrid& fromGrid )
+    template <class FromGrid, class Vector>
+    Grid* convert( const FromGrid& fromGrid, Vector& cellData )
     {
-      std::vector<unsigned int> ordering;
-      return convert( fromGrid, ordering );
+      return convert( fromGrid, cellData, ordering_ );
     }
+
+    tempalte <class Entity>
+    unsigned int insertionIndex( const Entity& <F11>/
 
   protected:
     template <int codim, class Entity>
