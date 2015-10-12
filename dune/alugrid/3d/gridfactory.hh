@@ -409,15 +409,6 @@ namespace Dune
                            const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
     {}
-
-    /** \brief constructor taking verbosity flag */
-    // Note: cannot use a default for communicator in this case because the single
-    // bool argument is too atractive for C++ - any pointer can implicitely
-    // cast into a bool - so const char* for example but even the MPICommunicatorType
-    explicit GridFactory ( const bool realGrid,
-                           const MPICommunicatorType &communicator )
-    : BaseType( realGrid, communicator )
-    {}
   };
 
   template< class Grid >
