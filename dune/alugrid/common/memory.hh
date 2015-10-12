@@ -44,7 +44,7 @@ namespace ALUGrid
 #ifdef _OPENMP
       return omp_get_thread_num();
 #elif HAVE_DUNE_FEM
-      return Fem :: ThreadManager :: thread() ;
+      return Dune::Fem :: ThreadManager :: thread() ;
 #else
       return 0;
 #endif
@@ -56,7 +56,7 @@ namespace ALUGrid
 #ifdef _OPENMP
       return omp_get_max_threads();
 #elif HAVE_DUNE_FEM
-      return Fem :: ThreadManager :: maxThreads() ;
+      return Dune::Fem :: ThreadManager :: maxThreads() ;
 #else
       return 1;
 #endif
