@@ -475,6 +475,8 @@ void checkGrid( GridType& grid )
   catch (...)
   {
     std::cout << "Caught unknown exception!" << std::endl;
+    assert( false );
+    std::abort();
   }
 }
 
