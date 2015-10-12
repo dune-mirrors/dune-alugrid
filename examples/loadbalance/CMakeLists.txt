@@ -41,11 +41,13 @@ dune_target_enable_all_packages( main_simple )
 set_property(TARGET main_simple APPEND PROPERTY 
   COMPILE_DEFINITIONS "BALL;USE_SIMPLELB=1" )
 
-add_executable(main_zoltan main.cc)
-dune_target_enable_all_packages( main_zoltan )
-#dune_target_link_libraries(main_zoltan "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_zoltan APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL;USE_ZOLTANLB=1" )
+if(ZOLTAN_FOUND)
+  add_executable(main_zoltan main.cc)
+  dune_target_enable_all_packages( main_zoltan )
+  #dune_target_link_libraries(main_zoltan "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
+  set_property(TARGET main_zoltan APPEND PROPERTY
+    COMPILE_DEFINITIONS "BALL;USE_ZOLTANLB=1" )
+endif()
 
 install(FILES ${exampleslb_HEADERS} DESTINATION ${exampleslbdir})
 
