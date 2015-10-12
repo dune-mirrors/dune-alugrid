@@ -247,7 +247,8 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).getIndex();
+      alugrid_assert( Grid::getRealImplementation( entity ).getIndex() < int(ordering_.size()) );
+      return ordering_[ Grid::getRealImplementation( entity ).getIndex() ];
     }
 
     virtual unsigned int
@@ -303,7 +304,7 @@ namespace Dune
              (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
-    const std::vector<int>& ordering () const { return ordering_; }
+    const std::vector<unsigned int>& ordering () const { return ordering_; }
 
   private:
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
@@ -331,7 +332,7 @@ namespace Dune
     void recreateBoundaryIds ( const int defaultId = 1 );
 
     // sort elements according to hilbert space filling curve (if Zoltan is available)
-    void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< int >& ordering );
+    void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< unsigned int >& ordering );
 
     int rank_;
 
@@ -349,7 +350,7 @@ namespace Dune
 
     MPICommunicatorType communicator_;
 
-    std::vector< int > ordering_;
+    std::vector< unsigned int > ordering_;
   };
 
 
