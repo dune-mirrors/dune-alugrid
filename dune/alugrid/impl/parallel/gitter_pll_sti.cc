@@ -249,7 +249,7 @@ namespace ALUGrid
 
     const size_t  _factor ;
     bool          _repeat ;
-    const bool    _biscectionRefinement;
+    const bool    _bisectionRefinement;
 
     PackUnpackRefineLoop( const PackUnpackRefineLoop& );
   public:
@@ -260,7 +260,7 @@ namespace ALUGrid
         _outerFaces( outerFaces ),
         _factor( biscectionRefinement ? 3 : 1 ),
         _repeat( false ),
-        _biscectionRefinement( biscectionRefinement )
+        _bisectionRefinement( biscectionRefinement )
     {}
 
     bool repeat () const { return _repeat; }
@@ -278,16 +278,14 @@ namespace ALUGrid
           const hface_iterator iEnd = _outerFaces[ link ].end ();
           for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
           {
-            (*i)->accessOuterPllX ().first->getRefinementRequest ( os );
-            packChildren( (*i)->down() );
+            packFace( (*i), os );
           }
         }
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i )
           {
-            (*i)->accessOuterPllX ().first->getRefinementRequest ( os );
-            packChildren( (*i)->down() );
+            packFace( (*i), os );
           }
         }
       }
@@ -298,10 +296,12 @@ namespace ALUGrid
       }
     }
 
-    void packChildren( const hface_STI* child, ObjectStream& os ) const
+    void packFace( hface_STI* face, ObjectStream& os ) const
     {
-      if( _biscectionRefinement )
+      face->accessOuterPllX ().first->getRefinementRequest ( os );
+      if( _bisectionRefinement )
       {
+        hface_STI* child = face->down();
         if( child )
         {
           for(; child; child = child->next() )
@@ -317,6 +317,30 @@ namespace ALUGrid
       }
     }
 
+    void unpackFace( hface_STI* face, ObjectStream& os )
+    {
+      const bool refined = face->accessOuterPllX ().first->setRefinementRequest ( os );
+      _repeat |= refined ;
+      if( _bisectionRefinement )
+      {
+        hface_STI* child = face->down();
+        _repeat |= refined;
+        if( child )
+        {
+          for( ; child ; child = child->next() )
+          {
+            _repeat |= child->accessOuterPllX ().first->setRefinementRequest ( os );
+          }
+        }
+        else
+        {
+          // remove two chars from the stream
+          os.get();
+          os.get();
+        }
+      }
+    }
+
     void unpack( const int link, ObjectStream& os )
     {
       try
@@ -328,12 +352,16 @@ namespace ALUGrid
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i )
-            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os );
+          {
+            unpackFace( (*i), os );
+          }
         }
         {
           const hface_iterator iEnd = _outerFaces[ link ].end ();
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
-            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os );
+          {
+            unpackFace( (*i), os );
+          }
         }
       }
       catch (Parallel::AccessPllException)
