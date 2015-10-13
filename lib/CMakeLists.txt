@@ -20,7 +20,7 @@ add_dune_mpi_flags( dunealugrid )
 
 # zoltan dependencies
 if( ${ZOLTAN_FOUND} )
-target_link_libraries(dunealugrid ${ZOLTAN_LIBRARY})
+target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
 set_property(TARGET dunealugrid APPEND PROPERTY
              INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
 endif()
