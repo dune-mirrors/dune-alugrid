@@ -7,6 +7,7 @@
 #include <dune/alugrid/common/macrogridview.hh>
 
 #include <dune/alugrid/common/memory.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
 
 /** @file
  @author Robert Kloefkorn
