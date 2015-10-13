@@ -19,9 +19,11 @@ dune_add_library(dunealugrid
 add_dune_mpi_flags( dunealugrid )
 
 # zoltan dependencies
+if( ${ZOLTAN_FOUND} )
 target_link_libraries(dunealugrid ${ZOLTAN_LIBRARY})
 set_property(TARGET dunealugrid APPEND PROPERTY
              INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
+endif()
 
 # register alu grid to all pkg flags
 dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
