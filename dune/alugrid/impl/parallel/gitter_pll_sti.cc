@@ -325,8 +325,7 @@ namespace ALUGrid
       if( _bisectionRefinement )
       {
         hface_STI* child = face->down();
-        _repeat |= refined;
-        if( child )
+        if( refined && child )
         {
           for( ; child ; child = child->next() )
           {
