@@ -311,8 +311,9 @@ namespace ALUGrid
         }
         else
         {
-          os.put( char(1) );
-          os.put( char(1) );
+          typedef RefinementRules::Hface3Rule rule_t;
+          os.put( char(rule_t::nosplit) );
+          os.put( char(rule_t::nosplit) );
         }
       }
     }
