@@ -252,12 +252,14 @@ namespace Dune
       return myGrid().numMacroBndSegments();
     else if(elType == tetra)
     {
-      const int segments = myGrid().numMacroBndSegments() - size(0);
+      // substract the number of macro elements
+      const int segments = myGrid().numMacroBndSegments() - size(0,0);
       return segments < 0 ? 0 : segments;
     }
     else if (elType == hexa)
     {
-      const int segments = myGrid().numMacroBndSegments() - 2*size(0);
+      // substract twice the number of macro elements (top and bottom)
+      const int segments = myGrid().numMacroBndSegments() - 2*size(0,0);
       return segments < 0 ? 0 : segments;
     }
   }
