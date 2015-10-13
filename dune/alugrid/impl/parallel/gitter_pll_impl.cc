@@ -707,29 +707,20 @@ namespace ALUGrid
     typename balrule_t::rule_t rule = _rul;
     os.put( char(rule) );
     _rul = balrule_t::nosplit;
+    return;
   }
 
-  template < class A > bool BndsegPllBaseXClosure < A >::setRefinementRequest (ObjectStream & os)
-  {
+  template < class A > bool BndsegPllBaseXClosure < A >::setRefinementRequest (ObjectStream & os) {
+
     // Die Methode schickt die Regel aus dem Nachbargitter in das
     // eigene Teilgitter hinein. Sie liefert "true" immer dann, wenn
     // sich das eigene Gitter g"andert hat -> f"uhrt zu einer weiteren
     // Iteration des parallelen refine ().
-    const bool bisection = myhbnd().myGrid()->conformingClosureNeeded();
 
-    signed char ru[ 3 ] = { balrule_t::undefined,
-                            balrule_t::undefined,
-                            balrule_t::undefined
-                          };
-
+    signed char ru;
     try
     {
-      ru[ 0 ] = os.get();
-      if( bisection )
-      {
-        ru[ 1 ] = os.get();
-        ru[ 2 ] = os.get();
-      }
+      ru = os.get();
     }
     catch( ObjectStream::EOFException )
     {
@@ -737,55 +728,16 @@ namespace ALUGrid
       alugrid_assert(0);
       abort();
     }
-
-    const balrule_t rule[ 3 ] = { balrule_t(ru[ 0 ]), balrule_t(ru[ 1 ]), balrule_t(ru[ 2 ]) } ;
-
+    balrule_t rule ( ru ) ;
     // std::cout << "setRefinementRequest: " << rule << std::endl;
-    if (rule[ 0 ] == balrule_t::nosplit)
+    if (rule == balrule_t::nosplit)
     {
       return false;
     }
     else
     {
-      bool success = false ;
-      if( myhbnd ().getrule () != rule[ 0 ] )
+      if (myhbnd ().getrule () == rule )
       {
-        success = myhbnd ().refineLikeElement ( rule[ 0 ] );
-      }
-
-      // check children
-      int i = 1;
-      for( auto child = myhbnd ().down(); child; child = child->next(), ++i )
-      {
-        if( rule[ i ] == balrule_t::nosplit) continue;
-        if( child->getrule() != rule[ i ] )
-        {
-          success = child->refineLikeElement( rule[ i ] );
-        }
-      }
-
-      if( ! success )
-      {
-        // Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
-        // f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
-        // sollte die Situation im isotropen Fall nicht auftreten.
-
-        std::cerr << "ERROR (fatal): Refinement inhibited on inner boundary." << std::endl;
-        alugrid_assert(0);
-        abort();
-      }
-      /*
-      if (myhbnd ().getrule () == rule[ 0 ] )
-      {
-        int i = 1;
-        for( auto child = myhbnd ().down(); child; child = child->next(), ++i )
-        {
-          if( child->getrule() !=
-        }
-        for( int i=0; i<2; ++i )
-        {
-
-        }
         return false;
       }
       else
@@ -806,12 +758,9 @@ namespace ALUGrid
           abort();
         }
       }
-      */
-      return success;
     }
     return (alugrid_assert(0), abort (), false);
   }
-
 
   template < class A > void BndsegPllBaseXClosure < A >::
   writeDynamicState (ObjectStream & os, GatherScatterType & gs ) const

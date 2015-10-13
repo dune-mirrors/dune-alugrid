@@ -45,12 +45,12 @@ namespace ALUGrid
         class Hbnd3Default : public hbndseg3_GEO
         {
           protected :
-            inline Hbnd3Default (myhface3_t *, int);
-            virtual ~Hbnd3Default () {}
-            //! return pointer to grid
+           inline Hbnd3Default (myhface3_t *, int);
+           virtual ~Hbnd3Default () {}
+           //! return pointer to grid
+           Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
+           const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
           public :
-            Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
-            const Gitter * myGrid() const { return myhface(0)->myvertex(0)->myGrid(); }
             typedef hbndseg3_GEO::bnd_t bnd_t;
             virtual inline bnd_t bndtype () const;
             virtual int ghostLevel () const;
