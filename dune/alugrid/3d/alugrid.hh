@@ -130,8 +130,12 @@ namespace Dune
       const bool verbose = verb && this->comm().rank() == 0;
       if( verbose )
       {
-        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix()
-                  << " from macro grid file '" << macroName << "'. \n\n";
+        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix();
+        if( macroName.empty() )
+          std::cout << " from input stream. \n";
+        else
+          std::cout << " from macro grid file '" << macroName << "'. \n";
+        std::cout << std::endl;
       }
     }
 
