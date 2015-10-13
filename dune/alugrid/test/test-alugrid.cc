@@ -605,6 +605,8 @@ int main (int argc , char **argv) {
     }
 
     const char *newfilename = 0;
+    if( argc > 2 )
+      newfilename = argv[ 2 ];
 
 #ifndef NO_2D
     bool testALU2dSimplex = initialize ;
@@ -674,7 +676,11 @@ int main (int argc , char **argv) {
       if( testALU2dCube )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/cube-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         GridType & grid = *gridPtr;
@@ -715,7 +721,11 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         GridType & grid = *gridPtr;
@@ -755,7 +765,11 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
         Dune::GridPtr<GridType> gridPtr( filename );
         GridType & grid = *gridPtr;
         grid.loadBalance();
