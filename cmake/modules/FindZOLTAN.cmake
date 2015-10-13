@@ -45,14 +45,17 @@ if (ZOLTAN_INCLUDE_DIRS OR ZOLTAN_LIBRARIES)
   set(ZOLTAN_LIBRARIES ${ZOLTAN_LIBRARIES} ${PARMETIS_LIBRARIES} ${PTSCOTCH_LIBRARIES})
   set(ZOLTAN_INCLUDE_DIRS ${ZOLTAN_INCLUDE_DIRS} ${PARMETIS_INCLUDE_DIRS}
       ${PTSCOTCH_INCLUDE_DIRS})
+
+  # register all ZOLTAN related flags
+  dune_register_package_flags(LIBRARIES "${ZOLTAN_LIBRARIES}"
+                            INCLUDE_DIRS "${ZOLTAN_INCLUDE_DIRS}")
+  set (ZOLTAN_CONFIG_VAR HAVE_ZOLTAN)
 endif()
 
-set (ZOLTAN_CONFIG_VAR HAVE_ZOLTAN)
-
 # print a message to indicate status of this package
-include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args(ZOLTAN
-  DEFAULT_MSG
-  ZOLTAN_LIBRARIES
-  ZOLTAN_INCLUDE_DIRS
-  )
+#include (FindPackageHandleStandardArgs)
+#find_package_handle_standard_args(ZOLTAN
+#  DEFAULT_MSG
+#  ZOLTAN_LIBRARIES
+#  ZOLTAN_INCLUDE_DIRS
+#  )

@@ -37,10 +37,10 @@ add_executable(backuprestore backuprestore.cc ${ALUSOURCES})
 add_executable(threadsafety threadsafety.cc ${ALUSOURCES})
 
 foreach(i ${TESTS})
-  target_link_libraries(${i} ${ZLIB_LIBRARIES})
+  # target_link_libraries(${i} ${ZLIB_LIBRARIES})
   # libdunalugrid needs symbols from zoltan. Therefore we need to link
   # to Zoltan afterwards.
-  add_dune_zoltan_flags(${i})
+  dune_target_enable_all_packages(${i})
 endforeach(i ${TESTS})
 # We do not want want to build the tests during make all
 # but just build them on demand

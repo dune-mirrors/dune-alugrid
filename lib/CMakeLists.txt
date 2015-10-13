@@ -15,9 +15,17 @@ dune_add_library(dunealugrid
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc
   ADD_LIBS "${DUNE_LIBS};${ZLIB_LIBRARIES}")
 
-# This _is_ needed for the correct compile flags.
-# (e.g. to not use the MPI C++ bindings, include path etc.)
-add_dune_zoltan_flags(dunealugrid)
+# add mpi flags to compile library
+add_dune_mpi_flags( dunealugrid )
+
+# zoltan dependencies
+target_link_libraries(dunealugrid ${ZOLTAN_LIBRARY})
+set_property(TARGET dunealugrid APPEND PROPERTY
+             INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
+
+# register alu grid to all pkg flags
+dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
+                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
 
 ####################################################################
 #### general warning: avoid such and similar commands here 
