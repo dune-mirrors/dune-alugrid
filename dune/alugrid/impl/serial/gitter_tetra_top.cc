@@ -402,7 +402,7 @@ namespace ALUGrid
                 }
               }
               //for bisection we want no hanging nodes
-              if(r.bisection()&& this->is2d())
+              if(r.bisection())
               {
                 neigh.first->refineBalance (r, neigh.second);
               }
