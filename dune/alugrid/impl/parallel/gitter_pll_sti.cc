@@ -255,12 +255,12 @@ namespace ALUGrid
   public:
     PackUnpackRefineLoop( std::vector< facevec_t >& innerFaces,
                           std::vector< facevec_t >& outerFaces,
-                          const bool biscectionRefinement )
+                          const bool bisectionRefinement )
       : _innerFaces( innerFaces ),
         _outerFaces( outerFaces ),
-        _factor( biscectionRefinement ? 3 : 1 ),
+        _factor( bisectionRefinement ? 3 : 1 ),
         _repeat( false ),
-        _bisectionRefinement( biscectionRefinement )
+        _bisectionRefinement( bisectionRefinement )
     {}
 
     bool repeat () const { return _repeat; }
