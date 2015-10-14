@@ -320,12 +320,11 @@ namespace ALUGrid
 
     void unpackFace( hface_STI* face, ObjectStream& os )
     {
-      const bool refined = face->accessOuterPllX ().first->setRefinementRequest ( os );
-      _repeat |= refined ;
+      _repeat |= face->accessOuterPllX ().first->setRefinementRequest ( os );
       if( _bisectionRefinement )
       {
         hface_STI* child = face->down();
-        if( refined && child )
+        if( child )
         {
           for( ; child ; child = child->next() )
           {
