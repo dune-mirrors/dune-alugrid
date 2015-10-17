@@ -55,4 +55,6 @@
 /* Include source file for dlmalloc */
 #cmakedefine DLMALLOC_SOURCE_INCLUDE ${DLMALLOC_SOURCE_INCLUDE}
 
+/* Grid type magic for DGF parser */
+@ALUGRID_CONFIG_H_BOTTOM@
 /* end dune-alugrid */
