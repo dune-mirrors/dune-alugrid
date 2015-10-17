@@ -1,7 +1,8 @@
-set(TESTS adapt 
-          backuprestore 
-          sizes
-          threadsafety)
+#set(TESTS adapt 
+#          backuprestore 
+#          sizes
+#          threadsafety)
+set(TESTS adapt)
 set(ALUSOURCES
   ${dune-alugrid_SOURCE_DIR}/dune/alugrid/impl/binaryio.cc
   ${dune-alugrid_SOURCE_DIR}/dune/alugrid/impl/macrofileheader.cc
@@ -45,4 +46,4 @@ endforeach(i ${TESTS})
 # We do not want want to build the tests during make all
 # but just build them on demand
 # We also don't want to build them when make test is called
-add_dependencies(${_test_target} ${TESTS} ${COMPILE_XFAIL_TESTS})
+# add_dependencies(${_test_target} ${TESTS} ${COMPILE_XFAIL_TESTS})

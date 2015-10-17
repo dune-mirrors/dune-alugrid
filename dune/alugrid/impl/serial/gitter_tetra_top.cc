@@ -402,9 +402,18 @@ namespace ALUGrid
                 }
               }
               //for bisection we want no hanging nodes
-              if(r.bisection()&& this->is2d())
+              if(r.bisection())
               {
                 neigh.first->refineBalance (r, neigh.second);
+                
+                //suggestion to be able to remove markforconformingclosure.
+             /*   neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;            
+                neigh.first->refineBalance (r, neigh.second);
+                if(! this-> is2d())
+                {
+                  neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;            
+                  neigh.first->refineBalance (r, neigh.second);
+                }*/
               }
             }
             else
