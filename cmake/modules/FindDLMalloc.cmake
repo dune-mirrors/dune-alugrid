@@ -59,7 +59,6 @@ mark_as_advanced(DLMALLOC_INCLUDE_DIR)
 # if found, store some results
 if(DLMALLOC_FOUND)
     message(STATUS "${DLMALLOC_SOURCE_INCLUDE} found.")
-    set(DLMALLOC_SOURCE_INCLUDE CACHE STRING ${DLMALLOC_SOURCE_INCLUDE})
 endif(DLMALLOC_FOUND)
 
 #set HAVE_DLMALLOC for config.h
