@@ -296,6 +296,36 @@ namespace ALUGrid
       }
     }
 
+    void unpack( const int link, ObjectStream& os )
+    {
+      try
+      {
+#ifdef ALUGRIDDEBUG
+        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * _factor * sizeof( char );
+        alugrid_assert ( os.size() == (int)expecetedSize );
+#endif
+        {
+          const hface_iterator iEnd = _innerFaces[ link ].end ();
+          for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i )
+          {
+            unpackFace( (*i), os );
+          }
+        }
+        {
+          const hface_iterator iEnd = _outerFaces[ link ].end ();
+          for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
+          {
+            unpackFace( (*i), os );
+          }
+        }
+      }
+      catch (Parallel::AccessPllException)
+      {
+        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
+        abort();
+      }
+    }
+  protected:
     void packFace( hface_STI* face, ObjectStream& os ) const
     {
       face->accessOuterPllX ().first->getRefinementRequest ( os );
@@ -340,35 +370,6 @@ namespace ALUGrid
       }
     }
 
-    void unpack( const int link, ObjectStream& os )
-    {
-      try
-      {
-#ifdef ALUGRIDDEBUG
-        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * _factor * sizeof( char );
-        alugrid_assert ( os.size() == (int)expecetedSize );
-#endif
-        {
-          const hface_iterator iEnd = _innerFaces[ link ].end ();
-          for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i )
-          {
-            unpackFace( (*i), os );
-          }
-        }
-        {
-          const hface_iterator iEnd = _outerFaces[ link ].end ();
-          for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
-          {
-            unpackFace( (*i), os );
-          }
-        }
-      }
-      catch (Parallel::AccessPllException)
-      {
-        std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
-        abort();
-      }
-    }
   };
 
   class PackUnpackEdgeCleanup : public MpAccessLocal::NonBlockingExchange::DataHandleIF
