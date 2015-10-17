@@ -20,6 +20,9 @@ foreach(i ${SUBDIRS})
   unset(opt)
 endforeach(i ${SUBDIRS})
 
+dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
+                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
+
 foreach(i ${TESTS})
   dune_target_enable_all_packages( ${i} )
   add_test(${i} ${i})
