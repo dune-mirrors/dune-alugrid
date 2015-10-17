@@ -247,14 +247,20 @@ namespace ALUGrid
 
     typedef facevec_t::const_iterator hface_iterator;
 
-    bool _repeat ;
+    const size_t  _factor ;
+    bool          _repeat ;
+    const bool    _bisectionRefinement;
+
     PackUnpackRefineLoop( const PackUnpackRefineLoop& );
   public:
     PackUnpackRefineLoop( std::vector< facevec_t >& innerFaces,
-                      std::vector< facevec_t >& outerFaces )
+                          std::vector< facevec_t >& outerFaces,
+                          const bool bisectionRefinement )
       : _innerFaces( innerFaces ),
         _outerFaces( outerFaces ),
-        _repeat( false )
+        _factor( bisectionRefinement ? 3 : 1 ),
+        _repeat( false ),
+        _bisectionRefinement( bisectionRefinement )
     {}
 
     bool repeat () const { return _repeat; }
@@ -267,16 +273,20 @@ namespace ALUGrid
         os.clear();
 
         // reserve memory for object stream
-        os.reserve( (_outerFaces[ link ].size() + _innerFaces[ link ].size() ) * sizeof(char) );
+        os.reserve( (_outerFaces[ link ].size() + _innerFaces[ link ].size() ) * _factor * sizeof(char) );
         {
           const hface_iterator iEnd = _outerFaces[ link ].end ();
           for (hface_iterator i = _outerFaces[ link ].begin (); i != iEnd; ++i )
-            (*i)->accessOuterPllX ().first->getRefinementRequest ( os );
+          {
+            packFace( (*i), os );
+          }
         }
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces[ link ].begin (); i != iEnd; ++i )
-            (*i)->accessOuterPllX ().first->getRefinementRequest ( os );
+          {
+            packFace( (*i), os );
+          }
         }
       }
       catch( Parallel::AccessPllException )
@@ -291,18 +301,22 @@ namespace ALUGrid
       try
       {
 #ifdef ALUGRIDDEBUG
-        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * sizeof( char );
+        const size_t expecetedSize = (_innerFaces[ link ].size() + _outerFaces[ link ].size() ) * _factor * sizeof( char );
         alugrid_assert ( os.size() == (int)expecetedSize );
 #endif
         {
           const hface_iterator iEnd = _innerFaces[ link ].end ();
           for (hface_iterator i = _innerFaces [ link ].begin (); i != iEnd; ++i )
-            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os );
+          {
+            unpackFace( (*i), os );
+          }
         }
         {
           const hface_iterator iEnd = _outerFaces[ link ].end ();
           for (hface_iterator i = _outerFaces [ link ].begin (); i != iEnd; ++i )
-            _repeat |= (*i)->accessOuterPllX ().first->setRefinementRequest ( os );
+          {
+            unpackFace( (*i), os );
+          }
         }
       }
       catch (Parallel::AccessPllException)
@@ -311,6 +325,51 @@ namespace ALUGrid
         abort();
       }
     }
+  protected:
+    void packFace( hface_STI* face, ObjectStream& os ) const
+    {
+      face->accessOuterPllX ().first->getRefinementRequest ( os );
+      if( _bisectionRefinement )
+      {
+        hface_STI* child = face->down();
+        if( child )
+        {
+          for(; child; child = child->next() )
+          {
+            child->accessOuterPllX ().first->getRefinementRequest ( os );
+          }
+        }
+        else
+        {
+          typedef RefinementRules::Hface3Rule rule_t;
+          os.put( char(rule_t::nosplit) );
+          os.put( char(rule_t::nosplit) );
+        }
+      }
+    }
+
+    void unpackFace( hface_STI* face, ObjectStream& os )
+    {
+      _repeat |= face->accessOuterPllX ().first->setRefinementRequest ( os );
+      if( _bisectionRefinement )
+      {
+        hface_STI* child = face->down();
+        if( child )
+        {
+          for( ; child ; child = child->next() )
+          {
+            _repeat |= child->accessOuterPllX ().first->setRefinementRequest ( os );
+          }
+        }
+        else
+        {
+          // remove two chars from the stream
+          os.get();
+          os.get();
+        }
+      }
+    }
+
   };
 
   class PackUnpackEdgeCleanup : public MpAccessLocal::NonBlockingExchange::DataHandleIF
@@ -429,7 +488,7 @@ namespace ALUGrid
       do
       {
         // unpack handle to unpack the data once their received
-        PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces );
+        PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces, conformingClosureNeeded() );
 
         // exchange data and unpack when received
         mpAccess ().exchange ( dataHandle );
