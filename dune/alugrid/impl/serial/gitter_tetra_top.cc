@@ -2167,8 +2167,22 @@ namespace ALUGrid
         // untersucht werden und dann erst das Element danach verfeinert werden.
         //
         // getrule can have changed because of reucrsive nature of bisection refinement
+        // if there is a loop in the mesh
         if(r != getrule ())
+        {
           refineImmediate (r) ;
+          if(r.bisection())
+          {
+            TetraTop < A > * child=this->down() ;
+            //if children are nonconforming
+            for(int i =0; i < 2; ++i )
+            {
+              if(child->markForConformingClosure())
+                child->refine();
+              child = child->next();
+            }
+          }
+        }
         return true ;
       }
     }
@@ -2205,28 +2219,6 @@ namespace ALUGrid
 
           //if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
           refine();
-            
-          TetraTop < A > * child=this->down() ;
-          //if children are nonconforming
-          for(int i =0; i < 2; ++i )
-          {
-            if(child->markForConformingClosure())
-            {
-              child->refine();
-              if(! this-> is2d())
-              {
-                TetraTop< A > * grandChild = child->down();
-                for(int j = 0; j < 2 ; ++j)
-                {
-                  if(grandChild->markForConformingClosure())
-                    grandChild->refine();
-                  grandChild->next();
-                }
-              }
-            }
-            child->next();
-          }
-          
         }
       }
     }
