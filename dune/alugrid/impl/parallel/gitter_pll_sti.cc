@@ -1124,8 +1124,10 @@ namespace ALUGrid
     const bool bisectionEnabled = conformingClosureNeeded();
     alugrid_assert ( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
 
+    refined |= refine();
+
     // loop until refinement leads to a conforming situation (conforming refinement only)
-    do
+  /*  do
     {
       alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::adapt ()" << std::endl, 1) : 1);
       alugrid_assert (! iterators_attached ());
@@ -1139,10 +1141,12 @@ namespace ALUGrid
         bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false;
 
     }
-    while ( needConformingClosure );
+    while ( needConformingClosure );*/
 
     // now do one coarsening step
     coarse ();
+
+
 
 #ifdef ALUGRIDDEBUG
     needConformingClosure =
