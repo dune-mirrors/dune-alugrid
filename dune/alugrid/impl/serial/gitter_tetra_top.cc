@@ -405,15 +405,6 @@ namespace ALUGrid
               if(r.bisection())
               {
                 neigh.first->refineBalance (r, neigh.second);
-                
-                //suggestion to be able to remove markforconformingclosure.
-             /*   neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;            
-                neigh.first->refineBalance (r, neigh.second);
-                if(! this-> is2d())
-                {
-                  neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;            
-                  neigh.first->refineBalance (r, neigh.second);
-                }*/
               }
             }
             else
@@ -703,7 +694,7 @@ namespace ALUGrid
         // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
         // ist.
 
-        // alugrid_assert (this->getrule () == myrule_t::nosplit) ;
+        alugrid_assert (this->getrule () == myrule_t::nosplit) ;
         switch (r) {
         case balrule_t::e01 :
         case balrule_t::e12 :
@@ -2181,6 +2172,7 @@ namespace ALUGrid
         return true ;
       }
     }
+    _req = myrule_t::nosplit ;
     return true ;
   }
 
@@ -2212,7 +2204,29 @@ namespace ALUGrid
           _req = suggestRule() ;
 
           //if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
-            refine();
+          refine();
+            
+          TetraTop < A > * child=this->down() ;
+          //if children are nonconforming
+          for(int i =0; i < 2; ++i )
+          {
+            if(child->markForConformingClosure())
+            {
+              child->refine();
+              if(! this-> is2d())
+              {
+                TetraTop< A > * grandChild = child->down();
+                for(int j = 0; j < 2 ; ++j)
+                {
+                  if(grandChild->markForConformingClosure())
+                    grandChild->refine();
+                  grandChild->next();
+                }
+              }
+            }
+            child->next();
+          }
+          
         }
       }
     }
