@@ -1119,15 +1119,21 @@ namespace ALUGrid
     stepnumber = 0;
 #endif
 
-    bool refined = false;
+    // refine the grid, should also lead to conforming grid
+    // when bisection refinement is used
+    const bool refined = refine();
+
+#if ALUGRIDDEBUG
     bool needConformingClosure = false;
     const bool bisectionEnabled = conformingClosureNeeded();
     alugrid_assert ( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
+#endif
 
-    refined |= refine();
+    /*
+    bool refined = false;
 
     // loop until refinement leads to a conforming situation (conforming refinement only)
-  /*  do
+    do
     {
       alugrid_assert (debugOption (20) ? (std::cout << "**INFO GitterPll::adapt ()" << std::endl, 1) : 1);
       alugrid_assert (! iterators_attached ());
@@ -1141,12 +1147,11 @@ namespace ALUGrid
         bisectionEnabled ? mpAccess().gmax( markForConformingClosure() ) : false;
 
     }
-    while ( needConformingClosure );*/
+    while ( needConformingClosure );
+    */
 
     // now do one coarsening step
     coarse ();
-
-
 
 #ifdef ALUGRIDDEBUG
     needConformingClosure =
