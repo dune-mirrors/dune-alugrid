@@ -1123,7 +1123,7 @@ namespace ALUGrid
     // when bisection refinement is used
     const bool refined = refine();
 
-#if ALUGRIDDEBUG
+#ifdef ALUGRIDDEBUG
     bool needConformingClosure = false;
     const bool bisectionEnabled = conformingClosureNeeded();
     alugrid_assert ( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
