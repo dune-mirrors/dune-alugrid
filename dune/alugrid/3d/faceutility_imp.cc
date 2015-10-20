@@ -91,7 +91,7 @@ namespace Dune
       if(bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
       {
         // if nonconformity occurs then go up one level
-        if( bnd->level () != bnd->ghostLevel() )
+        if( bnd->level () != bnd->ghostLevel() && !conformingRefinement_)
         {
           bnd = static_cast<const BNDFaceType *>(bnd->up());
           alugrid_assert ( bnd );
@@ -189,7 +189,7 @@ namespace Dune
         if( parallel() && bnd->bndtype() == ALU3DSPACE ProcessorBoundary_t)
         {
           // if nonconformity occurs then go up one level
-          if( bnd->level () != bnd->ghostLevel() )
+          if( bnd->level () != bnd->ghostLevel() && !conformingRefinement_)
           {
             bnd = static_cast<const BNDFaceType *>(bnd->up());
             alugrid_assert ( bnd );
@@ -198,6 +198,9 @@ namespace Dune
 
           // set boundary type to ghost boundary
           bndType_ = outerGhostBoundary ;
+
+          if(conformingRefinement_)
+            outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
 
           // access ghost only when ghost cells are enabled
           if( ghostCellsEnabled_ )
@@ -240,6 +243,10 @@ namespace Dune
 
     // make sure we got boundary id correctly
     alugrid_assert ( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
+
+    //make sure twists are set
+    alugrid_assert( innerTwist_ != -665);
+    alugrid_assert( outerTwist_ != -665);
 
     // set conformance information
     conformanceState_ = getConformanceState(innerLevel);
