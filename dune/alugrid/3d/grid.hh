@@ -8,6 +8,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/interfaces.hh>
 #include <dune/common/bigunsignedint.hh>
+#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -1364,11 +1365,13 @@ namespace Dune
       static const bool v = true;
     };
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isParallel< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
       static const bool v = true;
     };
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isLevelwiseConforming< ALU3dGrid< dim, dimworld, elType, Comm > >

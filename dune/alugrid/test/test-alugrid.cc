@@ -68,6 +68,7 @@ void checkCapabilities(const Grid& grid)
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
    static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     true ;
@@ -76,6 +77,7 @@ void checkCapabilities(const Grid& grid)
 #endif
    static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
                    "isParallel is not set correctly");
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
    static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
