@@ -402,7 +402,7 @@ namespace ALUGrid
                 }
               }
               //for bisection we want no hanging nodes
-              if(r.bisection()&& this->is2d())
+              if(r.bisection())
               {
                 neigh.first->refineBalance (r, neigh.second);
               }
@@ -694,7 +694,7 @@ namespace ALUGrid
         // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
         // ist.
 
-        // alugrid_assert (this->getrule () == myrule_t::nosplit) ;
+        alugrid_assert (this->getrule () == myrule_t::nosplit) ;
         switch (r) {
         case balrule_t::e01 :
         case balrule_t::e12 :
@@ -2167,11 +2167,26 @@ namespace ALUGrid
         // untersucht werden und dann erst das Element danach verfeinert werden.
         //
         // getrule can have changed because of reucrsive nature of bisection refinement
+        // if there is a loop in the mesh
         if(r != getrule ())
+        {
           refineImmediate (r) ;
+          if(r.bisection())
+          {
+            TetraTop < A > * child=this->down() ;
+            //if children are nonconforming
+            for(int i =0; i < 2; ++i )
+            {
+              if(child->markForConformingClosure())
+                child->refine();
+              child = child->next();
+            }
+          }
+        }
         return true ;
       }
     }
+    _req = myrule_t::nosplit ;
     return true ;
   }
 
@@ -2203,7 +2218,7 @@ namespace ALUGrid
           _req = suggestRule() ;
 
           //if (! BisectionInfo::refineFaces( this, suggestRule() ) ) return false ;
-            refine();
+          refine();
         }
       }
     }
@@ -2392,54 +2407,66 @@ namespace ALUGrid
     // die inneren Gitterteile restore'd.
 
     myrule_t r ((char) is.get ()) ;
-    alugrid_assert (getrule() == myrule_t::nosplit) ;
-    if (r == myrule_t::nosplit)
+    if(getrule() == r)
     {
-      // Vorsicht: beim restore m"ussen sich sowohl Element als auch
-      // Randelement um die Korrektheit der Nachbarschaft k"ummern,
-      // und zwar dann wenn sie "on the top" sind (= die gelesene
-      // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
-      // Die nachfolgende L"osung ist weit davon entfernt, sch"on
-      // zu sein - leider. Eventuell wird mit der Verbesserung der
-      // Behandlung der nichtkonf. Situationen mal eine "Anderung
-      // n"otig.
-
-      for (int i = 0 ; i < 4 ; ++i)
-      {
-        myhface_t & face (*(myhface (i))) ;
-        if (! face.leaf ())
-        {
-          alugrid_assert( face.getrule() == balrule_t::e01 ||
-                          face.getrule() == balrule_t::e12 ||
-                          face.getrule() == balrule_t::e20 ||
-                          face.getrule() == balrule_t::iso4 );
-          const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
-          for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
-        }
-      }
-    }
-    else
-    {
-      // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
-      // request (myrule_t) und dann refine () durchgef"uhrt werden.
-
-      // request read rule
-      request (r) ;
-      // refine tetra
-      refine() ;
-
-      alugrid_assert (getrule() == r) ;
-
       // call restore on inner items
       { for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
       { for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
-
       // call restore on children
       {
         for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ;
       }
     }
+    else
+    {
+      alugrid_assert (getrule() == myrule_t::nosplit) ;
+      if (r == myrule_t::nosplit)
+      {
+        // Vorsicht: beim restore m"ussen sich sowohl Element als auch
+        // Randelement um die Korrektheit der Nachbarschaft k"ummern,
+        // und zwar dann wenn sie "on the top" sind (= die gelesene
+        // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
+        // Die nachfolgende L"osung ist weit davon entfernt, sch"on
+        // zu sein - leider. Eventuell wird mit der Verbesserung der
+        // Behandlung der nichtkonf. Situationen mal eine "Anderung
+        // n"otig.
 
+        for (int i = 0 ; i < 4 ; ++i)
+        {
+          myhface_t & face (*(myhface (i))) ;
+          if (! face.leaf ())
+          {
+            alugrid_assert( face.getrule() == balrule_t::e01 ||
+                            face.getrule() == balrule_t::e12 ||
+                            face.getrule() == balrule_t::e20 ||
+                            face.getrule() == balrule_t::iso4 );
+            const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
+            for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
+          }
+        }
+      }
+      else
+      {
+        // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
+        // request (myrule_t) und dann refine () durchgef"uhrt werden.
+
+        // request read rule
+        request (r) ;
+        // refine tetra
+        refine() ;
+
+        alugrid_assert (getrule() == r) ;
+
+        // call restore on inner items
+        { for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
+        { for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
+
+        // call restore on children
+        {
+          for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ;
+        }
+      }
+    }
     return ;
   }
 

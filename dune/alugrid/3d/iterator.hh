@@ -103,8 +103,6 @@ public:
   typedef ALUTwists< (dim == 3 ) ? GridImp::elementType == tetra ? 3 : 4 : 2, dim-1 > Twists;
   typedef typename Twists::Twist Twist;
 
-  typedef typename GridImp::GridObjectFactoryType FactoryType;
-
   typedef typename GridImp::template Codim<0>::Entity             Entity;
   typedef typename GridImp::template Codim<1>::Geometry           Geometry;
   typedef typename GridImp::template Codim<1>::LocalGeometry      LocalGeometry;
@@ -116,15 +114,8 @@ public:
 
   typedef FieldVector<alu3d_ctype, dimworld> NormalType;
 
-  typedef ALUMemoryProvider< ThisType > StorageType;
-
-  //! The default Constructor , level tells on which level we want
-  //! neighbours
-  ALU3dGridIntersectionIterator(const FactoryType& factory,
-                                HElementType *el,
-                                int wLevel,bool end=false, bool levelIntersectionIterator = false);
-
-  ALU3dGridIntersectionIterator(const FactoryType& factory, int wLevel, bool levelIntersectionIterator = false);
+  //! The default Constructor
+  explicit ALU3dGridIntersectionIterator( const bool levelIntersectionIterator = false );
 
   //! The copy constructor
   ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org);
@@ -192,15 +183,15 @@ public:
 
   //! return unit outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
+  NormalType unitOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const ;
 
   //! return outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType outerNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return outer normal, this should be dependent on local
   //! coordinates for higher order boundary
-  NormalType & integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
+  NormalType integrationOuterNormal (const FieldVector<alu3d_ctype, dim-1>& local) const;
 
   //! return level of iterator (level of item)
   int level () const;
@@ -236,7 +227,9 @@ protected:
 
   // reset IntersectionIterator to first neighbour
   template <class EntityType>
-  void first(const EntityType & en, int wLevel);
+  void first(const EntityType & en, int wLevel,
+             const bool conformingRefinement,
+             const bool ghostCellsEnabled );
 
   // set new face
   void setNewFace(const GEOFaceType& newFace);
@@ -284,6 +277,12 @@ protected:
 
   // unit outer normal
   mutable NormalType unitOuterNormal_;
+
+public:
+  // used by SharedPointer
+  void invalidate() {}
+  // refCount used by SharedPointer
+  unsigned int refCount_;
 };
 
 template<class GridImp>
@@ -337,17 +336,8 @@ protected:
   using BaseType :: neighbor ;
 
 public:
-  typedef typename GridImp::GridObjectFactoryType FactoryType;
-
-  typedef ALUMemoryProvider< ThisType > StorageType;
-
-  //! The default Constructor , level tells on which level we want
-  //! neighbours
-  ALU3dGridLevelIntersectionIterator(const FactoryType& factory,
-                                     HElementType *el,
-                                     int wLevel,bool end=false);
-
-  ALU3dGridLevelIntersectionIterator(const FactoryType& factory, int wLevel);
+  //! The default Constructor
+  ALU3dGridLevelIntersectionIterator();
 
   //! The copy constructor
   ALU3dGridLevelIntersectionIterator(const ThisType & org);
@@ -360,7 +350,9 @@ public:
 
   // reset IntersectionIterator to first neighbour
   template <class EntityType>
-  void first(const EntityType & en, int wLevel);
+  void first(const EntityType & en, int wLevel,
+             const bool conformingRefinement,
+             const bool ghostCellsEnabled );
 
   //! return true if across the edge an neighbor on this level exists
   bool neighbor () const;
@@ -570,8 +562,6 @@ class ALU3dGridLevelIterator
   typedef ALU3dGridEntityPointer< cd, GridImp > BaseType;
 
 public:
-  typedef typename GridImp::GridObjectFactoryType FactoryType;
-
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef ALU3dGridVertexList< Comm > VertexListType;
 
@@ -583,13 +573,13 @@ public:
   typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, Comm >::val_t val_t;
 
   /** \brief default constructor */
-  ALU3dGridLevelIterator () : factory_( nullptr ), iter_(), level_( 0 ) {}
+  ALU3dGridLevelIterator () : grid_( nullptr ), iter_(), level_( 0 ) {}
 
   //! Constructor for begin iterator
-  ALU3dGridLevelIterator(const FactoryType& factory, int level, bool);
+  ALU3dGridLevelIterator(const GridImp& grid, int level, bool);
 
   //! Constructor for end iterator
-  ALU3dGridLevelIterator(const FactoryType& factory, int level);
+  ALU3dGridLevelIterator(const GridImp& grid, int level);
 
   //! Constructor
   ALU3dGridLevelIterator(const ThisType & org);
@@ -609,10 +599,10 @@ private:
   //! do assignment
   void assign (const ThisType & org);
 
-  const GridImp &grid () const { alugrid_assert( factory_ ); return factory_->grid(); }
+  const GridImp &grid () const { alugrid_assert( grid_ ); return *grid_; }
 
   // reference to factory class (ie grid)
-  const FactoryType *factory_;
+  const GridImp *grid_;
 
   // the internal iterator
   std::unique_ptr< IteratorType > iter_ ;
@@ -652,8 +642,6 @@ class ALU3dGridLeafIterator
   typedef ALU3dGridEntityPointer< cdim, GridImp > BaseType;
 
 public:
-  typedef typename GridImp::GridObjectFactoryType FactoryType;
-
   typedef typename GridImp::template Codim<cdim>::Entity Entity;
 
   typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, pitype, Comm > IteratorType ;
@@ -665,13 +653,13 @@ public:
   typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
   /** \brief default constructor */
-  ALU3dGridLeafIterator () : factory_( nullptr ), iter_() {}
+  ALU3dGridLeafIterator () : grid_( nullptr ), iter_() {}
 
   //! Constructor for end iterators
-  ALU3dGridLeafIterator(const FactoryType& factory, int level);
+  ALU3dGridLeafIterator(const GridImp& grid, int level);
 
   //! Constructor for begin Iterators
-  ALU3dGridLeafIterator(const FactoryType& factory, int level , bool isBegin);
+  ALU3dGridLeafIterator(const GridImp& grid, int level , bool isBegin);
 
   //! copy Constructor
   ALU3dGridLeafIterator(const ThisType & org);
@@ -689,10 +677,10 @@ public:
   ThisType & operator = (const ThisType & org);
 
 private:
-  const GridImp &grid () const { alugrid_assert( factory_ ); return factory_->grid(); }
+  const GridImp &grid () const { alugrid_assert( grid_ ); return *grid_; }
 
-  // reference to factory class (ie grid)
-  const FactoryType *factory_;
+  // reference to grid class (ie grid)
+  const GridImp *grid_;
 
   // the internal iterator
   std::unique_ptr< IteratorType > iter_;
@@ -783,8 +771,6 @@ class ALU3dGridHierarchicIterator
   };
 
 public:
-  typedef typename GridImp::GridObjectFactoryType FactoryType;
-
   typedef typename GridImp::template Codim<0>::Entity Entity;
   typedef typename GridImp::ctype ctype;
 

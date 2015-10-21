@@ -5,7 +5,7 @@ project("dune-alugrid" C CXX)
 set(BUILD_DOCS 1)
 
 # general stuff
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 2.8.12)
 
 # guess dune-common build dir
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
@@ -20,7 +20,7 @@ find_package(dune-common REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH}
   "${PROJECT_SOURCE_DIR}/cmake/modules")
 
-find_package(dune-grid)
+find_package(dune-grid REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${dune-grid_MODULE_PATH}
   "${PROJECT_SOURCE_DIR}/cmake/modules")
 

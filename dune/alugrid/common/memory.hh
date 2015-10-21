@@ -19,10 +19,6 @@ namespace ALUGrid
   template< class T, int length >
   class ALUGridFiniteStack;
 
-}
-
-namespace Dune
-{
   //! organize the memory management for entitys used by the NeighborIterator
   template <class Object>
   class ALUMemoryProviderSingleThread
@@ -48,7 +44,7 @@ namespace Dune
 #ifdef _OPENMP
       return omp_get_thread_num();
 #elif HAVE_DUNE_FEM
-      return Fem :: ThreadManager :: thread() ;
+      return Dune::Fem :: ThreadManager :: thread() ;
 #else
       return 0;
 #endif
@@ -60,7 +56,7 @@ namespace Dune
 #ifdef _OPENMP
       return omp_get_max_threads();
 #elif HAVE_DUNE_FEM
-      return Fem :: ThreadManager :: maxThreads() ;
+      return Dune::Fem :: ThreadManager :: maxThreads() ;
 #else
       return 1;
 #endif
@@ -242,6 +238,161 @@ namespace Dune
     void freeObject (ObjectType * obj) { memProvider( thread() ).freeObject( obj ); }
   };
 
-} // namespace Dune
+  template <class ObjectImp>
+  class ReferenceCountedObject
+  {
+  protected:
+    // type of object to be reference counted
+    typedef ObjectImp    ObjectType;
+
+    // object (e.g. geometry impl or intersection impl)
+    ObjectType object_;
+
+    unsigned int& refCount() { return object_.refCount_; }
+    const unsigned int& refCount() const { return object_.refCount_; }
+
+  public:
+    //! reset status and reference count
+    void reset()
+    {
+      // reset reference counter
+      refCount() = 1;
+
+      // reset status of object
+      object_.invalidate();
+    }
+
+    //! increase reference count
+    void operator ++ () { ++ refCount(); }
+
+    //! decrease reference count
+    void operator -- () { alugrid_assert ( refCount() > 0 ); --refCount(); }
+
+    //! return true if object has no references anymore
+    bool operator ! () const { return refCount() == 0; }
+
+    //! return true if there exists more then on reference
+    bool unique () const { return refCount() == 1 ; }
+
+    const ObjectType& object() const { return object_; }
+          ObjectType& object()       { return object_; }
+  };
+
+  template <class ObjectImp>
+  class SharedPointer
+  {
+  protected:
+    typedef ObjectImp  ObjectType;
+    typedef ReferenceCountedObject< ObjectType >              ReferenceCountedObjectType;
+    typedef ALUMemoryProvider< ReferenceCountedObjectType >   MemoryPoolType;
+
+    static MemoryPoolType& memoryPool()
+    {
+      static MemoryPoolType pool;
+      return pool;
+    }
+
+  public:
+    // default constructor
+    SharedPointer()
+    {
+      /*
+      static bool first = true ;
+      if( first )
+      {
+        std::cout << "Memory object = " << sizeof( ObjectType ) << " "
+                  << sizeof( ReferenceCountedObjectType ) << std::endl;
+        first = false;
+      }
+      */
+      getObject();
+    }
+
+    // copy contructor making shallow copy
+    SharedPointer( const SharedPointer& other )
+    {
+      assign( other );
+    }
+
+    // destructor clearing pointer
+    ~SharedPointer()
+    {
+      removeObject();
+    }
+
+    void getObject()
+    {
+      ptr_ = memoryPool().getEmptyObject();
+      ptr().reset();
+    }
+
+    void assign( const SharedPointer& other )
+    {
+      // copy pointer
+      ptr_ = other.ptr_;
+
+      // increase reference counter
+      ++ ptr();
+    }
+
+    void removeObject()
+    {
+      // decrease reference counter
+      -- ptr();
+
+      // if reference count is zero free the object
+      if( ! ptr() )
+      {
+        memoryPool().freeObject( ptr_ );
+      }
+
+      // reset pointer
+      ptr_ = nullptr;
+    }
+
+    void invalidate()
+    {
+      // if pointer is unique, invalidate status
+      if( ptr().unique() )
+      {
+        ptr().object().invalidate();
+      }
+      else
+      {
+        // if pointer is used elsewhere remove the pointer
+        // and get new object
+        removeObject();
+        getObject();
+      }
+    }
+
+    SharedPointer& operator = ( const SharedPointer& other )
+    {
+      if( ptr_ != other.ptr_ )
+      {
+        removeObject();
+        assign( other );
+      }
+      return *this;
+    }
+
+    operator bool () const { return bool( ptr_ ); }
+
+    bool operator == (const SharedPointer& other ) const { return ptr_ == other.ptr_; }
+
+    bool unique () const { return ptr().unique(); }
+
+    // dereferencing
+          ObjectType& operator* ()       { return ptr().object(); }
+    const ObjectType& operator* () const { return ptr().object(); }
+
+  protected:
+    ReferenceCountedObjectType& ptr() { alugrid_assert( ptr_ ); return *ptr_; }
+    const ReferenceCountedObjectType& ptr() const { alugrid_assert( ptr_ ); return *ptr_; }
+
+    ReferenceCountedObjectType* ptr_;
+  };
+
+} // namespace ALUGrid
 
 #endif // #ifndef DUNE_ALU3DGRIDMEMORY_HH

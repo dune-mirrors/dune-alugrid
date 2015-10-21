@@ -1,6 +1,7 @@
 #ifndef DUNE_ALUGRID_FROMTOGRIDFACTORY_HH
 #define DUNE_ALUGRID_FROMTOGRIDFACTORY_HH
 
+#include <map>
 #include <vector>
 
 #include <dune/common/version.hh>
@@ -33,9 +34,11 @@ namespace Dune
   protected:
     typedef FromToGridFactory< Grid > This;
 
+    std::vector< unsigned int > ordering_ ;
+
   public:
-    template <class FromGrid>
-    static Grid* convert( const FromGrid& grid, std::vector<int>& ordering )
+    template <class FromGrid, class Vector>
+    Grid* convert( const FromGrid& grid, Vector& cellData, std::vector<unsigned int>& ordering )
     {
       int rank = 0;
 #if HAVE_MPI
@@ -123,7 +126,12 @@ namespace Dune
               factory.insertBoundary( elementIndex, faceNumber );
 
             // for parallel grids we can check if we are at a process border
-            if( Capabilities::isParallel< FromGrid > :: v &&
+#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+            const double isParallel = true;
+#else
+            const double isParallel = Capabilities::isParallel< FromGrid > :: v;
+#endif //!DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+            if( isParallel &&
                 intersection.neighbor() &&
                 (*intersection.outside()).partitionType() != InteriorEntity )
             {
@@ -136,6 +144,21 @@ namespace Dune
 
       // create grid pointer (behaving like a shared_ptr)
       Grid* newgrid = factory.createGrid( true, true, std::string("FromToGrid") );
+
+      if( ! cellData.empty() )
+      {
+        Vector oldCellData( cellData );
+        auto macroView = newgrid->levelGridView( 0 );
+        size_t idx = 0;
+        for( auto it = macroView.template begin<0>(), end = macroView.template end<0>();
+             it != end; ++it, ++idx )
+        {
+          const int insertionIndex = ordering.empty() ?
+            factory.insertionIndex( *it ) : ordering[ factory.insertionIndex( *it ) ];                                                        ;
+          cellData[ idx ] = oldCellData[ insertionIndex ] ;
+        }
+      }
+
       // store the ordering from the factory, if it was not provided
       if( ordering.empty() )
         ordering = factory.ordering();
@@ -147,11 +170,10 @@ namespace Dune
       return newgrid;
     }
 
-    template <class FromGrid>
-    static Grid* convert( const FromGrid& fromGrid )
+    template <class FromGrid, class Vector>
+    Grid* convert( const FromGrid& fromGrid, Vector& cellData )
     {
-      std::vector<int> ordering;
-      return convert( fromGrid, ordering );
+      return convert( fromGrid, cellData, ordering_ );
     }
 
   protected:

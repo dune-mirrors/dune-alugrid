@@ -114,6 +114,10 @@ namespace Dune
       return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
     }
 
+  protected:
+    /** \brief constructor taking verbose flag */
+    explicit ALU3dGridFactory ( const bool verbose, const MPICommunicatorType &communicator );
+
   public:
     /** \brief default constructor */
     explicit ALU3dGridFactory ( const MPICommunicatorType &communicator = Grid::defaultCommunicator(),
@@ -122,9 +126,6 @@ namespace Dune
     /** \brief constructor taking filename for temporary outfile */
     explicit ALU3dGridFactory ( const std::string &filename,
                                 const MPICommunicatorType &communicator = Grid::defaultCommunicator() );
-
-    /** \brief constructor taking verbose flag */
-    explicit ALU3dGridFactory ( const bool verbose, const MPICommunicatorType &communicator );
 
     /** \brief Destructor */
     virtual ~ALU3dGridFactory ();
@@ -246,15 +247,20 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).getIndex();
+      alugrid_assert( Grid::getRealImplementation( entity ).getIndex() < int(ordering_.size()) );
+      return ordering_[ Grid::getRealImplementation( entity ).getIndex() ];
     }
 
     virtual unsigned int
     insertionIndex ( const typename Codim< dimension >::Entity &entity ) const
     {
-      if(dimension == 2)
+      if(dimension == 2 && elementType == hexa )
+        // for quadrilaterals we simply half the number, see gridfactory.cc doInsertVertex
         return Grid::getRealImplementation( entity ).getIndex()/2;
-      else  // dimension == 3
+      else if ( dimension == 2 && elementType == tetra )
+        // for triangles we have to substract 1, see gridfactory.cc doInsertVertex
+        return Grid::getRealImplementation( entity ).getIndex() - 1;
+      else  // dimension 3
         return Grid::getRealImplementation( entity ).getIndex();
     }
 
@@ -298,7 +304,7 @@ namespace Dune
              (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
-    const std::vector<int>& ordering () const { return ordering_; }
+    const std::vector<unsigned int>& ordering () const { return ordering_; }
 
   private:
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
@@ -326,7 +332,7 @@ namespace Dune
     void recreateBoundaryIds ( const int defaultId = 1 );
 
     // sort elements according to hilbert space filling curve (if Zoltan is available)
-    void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< int >& ordering );
+    void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< unsigned int >& ordering );
 
     int rank_;
 
@@ -344,7 +350,7 @@ namespace Dune
 
     MPICommunicatorType communicator_;
 
-    std::vector< int > ordering_;
+    std::vector< unsigned int > ordering_;
   };
 
 
@@ -383,7 +389,7 @@ namespace Dune
     }
   }
 
-  /** \brief Specialization of the generic GridFactory for ALUCubeGrid<3,3>
+  /** \brief Specialization of the generic GridFactory for ALUGrid
    *  \ingroup GridFactory
    */
   template<int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
@@ -404,17 +410,31 @@ namespace Dune
     {}
 
     /** \brief constructor taking filename */
-    GridFactory ( const std::string &filename,
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
+    explicit GridFactory ( const std::string &filename,
+                           const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
     {}
+  };
 
-  protected:
-    template< class, class, int > friend class ALULocalGeometryStorage;
-    /** \brief constructor taking verbosity flag */
-    GridFactory ( const bool realGrid,
-                  const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
-    : BaseType( realGrid, communicator )
+  template< class Grid >
+  class ReferenceGridFactory;
+
+  // Specialization of the ReferenceGridFactory for ALUGrid
+  template<int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype , class Comm >
+  class ReferenceGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
+  : public ALU3dGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
+  {
+    typedef ReferenceGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > > ThisType;
+    typedef ALU3dGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > > BaseType;
+
+  public:
+    typedef typename BaseType::Grid Grid;
+
+    typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
+
+    /** \brief Default constructor */
+    ReferenceGridFactory()
+      : BaseType(false, Grid::defaultCommunicator() )
     {}
   };
 

@@ -3,6 +3,7 @@
 
 /** include the grid capabilities
  ** to distiguish grids without local adaptation **/
+#include <dune/common/version.hh>
 #include <dune/common/timer.hh>
 
 #include <dune/grid/common/capabilities.hh>

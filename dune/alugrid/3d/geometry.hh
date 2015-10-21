@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDGEOMETRY_HH
 
 // System includes
+#include <memory>
 
 // Dune includes
 #include <dune/common/version.hh>
@@ -12,7 +13,7 @@
 #include "alu3dinclude.hh"
 #include "topology.hh"
 #include "mappings.hh"
-#include <dune/alugrid/common/objectfactory.hh>
+#include <dune/alugrid/common/memory.hh>
 
 namespace Dune
 {
@@ -56,19 +57,11 @@ namespace Dune
       //! the vertex coordinates
       typedef FieldMatrix<alu3d_ctype, corners , cdim>  CoordinateMatrixType;
 
-      template <int dummy, int dimused>
-      struct CoordTypeExtractorType
-      {
-        typedef CoordinateMatrixType Type;
-      };
-
-      template <int dummy>
-      struct CoordTypeExtractorType< dummy, 3 >
-      {
-        typedef CoordinateMatrixType* Type;
-      };
-
-      typedef typename CoordTypeExtractorType< 0, dim > :: Type CoordinateStorageType ;
+      // select coordinate storage for coord_ (pointer for dim == 3)
+      typedef typename std::conditional<
+          dim == 3,
+          std::unique_ptr< CoordinateMatrixType >,
+          CoordinateMatrixType >:: type CoordinateStorageType;
 
       //! the type of the mapping
       typedef Mapping     MappingType;
@@ -82,41 +75,21 @@ namespace Dune
       //! volume of element
       double volume_ ;
 
-      //! the reference counter
-      mutable unsigned int refCount_;
-
       //! the status (see different status above)
       signed char status_ ;
+
     public:
+      //! reference counter used by SharedPointer
+      unsigned int refCount_;
+
       //! default constructor
       GeometryImplBase()
-        : coord_( 0 ),
+        : coord_(),
           map_(),
           volume_( 1.0 )
       {
-        reset();
+        invalidate();
       }
-
-      //! reset status and reference count
-      void reset()
-      {
-        // reset reference counter
-        refCount_ = 1;
-        // reset status
-        status_   = invalid ;
-      }
-
-      //! increase reference count
-      void operator ++ () { ++ refCount_; }
-
-      //! decrease reference count
-      void operator -- () { alugrid_assert ( refCount_ > 0 ); --refCount_; }
-
-      //! return true if object has no references anymore
-      bool operator ! () const { return refCount_ == 0; }
-
-      //! return true if there exists more then on reference
-      bool stillUsed () const { return refCount_ > 1 ; }
 
       // copy coordinate vector from field vector or alu3d_ctype[cdim]
       template <class CoordPtrType>
@@ -458,12 +431,6 @@ namespace Dune
           coordPtr_[ i ] = 0;
       }
 
-      // desctructor
-      ~GeometryImpl()
-      {
-        if( coord_ ) delete coord_;
-      }
-
       const alu3d_ctype* point( const int i ) const
       {
         alugrid_assert ( valid() );
@@ -506,9 +473,9 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                                  const GeometryImp &myGeom)
       {
-        if( coord_ == 0 )
+        if( ! coord_ )
         {
-          coord_ = new CoordinateMatrixType();
+          coord_.reset( new CoordinateMatrixType() );
         }
 
         CoordinateMatrixType& coord = *coord_;
@@ -585,12 +552,6 @@ namespace Dune
           coordPtr_[ i ] = 0;
       }
 
-      // destructor
-      ~GeometryImpl()
-      {
-        if( coord_ ) delete coord_;
-      }
-
       const alu3d_ctype* point( const int i ) const
       {
         alugrid_assert ( valid() );
@@ -625,9 +586,9 @@ namespace Dune
       inline void updateInFather(const GeometryImp &fatherGeom ,
                           const GeometryImp & myGeom)
       {
-        if( coord_ == 0 )
+        if( ! coord_ )
         {
-          coord_ = new CoordinateMatrixType();
+          coord_.reset(new CoordinateMatrixType());
         }
 
         CoordinateMatrixType& coord = *coord_;
@@ -715,19 +676,6 @@ namespace Dune
     typedef FieldMatrix<ctype,
             GridImp::dimension == 3 ? EntityCount< elementType > :: numVerticesPerFace : 2 , cdim> FaceCoordinatesType;
 
-    //! for makeRefGeometry == true a Geometry with the coordinates of the
-    //! reference element is made
-    ALU3dGridGeometry();
-
-    //! copy constructor copying pointer and increasing reference count
-    ALU3dGridGeometry( const ALU3dGridGeometry& );
-
-    //! copy constructor copying pointer and increasing reference count
-    ALU3dGridGeometry& operator = ( const ALU3dGridGeometry& );
-
-    //! destructor decreasing reference count and freeing object
-    ~ALU3dGridGeometry( );
-
     //! return the element type identifier
     //! line , triangle or tetrahedron, depends on dim
     GeometryType type () const;
@@ -801,38 +749,20 @@ namespace Dune
     void print (std::ostream& ss) const;
 
     //! invalidate geometry implementation to avoid errors
-    void invalidate () ;
+    void invalidate () { geoImplPtr_.invalidate(); }
 
     //! invalidate geometry implementation to avoid errors
-    bool valid () const ;
-
-    // type of object provider
-    typedef ALUMemoryProvider< GeometryImplType > GeometryProviderType ;
-
-    //! return storage provider for geometry objects
-    static GeometryProviderType& geoProvider()
-    {
-      static GeometryProviderType storage;
-      return storage;
-    }
+    bool valid () const { return geoImpl().valid(); }
 
   protected:
-    //! assign pointer
-    void assign( const ALU3dGridGeometry& other );
-    //! remove pointer object
-    void removeObj();
-    //! get a new pointer object
-    void getObject();
-
     // return reference to geometry implementation
     GeometryImplType& geoImpl() const
     {
-      alugrid_assert ( geoImpl_ );
-      return *geoImpl_;
+      return *geoImplPtr_;
     }
 
-    // implementation of the coordinates and mapping
-    GeometryImplType* geoImpl_;
+    // proxy object holding GeometryImplType* with reference counting
+    mutable ALU3DSPACE SharedPointer< GeometryImplType > geoImplPtr_;
   };
 
 #if ! DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)

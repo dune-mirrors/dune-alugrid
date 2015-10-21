@@ -4,8 +4,9 @@
 
 #include <limits>
 #include <list>
-#include <utility>
+#include <mutex>
 #include <vector>
+#include <utility>
 
 #include "../macrofileheader.hh"
 #include "../indexstack.h"
@@ -20,6 +21,7 @@
 
 namespace ALUGrid
 {
+
   // interface class for projecting vertices for boundary adjustment
   typedef VertexProjection< 3, alucoord_t > ProjectVertex;
   // see ../projectvertex.h
@@ -1408,22 +1410,22 @@ namespace ALUGrid
       struct MkGitName
       {
         std::string name;
+        std::mutex mtx;
         bool ptr;
         MkGitName( const std::string& n ) : name( n ), ptr( false ){}
         template <class T>
         inline void dump( T t )
         {
-#ifdef _OPENMP
-#pragma omp critical
-#endif
           {
-            if( ! ptr ) { std::cerr << std::endl << name; ptr = true ; }
+            std::unique_lock<std::mutex> lck (mtx,std::defer_lock); lck.lock();
+            if( ! ptr && ! t ) { std::cerr << std::endl << name; ptr = true ; }
+            lck.unlock();
           }
         } ~MkGitName() { if( ptr ) std::cout << std::endl << name ; }
       };
       static MkGitName _msg;
 
-      virtual void dumpInfo() const { _msg.dump( 1 ); }
+      virtual void dumpInfo(int i=1) const { _msg.dump( i ); }
 
       virtual int iterators_attached () const;
       virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;

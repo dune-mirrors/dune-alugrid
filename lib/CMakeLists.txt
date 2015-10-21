@@ -8,7 +8,6 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 dune_add_library(dunealugrid
-  _DUNE_TARGET_OBJECTS:alugrid2d_
   _DUNE_TARGET_OBJECTS:serial_
   _DUNE_TARGET_OBJECTS:parallel_
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
@@ -16,9 +15,19 @@ dune_add_library(dunealugrid
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc
   ADD_LIBS "${DUNE_LIBS};${ZLIB_LIBRARIES}")
 
-# This _is_ needed for the correct compile flags.
-# (e.g. to not use the MPI C++ bindings, include path etc.)
-add_dune_zoltan_flags(dunealugrid)
+# add mpi flags to compile library
+add_dune_mpi_flags( dunealugrid )
+
+# zoltan dependencies
+if( ${ZOLTAN_FOUND} )
+target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
+set_property(TARGET dunealugrid APPEND PROPERTY
+             INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
+endif()
+
+# register alu grid to all pkg flags
+dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
+                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
 
 ####################################################################
 #### general warning: avoid such and similar commands here 

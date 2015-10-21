@@ -441,9 +441,9 @@ namespace ALUGrid
       void setIndexAndFlag();
 
     private :
-      innertetra_t * _bbb, * _up;
-      inner_t * _inner;
-      const double _volume;
+      innertetra_t * _bbb, * _up; // 16 byte
+      inner_t * _inner;           //  8 byte
+      const double _volume;       //  8 byte
 
       const unsigned char _lvl;  // 1 byte
       signed char _nChild;       // 1 byte

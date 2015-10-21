@@ -7,18 +7,22 @@ set(DUNE_ALUGRID_LIBRARY "${PROJECT_BINARY_DIR}/lib/libdunealugrid.a"
   CACHE FILEPATH "path to local libs in dune-alugrid" )
 mark_as_advanced(DUNE_ALUGRID_LIBRARY)
 
-
+#include(GridSelector)
+#initialize_grid_selector()
+#set(GRIDS GRID_CONFIG_H_BOTTOM)
 
 #define available alugrid types
-dune_define_alugridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CONFORM
+dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-dune_define_alugridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CUBE
+  dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CUBE
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-dune_define_alugridtype(GRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_SIMPLEX
+  dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_SIMPLEX
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+
+#finalize_grid_selector( GRIDS )
 
 # avoid conflicts with normal ALUGrid
 if( ALUGRID_CPPFLAGS )
@@ -49,10 +53,7 @@ if(ZLIB_FOUND)
 endif()
 
 find_package(SIONlib)
-include(AddSIONlibFlags)
 find_package(DLMalloc)
 find_package(ZOLTAN)
-include(AddZOLTANFlags)
-include(AddDuneAluGridFlags)
 
 message(AUTHOR_WARNING "TODO: Improve module test.")
