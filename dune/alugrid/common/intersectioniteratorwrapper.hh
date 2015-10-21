@@ -1,10 +1,16 @@
 #ifndef DUNE_INTERSECTIONITERATORWRAPPER_HH
 #define DUNE_INTERSECTIONITERATORWRAPPER_HH
 
+#include <dune/common/version.hh>
+#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 #include <dune/common/nullptr.hh>
+#endif //#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/alugrid/common/macrogridview.hh>
+
+#include <dune/alugrid/common/memory.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
 
 /** @file
  @author Robert Kloefkorn
@@ -25,11 +31,8 @@ class IntersectionIteratorWrapper
 
   typedef IntersectionIteratorImpl IntersectionIteratorImp;
 
-  typedef typename IntersectionIteratorImp :: StorageType IntersectionIteratorProviderType;
-
+  typedef ALU3DSPACE ALUMemoryProvider< IntersectionIteratorImpl > IntersectionIteratorProviderType ;
 public:
-  typedef typename GridImp :: GridObjectFactoryType   FactoryType;
-
   //! dimension
   enum { dimension      = dim };
   //! dimensionworld
@@ -54,70 +57,45 @@ public:
   typedef typename IntersectionIteratorImpl::Twists Twists;
   typedef typename Twists::Twist Twist;
 
-  IntersectionIteratorWrapper () : factory_( nullptr ), it_( nullptr ) {}
+  IntersectionIteratorWrapper() : itPtr_() {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  IntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end)
-    : factory_( &factory )
-    , it_( &factory.getIntersection(wLevel, (IntersectionIteratorImpl *) 0) )
+  IntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end)
+    : itPtr_()
   {
     if(end)
       it().done( en );
     else
-      it().first(en,wLevel);
+      it().first( en, wLevel, grid.conformingRefinement(), grid.ghostCellsEnabled() );
   }
 
-  //! The copy constructor
-  IntersectionIteratorWrapper(const ThisType & org)
-    : factory_( org.factory_ )
-  {
-    if( factory_ )
-    {
-      it_ = &factory().getIntersection( -1, static_cast< IntersectionIteratorImpl * >( nullptr ) );
-      it_->assign( org.it() );
-    }
-  }
-
-  //! the assignment operator
-  ThisType & operator = (const ThisType & org)
-  {
-    if( factory_ )
-    {
-      if( !org.factory_ )
-      {
-        factory_->freeIntersection( *it_ );
-        factory_ = nullptr;
-      }
-      else
-        it_->assign( *org.it_ );
-    }
-    else if( org.factory_ )
-    {
-      factory_ = org.factory_;
-      it_ = &factory().getIntersection( -1, static_cast< IntersectionIteratorImpl * >( nullptr ) );
-      it_->assign( *org.it_ );
-    }
-    return *this;
-  }
-
-  //! The Destructor puts internal object back to stack
-  ~IntersectionIteratorWrapper()
-  {
-    if( factory_ )
-      factory_->freeIntersection( *it_ );
-  }
-
-  operator bool () const { return bool( factory_ ); }
+  operator bool () const { return bool( itPtr_ ); }
 
   //! the equality method
   bool equals ( const ThisType &other ) const
   {
-    return (factory_ == other.factory_) && (!factory_ || it().equals( other.it() ));
+    return (itPtr_ && other.itPtr_ ) ? it().equals( other.it() ) : itPtr_ == other.itPtr_;
   }
 
   //! increment iterator
-  void increment () { it().increment(); }
+  void increment ()
+  {
+    // if the shared pointer is unique we can increment
+    if( itPtr_.unique() )
+    {
+      it().increment();
+    }
+    else
+    {
+      // otherwise make a copy and assign the same intersection
+      // and then increment
+      ALU3DSPACE SharedPointer< IntersectionIteratorImp > copy( itPtr_ );
+      itPtr_.invalidate();
+      it().assign( *copy );
+      it().increment();
+    }
+  }
 
   //! access neighbor
   EntityPointer outside() const { return it().outside(); }
@@ -228,8 +206,8 @@ public:
   bool conforming () const { return it().conforming(); }
 
   //! returns reference to underlying intersection iterator implementation
-  IntersectionIteratorImp & it() { assert( *this ); return *it_; }
-  const IntersectionIteratorImp & it() const { assert( *this ); return *it_; }
+  IntersectionIteratorImp & it() { return *itPtr_; }
+  const IntersectionIteratorImp & it() const { return *itPtr_; }
 
   //! return weight associated with graph edge between the neighboring elements
   int weight() const
@@ -238,10 +216,7 @@ public:
   }
 
 private:
-  const FactoryType &factory () const { assert( factory_ ); return *factory_; }
-
-  const FactoryType *factory_ ;
-  IntersectionIteratorImp *it_;
+  mutable ALU3DSPACE SharedPointer< IntersectionIteratorImp > itPtr_;
 }; // end class IntersectionIteratorWrapper
 
 template <class GridImp>
@@ -251,13 +226,12 @@ class LeafIntersectionWrapper
   typedef LeafIntersectionWrapper<GridImp> ThisType;
   typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LeafIntersectionIteratorImp> BaseType;
 public:
-  typedef typename BaseType::FactoryType FactoryType;
   LeafIntersectionWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LeafIntersectionWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-    : BaseType(factory,en,wLevel,end)
+  LeafIntersectionWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+    : BaseType( grid, en, wLevel, end )
   {
   }
 
@@ -278,7 +252,6 @@ class LeafIntersectionIteratorWrapper
   typedef LeafIntersectionWrapper<GridImp> IntersectionImp;
 
 public:
-  typedef typename IntersectionImp::FactoryType FactoryType;
   typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
   //! dimension
@@ -302,12 +275,13 @@ public:
   //! type of normal vector
   typedef FieldVector<ctype , dimensionworld> NormalType;
 
+  //! default constructor
   LeafIntersectionIteratorWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LeafIntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-  : intersection_( IntersectionImp(factory,en,wLevel,end) )
+  LeafIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+  : intersection_( IntersectionImp( grid, en, wLevel, end) )
   {}
 
   //! The copy constructor
@@ -355,13 +329,12 @@ class LevelIntersectionWrapper
   typedef LevelIntersectionWrapper<GridImp> ThisType;
   typedef IntersectionIteratorWrapper<GridImp,typename GridImp::LevelIntersectionIteratorImp> BaseType;
 public:
-  typedef typename BaseType::FactoryType FactoryType;
   LevelIntersectionWrapper () {}
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LevelIntersectionWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-    : BaseType(factory,en,wLevel,end)
+  LevelIntersectionWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+    : BaseType( grid, en, wLevel, end )
   {
   }
 
@@ -379,7 +352,6 @@ class LevelIntersectionIteratorWrapper
 {
   typedef LevelIntersectionIteratorWrapper<GridImp> ThisType;
   typedef LevelIntersectionWrapper<GridImp> IntersectionImp;
-  typedef typename IntersectionImp::FactoryType FactoryType;
 public:
   typedef Dune::Intersection< GridImp, IntersectionImp > Intersection;
 
@@ -408,8 +380,8 @@ public:
 
   //! constructor called from the ibegin and iend method
   template <class EntityImp>
-  LevelIntersectionIteratorWrapper(const FactoryType& factory, const EntityImp & en, int wLevel , bool end )
-  : intersection_( IntersectionImp(factory,en,wLevel,end) )
+  LevelIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
+  : intersection_( IntersectionImp( grid, en, wLevel, end ) )
   {}
 
   //! The copy constructor

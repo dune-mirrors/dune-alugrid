@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 
+#include <dune/common/version.hh>
 #include <dune/common/dynvector.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
 #include <dune/grid/common/datahandleif.hh>

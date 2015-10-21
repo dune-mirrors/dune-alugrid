@@ -1,6 +1,7 @@
 #ifndef DUNE_ALUGRID_CAPABILITIES_HH
 #define DUNE_ALUGRID_CAPABILITIES_HH
 
+#include <dune/common/version.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/geometry/genericgeometry/topologytypes.hh>
@@ -40,6 +41,7 @@ namespace Dune
       static const bool v = true;
     };
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
@@ -57,6 +59,7 @@ namespace Dune
     {
       static const bool v = true;
     };
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
     /** \brief ALUGrid can communicate when Comm == ALUGridMPIComm
     \ingroup ALUGrid

@@ -1,9 +1,15 @@
 #ifndef LOADBALANCE_ZOLTAN_HH
 #define LOADBALANCE_ZOLTAN_HH
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+#include <dune/common/version.hh>
 #include <dune/grid/common/gridenums.hh>
 
 #if HAVE_ZOLTAN && HAVE_MPI
+#include <dune/alugrid/impl/parallel/aluzoltan.hh>
 
 template< class Grid >
 class ZoltanLoadBalanceHandle

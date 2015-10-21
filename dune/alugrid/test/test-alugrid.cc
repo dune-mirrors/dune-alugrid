@@ -68,6 +68,7 @@ void checkCapabilities(const Grid& grid)
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
    static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     true ;
@@ -76,6 +77,7 @@ void checkCapabilities(const Grid& grid)
 #endif
    static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
                    "isParallel is not set correctly");
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
    static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -475,6 +477,8 @@ void checkGrid( GridType& grid )
   catch (...)
   {
     std::cout << "Caught unknown exception!" << std::endl;
+    assert( false );
+    std::abort();
   }
 }
 
@@ -603,6 +607,8 @@ int main (int argc , char **argv) {
     }
 
     const char *newfilename = 0;
+    if( argc > 2 )
+      newfilename = argv[ 2 ];
 
 #ifndef NO_2D
     bool testALU2dSimplex = initialize ;
@@ -672,7 +678,11 @@ int main (int argc , char **argv) {
       if( testALU2dCube )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/cube-testgrid-2-2.dgf" );
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/cube-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         GridType & grid = *gridPtr;
@@ -713,7 +723,11 @@ int main (int argc , char **argv) {
       if( testALU2dSimplex )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf" );
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         GridType & grid = *gridPtr;
@@ -753,7 +767,11 @@ int main (int argc , char **argv) {
       if( testALU2dConform )
       {
         typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
-        std::string filename( "./dgf/simplex-testgrid-2-2.dgf");
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
         Dune::GridPtr<GridType> gridPtr( filename );
         GridType & grid = *gridPtr;
         grid.loadBalance();

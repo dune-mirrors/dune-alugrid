@@ -1,6 +1,11 @@
 #ifndef DUNE_FEM_DG_RUNFILE_HH
 #define DUNE_FEM_DG_RUNFILE_HH
 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+
 #include <dune/common/timer.hh>
 
 #include <dune/alugrid/impl/serial/myalloc.h>

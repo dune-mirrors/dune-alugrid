@@ -1,11 +1,17 @@
 #ifndef ALU3DGRID_ENTITYKEY_HH
 #define ALU3DGRID_ENTITYKEY_HH
 
+#include "alu3dinclude.hh"
+
 namespace Dune
 {
 
+// Forward declarations
 template<int cd, class GridImp>
 class ALU3dGridEntitySeed ;
+
+template<int cd, int dim, class GridImp>
+class ALU3dGridEntity;
 
 //**********************************************************************
 //
@@ -20,12 +26,7 @@ protected:
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
 
-
   typedef typename GridImp::MPICommunicatorType Comm;
-
-  friend class ALU3dGridEntity<codim,dim,GridImp>;
-  friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<dim, codim>::ImplementationType ImplementationType;
@@ -217,10 +218,6 @@ public ALU3dGridEntitySeedBase<cd,GridImp>
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
-  friend class ALU3dGridEntity<cd,dim,GridImp>;
-  friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
-
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ImplementationType;
   typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType HElementType;
@@ -327,10 +324,6 @@ protected:
   enum { dimworld  = GridImp::dimensionworld };
 
   typedef typename GridImp::MPICommunicatorType Comm;
-
-  friend class ALU3dGridEntity<cd,dim,GridImp>;
-  friend class ALU3dGridEntity< 0,dim,GridImp>;
-  friend class ALU3dGrid < dim, dimworld, GridImp::elementType, Comm >;
 
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ImplementationType;

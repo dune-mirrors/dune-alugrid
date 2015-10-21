@@ -12,7 +12,6 @@ set(alucommon_HEADERS alugrid_assert.hh
                       ldbhandleif.hh
                       macrogridview.hh
                       memory.hh
-                      objectfactory.hh
                       persistentcontainer.hh
                       structuredgridfactory.hh
                       transformation.hh

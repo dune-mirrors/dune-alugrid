@@ -881,7 +881,7 @@ namespace ALUGrid
       virtual inline const MpAccessLocal & mpAccess () const;
     protected :
       GitterBasisPll (const int dim, MpAccessLocal & );
-      virtual void dumpInfo() const { if( _mpaccess.myrank() == 0 ) container().dumpInfo(); }
+      virtual void dumpInfo() const { container().dumpInfo( _mpaccess.myrank() ); }
 
     public :
       virtual inline MacroGitterPll & containerPll ();

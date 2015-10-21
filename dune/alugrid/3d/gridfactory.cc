@@ -304,7 +304,7 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid >
     ::sortElements( const VertexVector& vertices,
                     const ElementVector& elements,
-                    std::vector< int >& ordering )
+                    std::vector< unsigned int >& ordering )
   {
     const size_t elemSize = elements.size();
     ordering.resize( elemSize );
@@ -312,11 +312,10 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
 #if USE_ALUGRID_SFC_ORDERING
-    // the serial version do not special ordering
-    // since no load balancing has to be done
+    // apply space filling curve orderung to the inserted elements
+    // see common/hsfc.hh for details
     {
-      typedef MPIHelper :: MPICommunicator MPICommunicator;
-      CollectiveCommunication< MPICommunicator > comm( Dune::MPIHelper::getCommunicator() );
+      typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
       // if we are in parallel insertion mode we need communication
       const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
@@ -369,7 +368,8 @@ namespace Dune
         center /= double(vxSize);
 
         // generate sfc index from element's center and store index
-        // hsfc[ sfc.index( center ) ] = i;
+        // make sure that the mapping is unique
+        alugrid_assert( hsfc.find( sfc.index( center ) ) == hsfc.end() );
         hsfc.insert( std::make_pair( sfc.index( center ) , i ) );
       }
 
@@ -409,7 +409,7 @@ namespace Dune
 
     correctElementOrientation();
 
-    std::vector< int >& ordering = ordering_;
+    std::vector< unsigned int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
@@ -1055,7 +1055,6 @@ namespace Dune
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
-    // CollectiveCommunication< MPICommunicatorType > comm( communicator_ );
     typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
     int numBoundariesMine = faceMap.size();
@@ -1085,15 +1084,22 @@ namespace Dune
     if( numBoundariesMax == 0 ) return ;
 
     // get internal boundaries from each process
-    std::vector< std::vector< int > > boundariesEach;
+    std::vector< std::vector< int > > boundariesEach( comm.size() );
 
 #if HAVE_MPI
-    // collect data from all processes (use MPI_COMM_WORLD here) since in this case the
-    // grid must be parallel if we reaced this point
-    boundariesEach = ALU3DSPACE MpAccessMPI( Dune::MPIHelper::getCommunicator() ).gcollect( boundariesMine );
-#else
-    boundariesEach.resize( comm.size() );
+    if( comm.size() > 1 )
+    {
+      ALU3DSPACE MpAccessMPI mpAccess( Dune::MPIHelper::getCommunicator() );
+      // collect data from all processes (use MPI_COMM_WORLD here) since in this case the
+      // grid must be parallel if we reaced this point
+      boundariesEach = mpAccess.gcollect( boundariesMine );
+#ifndef NDEBUG
+      // make sure everybody is on the same page
+      mpAccess.barrier();
 #endif
+    }
+#endif // #if HAVE_MPI
+
     boundariesMine.clear();
 
     for( int p = 0; p < comm.size(); ++p )

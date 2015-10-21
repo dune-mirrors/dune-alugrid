@@ -54,7 +54,7 @@ namespace Dune
 
   public:
     //! constructor creating empty face info
-    ALU3dGridFaceInfo( const bool conformingRefinement, const bool ghostCellsEnabled, const bool levelIntersection = false );
+    ALU3dGridFaceInfo( const bool levelIntersection = false );
     void updateFaceInfo(const GEOFaceType& face, int innerLevel, int innerTwist);
 
     //- constructors and destructors
@@ -137,6 +137,12 @@ namespace Dune
     //! return true if conforming refinement is enabled
     bool conformingRefinement () const { return conformingRefinement_; }
 
+    //! return true if ghost cells are enabled
+    bool ghostCellsEnabled () const { return ghostCellsEnabled_; }
+
+    //! reset flags
+    void setFlags( const bool conformingRefinement, const bool ghostCellsEnabled );
+
   private:
     //! Description of conformance on the face
     ConformanceState getConformanceState(const int innerLevel) const;
@@ -170,8 +176,8 @@ namespace Dune
     boundary_t bndType_;
 
     ConformanceState conformanceState_;
-    const bool conformingRefinement_ ; // true if conforming refinement is enabled
-    const bool ghostCellsEnabled_ ;    // true if ghost cells are present
+    bool conformingRefinement_ ;       // true if conforming refinement is enabled
+    bool ghostCellsEnabled_ ;          // true if ghost cells are present
     const bool levelIntersection_ ;    // true if called from a levelintersection iterator
   };
 

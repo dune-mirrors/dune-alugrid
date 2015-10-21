@@ -44,7 +44,7 @@
 #cmakedefine HAVE_DLMALLOC 1
 
 /* Define if we have zoltan */
-#cmakedefine HAVE_ZOLTAN ENABLE_ZOLTAN
+#cmakedefine HAVE_ZOLTAN 1
 
 /* Define if we have thread local storage */
 #cmakedefine HAVE_PTHREAD_TLS 1
@@ -55,4 +55,6 @@
 /* Include source file for dlmalloc */
 #cmakedefine DLMALLOC_SOURCE_INCLUDE ${DLMALLOC_SOURCE_INCLUDE}
 
+/* Grid type magic for DGF parser */
+@ALUGRID_CONFIG_H_BOTTOM@
 /* end dune-alugrid */
