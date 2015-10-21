@@ -126,7 +126,12 @@ namespace Dune
               factory.insertBoundary( elementIndex, faceNumber );
 
             // for parallel grids we can check if we are at a process border
-            if( Capabilities::isParallel< FromGrid > :: v &&
+#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+            const double isParallel = true;
+#else
+            const double isParallel = Capabilities::isParallel< FromGrid > :: v;
+#endif //!DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+            if( isParallel &&
                 intersection.neighbor() &&
                 (*intersection.outside()).partitionType() != InteriorEntity )
             {
