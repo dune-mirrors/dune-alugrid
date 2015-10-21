@@ -1,3 +1,5 @@
+#ifndef ALUGRID_ENTITY_INLINE_HH
+#define ALUGRID_ENTITY_INLINE_HH
 #include <dune/common/exceptions.hh>
 
 #include "geometry.hh"
@@ -331,3 +333,4 @@ namespace Dune {
   }
 
 } // end namespace Dune
+#endif

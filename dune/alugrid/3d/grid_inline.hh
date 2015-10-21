@@ -1,3 +1,6 @@
+#ifndef ALUGRID_GRID_INLINE_HH
+#define ALUGRID_GRID_INLINE_HH
+
 // Dune includes
 #include <dune/common/stdstreams.hh>
 
@@ -448,3 +451,4 @@ namespace Dune
   }
 
 } // end namespace Dune
+#endif
