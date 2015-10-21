@@ -1,7 +1,10 @@
 #ifndef DUNE_INTERSECTIONITERATORWRAPPER_HH
 #define DUNE_INTERSECTIONITERATORWRAPPER_HH
 
+#include <dune/common/version.hh>
+#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 #include <dune/common/nullptr.hh>
+#endif //#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
 
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/alugrid/common/macrogridview.hh>
