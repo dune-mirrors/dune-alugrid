@@ -1,6 +1,10 @@
 #ifndef LOADBALANCE_SIMPLE_HH
 #define LOADBALANCE_SIMPLE_HH
 
+#include <set>
+#include <complex>
+#include <cmath>
+
 /********************************************************************
  *
  *  Simple repartition handle for ALUGrid
