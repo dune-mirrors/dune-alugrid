@@ -1,6 +1,4 @@
 set(modules 
-    AddSIONlibFlags.cmake
-    AddZOLTANFlags.cmake
     ALUGridType.cmake
     CMakeLists.txt
     DuneAlugridMacros.cmake
