@@ -1,6 +1,7 @@
 set(SUBDIRS dgf)
 set(TESTS
   test-alugrid
+  test-adaptivity
   test-fromtogridfactory
   test-twists
 )
@@ -9,6 +10,7 @@ set(TESTS
 file(COPY dgf DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(test-alugrid test-alugrid.cc)
+add_executable(test-adaptivity test-adaptivity.cc)
 add_executable(test-fromtogridfactory test-fromtogridfactory.cc)
 add_executable(test-twists test-twists.cc)
 
