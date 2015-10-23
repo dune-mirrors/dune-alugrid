@@ -396,9 +396,19 @@ namespace Dune
     const int twist =
       (ElementTopo::faceOrientation( faceIdx ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
-
-    // see topology.* files
-    return FaceTopo :: aluTwistMap( twist );
+    // see topology.* files for aluTwistMap
+    if( dim == 2 )
+    {
+      // in 2d twists are either 0 or 1, but because
+      // of the underlying 3d alu grid they could be different
+      // therefore we adjust to the right range
+      const int duneTwst = FaceTopo :: aluTwistMap( twist );
+      return (duneTwst == 0) ? 0 : 1;
+    }
+    else
+    {
+      return FaceTopo :: aluTwistMap( twist );
+    }
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
