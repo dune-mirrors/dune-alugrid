@@ -1,5 +1,3 @@
-
-
 include(ALUGridType)
 
 #make libdunealugrid known locally
@@ -42,11 +40,10 @@ find_package(ZLIB)
 #set HAVE_ZLIB for config.h
 set(HAVE_ZLIB ${ZLIB_FOUND})
 if(ZLIB_FOUND)
-  set(DUNE_LIBS ${DUNE_LIBS} ${ZLIB_LIBRARIES})
   # register package flags is not supported in CMake with Dune 2.3
   if(NOT (("${DUNE_COMMON_VERSION_MAJOR}" STREQUAL "2")
           AND ("${DUNE_COMMON_VERSION_MINOR}" STREQUAL "3")))
-  dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} LIBRARIES ${ZLIB_LIBRARIES})
+    dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} LIBRARIES ${ZLIB_LIBRARIES})
   endif()
 endif()
 
