@@ -362,7 +362,7 @@ namespace Dune {
     }
   };
 
-  // specialisation for edges
+  // specialisation for edges in 3d
   template <class GridImp>
   struct SubEntities<GridImp,3,2>
   {

@@ -92,7 +92,7 @@ namespace Dune {
      * Applying this twist to the DUNE reference vertices, i.e.,
      * - convert vertex number to ALU numbering,
      * - apply returned twist,
-     * .
+     *
      * equals the result of dune2aluFaceVertex
      *
      * The inverse of this twist, applied to ALU reference vertices, i.e.,
