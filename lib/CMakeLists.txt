@@ -13,7 +13,7 @@ dune_add_library(dunealugrid
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc
-  ADD_LIBS "${DUNE_LIBS};${ZLIB_LIBRARIES}")
+  ADD_LIBS ${ZLIB_LIBRARIES})
 
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )
