@@ -7,10 +7,6 @@ set(TESTS adapt
 file(COPY alugrid.cfg grids
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-# register alu grid to all pkg flags
-dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
-                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
-
 add_executable(sizes sizes.cc)
 add_executable(adapt adapt.cc)
 add_executable(backuprestore backuprestore.cc)

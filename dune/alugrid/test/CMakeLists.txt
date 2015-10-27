@@ -1,6 +1,7 @@
 set(SUBDIRS dgf)
 set(TESTS
   test-alugrid
+  test-adaptivity
   test-fromtogridfactory
   test-twists
 )
@@ -9,6 +10,7 @@ set(TESTS
 file(COPY dgf DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(test-alugrid test-alugrid.cc)
+add_executable(test-adaptivity test-adaptivity.cc)
 add_executable(test-fromtogridfactory test-fromtogridfactory.cc)
 add_executable(test-twists test-twists.cc)
 
@@ -23,12 +25,8 @@ endforeach(i ${SUBDIRS})
 dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
                             INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
 
+# enable all package flags for all tests
 foreach(i ${TESTS})
   dune_target_enable_all_packages( ${i} )
   add_test(${i} ${i})
 endforeach(i ${TESTS})
-
-# We do not want want to build the tests during make all
-# but just build them on demand
-add_directory_test_target(_test_target)
-add_dependencies(${_test_target} ${TESTS} ${COMPILE_XFAIL_TESTS})

@@ -1,5 +1,3 @@
-
-
 include(ALUGridType)
 
 #make libdunealugrid known locally
@@ -7,22 +5,20 @@ set(DUNE_ALUGRID_LIBRARY "${PROJECT_BINARY_DIR}/lib/libdunealugrid.a"
   CACHE FILEPATH "path to local libs in dune-alugrid" )
 mark_as_advanced(DUNE_ALUGRID_LIBRARY)
 
-#include(GridSelector)
-#initialize_grid_selector()
-#set(GRIDS GRID_CONFIG_H_BOTTOM)
-
 #define available alugrid types
-dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CONFORM
+dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-  dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_CUBE
+dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-  dune_define_alugridtype(ALUGRID_CONFIG_H_BOTTOM GRIDTYPE ALUGRID_SIMPLEX
+dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 
-#finalize_grid_selector( GRIDS )
+#if (ENABLE_GRID_SELECTOR)
+  set(ALUGRID_CONFIG_H_BOTTOM "${ALUGRID_CONFIG_H_BOTTOM} ${GRIDSELECTOR_GRIDS}")
+#endif (ENABLE_GRID_SELECTOR)
 
 # avoid conflicts with normal ALUGrid
 if( ALUGRID_CPPFLAGS )
@@ -44,11 +40,10 @@ find_package(ZLIB)
 #set HAVE_ZLIB for config.h
 set(HAVE_ZLIB ${ZLIB_FOUND})
 if(ZLIB_FOUND)
-  set(DUNE_LIBS ${DUNE_LIBS} ${ZLIB_LIBRARIES})
   # register package flags is not supported in CMake with Dune 2.3
   if(NOT (("${DUNE_COMMON_VERSION_MAJOR}" STREQUAL "2")
           AND ("${DUNE_COMMON_VERSION_MINOR}" STREQUAL "3")))
-  dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} LIBRARIES ${ZLIB_LIBRARIES})
+    dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} LIBRARIES ${ZLIB_LIBRARIES})
   endif()
 endif()
 

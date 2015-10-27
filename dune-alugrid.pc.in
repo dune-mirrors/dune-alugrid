@@ -9,7 +9,7 @@ DEPENDENCIES=@REQUIRES@
 Name: @PACKAGE_NAME@
 Version: @VERSION@
 Description: DUNE Adaptive, Load-balanced, and Unstructured Grid Module
-URL: http://aam.mathematik.uni-freiburg.de/IAM/Research/alugrid/
+URL: http://users.dune-project.org/projects/dune-alugrid
 Requires: ${DEPENDENCIES}
-Libs: -L${libdir}
+Libs: -L${libdir} -ldunealugrid
 Cflags: -I${includedir}
