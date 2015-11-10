@@ -4,6 +4,8 @@
 #include <config.h>
 /** standard headers **/
 #include <iostream>
+
+#include <dune/common/version.hh>
 /** dune (mpi, field-vector and grid type for dgf) **/
 #include <dune/common/fvector.hh>
 #include <dune/common/timer.hh>
@@ -298,11 +300,13 @@ catch( const std::exception &e )
   std::cout << "STL ERROR: " << e.what() << std::endl;
   return 1;
 }
+#if ! DUNE_VERSION_NEWER(DUNE_COMMON,3,0)
 catch( const Dune::Exception &e )
 {
   std::cout << "DUNE ERROR: " << e << std::endl;
   return 1;
 }
+#endif
 #if ! HAVE_ALUGRID
 catch( const ALUGrid::ALUGridException& e )
 {
