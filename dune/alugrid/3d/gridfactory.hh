@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <dune/common/array.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -17,7 +18,7 @@
 
 namespace Dune
 {
-  /** \brief Factory class for 3d ALUGrids */
+  /** \brief Factory class for ALUGrids */
   template< class ALUGrid >
   class ALU3dGridFactory
   : public GridFactoryInterface< ALUGrid >
