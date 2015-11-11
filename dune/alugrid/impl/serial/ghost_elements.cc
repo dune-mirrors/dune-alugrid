@@ -245,12 +245,14 @@ namespace ALUGrid
     const alucoord_t (&p)[4][3]  = ghInfo.getPoints();
     const int (&oppVerts)[4] = ghInfo.getOuterVertices();
 
+    std::set< int > internalVx ;
     // here all entities have to be created new, because otherwise
     // the index generation will fail
     for(int i=0; i<4; ++i)
     {
       const VertexGeo * vx = face->myvertex(i);
       const alucoord_t (&p)[3] = vx->Point();
+      internalVx.insert( vx->ident() );
       mgb.InsertNewUniqueVertex(p[0],p[1],p[2],vx->ident());
     }
 
@@ -271,6 +273,16 @@ namespace ALUGrid
     // set ghost values
     _ghostPair.first  = ghost;
     _ghostPair.second = ghInfo.internalFace();
+
+    // check that internal face number is correct
+    {
+      const hface4_GEO* intFace = ghost->myhface( ghInfo.internalFace() );
+      for( int i=0; i<4; ++i )
+      {
+        if( internalVx.find( intFace->myvertex( i )->ident() ) == internalVx.end() )
+          std::abort();
+      }
+    }
 
     // NOTE: we do not insert boundary faces, because we don't need them
     // here. This is ok because of the hasFaceEmpty class (gitter_sti.h)

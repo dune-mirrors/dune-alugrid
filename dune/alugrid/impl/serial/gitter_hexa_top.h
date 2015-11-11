@@ -1044,6 +1044,34 @@ namespace ALUGrid
     // store ghost element
     typedef Gitter::ghostpair_STI ghostpair_STI;
     ghostpair_STI p ( gh, gFace );
+    // check that faces match
+
+    if( gh )
+    {
+      myhface4_t* ghFace = ((Gitter::Geometric::hexa_GEO*) gh)->myhface( gFace );
+      for( int k=0; k<4; ++k )
+      {
+        const auto* vx = ghFace->myvertex( k );
+        bool found = false ;
+        for( int j=0; j<4; ++j )
+        {
+          const auto* vx2 = f->myvertex( j );
+          double sum = 0;
+          for( int d=0; d<3; ++d )
+          {
+            double diff = ( vx->Point()[ d ] - vx2->Point()[ d ]);
+            sum += ( diff * diff );
+          }
+          if( std::sqrt( sum ) < 1e-10 )
+          {
+            found = true;
+            break ;
+          }
+        }
+        assert( found );
+      }
+    }
+
     this->setGhost ( p );
 
     // get index from manager
