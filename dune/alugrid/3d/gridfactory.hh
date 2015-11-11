@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <dune/common/array.hh>
+#include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -17,7 +18,7 @@
 
 namespace Dune
 {
-  /** \brief Factory class for 3d ALUGrids */
+  /** \brief Factory class for ALUGrids */
   template< class ALUGrid >
   class ALU3dGridFactory
   : public GridFactoryInterface< ALUGrid >
@@ -215,7 +216,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< VertexId >& vertices,
-                            const std::shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment ) ;
+                            const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *
@@ -537,7 +538,7 @@ namespace Dune
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                          const std::shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
+                          const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
   {
     if( vertices.size() != numFaceCorners )
       DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
