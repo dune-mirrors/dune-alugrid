@@ -1,6 +1,9 @@
 #ifndef DUNE_ALU3DITERATORS_HH
 #define DUNE_ALU3DITERATORS_HH
 
+// system includes
+#include <set>
+
 // Dune includes
 #include <dune/grid/common/grid.hh>
 
@@ -1059,10 +1062,10 @@ namespace ALUGrid
       const int maxSize = numItems * count;
 
       ghList.getItemList().reserve(maxSize);
-      ghList.getItemList().resize(0);
-      std::map< int , int > visited;
+      ghList.getItemList().clear();
+      std::set< int > visited;
 
-      const std::map<int,int>::iterator visitedEnd = visited.end();
+      const std::set<int>::iterator visitedEnd = visited.end();
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
@@ -1071,13 +1074,13 @@ namespace ALUGrid
         for(int i=0; i<numItems; ++i)
         {
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
-          int idx = item->getIndex();
+          const int idx = item->getIndex();
           //For the 2d grid do not write non-2d vertices in ghost list
           if( GridImp::dimension == 2 && codim == 3 && !(item->is2d())  ) continue;
           if( visited.find(idx) == visitedEnd )
           {
             ghList.getItemList().push_back( (void *) item );
-            visited[idx] = 1;
+            visited.insert( idx );
           }
         }
       }

@@ -25,6 +25,7 @@
 #include <dune/geometry/referenceelements.hh>
 #include <dune/geometry/genericgeometry/codimtable.hh>
 
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
@@ -180,7 +181,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt)
     }
     grid.adapt();
     grid.postAdapt();
-    grid.loadBalance();
+    //grid.loadBalance();
   }
 }
 
@@ -455,8 +456,14 @@ void checkLevelIndexNonConform(GridType & grid)
 template <class GridView>
 void writeFile( const GridView& gridView )
 {
-  Dune::DGFWriter< GridView > writer( gridView );
-  writer.write( "dump.dgf" );
+  {
+    Dune::DGFWriter< GridView > writer( gridView );
+    writer.write( "dump.dgf" );
+  }
+  {
+    Dune::VTKWriter< GridView > writer( gridView );
+    writer.write( "dump.vtk" );
+  }
 }
 
 template <class GridType>
@@ -497,7 +504,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     delete gr;
   }
 
-  //writeFile( grid.leafGridView() );
+  writeFile( grid.leafGridView() );
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
@@ -533,6 +540,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
+  writeFile( grid.leafGridView() );
 
   // check iterators
   checkALUIterators( grid );
