@@ -10,7 +10,7 @@
 #define DUNE_INTERFACECHECK
 #endif
 
-// #define NO_2D
+#define NO_2D
 // #define NO_3D
 
 #include <iostream>
@@ -89,18 +89,21 @@ void checkCapabilities(const Grid& grid)
      == reallyCanCommunicate;
    static_assert ( canCommunicate, "canCommunicate is not set correctly");
 
-   std::cout << "Sizes of interface implementation classes: " << std::endl;
-   std::cout << "  Entity< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::Entity) << std::endl;
-   std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
-   std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
-   std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
-   std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
-   std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
-   std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
-   std::cout << std::endl;
+   if( grid.comm().rank() == 0 )
+   {
+     std::cout << "Sizes of interface implementation classes: " << std::endl;
+     std::cout << "  Entity< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::Entity) << std::endl;
+     std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
+     std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
+     std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
+     std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
+     std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
+     std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
+     std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
+     std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
+     std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
+     std::cout << std::endl;
+   }
 }
 
 template< class Grid >
