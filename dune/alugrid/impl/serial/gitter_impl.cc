@@ -154,7 +154,7 @@ namespace ALUGrid
   setIndicesAndBndId (const hface_STI & f, int face_nr)
   {
     // set all items to ghost bnd id
-    setGhostBoundaryIds();
+    // setGhostBoundaryIds();
 
     typedef Gitter::Geometric::BuilderIF BuilderIF;
 
@@ -163,6 +163,7 @@ namespace ALUGrid
 
     const myhface3_t & face = static_cast<const myhface3_t &> (f);
     const bndid_t bndid = face.bndId ();
+    alugrid_assert( bndid ==  Gitter::hbndseg_STI::closure );
 
     myhface3_t & myface = *(myhface3(face_nr));
 
@@ -171,7 +172,7 @@ namespace ALUGrid
     // set index of face
     myface.setIndex( ims.get(BuilderIF::IM_Faces), face.getIndex());
     // set bnd id of face
-    myface.setGhostBndId( bndid );
+    myface.setBorderBndId();
 
     IndexManagerType & vxIm = ims.get(BuilderIF::IM_Vertices);
     IndexManagerType & edIm = ims.get(BuilderIF::IM_Edges);
@@ -188,11 +189,11 @@ namespace ALUGrid
 
       vertex_GEO * vx = myface.myvertex(i);
       vx->setIndex( vxIm , face.myvertex(i)->getIndex() );
-      vx->setGhostBndId( bndid );
+      vx->setBorderBndId();
 
       hedge1_GEO * edge = myface.myhedge1(i);
       edge->setIndex( edIm , face.myhedge1(i)->getIndex() );
-      edge->setGhostBndId( bndid );
+      edge->setBorderBndId();
     }
   }
 
@@ -200,13 +201,11 @@ namespace ALUGrid
   void GitterBasis::Objects::TetraEmpty ::
   setGhostBoundaryIds()
   {
-    const bndid_t bndid = Gitter::hbndseg_STI::ghost_closure;
-
-    // value of ghost_closure
-    this->setGhostBndId( bndid );
-    for( int i=0; i<4; ++i) myhface3(i)->setGhostBndId( bndid );
-    for( int i=0; i<6; ++i) myhedge1(i)->setGhostBndId( bndid );
-    for( int i=0; i<4; ++i) myvertex(i)->setGhostBndId( bndid );
+    // set all items to be ghost
+    this->setGhostBndId();
+    for( int i=0; i<4; ++i) myhface3(i)->setGhostBndId();
+    for( int i=0; i<6; ++i) myhedge1(i)->setGhostBndId();
+    for( int i=0; i<4; ++i) myvertex(i)->setGhostBndId();
   }
 
 
@@ -369,7 +368,7 @@ namespace ALUGrid
   setIndicesAndBndId (const hface_STI & f, int face_nr)
   {
      // set all items to ghost bnd id
-     setGhostBoundaryIds();
+     // setGhostBoundaryIds();
 
      typedef Gitter::Geometric::BuilderIF BuilderIF;
 
@@ -378,6 +377,7 @@ namespace ALUGrid
 
      const myhface4_t & face = static_cast<const myhface4_t &> (f);
      const bndid_t bndid = face.bndId();
+     alugrid_assert( bndid == Gitter::hbndseg_STI::closure );
 
      myhface4_t & myface = *(myhface4(face_nr));
 
@@ -389,7 +389,7 @@ namespace ALUGrid
      // set index of face
      myface.setIndex( ims.get(BuilderIF::IM_Faces) , face.getIndex ());
      // set bnd id of face
-     myface.setGhostBndId( bndid );
+     myface.setBorderBndId();
 
      for (int i = 0; i < 4; ++i)
      {
@@ -403,11 +403,11 @@ namespace ALUGrid
 
        vertex_GEO * vx = myface.myvertex(i);
        vx->setIndex(vxIm, face.myvertex(i)->getIndex());
-       vx->setGhostBndId( bndid );
+       vx->setBorderBndId();
 
        hedge1_GEO * edge = myface.myhedge1(i);
        edge->setIndex(edIm, face.myhedge1(i)->getIndex());
-       edge->setGhostBndId( bndid );
+       edge->setBorderBndId();
      }
   }
 
@@ -416,13 +416,11 @@ namespace ALUGrid
   void GitterBasis::Objects::HexaEmpty ::
   setGhostBoundaryIds()
   {
-    const bndid_t bndid = Gitter::hbndseg_STI::ghost_closure;
-
-    // value of ghost_closure
-    this->setGhostBndId( bndid );
-    for( int i=0; i<6; ++i) myhface4(i)->setGhostBndId( bndid );
-    for( int i=0; i<12; ++i) myhedge1(i)->setGhostBndId( bndid );
-    for( int i=0; i<8; ++i) myvertex(i)->setGhostBndId( bndid );
+    // set all items to ghost
+    this->setGhostBndId();
+    for( int i=0; i<6;  ++i ) myhface4(i)->setGhostBndId();
+    for( int i=0; i<12; ++i ) myhedge1(i)->setGhostBndId();
+    for( int i=0; i<8;  ++i ) myvertex(i)->setGhostBndId();
   }
 
   //////////////////////////////////////////////////////////////////

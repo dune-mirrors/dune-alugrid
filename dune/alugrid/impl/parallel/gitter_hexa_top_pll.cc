@@ -39,6 +39,8 @@ namespace ALUGrid
       {
         ghost.tagForGlobalRefinement();
         ghost.refine();
+        for( auto child = ghost.down(); child; child = child->next() )
+          child->setGhostBoundaryIds();
       }
 
       int gFaceNum = _ghostPair.second;
