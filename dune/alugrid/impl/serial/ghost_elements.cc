@@ -112,6 +112,10 @@ namespace ALUGrid
     // InsertUniqueHexa gets the global vertex numbers
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
     assert( ghost );
+
+    if( ghost->ref == 0 )
+      ghost->setGhostBoundaryIds();
+
     // increase refcounter since ghost element can exist more than once
     ghost->ref++;
 
@@ -267,6 +271,10 @@ namespace ALUGrid
     // InsertUniqueHexa gets the global vertex numbers
     hexa_GEO* ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
     alugrid_assert ( ghost );
+
+    if( ghost->ref == 0 )
+      ghost->setGhostBoundaryIds();
+
     // increase refcounter since ghost element can exist more than once
     ghost->ref++;
 

@@ -181,7 +181,7 @@ void makeNonConfGrid(GridType &grid,int level,int adapt)
     }
     grid.adapt();
     grid.postAdapt();
-    //grid.loadBalance();
+    grid.loadBalance();
   }
 }
 
@@ -454,15 +454,15 @@ void checkLevelIndexNonConform(GridType & grid)
 }
 
 template <class GridView>
-void writeFile( const GridView& gridView )
+void writeFile( const GridView& gridView, const std::string name = "dump" )
 {
   {
     Dune::DGFWriter< GridView > writer( gridView );
-    writer.write( "dump.dgf" );
+    writer.write( name+".dgf" );
   }
   {
     Dune::VTKWriter< GridView > writer( gridView );
-    writer.write( "dump.vtk" );
+    writer.write( name );
   }
 }
 
@@ -540,7 +540,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
-  writeFile( grid.leafGridView() );
+  writeFile( grid.levelGridView( 0 ), "level" );
+  writeFile( grid.leafGridView(), "leaf" );
 
   // check iterators
   checkALUIterators( grid );
@@ -583,6 +584,7 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   // check iterators
   checkALUIterators( grid );
 
+  Dune :: checkIndexSet( grid, grid.leafGridView(), Dune :: dvverb );
   // -1 stands for leaf check
   checkCommunication(grid, -1, std::cout);
 

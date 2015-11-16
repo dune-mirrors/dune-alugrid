@@ -1072,6 +1072,9 @@ namespace ALUGrid
       }
     }
 
+    // store boundary id
+    setBoundaryId( _bt );
+
     this->setGhost ( p );
 
     // get index from manager
@@ -1079,8 +1082,6 @@ namespace ALUGrid
 
     // store segment index
     _segmentIndex = ( _up ) ? ( _up->_segmentIndex ) : this->getIndex(); // get segment index from father
-    // store boundary id
-    setBoundaryId( _bt );
     return;
   }
 

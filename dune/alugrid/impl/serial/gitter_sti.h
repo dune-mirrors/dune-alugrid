@@ -855,10 +855,18 @@ namespace ALUGrid
         if( id > _bndid ) _bndid = id;
       }
 
-      // set bnd id, id is overwritten in any case
-      void setGhostBndId (const bndid_t id)
+      // set ghost bnd id
+      void setGhostBndId ()
       {
-        _bndid = id;
+        // overwrite id with ghost value
+        _bndid = ghost;
+      }
+
+      // set ghost bnd id
+      void setBorderBndId ()
+      {
+        // overwrite id with border value
+        _bndid = border;
       }
 
       // returns trus, if item is interior item (not ghost or border)
@@ -1126,6 +1134,8 @@ namespace ALUGrid
        int leaf () const;
 
       virtual int orientation () const { return 0; }
+
+      virtual void setGhostBoundaryIds () {}
 
       //! default implementation of ldbVertexIndex calls this method on father
       //! the assumtion here is, that this method is overloaded approporiately

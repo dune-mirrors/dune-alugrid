@@ -586,11 +586,14 @@ namespace ALUGrid
     bool usingInner_;
   public:
     typedef LeafValType val_t;
-  private:
+  protected:
     // the pair of elementand boundary face
     mutable val_t elem_;
     // true if ghost cells are enabled
     const bool ghostCellsEnabled_ ;
+
+    // set of visisted ghost elements
+    std::set< int > visited_;
   public:
     typedef ElementPllXIF_t ItemType;
 
@@ -602,7 +605,8 @@ namespace ALUGrid
       nl_( nlinks ),
       link_( nlinks ), // makes default status == done
       elem_( (HElementType *)0, (HBndSegType *)0 ),
-      ghostCellsEnabled_( grid.ghostCellsEnabled() )
+      ghostCellsEnabled_( grid.ghostCellsEnabled() ),
+      visited_()
     {}
 
     ALU3dGridGhostIterator (const ALU3dGridGhostIterator & org)
@@ -613,6 +617,7 @@ namespace ALUGrid
       , usingInner_(false)
       , elem_(org.elem_)
       , ghostCellsEnabled_( org.ghostCellsEnabled_ )
+      , visited_( org.visited_ )
     {
       if( org.iterTT_ )
       {
@@ -643,6 +648,7 @@ namespace ALUGrid
       iterTT_ = 0;
       it_ = 0;
       usingInner_ = false;
+      visited_.clear();
     }
 
     void createIterator()
@@ -706,7 +712,7 @@ namespace ALUGrid
       it_ = 0;
     }
 
-    virtual void checkLeafEntity ()
+    virtual void checkValidEntity ()
     {
       if(it_)
       {
@@ -719,6 +725,13 @@ namespace ALUGrid
           // this occurs if internal element is leaf but the corresponding
           // ghost is not leaf, we have to go next
           if ( ! pll->isLeafEntity() ) next();
+
+          const int idx = pll->getGhost().first->getIndex() ;
+          if ( visited_.find( idx ) != visited_.end() )
+          {
+            next();
+          }
+          visited_.insert( idx );
         }
       }
     }
@@ -746,7 +759,7 @@ namespace ALUGrid
         // if now done, create new iterator
         if( it_->done() ) createIterator();
 
-        checkLeafEntity();
+        checkValidEntity();
       }
     }
 
@@ -754,11 +767,12 @@ namespace ALUGrid
     {
       if( ghostCellsEnabled_ )
       {
+        visited_.clear();
         link_ = -1;
         usingInner_ = false;
         // create iterator calls also first of iterators
         createIterator();
-        checkLeafEntity();
+        checkValidEntity();
         if( it_ ) alugrid_assert ( !it_->done());
       }
     }
@@ -788,30 +802,6 @@ namespace ALUGrid
   class ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIterator
   {
-  protected:
-    typedef LeafLevelIteratorTTProxy<1> IteratorType;
-    IteratorType * newIterator()
-    {
-      return new IteratorType ( this->gitter_, this->link_ );
-    }
-
-    void checkLeafEntity ()
-    {
-      if(this->it_)
-      {
-        if(! this->it_->done())
-        {
-          val_t & el = this->item();
-          HBndSegType * pll = el.second;
-          alugrid_assert ( pll );
-
-          // this occurs if internal element is leaf but the corresponding
-          // ghost is not leaf, we have to go next
-          if ( ! pll->isLeafEntity() ) this->next();
-        }
-      }
-    }
-
   public:
     template <class GridImp>
     ALU3dGridLeafIteratorWrapper(const GridImp & grid, int level , const int nlinks )
@@ -826,9 +816,11 @@ namespace ALUGrid
   class ALU3dGridLevelIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIterator
   {
+  protected:
     const int level_;
     const int mxl_;
-  protected:
+    using ALU3dGridGhostIterator :: visited_;
+
     typedef LeafLevelIteratorTTProxy<1> IteratorType;
     IteratorType * newIterator()
     {
@@ -837,7 +829,7 @@ namespace ALUGrid
     }
 
     // for level iterators don't check leaf entity
-    void checkLeafEntity ()
+    void checkValidEntity ()
     {
       if(this->it_)
       {
@@ -855,6 +847,13 @@ namespace ALUGrid
           {
             if( pll.ghostLevel() != level_ )  this->next();
           }
+
+          const int idx = pll.getGhost().first->getIndex() ;
+          if ( visited_.find( idx ) != visited_.end() )
+          {
+            next();
+          }
+          visited_.insert( idx );
         }
       }
     }
@@ -1069,18 +1068,30 @@ namespace ALUGrid
       for( ghostIter.first(); !ghostIter.done(); ghostIter.next() )
       {
         GhostPairType ghPair = ghostIter.item().second->getGhost();
-        const std::vector<int> & notOnFace = SelectVector< GridImp::elementType, codim >::
-                                          getNotOnItemVector(ghPair.second);
+        const std::vector<int> & notOnFace =
+          SelectVector< GridImp::elementType, codim >::getNotOnItemVector(ghPair.second);
         for(int i=0; i<numItems; ++i)
         {
+          // get face/edge/vertex
           ElType * item = GetItem<GridImp,codim>::getItem( *(ghPair.first) , notOnFace[i] );
-          const int idx = item->getIndex();
-          //For the 2d grid do not write non-2d vertices in ghost list
-          if( GridImp::dimension == 2 && codim == 3 && !(item->is2d())  ) continue;
-          if( visited.find(idx) == visitedEnd )
+          // if the item is not a ghost item then continue
+          // (this can happen when a ghost has more than one interior neighbor)
+          if( ! item->isGhost() && ! item->isBorder() )
+            std::cout << "codim " << codim << " bnd id  = " << int(item->bndId()) << std::endl;
+          assert( item->isGhost() || item->isBorder() || item->isInterior() );
+
+          //if( item->isBorder() ) continue ;
+          if( item->isGhost() )
           {
-            ghList.getItemList().push_back( (void *) item );
-            visited.insert( idx );
+            const int idx = item->getIndex();
+            //For the 2d grid do not write non-2d vertices in ghost list
+            if( GridImp::dimension == 2 && codim == 3 && !(item->is2d())  ) continue;
+            // check if idx was already found
+            if( visited.find(idx) == visitedEnd )
+            {
+              ghList.getItemList().push_back( (void *) item );
+              visited.insert( idx );
+            }
           }
         }
       }
