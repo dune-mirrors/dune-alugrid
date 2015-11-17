@@ -712,29 +712,7 @@ namespace ALUGrid
       it_ = 0;
     }
 
-    virtual void checkValidEntity ()
-    {
-      if(it_)
-      {
-        if(!it_->done())
-        {
-          val_t & el = item();
-          HBndSegType * pll = el.second;
-          alugrid_assert ( pll );
-
-          // this occurs if internal element is leaf but the corresponding
-          // ghost is not leaf, we have to go next
-          if ( ! pll->isLeafEntity() ) next();
-
-          const int idx = pll->getGhost().first->getIndex() ;
-          if ( visited_.find( idx ) != visited_.end() )
-          {
-            next();
-          }
-          visited_.insert( idx );
-        }
-      }
-    }
+    virtual void checkValidEntity () = 0;
 
   public:
     int size  ()    // ???? gives size only of small part of ghost cells ????
@@ -802,6 +780,9 @@ namespace ALUGrid
   class ALU3dGridLeafIteratorWrapper< 0, Dune::Ghost_Partition, Dune::ALUGridMPIComm >
   : public ALU3dGridGhostIterator
   {
+  protected:
+    using ALU3dGridGhostIterator :: it_;
+    using ALU3dGridGhostIterator :: visited_;
   public:
     template <class GridImp>
     ALU3dGridLeafIteratorWrapper(const GridImp & grid, int level , const int nlinks )
@@ -809,6 +790,31 @@ namespace ALUGrid
 
     ALU3dGridLeafIteratorWrapper(const ALU3dGridLeafIteratorWrapper & org)
       : ALU3dGridGhostIterator(org) {}
+
+    virtual void checkValidEntity ()
+    {
+      if(it_)
+      {
+        if(!it_->done())
+        {
+          val_t & el = item();
+          HBndSegType * pll = el.second;
+          alugrid_assert ( pll );
+
+          // this occurs if internal element is leaf but the corresponding
+          // ghost is not leaf, we have to go next
+          if ( ! pll->isLeafEntity() ) next();
+
+          const int idx = pll->getGhost().first->getIndex() ;
+          if ( visited_.find( idx ) != visited_.end() )
+          {
+            next();
+          }
+          visited_.insert( idx );
+        }
+      }
+    }
+
   };
 
   // the level ghost partition iterator
@@ -820,6 +826,7 @@ namespace ALUGrid
     const int level_;
     const int mxl_;
     using ALU3dGridGhostIterator :: visited_;
+    using ALU3dGridGhostIterator :: it_;
 
     typedef LeafLevelIteratorTTProxy<1> IteratorType;
     IteratorType * newIterator()
@@ -829,11 +836,11 @@ namespace ALUGrid
     }
 
     // for level iterators don't check leaf entity
-    void checkValidEntity ()
+    virtual void checkValidEntity()
     {
-      if(this->it_)
+      if(it_)
       {
-        if(! this->it_->done())
+        if(! it_->done())
         {
           val_t & el = this->item();
 
@@ -1445,8 +1452,8 @@ namespace ALUGrid
       typedef typename ElementLevelIterator :: val_t el_val_t;
       ElementLevelIterator iter(grid,level,nlinks);
 
-      edgeList_.getItemList().resize(0);
-      std::map< int, int > visited;
+      edgeList_.getItemList().clear();
+      std::set< int > visited;
 
       for( iter.first(); ! iter.done(); iter.next() )
       {
@@ -1468,10 +1475,10 @@ namespace ALUGrid
           if( edge->isGhost() ) continue;
 
           int idx = edge->getIndex();
-          if( visited.find(idx) == visited.end() )
+          if( visited.find( idx ) == visited.end() )
           {
             edgeList_.getItemList().push_back( (void *) edge );
-            visited[idx] = 1;
+            visited.insert( idx );
           }
         }
       }

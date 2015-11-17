@@ -859,7 +859,7 @@ namespace ALUGrid
       void setGhostBndId ()
       {
         // overwrite id with ghost value
-        _bndid = ghost;
+        if( isInterior() ) _bndid = ghost;
       }
 
       // set ghost bnd id

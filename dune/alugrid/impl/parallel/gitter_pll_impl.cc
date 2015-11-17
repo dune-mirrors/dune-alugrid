@@ -1615,6 +1615,7 @@ namespace ALUGrid
   template < class A >
   void HexaPllBaseX< A >::writeDynamicState (ObjectStream & os, int face) const
   {
+    alugrid_assert( myhexa().isInterior() );
     // write level and leaf for the ghost element
     // to determine leafEntity or not
     const unsigned char lvl = myhexa().level();

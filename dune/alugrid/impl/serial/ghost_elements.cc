@@ -113,9 +113,6 @@ namespace ALUGrid
     GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
     assert( ghost );
 
-    if( ghost->ref == 0 )
-      ghost->setGhostBoundaryIds();
-
     // increase refcounter since ghost element can exist more than once
     ghost->ref++;
 
