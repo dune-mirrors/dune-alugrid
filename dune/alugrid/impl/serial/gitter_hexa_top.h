@@ -1082,7 +1082,6 @@ namespace ALUGrid
 
     // store segment index
     _segmentIndex = ( _up ) ? ( _up->_segmentIndex ) : this->getIndex(); // get segment index from father
-    return;
   }
 
   template < class A > inline Hbnd4Top < A >::

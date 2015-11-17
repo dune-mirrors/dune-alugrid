@@ -154,7 +154,7 @@ namespace ALUGrid
   setIndicesAndBndId (const hface_STI & f, int face_nr)
   {
     // set all items to ghost bnd id
-    // setGhostBoundaryIds();
+    setGhostBoundaryIds();
 
     typedef Gitter::Geometric::BuilderIF BuilderIF;
 
@@ -368,7 +368,7 @@ namespace ALUGrid
   setIndicesAndBndId (const hface_STI & f, int face_nr)
   {
      // set all items to ghost bnd id
-     // setGhostBoundaryIds();
+     setGhostBoundaryIds();
 
      typedef Gitter::Geometric::BuilderIF BuilderIF;
 

@@ -39,8 +39,6 @@ namespace ALUGrid
       {
         ghost.tagForGlobalRefinement();
         ghost.refine();
-        for( auto child = ghost.down(); child; child = child->next() )
-          child->setGhostBoundaryIds();
       }
 
       int gFaceNum = _ghostPair.second;
@@ -49,6 +47,7 @@ namespace ALUGrid
 
       hface4_GEO * face = ghost.myhface( gFaceNum );
       alugrid_assert ( face );
+      alugrid_assert( this->level() == face->level() );
 
       int count = 0;
       for(face = face->down(); face; face = face->next() )
@@ -62,11 +61,13 @@ namespace ALUGrid
         if( ! neighbour.first->isboundary ())
         {
           ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
+          alugrid_assert ( ! face->nb.rear().first->isRealObject() );
           alugrid_assert (ghch);
           alugrid_assert ( ghch->up() == &ghost );
         }
         else
         {
+          alugrid_assert ( ! neighbour.first->isRealObject() );
           neighbour = face->nb.rear();
           alugrid_assert ( ! neighbour.first->isboundary () );
           ghch = dynamic_cast<hexa_GEO *> (neighbour.first);
