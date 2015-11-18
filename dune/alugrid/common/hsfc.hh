@@ -1,6 +1,10 @@
 #ifndef DUNE_ALU3DGRID_HSFC_HH
 #define DUNE_ALU3DGRID_HSFC_HH
 
+#include <string>
+#include <sstream>
+#include <fstream>
+
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
@@ -84,7 +88,71 @@ namespace ALUGridSFC {
     }
   };
 #endif // if HAVE_ZOLTAN
-}
+
+  template< class GridView >
+  void printSpaceFillingCurve ( const GridView& view, std::string name = "sfc" )
+  {
+    typedef typename GridView :: template Codim< 0 > :: Iterator  Iterator ;
+    typedef typename Iterator :: Entity :: Geometry :: GlobalCoordinate GlobalCoordinate ;
+
+    std::vector< GlobalCoordinate > vertices;
+    vertices.reserve( view.indexSet().size( 0 ) );
+
+    const Iterator endit = view.template end< 0 > ();
+    for(Iterator it = view.template begin< 0 > (); it != endit; ++ it )
+    {
+      GlobalCoordinate center = (*it).geometry().center();
+      vertices.push_back( center );
+    }
+
+    std::stringstream gnufilename;
+    gnufilename << name << ".gnu";
+    if( view.grid().comm().size() > 1 )
+      gnufilename << "." << view.grid().comm().rank();
+
+    std::ofstream gnuFile ( gnufilename.str() );
+    if( gnuFile )
+    {
+      for( size_t i=0; i<vertices.size(); ++i )
+      {
+        gnuFile << vertices[ i ] << std::endl;
+      }
+      gnuFile.close();
+    }
+
+    std::stringstream vtkfilename;
+    vtkfilename << name << ".vtk";
+    if( view.grid().comm().size() > 1 )
+      vtkfilename << "." << view.grid().comm().rank();
+    std::ofstream vtkFile ( vtkfilename.str() );
+
+    if( vtkFile )
+    {
+      vtkFile << "# vtk DataFile Version 1.0" << std::endl;
+      vtkFile << "Line representation of vtk" << std::endl;
+      vtkFile << "ASCII" << std::endl;
+      vtkFile << "DATASET POLYDATA" << std::endl;
+      vtkFile << "POINTS "<< vertices.size() << " FLOAT" << std::endl;
+
+      for( size_t i=0; i<vertices.size(); ++i )
+      {
+        vtkFile << vertices[ i ];
+        for( int d=GlobalCoordinate::dimension; d<3; ++d )
+          vtkFile << " 0";
+        vtkFile << std::endl;
+      }
+
+      // lines, #lines, #entries
+      vtkFile << "LINES " << vertices.size()-1 << " " << (vertices.size()-1)*3 << std::endl;
+
+      for( size_t i=0; i<vertices.size()-1; ++i )
+        vtkFile << "2 " << i << " " << i+1 << std::endl;
+
+      vtkFile.close();
+    }
+  }
+
+} // end namespace ALUGridSFC
 
 namespace Dune {
 
