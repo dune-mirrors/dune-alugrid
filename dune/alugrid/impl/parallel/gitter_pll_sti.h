@@ -181,6 +181,7 @@ namespace ALUGrid
       virtual bool refine ();
       virtual void coarse ();
       virtual bool adapt ();
+      virtual bool checkRepeat( const bool, const unsigned int ) const;
     public:
       virtual void printSizeTT ();
 
@@ -275,7 +276,9 @@ namespace ALUGrid
       // zwischen adapt () und refine (), damit die Zahl der
       // Iterationen am Ende ausgegeben werden kann.
 
-      int  _refineLoops;
+      unsigned int _minRefineLoops;
+      unsigned int _refinesDone;
+      unsigned int _averageRefineLoops;
       bool _ldbVerticesComputed;
   };
 
