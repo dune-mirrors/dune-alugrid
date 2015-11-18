@@ -26,18 +26,6 @@
 #include "diagnostics.hh"
 #include "paralleldgf.hh"
 
-  template <class Grid>
-  inline void printSpaceFillingCurve( const Grid& grid, std::ostream& out )
-  {
-    const auto& gridView = grid.leafGridView();
-    for( auto it = gridView.template begin<0>(), end = gridView.template end<0>();
-         it != end; ++it )
-    {
-      out << (*it).geometry().center() << std::endl;
-    }
-  }
-
-
 // method
 // ------
 void method ( int problem, int startLvl, int maxLvl,
@@ -67,8 +55,7 @@ void method ( int problem, int startLvl, int maxLvl,
 
   if( grid.comm().size() == 1 )
   {
-    std::ofstream file( "curve.gnu" );
-    printSpaceFillingCurve( grid, file );
+    ALUGridSFC::printSpaceFillingCurve( grid.leafGridView() );
   }
 
 #ifndef BALL
