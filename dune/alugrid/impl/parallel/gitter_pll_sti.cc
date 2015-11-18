@@ -425,6 +425,15 @@ namespace ALUGrid
     }
   };
 
+  bool GitterPll::checkRepeat( const bool repeat, const unsigned int refineLoops ) const
+  {
+    // perform a minimus of refine loops before doing an all_reduce
+    if( refineLoops < _minRefineLoops ) return true ;
+
+    // all_reduce to check if every process is finished
+    return mpAccess().gmax( repeat );
+  }
+
   bool GitterPll::refine ()
   {
     alugrid_assert (debugOption (5) ? (std::cout << "**INFO GitterPll::refine () " << std::endl, 1) : 1);
@@ -484,7 +493,7 @@ namespace ALUGrid
       // bis die Situation global station"ar ist.
 
       bool repeat (false);
-      _refineLoops = 0;
+      int refineLoops = 0;
       do
       {
         // unpack handle to unpack the data once their received
@@ -497,11 +506,26 @@ namespace ALUGrid
         repeat = dataHandle.repeat();
 
         // count loops
-        _refineLoops ++;
+        ++refineLoops;
       }
-      while ( mpAccess ().gmax ( repeat ) );
+      while ( checkRepeat( repeat, refineLoops ) );
 
-      // std::cout << _refineLoops << " refLoops " << std::endl;
+      _averageRefineLoops += refineLoops;
+
+      // increase refines counter
+      ++_refinesDone;
+      if( _refinesDone == 50 )
+      {
+        const unsigned int newAverage = _averageRefineLoops / _refinesDone ;
+        _minRefineLoops = std::min( (unsigned int )5, newAverage );
+        // reset values
+        _refinesDone = 0;
+        _averageRefineLoops = 0;
+        // make sure every process has the same value
+        alugrid_assert( int(_minRefineLoops) == mpAccess().gmax( _minRefineLoops ) );
+      }
+
+      //std::cout << "P[" << mpAccess().myrank() << "] " << refineLoops << " refLoops " << std::endl;
 
       // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
       // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
@@ -1561,7 +1585,8 @@ namespace ALUGrid
       _ldbOver (0.0),
       _ldbUnder (0.0),
       _ldbMethod (LoadBalancer::DataBase::NONE),
-      _refineLoops( 0 ),
+      _minRefineLoops( 2 ),
+      _refinesDone( 0 ),
       _ldbVerticesComputed( false )
   {
     if( mpa.myrank() == 0 )
