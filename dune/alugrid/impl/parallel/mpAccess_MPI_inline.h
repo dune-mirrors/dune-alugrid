@@ -177,7 +177,6 @@ namespace ALUGrid
 
   inline bool MpAccessMPI::gmax (bool i) const
   {
-    incrementAllreduceCalls();
     int j = int( i );
     // call int method
     const int ret = gmax( j );

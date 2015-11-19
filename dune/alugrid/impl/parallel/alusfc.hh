@@ -170,6 +170,12 @@ namespace ALUGridSFC
     // my rank
     const int me   = mpa.myrank();
 
+    if( me == 0 )
+    {
+      static int called = 0;
+      std::cout << "ALUsfc repartitioning call " << called++ << std::endl;
+    }
+
     // number of procs
     const int pSize = mpa.psize();
 
