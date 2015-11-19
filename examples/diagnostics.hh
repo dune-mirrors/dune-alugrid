@@ -247,6 +247,9 @@ namespace Dune {
             file << "# Procs = " << comm_.size() << " * " << maxThreads << " (MPI * threads)" << std::endl ;
             file << "# Timesteps = " << timesteps_ << std::endl ;
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
+#ifdef ALUGRID_COUNT_GLOBALCOMM
+            file << "GlobalComm: allgather = " << ALU3DSPACE allgatherCalled() << "  allreduce = " << ALU3DSPACE allreduceCalled() << std::endl;
+#endif
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
             file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     ALUGrid-MEMORY (MB)" << std::endl ;
