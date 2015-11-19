@@ -248,7 +248,8 @@ namespace Dune {
             file << "# Timesteps = " << timesteps_ << std::endl ;
             file << "# Max DoFs (per element): " << maxDofs << std::endl;
 #ifdef ALUGRID_COUNT_GLOBALCOMM
-            file << "GlobalComm: allgather = " << ALU3DSPACE allgatherCalled() << "  allreduce = " << ALU3DSPACE allreduceCalled() << std::endl;
+            file << "# allgather allreduce (counters for global communication)" << std::endl;
+            file << std::setw( 10 ) << ALU3DSPACE allgatherCalled() << "    " << ALU3DSPACE allreduceCalled() << std::endl;
 #endif
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
