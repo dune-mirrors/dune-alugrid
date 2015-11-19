@@ -525,7 +525,8 @@ namespace ALUGrid
         alugrid_assert( static_cast<int>( _minRefineLoops ) == mpAccess().gmax( static_cast<int>( _minRefineLoops ) ) );
       }
 
-      //std::cout << "P[" << mpAccess().myrank() << "] " << refineLoops << " refLoops " << std::endl;
+      //if( mpAccess().myrank() == 0)
+      //  std::cout << refineLoops << " refLoops | minRefLoops " << _minRefineLoops << std::endl;
 
       // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
       // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
