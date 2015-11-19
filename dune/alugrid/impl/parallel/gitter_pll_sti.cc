@@ -522,7 +522,7 @@ namespace ALUGrid
         _refinesDone = 0;
         _averageRefineLoops = 0;
         // make sure every process has the same value
-        alugrid_assert( int(_minRefineLoops) == mpAccess().gmax( _minRefineLoops ) );
+        alugrid_assert( static_cast<int>( _minRefineLoops ) == mpAccess().gmax( static_cast<int>( _minRefineLoops ) ) );
       }
 
       //std::cout << "P[" << mpAccess().myrank() << "] " << refineLoops << " refLoops " << std::endl;
