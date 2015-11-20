@@ -522,10 +522,11 @@ namespace ALUGrid
         _refinesDone = 0;
         _averageRefineLoops = 0;
         // make sure every process has the same value
-        alugrid_assert( int(_minRefineLoops) == mpAccess().gmax( _minRefineLoops ) );
+        alugrid_assert( static_cast<int>( _minRefineLoops ) == mpAccess().gmax( static_cast<int>( _minRefineLoops ) ) );
       }
 
-      //std::cout << "P[" << mpAccess().myrank() << "] " << refineLoops << " refLoops " << std::endl;
+      //if( mpAccess().myrank() == 0)
+      //  std::cout << refineLoops << " refLoops | minRefLoops " << _minRefineLoops << std::endl;
 
       // Jetzt noch die Kantensituation richtigstellen, es gen"ugt ein Durchlauf,
       // weil die Verfeinerung einer Kante keine Fernwirkungen hat. Vorsicht: Die
@@ -1587,6 +1588,7 @@ namespace ALUGrid
       _ldbMethod (LoadBalancer::DataBase::NONE),
       _minRefineLoops( 2 ),
       _refinesDone( 0 ),
+      _averageRefineLoops( 0 ),
       _ldbVerticesComputed( false )
   {
     if( mpa.myrank() == 0 )

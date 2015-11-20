@@ -347,8 +347,8 @@ namespace Dune
 
       alugrid_assert ( elem );
 
-      int level = elem->level();
-      if(level > testMaxLevel) testMaxLevel = level;
+      // get maximum of local element levels
+      testMaxLevel = std::max( testMaxLevel, int(elem->level()) );
     }
     maxlevel_ = comm().max( testMaxLevel );
     alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));

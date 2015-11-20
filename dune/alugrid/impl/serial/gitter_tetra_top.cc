@@ -2183,10 +2183,10 @@ namespace ALUGrid
             }
           }
         }
-        _req = myrule_t::nosplit ;
         return true ;
       }
     }
+    _req = myrule_t::nosplit ;
     return true ;
   }
 
@@ -2407,64 +2407,62 @@ namespace ALUGrid
     // die inneren Gitterteile restore'd.
 
     myrule_t r ((char) is.get ()) ;
-    if(getrule() == r)
+    if (r == myrule_t::nosplit)
     {
-      // call restore on inner items
-      { for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-      { for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
-      // call restore on children
+      // Vorsicht: beim restore m"ussen sich sowohl Element als auch
+      // Randelement um die Korrektheit der Nachbarschaft k"ummern,
+      // und zwar dann wenn sie "on the top" sind (= die gelesene
+      // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
+      // Die nachfolgende L"osung ist weit davon entfernt, sch"on
+      // zu sein - leider. Eventuell wird mit der Verbesserung der
+      // Behandlung der nichtkonf. Situationen mal eine "Anderung
+      // n"otig.
+
+      for (int i = 0 ; i < 4 ; ++i)
       {
-        for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ;
+        myhface_t & face (*(myhface (i))) ;
+        if (! face.leaf ())
+        {
+          alugrid_assert( face.getrule() == balrule_t::e01 ||
+                          face.getrule() == balrule_t::e12 ||
+                          face.getrule() == balrule_t::e20 ||
+                          face.getrule() == balrule_t::iso4 );
+          const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
+          for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
+        }
       }
     }
     else
     {
-      alugrid_assert (getrule() == myrule_t::nosplit) ;
-      if (r == myrule_t::nosplit)
-      {
-        // Vorsicht: beim restore m"ussen sich sowohl Element als auch
-        // Randelement um die Korrektheit der Nachbarschaft k"ummern,
-        // und zwar dann wenn sie "on the top" sind (= die gelesene
-        // Verfeinerungsregel ist nosplit). (s.a. beim Randelement)
-        // Die nachfolgende L"osung ist weit davon entfernt, sch"on
-        // zu sein - leider. Eventuell wird mit der Verbesserung der
-        // Behandlung der nichtkonf. Situationen mal eine "Anderung
-        // n"otig.
+      //alugrid_assert (getrule() == myrule_t::nosplit) ;
+      // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
+      // request (myrule_t) und dann refine () durchgef"uhrt werden.
 
-        for (int i = 0 ; i < 4 ; ++i)
-        {
-          myhface_t & face (*(myhface (i))) ;
-          if (! face.leaf ())
-          {
-            alugrid_assert( face.getrule() == balrule_t::e01 ||
-                            face.getrule() == balrule_t::e12 ||
-                            face.getrule() == balrule_t::e20 ||
-                            face.getrule() == balrule_t::iso4 );
-            const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
-            for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
-          }
-        }
-      }
-      else
+      if(getrule() != r)
       {
-        // Auf dem Element gibt es kein refine (myrule_t) deshalb mu"s erst
-        // request (myrule_t) und dann refine () durchgef"uhrt werden.
-
         // request read rule
         request (r) ;
         // refine tetra
         refine() ;
+      }
 
-        alugrid_assert (getrule() == r) ;
+      alugrid_assert (getrule() == r) ;
 
-        // call restore on inner items
-        { for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
-        { for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restore (is) ; }
+      // call restore on inner items
+      for (inneredge_t * e = innerHedge () ; e ; e = e->next ())
+      {
+        e->restore (is) ;
+      }
 
-        // call restore on children
-        {
-          for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ;
-        }
+      for (innerface_t * f = innerHface () ; f ; f = f->next ())
+      {
+        f->restore (is) ;
+      }
+
+      // call restore on children
+      for (innertetra_t * c = dwnPtr() ; c ; c = c->next ())
+      {
+        c->restore (is) ;
       }
     }
     return ;
