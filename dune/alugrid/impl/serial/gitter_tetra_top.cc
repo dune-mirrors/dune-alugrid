@@ -2183,10 +2183,11 @@ namespace ALUGrid
             }
           }
         }
+        _req = myrule_t::nosplit ;
         return true ;
       }
+      _req = myrule_t::nosplit ;
     }
-    _req = myrule_t::nosplit ;
     return true ;
   }
 

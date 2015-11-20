@@ -26,7 +26,7 @@ foreach( variant ball euler transport )
   endif()
   target_compile_definitions( ${prog} PUBLIC "ALUGRID_CUBE" "GRIDDIM=3" "WORLDDIM=3" )
 
-  foreach( type cube simplex )
+  foreach( type cube simplex conform )
     string( TOUPPER ${type} type_upper )
     foreach( dim RANGE 2 3 )
       set( prog "main_${variant}_${type}_${dim}d" )
