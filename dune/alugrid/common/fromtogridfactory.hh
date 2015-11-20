@@ -176,6 +176,12 @@ namespace Dune
       return convert( fromGrid, cellData, ordering_ );
     }
 
+    template <class FromGrid>
+    Grid* convert( const FromGrid& fromGrid )
+    {
+      std::vector<int> dummy(0);
+      return convert( fromGrid, dummy, ordering_ );
+    }
   protected:
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
