@@ -159,7 +159,7 @@ namespace ALUGridSFC
   } // shiftElementCuts
 
   // Partitioning of the space filling curve after Burstedde, Wilcox, and Ghattas, p4est, 2011.
-  // This method needs to global communications.
+  // This method needs two global communications, one allgather and one allreduce
   template< class vertexmap_t, class connect_t, class vec_t >
   bool CALL_parallelSpaceFillingCurve(const ALUGrid::MpAccessGlobal& mpa, // communicator
                                       const int numProcs,                 // number of partitions
@@ -169,6 +169,14 @@ namespace ALUGridSFC
   {
     // my rank
     const int me   = mpa.myrank();
+
+    /*
+    if( me == 0 )
+    {
+      static int called = 0;
+      std::cout << "ALUsfc repartitioning call " << called++ << std::endl;
+    }
+    */
 
     // number of procs
     const int pSize = mpa.psize();
@@ -193,7 +201,6 @@ namespace ALUGridSFC
     // if element cuts have not been computed, compute current cuts
     if( elementCuts.size() == 0 )
     {
-      //std::cout << "Compute element cuts" << std::endl;
       elementCuts = mpa.gcollect( myCut );
       for( int i=0; i<pSize; ++ i)
         nMax = std::max( nMax, elementCuts[ i ] );
@@ -286,8 +293,6 @@ namespace ALUGridSFC
 
     elementCuts.clear();
     elementCuts.resize( pSize, 0 );
-    //elementCuts.resize( pSize+1, 0 );
-    //elementCuts[ pSize ] = oldCuts[ pSize ];
 
     // communicate cuts
     mpa.gmax( &cuts[ 0 ], pSize, &elementCuts[ 0 ] );

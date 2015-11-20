@@ -11,6 +11,33 @@
 
 namespace ALUGrid
 {
+
+  static inline long int& allreduceCalled ()
+  {
+    static long int allreduce = 0;
+    return allreduce;
+  }
+
+  inline void incrementAllreduceCalls()
+  {
+#ifdef ALUGRID_COUNT_GLOBALCOMM
+    ++allreduceCalled();
+#endif
+  }
+
+  static inline long int& allgatherCalled ()
+  {
+    static long int allgather = 0;
+    return allgather;
+  }
+
+  inline void incrementAllgatherCalls()
+  {
+#ifdef ALUGRID_COUNT_GLOBALCOMM
+    ++allgatherCalled();
+#endif
+  }
+
   inline MpAccessMPI::MinMaxSumIF* MpAccessMPI::copyMPIComm ( MPI_Comm mpicomm )
   {
     int wasInitialized = 0;
@@ -79,19 +106,22 @@ namespace ALUGrid
   }
 
   inline int MpAccessMPI::barrier () const {
-      return MPI_SUCCESS == MPI_Barrier (_mpiComm) ? psize () : 0;
+    return MPI_SUCCESS == MPI_Barrier (_mpiComm) ? psize () : 0;
   }
 
   inline int MpAccessMPI::mpi_allgather (int * i, int si, int * o, int so) const {
-      return MPI_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm);
+    incrementAllgatherCalls();
+    return MPI_Allgather (i, si, MPI_INT, o, so, MPI_INT, _mpiComm);
   }
 
   inline int MpAccessMPI::mpi_allgather (char * i, int si, char * o, int so) const {
-      return MPI_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm);
+    incrementAllgatherCalls();
+    return MPI_Allgather (i, si, MPI_BYTE, o, so, MPI_BYTE, _mpiComm);
   }
 
   inline int MpAccessMPI::mpi_allgather (double * i, int si, double * o, int so) const {
-      return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm);
+    incrementAllgatherCalls();
+    return MPI_Allgather (i, si, MPI_DOUBLE, o, so, MPI_DOUBLE, _mpiComm);
   }
 
   template < class A > std::vector< std::vector< A > >
@@ -154,6 +184,7 @@ namespace ALUGrid
   }
 
   inline int MpAccessMPI::gmax (int i) const {
+    incrementAllreduceCalls();
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MAX, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -161,6 +192,7 @@ namespace ALUGrid
   }
 
   inline int MpAccessMPI::gmin (int i) const {
+    incrementAllreduceCalls();
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_MIN, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -168,6 +200,7 @@ namespace ALUGrid
   }
 
   inline int MpAccessMPI::gsum (int i) const {
+    incrementAllreduceCalls();
     int j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_INT, MPI_SUM, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -175,6 +208,7 @@ namespace ALUGrid
   }
 
   inline long MpAccessMPI::gmax (long i) const {
+    incrementAllreduceCalls();
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MAX, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -182,6 +216,7 @@ namespace ALUGrid
   }
 
   inline long MpAccessMPI::gmin (long i) const {
+    incrementAllreduceCalls();
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_MIN, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -189,6 +224,7 @@ namespace ALUGrid
   }
 
   inline long MpAccessMPI::gsum (long i) const {
+    incrementAllreduceCalls();
     long j;
     MY_INT_TEST MPI_Allreduce (&i, &j, 1, MPI_LONG, MPI_SUM, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -196,6 +232,7 @@ namespace ALUGrid
   }
 
   inline double MpAccessMPI::gmax (double a) const {
+    incrementAllreduceCalls();
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MAX, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -203,6 +240,7 @@ namespace ALUGrid
   }
 
   inline double MpAccessMPI::gmin (double a) const {
+    incrementAllreduceCalls();
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_MIN, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -210,6 +248,7 @@ namespace ALUGrid
   }
 
   inline double MpAccessMPI::gsum (double a) const {
+    incrementAllreduceCalls();
     double x;
     MY_INT_TEST MPI_Allreduce (&a, &x, 1, MPI_DOUBLE, MPI_SUM, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
@@ -217,31 +256,37 @@ namespace ALUGrid
   }
 
   inline void MpAccessMPI::gmax (double* a,int size,double *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MAX, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmin (double* a,int size,double *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_MIN, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gsum (double* a,int size,double *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_DOUBLE, MPI_SUM, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmax (int* a,int size,int *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MAX, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gmin (int* a,int size,int *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_MIN, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
 
   inline void MpAccessMPI::gsum (int* a,int size,int *x) const {
+    incrementAllreduceCalls();
     MY_INT_TEST MPI_Allreduce (a, x, size, MPI_INT, MPI_SUM, _mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
   }
@@ -309,11 +354,13 @@ namespace ALUGrid
 
   inline MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
   {
+    incrementAllreduceCalls();
     alugrid_assert ( _minmaxsum );
     return _minmaxsum->minmaxsum( value );
   }
 
   inline std::pair<double,double> MpAccessMPI::gmax (std::pair<double,double> p) const {
+    incrementAllreduceCalls();
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MAX, _mpiComm);
@@ -322,6 +369,7 @@ namespace ALUGrid
   }
 
   inline std::pair<double,double> MpAccessMPI::gmin (std::pair<double,double> p) const {
+    incrementAllreduceCalls();
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_MIN, _mpiComm);
@@ -330,6 +378,7 @@ namespace ALUGrid
   }
 
   inline std::pair<double,double> MpAccessMPI::gsum (std::pair<double,double> p) const {
+    incrementAllreduceCalls();
     double x[2];
     double a[2]={p.first,p.second};
     MY_INT_TEST MPI_Allreduce (a, x, 2, MPI_DOUBLE, MPI_SUM, _mpiComm);
@@ -389,16 +438,20 @@ namespace ALUGrid
   }
 
   inline std::vector< std::vector< int > > MpAccessMPI::gcollect (const std::vector< int > & v) const {
+    incrementAllgatherCalls();
     return doGcollectV (v, MPI_INT, _mpiComm);
   }
 
   inline std::vector< std::vector< double > > MpAccessMPI::gcollect (const std::vector< double > & v) const {
+    incrementAllgatherCalls();
     return doGcollectV (v, MPI_DOUBLE, _mpiComm);
   }
 
   inline std::vector< ObjectStream > MpAccessMPI::
   gcollect (const ObjectStream & in, const std::vector<int>& len ) const
   {
+    incrementAllgatherCalls();
+
     // number of processes
     const int np = psize ();
 
