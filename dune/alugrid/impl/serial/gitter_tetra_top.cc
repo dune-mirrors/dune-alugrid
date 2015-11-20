@@ -404,6 +404,8 @@ namespace ALUGrid
               //for bisection we want no hanging nodes
               if(r.bisection())
               {
+                //the neighbour may have changed
+                neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
                 neigh.first->refineBalance (r, neigh.second);
               }
             }
