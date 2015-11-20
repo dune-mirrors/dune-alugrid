@@ -1588,6 +1588,7 @@ namespace ALUGrid
       _ldbMethod (LoadBalancer::DataBase::NONE),
       _minRefineLoops( 2 ),
       _refinesDone( 0 ),
+      _averageRefineLoops( 0 ),
       _ldbVerticesComputed( false )
   {
     if( mpa.myrank() == 0 )
