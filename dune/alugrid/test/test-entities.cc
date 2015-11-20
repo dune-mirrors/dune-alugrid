@@ -13,7 +13,7 @@
 // include serial part of ALUGrid
 #include <dune/alugrid/common/declaration.hh>
 #include <dune/alugrid/common/alugrid_assert.hh>
-#include <dune/alugrid/common/objectfactory.hh>
+// #include <dune/alugrid/common/objectfactory.hh>
 #include <dune/alugrid/3d/grid.hh>
 
 #include <dune/grid/io/file/dgfparser/parser.hh>
