@@ -46,11 +46,8 @@ Installation
 
 For installation instructions please see the [DUNE website][2].
 
-Links
------
-
-[DUNE-ALUGrid][0]: https://gitlab.dune-project.org/extensions/dune-alugrid
-[DUNE][1]: http://www.dune-project.org
-[Installation][2]: http://www.dune-project.org/doc/installation-notes.html
-[zoltan][3]: http://www.cs.sandia.gov/Zoltan/
-[License][4]: LICENSE
+[0]: https://gitlab.dune-project.org/extensions/dune-alugrid
+[1]: http://www.dune-project.org
+[2]: http://www.dune-project.org/doc/installation-notes.html
+[3]: http://www.cs.sandia.gov/Zoltan/
+[4]: LICENSE
