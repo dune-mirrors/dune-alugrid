@@ -17,7 +17,7 @@ git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
 New features and improvements include
 
   *  Conforming refinement for the 3D simplex grid
-  *  Parallel 2D grids
+  *  All grids are now parall (i.e. 2D and 3D)
   *  Internal load balancing based on space filling curves
      making DUNE-ALUGrid self contained also in parallel
   *  Bindings for fully parallel partitioners using [Zoltan][3]
