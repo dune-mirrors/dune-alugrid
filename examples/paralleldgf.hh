@@ -21,10 +21,10 @@ namespace Dune
   };
 
 #if ! HAVE_ALUGRID
-  template < ALUGridRefinementType refineType, class Comm >
-  class CreateParallelGrid< ALUGrid< 3,3, Dune::cube, refineType, Comm > >
+  template < int dim, int dimworld, ALUGridRefinementType refineType, class Comm >
+  class CreateParallelGrid< ALUGrid< dim, dimworld, Dune::cube, refineType, Comm > >
   {
-    typedef ALUGrid< 3,3 , Dune::cube, refineType, Comm > Grid ;
+    typedef ALUGrid< dim, dimworld, Dune::cube, refineType, Comm > Grid ;
 
   public:
     static GridPtr< Grid > create( const std::string& filename )
