@@ -729,7 +729,6 @@ namespace ALUGrid
       abort();
     }
     balrule_t rule ( ru ) ;
-    // std::cout << "setRefinementRequest: " << rule << std::endl;
     if (rule == balrule_t::nosplit)
     {
       return false;
@@ -752,6 +751,9 @@ namespace ALUGrid
           // Verfeinerung verhindert irgendwo im Gitter. Dies ist ein Vorbehalt
           // f"ur den parallelen anisotropen Verfeinerungsalgorithmus. Daher
           // sollte die Situation im isotropen Fall nicht auftreten.
+
+          if(rule.bisection())
+            return myhbnd ().refineLikeElement ( rule );
 
           std::cerr << "ERROR (fatal): Refinement inhibited on inner boundary." << std::endl;
           alugrid_assert(0);

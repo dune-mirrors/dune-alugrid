@@ -605,6 +605,9 @@ namespace ALUGrid
     // es am Aufrufer die Verfeinerung nochmals anzuforern.
 
     alugrid_assert (b == 0) ;
+    if(!this->leaf())
+      return (this->getrule() == r) ;
+
     alugrid_assert (this->leaf ()) ;
     if ( ! this->bndNotifyBalance (r,b) )
     {
@@ -621,8 +624,17 @@ namespace ALUGrid
     else
     {
       myhface_t& face (*(myhface(0)));
+      //if we are using bisection the face may have been refined because
+      //of the recursive nature of the algorithm
+      //so we have to check whether face is also a leaf
+      if(!face.leaf())
+        return (face.getrule() == r);
+
       // refine face according to rule
       face.refineImmediate (r) ;
+
+      // std::cout << this->level() << " " << face.level() << " " << this->getrule() << " "  << face.getrule() << " " << r <<  " " << &face ;
+
       if(r == myrule_t::iso4)
       {
         // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
@@ -691,10 +703,14 @@ namespace ALUGrid
       }
       else {
         myhface_t& face (*(myhface(0)));
+        if(!face.leaf())
+          return (face.getrule() == r);
 
         // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
         // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
         // ist.
+        // if(this->getrule () != myrule_t::nosplit)
+        //std::cout << this->level() << " " << face.level() << " " << this->getrule() << " " << face.getrule() << " " << r << " " <<   &face;
 
         alugrid_assert (this->getrule () == myrule_t::nosplit) ;
         switch (r) {
