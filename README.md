@@ -9,7 +9,7 @@ A detailed description of all the new features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
 in the paper The DUNE-ALUGrid Module. http://arxiv.org/abs/1407.6954.
 
-This is the paper we would ask everyone to cite when using DUNE-ALUGrid.
+**This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
 Download via git:
 git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
