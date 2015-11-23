@@ -49,7 +49,7 @@ For installation instructions please see the [DUNE website][2].
 Links
 -----
 
- [0]: http://www.dune-project.org/extensions/dune-alugrid
+ [0]: https://gitlab.dune-project.org/extensions/dune-alugrid
  [1]: http://www.dune-project.org
  [2]: http://www.dune-project.org/doc/installation-notes.html
  [3]: http://www.cs.sandia.gov/Zoltan/
