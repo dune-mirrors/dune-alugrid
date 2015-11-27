@@ -14,6 +14,8 @@
 # SIONLIB_LIBRARIES      Name of the SIONLIB libraries
 #
 
+include (CheckIncludeFiles)
+
 set(SIONLIB_ROOT "" CACHE PATH "Path list to search for SIONLIB")
 set(SIONLIB_SUFFIX "_lib64" CACHE STRING "suffix to the library name , e.g. gcc or something")
 set(SIONLIB_INCLUDEDIR "" CACHE PATH "directory with SIONLIB headers inside")
