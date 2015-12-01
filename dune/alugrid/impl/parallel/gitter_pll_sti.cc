@@ -337,6 +337,7 @@ namespace ALUGrid
           for(; child; child = child->next() )
           {
             child->accessOuterPllX ().first->getRefinementRequest ( os );
+            alugrid_assert(!child->down());
           }
         }
         else
