@@ -258,7 +258,7 @@ namespace ALUGrid
                           const bool bisectionRefinement )
       : _innerFaces( innerFaces ),
         _outerFaces( outerFaces ),
-        _factor( bisectionRefinement ? 3 : 1 ),
+        _factor( bisectionRefinement ? 7 : 1 ),
         _repeat( false ),
         _bisectionRefinement( bisectionRefinement )
     {}
@@ -337,13 +337,31 @@ namespace ALUGrid
           for(; child; child = child->next() )
           {
             child->accessOuterPllX ().first->getRefinementRequest ( os );
-            if(child->down())
-              alugrid_assert(!child->down()->down());
+            hface_STI* grandChild = child->down();
+            if( grandChild )
+            {
+              for(; grandChild; grandChild = grandChild->next() )
+              {
+                grandChild->accessOuterPllX ().first->getRefinementRequest ( os );
+                if(grandChild->down())
+                  alugrid_assert(!grandChild->down()->down());
+              }
+            }
+            else
+            {
+              typedef RefinementRules::Hface3Rule rule_t;
+              os.put( char(rule_t::nosplit) );
+              os.put( char(rule_t::nosplit) );
+            }
           }
         }
         else
         {
           typedef RefinementRules::Hface3Rule rule_t;
+          os.put( char(rule_t::nosplit) );
+          os.put( char(rule_t::nosplit) );
+          os.put( char(rule_t::nosplit) );
+          os.put( char(rule_t::nosplit) );
           os.put( char(rule_t::nosplit) );
           os.put( char(rule_t::nosplit) );
         }
@@ -361,11 +379,29 @@ namespace ALUGrid
           for( ; child ; child = child->next() )
           {
             _repeat |= child->accessOuterPllX ().first->setRefinementRequest ( os );
+            hface_STI* grandChild = child->down();
+            if( grandChild )
+            {
+              for( ; grandChild ; grandChild = grandChild->next() )
+              {
+                _repeat |= grandChild->accessOuterPllX ().first->setRefinementRequest ( os );
+              }
+            }
+            else
+            {
+              // remove two chars from the stream
+              os.get();
+              os.get();
+            }
           }
         }
         else
         {
           // remove two chars from the stream
+          os.get();
+          os.get();
+          os.get();
+          os.get();
           os.get();
           os.get();
         }
