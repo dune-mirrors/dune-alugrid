@@ -386,8 +386,10 @@ namespace ALUGrid
           // get face neighbour
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
 
-          // check refineBalance
-          bool a = neigh.first->refineBalance (r, neigh.second);
+          bool a = true;
+          if(!r.bisection())
+            // check refineBalance
+            a = neigh.first->refineBalance (r, neigh.second);
 
           if (a)
           {
@@ -410,6 +412,13 @@ namespace ALUGrid
                 {
                   neigh.first->refineBalance (r, neigh.second);
                   neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+                }
+                for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
+                {
+                  // assert faces are leaf
+                  alugrid_assert(f->leaf());
+                  alugrid_assert(f->nb.front().first->nbLeaf());
+                  alugrid_assert(f->nb.rear().first->nbLeaf());
                 }
               }
             }
