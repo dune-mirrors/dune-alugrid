@@ -1,0 +1,18 @@
+# Where to search and which files to use
+INPUT                 += @top_srcdir@/dune \
+                         @top_srcdir@/examples
+
+EXCLUDE               += @top_srcdir@/dune/alugrid/test \
+                         @top_srcdir@/dune/alugrid/impl \
+                         @top_srcdir@/dune/scripts \
+                         @top_srcdir@/dune/cmake  \
+                         @top_srcdir@/dune/m4 \
+                         @top_srcdir@/dune/lib 
+
+ALIASES              += notcleardoc="\xrefitem notcleardoc \"documentation will be extended\" \"Needs extended documentation\"" \
+                        interfaceclass="\xrefitem interfaceclass \"An interface class\" \"Main interface classes\"" \
+                        newimplementation="\xrefitem newimplementation \"Newly added\" \"New interface implementation and other gadgets\"" 
+
+FILE_PATTERNS       += *.hh *.dist *.dev *.page
+
+EXAMPLE_PATH        +=  @top_srcdir@/example
