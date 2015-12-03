@@ -386,8 +386,10 @@ namespace ALUGrid
           // get face neighbour
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
 
-          // check refineBalance
-          bool a = neigh.first->refineBalance (r, neigh.second);
+          bool a = true;
+          if(!r.bisection())
+            // check refineBalance
+            a = neigh.first->refineBalance (r, neigh.second);
 
           if (a)
           {
@@ -406,7 +408,18 @@ namespace ALUGrid
               {
                 //the neighbour may have changed
                 neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
-                neigh.first->refineBalance (r, neigh.second);
+                while(neigh.first->nbLeaf())
+                {
+                  neigh.first->refineBalance (r, neigh.second);
+                  neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+                }
+                for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
+                {
+                  // assert faces are leaf
+                  alugrid_assert(f->leaf());
+                  alugrid_assert(f->nb.front().first->nbLeaf());
+                  alugrid_assert(f->nb.rear().first->nbLeaf());
+                }
               }
             }
             else
@@ -605,8 +618,6 @@ namespace ALUGrid
     // es am Aufrufer die Verfeinerung nochmals anzuforern.
 
     alugrid_assert (b == 0) ;
-    if(!this->leaf())
-      return (this->getrule() == r) ;
 
     alugrid_assert (this->leaf ()) ;
     if ( ! this->bndNotifyBalance (r,b) )
@@ -624,11 +635,6 @@ namespace ALUGrid
     else
     {
       myhface_t& face (*(myhface(0)));
-      //if we are using bisection the face may have been refined because
-      //of the recursive nature of the algorithm
-      //so we have to check whether face is also a leaf
-      if(!face.leaf())
-        return (face.getrule() == r);
 
       // refine face according to rule
       face.refineImmediate (r) ;
@@ -703,8 +709,6 @@ namespace ALUGrid
       }
       else {
         myhface_t& face (*(myhface(0)));
-        if(!face.leaf())
-          return (face.getrule() == r);
 
         // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
         // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
@@ -2188,18 +2192,8 @@ namespace ALUGrid
         // if there is a loop in the mesh
         if(r != getrule ())
         {
+          alugrid_assert( getrule() == myrule_t::nosplit);
           refineImmediate (r) ;
-          if(r.bisection())
-          {
-            TetraTop < A > * child=this->down() ;
-            //if children are nonconforming
-            for(int i =0; i < 2; ++i )
-            {
-              if(child->markForConformingClosure())
-                child->refine();
-              child = child->next();
-            }
-          }
         }
         _req = myrule_t::nosplit ;
         return true ;
