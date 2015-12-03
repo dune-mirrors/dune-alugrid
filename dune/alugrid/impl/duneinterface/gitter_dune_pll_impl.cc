@@ -150,42 +150,51 @@ namespace ALUGrid
 
     IteratorSTI < HItemType > & iter = *(a.first);
 
-    // for all master items
-    for (iter.first (); ! iter.done (); iter.next ())
+    try
     {
-      HItemType & item = iter.item();
-
-      // read data marker
-      recvBuff.readObject(hasdata);
-
-      // get comm buffers
-      DataBufferType & data = getCommunicationBuffer( item, commBuffMap, nl + 1 );
-
-      // only gather master data once
-      if ( dataHandle.containsItem( item ) )
+      // for all master items
+      for (iter.first (); ! iter.done (); iter.next ())
       {
-        // pack master data
-        BufferType & mData = data[ nl ];
-        // reset read and write position
-        mData.clear();
+        HItemType & item = iter.item();
 
-        // write master data to fake buffer
-        dataHandle.sendData(mData,item);
+        // read data marker
+        recvBuff.readObject(hasdata);
+
+        // get comm buffers
+        DataBufferType & data = getCommunicationBuffer( item, commBuffMap, nl + 1 );
+
+        // only gather master data once
+        if ( dataHandle.containsItem( item ) )
+        {
+          // pack master data
+          BufferType & mData = data[ nl ];
+          // reset read and write position
+          mData.clear();
+
+          // write master data to fake buffer
+          dataHandle.sendData(mData,item);
+        }
+
+        // if data has been send, read data
+        if (hasdata != noData)
+        {
+          // pack slave data to tmnp buffer
+          BufferType & slaveBuff = data[link];
+          // reset read and write position
+          slaveBuff.clear();
+
+          int dataSize;
+          recvBuff.readObject(dataSize);
+          // read dataSize bytes from recvBuff and write to slaveStream
+          recvBuff.readStream(slaveBuff, dataSize);
+        }
       }
-
-      // if data has been send, read data
-      if (hasdata != noData)
-      {
-        // pack slave data to tmnp buffer
-        BufferType & slaveBuff = data[link];
-        // reset read and write position
-        slaveBuff.clear();
-
-        int dataSize;
-        recvBuff.readObject(dataSize);
-        // read dataSize bytes from recvBuff and write to slaveStream
-        recvBuff.readStream(slaveBuff, dataSize);
-      }
+    }
+    catch( ObjectStream::EOFException )
+    {
+      std::cerr << "ERROR (fatal): GitterDunePll::unpackOnMaster EOF encountered." << std::endl;
+      alugrid_assert(0);
+      abort();
     }
 
     delete a.first;
