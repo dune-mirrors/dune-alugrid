@@ -1,0 +1,5 @@
+/** \mainpage dune-alugrid Automatic Documentation
+
+\section into Introduction
+
+*/
