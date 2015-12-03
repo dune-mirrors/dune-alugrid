@@ -1,0 +1,5 @@
+INPUT                 += @srcdir@/mainpage.txt \
+                         @top_srcdir@/dune/alugrid
+
+EXCLUDE               += @top_srcdir@/dune/alugrid/impl \
+                         @top_srcdir@/dune/alugrid/test
