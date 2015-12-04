@@ -23,25 +23,6 @@ namespace Dune
     return ( Conversion< Comm, ALUGridNoComm > :: sameType ) ? "serial" : "parallel";
   }
 
-  /**
-   (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
-
-   \li Available Implementations
-        - quadrilateral and hexahedral elements only nonconforming refinement
-          - Dune::ALUGrid< 2, 2, cube, nonconforming >
-          - Dune::ALUGrid< 2, 3, cube, nonconforming >
-          - Dune::ALUGrid< 3, 3, cube, nonconforming >
-        - simplicial elements and nonconforming refinement
-          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
-          - Dune::ALUGrid< 2, 3, simplex, nonconforming >
-          - Dune::ALUGrid< 3, 3, simplex, nonconforming >
-        - simplicial elements and bisection refinement
-          - Dune::ALUGrid< 2, 2, simplex, conforming >
-          - Dune::ALUGrid< 2, 3, simplex, conforming >
-          - Dune::ALUGrid< 3, 3, simplex, conforming > (work in progress)
-
-   \note template parameter Comm defaults to ALUGridMPIComm, if MPI is available, ALUGridNoComm otherwise.
-  */
   template< int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
   class ALUGrid
   : public ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid
@@ -225,4 +206,4 @@ namespace Dune
 } //end  namespace Dune
 
 #undef alu_inline
-#endif
+#endif // #ifndef DUNE_ALU3DGRID_ALUGRID_HH
