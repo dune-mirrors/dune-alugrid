@@ -49,6 +49,42 @@
 #define USE_PARALLEL_TEST 1
 #endif
 
+template <class GridViewType>
+class PartitioningData
+  : public Dune::VTKFunction< GridViewType >
+{
+  typedef PartitioningData   ThisType;
+
+public:
+  typedef typename GridViewType :: template Codim< 0 >::Entity EntityType;
+  typedef typename EntityType::Geometry::LocalCoordinate LocalCoordinateType;
+
+  //! constructor taking discrete function
+  PartitioningData( const int rank ) : rank_( rank ) {}
+
+  //! virtual destructor
+  virtual ~PartitioningData () {}
+
+  //! return number of components
+  virtual int ncomps () const { return 1; }
+
+  //! evaluate single component comp in
+  //! the entity
+  virtual double evaluate ( int comp, const EntityType &e, const LocalCoordinateType &xi ) const
+  {
+    return double( rank_ );
+  }
+
+  //! get name
+  virtual std::string name () const
+  {
+    return std::string( "rank" );
+  }
+
+private:
+  const int rank_;
+};
+
 
 template <class GridType>
 void makeNonConfGrid(GridType &grid,int rank,int adapt)
@@ -84,7 +120,12 @@ void writeFile( const GridView& gridView , std::string name )
  //Dune::DGFWriter< GridView > writer( gridView );
  // writer.write( "dump.dgf" );
 
+  const  int rank = gridView.grid().comm().rank();
+
+  std::shared_ptr< PartitioningData<GridView> > rankVTK ( new PartitioningData<GridView>( rank ) );
+
   Dune::VTKWriter< GridView > writer( gridView );
+  writer.addCellData( rankVTK );
   writer.write( name );
 }
 
