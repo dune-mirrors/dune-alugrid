@@ -51,13 +51,13 @@
 
 
 template <class GridType>
-void makeNonConfGrid(GridType &grid,int level,int adapt)
+void makeNonConfGrid(GridType &grid,int rank,int adapt)
 {
   int myrank = grid.comm().rank();
 
   for (int i=0;i<adapt;i++)
   {
-    if (myrank==10)
+    if (myrank==rank)
     {
       typedef typename GridType::template Codim< 0 >::template Partition< Dune::Interior_Partition >::LeafIterator LeafIterator;
 
@@ -89,7 +89,7 @@ void writeFile( const GridView& gridView , std::string name )
 }
 
 template <class GridType>
-void checkALUSerial(GridType & grid, int mxl = 2, std::string filename = "dumping")
+void checkALUSerial(GridType & grid, int rank = 10, int mxl = 2, std::string filename = "dumping")
 {
   if(grid.comm().size() == 1)
     std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
@@ -98,7 +98,7 @@ void checkALUSerial(GridType & grid, int mxl = 2, std::string filename = "dumpin
 
 
   // check also non-conform grids
-  makeNonConfGrid(grid,0,20);
+  makeNonConfGrid(grid,rank,20);
 
   writeFile( grid.leafGridView() , filename.substr(6));
 }
@@ -122,7 +122,7 @@ int main (int argc , char **argv) {
     grid.loadBalance();
 
     {
-      checkALUSerial(grid, 20, filename );
+      checkALUSerial(grid, 10, 20, filename );
     }
 
   /*  typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming > SurfaceGridType;
@@ -131,7 +131,7 @@ int main (int argc , char **argv) {
     Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
     SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
     surfaceGrid.loadBalance();
-    checkALUSerial( surfaceGrid, 20 ,surfaceFilename);
+    checkALUSerial( surfaceGrid, 10, 20 ,surfaceFilename);
 
 
     filename = "./dgf/simplex-testgrid-3-3.dgf";
@@ -142,7 +142,7 @@ int main (int argc , char **argv) {
     grid.loadBalance();
 
     {
-      checkALUSerial(grid, 20, filename);
+      checkALUSerial(grid,10, 20, filename);
     }
 */
   }
