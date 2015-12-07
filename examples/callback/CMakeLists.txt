@@ -17,6 +17,9 @@ set(EXAMPLES main_transport_cb
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")
+add_definitions("-DCALLBACK_ADAPTATION")
+
+#add_definitions("-DUSE_VECTOR_FOR_PWF")
 
 configure_file(check-adaptation.sh ${CMAKE_CURRENT_BINARY_DIR}/check-adaptation.sh COPYONLY)
 
