@@ -4,6 +4,7 @@ set(TESTS
   test-adaptivity
   test-fromtogridfactory
   test-twists
+  test-refinement
 )
 
 # copy data to build source to make tests work
@@ -13,6 +14,7 @@ add_executable(test-alugrid test-alugrid.cc)
 add_executable(test-adaptivity test-adaptivity.cc)
 add_executable(test-fromtogridfactory test-fromtogridfactory.cc)
 add_executable(test-twists test-twists.cc)
+add_executable(test-refinement test-refinement.cc)
 
 foreach(i ${SUBDIRS})
   if(${i} STREQUAL "test")
