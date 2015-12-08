@@ -251,7 +251,13 @@ inline double FiniteVolumeScheme< V, Model >
     const Entity &entity = *it;
     const IntersectionIterator iitend = gridView().iend( entity );
     for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
+    {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      apply( iit->outside(), time, solution, update, dt );
+#else
       apply( *(iit->outside()), time, solution, update, dt );
+#endif
+    }
   } // end grid traversal
 
   // return time step
