@@ -135,11 +135,11 @@ void checkALUSerial(GridType & grid, int rank = 10, int mxl = 2, std::string fil
   if(grid.comm().size() == 1)
     std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
-  writeFile( grid.leafGridView() , "init-" + filename.substr(6));
+  //writeFile( grid.leafGridView() , "init-" + filename.substr(6));
 
 
   // check also non-conform grids
-  makeNonConfGrid(grid,rank,20);
+  makeNonConfGrid(grid,rank,mxl);
 
   writeFile( grid.leafGridView() , filename.substr(6));
 }
@@ -163,7 +163,7 @@ int main (int argc , char **argv) {
     grid.loadBalance();
 
     {
-      checkALUSerial(grid, 10, 20, filename );
+      checkALUSerial(grid, 19, 20, filename );
     }
 
   /*  typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming > SurfaceGridType;
@@ -173,19 +173,19 @@ int main (int argc , char **argv) {
     SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
     surfaceGrid.loadBalance();
     checkALUSerial( surfaceGrid, 10, 20 ,surfaceFilename);
+*/
 
+    filename = "./dgf/unitcube3d.dgf";
 
-    filename = "./dgf/simplex-testgrid-3-3.dgf";
-
-    typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > GridType;
-    Dune::GridPtr< GridType > gridPtr( filename );
-    GridType & grid = *gridPtr;
-    grid.loadBalance();
+    typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > GridType3d;
+    Dune::GridPtr< GridType3d > gridPtr3d( filename );
+    GridType3d & grid3d = *gridPtr3d;
+    grid3d.loadBalance();
 
     {
-      checkALUSerial(grid,10, 20, filename);
+      checkALUSerial(grid3d,10, 20, filename);
     }
-*/
+
   }
   catch( Dune::Exception &e )
   {
