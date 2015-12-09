@@ -534,6 +534,21 @@ namespace ALUGrid
       int refineLoops = 0;
       do
       {
+        if(conformingClosureNeeded())
+        {
+          {
+            PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, true );
+            mpAccess().exchange( edgeData );
+          }
+
+          {
+            PackUnpackEdgeCleanup edgeData( innerEdges, outerEdges, false );
+            mpAccess().exchange( edgeData );
+          }
+          Gitter::markForConformingClosure();
+          Gitter::refine();
+        }
+
         // unpack handle to unpack the data once their received
         PackUnpackRefineLoop dataHandle ( innerFaces, outerFaces, conformingClosureNeeded() );
 
