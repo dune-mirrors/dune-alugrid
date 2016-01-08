@@ -160,43 +160,8 @@ namespace Dune
       DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
                              "into a 3-dimensional ALUGrid." );
     }
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
 
-    BndPair boundaryId;
-    if(dimension == 3)
-    {
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
-      {
-        const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-        boundaryId.first[ j ] = vertices[ i ];
-      }
-    }
-    else if(dimension == 2)
-    {
-      VertexId face[ 4 ];
-      if(elementType == tetra)
-      {
-        face[2] = vertices[1]+1;
-        face[1] = vertices[0]+1;
-        face[0] = 0;
-      }
-      else if(elementType == hexa)
-      {
-        face[0] = 2*vertices[0];
-        face[3] = 2*vertices[1];
-        face[1] = face[0]+1;
-        face[2] = face[3]+1;
-      }
-      const int nFace = elementType == hexa ? 4 : 3;
-      for (int i = 0; i < nFace; ++i)
-      {
-        boundaryId.first[ i ] = face[ i ];
-      }
-    }
-
-    boundaryId.second = id;
-    boundaryIds_.insert( boundaryId );
+    boundaryIds_.insert( makeBndPair( makeFace( vertices ), id ) );
   }
 
 
@@ -255,35 +220,8 @@ namespace Dune
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     alugrid_assert ( type.isCube() || type.isSimplex() );
 
-    std::vector<VertexId > face (vertices);
-
-    //if the dimension is 2, we have to adjust the
-    //vertex indices according to the transformation in
-    //insertBoundary
-    if(dimension == 2 && face.size() == 2)
-    {
-      if(elementType == tetra)
-      {
-        face.resize(3,0);
-        face[2] = vertices[1]+1;
-        face[1] = vertices[0]+1;
-        face[0] = 0;
-      }
-      else if(elementType == hexa)
-      {
-        face.resize(4,0);
-        face[0] = 2*vertices[0];
-        face[3] = 2*vertices[1];
-        face[1] = face[0]+1;
-        face[2] = face[3]+1;
-      }
-    }
-
-    FaceType faceId;
-    copyAndSort( face, faceId );
-
-    if( face.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << face.size() << "." );
+    FaceType faceId = makeFace( vertices );
+    std::sort( faceId.begin(), faceId.end() );
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
@@ -1046,6 +984,7 @@ namespace Dune
 
       if( pos == faceMap.end() )
       {
+        std::cerr << "Key: " << key << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
