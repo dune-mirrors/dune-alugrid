@@ -114,7 +114,7 @@ namespace Dune
         if( elementType == tetra )
           copy( { 0, vertices[ 1 ]+1, vertices[ 0 ]+1 }, faceId );
         else if( elementType == hexa )
-          copy( { 2*vertices[ 0 ], 2*vertices[ 1 ]+1, 2*vertices[ 1 ], 2*vertices[ 0 ]+1 }, faceId );
+          copy( { 2*vertices[ 0 ], 2*vertices[ 0 ]+1, 2*vertices[ 1 ]+1, 2*vertices[ 1 ] }, faceId );
       }
       else if( dimension == 3 )
         std::copy_n( vertices.begin(), numFaceCorners, faceId.begin() );
