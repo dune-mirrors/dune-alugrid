@@ -247,8 +247,8 @@ namespace Dune {
     : seed_( org.seed_ )
     , entity_( GridImp::getRealImplementation(org.entity_) )
   {
-    alugrid_assert( org.seed_.item() == & org.entityImp().getItem() );
-    alugrid_assert( seed_.item() == & entityImp().getItem() );
+    alugrid_assert( seed_   == org.seed_ );
+    alugrid_assert( entity_ == org.entity_ );
   }
 
   template<int codim, class GridImp >
