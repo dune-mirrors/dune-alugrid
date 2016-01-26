@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDITERATOR_HH
 
 // System includes
+#include <type_traits>
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
@@ -75,7 +76,7 @@ class ALU3dGridIntersectionIterator
 
   typedef ALU3dGridFaceInfo< dim, dimworld, GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename conditional<
+  typedef typename std::conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
@@ -305,7 +306,7 @@ public ALU3dGridIntersectionIterator<GridImp>
 
   typedef ALU3dGridFaceInfo< dim, dimworld,  GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename conditional<
+  typedef typename std::conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
