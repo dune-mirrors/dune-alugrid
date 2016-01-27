@@ -298,7 +298,7 @@ namespace ALUGrid
       void writeDynamicState (ObjectStream &, int) const;
 
       // access interior element and write data
-      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const
+      void writeDynamicState (ObjectStream &, GatherScatterType &) const
       {
         alugrid_assert ( false );
         abort();
@@ -380,7 +380,7 @@ namespace ALUGrid
       virtual void getAttachedElement ( std::pair< Gitter::helement_STI* , Gitter::hbndseg_STI * > & p );
 
       void writeDynamicState (ObjectStream &, int) const;
-      void writeDynamicState (ObjectStream &os, GatherScatterType &gs) const
+      void writeDynamicState (ObjectStream &, GatherScatterType &) const
       {
         alugrid_assert ( false ); abort();
       }
