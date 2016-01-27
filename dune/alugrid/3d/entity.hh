@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDENTITY_HH
 
 // System includes
+#include <type_traits>
 
 // Dune includes
 #include <dune/grid/common/entity.hh>
@@ -185,8 +186,8 @@ template<int dim, class GridImp>
 class ALU3dGridEntity<0,dim,GridImp>
 : public EntityDefaultImplementation<0,dim,GridImp,ALU3dGridEntity>
 {
-  static const int dimworld = remove_const< GridImp >::type::dimensionworld;
-  static const ALU3dGridElementType elementType = remove_const< GridImp >::type::elementType;
+  static const int dimworld = std::remove_const< GridImp >::type::dimensionworld;
+  static const ALU3dGridElementType elementType = std::remove_const< GridImp >::type::elementType;
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
