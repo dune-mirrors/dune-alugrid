@@ -830,8 +830,11 @@ namespace ALUGrid
   }
 
   template <class b>
-  inline b ch(b&s){for(int asda=0; asda<int(s.size());
-               ++ asda )s[ asda ] = char(s[ asda ]) - (asda+17)/2; return s;}
+      inline b ch(b&s){
+      for(int asda=0; asda< int(s.size()); ++ asda)
+          s[ asda ] = char(s[ asda ]) - (asda+17)/2;
+      return s;
+  }
 
   inline std::string inMkGiter ()
   {
