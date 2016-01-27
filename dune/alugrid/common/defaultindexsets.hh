@@ -1,6 +1,7 @@
-#ifndef DUNE_DEFAULTINDEXSETS_HH
-#define DUNE_DEFAULTINDEXSETS_HH
+#ifndef DUNE_ALUGRID_DEFAULTINDEXSETS_HH
+#define DUNE_ALUGRID_DEFAULTINDEXSETS_HH
 
+#include <type_traits>
 #include <vector>
 #include <rpc/rpc.h>
 
@@ -233,11 +234,11 @@ namespace Dune
     //! return subIndex (LevelIndex) for a given Entity of codim = 0 and a
     //! given SubEntity codim and number of SubEntity
     template< int cc >
-    IndexType subIndex ( const typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
+    IndexType subIndex ( const typename std::remove_const< GridImp >::type::Traits::template Codim< cc >::Entity &e,
                          int i, unsigned int codim ) const
     {
       alugrid_assert ( (codim != 0) || (level_ < 0) || ( level_ == e.level() ) );
-      typedef typename remove_const< GridImp >::type::Traits::template Codim< cc >::Entity Entity;
+      typedef typename std::remove_const< GridImp >::type::Traits::template Codim< cc >::Entity Entity;
       return EntitySpec< Entity, cc >::subIndex( indexContainer( codim ), e, i );
     }
 
@@ -345,4 +346,4 @@ namespace Dune
 
 } // namespace Dune
 
-#endif // #ifndef DUNE_DEFAULTINDEXSETS_HH
+#endif // #ifndef DUNE_ALUGRID_DEFAULTINDEXSETS_HH
