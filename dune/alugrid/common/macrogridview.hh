@@ -5,7 +5,8 @@
 
 #include <type_traits>
 
-#include <dune/common/typetraits.hh>
+#include <type_traits>
+
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/capabilities.hh>
