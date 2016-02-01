@@ -3,6 +3,7 @@
 
 // System includes
 #include <memory>
+#include <type_traits>
 
 // Dune includes
 #include <dune/common/version.hh>
