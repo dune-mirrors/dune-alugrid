@@ -8,7 +8,6 @@
 
 #include <dune/common/fvector.hh>
 
-#include "problem-transport.hh"
 #include "problem.hh"
 
 template< int dimD >
