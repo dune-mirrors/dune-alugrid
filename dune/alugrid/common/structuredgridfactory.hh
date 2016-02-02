@@ -1,9 +1,9 @@
 #ifndef DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 #define DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 
+#include <array>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/version.hh>
 
 #include <dune/common/classname.hh>
