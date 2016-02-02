@@ -239,6 +239,9 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::border ( const double time, const Arg &solution, Vector &update ) const
 {
+  // if model does not have numerical flux we have nothing to do here
+  if( ! Model::hasFlux ) return model_.fixedDt();
+
   // time step size (using std:min(.,dt) so set to maximum)
   double dt = std::numeric_limits<double>::infinity();
 
@@ -269,6 +272,9 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
+  // if model does not have numerical flux we have nothing to do here
+  if( ! Model::hasFlux ) return model_.fixedDt();
+
   // time step size (using std:min(.,dt) so set to maximum)
   double dt = std::numeric_limits<double>::infinity();
 
