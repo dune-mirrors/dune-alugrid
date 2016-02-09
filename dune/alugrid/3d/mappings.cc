@@ -66,8 +66,8 @@ namespace Dune
 
   template< int dim, int dimworld, class Comm >
   void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
-    ::child2parentE01 ( const CoordinateType &childCoordinates,
-                        CoordinateType &parentCoordinates ) const
+    ::child2parentE01 ( const CoordinateType &,
+                        CoordinateType & ) const
   {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
@@ -76,8 +76,8 @@ namespace Dune
 
   template< int dim, int dimworld, class Comm >
   void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
-    ::child2parentE12 ( const CoordinateType &childCoordinates,
-                        CoordinateType &parentCoordinates ) const
+    ::child2parentE12 ( const CoordinateType &,
+                        CoordinateType & ) const
   {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
@@ -86,8 +86,8 @@ namespace Dune
 
   template< int dim, int dimworld, class Comm >
   void NonConformingFaceMapping< dim, dimworld, tetra, Comm >
-    ::child2parentE20 ( const CoordinateType &childCoordinates,
-                        CoordinateType &parentCoordinates ) const
+    ::child2parentE20 ( const CoordinateType &,
+                        CoordinateType & ) const
   {
     DUNE_THROW(NotImplemented,
                "This refinement rule is currently not supported");
