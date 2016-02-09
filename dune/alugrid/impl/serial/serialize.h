@@ -537,13 +537,13 @@ namespace ALUGrid
 
   // streaming operators for ObjectStream ignoring space
   template< class Traits >
-  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const StandardWhiteSpace_t& space )
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const StandardWhiteSpace_t& )
   {
     return os;
   }
 
   // streaming operators for ObjectStream ignoring space
-  inline std::ostream& operator << ( std::ostream& os, const StandardWhiteSpace_t& space )
+  inline std::ostream& operator << ( std::ostream& os, const StandardWhiteSpace_t& )
   {
     os << char(' ');
     return os;
