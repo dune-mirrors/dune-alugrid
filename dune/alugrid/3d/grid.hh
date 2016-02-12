@@ -1133,6 +1133,7 @@ namespace Dune
     virtual void completeGrid ()
     {
       Communications::completeGrid( myGrid() );
+      clearIsNewMarkers();
     }
 
     //! return reference to Dune reference element according to elType
