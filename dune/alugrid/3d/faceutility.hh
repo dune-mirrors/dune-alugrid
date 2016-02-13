@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU3DGRIDFACEUTILITY_HH
 #define DUNE_ALU3DGRIDFACEUTILITY_HH
 
+#include <type_traits>
+
 #include <dune/geometry/referenceelements.hh>
 
 #include "mappings.hh"
@@ -130,9 +132,7 @@ namespace Dune
     ConformanceState conformanceState() const;
 
     //! return whether we are in a parallel environment or not
-    bool parallel() const {
-      return ! Conversion< Comm, ALUGridNoComm > :: sameType ;
-    }
+    bool parallel() const { return !std::is_same< Comm, ALUGridNoComm >::value; }
 
     //! return true if conforming refinement is enabled
     bool conformingRefinement () const { return conformingRefinement_; }

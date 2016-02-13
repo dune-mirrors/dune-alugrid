@@ -1,7 +1,7 @@
 #ifndef DUNE_ALUGRID_INTERFACES_HH
 #define DUNE_ALUGRID_INTERFACES_HH
 
-#include <dune/common/typetraits.hh>
+#include <type_traits>
 
 /** @file
   @author Robert Kloefkorn
@@ -34,7 +34,7 @@ namespace Dune {
   struct GridObjectStreamOrDefault
   {
     typedef GridObjectStreamOrDefaultHelper<
-                Conversion<GridImp, HasObjectStream>::exists,
+                std::is_base_of< HasObjectStream, GridImp >::value,
                 GridImp,
                 DefaultImp> GridObjectStreamTraits;
 

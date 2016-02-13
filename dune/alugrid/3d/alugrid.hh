@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU3DGRID_ALUGRID_HH
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
+#include <type_traits>
+
 // 3d version
 #include <dune/alugrid/common/capabilities.hh>
 #include <dune/alugrid/3d/indexsets.hh>
@@ -20,7 +22,7 @@ namespace Dune
   template <class Comm>
   static const char* ALUGridParallelSerial()
   {
-    return ( Conversion< Comm, ALUGridNoComm > :: sameType ) ? "serial" : "parallel";
+    return ( std::is_same< Comm, ALUGridNoComm >::value ) ? "serial" : "parallel";
   }
 
   template< int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
@@ -188,12 +190,6 @@ namespace Dune
     }
 
   private:
-    friend class Conversion< This , HasObjectStream > ;
-    friend class Conversion< const This, HasObjectStream > ;
-
-    friend class Conversion< This, HasHierarchicIndexSet > ;
-    friend class Conversion< const This, HasHierarchicIndexSet > ;
-
     template< class > friend class ALU3dGridFactory;
 
     //! Copy constructor should not be used
