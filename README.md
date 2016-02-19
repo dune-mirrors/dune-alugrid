@@ -7,7 +7,7 @@ providing unstructured simplicial and cube grids.
 
 A detailed description of all the new features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
-in the paper **The DUNE-ALUGrid Module.** http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252.
+in the paper [The DUNE-ALUGrid Module][3].
 
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
@@ -20,7 +20,7 @@ New features and improvements include
   *  All grids are now parallel (i.e. 2D and 3D)
   *  Internal load balancing based on space filling curves
      making DUNE-ALUGrid self contained also in parallel
-  *  Bindings for fully parallel partitioners using [Zoltan][3]
+  *  Bindings for fully parallel partitioners using [Zoltan][4]
   *  Complete user control of the load balancing
   *  Improved memory footprint
 
@@ -39,7 +39,7 @@ License
 The DUNE-ALUGrid library, headers and test programs are free open-source software,
 licensed under version 2 or later of the GNU General Public License.
 
-See the file [LICENSE][4] for full copying permissions.
+See the file [LICENSE][5] for full copying permissions.
 
 Installation
 ------------
@@ -49,5 +49,6 @@ For installation instructions please see the [DUNE website][2].
 [0]: https://gitlab.dune-project.org/extensions/dune-alugrid
 [1]: http://www.dune-project.org
 [2]: http://www.dune-project.org/doc/installation-notes.html
-[3]: http://www.cs.sandia.gov/Zoltan/
-[4]: LICENSE
+[3]: http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252
+[4]: http://www.cs.sandia.gov/Zoltan/
+[5]: LICENSE
