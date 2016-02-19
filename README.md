@@ -7,7 +7,7 @@ providing unstructured simplicial and cube grids.
 
 A detailed description of all the new features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
-in the paper **The DUNE-ALUGrid Module.** http://arxiv.org/abs/1407.6954.
+in the paper **The DUNE-ALUGrid Module.** http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252.
 
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
