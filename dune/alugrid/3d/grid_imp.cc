@@ -333,17 +333,17 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
 
     typedef typename IteratorType :: val_t val_t ;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
 
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
-      IMPLElementType * elem = 0;
+      HElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
+        elem = item.first;
       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+        elem = item.second->getGhost().first;
 
       alugrid_assert ( elem );
 
@@ -506,29 +506,31 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
 
     typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
 
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
       alugrid_assert ( item.first || item.second );
-      IMPLElementType * elem = 0;
+      HElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
+      {
+        elem = item.first;
+      }
       else if( item.second )
       {
-        elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
-        alugrid_assert ( elem );
+        elem = item.second->getGhost().first;
       }
+      alugrid_assert ( elem );
+
       if (elem->hasBeenRefined())
       {
         elem->resetRefinedTag();
         // on bisected grids its possible that not only leaf elements where added so
         // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
-        while (elem->up())
+        while ((elem = elem->up()))
         {
-          elem = static_cast<IMPLElementType *>(elem->up());
           elem->resetRefinedTag();
         }
       }
