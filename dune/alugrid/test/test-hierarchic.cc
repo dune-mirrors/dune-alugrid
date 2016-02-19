@@ -56,7 +56,7 @@ int main (int argc , char **argv) {
     factory.insertElement(dSimplex, {0, 1, 2});
     factory.insertElement(dSimplex, {0, 2, 3});
 
-    auto* grid = factory.createGrid();
+    std::unique_ptr< Grid > grid ( factory.createGrid() );
     grid->globalRefine(1);
 
     using HierarchicIterator = typename Grid::HierarchicIterator;
