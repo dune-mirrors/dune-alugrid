@@ -2523,8 +2523,8 @@ namespace ALUGrid
         return myhface(i)->subface(j) ;
       if ( twist(i) == 2 ||  twist(i) == -2 ||  twist(i) == -3 )
         return myhface(i)->subface(!j) ;
-        std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-        return 0;
+      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
+      return 0;
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
