@@ -9,6 +9,7 @@
 #include <dune/common/fvector.hh>
 
 #include "problem.hh"
+#include "problem-transport.hh"
 
 template< int dimD >
 struct BallData
