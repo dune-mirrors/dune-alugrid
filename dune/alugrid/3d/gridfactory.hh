@@ -350,6 +350,16 @@ namespace Dune
       return vertices_[ id ].first;
     }
 
+    const VertexInputType inputPosition ( const VertexId &id ) const
+    {
+      alugrid_assert ( id < vertices_.size() );
+      VertexType vertex = vertices_[ id ].first;
+      VertexInputType iVtx(0.);
+      for(unsigned i = 0 ; i < dimensionworld ; ++i)
+        iVtx[i] = vertex[i];
+      return iVtx;
+    }
+
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
