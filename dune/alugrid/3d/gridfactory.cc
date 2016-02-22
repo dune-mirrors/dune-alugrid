@@ -847,24 +847,27 @@ namespace Dune
                       const FaceType &key1, const FaceType &key2,
                       const int defaultId )
   {
-    /*
-    WorldVector w = transformation.evaluate( position( key1[ 0 ] ) );
+    WorldVector w = transformation.evaluate( inputPosition( key1[ 0 ] ) );
     int org = -1;
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
-      if( (w - position( key2[ i ] )).two_norm() < 1e-6 )
+      if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+      {
         org = i;
+        break;
+      }
     }
     if( org < 0 )
       return false;
+
 
     FaceType key0;
     key0[ 0 ] = key2[ org ];
     for( unsigned int i = 1; i < numFaceCorners; ++i )
     {
-      w = transformation.evaluate( position( key1[ i ] ) );
+      w = transformation.evaluate( inputPosition( key1[ i ] ) );
       const int j = ((org+numFaceCorners)-i) % numFaceCorners;
-      if( (w - position( key2[ j ] )).two_norm() >= 1e-6 )
+      if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
         return false;
       key0[ i ] = key2[ j ];
     }
@@ -889,7 +892,6 @@ namespace Dune
 
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
-    */
     return true;
   }
 
