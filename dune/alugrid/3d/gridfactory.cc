@@ -847,29 +847,55 @@ namespace Dune
                       const FaceType &key1, const FaceType &key2,
                       const int defaultId )
   {
-    WorldVector w = transformation.evaluate( inputPosition( key1[ 0 ] ) );
-    int org = -1;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    FaceType key0;
+    if(dimension == 3 || elementType ==hexa)
     {
-      if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+      WorldVector w = transformation.evaluate( inputPosition( key1[ 0 ] ) );
+      int org = -1;
+      for( unsigned int i = 0; i < numFaceCorners; ++i )
       {
-        org = i;
-        break;
+        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+        {
+          org = i;
+          break;
+        }
+      }
+      if( org < 0 )
+        return false;
+
+      key0[ 0 ] = key2[ org ];
+      for( unsigned int i = 1; i < numFaceCorners; ++i )
+      {
+        w = transformation.evaluate( inputPosition( key1[ i ] ) );
+        const int j = ((org+numFaceCorners)-i) % numFaceCorners;
+        if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
+          return false;
+        key0[ i ] = key2[ j ];
       }
     }
-    if( org < 0 )
-      return false;
-
-
-    FaceType key0;
-    key0[ 0 ] = key2[ org ];
-    for( unsigned int i = 1; i < numFaceCorners; ++i )
+    else //if dimension == 2 && elementType == tetra
     {
-      w = transformation.evaluate( inputPosition( key1[ i ] ) );
-      const int j = ((org+numFaceCorners)-i) % numFaceCorners;
+      if(key1[0] != 0 || key2[0] != 0) return false;
+      WorldVector w = transformation.evaluate( inputPosition( key1[ 1 ] ) );
+      int org = -1;
+      for( unsigned int i = 1; i < numFaceCorners; ++i )
+      {
+        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+        {
+          org = i;
+          break;
+        }
+      }
+      if( org < 0 )
+        return false;
+
+      key0[ 0 ] = 0;
+      key0[ 1 ] = key2[ org ];
+      w = transformation.evaluate( inputPosition( key1[ 2 ] ) );
+      const int j = (org == 1) ? 2 : 1;
       if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
         return false;
-      key0[ i ] = key2[ j ];
+      key0[ 2 ] = key2[ j ];
     }
 
     int bndId[ 2 ] = { 20, 20 };
@@ -964,7 +990,6 @@ namespace Dune
         else
         {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
-          searchPeriodicNeighbor( faceMap, faceMap.find( key ), defaultId );
         }
       }
     }
@@ -992,6 +1017,14 @@ namespace Dune
 
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
+    }
+
+    //the search for the periodic neighbour also deletes the
+    //found faces from the boundaryIds_ - thus it has to be done
+    //after the recreation of the Ids_, because of correctElementOrientation
+    for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+    {
+      searchPeriodicNeighbor( faceMap, it, defaultId );
     }
 
     // communicate unidentified boundaries and find process borders)
