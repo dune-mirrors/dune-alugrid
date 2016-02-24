@@ -3,6 +3,7 @@ set(modules
     CMakeLists.txt
     DuneAlugridMacros.cmake
     FindDLMalloc.cmake
+    FindPThreads.cmake
     FindSIONlib.cmake
     FindZOLTAN.cmake
 )
