@@ -24,18 +24,18 @@ add_executable(main_transport_comm main.cc)
 dune_target_enable_all_packages(main_transport_comm )
 #dune_target_link_libraries(main_transport_comm "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_transport_comm APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT" )
+  COMPILE_DEFINITIONS "TRANSPORT;NON_BLOCKING" )
 
 add_executable(main_ball_comm main.cc)
 dune_target_enable_all_packages(main_ball_comm )
 #dune_target_link_libraries(main_ball_comm "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_ball_comm APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL" )
+  COMPILE_DEFINITIONS "BALL;NON_BLOCKING" )
 
 add_executable(main_euler_comm main.cc)
 dune_target_enable_all_packages(main_euler_comm )
 #dune_target_link_libraries(main_euler_comm "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_euler_comm APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER" )
+  COMPILE_DEFINITIONS "EULER;NON_BLOCKING" )
 
 install(FILES ${communication_HEADERS} DESTINATION ${communicationdir})

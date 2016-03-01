@@ -12,6 +12,9 @@ add_executable(adapt adapt.cc)
 add_executable(backuprestore backuprestore.cc)
 add_executable(threadsafety threadsafety.cc)
 
+dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
+                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
+
 foreach(i ${TESTS})
   # target_link_libraries(${i} ${ZLIB_LIBRARIES})
   # libdunalugrid needs symbols from zoltan. Therefore we need to link

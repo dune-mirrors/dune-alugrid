@@ -136,8 +136,15 @@ public:
       else
         dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
     }
-    else
-      dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
+    else if( dimD == 2 )
+    {
+      if( problem_ == 22 )
+        dgfFileName << path << "/dgf/sb" << dimDomain << "d_6400.dgf";
+      else if( problem_ == 23 )
+        dgfFileName << path << "/dgf/sb" << dimDomain << "d_65536.dgf";
+      else
+        dgfFileName << path << "/dgf/sb" << dimDomain << "d.dgf";
+    }
     return dgfFileName.str();
   }
 

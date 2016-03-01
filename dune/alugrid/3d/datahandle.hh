@@ -3,8 +3,8 @@
 
 //- system includes
 #include <iostream>
+#include <type_traits>
 
-#include <dune/common/typetraits.hh>
 #include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -815,8 +815,7 @@ namespace ALUGrid
     };
 
     // check whether DataHandleImpl is derived from LoadBalanceHandleWithReserveAndCompress
-    static const bool hasCompressAndReserve =  Dune::Conversion< DataHandleImpl,
-                      LoadBalanceHandleWithReserveAndCompress >::exists ;
+    static const bool hasCompressAndReserve =  std::is_base_of< LoadBalanceHandleWithReserveAndCompress, DataHandleImpl >::value;
     // don't transmit size in case we have special DataHandleImpl
     static const bool transmitSize = ! hasCompressAndReserve ;
 

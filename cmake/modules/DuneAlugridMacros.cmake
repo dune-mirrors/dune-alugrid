@@ -51,4 +51,5 @@ find_package(SIONlib)
 find_package(DLMalloc)
 find_package(ZOLTAN)
 
-message(AUTHOR_WARNING "TODO: Improve module test.")
+# check for phtreads
+include(FindPThreads)

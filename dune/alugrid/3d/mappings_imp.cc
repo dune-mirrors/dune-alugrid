@@ -1061,7 +1061,7 @@ namespace Dune {
 
   template <>
   alu_inline void LinearMapping<3, 0> ::
-  inverse(const map_t& local) const
+  inverse(const map_t&) const
   {
     // invert transposed matrix and return determinant
     _det = 1.;
@@ -1070,7 +1070,7 @@ namespace Dune {
   }
   template <>
   alu_inline void LinearMapping<2, 0> ::
-  inverse(const map_t& local) const
+  inverse(const map_t&) const
   {
     // invert transposed matrix and return determinant
     _det = 1.;
@@ -1104,41 +1104,30 @@ namespace Dune {
 
   template <>
   alu_inline void LinearMapping<3, 0> ::
-  inverseCodimOne(const map_t& local) const
+  inverseCodimOne(const map_t&) const
   {
   }
 
   template <>
   alu_inline void LinearMapping<2, 0> ::
-  inverseCodimOne(const map_t& local) const
+  inverseCodimOne(const map_t&) const
   {
   }
 
   template <int cdim, int mydim>
   alu_inline void LinearMapping<cdim, mydim> ::
-  inverseCodimOne(const map_t& local) const
+  inverseCodimOne(const map_t&) const
   {
     // use least squares approach
     FieldMatrix<ctype, mydim, mydim> AT_A;
 
-    /*
-    inv_t matrix;
-    for( int i=0; i<cdim; ++i)
-      for( int j=0; j<mydim; ++j)
-      {
-        matrix[i][j] = _matrix[j][i];
-      }
-    */
-
     // calc ret = A^T*A
-    //FMatrixHelp::multTransposedMatrix( matrix, AT_A);
     multTransposedMatrix(_matrix, AT_A );
 
     // calc Jinv_ = A (A^T*A)^-1
     FieldMatrix< ctype, mydim, mydim> inv_AT_A;
 
     FMatrixHelp :: invertMatrix( AT_A, inv_AT_A );
-    //FMatrixHelp :: multMatrix( matrix, inv_AT_A, _invTransposed );
     multMatrix( _matrix, inv_AT_A, _invTransposed );
 
     // set flag
@@ -1148,7 +1137,7 @@ namespace Dune {
   // triangle mapping
   template <>
   alu_inline void LinearMapping<3, 2> ::
-  calculateDeterminant(const map_t& local) const
+  calculateDeterminant(const map_t&) const
   {
     enum { cdim  = 3 };
     world_t tmpV; //! temporary memory
@@ -1221,7 +1210,7 @@ namespace Dune {
   // edge mapping
   template <>
   alu_inline void LinearMapping<3, 1> ::
-  inverse(const map_t& local) const
+  inverse(const map_t&) const
   {
     FieldMatrix<ctype, 1, 1> AT_A_;
 
@@ -1240,7 +1229,7 @@ namespace Dune {
   // triangle mapping
   template <>
   alu_inline void LinearMapping<3, 1> ::
-  calculateDeterminant(const map_t& local) const
+  calculateDeterminant(const map_t&) const
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
@@ -1253,7 +1242,7 @@ namespace Dune {
   // triangle mapping
   template <>
   alu_inline void LinearMapping<2, 1> ::
-  calculateDeterminant(const map_t& local) const
+  calculateDeterminant(const map_t&) const
   {
     // calculate length
     _det = std::sqrt( (_matrix[0][0] * _matrix[0][0]) +
@@ -1301,7 +1290,7 @@ namespace Dune {
   template <>
   alu_inline const LinearMapping<3, 0> :: inv_t&
   LinearMapping<3, 0> ::
-  jacobianInverseTransposed(const map_t & local) const
+  jacobianInverseTransposed(const map_t &) const
   {
     return _invTransposed;
   }
@@ -1309,7 +1298,7 @@ namespace Dune {
   template <>
   alu_inline const LinearMapping<2, 0> :: inv_t&
   LinearMapping<2, 0> ::
-  jacobianInverseTransposed(const map_t & local) const
+  jacobianInverseTransposed(const map_t &) const
   {
     return _invTransposed;
   }

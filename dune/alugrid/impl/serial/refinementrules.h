@@ -289,7 +289,7 @@ namespace ALUGrid
     return isValid( _r );
   }
 
-  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int t) const
+  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int) const
   {
     switch (_r) {
     case nosplit :

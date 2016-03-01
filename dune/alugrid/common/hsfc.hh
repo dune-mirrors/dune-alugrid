@@ -90,7 +90,7 @@ namespace ALUGridSFC {
 #endif // if HAVE_ZOLTAN
 
   template< class GridView >
-  void printSpaceFillingCurve ( const GridView& view, std::string name = "sfc" )
+  void printSpaceFillingCurve ( const GridView& view, std::string name = "sfc", const bool vtk = false  )
   {
     typedef typename GridView :: template Codim< 0 > :: Iterator  Iterator ;
     typedef typename Iterator :: Entity :: Geometry :: GlobalCoordinate GlobalCoordinate ;
@@ -120,35 +120,38 @@ namespace ALUGridSFC {
       gnuFile.close();
     }
 
-    std::stringstream vtkfilename;
-    vtkfilename << name << ".vtk";
-    if( view.grid().comm().size() > 1 )
-      vtkfilename << "." << view.grid().comm().rank();
-    std::ofstream vtkFile ( vtkfilename.str() );
-
-    if( vtkFile )
+    if( vtk )
     {
-      vtkFile << "# vtk DataFile Version 1.0" << std::endl;
-      vtkFile << "Line representation of vtk" << std::endl;
-      vtkFile << "ASCII" << std::endl;
-      vtkFile << "DATASET POLYDATA" << std::endl;
-      vtkFile << "POINTS "<< vertices.size() << " FLOAT" << std::endl;
+      std::stringstream vtkfilename;
+      vtkfilename << name << ".vtk";
+      if( view.grid().comm().size() > 1 )
+        vtkfilename << "." << view.grid().comm().rank();
+      std::ofstream vtkFile ( vtkfilename.str() );
 
-      for( size_t i=0; i<vertices.size(); ++i )
+      if( vtkFile )
       {
-        vtkFile << vertices[ i ];
-        for( int d=GlobalCoordinate::dimension; d<3; ++d )
-          vtkFile << " 0";
-        vtkFile << std::endl;
+        vtkFile << "# vtk DataFile Version 1.0" << std::endl;
+        vtkFile << "Line representation of vtk" << std::endl;
+        vtkFile << "ASCII" << std::endl;
+        vtkFile << "DATASET POLYDATA" << std::endl;
+        vtkFile << "POINTS "<< vertices.size() << " FLOAT" << std::endl;
+
+        for( size_t i=0; i<vertices.size(); ++i )
+        {
+          vtkFile << vertices[ i ];
+          for( int d=GlobalCoordinate::dimension; d<3; ++d )
+            vtkFile << " 0";
+          vtkFile << std::endl;
+        }
+
+        // lines, #lines, #entries
+        vtkFile << "LINES " << vertices.size()-1 << " " << (vertices.size()-1)*3 << std::endl;
+
+        for( size_t i=0; i<vertices.size()-1; ++i )
+          vtkFile << "2 " << i << " " << i+1 << std::endl;
+
+        vtkFile.close();
       }
-
-      // lines, #lines, #entries
-      vtkFile << "LINES " << vertices.size()-1 << " " << (vertices.size()-1)*3 << std::endl;
-
-      for( size_t i=0; i<vertices.size()-1; ++i )
-        vtkFile << "2 " << i << " " << i+1 << std::endl;
-
-      vtkFile.close();
     }
   }
 

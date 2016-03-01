@@ -133,7 +133,7 @@ namespace Dune
 #endif //!DUNE_VERSION_NEWER(DUNE_GRID,3,0)
             if( isParallel &&
                 intersection.neighbor() &&
-                (*intersection.outside()).partitionType() != InteriorEntity )
+                intersection.outside().partitionType() != InteriorEntity )
             {
               // insert process boundary if the neighboring element has a different rank
               factory.insertProcessBorder( elementIndex, faceNumber );

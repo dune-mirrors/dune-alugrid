@@ -31,18 +31,17 @@ include(GridType)
 
 # start a dune project with information from dune.module
 dune_project()
-set(SUBDIRS
-  dune
-  lib
-  m4
-  utils)
 
-foreach(i ${SUBDIRS})
-  add_subdirectory(${i})
-endforeach(i ${SUBDIRS})
+add_subdirectory(cmake/modules)
+add_subdirectory(m4)
+
+add_subdirectory(doc/doxygen)
+
+add_subdirectory(dune)
+add_subdirectory(lib)
 
 add_subdirectory(examples EXCLUDE_FROM_ALL)
-add_subdirectory(cmake/modules)
+add_subdirectory(utils)
 
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)

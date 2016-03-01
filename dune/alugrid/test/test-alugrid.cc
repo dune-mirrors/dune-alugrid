@@ -42,6 +42,11 @@
 #endif
 //#include "checktwists.cc"
 
+#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#include <dune/grid/test/checkgridfactory.hh>
+#include <doc/grids/gridfactory/testgrids.hh>
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+
 #include <dune/alugrid/dgf.hh>
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI
@@ -650,6 +655,9 @@ int main (int argc , char **argv) {
       factorEpsilon = 5.e+5;
       // check empty grid
 
+
+      // check empty grids
+
 #ifndef NO_3D
       if (myrank == 0 && (testALU3dCube || testALU3dSimplex) )
         std::cout << "Check empty grids" << std::endl;
@@ -671,7 +679,38 @@ int main (int argc , char **argv) {
         Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > grid;
         checkALUSerial( grid );
       }
-#endif
+#endif // #ifndef NO_3D
+
+
+      // check grid factory (test only available for dune-grid 3.0 or later)
+
+#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+      if( myrank == 0 )
+        std::cout << "Checking grid factory..." << std::endl;
+
+#ifndef NO_2D
+      if( testALU2dCube )
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > >( Dune::TestGrids::unitSquare );
+
+      if( testALU2dSimplex )
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > >( Dune::TestGrids::kuhn2d );
+
+      if( testALU2dConform )
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn2d );
+#endif // #ifndef NO_2D
+
+#ifndef NO_3D
+      if( testALU3dCube )
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > >( Dune::TestGrids::unitCube );
+
+      if( testALU3dSimplex )
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > >( Dune::TestGrids::kuhn3d );
+
+      if( testALU3dConform )
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
+#endif // #ifndef NO_3D
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+
 
 #ifndef NO_2D
       // check non-conform ALUGrid for 2d
