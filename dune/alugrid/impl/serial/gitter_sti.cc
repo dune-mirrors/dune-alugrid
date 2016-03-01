@@ -721,7 +721,7 @@ namespace ALUGrid
     return adapt();
   }
 
-  bool Gitter::duneAdapt ( AdaptRestrictProlongType &arp )
+  bool Gitter::duneAdapt ( AdaptRestrictProlongType & )
   {
     std::cerr << "ERROR: Method Gitter::duneAdapt not overloaded." << std::endl;
     return adapt();

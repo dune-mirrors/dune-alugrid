@@ -69,10 +69,12 @@ public:
   {
     assert( n == size( entity ) );
 
-    data_.resize();
     // we only have data on the leaf level
     if( entity.isLeaf() )
+    {
+      data_.resize();
       buffer.read( data_[ entity ] );
+    }
   }
 
   //! see documentation in Dune::CommDataHandleIF (method for general entities)

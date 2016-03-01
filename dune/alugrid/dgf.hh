@@ -1,6 +1,8 @@
 #ifndef DUNE_ALUGRID_DGF_HH
 #define DUNE_ALUGRID_DGF_HH
 
+#include <type_traits>
+
 #if HAVE_ALUGRID
 #include <dune/alugrid/grid.hh>
 #include <dune/grid/io/file/dgfparser/dgfalu.hh>
@@ -263,7 +265,7 @@ namespace Dune
                                const char *filename,
                                MPICommunicatorType communicator )
     {
-      if( ! Conversion< MPICommunicatorType , No_Comm > :: sameType )
+      if( !std::is_same< MPICommunicatorType, No_Comm >::value )
       {
         // in parallel runs add rank to filename
         std :: stringstream tmps;

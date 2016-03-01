@@ -239,6 +239,9 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::border ( const double time, const Arg &solution, Vector &update ) const
 {
+  // if model does not have numerical flux we have nothing to do here
+  if( ! Model::hasFlux ) return model_.fixedDt();
+
   // time step size (using std:min(.,dt) so set to maximum)
   double dt = std::numeric_limits<double>::infinity();
 
@@ -251,7 +254,13 @@ inline double FiniteVolumeScheme< V, Model >
     const Entity &entity = *it;
     const IntersectionIterator iitend = gridView().iend( entity );
     for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
+    {
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+      apply( iit->outside(), time, solution, update, dt );
+#else
       apply( *(iit->outside()), time, solution, update, dt );
+#endif
+    }
   } // end grid traversal
 
   // return time step
@@ -263,6 +272,9 @@ template< class Arg >
 inline double FiniteVolumeScheme< V, Model >
   ::operator() ( const double time, const Arg &solution, Vector &update ) const
 {
+  // if model does not have numerical flux we have nothing to do here
+  if( ! Model::hasFlux ) return model_.fixedDt();
+
   // time step size (using std:min(.,dt) so set to maximum)
   double dt = std::numeric_limits<double>::infinity();
 

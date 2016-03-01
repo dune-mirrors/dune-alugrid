@@ -18,6 +18,8 @@ add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")
 
+#add_definitions("-DUSE_VECTOR_FOR_PWF")
+
 configure_file(check-adaptation.sh ${CMAKE_CURRENT_BINARY_DIR}/check-adaptation.sh COPYONLY)
 
 
@@ -25,18 +27,18 @@ add_executable(main_transport_cb main.cc)
 dune_target_enable_all_packages( main_transport_cb )
 #dune_target_link_libraries(main_transport_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_transport_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT" )
+  COMPILE_DEFINITIONS "TRANSPORT;CALLBACK_ADAPTATION" )
 
 add_executable(main_ball_cb main.cc)
 dune_target_enable_all_packages( main_ball_cb )
 #dune_target_link_libraries(main_ball_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_ball_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL" )
+  COMPILE_DEFINITIONS "BALL;CALLBACK_ADAPTATION" )
 
 add_executable(main_euler_cb main.cc)
 dune_target_enable_all_packages( main_euler_cb )
 #dune_target_link_libraries(main_euler_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
 set_property(TARGET main_euler_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER" )
+  COMPILE_DEFINITIONS "EULER;CALLBACK_ADAPTATION" )
 
 install(FILES ${callback_HEADERS} DESTINATION ${callbackdir})

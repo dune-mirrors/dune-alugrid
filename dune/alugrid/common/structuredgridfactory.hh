@@ -1,9 +1,9 @@
 #ifndef DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 #define DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 
+#include <array>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/version.hh>
 
 #include <dune/common/classname.hh>
@@ -103,6 +103,20 @@ namespace Dune
 
     public:
       template< class Entity >
+      double index( const Entity &entity ) const
+      {
+        alugrid_assert ( Entity::codimension == 0 );
+#ifdef USE_ALUGRID_SFC_ORDERING
+        // get center of entity's geometry
+        VertexType center = entity.geometry().center();
+        // get hilbert index in [0,1]
+        return sfc_.index( center );
+#else
+        return double(indexSet_.index( entity ));
+#endif
+      }
+
+      template< class Entity >
       int rank( const Entity &entity ) const
       {
         alugrid_assert ( Entity::codimension == 0 );
@@ -131,7 +145,6 @@ namespace Dune
         return pSize_-1;
       }
 
-    protected:
       void calculateElementCuts()
       {
         const size_t nElements = indexSet_.size( 0 );
@@ -196,7 +209,7 @@ namespace Dune
       std::vector< long int > elementCuts_ ;
 
 #ifdef USE_ALUGRID_SFC_ORDERING
-      // get element to hilbert index mapping
+      // get element to hilbert (or Z) index mapping
       SpaceFillingCurveOrdering< VertexType > sfc_;
 #endif
       const double maxIndex_ ;
@@ -371,18 +384,30 @@ namespace Dune
 
       // map global vertex ids to local ones
       std::map< IndexType, unsigned int > vtxMap;
+      std::map< double, const Entity > sortedElementList;
 
       const int numVertices = (1 << dim);
       std::vector< unsigned int > vertices( numVertices );
 
-      int nextElementIndex = 0;
       const ElementIterator end = gridView.template end< 0 >();
       for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
       {
         const Entity &entity = *it;
+
         // if the element does not belong to our partition, continue
         if( partitioner.rank( entity ) != myrank )
           continue;
+
+        const double elIndex = partitioner.index( entity );
+        assert( sortedElementList.find( elIndex ) == sortedElementList.end() );
+        sortedElementList.insert( std::make_pair( elIndex, entity ) );
+      }
+
+      int nextElementIndex = 0;
+      const auto endSorted = sortedElementList.end();
+      for( auto it = sortedElementList.begin(); it != endSorted; ++it )
+      {
+        const Entity &entity = (*it).second;
 
         // insert vertices and element
         const typename Entity::Geometry geo = entity.geometry();
@@ -397,6 +422,7 @@ namespace Dune
             factory.insertVertex( geo.corner( i ), vtxId );
           vertices[ i ] = result.first->second;
         }
+
         factory.insertElement( entity.type(), vertices );
         const int elementIndex = nextElementIndex++;
 

@@ -160,43 +160,8 @@ namespace Dune
       DUNE_THROW( GridError, "Only 2-dimensional boundaries can be inserted "
                              "into a 3-dimensional ALUGrid." );
     }
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of vertices." );
 
-    BndPair boundaryId;
-    if(dimension == 3)
-    {
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
-      {
-        const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-        boundaryId.first[ j ] = vertices[ i ];
-      }
-    }
-    else if(dimension == 2)
-    {
-      VertexId face[ 4 ];
-      if(elementType == tetra)
-      {
-        face[2] = vertices[1]+1;
-        face[1] = vertices[0]+1;
-        face[0] = 0;
-      }
-      else if(elementType == hexa)
-      {
-        face[0] = 2*vertices[0];
-        face[3] = 2*vertices[1];
-        face[1] = face[0]+1;
-        face[2] = face[3]+1;
-      }
-      const int nFace = elementType == hexa ? 4 : 3;
-      for (int i = 0; i < nFace; ++i)
-      {
-        boundaryId.first[ i ] = face[ i ];
-      }
-    }
-
-    boundaryId.second = id;
-    boundaryIds_.insert( boundaryId );
+    boundaryIds_.insert( makeBndPair( makeFace( vertices ), id ) );
   }
 
 
@@ -255,35 +220,8 @@ namespace Dune
       DUNE_THROW( GridError, "Inserting boundary face of wrong dimension: " << type.dim() );
     alugrid_assert ( type.isCube() || type.isSimplex() );
 
-    std::vector<VertexId > face (vertices);
-
-    //if the dimension is 2, we have to adjust the
-    //vertex indices according to the transformation in
-    //insertBoundary
-    if(dimension == 2 && face.size() == 2)
-    {
-      if(elementType == tetra)
-      {
-        face.resize(3,0);
-        face[2] = vertices[1]+1;
-        face[1] = vertices[0]+1;
-        face[0] = 0;
-      }
-      else if(elementType == hexa)
-      {
-        face.resize(4,0);
-        face[0] = 2*vertices[0];
-        face[3] = 2*vertices[1];
-        face[1] = face[0]+1;
-        face[2] = face[3]+1;
-      }
-    }
-
-    FaceType faceId;
-    copyAndSort( face, faceId );
-
-    if( face.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << face.size() << "." );
+    FaceType faceId = makeFace( vertices );
+    std::sort( faceId.begin(), faceId.end() );
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
@@ -909,26 +847,55 @@ namespace Dune
                       const FaceType &key1, const FaceType &key2,
                       const int defaultId )
   {
-    /*
-    WorldVector w = transformation.evaluate( position( key1[ 0 ] ) );
-    int org = -1;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-    {
-      if( (w - position( key2[ i ] )).two_norm() < 1e-6 )
-        org = i;
-    }
-    if( org < 0 )
-      return false;
-
     FaceType key0;
-    key0[ 0 ] = key2[ org ];
-    for( unsigned int i = 1; i < numFaceCorners; ++i )
+    if(dimension == 3 || elementType ==hexa)
     {
-      w = transformation.evaluate( position( key1[ i ] ) );
-      const int j = ((org+numFaceCorners)-i) % numFaceCorners;
-      if( (w - position( key2[ j ] )).two_norm() >= 1e-6 )
+      WorldVector w = transformation.evaluate( inputPosition( key1[ 0 ] ) );
+      int org = -1;
+      for( unsigned int i = 0; i < numFaceCorners; ++i )
+      {
+        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+        {
+          org = i;
+          break;
+        }
+      }
+      if( org < 0 )
         return false;
-      key0[ i ] = key2[ j ];
+
+      key0[ 0 ] = key2[ org ];
+      for( unsigned int i = 1; i < numFaceCorners; ++i )
+      {
+        w = transformation.evaluate( inputPosition( key1[ i ] ) );
+        const int j = ((org+numFaceCorners)-i) % numFaceCorners;
+        if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
+          return false;
+        key0[ i ] = key2[ j ];
+      }
+    }
+    else //if dimension == 2 && elementType == tetra
+    {
+      if(key1[0] != 0 || key2[0] != 0) return false;
+      WorldVector w = transformation.evaluate( inputPosition( key1[ 1 ] ) );
+      int org = -1;
+      for( unsigned int i = 1; i < numFaceCorners; ++i )
+      {
+        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+        {
+          org = i;
+          break;
+        }
+      }
+      if( org < 0 )
+        return false;
+
+      key0[ 0 ] = 0;
+      key0[ 1 ] = key2[ org ];
+      w = transformation.evaluate( inputPosition( key1[ 2 ] ) );
+      const int j = (org == 1) ? 2 : 1;
+      if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
+        return false;
+      key0[ 2 ] = key2[ j ];
     }
 
     int bndId[ 2 ] = { 20, 20 };
@@ -951,7 +918,6 @@ namespace Dune
 
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
-    */
     return true;
   }
 
@@ -1024,7 +990,6 @@ namespace Dune
         else
         {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
-          searchPeriodicNeighbor( faceMap, faceMap.find( key ), defaultId );
         }
       }
     }
@@ -1046,11 +1011,20 @@ namespace Dune
 
       if( pos == faceMap.end() )
       {
+        std::cerr << "Key: " << key << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
       reinsertBoundary( faceMap, pos, bndIt->second );
       faceMap.erase( pos );
+    }
+
+    //the search for the periodic neighbour also deletes the
+    //found faces from the boundaryIds_ - thus it has to be done
+    //after the recreation of the Ids_, because of correctElementOrientation
+    for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+    {
+      searchPeriodicNeighbor( faceMap, it, defaultId );
     }
 
     // communicate unidentified boundaries and find process borders)

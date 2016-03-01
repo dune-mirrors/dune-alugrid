@@ -488,12 +488,6 @@ namespace Dune
     friend class ALU3dGridGlobalIdSet< dim, dimworld, elType, Comm >;
     friend class ALU3dGridLocalIdSet< dim, dimworld, elType, Comm >;
 
-    friend class Conversion< ThisType, HasObjectStream >;
-    friend class Conversion< const ThisType, HasObjectStream >;
-
-    friend class Conversion< ThisType, HasHierarchicIndexSet >;
-    friend class Conversion< const ThisType, HasHierarchicIndexSet >;
-
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
     typedef ALU3dGridIntersectionIterator<const ThisType>

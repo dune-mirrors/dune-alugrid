@@ -46,14 +46,17 @@
 /* Define if we have zoltan */
 #cmakedefine HAVE_ZOLTAN 1
 
-/* Define if we have thread local storage */
-#cmakedefine HAVE_PTHREAD_TLS 1
-
 /* Define if we have ZLIB */
 #cmakedefine HAVE_ZLIB 1
 
 /* Include source file for dlmalloc */
 #cmakedefine DLMALLOC_SOURCE_INCLUDE ${DLMALLOC_SOURCE_INCLUDE}
+
+/* Define if we have thread local storage */
+#cmakedefine HAVE_PTHREAD_TLS 1
+
+/* Define if we have pthreads */
+#cmakedefine HAVE_PTHREAD 1
 
 /* Grid type magic for DGF parser */
 @ALUGRID_CONFIG_H_BOTTOM@
