@@ -15,6 +15,7 @@ set(alucommon_HEADERS alugrid_assert.hh
                       persistentcontainer.hh
                       structuredgridfactory.hh
                       transformation.hh
+                      twists.hh
                       typetraits.hh
                       writeparalleldgf.hh
    )
