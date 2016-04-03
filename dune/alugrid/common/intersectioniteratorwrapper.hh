@@ -179,9 +179,8 @@ public:
   //! coordinates for higher order boundary
   const NormalType centerUnitOuterNormal ( ) const
   {
-    GeometryType type = geometry().type();
     const ReferenceElement<ctype, dim-1> & refElement =
-         ReferenceElements<ctype, dim-1>::general(type);
+         ReferenceElements<ctype, dim-1>::general( type() );
     return unitOuterNormal(refElement.position(0,0));
   }
 
