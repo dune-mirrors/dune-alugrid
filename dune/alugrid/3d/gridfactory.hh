@@ -7,6 +7,7 @@
 
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -45,7 +46,9 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
       typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     };
 
     typedef unsigned int VertexId;
