@@ -93,7 +93,9 @@ public:
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
   //! typedef of my type
   typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -240,13 +242,18 @@ public:
   typedef LevelIntersectionIteratorWrapper<GridImp>  ALU3dGridLevelIntersectionIteratorType;
 
   typedef typename GridImp::template Codim<0>::Entity        Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
   template <int cd>
   struct Codim
   {
     typedef typename GridImp::Traits::template Codim< cd >::Twists::Twist Twist;
+    typedef typename GridImp::template Codim< cd >::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   };
 
   //! typedef of my type
@@ -289,7 +296,7 @@ public:
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
   template< int codim >
-  typename Codim< codim >::EntityPointer subEntity ( int i ) const;
+  typename Codim< codim >::Entity subEntity ( int i ) const;
 
   template< int codim >
   typename Codim< codim >::Twist twist ( int i ) const;
@@ -299,7 +306,7 @@ public:
 
   //! Inter-level access to father element on coarser grid.
   //! Assumes that meshes are nested.
-  EntityPointer father () const;
+  Entity father () const;
 
   //! returns true if father entity exists
   bool hasFather () const
