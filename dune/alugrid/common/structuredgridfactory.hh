@@ -2,6 +2,7 @@
 #define DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 
 #include <array>
+#include <memory>
 #include <vector>
 
 #include <dune/common/version.hh>
@@ -312,7 +313,7 @@ namespace Dune
       dgfstream << "#" << std::endl;
 
       Dune::GridPtr< Grid > grid( dgfstream, mpiComm );
-      return std::make_shared( grid.release() );
+      return SharedPtrType( grid.release() );
     }
 
     template < class int_t >
