@@ -43,8 +43,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -98,10 +100,10 @@ public:
   }
 
   //! access neighbor
-  EntityPointer outside() const { return it().outside(); }
+  Entity outside() const { return it().outside(); }
 
   //! access entity where iteration started
-  EntityPointer inside() const { return it().inside(); }
+  Entity inside() const { return it().inside(); }
 
   //! return true if intersection is with boundary. \todo connection with
   //! boundary information, processor/outer boundary
@@ -179,9 +181,8 @@ public:
   //! coordinates for higher order boundary
   const NormalType centerUnitOuterNormal ( ) const
   {
-    GeometryType type = geometry().type();
     const ReferenceElement<ctype, dim-1> & refElement =
-         ReferenceElements<ctype, dim-1>::general(type);
+         ReferenceElements<ctype, dim-1>::general( type() );
     return unitOuterNormal(refElement.position(0,0));
   }
 
@@ -264,8 +265,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -365,8 +368,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
