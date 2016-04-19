@@ -99,10 +99,12 @@ void checkCapabilities(const Grid& grid)
    std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
    std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
    std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
    std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
    std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
    std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
    std::cout << std::endl;
