@@ -5,6 +5,8 @@
 #include <sstream>
 #include <fstream>
 
+#include <dune/common/exceptions.hh>
+
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
@@ -77,7 +79,7 @@ namespace ALUGridSFC {
       // return hsfc index in interval [0,1]
       return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
 #else
-      DUNE_THROW(DuneError,"Zoltan not found, cannot use Zoltan's Hilbert curve");
+      DUNE_THROW(Dune::SystemError,"Zoltan not found, cannot use Zoltan's Hilbert curve");
       return 0.0;
 #endif
     }
