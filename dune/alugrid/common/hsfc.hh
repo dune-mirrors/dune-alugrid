@@ -9,18 +9,6 @@
 #include <dune/common/parallel/collectivecommunication.hh>
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
-#ifndef DISABLE_ALUGRID_SFC_ORDERING
-#define USE_ALUGRID_SFC_ORDERING 1
-#else
-#warning "ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING"
-#endif
-
-// to disable Zoltans HSFC ordering of the macro elements define
-// DISABLE_ZOLTAN_HSFC_ORDERING on the command line
-#if HAVE_ZOLTAN && HAVE_MPI
-#define USE_ZOLTAN_SFC_ORDERING 1
-#endif
-
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 #if HAVE_ZOLTAN
 #include <dune/alugrid/impl/parallel/aluzoltan.hh>
@@ -33,13 +21,17 @@ extern "C" {
 
 namespace ALUGridSFC {
 
-#if USE_ZOLTAN_SFC_ORDERING
   template <class Coordinate>
   class ZoltanSpaceFillingCurveOrdering
   {
     // type of communicator
     typedef Dune :: CollectiveCommunication< typename Dune :: MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
+
+#if ! HAVE_ZOLTAN
+    typedef void                      Zoltan_Struct;
+    typedef CollectiveCommunication   Zoltan;
+#endif
 
     // type of Zoltan HSFC ordering function
     typedef double zoltan_hsfc_inv_t(Zoltan_Struct *zz, double *coord);
@@ -60,7 +52,11 @@ namespace ALUGridSFC {
                                      CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
+#if HAVE_ZOLTAN
         hsfcInv_( dimension == 3 ? Zoltan_HSFC_InvHilbert3d : Zoltan_HSFC_InvHilbert2d ),
+#else
+        hsfcInv_( 0 ),
+#endif
         zz_( comm )
     {
       // compute length
@@ -70,6 +66,7 @@ namespace ALUGridSFC {
     // return unique hilbert index in interval [0,1] given an element's center
     double hilbertIndex( const Coordinate& point ) const
     {
+#if HAVE_ZOLTAN
       assert( point.size() == (unsigned int)dimension );
 
       Coordinate center( 0 ) ;
@@ -79,6 +76,10 @@ namespace ALUGridSFC {
 
       // return hsfc index in interval [0,1]
       return hsfcInv_( zz_.Get_C_Handle(), &center[ 0 ] );
+#else
+      DUNE_THROW(DuneError,"Zoltan not found, cannot use Zoltan's Hilbert curve");
+      return 0.0;
+#endif
     }
 
     // return unique hilbert index in interval [0,1] given an element's center
@@ -87,7 +88,6 @@ namespace ALUGridSFC {
       return hilbertIndex( point );
     }
   };
-#endif // if HAVE_ZOLTAN
 
   template< class GridView >
   void printSpaceFillingCurve ( const GridView& view, std::string name = "sfc", const bool vtk = false  )
@@ -160,52 +160,75 @@ namespace ALUGridSFC {
 namespace Dune {
 
   template <class Coordinate>
-  class SpaceFillingCurveOrdering : public
-#if USE_ZOLTAN_SFC_ORDERING
-    ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate >
-#else
-#warning "(Zoltan && MPI) not found, using ALUGrid's ZCurve ordering"
-    ::ALUGridSFC::ZCurve< long int, Coordinate::dimension>
-#endif
+  class SpaceFillingCurveOrdering
   {
-
-#if USE_ZOLTAN_SFC_ORDERING
-    typedef ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate > BaseType;
-#else
-    typedef ::ALUGridSFC::ZCurve< long int, Coordinate::dimension> BaseType;
-#endif
+    typedef ::ALUGridSFC::ZCurve< long int, Coordinate::dimension>      ZCurveOrderingType;
+    typedef ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate > HilbertOrderingType;
 
     // type of communicator
     typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
         CollectiveCommunication ;
+  public:
+    enum CurveType { ZCurve, Hilbert, None };
+
+#if HAVE_ZOLTAN
+    static const CurveType DefaultCurve = Hilbert ;
+#else
+    static const CurveType DefaultCurve = ZCurve ;
+#endif
+
+  protected:
+    ZCurveOrderingType   zCurve_;
+    HilbertOrderingType  hilbert_;
+
+    const CurveType curveType_;
 
   public:
-    SpaceFillingCurveOrdering( const Coordinate& lower,
+    SpaceFillingCurveOrdering( const CurveType& curveType,
+                               const Coordinate& lower,
                                const Coordinate& upper,
                                const CollectiveCommunication& comm =
                                CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
-      : BaseType( lower, upper, comm )
+      : zCurve_ ( lower, upper, comm )
+      , hilbert_( lower, upper, comm )
+      , curveType_( curveType )
     {
     }
 
     template <class OtherComm>
-    SpaceFillingCurveOrdering( const Coordinate& lower,
+    SpaceFillingCurveOrdering( const CurveType& curveType,
+                               const Coordinate& lower,
                                const Coordinate& upper,
                                const OtherComm& otherComm )
-      : BaseType( lower, upper,
+      : zCurve_ ( lower, upper,
                   otherComm.size() > 1 ? CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) :
                                          CollectiveCommunication( Dune::MPIHelper::getLocalCommunicator() ) )
+      , hilbert_( lower, upper,
+                  otherComm.size() > 1 ? CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) :
+                                         CollectiveCommunication( Dune::MPIHelper::getLocalCommunicator() ) )
+      , curveType_( curveType )
     {
     }
 
     // return unique hilbert index in interval [0,1] given an element's center
     double index( const Coordinate& point ) const
     {
-      return double( BaseType :: index( point ) );
+      if( curveType_ == ZCurve )
+      {
+        return double( zCurve_.index( point ) );
+      }
+      else if ( curveType_ == Hilbert )
+      {
+        return double( hilbert_.index( point ) );
+      }
+      else
+      {
+        DUNE_THROW(NotImplemented,"Wrong space filling curve ordering selected");
+        return 0.0;
+      }
     }
   };
 
 } // end namespace Dune
 
-#undef USE_ZOLTAN_SFC_ORDERING
 #endif // #ifndef DUNE_ALU3DGRID_HSFC_HH

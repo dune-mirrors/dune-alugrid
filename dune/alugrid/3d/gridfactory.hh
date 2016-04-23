@@ -17,6 +17,8 @@
 #include <dune/alugrid/common/transformation.hh>
 #include <dune/alugrid/3d/alugrid.hh>
 
+#include <dune/alugrid/common/hsfc.hh>
+
 namespace Dune
 {
   /** \brief Factory class for ALUGrids */
@@ -79,6 +81,7 @@ namespace Dune
 
     // type of vertex coordinates put into the factory
     typedef FieldVector< ctype, dimensionworld > VertexInputType;
+    typedef SpaceFillingCurveOrdering< VertexInputType > SpaceFillingCurveOrderingType;
 
     // type of vertex coordinates stored inside the factory
     typedef FieldVector< ctype, 3 > VertexType;
@@ -391,6 +394,7 @@ namespace Dune
 
     MPICommunicatorType communicator_;
 
+    typename SpaceFillingCurveOrderingType :: CurveType curveType_;
     std::vector< unsigned int > ordering_;
   };
 
@@ -495,7 +499,8 @@ namespace Dune
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
@@ -509,7 +514,8 @@ namespace Dune
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
@@ -523,7 +529,8 @@ namespace Dune
     realGrid_( realGrid ),
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
