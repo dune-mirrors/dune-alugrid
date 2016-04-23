@@ -16,8 +16,6 @@
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
-#include <dune/alugrid/common/hsfc.hh>
-
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 
 #if COMPILE_ALUGRID_INLINE
@@ -249,10 +247,18 @@ namespace Dune
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
-#if USE_ALUGRID_SFC_ORDERING
-    // apply space filling curve orderung to the inserted elements
-    // see common/hsfc.hh for details
+#ifdef DISABLE_ALUGRID_SFC_ORDERING
+    std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
+    return ;
+#endif
+
+    // if type of curve is chosen to be None, nothing more to be done here
+    if( curveType_ == SpaceFillingCurveOrderingType :: None )
+      return ;
+
     {
+      // apply space filling curve orderung to the inserted elements
+      // see common/hsfc.hh for details
       typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
       // if we are in parallel insertion mode we need communication
@@ -286,8 +292,8 @@ namespace Dune
         }
       }
 
-      // get element's center to hilbert index mapping
-      SpaceFillingCurveOrdering< VertexInputType > sfc( minCoord, maxCoord, comm );
+      // get element's center to Hilbert/Zcurve index mapping
+      SpaceFillingCurveOrderingType sfc( curveType_, minCoord, maxCoord, comm );
 
       typedef std::multimap< double, long int > hsfc_t;
       hsfc_t hsfc;
@@ -319,7 +325,6 @@ namespace Dune
         ordering[ idx ] = (*it).second ;
       }
     }
-#endif
   }
 
   template< class ALUGrid >
