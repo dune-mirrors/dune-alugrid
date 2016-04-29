@@ -185,6 +185,9 @@ namespace Dune
 
     static void completeGrid ( GitterImplType &grid ) {}
 
+    void print( std::ostream& out ) const
+    {}
+
     CollectiveCommunication ccobj_;
   };
 
@@ -205,7 +208,7 @@ namespace Dune
     : ccobj_( comm ), mpAccess_( comm )
     {}
 
-    int nlinks () const { return mpAccess_.nlinks(); }
+    int nlinks () const { return mpAccess_.sendLinks(); }
 
     GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
@@ -232,6 +235,11 @@ namespace Dune
       int rank = 0;
       MPI_Comm_rank( comm, &rank );
       return rank;
+    }
+
+    void print( std::ostream& out ) const
+    {
+      mpAccess_.printLinkage( out );
     }
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
