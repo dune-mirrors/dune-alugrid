@@ -26,9 +26,10 @@ public:
 
 
   const int numFaces = 4;
-  const bool stevensonRefinement_ = true ;
+  const bool stevensonRefinement_ = false ;
   const int bisectionType = 1;
-  const int node = stevensonRefinement_ ? 1 : 3;
+  const int type1node = stevensonRefinement_ ? 1 : 3;
+  const int type1face = numFaces - type1node - 1;
 
   //constructor taking elements
   BisectionCompatibility(std::vector<ElementType >  elements)
@@ -135,13 +136,13 @@ public:
       FaceElementType faceElement;
       //walk over all faces
       //add face 2 to freeFaces - if already free -great, match and keep, if active and not free, match and erase
-      getFace(el,2,faceElement);
-      getFace(el,2, face);
+      getFace(el,type1face,faceElement);
+      getFace(el,type1face, face);
       if(freeFaces.find(face) != freeFaces.end())
       {
         while(!checkFaceCompatibility(faceElement))
         {
-          elements_[elIndex] = matchingRotate(elements_[elIndex]);
+          elements_[elIndex] = rotate(elements_[elIndex]);
         }
         freeFaces.find(face)->second[1] = elIndex;
       }
@@ -149,7 +150,7 @@ public:
       {
         while(!checkFaceCompatibility(faceElement))
         {
-          elements_[elIndex] = matchingRotate(elements_[elIndex]);
+          elements_[elIndex] = rotate(elements_[elIndex]);
         }
         activeFaces.erase(face);
       }
@@ -158,24 +159,22 @@ public:
         freeFaces.insert({{face,{elIndex,elIndex}}});
       }
       //add others to activeFaces - if already there, delete, if already free, match and erase
-      for(auto&& i : {0,1,3})
+      for(auto&& i : {0,1,2,3})
       {
+        if (i == type1face) continue;
         getFace(el,i,face);
         getFace(el,i,faceElement);
         int neighborIndex = faceElement.second[0] == elIndex ? faceElement.second[1] : faceElement.second[0];
         if(freeFaces.find(face) != freeFaces.end())
           while(!checkFaceCompatibility(faceElement))
           {
-            std::cout << i <<  "active free" ;
-            elements_[neighborIndex] = matchingRotate(elements_[neighborIndex]);
+
+            elements_[neighborIndex] = rotate(elements_[neighborIndex]);
           }
         else if(activeFaces.find(face) != activeFaces.end())
         {
           if(!checkFaceCompatibility(faceElement))
           {
-            std::cout << "FAILED" << std::endl << std::endl;
-            for(int k =0 ; k < nodePriority.size() ; ++k)
-              std::cout << "[" << k << ", " << nodePriority[k] << "]" << std::endl;
             return false;
           }
           activeFaces.erase(face);
@@ -218,26 +217,9 @@ private:
     return true;
   }
 
-
-  ElementType matchingRotate(ElementType el)
-  {
-    if(stevensonRefinement_)
-      return rotate(el);
-    else
-      return rotate(el);
-  }
-
-
   ElementType fixNode(ElementType el, int node, bool orientation)
   {
-    if(stevensonRefinement_)
-    {
-      std::swap(el[node],el[1]);
-    }
-    else //ALBERTA
-    {
-      std::swap(el[node],el[3]);
-    }
+    std::swap(el[node],el[type1node]);
     return el;
   }
 
