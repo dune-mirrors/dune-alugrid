@@ -26,7 +26,7 @@ public:
 
 
   const int numFaces = 4;
-  const bool stevensonRefinement_ = false ;
+  const bool stevensonRefinement_ = true ;
   const int bisectionType = 1;
   const int type1node = stevensonRefinement_ ? 1 : 3;
   const int type1face = numFaces - type1node - 1;
@@ -119,17 +119,17 @@ public:
           freeFace = i;
       }
       if(priorityNode > -1)
-        elements_[elIndex] = fixNode(el, priorityNode);
+        fixNode(el, priorityNode);
       else if(freeFace > -1)
       {
         nodePriority[el[freeFace]] = currNodePriority;
-        elements_[elIndex] = fixNode(el, freeFace);
+        fixNode(el, freeFace);
         --currNodePriority;
       }
       else //fix a random node
       {
         nodePriority[el[0]] = currNodePriority;
-        elements_[elIndex] = fixNode(el, 0);
+        fixNode(el, 0);
         --currNodePriority;
       }
 
@@ -142,7 +142,7 @@ public:
       {
         while(!checkFaceCompatibility(faceElement))
         {
-          elements_[elIndex] = rotate(elements_[elIndex]);
+          rotate(el);
         }
         freeFaces.find(face)->second[1] = elIndex;
       }
@@ -150,7 +150,7 @@ public:
       {
         while(!checkFaceCompatibility(faceElement))
         {
-          elements_[elIndex] = rotate(elements_[elIndex]);
+          rotate(el);
         }
         activeFaces.erase(face);
       }
@@ -168,7 +168,7 @@ public:
         if(freeFaces.find(face) != freeFaces.end())
           while(!checkFaceCompatibility(faceElement))
           {
-            elements_[neighborIndex] = rotate(elements_[neighborIndex]);
+            rotate(elements_[neighborIndex]);
           }
         else if(activeFaces.find(face) != activeFaces.end())
         {
@@ -216,7 +216,7 @@ private:
     return true;
   }
 
-  ElementType fixNode(ElementType el, int node)
+  void fixNode(ElementType& el, int node)
   {
     if(!(node == type1node))
     {
@@ -226,20 +226,21 @@ private:
       //2 and 0 are never type1node
       std::swap(el[0],el[2]);
     }
-    return el;
   }
 
   //The rotations that keep the type 1 node fixed
-  ElementType rotate(ElementType el)
+  void rotate(ElementType& el)
   {
     if(stevensonRefinement_)
     {
-      return {el[2], el[1], el[3], el[0]};
+      std::swap(el[0],el[2]);
+      std::swap(el[0],el[3]);
     }
     //ALBERTA refinement
     else
     {
-      return {el[1], el[2], el[0], el[3]};
+      std::swap(el[0],el[2]);
+      std::swap(el[0],el[1]);
     }
   }
 
