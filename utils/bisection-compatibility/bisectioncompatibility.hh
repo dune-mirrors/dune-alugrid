@@ -26,14 +26,14 @@ public:
 
 
   const int numFaces = 4;
-  const int numRotations = 6;
   const bool stevensonRefinement_ = true ;
   const int bisectionType = 1;
+  const int node = stevensonRefinement_ ? 1 : 3;
 
   //constructor taking elements
   BisectionCompatibility(std::vector<ElementType >  elements)
-    : origElements_(elements), debug_({0}), dbgCounter_(0), maxVertexIndex_(0) {
-    buildNeighbors(true); reOrder(); buildElements(); buildOrientations(); buildNeighbors(false);
+    : elements_(elements), maxVertexIndex_(0) {
+    buildNeighbors();
   };
 
 
@@ -71,15 +71,14 @@ public:
   void printElement(int index)
   {
     ElementType el = elements_[index];
-    bool orientation =orientations_[index];
     EdgeType edge;
     std::cout << "[" << el[0] ;
     for(int i=1; i < numFaces; ++i)
       std::cout << ","<< el[i] ;
-    std::cout << "]  orientation: " << orientation << " Refinement Edges: ";
+    std::cout << "]  Refinement Edges: ";
     for(int i=0; i< numFaces; ++i)
     {
-      getRefinementEdge(el, i, edge, orientation, bisectionType);
+      getRefinementEdge(el, i, edge, bisectionType);
       std::cout << "[" << edge[0] << "," << edge[1] << "] ";
     }
     std::cout << std::endl;
@@ -197,57 +196,6 @@ public:
     }
   }
 
-  //make grid compatible
-  //easiest algorithm :
-  //try all positive rotations of all elements
-  //and check each time for compatibility
-  //results in 6^n effort. (stop at first possibility)
-  bool makeCompatibleRecursively(unsigned int index)
-  {
-    if(index < origElements_.size())
-    {
-      debugOutput(index);
-      for(int i = 0; i<numRotations ; ++i)
-      {
-        elements_[index] = rotate(origElements_[ordering_[index]], i);
-        if(compatibilityCheck(index))
-        {
-          if( makeCompatibleRecursively(index+1) )
-            return true;
-        }
-        //if this did not work, first try switching the orientation
-        orientations_[index] = !orientations_[index];
-        if(compatibilityCheck(index))
-        {
-          if( makeCompatibleRecursively(index+1) )
-            return true;
-        }
-      }
-    }
-    else if( compatibilityCheck() )
-    {
-      std::cout << std::endl << std::endl << "Iterations: " << dbgCounter_ << std::endl ;
-      return true;
-    }
-    return false;
-  }
-
-  //return elements in their original ordering
-  void returnElements(std::vector<ElementType> & elements, std::vector<bool> & orientations)
-  {
-    for(unsigned int i = 0; i < elements_.size(); ++i)
-    {
-      elements[ordering_[i]] = elements_[i];
-      orientations[ordering_[i]] =orientations_[i];
-    }
-  }
-
-  //get the orientation of an element
-  bool orientation(unsigned int index)
-  {
-    return orientations_[index];
-  }
-
 private:
 
   //check face for compatibility
@@ -256,8 +204,8 @@ private:
     EdgeType edge1,edge2;
     if(face.second[0] != face.second[1])
     {
-      getRefinementEdge(elements_[face.second[0]], face.first, edge1, orientations_[face.second[0]], bisectionType);
-      getRefinementEdge(elements_[face.second[1]], face.first, edge2, orientations_[face.second[1]], bisectionType);
+      getRefinementEdge(elements_[face.second[0]], face.first, edge1, bisectionType);
+      getRefinementEdge(elements_[face.second[1]], face.first, edge2, bisectionType);
       if(edge1 != edge2)
       {
         /*   std::cerr << "Face: " << face.first[0] << ", " << face.first[1] << ", " << face.first[2]
@@ -274,9 +222,9 @@ private:
   ElementType matchingRotate(ElementType el)
   {
     if(stevensonRefinement_)
-      return rotate(el, 7);
+      return rotate(el);
     else
-      return rotate(el,4);
+      return rotate(el);
   }
 
 
@@ -288,88 +236,23 @@ private:
     }
     else //ALBERTA
     {
-      if(orientation)
-        std::swap(el[node],el[3]);
-      else
-        std::swap(el[node],el[2]);
+      std::swap(el[node],el[3]);
     }
     return el;
   }
 
-  //all positive permutations of the elements
-  //we need all positive rotations
-  ElementType rotate(ElementType el, int rotation)
+  //The rotations that keep the type 1 node fixed
+  ElementType rotate(ElementType el)
   {
     if(stevensonRefinement_)
     {
-      switch(rotation)
-      {
-      case 0 :
-        return el;
-      //rotate face 1,2,3
-      case 1 :
-        return {el[0], el[3], el[1], el[2]};
-      //rotate face 1,2,3
-      case 2 :
-        return {el[0], el[2], el[3], el[1]};
-      //rotate face 0,1,2
-      case 3 :
-        return {el[2], el[0], el[1], el[3]};
-      //rotate face 0,1,2
-      case 4 :
-        return {el[1], el[2], el[0], el[3]};
-      //flip 0,1 and 2,3
-      case 5 :
-        return {el[1], el[0], el[3], el[2]};
-      //reverse
-      case 6 :
-        return {el[3], el[2], el[1], el[0]};
-      //reversion of 1
-      case 7 :
-        return {el[2], el[1], el[3], el[0]};
-      //reversion of 2
-      case 8 :
-        return {el[1], el[3], el[2], el[0]};
-      //reversion of 3
-      case 9 :
-        return {el[3], el[1], el[0], el[2]};
-      //reversion of 4
-      case 10 :
-        return {el[3], el[0], el[2], el[1]};
-      //reversion of 5
-      case 11 :
-        return {el[2], el[3], el[0], el[1]};
-      default :
-        return el;
-      }
+      return {el[2], el[1], el[3], el[0]};
     }
     //ALBERTA refinement
     else
     {
-      switch(rotation)
-      {
-      case 0 :
-        return el;
-      //reverse
-      case 1 :
-        return {el[3], el[2], el[1], el[0]};
-      //rotate face 1,2,3
-      case 2 :
-        return {el[0], el[3], el[1], el[2]};
-      //rotate face 1,2,3
-      case 3 :
-        return {el[0], el[2], el[3], el[1]};
-      //rotate face 0,1,2
-      case 4 :
-        return {el[1], el[2], el[0], el[3]};
-      //reversion of 3
-      case 5 :
-        return {el[1], el[3], el[2], el[0]};
-      default :
-        return el;
-      }
+      return {el[1], el[2], el[0], el[3]};
     }
-    return el;
   }
 
   //get the sorted face of an element to a corresponding index
@@ -407,7 +290,7 @@ private:
   //get the sorted initial refinement edge of a face of an element
   //this has to be adjusted, when using stevensonRefinement
   //orientation switches indices 2 and 3 in the internal ordering
-  void getRefinementEdge(ElementType el, int faceIndex, EdgeType & edge, bool orientation, int type )
+  void getRefinementEdge(ElementType el, int faceIndex, EdgeType & edge, int type )
   {
     if(type == 0)
     {
@@ -422,16 +305,10 @@ private:
           edge = {el[0],el[3]};
           break;
         case 2 :
-          if(orientation)
-            edge = {el[0],el[2]};
-          else
-            edge =  {el[0],el[3]};
+          edge = {el[0],el[2]};
           break;
         case 3 :
-          if(orientation)
-            edge =  {el[1],el[3]};
-          else
-            edge = {el[1],el[2]};
+          edge =  {el[1],el[3]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
@@ -449,16 +326,10 @@ private:
           edge = {el[0],el[1]};
           break;
         case 2 :
-          if(orientation)
-            edge =  {el[0],el[2]};
-          else
-            edge = {el[0],el[3]};
+          edge =  {el[0],el[2]};
           break;
         case 3 :
-          if(orientation)
-            edge =  {el[1],el[3]};
-          else
-            edge =  {el[1],el[2]};
+          edge =  {el[1],el[3]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
@@ -479,10 +350,7 @@ private:
           edge = {el[0],el[3]};
           break;
         case 2 :
-          if(orientation)
-            edge = {el[0],el[2]};
-          else
-            edge =  {el[0],el[3]};
+          edge = {el[0],el[2]};
           break;
         case 3 :
           edge =  {el[2],el[3]};
@@ -503,16 +371,10 @@ private:
           edge = {el[0],el[1]};
           break;
         case 2 :
-          if(orientation)
-            edge = {el[0],el[2]};
-          else
-            edge = {el[0],el[3]};
+          edge = {el[0],el[2]};
           break;
         case 3 :
-          if(orientation)
-            edge = {el[1],el[2]};
-          else
-            edge = {el[1],el[3]};
+          edge = {el[1],el[2]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
@@ -530,9 +392,9 @@ private:
   }
 
   //get the sorted initial refinement edge of a face of an element
-  void getRefinementEdge(ElementType el, FaceType face, EdgeType & edge, bool orientation, int type )
+  void getRefinementEdge(ElementType el, FaceType face, EdgeType & edge, int type )
   {
-    getRefinementEdge(el, getFaceIndex(el, face), edge, orientation, type);
+    getRefinementEdge(el, getFaceIndex(el, face), edge, type);
     return;
   }
 
@@ -553,7 +415,7 @@ private:
   //the elements that share said face
   //boundary faces have two times the same index
   //this is executed in the constructor
-  void buildNeighbors(bool original)
+  void buildNeighbors()
   {
     if(!neighbours_.empty())
       neighbours_.clear();
@@ -561,171 +423,37 @@ private:
     EdgeType indexPair;
 
     unsigned int index = 0;
-    if(!original)
-    {
-      std::cout << "buildNeighbors false" << std::endl;
-      for(auto&& el : elements_)
-      {
-        for(int i = 0; i< numFaces; ++i)
-        {
-          getFace(el, i, face);
-          auto faceInList = neighbours_.find(face);
-          if(faceInList == neighbours_.end())
-          {
-            indexPair = {index, index};
-            neighbours_.insert(std::make_pair (face, indexPair ) );
-          }
-          else
-          {
-            faceInList = neighbours_.find(face);
-            assert(faceInList != neighbours_.end());
-            faceInList->second[1] = index;
-          }
-        }
-        ++index;
-      }
-    }
-    else
-    {
-      std::cout << "buildNeighbors true" << std::endl;
-      for(auto&& el : origElements_)
-      {
-        for(int i = 0; i< numFaces; ++i)
-        {
-          getFace(el, i, face);
-          auto faceInList = neighbours_.find(face);
-          if(faceInList == neighbours_.end())
-          {
-            indexPair = {index, index};
-            neighbours_.insert(std::make_pair (face, indexPair ) );
-          }
-          else
-          {
-            faceInList = neighbours_.find(face);
-            assert(faceInList != neighbours_.end());
-            faceInList->second[1] = index;
-          }
-        }
-        ++index;
-      }
-    }
-  }
-
-  //create orientations
-  //to be filled into insertUniquetetra
-  void buildOrientations()
-  {
-    std::cout << "buildOrientations"  <<std ::endl;
-    orientations_.resize(origElements_.size());
-    for(unsigned int i = 0; i<orientations_.size(); ++i)
-      // orientations_[i] = ordering_[i]%2;
-      orientations_[i] = 0;
-  }
-
-  //sort elements by ordering
-  void buildElements()
-  {
-    std::cout << "buildElements" << std::endl;
-    elements_.resize(origElements_.size());
-    for(unsigned int i = 0; i< origElements_.size(); ++i)
-      elements_ [i] = origElements_[ordering_[i]];
-
     for(auto&& el : elements_)
+    {
+      for(int i = 0; i< numFaces; ++i)
+      {
+        getFace(el, i, face);
+        auto faceInList = neighbours_.find(face);
+        if(faceInList == neighbours_.end())
+        {
+          indexPair = {index, index};
+          neighbours_.insert(std::make_pair (face, indexPair ) );
+        }
+        else
+        {
+          faceInList = neighbours_.find(face);
+          assert(faceInList != neighbours_.end());
+          faceInList->second[1] = index;
+        }
+      }
+      ++index;
       for(int i=0; i < numFaces ; ++i)
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
-  }
-
-  //create an ordering such that elements are
-  //always connected
-  void reOrder()
-  {
-    std::cout << "reOrder" << std::endl;
-    ordering_.resize(origElements_.size(),0);
-    ordering_[0] = 0;
-    FaceType face;
-    for(unsigned int i =1; i<origElements_.size(); ++i)
-    {
-      //go through all faces up to i
-      for(unsigned int j =0; j < i; ++j)
-      {
-        for(int faceIndex =0; faceIndex< numFaces; ++faceIndex)
-        {
-          getFace(origElements_[ordering_[j]], faceIndex, face);
-          auto nb = neighbours_.find(face);
-          //if neighbour is not in ordering
-          if(!inOrdering(i, nb->second[0]))
-          {
-            ordering_[i] = nb->second[0];
-            ++i;
-          }
-          if(!inOrdering(i, nb->second[1]))
-          {
-            ordering_[i] = nb->second[1];
-            ++i;
-          }
-        }
-      }
     }
-    assert(ordering_[ordering_.size()-1] != 0);
   }
-
-  //for reOrder():
-  //check if index was already inserted
-  bool inOrdering(unsigned int currentMax, unsigned int index)
-  {
-    for(unsigned int i =0; i < currentMax; ++i)
-    {
-      if(ordering_[i] == index)
-        return true;
-    }
-    return false;
-  }
-
-
-
-  //some debug output for the recursion
-  void debugOutput(unsigned int index)
-  {
-    if(index > debug_.size ())
-      debug_.resize(index,0);
-    else
-      debug_[index] +=1;
-
-    if(dbgCounter_ % 1000 == 0)
-    {
-      std::cout << debug_.size()  << "," << minElement(debug_) << "  ";
-      debug_.clear();
-    }
-    dbgCounter_ ++;
-  }
-
-  unsigned int minElement( std::vector<unsigned int> vec)
-  {
-    for(unsigned int i =0; i< vec.size(); ++i)
-      if(vec[i] !=0 ) return i;
-
-    return vec.size();
-  }
-
 
 private:
-  //the ordering
-  std::vector< unsigned int > ordering_;
-  //the original elements
-  std::vector<ElementType> origElements_;
   //the elements to be renumbered
   std::vector<ElementType> elements_;
   //the neighbouring structure
   FaceMapType neighbours_;
-  //the element orientation
-  std::vector<bool> orientations_;
-
+  //The maximum Vertex Index
   unsigned int maxVertexIndex_;
-
-  std::vector<unsigned int> debug_;
-  unsigned int dbgCounter_;
-
-
 
 }; //class bisectioncompatibility
 

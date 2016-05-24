@@ -18,6 +18,8 @@
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 
+#include <utils/bisection-compatibility/bisectioncompatibility.hh>
+
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline
 #else
@@ -352,6 +354,26 @@ namespace Dune
 
     correctElementOrientation();
 
+    std::vector <bool> elementOrientations;
+    elementOrientations.resize(elements_.size(),0);
+    for(unsigned int i =0; i<elementOrientations.size(); ++i)
+      elementOrientations[i] = i%2;
+    BisectionCompatibility bisComp(elements_);
+    if(bisComp.compatibilityCheck())
+      std::cout << "Grid is compatible!" << std::endl;
+    else
+    {
+      std::cout << "Making compatible" << std::endl;
+      if(bisComp.makeCompatible(0))
+      {
+        std::cout << "Grid is compatible!!" << std::endl;
+        bisComp.returnElements(elements_,elementOrientations);
+      }
+      else
+        std::cout << "Could not make compatible!" << std::endl;
+    }
+
+
     std::vector< unsigned int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
@@ -533,7 +555,7 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
-          mgb.InsertUniqueTetra( element, dimension == 3 ? (elemIndex % 2) : 0 );
+          mgb.InsertUniqueTetra( element, dimension == 3 ?  elementOrientations[elemIndex] : 0 );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
