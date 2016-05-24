@@ -119,17 +119,17 @@ public:
           freeFace = i;
       }
       if(priorityNode > -1)
-        elements_[elIndex] = fixNode(el, priorityNode, true);
+        elements_[elIndex] = fixNode(el, priorityNode);
       else if(freeFace > -1)
       {
         nodePriority[el[freeFace]] = currNodePriority;
-        elements_[elIndex] = fixNode(el, freeFace, true);
+        elements_[elIndex] = fixNode(el, freeFace);
         --currNodePriority;
       }
       else //fix a random node
       {
         nodePriority[el[0]] = currNodePriority;
-        elements_[elIndex] = fixNode(el, 0, true);
+        elements_[elIndex] = fixNode(el, 0);
         --currNodePriority;
       }
 
@@ -168,7 +168,6 @@ public:
         if(freeFaces.find(face) != freeFaces.end())
           while(!checkFaceCompatibility(faceElement))
           {
-
             elements_[neighborIndex] = rotate(elements_[neighborIndex]);
           }
         else if(activeFaces.find(face) != activeFaces.end())
@@ -217,9 +216,16 @@ private:
     return true;
   }
 
-  ElementType fixNode(ElementType el, int node, bool orientation)
+  ElementType fixNode(ElementType el, int node)
   {
-    std::swap(el[node],el[type1node]);
+    if(!(node == type1node))
+    {
+      //swap the node at the right position
+      std::swap(el[node],el[type1node]);
+      //also swap to other nodes to keep the volume positive
+      //2 and 0 are never type1node
+      std::swap(el[0],el[2]);
+    }
     return el;
   }
 
