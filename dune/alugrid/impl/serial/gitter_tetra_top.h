@@ -432,7 +432,7 @@ namespace ALUGrid
       int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
       // the element type is obtained from the level of the element
       // under the assumption that on level 0 all elements have type 0
-      unsigned char elementType () const { return (_lvl % 3); }
+      unsigned char elementType () const { return ((_lvl +1) % 3); }
 
       // sets the new _vxMap for this tetra
       void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int );

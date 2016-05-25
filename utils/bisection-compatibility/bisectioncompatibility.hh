@@ -26,9 +26,9 @@ public:
 
 
   const int numFaces = 4;
-  const bool stevensonRefinement_ = true ;
+  const bool stevensonRefinement_ = false ;
   const int bisectionType = 1;
-  const int type1node = stevensonRefinement_ ? 1 : 3;
+  const int type1node = stevensonRefinement_ ? 1 : 2;
   const int type1face = numFaces - type1node - 1;
 
   //constructor taking elements
@@ -98,7 +98,7 @@ public:
 
 
     //walk over all elements
-    for(int elIndex =0 ; elIndex < elements_.size(); ++elIndex)
+    for(unsigned int elIndex =0 ; elIndex < elements_.size(); ++elIndex)
     {
       //if no node is constrained and no face is active, fix one (e.g. smallest index)
       ElementType & el = elements_[elIndex];
@@ -128,8 +128,8 @@ public:
       }
       else //fix a random node
       {
-        nodePriority[el[0]] = currNodePriority;
-        fixNode(el, 0);
+        nodePriority[el[type1node]] = currNodePriority;
+        fixNode(el, type1node);
         --currNodePriority;
       }
 
@@ -164,7 +164,7 @@ public:
         if (i == type1face) continue;
         getFace(el,i,face);
         getFace(el,i,faceElement);
-        int neighborIndex = faceElement.second[0] == elIndex ? faceElement.second[1] : faceElement.second[0];
+        unsigned int neighborIndex = faceElement.second[0] == elIndex ? faceElement.second[1] : faceElement.second[0];
         if(freeFaces.find(face) != freeFaces.end())
           while(!checkFaceCompatibility(faceElement))
           {
@@ -184,14 +184,21 @@ public:
         }
       }
     }
-    //now postprocessing of freeFaces. possibly - not really necessary, has to be thought about.
+    //now postprocessing of freeFaces. possibly - not really necessary, has to be thought about
+    //useful for parallelization .
     for(auto&& face : freeFaces)
     {
-      int elementIndex = face.second[0];
-      int neighborIndex = face.second[1];
+      unsigned int elementIndex = face.second[0];
+      unsigned int neighborIndex = face.second[1];
       //give refinement edge positive priority
       //and non-refinement edge negative priority less than -1 and counting
     }
+    return true;
+  }
+
+  void returnElements(std::vector<ElementType> & elements)
+  {
+    elements = elements_;
   }
 
 private:
@@ -224,24 +231,15 @@ private:
       std::swap(el[node],el[type1node]);
       //also swap to other nodes to keep the volume positive
       //2 and 0 are never type1node
-      std::swap(el[0],el[2]);
+      std::swap(el[(type1node+1)%4],el[(type1node+2)%4]);
     }
   }
 
   //The rotations that keep the type 1 node fixed
   void rotate(ElementType& el)
   {
-    if(stevensonRefinement_)
-    {
-      std::swap(el[0],el[2]);
-      std::swap(el[0],el[3]);
-    }
-    //ALBERTA refinement
-    else
-    {
-      std::swap(el[0],el[2]);
-      std::swap(el[0],el[1]);
-    }
+    std::swap(el[(type1node+1)%4],el[(type1node+2)%4]);
+    std::swap(el[(type1node+1)%4],el[(type1node+3)%4]);
   }
 
   //get the sorted face of an element to a corresponding index
@@ -360,10 +358,10 @@ private:
           edge = {el[0],el[1]};
           break;
         case 2 :
-          edge = {el[0],el[2]};
+          edge = {el[0],el[type1node == 2 ? 3 :2]};
           break;
         case 3 :
-          edge = {el[1],el[2]};
+          edge = {el[1],el[type1node == 2 ? 3 :2]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;

@@ -354,20 +354,16 @@ namespace Dune
 
     correctElementOrientation();
 
-    std::vector <bool> elementOrientations;
-    elementOrientations.resize(elements_.size(),0);
-    for(unsigned int i =0; i<elementOrientations.size(); ++i)
-      elementOrientations[i] = i%2;
     BisectionCompatibility bisComp(elements_);
     if(bisComp.compatibilityCheck())
       std::cout << "Grid is compatible!" << std::endl;
     else
     {
       std::cout << "Making compatible" << std::endl;
-      if(bisComp.makeCompatible(0))
+      if(bisComp.makeCompatible())
       {
         std::cout << "Grid is compatible!!" << std::endl;
-        bisComp.returnElements(elements_,elementOrientations);
+        bisComp.returnElements(elements_);
       }
       else
         std::cout << "Could not make compatible!" << std::endl;
@@ -555,7 +551,7 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
-          mgb.InsertUniqueTetra( element, dimension == 3 ?  elementOrientations[elemIndex] : 0 );
+          mgb.InsertUniqueTetra( element, 0 );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
