@@ -415,10 +415,11 @@ namespace ALUGrid
                 }
                 for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
                 {
-                  // assert faces are leaf
-                  alugrid_assert(f->leaf());
-                  alugrid_assert(f->nb.front().first->nbLeaf());
-                  alugrid_assert(f->nb.rear().first->nbLeaf());
+                  // assert faces are leaf - this is not true anymore with weak compatibility
+               //   alugrid_assert(f->leaf());
+                 // alugrid_assert(f->nb.front().first->nbLeaf());
+                  //alugrid_assert(f->nb.rear().first->nbLeaf());
+                ;
                 }
               }
             }
