@@ -43,7 +43,7 @@ if(ZLIB_FOUND)
   # register package flags is not supported in CMake with Dune 2.3
   if(NOT (("${DUNE_COMMON_VERSION_MAJOR}" STREQUAL "2")
           AND ("${DUNE_COMMON_VERSION_MINOR}" STREQUAL "3")))
-    dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} LIBRARIES ${ZLIB_LIBRARIES})
+    dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} LIBRARIES ${ZLIB_LIBRARIES})
   endif()
 endif()
 
