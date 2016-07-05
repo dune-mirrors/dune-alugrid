@@ -24,6 +24,8 @@ target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
 set_property(TARGET dunealugrid APPEND PROPERTY
              INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
 endif()
+set_property(TARGET dunealugrid APPEND PROPERTY
+             INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
 
 # register alu grid to all pkg flags
 dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
