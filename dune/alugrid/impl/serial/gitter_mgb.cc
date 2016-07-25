@@ -79,7 +79,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
-  InsertUniqueTetra (int (&v)[4], int orientation)
+  InsertUniqueTetra (int (&v)[4], SimplexTypeFlag elementType)
   {
     elementKey_t key (v [0], v [1], v [2], v [3]);
     std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
@@ -96,7 +96,7 @@ namespace ALUGrid
         twst [fce] = cyclicReorder (x,x+3);
         face [fce] =  InsertUniqueHface (x).first;
       }
-      result.first->second = myBuilder ().insert_tetra (face,twst,orientation);
+      result.first->second = myBuilder ().insert_tetra (face,twst, elementType);
       alugrid_assert( result.first->second );
     }
     return std::make_pair( static_cast< tetra_GEO * >( result.first->second ), result.second );
@@ -859,7 +859,8 @@ namespace ALUGrid
           in >> v[ j ] ;
         }
         int orientation = i%2;
-        InsertUniqueTetra (v, orientation);
+        int elementType = 0;
+        InsertUniqueTetra (v, SimplexTypeFlag(orientation, elementType) );
       }
     }
 

@@ -108,15 +108,15 @@ namespace ALUGrid
     // to behave like stringstream
     ////////////////////////////////////
     // put char
-    inline void put (const char a)  { write(a); }
+    inline void put (const signed char a)  { write(a); }
 
     // put char with checking buffer size (reserve size before usage)
-    inline void putNoChk (const char a)  { writeUnchecked(a); }
+    inline void putNoChk (const signed char a)  { writeUnchecked(a); }
 
     // get char
-    inline char get ()
+    inline signed char get ()
     {
-      char a;
+      signed char a;
       read(a);
       return a;
     }
