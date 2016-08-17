@@ -26,7 +26,6 @@ template< class Grid >
 struct GridMarker
 {
   typedef typename Grid::template Codim< 0 >::Entity        Entity;
-  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
   /** \brief constructor
    *  \param grid     the grid. Here we can not use a grid view since they only
@@ -163,7 +162,6 @@ struct FiniteVolumeScheme
   // types of codim zero entity iterator and geometry
   typedef typename GridView::template Codim< 0 >:: template Partition< ptype > :: Iterator  Iterator;
   typedef typename Iterator::Entity                         Entity;
-  typedef typename Entity::EntityPointer                    EntityPointer;
   typedef typename Entity::Geometry                         Geometry;
 
   // type of intersections and corresponding geometries
@@ -327,7 +325,7 @@ inline void FiniteVolumeScheme< V, Model >
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const Entity &neighbor = intersection.outside();
 #else
-      const EntityPointer outside = intersection.outside();
+      const typename Entity::EntityPointer outside = intersection.outside();
       const Entity &neighbor = *outside;
 #endif
 
@@ -427,7 +425,7 @@ inline size_t FiniteVolumeScheme< V, Model >
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         const Entity &neighbor = intersection.outside();
 #else
-        const EntityPointer outside = intersection.outside();
+        const typename Entity::EntityPointer outside = intersection.outside();
         const Entity &neighbor = *outside;
 #endif
         const RangeType &uRight = solution[ neighbor ];

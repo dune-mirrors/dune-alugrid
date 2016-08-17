@@ -43,7 +43,7 @@ namespace ALUGridSFC {
     Coordinate lower_;
     Coordinate length_;
 
-    const zoltan_hsfc_inv_t* hsfcInv_;
+    zoltan_hsfc_inv_t* hsfcInv_;
 
     mutable Zoltan zz_;
 

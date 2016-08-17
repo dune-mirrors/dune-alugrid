@@ -59,7 +59,11 @@ namespace ALUGrid
       enum { VERTEX = 1, EDGE1, FACE3, FACE4,
              HEXA, TETRA, PERIODIC3, PERIODIC4=-65,
              HBND3EXT, HBND4EXT, HBND3INT, HBND4INT = -22 ,
-             ENDMARKER , ENDSTREAM,  NO_POINT = -777, POINTTRANSMITTED=-888 } ;
+             ENDMARKER , ENDSTREAM } ;
+
+      static constexpr signed char NO_POINT=-111;
+      static constexpr signed char POINTTRANSMITTED=-112;
+
       virtual void attach2   (int) = 0 ;
       virtual void unattach2 (int) = 0 ;
 

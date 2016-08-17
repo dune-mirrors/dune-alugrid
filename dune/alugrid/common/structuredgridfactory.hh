@@ -73,7 +73,6 @@ namespace Dune
       static const int dimension = Grid::dimension;
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef typename Grid::template Codim< 0 >::EntityPointer ElementPointer;
 
       typedef typename Element::Geometry::GlobalCoordinate VertexType;
 

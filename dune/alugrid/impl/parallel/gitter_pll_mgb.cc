@@ -635,9 +635,11 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
-    int orientation = 0;
-    os.readObject( orientation );
-    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation);
+
+    SimplexTypeFlag elementType;
+    elementType.read( os );
+
+    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, elementType);
     // set unique element number
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs);
@@ -772,8 +774,7 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    int readPoint = 0;
-    os.readObject( readPoint );
+    const signed char readPoint = os.get();
 
     MacroGhostInfoTetra * ghInfo = 0;
     if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )
@@ -821,8 +822,7 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    int readPoint = 0;
-    os.readObject( readPoint );
+    const signed char readPoint = os.get();
 
     MacroGhostInfoHexa* ghInfo = 0;
     if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )

@@ -8,35 +8,35 @@ namespace ALUGrid
 
   template<int points>
   void MacroGhostInfoStorage<points>::
-  inlineGhostElement(ObjectStream & os ) const
+  doInlineGhostElement(ObjectStream & os ) const
   {
-   // local face number
-    os.writeObject( _fce );
+    // local face number
+    os.put( _fce );
 
-    // global vertex number of the hexas vertices
-    for(int i=0; i<noVx; ++i) os.writeObject( _vx[i] );
+    // global vertex number of the elements vertices
+    for(int i=0; i<noVx; ++i) os.write( _vx[i] );
 
     // global vertex numbers of the face not existing on this partition
     for(int i=0; i<noFaceVx; ++i)
     {
-      os.writeObject( _vxface[i] );
-      os.writeObject( _p[i][0] );
-      os.writeObject( _p[i][1] );
-      os.writeObject( _p[i][2] );
+      os.write( _vxface[i] );
+      os.write( _p[i][0] );
+      os.write( _p[i][1] );
+      os.write( _p[i][2] );
     }
   }
 
   template<int points>
   void MacroGhostInfoStorage<points>::
-  readData(ObjectStream & os )
+  doReadData(ObjectStream & os )
   {
     // read local face number
-    os.readObject ( _fce );
+    _fce = os.get();
 
     // read vertices of element
     for(int i=0; i<noVx; ++i)
     {
-      os.readObject ( _vx[i] );
+      os.read( _vx[i] );
     }
 
 #ifdef ALUGRIDDEBUG
@@ -53,12 +53,12 @@ namespace ALUGrid
     // read vertices of face an coordinates
     for(int i=0; i<noFaceVx; ++i)
     {
-      os.readObject ( _vxface[i] );
+      os.read( _vxface[i] );
       alucoord_t (&pr) [3] = _p[i];
 
-      os.readObject (pr[0]);
-      os.readObject (pr[1]);
-      os.readObject (pr[2]);
+      os.read(pr[0]);
+      os.read(pr[1]);
+      os.read(pr[2]);
     }
 
     alugrid_assert ( _fce != invalidFace );
@@ -87,8 +87,38 @@ namespace ALUGrid
     this->_fce = fce;
   }
 
+  void MacroGhostInfoHexa::
+  writeGhostInfo( ObjectStream& os,
+                  const int fce,
+                  const Gitter::Geometric::hexa_GEO& hexa )
+  {
+    signed char face = fce;
+    // local face number as char
+    os.put( face );
+
+    // global vertex number of the elements vertices
+    for(int k=0; k<noVx; ++k)
+    {
+      int vx = hexa.myvertex (k)->ident ();
+      os.write( vx );
+    }
+
+    const int oppFace = Gitter::Geometric::Hexa::oppositeFace[fce];
+    for(int vx=0; vx<noFaceVx; ++vx)
+    {
+      const Gitter::Geometric::VertexGeo * vertex = hexa.myvertex(oppFace,vx);
+      os.writeObject( vertex->ident() );
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] );
+      os.writeObject ( p[1] );
+      os.writeObject ( p[2] );
+    }
+  }
+
+
   MacroGhostInfoTetra::MacroGhostInfoTetra ( const Gitter::Geometric::tetra_GEO *tetra, const int fce )
   {
+    _simplexTypeFlag = tetra->simplexTypeFlag();
     alugrid_assert ( points == this->nop() );
     const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( fce );
     alugrid_assert ( vertex );
@@ -104,7 +134,42 @@ namespace ALUGrid
     for( int i = 0; i < noVx; ++i )
       this->_vx[i] = tetra->myvertex(i)->ident();
 
-    this->_fce = tetra->orientation() ? -fce-1 : fce;
+    this->_fce = tetra->simplexTypeFlag().orientation() ? -fce-1 : fce;
+  }
+
+  void MacroGhostInfoTetra::
+  writeGhostInfo( ObjectStream& os,
+                  const int fce,
+                  const Gitter::Geometric::tetra_GEO& tetra )
+  {
+    signed char face = fce;
+    // local face number as char
+    os.put( face );
+
+    // global vertex number of the elements vertices
+    for(int k=0; k<noVx; ++k)
+    {
+      int vx = tetra.myvertex (k)->ident ();
+      os.write( vx );
+    }
+
+    {
+      const Gitter::Geometric::VertexGeo * vertex = tetra.myvertex(fce);
+      alugrid_assert ( vertex );
+
+      // know identifier of transmitted point
+      int vxId = vertex->ident () ;
+      os.write( vxId );
+
+      // store the missing point to form a tetra
+      const alucoord_t (&p)[3] = vertex->Point();
+      os.writeObject ( p[0] );
+      os.writeObject ( p[1] );
+      os.writeObject ( p[2] );
+    }
+
+    // write simplex type flag
+    tetra.simplexTypeFlag().write( os );
   }
 
 

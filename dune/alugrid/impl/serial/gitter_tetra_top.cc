@@ -842,7 +842,7 @@ namespace ALUGrid
             myhface_t * f1, int t1, // face, twist
             myhface_t * f2, int t2, // face, twist
             myhface_t * f3, int t3, // face, twist
-            int orientation )
+            SimplexTypeFlag simplexType )
     : A (f0, t0, f1, t1, f2, t2, f3, t3)
     , _bbb (0), _up(0)
     , _inner( 0 )
@@ -858,15 +858,22 @@ namespace ALUGrid
     // set element's index and 2d flag if necessary
     this->setIndexAnd2dFlag( indexManager() );
 
+    // currently, only type 0 and 1 are supported on init
+    // more change needs to be done on DuneIndexProvider to support type 2
+    alugrid_assert( simplexType.type() < 2 );
+
+    // if simplex type is not 0 then we assume type 1
+    if( simplexType.type() > 0 )
+      this->setSimplexTypeFlagOne() ;
+
     // initial mapping is has to be adjusted according
     // to the make-6 algorithm
     // NOTE: the _vxMap numbers only affect the bisection refinement
-    const int mod = 1 - orientation ;
+    const int mod = 1 - simplexType.orientation() ;
     _vxMap[ 0 ] = 0;
     _vxMap[ 1 ] = 1;
     _vxMap[ 2 ] = 2 + mod ;
     _vxMap[ 3 ] = 3 - mod ;
-    // std::cout << "Create Tetra with orientation " << orientation << std::endl;
   }
 
   template< class A > TetraTop < A >::~TetraTop ()
