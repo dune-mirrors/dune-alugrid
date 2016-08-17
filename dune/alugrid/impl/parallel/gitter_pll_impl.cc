@@ -869,13 +869,14 @@ namespace ALUGrid
 
     if(_ghInfo) // is stored ghost point exists
     {
-      os.writeObject ( MacroGridMoverIF::POINTTRANSMITTED );
+      os.put( MacroGridMoverIF::POINTTRANSMITTED );
+
       // see ghost_info.h for implementation of this functions
       _ghInfo->inlineGhostElement(os);
     }
     else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
+      os.put( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
 
     return;
@@ -924,8 +925,8 @@ namespace ALUGrid
   TetraPllXBaseMacro< A >::
   TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                              myhface3_t *f2, int s2, myhface3_t *f3, int s3,
-                      int orientation )
-    : A(l, f0, s0, f1, s1, f2, s2, f3, s3, orientation )
+                      SimplexTypeFlag elementType )
+    : A(l, f0, s0, f1, s1, f2, s2, f3, s3, elementType )
     , _moveTo ( -1 )
     , _ldbVertexIndex (-1)
   {
@@ -1090,8 +1091,9 @@ namespace ALUGrid
     os.writeObject (mytetra ().myvertex (1)->ident ());
     os.writeObject (mytetra ().myvertex (2)->ident ());
     os.writeObject (mytetra ().myvertex (3)->ident ());
-    int orientation = mytetra ().orientation();
-    os.writeObject ( orientation );
+
+    // write bisection simplex type and orientation
+    mytetra ().simplexTypeFlag().write( os );
 
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! mytetra_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
@@ -1136,36 +1138,14 @@ namespace ALUGrid
     {
       alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
-      int writePoint = MacroGridMoverIF::POINTTRANSMITTED; // point is transmitted
-      os.writeObject ( writePoint ); // write point info
+      os.put( MacroGridMoverIF::POINTTRANSMITTED ); // write point info, point is transmitted
 
-      // know which face is the internal bnd
-      os.writeObject (fce);
-
-      // write the vertices of the tetra
-      for(int k=0; k<4; ++k)
-      {
-        int vx = mytetra ().myvertex (k)->ident ();
-        os.writeObject ( vx );
-      }
-
-      {
-        const Gitter::Geometric::VertexGeo * vertex = mytetra().myvertex(fce);
-        alugrid_assert ( vertex );
-
-        // know identifier of transmitted point
-        os.writeObject ( vertex->ident ());
-
-        // store the missing point to form a tetra
-        const alucoord_t (&p)[3] = vertex->Point();
-        os.writeObject ( p[0] );
-        os.writeObject ( p[1] );
-        os.writeObject ( p[2] );
-      }
+      // write ghost information
+      MacroGhostInfoTetra::writeGhostInfo( os, fce, mytetra() );
     }
     else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
+      os.put( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
   }
 
@@ -1850,32 +1830,14 @@ namespace ALUGrid
     {
       alugrid_assert ( this->myGrid()->ghostCellsEnabled() );
 
-      int writePoint = MacroGridMoverIF::POINTTRANSMITTED;
-      os.writeObject ( writePoint ); // 1 == points are transmitted
+      os.put( MacroGridMoverIF::POINTTRANSMITTED ); // 1 == points are transmitted
 
-      // know which face is the internal bnd
-      os.writeObject (fce);
-
-      for(int k=0; k<8; ++k)
-      {
-        int vx = myhexa ().myvertex (k)->ident ();
-        os.writeObject ( vx );
-      }
-
-      int oppFace = Gitter::Geometric::Hexa::oppositeFace[fce];
-      for(int vx=0; vx<4; ++vx)
-      {
-        const Gitter::Geometric::VertexGeo * vertex = myhexa().myvertex(oppFace,vx);
-        os.writeObject( vertex->ident() );
-        const alucoord_t (&p)[3] = vertex->Point();
-        os.writeObject ( p[0] );
-        os.writeObject ( p[1] );
-        os.writeObject ( p[2] );
-      }
+      // write ghost information
+      MacroGhostInfoHexa::writeGhostInfo( os, fce, myhexa() );
     }
     else
     {
-      os.writeObject ( MacroGridMoverIF::NO_POINT ); // no point transmitted
+      os.put( MacroGridMoverIF::NO_POINT ); // no point transmitted
     }
   }
 
@@ -2116,9 +2078,9 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::tetra_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation )
+  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], SimplexTypeFlag simplexType )
   {
-    return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], orientation );
+    return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], simplexType );
   }
 
   Gitter::Geometric::periodic3_GEO * GitterBasisPll::MacroGitterBasisPll::
@@ -2351,6 +2313,8 @@ namespace ALUGrid
       typedef GitterBasis::Objects::VertexEmptyMacro VertexEmptyMacro;
       typedef GitterBasis::Objects::VertexEmpty VertexEmpty;
       typedef Gitter::Geometric::VertexGeo VertexGeo;
+      typedef TreeIterator< Gitter::helement_STI, is_leaf< Gitter::helement_STI > > TreeIter;
+
       if( rank == 0 )
       {
         std::cout << "bool   = " << sizeof(bool) << std::endl;
@@ -2395,6 +2359,9 @@ namespace ALUGrid
         std::cout << "Hface4::nb = " << sizeof( Gitter::Geometric::hface4::face4Neighbour ) << std::endl;
         std::cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << std::endl;
         std::cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << std::endl << std::endl;
+
+        std::cout << "TreeIterator< A, B > = " << sizeof( TreeIter) << std::endl;
+
       }
 
       std::cout << "******** Number of Elements ************************8\n";

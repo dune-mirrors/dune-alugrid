@@ -25,7 +25,6 @@ private:
   struct Codim
   {
     typedef typename Grid :: Traits :: template Codim< codim > :: Entity Entity;
-    typedef typename Grid :: Traits :: template Codim< codim > :: EntityPointer EntityPointer;
   };
 
   struct ZoltanPartitioning{

@@ -551,7 +551,9 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
-          mgb.InsertUniqueTetra( element, 0 );
+          // bisection element type: orientation and type (default 0)
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
+          mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");

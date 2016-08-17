@@ -5,6 +5,7 @@ set(TESTS
   test-fromtogridfactory
   test-twists
   test-hierarchic
+  test-ball-projection
 )
 
 # copy data to build source to make tests work
@@ -15,6 +16,7 @@ add_executable(test-adaptivity test-adaptivity.cc)
 add_executable(test-fromtogridfactory test-fromtogridfactory.cc)
 add_executable(test-twists test-twists.cc)
 add_executable(test-hierarchic test-hierarchic.cc)
+add_executable(test-ball-projection test-ball-projection.cc)
 
 foreach(i ${SUBDIRS})
   if(${i} STREQUAL "test")
