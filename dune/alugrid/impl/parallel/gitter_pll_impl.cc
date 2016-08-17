@@ -2351,6 +2351,8 @@ namespace ALUGrid
       typedef GitterBasis::Objects::VertexEmptyMacro VertexEmptyMacro;
       typedef GitterBasis::Objects::VertexEmpty VertexEmpty;
       typedef Gitter::Geometric::VertexGeo VertexGeo;
+      typedef TreeIterator< Gitter::helement_STI, is_leaf< Gitter::helement_STI > > TreeIter;
+
       if( rank == 0 )
       {
         std::cout << "bool   = " << sizeof(bool) << std::endl;
@@ -2395,6 +2397,9 @@ namespace ALUGrid
         std::cout << "Hface4::nb = " << sizeof( Gitter::Geometric::hface4::face4Neighbour ) << std::endl;
         std::cout << "Hbnd4_IMPL  = " << sizeof(hbndseg4_IMPL) << std::endl;
         std::cout << "MacroGhostInfoHexa = " << sizeof(MacroGhostInfoHexa) << std::endl << std::endl;
+
+        std::cout << "TreeIterator< A, B > = " << sizeof( TreeIter) << std::endl;
+
       }
 
       std::cout << "******** Number of Elements ************************8\n";
