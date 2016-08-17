@@ -1115,12 +1115,12 @@ namespace ALUGrid
       virtual int resetRefinementRequest () = 0;
       virtual int tagForBallRefinement (const alucoord_t (&)[3],double,int) = 0;
       virtual int test () const = 0;
-       int leaf () const;
+      int leaf () const;
 
       virtual int orientation () const { return 0; }
 
       //! default implementation of ldbVertexIndex calls this method on father
-      //! the assumtion here is, that this method is overloaded approporiately
+      //! the assumption here is, that this method is overloaded appropriately
       //! on the corresponding parallel macro elements
       virtual int ldbVertexIndex () const
       {
