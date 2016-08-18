@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDGRID_HH
 
 //- System includes
+#include <memory>
 #include <vector>
 
 //- Dune includes
@@ -610,11 +611,6 @@ namespace Dune
 
     typedef typename ALU3dImplTraits< elType, Comm >::GitterImplType GitterImplType;
 
-    //! max number of levels
-    enum {
-      //! \brief maximal number of levels is 32
-      MAXL = 32 };
-
     //! element chunk for refinement
     enum {
       //! \brief normal default number of new elements for new adapt method
@@ -804,7 +800,9 @@ namespace Dune
     const GlobalIdSet &globalIdSet () const
     {
       if( !globalIdSet_ )
-        globalIdSet_ = new GlobalIdSetImp( *this );
+      {
+        globalIdSet_.reset( new GlobalIdSetImp( *this ) );
+      }
       return *globalIdSet_;
     }
 
@@ -1123,7 +1121,7 @@ namespace Dune
       return communications_->createALUGrid( stream, vertexProjection(), conformingRefinement() );
     }
 
-    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }
+    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_.operator -> (); }
 
     // return appropriate ALUGrid builder
     virtual typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder () const
@@ -1200,6 +1198,7 @@ namespace Dune
 
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
+      alugrid_assert ( level < int(ghostLevelList_[codim-1].size()) );
       return ghostLevelList_[codim-1][level];
     }
 
@@ -1292,7 +1291,7 @@ namespace Dune
     /////////////////////////////////////////////////////////////////
 
     // the real ALU grid
-    mutable GitterImplType *mygrid_;
+    mutable std::unique_ptr< GitterImplType > mygrid_;
 
     // max level of grid
     int maxlevel_;
@@ -1309,7 +1308,7 @@ namespace Dune
     HierarchicIndexSet hIndexSet_;
 
     // out global id set
-    mutable GlobalIdSetImp *globalIdSet_;
+    mutable std::unique_ptr< GlobalIdSetImp > globalIdSet_;
 
     // out global id set
     LocalIdSetImp localIdSet_;
@@ -1318,22 +1317,22 @@ namespace Dune
     mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
 
     // the leaf index set
-    mutable LeafIndexSetImp * leafIndexSet_;
+    mutable std::unique_ptr< LeafIndexSetImp > leafIndexSet_;
 
-    mutable VertexListType vertexList_[MAXL];
+    mutable std::vector< VertexListType > vertexList_;
 
     //the ghostleaf list is used in alu3diterators, where we use the internal aluIterators
     // the vertex codim there is 3, so the list has to fulfill that
     mutable ALU3dGridItemListType ghostLeafList_[ 3 ];
-    mutable ALU3dGridItemListType ghostLevelList_[ 3 ][MAXL];
+    mutable std::vector< ALU3dGridItemListType > ghostLevelList_[ 3 ];
 
-    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
+    mutable std::vector< ALU3dGridItemListType > levelEdgeList_;
 
     mutable LeafVertexListType leafVertexList_;
 
     // the type of our size cache
     typedef SizeCache<MyType> SizeCacheType;
-    SizeCacheType * sizeCache_;
+    std::unique_ptr< SizeCacheType > sizeCache_;
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
@@ -1342,13 +1341,13 @@ namespace Dune
     const DuneBoundaryProjectionType* bndPrj_;
 
     // pointer to Dune boundary projection
-    const DuneBoundaryProjectionVector* bndVec_;
+    std::unique_ptr< const DuneBoundaryProjectionVector > bndVec_;
 
     // boundary projection for vertices
-    ALUGridBoundaryProjectionType* vertexProjection_ ;
+    std::unique_ptr< ALUGridBoundaryProjectionType > vertexProjection_ ;
 
     // pointer to communications object
-    Communications *communications_;
+    std::unique_ptr< Communications > communications_;
 
     // refinement type (nonconforming or conforming)
     const ALUGridRefinementType refinementType_ ;
