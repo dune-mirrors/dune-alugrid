@@ -6,6 +6,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include "myalloc.h"
 #include "iterator_sti.h"
@@ -247,7 +248,7 @@ namespace ALUGrid
     : public IteratorSTI < A >
   {
     public:
-      static constexpr int maxStackDepth = 64;
+      static constexpr signed char _defaultStackDepth = 16;
 
       typedef B comp_t;
       typedef A val_t;
@@ -263,14 +264,7 @@ namespace ALUGrid
       val_t & item () const;
       virtual IteratorSTI < A > * clone () const;
 
-      void init( A * seed )
-      {
-        _seed   = seed;
-        *_stack = nullptr;
-        _pos  = 0;
-        _cnt = -1;
-      }
-
+      void init( A * seed );
     protected:
       int pushdown ();
       int pullup ();
@@ -279,11 +273,13 @@ namespace ALUGrid
       void assignIterator (const TreeIterator < A, B > &);
 
     protected:
-      A * _stack [ maxStackDepth ];
+      std::vector< A* > _stack;
       A * _seed;
 
-      int _pos; // position in stack
       int _cnt; // counter for the size of the iterator (#items)
+
+      signed char _pos;     // position in stack
+      signed char _lastPos; // last position in stack
 
       B _cmp;
   };
@@ -357,7 +353,6 @@ namespace ALUGrid
       val_t & item () const;
       virtual IteratorSTI < val_t > * clone () const;
     private :
-      void removeObj();
       // count items
       int count () const;
 
@@ -447,7 +442,7 @@ namespace ALUGrid
 
   template < class A, class B >
   inline TreeIterator < A, B > :: TreeIterator (A & s, const B & c)
-    : _cmp(c)
+    : _stack( _defaultStackDepth ), _lastPos( _defaultStackDepth - 1 ), _cmp(c)
   {
     init( &s );
     return;
@@ -455,7 +450,7 @@ namespace ALUGrid
 
   template < class A, class B >
   inline TreeIterator < A, B > :: TreeIterator (A * s, const B & c)
-    : _cmp(c)
+    :  _stack( _defaultStackDepth ), _lastPos( _defaultStackDepth - 1 ), _cmp(c)
   {
     init( s );
     return;
@@ -469,6 +464,15 @@ namespace ALUGrid
   }
 
   template < class A, class B >
+  inline void TreeIterator < A, B > :: init(A* seed)
+  {
+    _seed   = seed;
+    _stack[ 0 ] = nullptr;
+    _pos  = 0;
+    _cnt = -1;
+  }
+
+  template < class A, class B >
   inline IteratorSTI < A > *  TreeIterator < A, B > ::
   clone () const
   {
@@ -479,14 +483,12 @@ namespace ALUGrid
   inline void TreeIterator < A, B > ::
   assignIterator (const TreeIterator < A, B > & w)
   {
-    // make a copy of iterator
-    _seed = w._seed;
-    _cnt  = w._cnt;
-    _pos  = w._pos;
-    _cmp  = w._cmp;
-
-    alugrid_assert ( _pos < maxStackDepth );
-    for (int i = 0; i <= _pos; ++i) _stack [i] = w._stack [i];
+    _stack   = w._stack;
+    _seed    = w._seed;
+    _cnt     = w._cnt;
+    _pos     = w._pos;
+    _lastPos = w._lastPos;
+    _cmp     = w._cmp;
   }
 
   template < class A, class B >
@@ -501,8 +503,16 @@ namespace ALUGrid
   inline int TreeIterator < A, B > :: pushdown ()
   {
     A * e = _stack [_pos];
-    alugrid_assert ( _pos+1 < maxStackDepth );
-    for(; e ? ! _cmp (e) : 0; _stack [ ++ _pos] = (e = e->down ()));
+    // make sure there is enough space fro 2 more items
+    for(; e ? ! _cmp (e) : 0; _stack [ ++ _pos] = (e = e->down ()))
+    {
+      if( _pos >= _lastPos )
+      {
+        _lastPos += _defaultStackDepth ;
+        alugrid_assert( _lastPos > 0 );
+        _stack.resize( _lastPos + 1 );
+      }
+    }
     return e ? 1 : (-- _pos, 0);
   }
 
@@ -529,14 +539,14 @@ namespace ALUGrid
   {
     if (_seed)
     {
-      * _stack = _seed;
+      _stack[ 0 ] = _seed;
       _pos = 0;
       do {
         if(pushdown ()) return;
       } while(pullup ());
     }
     _pos = 0;
-    * _stack = 0;
+    _stack[ 0 ] = 0;
     return;
   }
 
@@ -546,14 +556,22 @@ namespace ALUGrid
     A * e = _stack [_pos];
     A * d = e->down ();
     if (d) {
-      _stack[++_pos] = d;
+      // make sure there is enough space for 2 more items
+      ++_pos;
+      if( _pos >= _lastPos )
+      {
+        _lastPos += _defaultStackDepth;
+        alugrid_assert( _lastPos > 0 );
+        _stack.resize( _lastPos + 1 );
+      }
+      _stack[_pos] = d;
       if(pushdown ()) return;
     }
     while (pullup ()) {
       if (pushdown ()) return;
     }
     _pos = 0;
-    * _stack = 0;
+    _stack[ 0 ] = 0;
     return;
   }
 
@@ -567,14 +585,14 @@ namespace ALUGrid
   inline int TreeIterator < A, B > :: done () const
   {
     alugrid_assert ( _pos >= 0 );
-    alugrid_assert ( _pos < maxStackDepth );
+    alugrid_assert ( _pos < int(_stack.size()) );
     return ! _stack [_pos];
   }
 
   template < class A, class B >
   inline A & TreeIterator < A, B > :: item () const {
     alugrid_assert (! done ()) ;
-    return * _stack [_pos];
+    return * (_stack [_pos]);
   }
 
 
@@ -739,7 +757,9 @@ namespace ALUGrid
     for (_curr = _it.begin (); (_curr == end ? 0 : ((*_curr)->first (), (*_curr)->done ())); ++_curr);
     _ahead = _curr;
     if (_ahead != end)
-      _ahead++;
+    {
+      ++_ahead;
+    }
     for (; (_ahead == end ? 0 : ((*_ahead)->first (), (*_ahead)->done ())); ++_ahead );
     return;
   }
