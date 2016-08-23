@@ -847,9 +847,38 @@ namespace Dune
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
     {
-      return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      if( ! levelIndexVec_[ level ] )
+      {
+        levelIndexVec_[ level ] = createLevelIndexSet( level );
+      }
+      return (*levelIndexVec_[ level ]);
     }
 
+    /** \brief return instance of level index set
+        \note if index set for this level has not been created then this
+        instance will be deleted once the shared_ptr goes out of scope.
+    */
+    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const
+    {
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      if( levelIndexVec_[ level ] )
+      {
+        return levelIndexVec_[ level ];
+      }
+      else
+      {
+        return createLevelIndexSet( level );
+      }
+    }
+
+  protected:
+    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const
+    {
+      return std::shared_ptr< LevelIndexSetImp > (new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level ) );
+    }
+
+  public:
     template< int cd >
     typename Codim< cd >::Twists twists ( GeometryType type ) const
     {
@@ -1257,15 +1286,6 @@ namespace Dune
     void makeGeometries();
 
   public:
-    std::pair< LevelIndexSetImp *, bool > getLevelIndexSet ( int level ) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
-      if( !indexSet.second )
-        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level );
-      return indexSet;
-    }
-
     // return true if conforming refinement is enabled
     bool conformingRefinement() const
     {
@@ -1314,7 +1334,7 @@ namespace Dune
     LocalIdSetImp localIdSet_;
 
     // the level index set ( default type )
-    mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
+    mutable std::vector < std::shared_ptr< LevelIndexSetImp > > levelIndexVec_;
 
     // the leaf index set
     mutable std::unique_ptr< LeafIndexSetImp > leafIndexSet_;

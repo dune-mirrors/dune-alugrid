@@ -158,7 +158,7 @@ protected:
   //! convert ALUGrid partition type to dune partition type
   PartitionType convertBndId(const HItemType & item) const ;
 
-  //! the cuurent geometry
+  //! the current geometry
   mutable GeometryImpl geo_;
 
   //! the information necessary to make sense of this entity
