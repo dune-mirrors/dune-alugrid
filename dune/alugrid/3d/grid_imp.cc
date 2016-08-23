@@ -210,8 +210,6 @@ namespace Dune
         delete (*bndVec_)[i];
       }
     }
-
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
   }
 
 
