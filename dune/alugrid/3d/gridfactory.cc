@@ -354,6 +354,8 @@ namespace Dune
 
     correctElementOrientation();
 
+    int bisectionType = 0;
+
     if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
       BisectionCompatibility bisComp(elements_);
@@ -362,7 +364,8 @@ namespace Dune
       else
       {
         std::cout << "Making compatible" << std::endl;
-        if(bisComp.makeCompatible())
+        bisectionType = bisComp.type1Algorithm();
+        if(bisectionType)
         {
           std::cout << "Grid is compatible!!" << std::endl;
           bisComp.returnElements(elements_);
@@ -554,7 +557,7 @@ namespace Dune
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
           // bisection element type: orientation and type (default 0)
-          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), bisectionType );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else
