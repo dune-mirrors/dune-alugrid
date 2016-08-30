@@ -354,21 +354,23 @@ namespace Dune
 
     correctElementOrientation();
 
-    BisectionCompatibility bisComp(elements_);
-    if(bisComp.compatibilityCheck())
-      std::cout << "Grid is compatible!" << std::endl;
-    else
+    if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
-      std::cout << "Making compatible" << std::endl;
-      if(bisComp.makeCompatible())
-      {
-        std::cout << "Grid is compatible!!" << std::endl;
-        bisComp.returnElements(elements_);
-      }
+      BisectionCompatibility bisComp(elements_);
+      if(bisComp.compatibilityCheck())
+        std::cout << "Grid is compatible!" << std::endl;
       else
-        std::cout << "Could not make compatible!" << std::endl;
+      {
+        std::cout << "Making compatible" << std::endl;
+        if(bisComp.makeCompatible())
+        {
+          std::cout << "Grid is compatible!!" << std::endl;
+          bisComp.returnElements(elements_);
+        }
+        else
+          std::cout << "Could not make compatible!" << std::endl;
+      }
     }
-
 
     std::vector< unsigned int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
