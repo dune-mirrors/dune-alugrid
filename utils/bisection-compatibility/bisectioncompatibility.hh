@@ -27,33 +27,22 @@ public:
 
   const int numFaces = 4;
   const bool stevensonRefinement_ = false ;
-  const int bisectionType = 1;
   const int type1node = stevensonRefinement_ ? 1 : 2;
   const int type1face = numFaces - type1node - 1;
 
   //constructor taking elements
+  //assumes standard orientation elemIndex % 2
   BisectionCompatibility(std::vector<ElementType >  elements)
     : elements_(elements), maxVertexIndex_(0) {
+    applyStandardOrientation();
     buildNeighbors();
   };
-
 
   //check grid for compatibility
   bool compatibilityCheck ()
   {
     for(auto&& face : neighbours_)
     {
-      if(!checkFaceCompatibility(face)) return false;
-    }
-    return true;
-  }
-
-  //check a subset of the elements for compatibility
-  bool compatibilityCheck (unsigned int index)
-  {
-    for(auto&& face : neighbours_)
-    {
-      if(face.second[1] >= index) continue;
       if(!checkFaceCompatibility(face)) return false;
     }
     return true;
@@ -79,7 +68,7 @@ public:
     std::cout << "]  Refinement Edges: ";
     for(int i=0; i< numFaces; ++i)
     {
-      getRefinementEdge(el, i, edge, bisectionType);
+      getRefinementEdge(el, i, edge, types_[index]);
       std::cout << "[" << edge[0] << "," << edge[1] << "] ";
     }
     std::cout << std::endl;
@@ -198,19 +187,37 @@ public:
 
   void returnElements(std::vector<ElementType> & elements)
   {
+    applyStandardOrientation();
     elements = elements_;
   }
 
 private:
 
+  //switch vertices 2,3 for all elements with elemIndex % 2
+  void applyStandardOrientation ()
+  {
+    int i = 0;
+    for(auto & element : elements_ )
+    {
+      if ( i % 2 == 0 )
+      {
+        std::swap(element[2],element[3]);
+      }
+      ++i;
+    }
+    types_.resize(elements_.size(), 0);
+  }
+
   //check face for compatibility
   bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face)
   {
     EdgeType edge1,edge2;
-    if(face.second[0] != face.second[1])
+    int elIndex = face.second[0];
+    int neighIndex = face.second[1];
+    if(elIndex != neighIndex)
     {
-      getRefinementEdge(elements_[face.second[0]], face.first, edge1, bisectionType);
-      getRefinementEdge(elements_[face.second[1]], face.first, edge2, bisectionType);
+      getRefinementEdge(elements_[elIndex], face.first, edge1, types_[elIndex]);
+      getRefinementEdge(elements_[neighIndex], face.first, edge2, types_[neighIndex]);
       if(edge1 != edge2)
       {
         /*   std::cerr << "Face: " << face.first[0] << ", " << face.first[1] << ", " << face.first[2]
@@ -441,6 +448,8 @@ private:
   FaceMapType neighbours_;
   //The maximum Vertex Index
   unsigned int maxVertexIndex_;
+  //the element types
+  std::vector<int> types_;
 
 }; //class bisectioncompatibility
 
