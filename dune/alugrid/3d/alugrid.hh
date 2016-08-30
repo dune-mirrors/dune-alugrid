@@ -45,6 +45,7 @@ namespace Dune
     typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
     enum { dimension=BaseType::dimension,  dimensionworld=BaseType::dimensionworld};
+    static const ALUGridRefinementType refinementType = refineType;
     typedef typename BaseType::ctype ctype;
     typedef typename BaseType::GridFamily GridFamily;
     typedef typename GridFamily::Traits Traits;
