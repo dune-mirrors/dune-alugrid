@@ -102,7 +102,7 @@ int main()
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
   else
-  if(bisComp.makeCompatible() )
+  if(bisComp.type1Algorithm() )
     std::cout << "DONE" << std::endl;
   else
     std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
@@ -110,7 +110,7 @@ int main()
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
   else
-  if(bisComp.makeCompatible() )
+  if(bisComp.type1Algorithm() )
     std::cout << "DONE" << std::endl;
   else
     std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;

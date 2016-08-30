@@ -25,10 +25,9 @@ public:
   typedef std::pair< FaceType, EdgeType > FaceElementType;
 
 
-  const int numFaces = 4;
   const bool stevensonRefinement_ = false ;
   const int type1node = stevensonRefinement_ ? 1 : 2;
-  const int type1face = numFaces - type1node - 1;
+  const int type1face = 3 - type1node ;
 
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
@@ -63,10 +62,10 @@ public:
     ElementType el = elements_[index];
     EdgeType edge;
     std::cout << "[" << el[0] ;
-    for(int i=1; i < numFaces; ++i)
+    for(int i=1; i < 4; ++i)
       std::cout << ","<< el[i] ;
     std::cout << "]  Refinement Edges: ";
-    for(int i=0; i< numFaces; ++i)
+    for(int i=0; i< 4; ++i)
     {
       getRefinementEdge(el, i, edge, types_[index]);
       std::cout << "[" << edge[0] << "," << edge[1] << "] ";
@@ -74,8 +73,10 @@ public:
     std::cout << std::endl;
   }
 
-  bool makeCompatible()
+  bool type1Algorithm()
   {
+    for(auto & type : types_ )
+      type = 1;
     //the currently active Faces.
     //and the free faces that can still be adjusted at the end.
     FaceMapType activeFaces, freeFaces;
@@ -331,7 +332,7 @@ private:
         }
       }
     }
-    else if(type == 1)
+    else if(type == 1 || type == 2)
     {
       if(stevensonRefinement_)
       {
@@ -378,7 +379,7 @@ private:
     }
     else
     {
-      std::cerr << "no other types than 0 and 1 implemented." << std::endl;
+      std::cerr << "no other types than 0, 1, 2 implemented." << std::endl;
       abort();
     }
     std::sort(edge.begin(),edge.end());
@@ -396,10 +397,10 @@ private:
   //this could be improved by exploiting that faces are sorted
   int getFaceIndex(ElementType el, FaceType face)
   {
-    for(int i =0; i<numFaces ; ++i)
+    for(int i =0; i<4 ; ++i)
     {
       if(!( el[i] == face[0] || el[i] == face[1]  || el[i] == face[2] ) )
-        return numFaces - i - 1 ;
+        return 4 - i - 1 ;
     }
     return -1;
   }
@@ -419,7 +420,7 @@ private:
     unsigned int index = 0;
     for(auto&& el : elements_)
     {
-      for(int i = 0; i< numFaces; ++i)
+      for(int i = 0; i< 4; ++i)
       {
         getFace(el, i, face);
         auto faceInList = neighbours_.find(face);
@@ -436,7 +437,7 @@ private:
         }
       }
       ++index;
-      for(int i=0; i < numFaces ; ++i)
+      for(int i=0; i < 4 ; ++i)
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
   }
