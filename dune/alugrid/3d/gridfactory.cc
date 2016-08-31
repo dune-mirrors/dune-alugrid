@@ -561,7 +561,6 @@ namespace Dune
           if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
           {
             simplexTypeFlag = ALU3DSPACE SimplexTypeFlag(0,1);
-           // std::cout << "resetting simplexTypeFlag: " << int(simplexTypeFlag.type() ) << " " << int ( simplexTypeFlag.orientation() ) << std::endl;
           }
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
