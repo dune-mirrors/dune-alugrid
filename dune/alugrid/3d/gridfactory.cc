@@ -354,18 +354,22 @@ namespace Dune
 
     correctElementOrientation();
 
-    int bisectionType = 0;
+    std::vector< unsigned int >& ordering = ordering_;
+    // sort element given a hilbert space filling curve (if Zoltan is available)
+    sortElements( vertices_, elements_, ordering );
+
+    bool make6 = true;
 
     if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
       BisectionCompatibility bisComp(elements_);
-      if(bisComp.compatibilityCheck())
+      if(bisComp.make6CompatibilityCheck())
         std::cout << "Grid is compatible!" << std::endl;
       else
       {
+        make6 = false;
         std::cout << "Making compatible" << std::endl;
-        bisectionType = bisComp.type1Algorithm();
-        if(bisectionType)
+        if(bisComp.type1Algorithm())
         {
           std::cout << "Grid is compatible!!" << std::endl;
           bisComp.returnElements(elements_);
@@ -374,10 +378,6 @@ namespace Dune
           std::cout << "Could not make compatible!" << std::endl;
       }
     }
-
-    std::vector< unsigned int >& ordering = ordering_;
-    // sort element given a hilbert space filling curve (if Zoltan is available)
-    sortElements( vertices_, elements_, ordering );
 
     numFacesInserted_ = boundaryIds_.size();
 
@@ -557,7 +557,12 @@ namespace Dune
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
           // bisection element type: orientation and type (default 0)
-          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), bisectionType );
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
+          if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
+          {
+            simplexTypeFlag = ALU3DSPACE SimplexTypeFlag(0,1);
+           // std::cout << "resetting simplexTypeFlag: " << int(simplexTypeFlag.type() ) << " " << int ( simplexTypeFlag.orientation() ) << std::endl;
+          }
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else
