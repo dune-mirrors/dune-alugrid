@@ -1,3 +1,5 @@
+add_directory_test_target(_test_target)
+
 set(TESTS adapt
           backuprestore
           sizes
