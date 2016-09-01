@@ -1,5 +1,3 @@
-add_directory_test_target(_test_target)
-
 set(SUBDIRS dgf)
 set(TESTS
   test-alugrid
@@ -36,5 +34,3 @@ foreach(i ${TESTS})
   dune_target_enable_all_packages( ${i} )
   add_test(${i} ${i})
 endforeach(i ${TESTS})
-
-add_dependencies(${_test_target} ${TESTS})
