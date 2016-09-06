@@ -27,9 +27,6 @@ public:
   typedef std::map< FaceType, EdgeType > FaceMapType;
   typedef std::pair< FaceType, EdgeType > FaceElementType;
 
-  //true if stevenson notation is used
-  //false for ALBERTA
-  const bool stevensonRefinement_ = false;
   //second node of the refinement edge (first is 0)
   const int type0node = stevensonRefinement_ ? 3 : 1 ;
   //The interior node of a type 1 element
@@ -39,8 +36,8 @@ public:
 
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
-  BisectionCompatibility(std::vector<ElementType >  elements)
-    : elements_(elements), maxVertexIndex_(0), types_(elements_.size(),0) {
+  BisectionCompatibility(std::vector<ElementType >  elements, bool stevenson)
+    : elements_(elements), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
     //build the information about neighbours
     buildNeighbors();
   };
@@ -108,6 +105,15 @@ public:
   //and tries to make as many reflected neighbors as possible.
   bool type0Algorithm()
   {
+    if(!stevensonRefinement_)
+    {
+      BisectionCompatibility stevensonBisComp(elements_, true);
+      stevensonBisComp.alberta2Stevenson();
+      bool result = stevensonBisComp.type0Algorithm();
+      stevensonBisComp.stevenson2Alberta();
+      stevensonBisComp.returnElements(elements_);
+      return result;
+    }
     std::list<int> vertexPriorityList;
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
@@ -360,6 +366,25 @@ public:
   void returnElements(std::vector<ElementType> & elements)
   {
     elements = elements_;
+  }
+
+  void stevenson2Alberta()
+  {
+    for(auto&& el : elements_)
+    {
+      std::swap(el[0],el[3]);
+      std::swap(el[1],el[3]);
+    }
+  }
+
+
+  void alberta2Stevenson()
+  {
+    for(auto&& el : elements_)
+    {
+      std::swap(el[3],el[1]);
+      std::swap(el[0],el[3]);
+    }
   }
 
 private:
@@ -673,6 +698,9 @@ private:
   unsigned int maxVertexIndex_;
   //the element types
   std::vector<int> types_;
+  //true if stevenson notation is used
+  //false for ALBERTA
+  const bool stevensonRefinement_;
 
 }; //class bisectioncompatibility
 
