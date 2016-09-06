@@ -111,7 +111,7 @@ public:
       stevensonBisComp.alberta2Stevenson();
       bool result = stevensonBisComp.type0Algorithm();
       stevensonBisComp.stevenson2Alberta();
-      stevensonBisComp.returnElements(elements_);
+      elementOrientation_ = stevensonBisComp.returnElements(elements_);
       return result;
     }
     std::list<unsigned int> vertexPriorityList;
@@ -196,7 +196,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it0);
         std::swap(neigh[0],*helpIt);
-        elementOrientation_[neighIndex]++;
+        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
       }
       ++it0;
       auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin() + 1, neigh.end());
@@ -204,7 +204,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it1);
         std::swap(neigh[1],*helpIt);
-        elementOrientation_[neighIndex]++;
+        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
       }
       ++it1;
       auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin() + 2, neigh.end());
@@ -212,7 +212,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it2);
         std::swap(neigh[2],*helpIt);
-        elementOrientation_[neighIndex]++;
+        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
       }
       //add and remove faces from activeFaceList
       for(int i = 0; i < 4 ; ++i)
@@ -362,7 +362,7 @@ public:
     return true;
   }
 
-  std::vector<int> returnElements(std::vector<ElementType> & elements)
+  std::vector<bool> returnElements(std::vector<ElementType> & elements)
   {
     elements = elements_;
     return elementOrientation_;
@@ -692,7 +692,7 @@ private:
 private:
   //the elements to be renumbered
   std::vector<ElementType> elements_;
-  std::vector<int> elementOrientation_;
+  std::vector<bool> elementOrientation_;
   //the neighbouring structure
   FaceMapType neighbours_;
   //The maximum Vertex Index
