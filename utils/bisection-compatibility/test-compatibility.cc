@@ -97,23 +97,31 @@ int main()
       {26,48,49,50}
     });
 
+ /* std::vector<ElementType> elements(
+  {
+    {0,1,2,3},
+    {3,0,1,4},
+    {4,1,0,5},
+    {1,2,0,5}
+  });*/
+
   BisectionCompatibility bisComp(elements);
   std::cout << "Construction worked" << std::endl;
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
   else
-  if(bisComp.type1Algorithm() )
+  if(bisComp.type0Algorithm() )
     std::cout << "DONE" << std::endl;
   else
     std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
 
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
-  else
-  if(bisComp.type1Algorithm() )
-    std::cout << "DONE" << std::endl;
-  else
-    std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
+//  else
+//  if(bisComp.type1Algorithm() )
+ //   std::cout << "DONE" << std::endl;
+ // else
+  //  std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
 
   // bisComp.printNB();
   for(unsigned int i=0; i < elements.size(); ++i)
