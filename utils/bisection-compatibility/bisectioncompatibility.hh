@@ -37,7 +37,7 @@ public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
   BisectionCompatibility(std::vector<ElementType >  elements, bool stevenson)
-    : elements_(elements), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
+    : elements_(elements), elementOrientation_(elements_.size(),0), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
     //build the information about neighbours
     buildNeighbors();
   };
@@ -114,11 +114,10 @@ public:
       stevensonBisComp.returnElements(elements_);
       return result;
     }
-    std::list<int> vertexPriorityList;
+    std::list<unsigned int> vertexPriorityList;
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
-    std::vector<int> elementOrientation(elements_.size(),0);
 
     //for now - no edge Priority, we just use the fact, that
     //each simplex know its desired refinement edge
@@ -197,7 +196,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it0);
         std::swap(neigh[0],*helpIt);
-        elementOrientation[neighIndex]++;
+        elementOrientation_[neighIndex]++;
       }
       ++it0;
       auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin() + 1, neigh.end());
@@ -205,7 +204,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it1);
         std::swap(neigh[1],*helpIt);
-        elementOrientation[neighIndex]++;
+        elementOrientation_[neighIndex]++;
       }
       ++it1;
       auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin() + 2, neigh.end());
@@ -213,7 +212,7 @@ public:
       {
         auto helpIt = std::find(neigh.begin(), neigh.end(), *it2);
         std::swap(neigh[2],*helpIt);
-        elementOrientation[neighIndex]++;
+        elementOrientation_[neighIndex]++;
       }
       //add and remove faces from activeFaceList
       for(int i = 0; i < 4 ; ++i)
@@ -363,9 +362,10 @@ public:
     return true;
   }
 
-  void returnElements(std::vector<ElementType> & elements)
+  std::vector<int> returnElements(std::vector<ElementType> & elements)
   {
     elements = elements_;
+    return elementOrientation_;
   }
 
   void stevenson2Alberta()
@@ -692,6 +692,7 @@ private:
 private:
   //the elements to be renumbered
   std::vector<ElementType> elements_;
+  std::vector<int> elementOrientation_;
   //the neighbouring structure
   FaceMapType neighbours_;
   //The maximum Vertex Index
