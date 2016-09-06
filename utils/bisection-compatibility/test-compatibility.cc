@@ -105,7 +105,7 @@ int main()
     {1,2,0,5}
   });*/
 
-  BisectionCompatibility bisComp(elements);
+  BisectionCompatibility bisComp(elements, false);
   std::cout << "Construction worked" << std::endl;
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
@@ -117,11 +117,11 @@ int main()
 
   if(bisComp.compatibilityCheck())
     std::cout << "Refinement is okay" << std::endl;
-//  else
-//  if(bisComp.type1Algorithm() )
- //   std::cout << "DONE" << std::endl;
- // else
-  //  std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
+  else
+  if(bisComp.type1Algorithm() )
+    std::cout << "DONE" << std::endl;
+  else
+   std::cout << "COULD NOT MAKE COMPATIBLE!" << std::endl;
 
   // bisComp.printNB();
   for(unsigned int i=0; i < elements.size(); ++i)
