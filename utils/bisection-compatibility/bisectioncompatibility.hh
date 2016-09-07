@@ -37,7 +37,7 @@ public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
   BisectionCompatibility(std::vector<ElementType >  elements, bool stevenson)
-    : elements_(elements), elementOrientation_(elements_.size(),0), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
+    : elements_(elements), elementOrientation_(elements_.size(),false), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
     //build the information about neighbours
     buildNeighbors();
   };
@@ -111,7 +111,7 @@ public:
       stevensonBisComp.alberta2Stevenson();
       bool result = stevensonBisComp.type0Algorithm();
       stevensonBisComp.stevenson2Alberta();
-      elementOrientation_ = stevensonBisComp.returnElements(elements_);
+      elementOrientation_ = stevensonBisComp.returnElements(elements_, false);
       return result;
     }
     std::list<unsigned int> vertexPriorityList;
@@ -362,8 +362,13 @@ public:
     return true;
   }
 
-  std::vector<bool> returnElements(std::vector<ElementType> & elements)
+  std::vector<bool> returnElements(std::vector<ElementType> & elements, bool ALUexport = true)
   {
+    for(unsigned int i =0 ; i < elements_.size(); ++i)
+    {
+      if(ALUexport && elementOrientation_[i])
+        std::swap(elements_[i][2], elements_[i][3]);
+    }
     elements = elements_;
     return elementOrientation_;
   }
@@ -372,7 +377,6 @@ public:
   {
     for(auto&& el : elements_)
     {
-      std::swap(el[0],el[3]);
       std::swap(el[1],el[3]);
     }
   }
@@ -382,8 +386,7 @@ public:
   {
     for(auto&& el : elements_)
     {
-      std::swap(el[3],el[1]);
-      std::swap(el[0],el[3]);
+      std::swap(el[1],el[3]);
     }
   }
 
@@ -553,10 +556,10 @@ private:
           edge = {el[0],el[1]};
           break;
         case 1 :
-          edge =  {el[0],el[3]};
+          edge =  {el[0],el[2]};
           break;
         case 0 :
-          edge =  {el[1],el[2]};
+          edge =  {el[1],el[3]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;

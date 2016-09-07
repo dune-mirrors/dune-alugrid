@@ -359,20 +359,20 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
     bool make6 = true;
-
+    std::vector<bool> elementOrientation(elements_.size(), false);
     if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
-      BisectionCompatibility bisComp(elements_);
+      BisectionCompatibility bisComp(elements_, false);
       if(bisComp.make6CompatibilityCheck())
         std::cout << "Grid is compatible!" << std::endl;
       else
       {
         make6 = false;
         std::cout << "Making compatible" << std::endl;
-        if(bisComp.type1Algorithm())
+        if(bisComp.type0Algorithm())
         {
           std::cout << "Grid is compatible!!" << std::endl;
-          bisComp.returnElements(elements_);
+          elementOrientation = bisComp.returnElements(elements_);
         }
         else
           std::cout << "Could not make compatible!" << std::endl;
@@ -560,7 +560,7 @@ namespace Dune
           ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
           if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
           {
-            simplexTypeFlag = ALU3DSPACE SimplexTypeFlag(0,1);
+            simplexTypeFlag = ALU3DSPACE SimplexTypeFlag(!(elementOrientation[elemIndex]),0);
           }
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
