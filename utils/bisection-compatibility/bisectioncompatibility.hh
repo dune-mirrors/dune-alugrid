@@ -236,7 +236,7 @@ public:
       }
     }
     assert(activeFaceList.empty());
-    return true;
+    return compatibilityCheck();
   }
 
 
@@ -398,7 +398,7 @@ private:
     int i = 0;
     for(auto & element : elements_ )
     {
-      if ( i % 2 == 1 )
+      if ( i % 2 == 0 )
       {
         std::swap(element[2],element[3]);
       }
