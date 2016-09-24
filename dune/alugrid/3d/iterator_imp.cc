@@ -348,11 +348,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     Coordinate xInside = geometryInInside().global( local );
     Coordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
     const ElementGeometry insideGeom = inside().geometry();
-#else
-    const ElementGeometry insideGeom = inside().dereference().geometry();
-#endif
     insideGeom.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
     outerNormal *= insideGeom.integrationElement( xInside );
     if(connector_.conformanceState() == FaceInfoType::REFINED_OUTER) outerNormal *=0.5;

@@ -19,7 +19,7 @@ fi
 # NOTE: Zoltan has to be downloaded separately from
 
 #change appropriately, i.e. 2.3 or empty (which refers to master)
-DUNEVERSION=2.3
+DUNEVERSION=2.4
 
 # use of cmake is not recommended, since it might not work
 # and it won't make it easy to reproduce the paper results

@@ -375,14 +375,8 @@ namespace Dune
 
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
-
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         typedef EntityImp EntityPointerImpl;
         typedef Entity    EntityPointer;
-#else
-        typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
-        typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
-#endif
 
         template< PartitionIteratorType pitype >
         struct Partition
