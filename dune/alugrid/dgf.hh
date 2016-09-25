@@ -151,12 +151,8 @@ namespace Dune
     int boundaryId ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const typename Intersection::Entity & entity = intersection.inside();
-#else
-       typename Intersection::EntityPointer inside = intersection.inside();
-       const typename Intersection::Entity & entity = *inside;
-#endif
+
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > & refElem =
@@ -166,11 +162,7 @@ namespace Dune
       for( int i=0; i < corners; ++i )
       {
         const int k =  refElem.subEntity( face, 1, i, dimension );
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         bound[ i ] = factory_.insertionIndex( entity.template subEntity< dimension >( k ) );
-#else
-        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
-#endif
       }
 
       DuneGridFormatParser::facemap_t::key_type key( bound, false );
@@ -186,12 +178,8 @@ namespace Dune
       boundaryParameter ( const Intersection< GG, II > & intersection ) const
     {
       typedef Dune::Intersection< GG, II > Intersection;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const typename Intersection::Entity & entity = intersection.inside();
-#else
-       typename Intersection::EntityPointer inside = intersection.inside();
-       const typename Intersection::Entity & entity = *inside;
-#endif
+
       const int face = intersection.indexInInside();
 
       const ReferenceElement< double, dimension > & refElem =
@@ -201,11 +189,7 @@ namespace Dune
       for( int i=0; i < corners; ++i )
       {
         const int k =  refElem.subEntity( face, 1, i, dimension );
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         bound[ i ] = factory_.insertionIndex( entity.template subEntity< dimension >( k ) );
-#else
-        bound[ i ] = factory_.insertionIndex( *entity.template subEntity< dimension >( k ) );
-#endif
       }
 
       DuneGridFormatParser::facemap_t::key_type key( bound, false );
