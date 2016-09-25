@@ -507,13 +507,8 @@ public:
   ThisType & operator = (const ThisType & org);
 
   //! dereferencing
-  Entity
-//#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-    & // need reference here for older versions
-//#endif
-  dereference () const
+  Entity& dereference () const
   {
-
     // don't dereference empty entity pointer
     alugrid_assert ( seed_.isValid() );
     alugrid_assert ( seed_.item() == & entityImp().getItem() );
