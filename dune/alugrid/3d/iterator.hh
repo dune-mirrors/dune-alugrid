@@ -104,10 +104,11 @@ public:
   typedef ALUTwists< (dim == 3 ) ? GridImp::elementType == tetra ? 3 : 4 : 2, dim-1 > Twists;
   typedef typename Twists::Twist Twist;
 
-  typedef typename GridImp::template Codim<0>::Entity             Entity;
-  typedef typename GridImp::template Codim<1>::Geometry           Geometry;
-  typedef typename GridImp::template Codim<1>::LocalGeometry      LocalGeometry;
-  typedef typename GridImp::template Codim<0>::EntityPointerImpl  EntityPointerImpl;
+  typedef typename GridImp::template Codim<0>::Entity         Entity;
+  typedef typename GridImp::template Codim<0>::EntityImp      EntityImp;
+
+  typedef typename GridImp::template Codim<1>::Geometry       Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry  LocalGeometry;
 
   typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
   //! type of the intersection
@@ -131,10 +132,10 @@ public:
   void increment ();
 
   //! access neighbor
-  EntityPointerImpl outside() const;
+  EntityImp outside() const;
 
   //! access entity where iteration started
-  EntityPointerImpl inside() const;
+  EntityImp inside() const;
 
   //! return true if intersection is with boundary.
   bool boundary () const;
