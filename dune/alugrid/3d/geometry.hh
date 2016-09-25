@@ -766,19 +766,6 @@ namespace Dune
     mutable ALU3DSPACE SharedPointer< GeometryImplType > geoImplPtr_;
   };
 
-#if ! DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
-  namespace FacadeOptions
-  {
-    //! geometry can be stored as an object
-    template< int mydim, int cdim, class GridImp >
-    struct StoreGeometryReference< mydim, cdim, GridImp, ALU3dGridGeometry >
-    {
-      //! Whether to store by reference.
-      static const bool v = false;
-    };
-  }
-#endif
-
 } // namespace Dune
 
 #include "geometry_imp.cc"

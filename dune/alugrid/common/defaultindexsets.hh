@@ -63,11 +63,7 @@ namespace Dune
   template < class GridImp, class IteratorImp >
   class DefaultIndexSet :
     public IndexSet< GridImp, DefaultIndexSet <GridImp, IteratorImp>,
-                     unsigned int
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-    , std::vector< GeometryType >
-#endif
-      >
+                     unsigned int, std::vector< GeometryType > >
   {
     typedef GridImp GridType;
     enum { dim = GridType::dimension };
@@ -115,11 +111,7 @@ namespace Dune
         }
         else
         {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           const int subEntities = entity.subEntities( codim );
-#else
-          const int subEntities = entity.template count< codim > ();
-#endif
           for( int i = 0; i < subEntities; ++i )
           {
             Index &idx = codimContainer( entity, i );
