@@ -139,6 +139,11 @@ public:
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 
+  int subIndex ( int i, unsigned int codim ) const
+  {
+    DUNE_THROW( NotImplemented, "Method subIndex for higher codimension not implemented, yet." );
+  }
+
   // return reference to internal item
   const ItemType& getItem () const { return *(static_cast<ItemType *> (seed_.item())); }
 
