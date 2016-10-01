@@ -54,4 +54,4 @@ For installation instructions please see the [DUNE website][2].
 [3]: http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252
 [4]: http://www.cs.sandia.gov/Zoltan/
 [5]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/COPYING
-[6]: https://gitlab.dune-project.org/extensions/dune-alugrid/doc/dunealugrid.bib
+[6]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/doc/dunealugrid.bib
