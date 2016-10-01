@@ -9,7 +9,7 @@ A detailed description of all the new features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
 in the paper
 
-[Alkämper, Dedner, Klöfkorn, Nolte. The DUNE-ALUGrid Module, Archive of Numerical Software 4(1), 2016][3][bib][6].
+[Alkämper, Dedner, Klöfkorn, Nolte. The DUNE-ALUGrid Module, Archive of Numerical Software 4(1), 2016][3] [(bibtex)][6].
 
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
