@@ -348,12 +348,8 @@ generateHypergraph()
       const Intersection &intersection = *iit;
       if( intersection.neighbor() )
 	    {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 		    const Entity &neighbor = intersection.outside();
-#else
-        const  typename Entity::EntityPointer pOutside = intersection.outside();
-		    const Entity &neighbor = *pOutside;
-#endif
+
 		    std::vector<int> neighborGID(NUM_GID_ENTRIES);
         // use special ALU method that returns a pure integer tuple which is a
         // unique id on the macrolevel
