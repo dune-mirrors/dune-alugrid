@@ -27,19 +27,11 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
-#else
-#include <dune/grid/test/gridcheck.cc>
-#include <dune/grid/test/checkgeometryinfather.cc>
-#include <dune/grid/test/checkintersectionit.cc>
-#include <dune/grid/test/checkiterators.cc>
-#include <dune/grid/test/checkcommunicate.cc>
-#endif
 //#include "checktwists.cc"
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
@@ -308,15 +300,9 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
 
       if( intersection.neighbor() )
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         // check twist of inside geometry
         const int twistOutside = aluTwistCheck( intersection.outside(), intersection.geometryInOutside(),
                                                 intersection.indexInOutside(), true, verbose );
-#else
-        // check twist of inside geometry
-        const int twistOutside = aluTwistCheck( *intersection.outside(), intersection.geometryInOutside(),
-                                                intersection.indexInOutside(), true, verbose );
-#endif
         const int twistOut = gridView.grid().getRealIntersection( intersection ).twistInOutside();
         if( twistOutside != twistOut )
           std::cerr << "Error: outside twists " << twistOutside << " (found)  and  " << twistOut << " (given) differ" << std::endl;

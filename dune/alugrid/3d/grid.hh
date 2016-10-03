@@ -376,12 +376,9 @@ namespace Dune
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,3,0)
         typedef EntityImp EntityPointerImpl;
         typedef Entity    EntityPointer;
-#else
-        typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
-        typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
 #endif
 
         template< PartitionIteratorType pitype >
@@ -533,10 +530,13 @@ namespace Dune
     struct Codim
       : public BaseType::template Codim< codim >
     {
-      typedef typename Traits::template Codim< codim >::EntityImp         EntityImp;
+      typedef typename Traits::template Codim< codim >::EntityImp   EntityImp;
+      typedef typename Traits::template Codim< codim >::Twists      Twists;
+      typedef typename Twists::Twist                                Twist;
+
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,3,0)
       typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-      typedef typename Traits::template Codim< codim >::Twists Twists;
-      typedef typename Twists::Twist Twist;
+#endif
     };
 
   protected:
