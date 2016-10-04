@@ -31,7 +31,6 @@ class IntersectionIteratorWrapper
 
   typedef IntersectionIteratorImpl IntersectionIteratorImp;
 
-  typedef ALU3DSPACE ALUMemoryProvider< IntersectionIteratorImpl > IntersectionIteratorProviderType ;
 public:
   //! dimension
   enum { dimension      = dim };
