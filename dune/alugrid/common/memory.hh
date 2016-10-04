@@ -5,14 +5,6 @@
 #include <cstdlib>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#if HAVE_DUNE_FEM
-#include <dune/fem/misc/threads/threadmanager.hh>
-#endif
-
 namespace ALUGrid
 {
 
@@ -21,7 +13,7 @@ namespace ALUGrid
 
   //! organize the memory management for entitys used by the NeighborIterator
   template <class Object>
-  class ALUMemoryProviderSingleThread
+  class ALUMemoryProvider
   {
     enum { maxStackObjects = 256 };
     typedef ::ALUGrid::ALUGridFiniteStack< Object *, maxStackObjects > StackType;
@@ -29,54 +21,24 @@ namespace ALUGrid
     // stack to store object pointers
     StackType objStack_;
 
-    // thread number
-    int thread_;
-
     // return reference to object stack
     StackType &objStack () { return objStack_; }
   public:
     // type of object to be stored
     typedef Object ObjectType;
 
-    // return thread number
-    static inline int thread()
-    {
-#ifdef _OPENMP
-      return omp_get_thread_num();
-#elif HAVE_DUNE_FEM
-      return Dune::Fem :: ThreadManager :: thread() ;
-#else
-      return 0;
-#endif
-    }
-
-    // return maximal possible number of threads
-    static inline int maxThreads()
-    {
-#ifdef _OPENMP
-      return omp_get_max_threads();
-#elif HAVE_DUNE_FEM
-      return Dune::Fem :: ThreadManager :: maxThreads() ;
-#else
-      return 1;
-#endif
-    }
-
     //! default constructor
-    ALUMemoryProviderSingleThread()
-      : objStack_(), thread_( -1 )
+    ALUMemoryProvider()
+      : objStack_()
     {}
 
     //! copy constructor
-    ALUMemoryProviderSingleThread( const ALUMemoryProviderSingleThread& org )
-      : objStack_(), thread_( org.thread_ )
+    ALUMemoryProvider( const ALUMemoryProvider& org )
+      : objStack_()
     {}
 
-    //! set thread number this memory provider works for
-    void setThreadNumber( const int thread ) { thread_ = thread; }
-
     //! call deleteEntity
-    ~ALUMemoryProviderSingleThread ();
+    ~ALUMemoryProvider ();
 
     //! i.e. return pointer to Entity
     template <class FactoryType>
@@ -105,8 +67,6 @@ namespace ALUGrid
   protected:
     inline ObjectType * stackObject()
     {
-      // make sure we operate on the correct thread
-      alugrid_assert ( thread_ == thread() );
       // make sure stack is not empty
       alugrid_assert ( ! objStack().empty() );
       // finite stack does also return object on pop
@@ -117,12 +77,12 @@ namespace ALUGrid
 
   //************************************************************************
   //
-  //  ALUMemoryProviderSingleThread implementation
+  //  ALUMemoryProvider implementation
   //
   //************************************************************************
   template <class Object> template <class FactoryType>
-  inline typename ALUMemoryProviderSingleThread<Object>::ObjectType*
-  ALUMemoryProviderSingleThread<Object>::
+  inline typename ALUMemoryProvider<Object>::ObjectType*
+  ALUMemoryProvider<Object>::
   getObject( const FactoryType &factory, int level )
   {
     if( objStack().empty() )
@@ -136,8 +96,8 @@ namespace ALUGrid
   }
 
   template <class Object>
-  inline typename ALUMemoryProviderSingleThread<Object>::ObjectType *
-  ALUMemoryProviderSingleThread<Object>::getEmptyObject ()
+  inline typename ALUMemoryProvider<Object>::ObjectType *
+  ALUMemoryProvider<Object>::getEmptyObject ()
   {
     if( objStack().empty() )
     {
@@ -150,7 +110,7 @@ namespace ALUGrid
   }
 
   template <class Object>
-  inline ALUMemoryProviderSingleThread<Object>::~ALUMemoryProviderSingleThread()
+  inline ALUMemoryProvider<Object>::~ALUMemoryProvider()
   {
     StackType& objStk = objStack();
     while ( ! objStk.empty() )
@@ -161,82 +121,15 @@ namespace ALUGrid
   }
 
   template <class Object>
-  inline void ALUMemoryProviderSingleThread<Object>::freeObject( Object * obj )
+  inline void ALUMemoryProvider<Object>::freeObject( Object * obj )
   {
     // make sure we operate on the correct thread
-    alugrid_assert ( thread_ == thread() );
     StackType& stk = objStack();
     if( stk.full() )
       delete obj;
     else
       stk.push( obj );
   }
-
-  //! organize the memory management for entitys used by the NeighborIterator
-  template <class Object>
-  class ALUMemoryProvider
-  {
-    typedef ALUMemoryProviderSingleThread < Object > MemoryProvider ;
-
-    std::vector< MemoryProvider > memProviders_;
-
-    MemoryProvider& memProvider( const unsigned int thread )
-    {
-      alugrid_assert( thread < memProviders_.size() );
-      return memProviders_[ thread ];
-    }
-
-    void init ()
-    {
-      const int threads = maxThreads();
-      for( int thread = 0; thread < threads; ++ thread )
-      {
-        memProviders_[ thread ].setThreadNumber( thread );
-      }
-    }
-
-  public:
-    // return thread number
-    static inline int thread() { return MemoryProvider :: thread(); }
-
-    // return maximal possible number of threads
-    static inline int maxThreads() { return MemoryProvider :: maxThreads(); }
-
-    // type of stored object
-    typedef Object ObjectType;
-
-    //! default constructor
-    ALUMemoryProvider() : memProviders_( maxThreads() )
-    {
-      init();
-    }
-
-    //! copy constructor (don't copy memory providers)
-    ALUMemoryProvider( const ALUMemoryProvider& org ) : memProviders_( maxThreads() )
-    {
-      init();
-    }
-
-    //! i.e. return pointer to Entity
-    template <class FactoryType>
-    ObjectType * getObject(const FactoryType &factory, int level)
-    {
-      return memProvider( thread() ).getObject( factory, level );
-    }
-
-    //! i.e. return pointer to Entity
-    template <class FactoryType, class EntityImp>
-    inline ObjectType * getEntityObject(const FactoryType& factory, int level , EntityImp * fakePtr )
-    {
-      return memProvider( thread() ).getEntityObject( factory, level, fakePtr );
-    }
-
-    //! return object, if created default constructor is used
-    ObjectType * getEmptyObject () { return memProvider( thread() ).getEmptyObject(); }
-
-    //! free, move element to stack, returns NULL
-    void freeObject (ObjectType * obj) { memProvider( thread() ).freeObject( obj ); }
-  };
 
   template <class ObjectImp>
   class ReferenceCountedObject
@@ -288,7 +181,7 @@ namespace ALUGrid
 
     static MemoryPoolType& memoryPool()
     {
-      static MemoryPoolType pool;
+      static thread_local MemoryPoolType pool;
       return pool;
     }
 
@@ -296,15 +189,6 @@ namespace ALUGrid
     // default constructor
     SharedPointer()
     {
-      /*
-      static bool first = true ;
-      if( first )
-      {
-        std::cout << "Memory object = " << sizeof( ObjectType ) << " "
-                  << sizeof( ReferenceCountedObjectType ) << std::endl;
-        first = false;
-      }
-      */
       getObject();
     }
 
