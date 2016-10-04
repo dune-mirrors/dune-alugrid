@@ -78,8 +78,6 @@ namespace Dune
   class ALU3dGridLocalIdSet;
   template< int, int, ALU3dGridElementType, class >
   class ALU3dGridHierarchicIndexSet;
-  template <class EntityImp>
-  class ALUMemoryProvider;
   template< class >
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild>
@@ -1298,11 +1296,6 @@ namespace Dune
       return comm().size() > 1 && myGrid().ghostCellsEnabled();
     }
 
-    //! return current thread number
-    static int thread () { return ALU3DSPACE ALUMemoryProvider< int > :: thread(); }
-
-    //! return max number of threads
-    static int maxThreads () { return ALU3DSPACE ALUMemoryProvider< int > :: maxThreads(); }
   protected:
     /////////////////////////////////////////////////////////////////
     //
