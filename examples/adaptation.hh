@@ -73,8 +73,10 @@ public:
     balanceStep_( balanceStep ),
     balanceCounter_( balanceCounter < 0 ? balanceStep-1 : balanceCounter ),
     adaptTime_( 0.0 ),
+    restProlTime_( 0.0 ),
     lbTime_( 0.0 ),
-    commTime_( 0.0 )
+    commTime_( 0.0 ),
+    newElements_( 0 )
   {}
 
   /** \brief main method performing the adaptation and
@@ -88,10 +90,14 @@ public:
 
   //! return time spent for the last adapation in sec
   double adaptationTime() const { return adaptTime_; }
+  //! return time spent for the last adapation in sec
+  double restProlTime() const { return restProlTime_; }
   //! return time spent for the last load balancing in sec
   double loadBalanceTime() const { return lbTime_; }
   //! return time spent for the last communication in sec
   double communicationTime() const { return commTime_; }
+  //! return number of newly created elements
+  size_t newElements() const { return newElements_; }
 
   // this is called before the adaptation process starts
   void initialize ();
@@ -131,8 +137,11 @@ private:
   int balanceCounter_;
 
   double adaptTime_;
+  double restProlTime_;
   double lbTime_;
   double commTime_;
+
+  mutable size_t newElements_;
 };
 
 template< class Grid, class Vector >
@@ -147,9 +156,7 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
   commTime_  = 0.0;
-
-  // reset timer
-  adaptTimer_.reset() ;
+  restProlTime_ = 0.0;
 
   // copy data to container
   initialize();
@@ -170,17 +177,28 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
       hierarchicRestrict( *it, container_ );
   }
 
+  restProlTime_ = adaptTimer_.elapsed();
+  adaptTimer_.reset();
+
   // adapt grid, returns true if new elements were created
   const bool refined = grid_.adapt();
+
+  adaptTime_ = adaptTimer_.elapsed();
+  adaptTimer_.reset();
 
   // interpolate all new cells to leaf level
   if( refined )
   {
     container_.resize();
+    newElements_ = 0;
     const LevelIterator end = grid_.template lend< 0, partition >( 0 );
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong( *it, container_ );
   }
+
+  restProlTime_ += adaptTimer_.elapsed();
+
+  adaptTimer_.reset();
 
   // reset adaptation information in grid
   grid_.postAdapt();
@@ -196,6 +214,9 @@ template< class Grid, class Vector >
 inline void LeafAdaptation< Grid, Vector >
   ::initialize()
 {
+  // reset timer
+  adaptTimer_.reset() ;
+
 #ifdef USE_VECTOR_FOR_PWF
   const Vector& solution = getSolution();
   const GridView &gridView = solution.gridView();
@@ -218,7 +239,7 @@ inline void LeafAdaptation< Grid, Vector >::finalize()
   Container &container_ = solution.container();
 #endif
 
-  adaptTime_ = adaptTimer_.elapsed();
+  adaptTime_ += adaptTimer_.elapsed();
 
   bool callBalance = ((balanceStep_ > 0) && (++balanceCounter_ % balanceStep_ == 0));
   // make sure everybody is on the same track
@@ -308,7 +329,10 @@ inline void LeafAdaptation< Grid, Vector >
 
     const bool doProlong = hit->isNew();
     if( doProlong )
+    {
+      ++newElements_;
       Vector::prolongLocal( entity, dataMap );
+    }
 
     // if the children have children then we have to go deeper
     for( ; hit != hend; ++hit )
