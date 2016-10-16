@@ -197,16 +197,23 @@ void method ( int problem, int startLvl, int maxLvl,
       /* set saveStep for next save point */
       saveStep += saveInterval;
 
-      size_t sumElements = gridView.grid().comm().sum( elements );
+      size_t elemBuff[ 2 ] = { elements, adaptation.newElements() };
+
+      //size_t sumElements = gridView.grid().comm().sum( elements );
+      gridView.grid().comm().sum( &elemBuff[0], 2 );
+      size_t sumElements = elemBuff[ 0 ];
+      size_t newElements = elemBuff[ 1 ];
+
       size_t minElements = gridView.grid().comm().min( elements );
       size_t maxElements = gridView.grid().comm().max( elements );
       double imbalance = double(maxElements)/double(minElements);
+
 
       /* print info about time, timestep size and counter */
       if ( verboseRank )
       {
         std::cout << "elements = " << sumElements ;
-        std::cout << " ("<<minElements << "," << maxElements << "," << imbalance << ")";
+        std::cout << " ("<<minElements << "," << maxElements << "," << imbalance << "), new = " << newElements;
         std::cout << "   maxLevel = " << grid.maxLevel();
         std::cout << "   step = " << step;
         std::cout << "   time = " << time;
@@ -230,6 +237,7 @@ void method ( int problem, int startLvl, int maxLvl,
                          adaptation.adaptationTime(),  // time for adaptation
                          adaptation.loadBalanceTime(), // time for load balance
                          overallTimer.elapsed(),       // time step overall time
+                         adaptation.restProlTime(),
                          getMemoryUsage() );                   // memory usage
 
     }
