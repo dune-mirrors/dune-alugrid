@@ -1184,15 +1184,14 @@ namespace ALUGrid
 
     // refine the grid, should also lead to conforming grid
     // when bisection refinement is used
-    const bool refined = refine();
+    // const bool refined = refine();
 
-#ifdef ALUGRIDDEBUG
     bool needConformingClosure = false;
     const bool bisectionEnabled = conformingClosureNeeded();
+#ifdef ALUGRIDDEBUG
     alugrid_assert ( bisectionEnabled == mpAccess().gmax( bisectionEnabled ) );
 #endif
 
-    /*
     bool refined = false;
 
     // loop until refinement leads to a conforming situation (conforming refinement only)
@@ -1211,7 +1210,6 @@ namespace ALUGrid
 
     }
     while ( needConformingClosure );
-    */
 
     // now do one coarsening step
     coarse ();
