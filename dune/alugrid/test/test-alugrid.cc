@@ -32,6 +32,8 @@
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
+
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 //#include "checktwists.cc"
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
@@ -447,6 +449,9 @@ void writeFile( const GridView& gridView )
 {
   Dune::DGFWriter< GridView > writer( gridView );
   writer.write( "dump.dgf" );
+
+  Dune::VTKWriter< GridView > vtk( gridView );
+  vtk.write( "dump.vtk" );
 }
 
 template <class GridType>
@@ -487,7 +492,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     delete gr;
   }
 
-  //writeFile( grid.leafGridView() );
+  writeFile( grid.leafGridView() );
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
