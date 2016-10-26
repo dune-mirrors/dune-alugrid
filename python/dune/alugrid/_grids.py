@@ -1,7 +1,30 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
+import logging
+logger = logging.getLogger(__name__)
+
+import dune.common.checkconfiguration as checkconfiguration
+
 def aluGrid(constructor, dimgrid, dimworld=None, elementType=None, **parameters):
     from dune.grid.grid_generator import module
+
+    try:
+        checkconfiguration.preprocessorTest([ ("#if HAVE_DUNE_ALUGRID","ALUGrid is not available") ])
+    except checkconfiguration.ConfigurationError as err:
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            raise
+        else:
+            print("configuration error while creating an ALUGrid, exiting...")
+            sys.exit(-1)
+    try:
+        checkconfiguration.have("HAVE_DUNE_ALUGRID")
+    except checkconfiguration.ConfigurationError as err:
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            raise
+        else:
+            print("configuration error while creating an ALUGrid, exiting...")
+            sys.exit(-1)
 
     if dimworld is None:
         dimworld = dimgrid

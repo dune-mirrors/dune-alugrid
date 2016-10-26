@@ -32,7 +32,6 @@
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
-
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 //#include "checktwists.cc"
 
