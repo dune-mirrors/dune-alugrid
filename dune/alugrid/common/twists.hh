@@ -156,9 +156,9 @@ namespace Dune
     GeometryType type () const
     {
       if( corners == 3 )
-        return GeometryType( typename GenericGeometry::SimplexTopology< dimension >::type() );
+        return GeometryType( typename Impl::SimplexTopology< dimension >::type() );
       else
-        return GeometryType( typename GenericGeometry::CubeTopology< dimension >::type() );
+        return GeometryType( typename Impl::CubeTopology< dimension >::type() );
     }
 
     /**
@@ -315,7 +315,7 @@ namespace Dune
      */
 
     /** \brief obtain type of reference element */
-    GeometryType type () const { return GeometryType( GenericGeometry::CubeTopology< dimension >::type() ); }
+    GeometryType type () const { return GeometryType( Impl::CubeTopology< dimension >::type() ); }
 
     /**
      * \brief map i-th corner
@@ -375,9 +375,9 @@ namespace Dune
     GeometryType type () const
     {
       if( corners == 3 )
-        return GeometryType( typename GenericGeometry::SimplexTopology< dimension >::type() );
+        return GeometryType( typename Impl::SimplexTopology< dimension >::type() );
       else
-        return GeometryType( typename GenericGeometry::CubeTopology< dimension >::type() );
+        return GeometryType( typename Impl::CubeTopology< dimension >::type() );
     }
 
     /** \brief obtain number of twists in the group */
@@ -440,7 +440,7 @@ namespace Dune
     typedef ALUTwistIterator< Twist > Iterator;
 
     /** \brief obtain type of reference element */
-    GeometryType type () const { return GeometryType( GenericGeometry::CubeTopology< dimension >::type() ); }
+    GeometryType type () const { return GeometryType( Impl::CubeTopology< dimension >::type() ); }
 
     /** \brief obtain number of twists in the group */
     std::size_t size () const { return 2; }
