@@ -4,7 +4,7 @@
 #include <dune/common/version.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/declaration.hh>
-#include <dune/geometry/genericgeometry/topologytypes.hh>
+#include <dune/geometry/type.hh>
 
 /** @file
  *  @author Robert Kloefkorn
@@ -28,8 +28,8 @@ namespace Dune
     {
       static const bool v = true;
       static const unsigned int topologyId = (eltype == cube) ?
-        GenericGeometry :: CubeTopology< dim > :: type :: id :
-        GenericGeometry :: SimplexTopology< dim > :: type :: id ;
+        Impl :: CubeTopology< dim > :: type :: id :
+        Impl :: SimplexTopology< dim > :: type :: id ;
     };
 
     /** \brief ALUGrid has entities for all codimension

@@ -274,13 +274,13 @@ namespace Dune
   template<int dim>
   struct ALU3dGridTwists< dim, tetra, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::SimplexTopology< dim >::type::id, dim > Type;
+    typedef TrivialTwists< Impl::SimplexTopology< dim >::type::id, dim > Type;
   };
 
   template<int dim>
   struct ALU3dGridTwists< dim, hexa, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::CubeTopology< dim >::type::id, dim > Type;
+    typedef TrivialTwists< Impl::CubeTopology< dim >::type::id, dim > Type;
   };
 
   template< int dim, ALU3dGridElementType elType >
