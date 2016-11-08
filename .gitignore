@@ -1,41 +1,6 @@
-/aclocal.m4
-/am
-/autom4te.cache
-/compile
-/configure
-/config.guess
-/config.h
-/config.h.in
-/config.lt
-/config.status
-/config.sub
-/depcomp
-/dependencies.m4
-/dune-alugrid.pc
-/dune-alugrid-*.tar.gz
-/install-sh
-/libtool
-/ltmain.sh
-/missing
-/stamp-h1
-/test-driver
-
-Makefile
-Makefile.in
-.deps
-.libs
-
+# ignore all build folders
+/build*/
+# ignore backup files
 *~
-*.la
-*.lo
-*.log
-*.o
-*.tmp
-*.swp
-*.out
-*.vtu 
-*.pvtu
-*.pvd
-*.speedup.*
-
-build-*
+# ignore Python files
+*.pyc
