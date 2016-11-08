@@ -2,9 +2,9 @@
 #define DUNE_INTERSECTIONITERATORWRAPPER_HH
 
 #include <dune/common/version.hh>
-#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
+#if !DUNE_VERSION_NEWER( DUNE_GRID,2,5)
 #include <dune/common/nullptr.hh>
-#endif //#if !DUNE_VERSION_NEWER( DUNE_GRID, 3, 0 )
+#endif //#if !DUNE_VERSION_NEWER( DUNE_GRID,2,5)
 
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/alugrid/common/macrogridview.hh>
@@ -42,10 +42,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -264,10 +264,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
@@ -367,10 +367,10 @@ public:
 
   //! Entity type
   typedef typename GridImp::template Codim<0>::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   //! type of EntityPointer
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   //! type of intersectionGlobal
   typedef typename GridImp::template Codim<1>::Geometry Geometry;
