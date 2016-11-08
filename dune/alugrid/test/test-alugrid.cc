@@ -34,10 +34,10 @@
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 //#include "checktwists.cc"
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 #include <dune/grid/test/checkgridfactory.hh>
 #include <doc/grids/gridfactory/testgrids.hh>
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
 #include <dune/alugrid/dgf.hh>
 
@@ -65,7 +65,7 @@ void checkCapabilities(const Grid& grid)
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     true ;
@@ -74,7 +74,7 @@ void checkCapabilities(const Grid& grid)
 #endif
    static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
                    "isParallel is not set correctly");
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
    static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -91,12 +91,12 @@ void checkCapabilities(const Grid& grid)
    std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
    std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
    std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
    std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
    std::cout << std::endl;
@@ -675,7 +675,7 @@ int main (int argc , char **argv) {
 
       // check grid factory (test only available for dune-grid 3.0 or later)
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       if( myrank == 0 )
         std::cout << "Checking grid factory..." << std::endl;
 
@@ -700,7 +700,7 @@ int main (int argc , char **argv) {
       if( testALU3dConform )
         Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
 #endif // #ifndef NO_3D
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
 
 #ifndef NO_2D

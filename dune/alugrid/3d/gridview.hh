@@ -51,7 +51,7 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
-#if ! DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
 #endif
@@ -246,7 +246,7 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
-#if ! DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
 #endif
