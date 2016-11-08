@@ -1,8 +1,6 @@
 #ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
-#include <dune/geometry/genericgeometry/topologytypes.hh>
-
 #include "grid.hh"
 #include "mappings.hh"
 #include "geometry.hh"
@@ -17,8 +15,8 @@ inline GeometryType
 ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
 {
   return GeometryType( (elementType == tetra) ?
-      GenericGeometry :: SimplexTopology< mydim > :: type :: id :
-      GenericGeometry :: CubeTopology   < mydim > :: type :: id,
+      Impl :: SimplexTopology< mydim > :: type :: id :
+      Impl :: CubeTopology   < mydim > :: type :: id,
       mydim );
 }
 

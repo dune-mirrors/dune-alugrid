@@ -23,7 +23,6 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/codimtable.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
