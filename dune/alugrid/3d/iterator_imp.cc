@@ -1,8 +1,6 @@
 #ifndef DUNE_ALUGRID_ITERATOR_IMP_CC
 #define DUNE_ALUGRID_ITERATOR_IMP_CC
 
-#include <dune/geometry/genericgeometry/topologytypes.hh>
-
 #include "alu3dinclude.hh"
 
 #include "geometry.hh"
@@ -383,8 +381,8 @@ type () const
 {
   return GeometryType(
       GridImp::elementType == tetra ?
-        GenericGeometry :: SimplexTopology< dim-1 > :: type :: id :
-        GenericGeometry :: CubeTopology   < dim-1 > :: type :: id,
+        Impl :: SimplexTopology< dim-1 > :: type :: id :
+        Impl :: CubeTopology   < dim-1 > :: type :: id,
           dim-1 );
 }
 
