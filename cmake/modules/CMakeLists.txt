@@ -1,5 +1,4 @@
-set(modules 
-    ALUGridType.cmake
+set(modules
     CMakeLists.txt
     DuneAlugridMacros.cmake
     FindDLMalloc.cmake
