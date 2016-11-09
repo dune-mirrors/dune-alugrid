@@ -1,18 +1,16 @@
-include(ALUGridType)
-
 #make libdunealugrid known locally
 set(DUNE_ALUGRID_LIBRARY "${PROJECT_BINARY_DIR}/lib/libdunealugrid.a"
   CACHE FILEPATH "path to local libs in dune-alugrid" )
 mark_as_advanced(DUNE_ALUGRID_LIBRARY)
 
 #define available alugrid types
-dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
-dune_define_alugridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 
