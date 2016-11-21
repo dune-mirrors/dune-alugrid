@@ -19,7 +19,6 @@
 
 #include <dune/common/version.hh>
 #include <dune/common/tupleutility.hh>
-#include <dune/common/tuples.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
