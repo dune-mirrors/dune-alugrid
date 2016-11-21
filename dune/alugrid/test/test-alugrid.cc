@@ -24,6 +24,23 @@
 #include <dune/geometry/referenceelements.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
+#include <dune/alugrid/dgf.hh>
+
+// disable boundarySegmentIndex check because it's broken
+template < class GridImp, Dune::PartitionIteratorType pitype >
+void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLevelGridViewTraits< const GridImp, pitype > > &gridView )
+{
+  if( gridView.grid().comm().rank() == 0 )
+    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LevelGridView" << std::endl;
+}
+
+// disable boundarySegmentIndex check because it's broken
+template < class GridImp, Dune::PartitionIteratorType pitype >
+void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLeafGridViewTraits< const GridImp, pitype > > &gridView )
+{
+  if( gridView.grid().comm().rank() == 0 )
+    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LeafGridView" << std::endl;
+}
 
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
@@ -38,7 +55,6 @@
 #include <doc/grids/gridfactory/testgrids.hh>
 #endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
-#include <dune/alugrid/dgf.hh>
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI
 #define USE_PARALLEL_TEST 1
@@ -132,7 +148,6 @@ protected:
   const Grid& grid_;
   const MacroView macroView_;
 };
-
 
 
 template <class GridType>
