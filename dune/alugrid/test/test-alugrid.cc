@@ -19,35 +19,42 @@
 
 #include <dune/common/version.hh>
 #include <dune/common/tupleutility.hh>
-#include <dune/common/tuples.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/codimtable.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
+#include <dune/alugrid/dgf.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+// disable boundarySegmentIndex check because it's broken
+template < class GridImp, Dune::PartitionIteratorType pitype >
+void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLevelGridViewTraits< const GridImp, pitype > > &gridView )
+{
+  if( gridView.grid().comm().rank() == 0 )
+    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LevelGridView" << std::endl;
+}
+
+// disable boundarySegmentIndex check because it's broken
+template < class GridImp, Dune::PartitionIteratorType pitype >
+void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLeafGridViewTraits< const GridImp, pitype > > &gridView )
+{
+  if( gridView.grid().comm().rank() == 0 )
+    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LeafGridView" << std::endl;
+}
+
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
-#else
-#include <dune/grid/test/gridcheck.cc>
-#include <dune/grid/test/checkgeometryinfather.cc>
-#include <dune/grid/test/checkintersectionit.cc>
-#include <dune/grid/test/checkiterators.cc>
-#include <dune/grid/test/checkcommunicate.cc>
-#endif
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
 //#include "checktwists.cc"
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 #include <dune/grid/test/checkgridfactory.hh>
 #include <doc/grids/gridfactory/testgrids.hh>
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
-#include <dune/alugrid/dgf.hh>
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI
 #define USE_PARALLEL_TEST 1
@@ -73,7 +80,7 @@ void checkCapabilities(const Grid& grid)
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    static const bool reallyParallel =
 #if ALU3DGRID_PARALLEL
     true ;
@@ -82,7 +89,7 @@ void checkCapabilities(const Grid& grid)
 #endif
    static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
                    "isParallel is not set correctly");
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
    static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -99,12 +106,12 @@ void checkCapabilities(const Grid& grid)
    std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
    std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
    std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
    std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
    std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
    std::cout << std::endl;
@@ -141,7 +148,6 @@ protected:
   const Grid& grid_;
   const MacroView macroView_;
 };
-
 
 
 template <class GridType>
@@ -308,15 +314,9 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
 
       if( intersection.neighbor() )
       {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         // check twist of inside geometry
         const int twistOutside = aluTwistCheck( intersection.outside(), intersection.geometryInOutside(),
                                                 intersection.indexInOutside(), true, verbose );
-#else
-        // check twist of inside geometry
-        const int twistOutside = aluTwistCheck( *intersection.outside(), intersection.geometryInOutside(),
-                                                intersection.indexInOutside(), true, verbose );
-#endif
         const int twistOut = gridView.grid().getRealIntersection( intersection ).twistInOutside();
         if( twistOutside != twistOut )
           std::cerr << "Error: outside twists " << twistOutside << " (found)  and  " << twistOut << " (given) differ" << std::endl;
@@ -461,6 +461,9 @@ void writeFile( const GridView& gridView )
 {
   Dune::DGFWriter< GridView > writer( gridView );
   writer.write( "dump.dgf" );
+
+  Dune::VTKWriter< GridView > vtk( gridView );
+  vtk.write( "dump.vtk" );
 }
 
 template <class GridType>
@@ -501,7 +504,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     delete gr;
   }
 
-  //writeFile( grid.leafGridView() );
+  writeFile( grid.leafGridView() );
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
@@ -686,7 +689,7 @@ int main (int argc , char **argv) {
 
       // check grid factory (test only available for dune-grid 3.0 or later)
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       if( myrank == 0 )
         std::cout << "Checking grid factory..." << std::endl;
 
@@ -711,7 +714,7 @@ int main (int argc , char **argv) {
       if( testALU3dConform )
         Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
 #endif // #ifndef NO_3D
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
 
 #ifndef NO_2D

@@ -20,13 +20,8 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 // include DGF parser implementation for YaspGrid
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
-#else
-// include DGF parser implementation for SGrid
-#include <dune/grid/io/file/dgfparser/dgfs.hh>
-#endif
 
 namespace Dune
 {
@@ -73,7 +68,6 @@ namespace Dune
       static const int dimension = Grid::dimension;
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef typename Grid::template Codim< 0 >::EntityPointer ElementPointer;
 
       typedef typename Element::Geometry::GlobalCoordinate VertexType;
 
@@ -242,9 +236,7 @@ namespace Dune
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
-#endif
 
       Dune::dgf::IntervalBlock intervalBlock( input );
       if( !intervalBlock.isactive() )
@@ -332,11 +324,7 @@ namespace Dune
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       return entity.subEntities( codim );
-#else
-      return entity.template count< codim > ();
-#endif
     }
 
     template < class int_t >
@@ -349,7 +337,6 @@ namespace Dune
     {
       const int myrank = comm.rank();
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
       std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
@@ -357,14 +344,6 @@ namespace Dune
       CollectiveCommunication commSelf( MPIHelper :: getLocalCommunicator() );
       // create YaspGrid to partition and insert elements that belong to process directly
       CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
-#else
-      typedef SGrid< dim, dimworld, double > CartesianGridType ;
-      FieldVector< int, dim > dims;
-      for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
-
-      // create SGrid to partition and insert elements that belong to process directly
-      CartesianGridType sgrid( dims, lowerLeft, upperRight );
-#endif
 
       typedef typename CartesianGridType :: LeafGridView GridView ;
       typedef typename GridView  :: IndexSet  IndexSet ;
@@ -438,11 +417,7 @@ namespace Dune
           if( isec.boundary() )
             factory.insertBoundary( elementIndex, faceNumber );
           // insert process boundary if the neighboring element has a different rank
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           if( isec.neighbor() && (partitioner.rank( isec.outside() ) != myrank) )
-#else
-          if( isec.neighbor() && (partitioner.rank( *isec.outside() ) != myrank) )
-#endif
             factory.insertProcessBorder( elementIndex, faceNumber );
         }
       }

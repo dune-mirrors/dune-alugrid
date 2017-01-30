@@ -283,18 +283,12 @@ namespace Dune
 
       Storage ( const Grid &grid, int level, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, level ),
-          indexSet_( grid.getLevelIndexSet( level ) ),
-          vertexGatherScatter_( grid, vertex, Grid::getRealImplementation( vertex ), dataHandle, *indexSet_.first, level ),
-          edgeGatherScatter_( grid, edge, Grid::getRealImplementation( edge ), dataHandle, *indexSet_.first, level ),
-          faceGatherScatter_( grid, face, Grid::getRealImplementation( face ), dataHandle, *indexSet_.first, level ),
-          elementGatherScatter_( grid, element, Grid::getRealImplementation( element ), dataHandle, *indexSet_.first, level )
+          indexSet_( grid.accessLevelIndexSet( level ) ),
+          vertexGatherScatter_( grid, vertex, Grid::getRealImplementation( vertex ), dataHandle, *indexSet_, level ),
+          edgeGatherScatter_( grid, edge, Grid::getRealImplementation( edge ), dataHandle, *indexSet_, level ),
+          faceGatherScatter_( grid, face, Grid::getRealImplementation( face ), dataHandle, *indexSet_, level ),
+          elementGatherScatter_( grid, element, Grid::getRealImplementation( element ), dataHandle, *indexSet_, level )
       {}
-
-      ~Storage ()
-      {
-        if( !indexSet_.second )
-          delete indexSet_.first;
-      }
 
       GatherScatter &vertexGatherScatter () { return vertexGatherScatter_; }
       GatherScatter &edgeGatherScatter () { return edgeGatherScatter_; }
@@ -307,7 +301,7 @@ namespace Dune
       using Base::Storage::face;
       using Base::Storage::element;
 
-      std::pair< typename Grid::LevelIndexSetImp *, bool > indexSet_;
+      std::shared_ptr< typename Grid::LevelIndexSetImp > indexSet_;
       ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, dim > vertexGatherScatter_;
       EdgeGatherScatterType edgeGatherScatter_;
       ALU3DSPACE GatherScatterLevelData< Grid, CommDataHandleIF, 1 > faceGatherScatter_;

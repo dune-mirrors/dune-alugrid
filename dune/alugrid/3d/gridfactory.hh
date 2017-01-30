@@ -48,9 +48,9 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     };
 
     typedef unsigned int VertexId;
@@ -300,12 +300,7 @@ namespace Dune
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
       std::vector< unsigned int > vertices;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const typename Codim< 0 >::Entity& in = intersection.inside();
-#else
-      const typename Codim< 0 >::EntityPointer inPtr = intersection.inside();
-      const typename Codim< 0 >::Entity &in = *inPtr;
-#endif
 
       const Dune::ReferenceElement< double, dimension > &refElem =
           Dune::ReferenceElements< double, dimension >::general( in.type() );
@@ -314,11 +309,7 @@ namespace Dune
       for (int i=0;i<vxSize;++i)
       {
         int vxIdx = refElem.subEntity( faceNr, 1 , i , dimension);
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         vertices.push_back( insertionIndex( in.template subEntity<dimension>(vxIdx) ) );
-#else
-        vertices.push_back( insertionIndex( *(in.template subEntity<dimension>(vxIdx) ) ) );
-#endif
       }
 
       FaceType faceId = makeFace( vertices );

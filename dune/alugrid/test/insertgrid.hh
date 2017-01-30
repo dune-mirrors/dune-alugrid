@@ -66,7 +66,9 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
       element[ 3 ] = dgf.element( el )[ 1 ]+1;
       element[ 2 ] = dgf.element( el )[ 2 ]+1;
 
-      mgb.InsertUniqueTetra( element, (el % 2) );
+      int dimension = grid->dimension();
+      ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (el % 2) : 0), 0 );
+      mgb.InsertUniqueTetra( element, simplexTypeFlag );
     }
   }
 

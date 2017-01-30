@@ -135,7 +135,7 @@ struct BallModel : public TransportModel<dimD>
 
   double fixedDt () const
   {
-    return 0.01;
+    return 0.01 / 0.15;
   }
 
   /** \copydoc TransportProblem::indicator */

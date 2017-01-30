@@ -26,7 +26,6 @@ template< class Grid >
 struct GridMarker
 {
   typedef typename Grid::template Codim< 0 >::Entity        Entity;
-  typedef typename Grid::template Codim< 0 >::EntityPointer EntityPointer;
 
   /** \brief constructor
    *  \param grid     the grid. Here we can not use a grid view since they only
@@ -163,7 +162,6 @@ struct FiniteVolumeScheme
   // types of codim zero entity iterator and geometry
   typedef typename GridView::template Codim< 0 >:: template Partition< ptype > :: Iterator  Iterator;
   typedef typename Iterator::Entity                         Entity;
-  typedef typename Entity::EntityPointer                    EntityPointer;
   typedef typename Entity::Geometry                         Geometry;
 
   // type of intersections and corresponding geometries
@@ -255,11 +253,7 @@ inline double FiniteVolumeScheme< V, Model >
     const IntersectionIterator iitend = gridView().iend( entity );
     for( IntersectionIterator iit = gridView().ibegin( entity ); iit != iitend; ++iit )
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       apply( iit->outside(), time, solution, update, dt );
-#else
-      apply( *(iit->outside()), time, solution, update, dt );
-#endif
     }
   } // end grid traversal
 
@@ -324,12 +318,7 @@ inline void FiniteVolumeScheme< V, Model >
     if( intersection.neighbor() )
     {
       // access neighbor
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const Entity &neighbor = intersection.outside();
-#else
-      const EntityPointer outside = intersection.outside();
-      const Entity &neighbor = *outside;
-#endif
 
       // compute flux from one side only
       if( update.visitElement( neighbor ) )
@@ -424,12 +413,8 @@ inline size_t FiniteVolumeScheme< V, Model >
       else
       {
         // access neighbor
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         const Entity &neighbor = intersection.outside();
-#else
-        const EntityPointer outside = intersection.outside();
-        const Entity &neighbor = *outside;
-#endif
+
         const RangeType &uRight = solution[ neighbor ];
 
         const GlobalType point = intersectionGeometry.center();

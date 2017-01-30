@@ -1,5 +1,6 @@
 Module: dune-alugrid
-Version: 2.4
+Version: 3.0.0
 Maintainer: alugrid@mathematik.uni-freiburg.de
 Whitespace-Hook: Yes
 Depends: dune-grid (>= 2.4)
+Suggests: dune-corepy

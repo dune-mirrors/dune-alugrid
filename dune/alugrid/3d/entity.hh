@@ -93,9 +93,9 @@ public:
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   //! typedef of my type
   typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -139,6 +139,11 @@ public:
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 
+  int subIndex ( int i, unsigned int codim ) const
+  {
+    DUNE_THROW( NotImplemented, "Method subIndex for higher codimension not implemented, yet." );
+  }
+
   // return reference to internal item
   const ItemType& getItem () const { return *(static_cast<ItemType *> (seed_.item())); }
 
@@ -158,7 +163,7 @@ protected:
   //! convert ALUGrid partition type to dune partition type
   PartitionType convertBndId(const HItemType & item) const ;
 
-  //! the cuurent geometry
+  //! the current geometry
   mutable GeometryImpl geo_;
 
   //! the information necessary to make sense of this entity
@@ -242,18 +247,18 @@ public:
   typedef LevelIntersectionIteratorWrapper<GridImp>  ALU3dGridLevelIntersectionIteratorType;
 
   typedef typename GridImp::template Codim<0>::Entity        Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   template <int cd>
   struct Codim
   {
     typedef typename GridImp::Traits::template Codim< cd >::Twists::Twist Twist;
     typedef typename GridImp::template Codim< cd >::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   };
 
   //! typedef of my type
@@ -507,13 +512,8 @@ public:
   ThisType & operator = (const ThisType & org);
 
   //! dereferencing
-  Entity
-//#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-    & // need reference here for older versions
-//#endif
-  dereference () const
+  Entity& dereference () const
   {
-
     // don't dereference empty entity pointer
     alugrid_assert ( seed_.isValid() );
     alugrid_assert ( seed_.item() == & entityImp().getItem() );
