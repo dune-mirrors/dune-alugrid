@@ -4,6 +4,9 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <vector>
+
+#include <dune/common/exceptions.hh>
 
 #include <dune/common/exceptions.hh>
 
@@ -43,7 +46,7 @@ namespace ALUGridSFC {
     Coordinate lower_;
     Coordinate length_;
 
-    const zoltan_hsfc_inv_t* hsfcInv_;
+    zoltan_hsfc_inv_t* hsfcInv_;
 
     mutable Zoltan zz_;
 

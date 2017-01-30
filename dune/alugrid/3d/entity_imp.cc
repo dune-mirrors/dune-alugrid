@@ -172,11 +172,7 @@ namespace Dune {
     if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::RefinementRules::refine_element_t) )
     {
       LocalGeometryImpl geom;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       geom.buildGeomInFather( father().geometry(), geometry() );
-#else
-      geom.buildGeomInFather( father()->geometry(), geometry() );
-#endif
 
       return LocalGeometry( geom );
     }

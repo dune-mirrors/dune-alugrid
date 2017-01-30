@@ -502,9 +502,9 @@ namespace ALUGrid
   }
 
   GitterBasis::tetra_GEO * GitterBasis::MacroGitterBasis::
-  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], int orientation )
+  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], SimplexTypeFlag simplexType )
   {
-    return new Objects::tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], orientation);
+    return new Objects::tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], simplexType );
   }
 
   GitterBasis::periodic3_GEO *

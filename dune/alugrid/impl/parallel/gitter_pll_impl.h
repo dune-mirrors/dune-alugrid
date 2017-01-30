@@ -232,7 +232,7 @@ namespace ALUGrid
       typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
       TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                         myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation);
+                         myhface3_t *f2, int s2, myhface3_t *f3, int s3, SimplexTypeFlag elementType);
     public :
       virtual int ldbVertexIndex () const;
       virtual void writeStaticState (ObjectStream &, int) const ;
@@ -727,8 +727,8 @@ namespace ALUGrid
       {
       public :
         inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                                   myhface3_t *f2, int s2, myhface3_t *f3, int s3, int orientation)
-          : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, orientation) {} // 0 == level 0
+                                   myhface3_t *f2, int s2, myhface3_t *f3, int s3, SimplexTypeFlag elementType)
+          : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, elementType) {} // 0 == level 0
         virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
         virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
       };
@@ -858,7 +858,7 @@ namespace ALUGrid
           virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
           virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]);
           virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
-          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int);
+          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag);
 
           virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
           virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );

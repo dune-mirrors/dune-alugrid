@@ -780,8 +780,6 @@ namespace ALUGrid
     struct Codim
     {
       typedef typename GridType :: Traits :: template Codim< codim > :: Entity Entity;
-      typedef typename GridType :: Traits :: template Codim< codim > :: EntityPointer
-        EntityPointer;
     };
 
     typedef typename GridType::MPICommunicatorType Comm;
@@ -982,11 +980,7 @@ namespace ALUGrid
     template <int codim>
     int subEntities( const EntityType &element ) const
     {
-#if DUNE_VERSION_NEWER_REV(DUNE_GRID,2,4,0)
       return element.subEntities( codim );
-#else
-      return element.template count< codim > ();
-#endif
     }
 
     template< int codim >
@@ -997,13 +991,7 @@ namespace ALUGrid
         const int numSubEntities = this->template subEntities< codim >( element );
         for( int i = 0; i < numSubEntities; ++i )
         {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           inlineEntityData< codim >( stream, element.template subEntity< codim >( i ) );
-#else
-          typedef typename Codim< codim > :: EntityPointer EntityPointer;
-          const  EntityPointer pEntity = element.template subEntity< codim >( i );
-          inlineEntityData< codim >( stream, *pEntity );
-#endif
         }
       }
     }
@@ -1016,13 +1004,7 @@ namespace ALUGrid
         const int numSubEntities = this->template subEntities< codim >( element );
         for( int i = 0; i < numSubEntities; ++i )
         {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           xtractEntityData< codim >( stream, element.template subEntity< codim >( i ) );
-#else
-          typedef typename Codim< codim > :: EntityPointer EntityPointer;
-          const  EntityPointer pEntity = element.template subEntity< codim >( i );
-          xtractEntityData< codim >( stream, *pEntity );
-#endif
         }
       }
     }
