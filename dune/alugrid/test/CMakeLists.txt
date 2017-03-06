@@ -5,6 +5,7 @@ set(TESTS
   test-twists
   test-hierarchic
   test-ball-projection
+  test-levelintersection
 )
 
 # 2.5 and higher
