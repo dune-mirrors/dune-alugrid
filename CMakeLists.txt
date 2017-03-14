@@ -33,7 +33,6 @@ include(GridType)
 dune_project()
 
 add_subdirectory(cmake/modules)
-add_subdirectory(m4)
 
 add_subdirectory(doc/doxygen)
 
