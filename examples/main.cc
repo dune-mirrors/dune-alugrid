@@ -313,7 +313,7 @@ catch( const std::exception &e )
   std::cout << "STL ERROR: " << e.what() << std::endl;
   return 1;
 }
-#if ! DUNE_VERSION_NEWER(DUNE_COMMON,3,0)
+#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,5)
 catch( const Dune::Exception &e )
 {
   std::cout << "DUNE ERROR: " << e << std::endl;
