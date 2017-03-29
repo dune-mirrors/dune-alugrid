@@ -119,47 +119,47 @@ namespace Dune
     /** \brief obtain the index set */
     const IndexSet &indexSet () const
     {
-      return grid().levelIndexSet( level_ );
+      return grid().levelIndexSet( level() );
     }
 
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
-      return grid().size( level_, codim );
+      return grid().size( level(), codim );
     }
 
     /** \brief obtain number of entities with a given geometry type */
     int size ( const GeometryType &type ) const
     {
-      return grid().size( level_, type );
+      return grid().size( level(), type );
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pitype >( level_ );
+      return grid().template lbegin< cd, pitype >( level() );
     }
 
     /** \brief obtain begin iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator begin () const
     {
-      return grid().template lbegin< cd, pit >( level_ );
+      return grid().template lbegin< cd, pit >( level() );
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd >
     typename Codim< cd > :: Iterator end () const
     {
-      return grid().template lend< cd, pitype >( level_ );
+      return grid().template lend< cd, pitype >( level() );
     }
 
     /** \brief obtain end iterator for this view */
     template< int cd, PartitionIteratorType pit >
     typename Codim< cd > :: template Partition< pit > :: Iterator end () const
     {
-      return grid().template lend< cd, pit >( level_ );
+      return grid().template lend< cd, pit >( level() );
     }
 
     /** \brief obtain begin intersection iterator with respect to this view */
@@ -185,13 +185,13 @@ namespace Dune
     /** \brief Return size of the overlap region for a given codim on the grid view.  */
     int overlapSize(int codim) const
     {
-      return grid().overlapSize(level_, codim);
+      return grid().overlapSize(level(), codim);
     }
 
     /** \brief Return size of the ghost region for a given codim on the grid view.  */
     int ghostSize(int codim) const
     {
-      return grid().ghostSize(level_, codim);
+      return grid().ghostSize(level(), codim);
     }
 
     /** communicate data on this view */
@@ -200,7 +200,7 @@ namespace Dune
                                                    InterfaceType iftype,
                                                    CommunicationDirection dir ) const
     {
-      return grid().communicate( data, iftype, dir, level_ );
+      return grid().communicate( data, iftype, dir, level() );
     }
 
     template< int cd >
@@ -208,6 +208,8 @@ namespace Dune
     {
       return grid().template twists< cd >( type );
     }
+
+    int level () const { return level_; }
 
   private:
     const Grid *grid_;
