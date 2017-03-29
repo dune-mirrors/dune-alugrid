@@ -45,7 +45,7 @@ def aluGrid(constructor, dimgrid, dimworld=None, elementType=None, **parameters)
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
     typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", " + elementType + ", " + refinement + " >"
-    includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
+    includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh", "dune/alugrid/pickle.hh"]
     gridModule = module(includes, typeName)
 
     return gridModule.LeafGrid(gridModule.reader(constructor))
