@@ -12,6 +12,6 @@ foreach(i ${SUBDIRS})
   unset(opt)
 endforeach(i ${SUBDIRS})
 
-set(alugrid_HEADERS dgf.hh grid.hh)
+set(alugrid_HEADERS dgf.hh grid.hh pickle.hh)
 install(FILES ${alugrid_HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid)
