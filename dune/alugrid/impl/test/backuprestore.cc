@@ -142,7 +142,7 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
 
 
 #if HAVE_MPI
-#warning RUNNING PARALLEL VERSION
+#warning "RUNNING PARALLEL VERSION"
 #endif
 
 template <class GitterType, class element_t>
@@ -230,7 +230,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
 }
 
 // exmaple on read grid, refine global and print again
-int main (int argc, char ** argv, const char ** envp)
+int main (int argc, char ** argv)
 {
   int rank = 0;
 #if HAVE_MPI
