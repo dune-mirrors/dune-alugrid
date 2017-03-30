@@ -36,7 +36,8 @@ void algorithm ( HGridType &grid, const int step )
 int main ( int argc, char **argv )
 try
 {
-  Dune::MPIHelper &mpihelper = Dune::MPIHelper::instance( argc, argv );
+  //Dune::MPIHelper &mpihelper =
+  Dune::MPIHelper::instance( argc, argv );
 
   // create grid from DGF file
   const std::string gridFile = "dgf/ball.dgf";
