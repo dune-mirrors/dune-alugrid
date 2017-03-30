@@ -19,7 +19,7 @@
 
 #include <dune/common/version.hh>
 #include <dune/common/tupleutility.hh>
-#include <dune/common/tuples.hh>
+//#include <dune/common/tuples.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
@@ -38,9 +38,10 @@
 int main (int argc , char **argv) {
 
   // this method calls MPI_Init, if MPI is enabled
-  Dune::MPIHelper &mpihelper = Dune::MPIHelper::instance( argc, argv );
-  int myrank = mpihelper.rank();
-  int mysize = mpihelper.size();
+  //Dune::MPIHelper &mpihelper =
+  Dune::MPIHelper::instance( argc, argv );
+  //int myrank = mpihelper.rank();
+  //int mysize = mpihelper.size();
 
   try {
     using Grid = Dune::ALUGrid<2, 2, Dune::ALUGridElementType::simplex, Dune::ALUGridRefinementType::nonconforming>;
