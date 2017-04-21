@@ -23,6 +23,9 @@
 // include DGF parser implementation for YaspGrid
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
 
+// include DGF parser implementation for ALUGrid
+#include <dune/alugrid/dgf.hh>
+
 namespace Dune
 {
 
