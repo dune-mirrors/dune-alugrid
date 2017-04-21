@@ -234,7 +234,7 @@ void globalCoarsening(GitterType& grid, int refcount) {
 
 
 // exmaple on read grid, refine global and print again
-int main (int argc, char ** argv, const char ** envp)
+int main (int argc, char ** argv)
 {
 #if HAVE_MPI
   MPI_Init(&argc,&argv);
