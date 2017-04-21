@@ -316,7 +316,7 @@ namespace Dune
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( mpiComm );
-      std::string name( "Cartesian ALUGrid via SGrid" );
+      std::string name( "Cartesian ALUGrid via YaspGrid" );
       return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
     }
 
@@ -335,6 +335,12 @@ namespace Dune
                          const CollectiveCommunication& comm,
                          const std::string& name )
     {
+      if( comm.rank() == 0 )
+      {
+        std::cerr <<"Warning: using DGF Parser until bug in StructuredGridFactory is fixed!" << std::endl;
+      }
+      return createSimplexGrid( lowerLeft, upperRight, elements );
+
       const int myrank = comm.rank();
 
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;

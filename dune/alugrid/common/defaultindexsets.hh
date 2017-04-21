@@ -5,7 +5,6 @@
 #include <vector>
 #include <rpc/rpc.h>
 
-#include <dune/common/forloop.hh>
 #include <dune/common/version.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -96,8 +95,11 @@ namespace Dune
     typedef DefaultIndexSet<GridType, IteratorType > ThisType;
 
     template< int codim >
-    struct InsertEntity
+    struct InsertEntityLoop
     {
+      // determine next codim with a sealing of the grid's dimension
+      static const int nextCodim = codim == dim ? dim : codim + 1;
+
       static void apply ( const typename GridType::template Codim< 0 >::Entity &entity,
                           PersistentContainerVectorType &indexContainer,
                           std::vector< int > &sizes )
@@ -118,6 +120,12 @@ namespace Dune
             if( idx.index() < 0 )
               idx.set( sizes[ codim ]++ );
           }
+        }
+
+        if( codim < dim )
+        {
+          // call next codim, dim will end this loop
+          InsertEntityLoop< nextCodim >::apply( entity, indexContainer, sizes );
         }
       }
     };
@@ -273,9 +281,9 @@ namespace Dune
       // grid walk to setup index set
       for( IteratorType it = begin; it != end; ++it )
       {
-        alugrid_assert ( ( level_ < 0 ) ? it->isLeaf() : (it->level() == level_) );
         const typename IteratorType::Entity &entity = *it;
-        ForLoop< InsertEntity, 0, dim >::apply( entity, indexContainers_, size_ );
+        alugrid_assert ( ( level_ < 0 ) ? entity.isLeaf() : (entity.level() == level_) );
+        InsertEntityLoop< 0 >::apply( entity, indexContainers_, size_ );
       }
 
       // remember the number of entity on level and cd = 0
