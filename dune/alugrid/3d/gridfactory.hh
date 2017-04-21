@@ -1,8 +1,10 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
+#include <algorithm>
 #include <array>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <dune/common/shared_ptr.hh>
@@ -558,9 +560,8 @@ namespace Dune
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
   {
-    FaceType faceId = makeFace( vertices );
+    const std::size_t numVx = vertices.size();
 
-    const size_t numVx = vertices.size();
     GeometryType type;
     if( elementType == tetra )
       type.makeSimplex( dimension-1 );
@@ -571,16 +572,29 @@ namespace Dune
     // and BoundarySegmentWrapper which have double as coordinate type
     typedef FieldVector< double, dimensionworld > CoordType;
     std::vector< CoordType > coords( numVx );
-    for( size_t i = 0; i < numVx; ++i )
+    for( std::size_t i = 0; i < numVx; ++i )
     {
+      // adapt vertex index for 2d grids
+      const std::size_t vtx = (dimension == 2 ? (elementType == tetra ? vertices[ i ] + 1 : 2 * vertices[ i ]) : vertices[ i ]);
+
       // if this assertions is thrown vertices were not inserted at first
-      alugrid_assert ( vertices_.size() > vertices[ i ] );
+      alugrid_assert ( vertices_.size() > vtx );
 
       // get global coordinate and copy it
-      const VertexType &x = position( vertices[ i ] );
-      for( unsigned int j = 0; j < dimensionworld; ++j )
-        coords[ i ][ j ] = x[ j ];
+      std::copy_n( position( vtx ).begin(), dimensionworld, coords[ i ].begin() );
     }
+
+    std::unique_ptr< BoundarySegmentWrapperType > prj( new BoundarySegmentWrapperType( type, coords, boundarySegment ) );
+
+    // consistency check
+    for( std::size_t i = 0; i < numVx; ++i )
+    {
+      CoordType global = (*prj)( coords [ i ] );
+      if( (global - coords[ i ]).two_norm() > 1e-6 )
+        DUNE_THROW( GridError, "BoundarySegment does not map face vertices to face vertices." );
+    }
+
+    FaceType faceId = makeFace( vertices );
 
     boundaryIds_.insert( makeBndPair( faceId, 1 ) );
 
@@ -588,18 +602,7 @@ namespace Dune
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
 
-    BoundarySegmentWrapperType* prj
-      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
-    boundaryProjections_[ faceId ] = prj;
-#ifdef ALUGRIDDEBUG
-    // consistency check
-    for( size_t i = 0; i < numVx; ++i )
-    {
-      CoordType global = (*prj)( coords [ i ] );
-      if( (global - coords[ i ]).two_norm() > 1e-6 )
-        DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
-    }
-#endif
+    boundaryProjections_[ faceId ] = prj.release();
 
     insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }

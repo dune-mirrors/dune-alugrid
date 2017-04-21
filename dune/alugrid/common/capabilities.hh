@@ -5,7 +5,7 @@
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/declaration.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,6)
+#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,5)
 #include <dune/geometry/type.hh>
 #else
 #include <dune/geometry/genericgeometry/topologytypes.hh>
@@ -19,7 +19,7 @@
 namespace Dune
 {
 
-#if ! DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,6)
+#if ! DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,5)
   namespace Impl
   {
     using Dune :: GenericGeometry :: SimplexTopology ;
