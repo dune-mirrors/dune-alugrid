@@ -42,7 +42,7 @@ add_subdirectory(lib)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
-if (COMMAND add_python_target)
+if(dune-corepy_FOUND)
   add_subdirectory(python)
 endif()
 
