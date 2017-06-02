@@ -44,6 +44,9 @@ add_subdirectory(utils)
 
 if(dune-corepy_FOUND)
   add_subdirectory(python)
+  if(NOT (${DUNE_COMMON_VERSION} VERSION_LESS 2.6)
+    dune_python_install_package(PATH "python")
+  endif()
 endif()
 
 # finalize the dune project, e.g., generate config.h etc.
