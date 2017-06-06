@@ -76,7 +76,7 @@ inline void backupSION( const std::string& filename,          // filename
 #endif // HAVE_SIONLIB && HAVE_MPI
 }
 
-inline void restoreSION( const std::string& filename,    // filename
+inline bool restoreSION( const std::string& filename,    // filename
                          const int rank,                 // MPI rank
                          std::stringstream& datastream ) // data stream
 {
@@ -133,7 +133,10 @@ inline void restoreSION( const std::string& filename,    // filename
 
   delete [] buffer ;
 
-#endif // HAVE_SIONLIB && HAVE_MPI
+  return true;
+#else // #if HAVE_SIONLIB && HAVE_MPI
+  return false;
+#endif // #else // #if HAVE_SIONLIB && HAVE_MPI
 }
 
 #endif
