@@ -1,12 +1,4 @@
 # build library libdunealugrid
-
-# OBJECT is needed since CMake 3.0.0
-# but it conflicts with shared libs
-set(_OBJECT_FLAG "OBJECT")
-if(BUILD_SHARED_LIBS)
-  set(_OBJECT_FLAG "")
-endif()
-
 dune_add_library(dunealugrid
   _DUNE_TARGET_OBJECTS:serial_
   _DUNE_TARGET_OBJECTS:parallel_
@@ -29,10 +21,6 @@ if(ZLIB_FOUND)
   set_property(TARGET dunealugrid APPEND PROPERTY
                INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
 endif()
-
-# register alu grid to all pkg flags
-dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
-                            INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
 
 ####################################################################
 #### general warning: avoid such and similar commands here 
