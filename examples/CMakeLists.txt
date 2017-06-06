@@ -1,4 +1,9 @@
-set(SUBDIRS callback dgf loadbalance backuprestore communication testEfficiency)
+add_subdirectory(backuprestore)
+add_subdirectory(callback)
+add_subdirectory(communication)
+add_subdirectory(dgf)
+add_subdirectory(loadbalance)
+add_subdirectory(testEfficiency)
 
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
 set(examples_HEADERS adaptation.hh  
@@ -38,11 +43,3 @@ foreach( variant ball euler transport )
 endforeach()
 
 install(FILES ${examples_HEADERS} DESTINATION ${examplesdir})
-
-foreach(i ${SUBDIRS})
-  if(${i} STREQUAL "test")
-    set(opt EXCLUDE_FROM_ALL)
-  endif(${i} STREQUAL "test")
-  add_subdirectory(${i} ${opt})
-  unset(opt)
-endforeach(i ${SUBDIRS})
