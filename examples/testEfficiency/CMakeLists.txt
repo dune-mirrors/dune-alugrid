@@ -16,19 +16,12 @@ add_definitions("-DWORLDDIM=3")
 
 configure_file(check-efficiency.sh ${CMAKE_CURRENT_BINARY_DIR}/check-efficiency.sh COPYONLY)
 
-add_executable(main_transport_eff main.cc)
-dune_target_enable_all_packages(main_transport_eff )
-set_property(TARGET main_transport_eff APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT" )
-
-add_executable(main_ball_eff main.cc)
-dune_target_enable_all_packages(main_ball_eff )
-set_property(TARGET main_ball_eff APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL" )
-
-add_executable(main_euler_eff main.cc)
-dune_target_enable_all_packages(main_euler_eff )
-set_property(TARGET main_euler_eff APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER" )
+foreach(variant transport ball euler)
+  string(TOUPPER ${variant} variant_upper)
+  add_executable(main_${variant}_eff main.cc)
+  dune_target_enable_all_packages(main_${variant}_eff)
+  target_compile_definitions(main_${variant}_eff PRIVATE "${variant_upper}")
+  set_property(TARGET main_${variant}_eff APPEND PROPERTY LINK_LIBRARIES dunealugrid)
+endforeach()
 
 install(FILES ${examples_HEADERS} DESTINATION ${examplesdir})

@@ -18,23 +18,12 @@ add_definitions("-DWORLDDIM=3")
 
 configure_file(check-adaptation.sh ${CMAKE_CURRENT_BINARY_DIR}/check-adaptation.sh COPYONLY)
 
-
-add_executable(main_transport_cb main.cc)
-dune_target_enable_all_packages( main_transport_cb )
-#dune_target_link_libraries(main_transport_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_transport_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "TRANSPORT;CALLBACK_ADAPTATION" )
-
-add_executable(main_ball_cb main.cc)
-dune_target_enable_all_packages( main_ball_cb )
-#dune_target_link_libraries(main_ball_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_ball_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL;CALLBACK_ADAPTATION" )
-
-add_executable(main_euler_cb main.cc)
-dune_target_enable_all_packages( main_euler_cb )
-#dune_target_link_libraries(main_euler_cb "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_euler_cb APPEND PROPERTY 
-  COMPILE_DEFINITIONS "EULER;CALLBACK_ADAPTATION" )
+foreach(variant transport ball euler)
+  string(TOUPPER ${variant} variant_upper)
+  add_executable(main_${variant}_cb main.cc)
+  dune_target_enable_all_packages(main_${variant}_cb)
+  target_compile_definitions(main_${variant}_cb PRIVATE "${variant_upper}" "CALLBACK_ADAPTATION")
+  set_property(TARGET main_${variant}_cb APPEND PROPERTY LINK_LIBRARIES dunealugrid)
+endforeach()
 
 install(FILES ${callback_HEADERS} DESTINATION ${callbackdir})

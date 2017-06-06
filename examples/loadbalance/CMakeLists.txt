@@ -17,31 +17,26 @@ add_definitions("-DGRIDDIM=3")
 
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
-
 add_executable(main_internal main.cc)
-dune_target_enable_all_packages( main_internal )
-#dune_target_link_libraries(main_internal "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_internal APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL" )
+dune_target_enable_all_packages(main_internal)
+set_property(TARGET main_internal APPEND PROPERTY COMPILE_DEFINITIONS "BALL")
+set_property(TARGET main_internal APPEND PROPERTY LINK_LIBRARIES dunealugrid)
 
 add_executable(main_weights main.cc)
-dune_target_enable_all_packages( main_weights )
-#dune_target_link_libraries(main_weights "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_weights APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL;USE_WEIGHTS=1" )
+dune_target_enable_all_packages(main_weights)
+set_property(TARGET main_weights APPEND PROPERTY COMPILE_DEFINITIONS "BALL" "USE_WEIGHTS=1")
+set_property(TARGET main_weights APPEND PROPERTY LINK_LIBRARIES dunealugrid)
 
 add_executable(main_simple main.cc)
-dune_target_enable_all_packages( main_simple )
-#dune_target_link_libraries(main_simple "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-set_property(TARGET main_simple APPEND PROPERTY 
-  COMPILE_DEFINITIONS "BALL;USE_SIMPLELB=1" )
+dune_target_enable_all_packages(main_simple)
+set_property(TARGET main_simple APPEND PROPERTY COMPILE_DEFINITIONS "BALL" "USE_SIMPLELB=1")
+set_property(TARGET main_simple APPEND PROPERTY LINK_LIBRARIES dunealugrid)
 
 if(ZOLTAN_FOUND)
   add_executable(main_zoltan main.cc)
-  dune_target_enable_all_packages( main_zoltan )
-  #dune_target_link_libraries(main_zoltan "${DUNE_LIBS};${DUNE_ALUGRID_LIBRARY}")
-  set_property(TARGET main_zoltan APPEND PROPERTY
-    COMPILE_DEFINITIONS "BALL;USE_ZOLTANLB=1" )
+  dune_target_enable_all_packages(main_zoltan)
+  set_property(TARGET main_zoltan APPEND PROPERTY COMPILE_DEFINITIONS "BALL" "USE_ZOLTANLB=1")
+  set_property(TARGET main_zoltan APPEND PROPERTY LINK_LIBRARIES dunealugrid)
 endif()
 
 install(FILES ${exampleslb_HEADERS} DESTINATION ${exampleslbdir})
