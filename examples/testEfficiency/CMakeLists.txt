@@ -9,9 +9,6 @@ set(testefficiency_HEADERS adaptation.hh
                            piecewisefunction.hh  
                            problem-euler.hh  
                            problem.hh)
-set(EXAMPLES main_transport_eff
-             main_ball_eff 
-             main_euler_eff)
 
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
