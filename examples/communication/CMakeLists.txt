@@ -10,10 +10,6 @@ set(communication_HEADERS adaptation.hh
                           problem-euler.hh  
                           problem.hh)
 
-set(EXAMPLES main_transport_comm 
-             main_ball_comm 
-             main_euler_comm)
-
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")

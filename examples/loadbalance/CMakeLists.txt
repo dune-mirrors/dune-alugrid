@@ -12,11 +12,6 @@ set(exampleslb_HEADERS adaptation.hh
                        problem-euler.hh  
                        problem.hh)
 
-set(EXAMPLES main_internal
-             main_weights 
-             main_simple 
-             main_zoltan)
-
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 

@@ -10,10 +10,6 @@ set(callback_HEADERS adaptation.hh
                           problem-euler.hh  
                           problem.hh)
 
-set(EXAMPLES main_transport_cb 
-             main_ball_cb 
-             main_euler_cb)
-
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")

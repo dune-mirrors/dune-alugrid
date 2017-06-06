@@ -2,8 +2,6 @@ set(examplesbrdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/backuprestore)
 set(examplesbr_HEADERS sionlib.hh 
                        paralleldgf.hh)
 
-set(EXAMPLES main_br )
-
 add_definitions("-DALUGRID_CUBE")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")
