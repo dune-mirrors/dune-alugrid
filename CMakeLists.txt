@@ -42,9 +42,7 @@ add_subdirectory(lib)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
-if (COMMAND add_python_target)
-  add_subdirectory(python)
-endif()
+add_subdirectory(python)
 
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
