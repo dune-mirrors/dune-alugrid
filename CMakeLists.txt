@@ -27,13 +27,12 @@ list(APPEND CMAKE_MODULE_PATH ${dune-grid_MODULE_PATH}
 
 #include the dune macros
 include(DuneMacros)
-include(GridType) 
+include(GridType)
 
 # start a dune project with information from dune.module
 dune_project()
 
 add_subdirectory(cmake/modules)
-add_subdirectory(m4)
 
 add_subdirectory(doc/doxygen)
 
@@ -42,6 +41,13 @@ add_subdirectory(lib)
 
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
+
+if(dune-corepy_FOUND)
+  add_subdirectory(python)
+  if(NOT (${DUNE_COMMON_VERSION} VERSION_LESS 2.6))
+    dune_python_install_package(PATH "python")
+  endif()
+endif()
 
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)

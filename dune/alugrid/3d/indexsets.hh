@@ -65,8 +65,15 @@ namespace Dune
       return GridType::getRealImplementation( entity ).getIndex();
     }
 
+    template< class Entity >
+    int subIndex ( const Entity &entity, int i, unsigned int codim ) const
+    {
+      return subIndex< Entity::codimension >( entity, i, codim );
+    }
+
     //! return subIndex i of given entity for subEntity with codim
-    int subIndex ( const EntityCodim0Type &e, int i, unsigned int codim ) const
+    template< int cd >
+    int subIndex ( const typename GridType::Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
       // call method subIndex on real implementation
       return GridType::getRealImplementation( e ).subIndex( i, codim );

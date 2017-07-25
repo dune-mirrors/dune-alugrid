@@ -8,7 +8,8 @@ providing unstructured simplicial and cube grids.
 A detailed description of all the new features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
 in the paper
-[Alkämper, Dedner, Klöfkorn, Nolte. The DUNE-ALUGrid Module, Archive of Numerical Software 4(1), 2016][3].
+
+[Alkämper, Dedner, Klöfkorn, Nolte. The DUNE-ALUGrid Module, Archive of Numerical Software 4(1), 2016][3] [(bibtex)][6].
 
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
@@ -40,7 +41,7 @@ License
 The DUNE-ALUGrid library, headers and test programs are free open-source software,
 licensed under version 2 or later of the GNU General Public License.
 
-See the file [LICENSE][5] for full copying permissions.
+See the file [COPYING][5] for full copying permissions.
 
 Installation
 ------------
@@ -49,7 +50,8 @@ For installation instructions please see the [DUNE website][2].
 
 [0]: https://gitlab.dune-project.org/extensions/dune-alugrid
 [1]: http://www.dune-project.org
-[2]: http://www.dune-project.org/doc/installation-notes.html
+[2]: http://www.dune-project.org/doc/installation
 [3]: http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252
 [4]: http://www.cs.sandia.gov/Zoltan/
-[5]: LICENSE
+[5]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/COPYING
+[6]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/doc/dunealugrid.bib
