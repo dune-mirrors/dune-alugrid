@@ -54,7 +54,7 @@ namespace Dune {
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const HItemType & item, const GridImp& grid)
   {
-    setElement( item, GetLevel<GridImp,cd>::getLevel(grid,item) );
+    setElement( item, GetLevel<GridImp,dim,cd>::getLevel(grid,item) );
   }
 
   template<int cd, int dim, class GridImp>
@@ -172,11 +172,7 @@ namespace Dune {
     if( (GridImp::elementType == tetra) && (item_->up()->getrule() != ImplTraits::RefinementRules::refine_element_t) )
     {
       LocalGeometryImpl geom;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       geom.buildGeomInFather( father().geometry(), geometry() );
-#else
-      geom.buildGeomInFather( father()->geometry(), geometry() );
-#endif
 
       return LocalGeometry( geom );
     }

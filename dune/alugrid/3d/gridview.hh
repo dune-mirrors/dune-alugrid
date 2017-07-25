@@ -3,6 +3,7 @@
 
 #include <type_traits>
 
+#include <dune/common/version.hh>
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/capabilities.hh>
@@ -50,8 +51,10 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
+#endif
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
       typedef typename Grid :: template Codim< cd > :: LocalGeometry
@@ -243,8 +246,10 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
+#endif
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
       typedef typename Grid :: template Codim< cd > :: LocalGeometry
