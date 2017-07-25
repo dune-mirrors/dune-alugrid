@@ -179,14 +179,17 @@ public:
       {
         it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInEl]);
         //orientate element (add new vertex to vertexPriorityList)
-        if(faceInEl == 0 && faceInNeigh == type0node )
+        //This does a bit of magic by knowing that
+        // the refinement edge is not contained in
+        // face 0  and face type0node.
+        // So if we are in the mixed case, we do not want to
+        // make reflected neighbors, but instead rather
+        //that the children are reflected.
+        // So we choose to insert the vertex after the
+        // faceInNeigh index.
+        if( (faceInEl == 0 && faceInNeigh == type0node) || (faceInEl == type0node && faceInNeigh == 0) )
         {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[type0node]);
-          it++;
-        }
-        else if (faceInEl == type0node && faceInNeigh == 0 )
-        {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[0]);
+          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
           it++;
         }
         vertexPriorityList.insert(it, neigh[faceInNeigh]);
