@@ -35,6 +35,8 @@ struct BallData
       dgfFileName << path << "/dgf/cube_hc_4096.dgf";
     else if ( problem_ == 3 )
       dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+    else if ( problem_ == 4 )
+      dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
     else
       dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
