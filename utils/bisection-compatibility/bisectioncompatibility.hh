@@ -9,11 +9,6 @@
 #include <algorithm>
 #include <assert.h>
 
-//#include <dune/grid/io/file/dgfparser/parser.hh>
-//#include <dune/alugrid/common/alugrid_assert.hh>
-//#include <dune/alugrid/common/declaration.hh>
-
-
 
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
@@ -27,20 +22,44 @@ public:
   typedef std::map< FaceType, EdgeType > FaceMapType;
   typedef std::pair< FaceType, EdgeType > FaceElementType;
 
-  //second node of the refinement edge (first is 0)
-  const int type0node = stevensonRefinement_ ? 3 : 1 ;
-  //The interior node of a type 1 element
-  const int type1node = stevensonRefinement_ ? 1 : 2;
-  //the face opposite of the interior node
-  const int type1face = 3 - type1node ;
+protected:
 
+  //the elements to be renumbered
+  std::vector<ElementType> elements_;
+  std::vector<bool> elementOrientation_;
+  //the neighbouring structure
+  FaceMapType neighbours_;
+  //The maximum Vertex Index
+  unsigned int maxVertexIndex_;
+  //the element types
+  std::vector<int> types_;
+  //true if stevenson notation is used
+  //false for ALBERTA
+  const bool stevensonRefinement_;
+
+  //second node of the refinement edge (first is 0)
+  const int type0node_;  // = stevensonRefinement_ ? 3 : 1 ;
+  //The interior node of a type 1 element
+  const int type1node_;  // = stevensonRefinement_ ? 1 : 2;
+  //the face opposite of the interior node
+  const int type1face_;  // = 3 - type1node_ ;
+
+public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
-  BisectionCompatibility(std::vector<ElementType >  elements, bool stevenson)
-    : elements_(elements), elementOrientation_(elements_.size(),false), maxVertexIndex_(0), types_(elements_.size(),0), stevensonRefinement_(stevenson) {
+  BisectionCompatibility( const std::vector<ElementType>& elements, const bool stevenson)
+    : elements_(elements),
+      elementOrientation_(elements_.size(),false),
+      maxVertexIndex_(0),
+      types_(elements_.size(),0),
+      stevensonRefinement_(stevenson),
+      type0node_( stevensonRefinement_ ? 3 : 1 ),
+      type1node_( stevensonRefinement_ ? 1 : 2 ),
+      type1face_( 3 - type1node_ )
+  {
     //build the information about neighbours
     buildNeighbors();
-  };
+  }
 
   //check for strong compatibility
   bool stronglyCompatible ()
@@ -144,7 +163,7 @@ public:
       if(it == activeFaceList.end())
       {
         //if face does not contain ref Edge
-        if(i == 0 || i == type0node)
+        if(i == 0 || i == type0node_)
           activeFaceList.push_back(faceElement);
         else
           activeFaceList.push_front(faceElement);
@@ -154,8 +173,8 @@ public:
     }
 
     //create the vertex priority List
-    int numberOfElements = elements_.size();
-    for(int counter = 1; counter < numberOfElements ; counter++)
+    const int numberOfElements = elements_.size();
+    for(int counter = 1; counter < numberOfElements ; ++counter)
     {
       //take element at first face from activeFaceList
       faceElement = *activeFaceList.begin();
@@ -181,13 +200,13 @@ public:
         //orientate element (add new vertex to vertexPriorityList)
         //This does a bit of magic by knowing that
         // the refinement edge is not contained in
-        // face 0  and face type0node.
+        // face 0  and face type0node_.
         // So if we are in the mixed case, we do not want to
         // make reflected neighbors, but instead rather
         //that the children are reflected.
         // So we choose to insert the vertex after the
         // faceInNeigh index.
-        if( (faceInEl == 0 && faceInNeigh == type0node) || (faceInEl == type0node && faceInNeigh == 0) )
+        if( (faceInEl == 0 && faceInNeigh == type0node_) || (faceInEl == type0node_ && faceInNeigh == 0) )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
           it++;
@@ -229,7 +248,7 @@ public:
         if(it == activeFaceList.end())
         {
           //if face does not contain ref Edge
-          if(i == 0 || i == type0node)
+          if(i == 0 || i == type0node_)
             activeFaceList.push_back(faceElement);
           else
             activeFaceList.push_front(faceElement);
@@ -247,8 +266,7 @@ public:
   bool type1Algorithm()
   {
     //set all types to 1
-    for(auto & type : types_ )
-      type = 1;
+    std::fill( types_.begin(), types_.end(), 1 );
 
     //the currently active Faces.
     //and the free faces that can still be adjusted at the end.
@@ -296,23 +314,26 @@ public:
       }
       else //fix a random node
       {
-        nodePriority[el[type1node]] = currNodePriority;
-        fixNode(el, type1node);
+        nodePriority[el[type1node_]] = currNodePriority;
+        fixNode(el, type1node_);
         --currNodePriority;
       }
 
       FaceElementType faceElement;
       //walk over all faces
       //add face 2 to freeFaces - if already free -great, match and keep, if active and not free, match and erase
-      getFace(el,type1face,faceElement);
-      getFace(el,type1face, face);
-      if(freeFaces.find(face) != freeFaces.end())
+      getFace(el,type1face_, faceElement);
+      getFace(el,type1face_, face);
+
+      const auto freeFacesEnd = freeFaces.end();
+      const auto freeFaceIt = freeFaces.find(face);
+      if( freeFaceIt != freeFacesEnd)
       {
         while(!checkFaceCompatibility(faceElement))
         {
           rotate(el);
         }
-        freeFaces.find(face)->second[1] = elIndex;
+        freeFaceIt->second[1] = elIndex;
       }
       else if(activeFaces.find(face) != activeFaces.end())
       {
@@ -327,17 +348,21 @@ public:
         freeFaces.insert({{face,{elIndex,elIndex}}});
       }
       //add others to activeFaces - if already there, delete, if already free, match and erase
-      for(auto&& i : {0,1,2,3})
+      for(int i=0; i<4; ++i ) //auto&& i : {0,1,2,3})
       {
-        if (i == type1face) continue;
+        if (i == type1face_) continue;
+
         getFace(el,i,face);
         getFace(el,i,faceElement);
+
         unsigned int neighborIndex = faceElement.second[0] == elIndex ? faceElement.second[1] : faceElement.second[0];
-        if(freeFaces.find(face) != freeFaces.end())
+        if(freeFaces.find(face) != freeFacesEnd)
+        {
           while(!checkFaceCompatibility(faceElement))
           {
             rotate(elements_[neighborIndex]);
           }
+        }
         else if(activeFaces.find(face) != activeFaces.end())
         {
           if(!checkFaceCompatibility(faceElement))
@@ -353,6 +378,7 @@ public:
         }
       }
     }
+
     //now postprocessing of freeFaces. possibly - not really necessary, has to be thought about
     //useful for parallelization .
     for(auto&& face : freeFaces)
@@ -451,7 +477,9 @@ private:
       // if the refinement edge is not contained in the shared face, we
       // have reflected neighbors of the children, if the face is in the same direction
       // and the other edge of the refinement edge is the missing one.
-      if(elFaceIndex != neighFaceIndex || !(elFaceIndex == 0 && neighFaceIndex == type0node) || !(elFaceIndex == type0node && neighFaceIndex == 0) )
+      if( elFaceIndex != neighFaceIndex ||
+         !(elFaceIndex == 0 && neighFaceIndex == type0node_) ||
+         !(elFaceIndex == type0node_ && neighFaceIndex == 0) )
       {
         if (verbose)
         {
@@ -470,21 +498,21 @@ private:
 
   void fixNode(ElementType& el, int node)
   {
-    if(!(node == type1node))
+    if(!(node == type1node_))
     {
       //swap the node at the right position
-      std::swap(el[node],el[type1node]);
+      std::swap(el[node],el[type1node_]);
       //also swap to other nodes to keep the volume positive
-      //2 and 0 are never type1node
-      std::swap(el[(type1node+1)%4],el[(type1node+2)%4]);
+      //2 and 0 are never type1node_
+      std::swap(el[(type1node_+1)%4],el[(type1node_+2)%4]);
     }
   }
 
   //The rotations that keep the type 1 node fixed
   void rotate(ElementType& el)
   {
-    std::swap(el[(type1node+1)%4],el[(type1node+2)%4]);
-    std::swap(el[(type1node+1)%4],el[(type1node+3)%4]);
+    std::swap(el[(type1node_+1)%4],el[(type1node_+2)%4]);
+    std::swap(el[(type1node_+1)%4],el[(type1node_+3)%4]);
   }
 
   //get the sorted face of an element to a corresponding index
@@ -507,7 +535,7 @@ private:
       break;
     default :
       std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-      abort();
+      std::abort();
     }
     std::sort(face.begin(), face.end());
     return;
@@ -545,7 +573,7 @@ private:
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          abort();
+          std::abort();
         }
       }
       else //ALBERTA Refinement
@@ -566,7 +594,7 @@ private:
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          abort();
+          std::abort();
         }
       }
     }
@@ -590,7 +618,7 @@ private:
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          abort();
+          std::abort();
         }
       }
       else //ALBERTA Refinement
@@ -604,21 +632,21 @@ private:
           edge = {el[0],el[1]};
           break;
         case 1 :
-          edge = {el[0],el[type1node == 2 ? 3 :2]};
+          edge = {el[0],el[type1node_ == 2 ? 3 :2]};
           break;
         case 0 :
-          edge = {el[1],el[type1node == 2 ? 3 :2]};
+          edge = {el[1],el[type1node_ == 2 ? 3 :2]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          abort();
+          std::abort();
         }
       }
     }
     else
     {
       std::cerr << "no other types than 0, 1, 2 implemented." << std::endl;
-      abort();
+      std::abort();
     }
     std::sort(edge.begin(),edge.end());
     return;
@@ -650,8 +678,9 @@ private:
   //this is executed in the constructor
   void buildNeighbors()
   {
-    if(!neighbours_.empty())
-      neighbours_.clear();
+    // clear existing structures
+    neighbours_.clear();
+
     FaceType face;
     EdgeType indexPair;
 
@@ -689,25 +718,11 @@ private:
       getRefinementEdge(el, 2 , edge,0);
       auto pos = edges.find(edge);
       if(pos != edges.end())
-        pos->second += 1;
+        ++(pos->second);
       else
         edges.insert({edge, 1});
     }
   }
-
-private:
-  //the elements to be renumbered
-  std::vector<ElementType> elements_;
-  std::vector<bool> elementOrientation_;
-  //the neighbouring structure
-  FaceMapType neighbours_;
-  //The maximum Vertex Index
-  unsigned int maxVertexIndex_;
-  //the element types
-  std::vector<int> types_;
-  //true if stevenson notation is used
-  //false for ALBERTA
-  const bool stevensonRefinement_;
 
 }; //class bisectioncompatibility
 
