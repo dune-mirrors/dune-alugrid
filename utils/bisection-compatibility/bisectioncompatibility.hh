@@ -13,9 +13,14 @@
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
 // Also implements checks for compatibility.
+template <class VertexVector>
 class BisectionCompatibility
 {
+  typedef BisectionCompatibility< VertexVector > ThisType;
 public:
+  // type of vertex coordinates stored inside the factory
+  typedef VertexVector  VertexVectorType;
+
   typedef std::array<unsigned int, 3> FaceType;
   typedef std::vector< unsigned int > ElementType;
   typedef std::array<unsigned int, 2> EdgeType;
@@ -23,6 +28,7 @@ public:
   typedef std::pair< FaceType, EdgeType > FaceElementType;
 
 protected:
+  const VertexVectorType& vertices_;
 
   //the elements to be renumbered
   std::vector<ElementType> elements_;
@@ -47,8 +53,11 @@ protected:
 public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
-  BisectionCompatibility( const std::vector<ElementType>& elements, const bool stevenson)
-    : elements_(elements),
+  BisectionCompatibility( const VertexVectorType& vertices,
+                          const std::vector<ElementType>& elements,
+                          const bool stevenson)
+    : vertices_( vertices ),
+      elements_( elements ),
       elementOrientation_(elements_.size(),false),
       maxVertexIndex_(0),
       types_(elements_.size(),0),
@@ -81,6 +90,24 @@ public:
       if(!checkFaceCompatibility(face)) return false;
     }
     return true;
+  }
+
+  double determinant( const int i ) const
+  {
+    Dune::FieldMatrix< double, 4, 3 > p( 0 );
+    for( int j=0; j<4; ++j )
+    {
+      p[ j ] = vertices_[ elements_[ i ][ j ] ].first;
+    }
+
+    Dune::FieldMatrix< double, 3, 3 > matrix( 0 );
+
+    for( int j=0; j<3; ++j )
+    {
+      matrix [j] = p[j+1] - p[0];
+    }
+
+    return matrix.determinant();
   }
 
   bool make6CompatibilityCheck()
@@ -119,20 +146,127 @@ public:
     std::cout << std::endl;
   }
 
+  void swap( int el, int v1, int v2 )
+  {
+  }
+
+
+  double edgeLength( const int e, const int edge ) const
+  {
+    // ALBERTA numbering of edges (edges 2 and 3 swaped in comparison to DUNE refelement)
+    //static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
+
+    // DUNE reference element edge numbering
+    static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {1,2}, {0,3}, {1,3}, {2,3} };
+
+    const int vx0 = elements_[ e ][ edges[ edge ][ 0 ] ];
+    const int vx1 = elements_[ e ][ edges[ edge ][ 1 ] ];
+    return ( vertices_[ vx0 ].first - vertices_[ vx1 ].first ).two_norm2();
+  }
+
+
+  template <class Element>
+  inline void rotate ( Element& element, int shift )
+  {
+    const int numVertices = 4 ;
+    assert( element.size() == 4 );
+    Element old( element );
+    for( int j = 0; j < numVertices; ++j )
+    {
+      element[ j ] = old[ (j+shift) % numVertices ];
+    }
+  }
+
+  int longestEdge ( int e ) const
+  {
+    int maxEdge = 0;
+    double maxLength = edgeLength( e, 0 );
+    for( int i = 1; i < 6; ++i )
+    {
+      const double length = edgeLength( e, i );
+      if( length <= maxLength )
+        continue;
+      maxEdge = i;
+      maxLength = length;
+    }
+    return maxEdge;
+  }
+
+  void sortForLongestEdge()
+  {
+    assert( !stevensonRefinement_ );
+
+    static const int swapSuccessor[ 6 ] = { -1, 1, -1, -1, 3, -1 };
+
+    // DUNE reference element
+    static const int shift[ 6 ] = { 0, 0, 1, 3, 0, 2 };
+
+    // ALBERTA reference element (edge 2 and 3 swaped compared to DUNE)
+    //static const int shift[ 6 ] = { 0, 0, 3, 1, 0, 2 };
+
+    std::cerr << "Marking longest edge for refinement..." << std::endl;
+
+    const int numVertices = 4;
+
+    //create the vertex priority List
+    const int numberOfElements = elements_.size();
+    for(int el = 0; el < numberOfElements ; ++el )
+    {
+      assert( int(elements_[ el ].size()) == numVertices );
+
+      // find longest edge
+      int edge = longestEdge( el );
+
+      // mark longest edge as refinement edge
+      if( shift[ edge ] > 0 )
+      {
+        rotate( elements_[ el ], shift[ edge ] );
+      }
+
+      if( swapSuccessor[ edge ] > 0 )
+      {
+        std::swap( elements_[ el ][  swapSuccessor[ edge ] ],
+                   elements_[ el ][ (swapSuccessor[ edge ] + 1) % numVertices ] );
+      }
+
+#ifndef NDEBUG
+      // make sure that the longest edge is the refinement edge (temporary assertion)
+      const int refEdge = 0 ;//RefinementEdge< dimension >::value;
+      const int longest = longestEdge( el );
+
+      if( longest != refEdge )
+      {
+        std::cout << "refEdge = " << refEdge << " is not longest edge " << longest << std::endl;
+        std::abort();
+      }
+#endif
+    }
+
+  }
+
   //an algorithm using only elements of type 0
   //it works by sorting the vertices in a global ordering
   //and tries to make as many reflected neighbors as possible.
-  bool type0Algorithm()
+  bool type0Algorithm( )
   {
     if(!stevensonRefinement_)
     {
-      BisectionCompatibility stevensonBisComp(elements_, true);
+      sortForLongestEdge();
+
+      std::cout << "Stevenson + type0" << std::endl;
+      ThisType stevensonBisComp(vertices_, elements_, true);
       stevensonBisComp.alberta2Stevenson();
       bool result = stevensonBisComp.type0Algorithm();
+      //bool result = stevensonBisComp.type1Algorithm();
       stevensonBisComp.stevenson2Alberta();
       elementOrientation_ = stevensonBisComp.returnElements(elements_, false);
+
+      std::cout << "Done Stevenson + type0" << std::endl;
       return result;
     }
+
+    std::cout << "Alberta refinement " << std::endl;
+
     std::list<unsigned int> vertexPriorityList;
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
@@ -146,8 +280,11 @@ public:
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
     for(int vtx : el0)
+    {
       vertexPriorityList.push_back ( vtx );
-    doneElements[0] =true;
+    }
+
+    doneElements[0] = true;
     //add faces to activeFaceList, if not boundary
     //at beginning if face contains ref Edge,
     //else at the end
@@ -193,6 +330,7 @@ public:
       ElementType & neigh = elements_[neighIndex];
       int faceInEl = getFaceIndex(el, faceElement.first);
       int faceInNeigh = getFaceIndex(neigh, faceElement.first);
+
       auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[faceInNeigh]);
       if(it == vertexPriorityList.end() )
       {
@@ -209,7 +347,7 @@ public:
         if( (faceInEl == 0 && faceInNeigh == type0node_) || (faceInEl == type0node_ && faceInNeigh == 0) )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
-          it++;
+          ++it;
         }
         vertexPriorityList.insert(it, neigh[faceInNeigh]);
       }
@@ -348,7 +486,8 @@ public:
         freeFaces.insert({{face,{elIndex,elIndex}}});
       }
       //add others to activeFaces - if already there, delete, if already free, match and erase
-      for(int i=0; i<4; ++i ) //auto&& i : {0,1,2,3})
+      //for(int i=0; i<4; ++i ) //auto&& i : {0,1,2,3})
+      for(auto&& i : {0,1,2,3})
       {
         if (i == type1face_) continue;
 
@@ -395,9 +534,18 @@ public:
   {
     for(unsigned int i =0 ; i < elements_.size(); ++i)
     {
+      double det = determinant( i ) ;
+      elementOrientation_[i] = (det < 0);
+      //if( (det < 0) != elementOrientation_[i] )
+      //  elementOrientation_[i] = (det < 0);
+
+      det = determinant( i ) ;
+
       if(ALUexport && elementOrientation_[i])
         std::swap(elements_[i][2], elements_[i][3]);
+      std::cout << i << " det = " << det << "  elorient = " << elementOrientation_[ i ] << std::endl;
     }
+
     elements = elements_;
     return elementOrientation_;
   }
