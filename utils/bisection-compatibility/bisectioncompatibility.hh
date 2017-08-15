@@ -41,14 +41,14 @@ protected:
   std::vector<int> types_;
   //true if stevenson notation is used
   //false for ALBERTA
-  const bool stevensonRefinement_;
+  bool stevensonRefinement_;
 
   //second node of the refinement edge (first is 0)
-  const int type0node_;  // = stevensonRefinement_ ? 3 : 1 ;
+  int type0node_;  // = stevensonRefinement_ ? 3 : 1 ;
   //The interior node of a type 1 element
-  const int type1node_;  // = stevensonRefinement_ ? 1 : 2;
+  int type1node_;  // = stevensonRefinement_ ? 1 : 2;
   //the face opposite of the interior node
-  const int type1face_;  // = 3 - type1node_ ;
+  int type1face_;  // = 3 - type1node_ ;
 
 public:
   //constructor taking elements
@@ -58,9 +58,9 @@ public:
                           const bool stevenson)
     : vertices_( vertices ),
       elements_( elements ),
-      elementOrientation_(elements_.size(),false),
+      elementOrientation_(elements_.size(), true),
       maxVertexIndex_(0),
-      types_(elements_.size(),0),
+      types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
       type0node_( stevensonRefinement_ ? 3 : 1 ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
@@ -145,11 +145,6 @@ public:
     }
     std::cout << std::endl;
   }
-
-  void swap( int el, int v1, int v2 )
-  {
-  }
-
 
   double edgeLength( const int e, const int edge ) const
   {
@@ -249,23 +244,11 @@ public:
   //and tries to make as many reflected neighbors as possible.
   bool type0Algorithm( )
   {
-    if(!stevensonRefinement_)
-    {
-      sortForLongestEdge();
+    // convert ordering of refinement edge to stevenson
+    alberta2Stevenson();
 
-      std::cout << "Stevenson + type0" << std::endl;
-      ThisType stevensonBisComp(vertices_, elements_, true);
-      stevensonBisComp.alberta2Stevenson();
-      bool result = stevensonBisComp.type0Algorithm();
-      //bool result = stevensonBisComp.type1Algorithm();
-      stevensonBisComp.stevenson2Alberta();
-      elementOrientation_ = stevensonBisComp.returnElements(elements_, false);
-
-      std::cout << "Done Stevenson + type0" << std::endl;
-      return result;
-    }
-
-    std::cout << "Alberta refinement " << std::endl;
+    // all elements are type 0
+    std::fill( types_.begin(), types_.end(), 0 );
 
     std::list<unsigned int> vertexPriorityList;
     vertexPriorityList.clear();
@@ -403,6 +386,9 @@ public:
   //An algorithm using only elements of type 1
   bool type1Algorithm()
   {
+    // convert to stevenson ordering
+    alberta2Stevenson();
+
     //set all types to 1
     std::fill( types_.begin(), types_.end(), 1 );
 
@@ -520,6 +506,7 @@ public:
 
     //now postprocessing of freeFaces. possibly - not really necessary, has to be thought about
     //useful for parallelization .
+    /*
     for(auto&& face : freeFaces)
     {
       unsigned int elementIndex = face.second[0];
@@ -527,47 +514,61 @@ public:
       //give refinement edge positive priority
       //and non-refinement edge negative priority less than -1 and counting
     }
+    */
     return true;
   }
 
-  std::vector<bool> returnElements(std::vector<ElementType> & elements, bool ALUexport = true)
+  void returnElements(std::vector<ElementType> & elements,
+                      std::vector<bool>& elementOrientation,
+                      std::vector<int>& types,
+                      const bool stevenson = false )
   {
-    for(unsigned int i =0 ; i < elements_.size(); ++i)
+    if( stevenson )
     {
-      double det = determinant( i ) ;
-      elementOrientation_[i] = (det < 0);
-      //if( (det < 0) != elementOrientation_[i] )
-      //  elementOrientation_[i] = (det < 0);
-
-      det = determinant( i ) ;
-
-      if(ALUexport && elementOrientation_[i])
-        std::swap(elements_[i][2], elements_[i][3]);
-      std::cout << i << " det = " << det << "  elorient = " << elementOrientation_[ i ] << std::endl;
+      alberta2Stevenson();
+    }
+    else
+    {
+      stevenson2Alberta();
     }
 
     elements = elements_;
-    return elementOrientation_;
+    elementOrientation = elementOrientation_;
+    types = types_;
   }
 
   void stevenson2Alberta()
   {
-    for(auto&& el : elements_)
+    if( stevensonRefinement_ )
     {
-      std::swap(el[1],el[3]);
+      swapRefinementType();
     }
   }
 
-
   void alberta2Stevenson()
   {
-    for(auto&& el : elements_)
+    if( ! stevensonRefinement_ )
     {
-      std::swap(el[1],el[3]);
+      swapRefinementType();
     }
   }
 
 private:
+  void swapRefinementType()
+  {
+    const int nElements = elements_.size();
+    for( int el = 0; el<nElements; ++el )
+    {
+      elementOrientation_[ el ] = !elementOrientation_[ el ];
+      std::swap(elements_[ el ][ 1 ], elements_[ el ][ 3 ]);
+    }
+
+    // swap refinement flags
+    stevensonRefinement_ = ! stevensonRefinement_;
+    type0node_ = stevensonRefinement_ ? 3 : 1 ;
+    type1node_ = stevensonRefinement_ ? 1 : 2 ;
+    type1face_ = ( 3 - type1node_ );
+  }
 
   //switch vertices 2,3 for all elements with elemIndex % 2
   void applyStandardOrientation ()
