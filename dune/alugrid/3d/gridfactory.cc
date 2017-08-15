@@ -362,17 +362,17 @@ namespace Dune
     std::vector<bool> elementOrientation(elements_.size(), false);
     if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
-      BisectionCompatibility bisComp(elements_, false);
+      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
       if(bisComp.make6CompatibilityCheck())
         std::cout << "Grid is compatible!" << std::endl;
       else
       {
         make6 = false;
         std::cout << "Making compatible" << std::endl;
-        if(bisComp.type0Algorithm())
+        if( bisComp.type0Algorithm() )
         {
           std::cout << "Grid is compatible!!" << std::endl;
-          elementOrientation = bisComp.returnElements(elements_);
+          elementOrientation = bisComp.returnElements( elements_ );
         }
         else
           std::cout << "Could not make compatible!" << std::endl;
