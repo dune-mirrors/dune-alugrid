@@ -1,6 +1,6 @@
 DGF
 Simplexgenerator
-%min-angle 1.1        % quality enhancment 
+%min-angle 45        % quality enhancment 
 max-area 0.01         % maximum element area restriction
 display 0              % show result using the Tetgen viewer
 

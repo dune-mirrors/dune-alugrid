@@ -359,12 +359,16 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
     bool make6 = true;
-    std::vector<bool> elementOrientation(elements_.size(), false);
+    std::vector< bool > elementOrientation;
+    std::vector< int  > simplexTypes;
+
     if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
       if(bisComp.make6CompatibilityCheck())
+      {
         std::cout << "Grid is compatible!" << std::endl;
+      }
       else
       {
         make6 = false;
@@ -372,7 +376,9 @@ namespace Dune
         if( bisComp.type0Algorithm() )
         {
           std::cout << "Grid is compatible!!" << std::endl;
-          elementOrientation = bisComp.returnElements( elements_ );
+
+          // obtain new element sorting, orientations, and types
+          bisComp.returnElements( elements_, elementOrientation, simplexTypes );
         }
         else
           std::cout << "Could not make compatible!" << std::endl;
@@ -556,12 +562,26 @@ namespace Dune
             const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
             element[ j ] = globalId( elements_[ elemIndex ][ i ] );
           }
+
           // bisection element type: orientation and type (default 0)
-          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
+          int type = 0;
+          int orientation = (dimension == 3 ? (elemIndex % 2) : 0);
           if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
           {
-            simplexTypeFlag = ALU3DSPACE SimplexTypeFlag(!(elementOrientation[elemIndex]),0);
+            assert( !elementOrientation.empty() );
+            orientation = (elementOrientation[ elemIndex ]);
+
+            assert( !simplexTypes.empty() );
+            type = simplexTypes[ elemIndex ];
+
+            // in ALU only elements with negative orientation can be inserted
+            if( ! elementOrientation[ elemIndex  ] )
+            {
+              // the refinement edge is 0 -- 1, so we can swap 2 and 3
+              std::swap( element[ 2 ], element[ 3 ] );
+            }
           }
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( orientation, type );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else
