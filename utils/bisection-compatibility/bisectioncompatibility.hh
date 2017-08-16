@@ -43,8 +43,10 @@ protected:
   //false for ALBERTA
   bool stevensonRefinement_;
 
-  //second node of the refinement edge (first is 0)
-  int type0node_;  // = stevensonRefinement_ ? 3 : 1 ;
+  //the 2 nodes of the refinement edge
+  EdgeType type0nodes_;  // = stevensonRefinement_ ? 0,3 : 0,1 ;
+  //the faces opposite of type 0 nodes
+  EdgeType type0faces_;
   //The interior node of a type 1 element
   int type1node_;  // = stevensonRefinement_ ? 1 : 2;
   //the face opposite of the interior node
@@ -62,7 +64,8 @@ public:
       maxVertexIndex_(0),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
-      type0node_( stevensonRefinement_ ? 3 : 1 ),
+      type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
+      type0faces_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
       type1face_( 3 - type1node_ )
   {
@@ -267,7 +270,7 @@ public:
     //at beginning if face contains ref Edge,
     //else at the end
     FaceElementType faceElement;
-    for(int i = 0; i < 4 ; ++i)
+    for(unsigned int i = 0; i < 4 ; ++i)
     {
       getFace(el0, i, faceElement);
       //do nothing for boundary
@@ -278,7 +281,7 @@ public:
       if(it == activeFaceList.end())
       {
         //if face does not contain ref Edge
-        if(i == 0 || i == type0node_)
+        if(i == type0nodes_[0] || i == type0nodes_[1] )
           activeFaceList.push_back(faceElement);
         else
           activeFaceList.push_front(faceElement);
@@ -306,8 +309,8 @@ public:
       doneElements[neighIndex] = true;
       ElementType el = elements_[elIndex];
       ElementType & neigh = elements_[neighIndex];
-      int faceInEl = getFaceIndex(el, faceElement.first);
-      int faceInNeigh = getFaceIndex(neigh, faceElement.first);
+      unsigned int faceInEl = getFaceIndex(el, faceElement.first);
+      unsigned int faceInNeigh = getFaceIndex(neigh, faceElement.first);
 
       auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[faceInNeigh]);
       if(it == vertexPriorityList.end() )
@@ -322,7 +325,7 @@ public:
         //that the children are reflected.
         // So we choose to insert the vertex after the
         // faceInNeigh index.
-        if( (faceInEl == 0 && faceInNeigh == type0node_) || (faceInEl == type0node_ && faceInNeigh == 0) )
+        if( (faceInEl == type0faces_[0] && faceInNeigh == type0faces_[1] ) || (faceInEl == type0faces_[1] && faceInNeigh == type0faces_[0] ) )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
           ++it;
@@ -353,7 +356,7 @@ public:
         elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
       }
       //add and remove faces from activeFaceList
-      for(int i = 0; i < 4 ; ++i)
+      for(unsigned int i = 0; i < 4 ; ++i)
       {
         getFace(neigh, i, faceElement);
         //do nothing for boundary
@@ -364,7 +367,7 @@ public:
         if(it == activeFaceList.end())
         {
           //if face does not contain ref Edge
-          if(i == 0 || i == type0node_)
+          if(i == type0nodes_[0] || i == type0nodes_[1] )
             activeFaceList.push_back(faceElement);
           else
             activeFaceList.push_front(faceElement);
@@ -560,7 +563,8 @@ private:
 
     // swap refinement flags
     stevensonRefinement_ = ! stevensonRefinement_;
-    type0node_ = stevensonRefinement_ ? 3 : 1 ;
+    type0nodes_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
+    type0faces_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
     type1node_ = stevensonRefinement_ ? 1 : 2 ;
     type1face_ = ( 3 - type1node_ );
   }
@@ -622,8 +626,8 @@ private:
       // have reflected neighbors of the children, if the face is in the same direction
       // and the other edge of the refinement edge is the missing one.
       if( elFaceIndex != neighFaceIndex ||
-         !(elFaceIndex == 0 && neighFaceIndex == type0node_) ||
-         !(elFaceIndex == type0node_ && neighFaceIndex == 0) )
+         !(elFaceIndex == type0faces_[0] && neighFaceIndex == type0faces_[1]) ||
+         !(elFaceIndex == type0faces_[1] && neighFaceIndex == type0faces_[0]) )
       {
         if (verbose)
         {
