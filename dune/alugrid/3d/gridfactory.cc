@@ -373,7 +373,7 @@ namespace Dune
       {
         make6 = false;
         std::cout << "Making compatible" << std::endl;
-        if( bisComp.type1Algorithm() )
+        if( bisComp.type0Algorithm() )
         {
           std::cout << "Grid is compatible!!" << std::endl;
 
@@ -393,7 +393,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
+    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 || !make6 )
       recreateBoundaryIds();
 
     // if dump file should be written
