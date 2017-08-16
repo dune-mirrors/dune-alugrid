@@ -255,11 +255,6 @@ public:
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
 
-    //for now - no edge Priority, we just use the fact, that
-    //each simplex know its desired refinement edge
-    //std::map<EdgeType, int> edgePriorityMap;
-    //buildEdgePriority (edgePriorityMap);
-
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
     for(int vtx : el0)
@@ -857,22 +852,6 @@ private:
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
   }
-
-  //build the structure of announced edges
-  void buildEdgePriority(std::map<EdgeType, int> & edges)
-  {
-    EdgeType edge;
-    for(auto & el : elements_)
-    {
-      getRefinementEdge(el, 2 , edge,0);
-      auto pos = edges.find(edge);
-      if(pos != edges.end())
-        ++(pos->second);
-      else
-        edges.insert({edge, 1});
-    }
-  }
-
 }; //class bisectioncompatibility
 
 
