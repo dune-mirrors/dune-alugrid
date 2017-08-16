@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <assert.h>
 
+#include <dune/common/fieldmatrix.hh>
+
 
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
