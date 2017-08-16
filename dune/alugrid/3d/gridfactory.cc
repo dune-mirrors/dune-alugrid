@@ -675,13 +675,6 @@ namespace Dune
 
             assert( !simplexTypes.empty() );
             type = simplexTypes[ elemIndex ];
-
-            // in ALU only elements with negative orientation can be inserted
-            if( elementOrientation[ elemIndex  ] )
-            {
-              // the refinement edge is 0 -- 1, so we can swap 2 and 3
-              std::swap( element[ 2 ], element[ 3 ] );
-            }
           }
           ALU3DSPACE SimplexTypeFlag simplexTypeFlag( orientation, type );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
