@@ -362,7 +362,7 @@ namespace Dune
     std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
 
-    if(dimension == 3 && ALUGrid::refinementType == conforming && !temporary)
+    if(dimension == 3 && ALUGrid::refinementType == conforming )
     {
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
       if(bisComp.make6CompatibilityCheck())
