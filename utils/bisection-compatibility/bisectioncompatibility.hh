@@ -325,7 +325,8 @@ public:
       unsigned int faceInNeigh = getFaceIndex(neigh, faceElement.first);
       unsigned int nodeInNeigh = 3 - faceInNeigh;
 
-      //helper element that will be the correctly orientated neigh
+      //helper element that contains neigh
+      // in the ordering of vertexPriorityList
       ElementType newNeigh(el);
       //insertion of new vertex
       if( !doneVertices[ neigh [ nodeInNeigh ] ] )
@@ -372,6 +373,41 @@ public:
         auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
         newNeigh[2] = *it2;
       }
+      //adjust type of newNeigh
+      unsigned int type = 0;
+      bool contained[4];
+      for(unsigned int i =0; i < 4; ++i)
+      {
+        contained[i] = containedInV0_[newNeigh[i]];
+      }
+      if(! ( contained[0] && contained[1] && contained[2] && contained[3] || ( !contained[0] && !contained[1] && !contained[2] && !contained[3] ) ) )
+      {
+        ElementType V0Part(newNeigh);
+        ElementType V1Part(newNeigh);
+        for(unsigned int i = 0 ; i < 4; ++i)
+        {
+          if( contained[ i ] )
+          {
+            V1Part.erase( std::find(V1Part.begin(),V1Part.end(),newNeigh[i]) );
+          }
+          else
+          {
+            V0Part.erase( std::find(V0Part.begin(),V0Part.end(),newNeigh[i]) );
+            ++type;
+          }
+        }
+        for(unsigned int i = 0; i < 4; ++i)
+        {
+          if(i == 0)
+            newNeigh[ i ] = V0Part[ i ];
+          else if( i <= type )
+            newNeigh[ i ] = V1Part[ i - 1 ] ;
+          else if( i > type)
+            newNeigh[ i ] = V0Part[ i - type];
+        }
+      }
+      types_[neighIndex] = type % 3;
+
       //reorientate neigh using the helper element newNeigh
       //we use swaps to be able to track the elementOrientation_
       bool neighOrientation = elementOrientation_[neighIndex];
