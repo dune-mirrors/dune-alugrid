@@ -74,12 +74,13 @@ public:
   }
 
   //check for strong compatibility
-  bool stronglyCompatible ()
+  int stronglyCompatibleFaces ()
   {
-    bool result = true;
+    int result = 0;
     for(auto&& face : neighbours_)
     {
-      result &= checkStrongCompatibility(face);
+      if(! checkStrongCompatibility(face))
+        ++result;
     }
     return result;
   }
