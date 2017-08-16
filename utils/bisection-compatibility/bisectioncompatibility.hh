@@ -65,9 +65,9 @@ public:
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
       type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
-      type0faces_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
+      type0faces_( stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
-      type1face_( 3 - type1node_ )
+      type1face_( type1node_ )
   {
     //build the information about neighbours
     buildNeighbors();
@@ -281,7 +281,7 @@ public:
       if(it == activeFaceList.end())
       {
         //if face does not contain ref Edge
-        if(i == type0nodes_[0] || i == type0nodes_[1] )
+        if(i != type0faces_[0] && i != type0faces_[1] )
           activeFaceList.push_back(faceElement);
         else
           activeFaceList.push_front(faceElement);
@@ -310,12 +310,15 @@ public:
       ElementType el = elements_[elIndex];
       ElementType & neigh = elements_[neighIndex];
       unsigned int faceInEl = getFaceIndex(el, faceElement.first);
+      unsigned int nodeInEl = 3 - faceInEl;
       unsigned int faceInNeigh = getFaceIndex(neigh, faceElement.first);
+      unsigned int nodeInNeigh = 3 - faceInNeigh;
 
-      auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[faceInNeigh]);
+
+      auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[nodeInNeigh]);
       if(it == vertexPriorityList.end() )
       {
-        it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInEl]);
+        it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
         //orientate element (add new vertex to vertexPriorityList)
         //This does a bit of magic by knowing that
         // the refinement edge is not contained in
@@ -330,7 +333,7 @@ public:
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
           ++it;
         }
-        vertexPriorityList.insert(it, neigh[faceInNeigh]);
+        vertexPriorityList.insert(it, neigh[nodeInNeigh]);
       }
       auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
       if(*it0 != neigh[0])
@@ -367,7 +370,7 @@ public:
         if(it == activeFaceList.end())
         {
           //if face does not contain ref Edge
-          if(i == type0nodes_[0] || i == type0nodes_[1] )
+          if(i != type0faces_[0] && i != type0faces_[1] )
             activeFaceList.push_back(faceElement);
           else
             activeFaceList.push_front(faceElement);
@@ -564,9 +567,9 @@ private:
     // swap refinement flags
     stevensonRefinement_ = ! stevensonRefinement_;
     type0nodes_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
-    type0faces_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
+    type0faces_ = stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ;
     type1node_ = stevensonRefinement_ ? 1 : 2 ;
-    type1face_ = ( 3 - type1node_ );
+    type1face_ = (  type1node_ );
   }
 
   //switch vertices 2,3 for all elements with elemIndex % 2
@@ -669,16 +672,16 @@ private:
   {
     switch(faceIndex)
     {
-    case 0 :
+    case 3 :
       face = {el[1],el[2],el[3]};
       break;
-    case 1 :
+    case 2 :
       face = {el[0],el[2],el[3]};
       break;
-    case 2 :
+    case 1 :
       face = {el[0],el[1],el[3]};
       break;
-    case 3 :
+    case 0 :
       face = {el[0],el[1],el[2]};
       break;
     default :
@@ -707,16 +710,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
+        case 0 :
           edge = {el[0],el[2]};
-          break;
-        case 2 :
-          edge = {el[0],el[3]};
           break;
         case 1 :
           edge = {el[0],el[3]};
           break;
-        case 0 :
+        case 2 :
+          edge = {el[0],el[3]};
+          break;
+        case 3 :
           edge =  {el[1],el[3]};
           break;
         default :
@@ -728,16 +731,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
+        case 0 :
           edge = {el[0],el[1]};
           break;
         case 1 :
+          edge = {el[0],el[1]};
+          break;
+        case 2 :
           edge =  {el[0],el[2]};
           break;
-        case 0 :
+        case 3 :
           edge =  {el[1],el[3]};
           break;
         default :
@@ -752,16 +755,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
+        case 0 :
           edge = {el[0],el[2]};
-          break;
-        case 2 :
-          edge = {el[0],el[3]};
           break;
         case 1 :
+          edge = {el[0],el[3]};
+          break;
+        case 2 :
           edge = {el[0],el[2]};
           break;
-        case 0 :
+        case 3 :
           edge =  {el[2],el[3]};
           break;
         default :
@@ -773,16 +776,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
+        case 0 :
           edge = {el[0],el[1]};
           break;
         case 1 :
+          edge = {el[0],el[1]};
+          break;
+        case 2 :
           edge = {el[0],el[type1node_ == 2 ? 3 :2]};
           break;
-        case 0 :
+        case 3 :
           edge = {el[1],el[type1node_ == 2 ? 3 :2]};
           break;
         default :
@@ -814,7 +817,7 @@ private:
     for(int i =0; i<4 ; ++i)
     {
       if(!( el[i] == face[0] || el[i] == face[1]  || el[i] == face[2] ) )
-        return i ;
+        return 3 - i ;
     }
     return -1;
   }
