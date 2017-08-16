@@ -711,8 +711,8 @@ int main (int argc , char **argv) {
       if( testALU3dSimplex )
         Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > >( Dune::TestGrids::kuhn3d );
 
-      if( testALU3dConform )
-        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
+    //  if( testALU3dConform )
+      //  Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
 #endif // #ifndef NO_3D
 #endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
