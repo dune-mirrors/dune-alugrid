@@ -373,7 +373,7 @@ namespace Dune
       {
         make6 = false;
         std::cout << "Making compatible" << std::endl;
-        if( bisComp.type0Algorithm() )
+        if( bisComp.type1Algorithm() )
         {
           std::cout << "Grid is compatible!!" << std::endl;
 
