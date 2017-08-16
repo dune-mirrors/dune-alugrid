@@ -258,12 +258,14 @@ public:
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
+    std::vector<bool> doneVertices(maxVertexIndex_, false);
 
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
     for(int vtx : el0)
     {
       vertexPriorityList.push_back ( vtx );
+      doneVertices[vtx] = true;
     }
 
     doneElements[0] = true;
@@ -315,37 +317,55 @@ public:
       unsigned int faceInNeigh = getFaceIndex(neigh, faceElement.first);
       unsigned int nodeInNeigh = 3 - faceInNeigh;
 
-
-      auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[nodeInNeigh]);
-      if(it == vertexPriorityList.end() )
+      //helper element that will be the correctly orientated neigh
+      ElementType newNeigh(el);
+      //insertion of new vertex
+      if( !doneVertices[ neigh [ nodeInNeigh ] ] )
       {
-        it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
-        //orientate element (add new vertex to vertexPriorityList)
-        //This does a bit of magic by knowing that
-        // the refinement edge is not contained in
-        // face 0  and face type0node_.
-        // So if we are in the mixed case, we do not want to
-        // make reflected neighbors, but instead rather
-        //that the children are reflected.
-        // So we choose to insert the vertex after the
-        // faceInNeigh index.
-        if( (faceInEl == type0faces_[0] && faceInNeigh == type0faces_[1] ) || (faceInEl == type0faces_[1] && faceInNeigh == type0faces_[0] ) )
+        auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
+
+        //New orientation of newNeigh using element information
+        //this means reflected neighbor
+        newNeigh[nodeInEl] = neigh[nodeInNeigh];
+
+        //this takes care that the children will be reflected neighbors
+        //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
+        if( (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
+          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          ++it;
+          //rotate newNeigh forward by 1
+          std::rotate(newNeigh.begin(), newNeigh.begin() + 1, newNeigh.end());
+        }
+        //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
+        else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
+        {
+          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          //rotate newNeigh backwards by 1
+          std::rotate(newNeigh.rbegin(), newNeigh.rbegin() + 1, newNeigh.rend());
+        }
+        //else just insert after nodeInEl
+        else
+        {
           ++it;
         }
         vertexPriorityList.insert(it, neigh[nodeInNeigh]);
+        doneVertices[ neigh [ nodeInNeigh ]  ] = true;
       }
-      ElementType newNeigh({0,0,0});
+      else
+      {
+        //New orientation of newNeigh using list information
+        auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[0] = *it0;
+        ++it0;
+        auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[1] = *it1;
+        ++it1;
+        auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[2] = *it2;
+      }
+      //reorientate neigh using the helper element newNeigh
       bool neighOrientation = elementOrientation_[neighIndex];
-      auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
-      newNeigh[0] = *it0;
-      ++it0;
-      auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin(), neigh.end());
-      newNeigh[1] = *it1;
-      ++it1;
-      auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
-      newNeigh[2] = *it2;
       for(unsigned int i =0 ; i < 3; ++i)
       {
         if( newNeigh[i] != neigh[i] )
