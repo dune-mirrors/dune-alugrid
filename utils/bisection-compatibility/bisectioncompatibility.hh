@@ -39,6 +39,9 @@ protected:
   FaceMapType neighbours_;
   //The maximum Vertex Index
   unsigned int maxVertexIndex_;
+  //A tag vector for vertices to
+  //decide whether they are in V_1 or v_0
+  std::vector<bool> containedInV0_;
   //the element types
   std::vector<int> types_;
   //true if stevenson notation is used
@@ -64,6 +67,7 @@ public:
       elements_( elements ),
       elementOrientation_(elements_.size(), true),
       maxVertexIndex_(0),
+      containedInV0_(maxVertexIndex_,true),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
       type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
@@ -73,6 +77,8 @@ public:
   {
     //build the information about neighbours
     buildNeighbors();
+    //calculate V0,V1
+    calculatevV0();
   }
 
   //check for strong compatibility
@@ -892,6 +898,14 @@ private:
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
   }
+
+  //This method is supposed to calculate V0 and V1
+  void calculatevV0()
+  {
+    //For now, everything is in V0
+    containedInV0_.resize(maxVertexIndex_,true);
+  }
+
 }; //class bisectioncompatibility
 
 
