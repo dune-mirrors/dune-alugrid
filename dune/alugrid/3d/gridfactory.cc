@@ -495,7 +495,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
+    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 )
       recreateBoundaryIds();
 
     // if dump file should be written

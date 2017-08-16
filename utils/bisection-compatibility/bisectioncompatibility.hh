@@ -43,8 +43,10 @@ protected:
   //false for ALBERTA
   bool stevensonRefinement_;
 
-  //second node of the refinement edge (first is 0)
-  int type0node_;  // = stevensonRefinement_ ? 3 : 1 ;
+  //the 2 nodes of the refinement edge
+  EdgeType type0nodes_;  // = stevensonRefinement_ ? 0,3 : 0,1 ;
+  //the faces opposite of type 0 nodes
+  EdgeType type0faces_;
   //The interior node of a type 1 element
   int type1node_;  // = stevensonRefinement_ ? 1 : 2;
   //the face opposite of the interior node
@@ -62,7 +64,8 @@ public:
       maxVertexIndex_(0),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
-      type0node_( stevensonRefinement_ ? 3 : 1 ),
+      type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
+      type0faces_( stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
       type1face_( 3 - type1node_ )
   {
@@ -71,12 +74,13 @@ public:
   }
 
   //check for strong compatibility
-  bool stronglyCompatible ()
+  int stronglyCompatibleFaces ()
   {
-    bool result = true;
+    int result = 0;
     for(auto&& face : neighbours_)
     {
-      result &= checkStrongCompatibility(face);
+      if(! checkStrongCompatibility(face))
+        ++result;
     }
     return result;
   }
@@ -254,17 +258,14 @@ public:
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
-
-    //for now - no edge Priority, we just use the fact, that
-    //each simplex know its desired refinement edge
-    //std::map<EdgeType, int> edgePriorityMap;
-    //buildEdgePriority (edgePriorityMap);
+    std::vector<bool> doneVertices(maxVertexIndex_, false);
 
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
     for(int vtx : el0)
     {
       vertexPriorityList.push_back ( vtx );
+      doneVertices[vtx] = true;
     }
 
     doneElements[0] = true;
@@ -272,7 +273,7 @@ public:
     //at beginning if face contains ref Edge,
     //else at the end
     FaceElementType faceElement;
-    for(int i = 0; i < 4 ; ++i)
+    for(unsigned int i = 0; i < 4 ; ++i)
     {
       getFace(el0, i, faceElement);
       //do nothing for boundary
@@ -283,7 +284,7 @@ public:
       if(it == activeFaceList.end())
       {
         //if face does not contain ref Edge
-        if(i == 0 || i == type0node_)
+        if(i != type0faces_[0] && i != type0faces_[1] )
           activeFaceList.push_back(faceElement);
         else
           activeFaceList.push_front(faceElement);
@@ -311,54 +312,73 @@ public:
       doneElements[neighIndex] = true;
       ElementType el = elements_[elIndex];
       ElementType & neigh = elements_[neighIndex];
-      int faceInEl = getFaceIndex(el, faceElement.first);
-      int faceInNeigh = getFaceIndex(neigh, faceElement.first);
+      unsigned int faceInEl = getFaceIndex(el, faceElement.first);
+      unsigned int nodeInEl = 3 - faceInEl;
+      unsigned int faceInNeigh = getFaceIndex(neigh, faceElement.first);
+      unsigned int nodeInNeigh = 3 - faceInNeigh;
 
-      auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), neigh[faceInNeigh]);
-      if(it == vertexPriorityList.end() )
+      //helper element that will be the correctly orientated neigh
+      ElementType newNeigh(el);
+      //insertion of new vertex
+      if( !doneVertices[ neigh [ nodeInNeigh ] ] )
       {
-        it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInEl]);
-        //orientate element (add new vertex to vertexPriorityList)
-        //This does a bit of magic by knowing that
-        // the refinement edge is not contained in
-        // face 0  and face type0node_.
-        // So if we are in the mixed case, we do not want to
-        // make reflected neighbors, but instead rather
-        //that the children are reflected.
-        // So we choose to insert the vertex after the
-        // faceInNeigh index.
-        if( (faceInEl == 0 && faceInNeigh == type0node_) || (faceInEl == type0node_ && faceInNeigh == 0) )
+        auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
+
+        //New orientation of newNeigh using element information
+        //this means reflected neighbor
+        newNeigh[nodeInEl] = neigh[nodeInNeigh];
+
+        //this takes care that the children will be reflected neighbors
+        //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
+        if( (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[faceInNeigh]);
+          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          ++it;
+          //rotate newNeigh forward by 1
+          std::rotate(newNeigh.begin(), newNeigh.begin() + 1, newNeigh.end());
+        }
+        //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
+        else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
+        {
+          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          //rotate newNeigh backwards by 1
+          std::rotate(newNeigh.rbegin(), newNeigh.rbegin() + 1, newNeigh.rend());
+        }
+        //else just insert after nodeInEl
+        else
+        {
           ++it;
         }
-        vertexPriorityList.insert(it, neigh[faceInNeigh]);
+        vertexPriorityList.insert(it, neigh[nodeInNeigh]);
+        doneVertices[ neigh [ nodeInNeigh ]  ] = true;
       }
-      auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
-      if(*it0 != neigh[0])
+      else
       {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it0);
-        std::swap(neigh[0],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
+        //New orientation of newNeigh using list information
+        auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[0] = *it0;
+        ++it0;
+        auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[1] = *it1;
+        ++it1;
+        auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
+        newNeigh[2] = *it2;
       }
-      ++it0;
-      auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin() + 1, neigh.end());
-      if(*it1 != neigh[1])
+      //reorientate neigh using the helper element newNeigh
+      //we use swaps to be able to track the elementOrientation_
+      bool neighOrientation = elementOrientation_[neighIndex];
+      for(unsigned int i =0 ; i < 3; ++i)
       {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it1);
-        std::swap(neigh[1],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
+        if( newNeigh[i] != neigh[i] )
+        {
+          auto neighIt = std::find(neigh.begin(),neigh.end(),newNeigh[i]);
+          std::swap(*neighIt,neigh[i]);
+          neighOrientation = ! neighOrientation;
+        }
       }
-      ++it1;
-      auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin() + 2, neigh.end());
-      if(*it2 != neigh[2])
-      {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it2);
-        std::swap(neigh[2],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
-      }
+      elementOrientation_[neighIndex] = neighOrientation;
       //add and remove faces from activeFaceList
-      for(int i = 0; i < 4 ; ++i)
+      for(unsigned int i = 0; i < 4 ; ++i)
       {
         getFace(neigh, i, faceElement);
         //do nothing for boundary
@@ -369,7 +389,7 @@ public:
         if(it == activeFaceList.end())
         {
           //if face does not contain ref Edge
-          if(i == 0 || i == type0node_)
+          if(i != type0faces_[0] && i != type0faces_[1] )
             activeFaceList.push_back(faceElement);
           else
             activeFaceList.push_front(faceElement);
@@ -409,31 +429,29 @@ public:
       ElementType & el = elements_[elIndex];
       int priorityNode = -1;
       FaceType face;
-      int freeFace = -1;
+      int freeNode = -1;
       for(int i = 0; i < 4; ++i)
       {
+        int tmpPrio = nodePriority[el[i]];
         //if a node has positive priority
-        if(nodePriority[el[i]] > -1)
+        if( tmpPrio > -1 )
         {
-          if(priorityNode < 0)
-            priorityNode = i;
-          //if it has maximum priority choose this index
-          else if(nodePriority[el[i]] > nodePriority[el[priorityNode]])
+          if( priorityNode < 0 || tmpPrio > nodePriority[el[priorityNode]] )
             priorityNode = i;
         }
-        getFace(el,i,face );
+        getFace(el,3 - i,face );
         //if we have a free face, the opposite node is good to be fixed
         if(freeFaces.find(face) != freeFaces.end())
-          freeFace = i;
+          freeNode = i;
       }
       if(priorityNode > -1)
       {
         fixNode(el, priorityNode);
       }
-      else if(freeFace > -1)
+      else if(freeNode > -1)
       {
-        nodePriority[el[freeFace]] = currNodePriority;
-        fixNode(el, freeFace);
+        nodePriority[el[freeNode]] = currNodePriority;
+        fixNode(el, freeNode);
         --currNodePriority;
       }
       else //fix a random node
@@ -532,6 +550,19 @@ public:
       stevenson2Alberta();
     }
 
+    //This needs to happen, before the boundaryIds are
+    //recreated in the GridFactory
+    const int nElements = elements_.size();
+    for( int el = 0; el<nElements; ++el )
+    {
+      // in ALU only elements with negative orientation can be inserted
+      if( ! elementOrientation_[ el  ] )
+      {
+        // the refinement edge is 0 -- 1, so we can swap 2 and 3
+        std::swap( elements_[ el ][ 2 ], elements_[ el ][ 3 ] );
+      }
+    }
+
     elements = elements_;
     elementOrientation = elementOrientation_;
     types = types_;
@@ -565,9 +596,10 @@ private:
 
     // swap refinement flags
     stevensonRefinement_ = ! stevensonRefinement_;
-    type0node_ = stevensonRefinement_ ? 3 : 1 ;
+    type0nodes_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
+    type0faces_ = stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ;
     type1node_ = stevensonRefinement_ ? 1 : 2 ;
-    type1face_ = ( 3 - type1node_ );
+    type1face_ = ( 3 -  type1node_ );
   }
 
   //switch vertices 2,3 for all elements with elemIndex % 2
@@ -579,6 +611,7 @@ private:
       if ( i % 2 == 0 )
       {
         std::swap(element[2],element[3]);
+        elementOrientation_[i] = ! elementOrientation_[i];
       }
       ++i;
     }
@@ -627,8 +660,8 @@ private:
       // have reflected neighbors of the children, if the face is in the same direction
       // and the other edge of the refinement edge is the missing one.
       if( elFaceIndex != neighFaceIndex ||
-         !(elFaceIndex == 0 && neighFaceIndex == type0node_) ||
-         !(elFaceIndex == type0node_ && neighFaceIndex == 0) )
+         !(elFaceIndex == type0faces_[0] && neighFaceIndex == type0faces_[1]) ||
+         !(elFaceIndex == type0faces_[1] && neighFaceIndex == type0faces_[0]) )
       {
         if (verbose)
         {
@@ -651,7 +684,7 @@ private:
     {
       //swap the node at the right position
       std::swap(el[node],el[type1node_]);
-      //also swap to other nodes to keep the volume positive
+      //also swap two other nodes to keep the volume positive
       //2 and 0 are never type1node_
       std::swap(el[(type1node_+1)%4],el[(type1node_+2)%4]);
     }
@@ -670,16 +703,16 @@ private:
   {
     switch(faceIndex)
     {
-    case 0 :
+    case 3 :
       face = {el[1],el[2],el[3]};
       break;
-    case 1 :
+    case 2 :
       face = {el[0],el[2],el[3]};
       break;
-    case 2 :
+    case 1 :
       face = {el[0],el[1],el[3]};
       break;
-    case 3 :
+    case 0 :
       face = {el[0],el[1],el[2]};
       break;
     default :
@@ -708,16 +741,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
+        case 0 :
           edge = {el[0],el[2]};
-          break;
-        case 2 :
-          edge = {el[0],el[3]};
           break;
         case 1 :
           edge = {el[0],el[3]};
           break;
-        case 0 :
+        case 2 :
+          edge = {el[0],el[3]};
+          break;
+        case 3 :
           edge =  {el[1],el[3]};
           break;
         default :
@@ -729,16 +762,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
+        case 0 :
           edge = {el[0],el[1]};
           break;
         case 1 :
+          edge = {el[0],el[1]};
+          break;
+        case 2 :
           edge =  {el[0],el[2]};
           break;
-        case 0 :
+        case 3 :
           edge =  {el[1],el[3]};
           break;
         default :
@@ -753,16 +786,16 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
+        case 0 :
           edge = {el[0],el[2]};
+          break;
+        case 1 :
+          edge = {el[0],el[3]};
           break;
         case 2 :
           edge = {el[0],el[3]};
           break;
-        case 1 :
-          edge = {el[0],el[2]};
-          break;
-        case 0 :
+        case 3 :
           edge =  {el[2],el[3]};
           break;
         default :
@@ -774,17 +807,17 @@ private:
       {
         switch(faceIndex)
         {
-        case 3 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
+        case 0 :
           edge = {el[0],el[1]};
           break;
         case 1 :
-          edge = {el[0],el[type1node_ == 2 ? 3 :2]};
+          edge = {el[0],el[1]};
           break;
-        case 0 :
-          edge = {el[1],el[type1node_ == 2 ? 3 :2]};
+        case 2 :
+          edge = {el[0],el[3]};
+          break;
+        case 3 :
+          edge = {el[1],el[3]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
@@ -815,7 +848,7 @@ private:
     for(int i =0; i<4 ; ++i)
     {
       if(!( el[i] == face[0] || el[i] == face[1]  || el[i] == face[2] ) )
-        return i ;
+        return 3 - i ;
     }
     return -1;
   }
@@ -857,22 +890,6 @@ private:
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
   }
-
-  //build the structure of announced edges
-  void buildEdgePriority(std::map<EdgeType, int> & edges)
-  {
-    EdgeType edge;
-    for(auto & el : elements_)
-    {
-      getRefinementEdge(el, 2 , edge,0);
-      auto pos = edges.find(edge);
-      if(pos != edges.end())
-        ++(pos->second);
-      else
-        edges.insert({edge, 1});
-    }
-  }
-
 }; //class bisectioncompatibility
 
 
