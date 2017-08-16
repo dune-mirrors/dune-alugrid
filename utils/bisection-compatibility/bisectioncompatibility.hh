@@ -531,6 +531,19 @@ public:
       stevenson2Alberta();
     }
 
+    //This needs to happen, before the boundaryIds are
+    //recreated in the GridFactory
+    const int nElements = elements_.size();
+    for( int el = 0; el<nElements; ++el )
+    {
+      // in ALU only elements with negative orientation can be inserted
+      if( ! elementOrientation_[ el  ] )
+      {
+        // the refinement edge is 0 -- 1, so we can swap 2 and 3
+        std::swap( elements_[ el ][ 2 ], elements_[ el ][ 3 ] );
+      }
+    }
+
     elements = elements_;
     elementOrientation = elementOrientation_;
     types = types_;
@@ -579,6 +592,7 @@ private:
       if ( i % 2 == 0 )
       {
         std::swap(element[2],element[3]);
+        elementOrientation_[i] = ! elementOrientation_[i];
       }
       ++i;
     }
