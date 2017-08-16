@@ -335,29 +335,26 @@ public:
         }
         vertexPriorityList.insert(it, neigh[nodeInNeigh]);
       }
+      ElementType newNeigh({0,0,0});
+      bool neighOrientation = elementOrientation_[neighIndex];
       auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
-      if(*it0 != neigh[0])
-      {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it0);
-        std::swap(neigh[0],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
-      }
+      newNeigh[0] = *it0;
       ++it0;
-      auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin() + 1, neigh.end());
-      if(*it1 != neigh[1])
-      {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it1);
-        std::swap(neigh[1],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
-      }
+      auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin(), neigh.end());
+      newNeigh[1] = *it1;
       ++it1;
-      auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin() + 2, neigh.end());
-      if(*it2 != neigh[2])
+      auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
+      newNeigh[2] = *it2;
+      for(unsigned int i =0 ; i < 3; ++i)
       {
-        auto helpIt = std::find(neigh.begin(), neigh.end(), *it2);
-        std::swap(neigh[2],*helpIt);
-        elementOrientation_[neighIndex] = !(elementOrientation_[neighIndex]);
+        if( newNeigh[i] != neigh[i] )
+        {
+          auto neighIt = std::find(neigh.begin(),neigh.end(),newNeigh[i]);
+          std::swap(*neighIt,neigh[i]);
+          neighOrientation = ! neighOrientation;
+        }
       }
+      elementOrientation_[neighIndex] = neighOrientation;
       //add and remove faces from activeFaceList
       for(unsigned int i = 0; i < 4 ; ++i)
       {
