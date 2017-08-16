@@ -67,7 +67,7 @@ public:
       type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
       type0faces_( stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
-      type1face_( type1node_ )
+      type1face_( 3 - type1node_ )
   {
     //build the information about neighbours
     buildNeighbors();
@@ -410,31 +410,29 @@ public:
       ElementType & el = elements_[elIndex];
       int priorityNode = -1;
       FaceType face;
-      int freeFace = -1;
+      int freeNode = -1;
       for(int i = 0; i < 4; ++i)
       {
+        int tmpPrio = nodePriority[el[i]];
         //if a node has positive priority
-        if(nodePriority[el[i]] > -1)
+        if( tmpPrio > -1 )
         {
-          if(priorityNode < 0)
-            priorityNode = i;
-          //if it has maximum priority choose this index
-          else if(nodePriority[el[i]] > nodePriority[el[priorityNode]])
+          if( priorityNode < 0 || tmpPrio > nodePriority[el[priorityNode]] )
             priorityNode = i;
         }
-        getFace(el,i,face );
+        getFace(el,3 - i,face );
         //if we have a free face, the opposite node is good to be fixed
         if(freeFaces.find(face) != freeFaces.end())
-          freeFace = i;
+          freeNode = i;
       }
       if(priorityNode > -1)
       {
         fixNode(el, priorityNode);
       }
-      else if(freeFace > -1)
+      else if(freeNode > -1)
       {
-        nodePriority[el[freeFace]] = currNodePriority;
-        fixNode(el, freeFace);
+        nodePriority[el[freeNode]] = currNodePriority;
+        fixNode(el, freeNode);
         --currNodePriority;
       }
       else //fix a random node
@@ -569,7 +567,7 @@ private:
     type0nodes_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
     type0faces_ = stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ;
     type1node_ = stevensonRefinement_ ? 1 : 2 ;
-    type1face_ = (  type1node_ );
+    type1face_ = ( 3 -  type1node_ );
   }
 
   //switch vertices 2,3 for all elements with elemIndex % 2
@@ -653,7 +651,7 @@ private:
     {
       //swap the node at the right position
       std::swap(el[node],el[type1node_]);
-      //also swap to other nodes to keep the volume positive
+      //also swap two other nodes to keep the volume positive
       //2 and 0 are never type1node_
       std::swap(el[(type1node_+1)%4],el[(type1node_+2)%4]);
     }
@@ -762,7 +760,7 @@ private:
           edge = {el[0],el[3]};
           break;
         case 2 :
-          edge = {el[0],el[2]};
+          edge = {el[0],el[3]};
           break;
         case 3 :
           edge =  {el[2],el[3]};
@@ -783,10 +781,10 @@ private:
           edge = {el[0],el[1]};
           break;
         case 2 :
-          edge = {el[0],el[type1node_ == 2 ? 3 :2]};
+          edge = {el[0],el[3]};
           break;
         case 3 :
-          edge = {el[1],el[type1node_ == 2 ? 3 :2]};
+          edge = {el[1],el[3]};
           break;
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
