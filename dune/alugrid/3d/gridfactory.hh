@@ -141,6 +141,8 @@ namespace Dune
       return bndPair;
     }
 
+    void markLongestEdge( std::vector< bool >& elementOrientation ) ;
+
   private:
     // return grid object
     virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
