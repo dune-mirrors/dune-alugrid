@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <assert.h>
 
-#include <dune/common/fieldmatrix.hh>
+#include <dune/common/fmatrix.hh>
 
 
 //Class to correct the element orientation to make bisection work in 3d
