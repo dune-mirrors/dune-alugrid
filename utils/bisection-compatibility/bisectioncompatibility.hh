@@ -155,7 +155,12 @@ public:
       getRefinementEdge(el, i, edge, types_[index]);
       std::cout << "[" << edge[0] << "," << edge[1] << "] ";
     }
-    std::cout << std::endl;
+    std::cout << " Type: " << types_[ index ] << " V1: ";
+    for (size_t i = 0; i < 4; ++i) {
+      if(!containedInV0_[ el [ i ] ] )
+        std::cout << el[i] << "," ;
+    }
+    std::cout <<  std::endl;
   }
 
   double edgeLength( const int e, const int edge ) const
