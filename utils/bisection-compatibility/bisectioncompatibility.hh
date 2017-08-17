@@ -264,7 +264,7 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(2);
+    calculatevV0(2,22);
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -973,6 +973,31 @@ private:
       case 2:
         {
           std::vector<int> numberOfAdjacentElements(maxVertexIndex_, 0);
+          for(auto&& neigh : neighbours_)
+          {
+            //On the boundary we want the 2d threshold (6)
+            if(neigh.second[1] == neigh.second[0])
+            {
+              for(unsigned int i =0; i < 3 ; ++i)
+              {
+                numberOfAdjacentElements[ neigh.first [ i ] ] ++;
+              }
+            }
+          }
+          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
+          {
+            int n = numberOfAdjacentElements[ i ];
+            if( n == 0) ;
+            else if( n < 6 )
+            {
+              containedInV0_[ i ] = false;
+            }
+            else
+            {
+              numberOfAdjacentElements[ i ] = threshold;
+            }
+          }
+          //for inner vertices, we want the standard threshold
           for(auto&& el : elements_)
           {
             for(unsigned int i =0; i < 4; ++i)
@@ -982,22 +1007,12 @@ private:
           }
           for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
           {
-            if(numberOfAdjacentElements[ i ] > threshold )
+            if(numberOfAdjacentElements[ i ] < threshold )
             {
               containedInV0_[ i ] = false;
             }
           }
-          for(auto&& neigh : neighbours_)
-          {
-            //On the boundary we want to have only type 0 nodes
-            if(neigh.second[1] == neigh.second[0])
-            {
-              for(unsigned int i =0; i < 3 ; ++i)
-              {
-                containedInV0_[ neigh.first[ i ] ] = true ;
-              }
-            }
-          }
+
         }
         break;
       case 3:
