@@ -304,25 +304,17 @@ public:
       {
         auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
 
-        //New orientation of newNeigh using element information
-        //this means reflected neighbor
-      //  newNeigh[nodeInEl] = neigh[nodeInNeigh];
-
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
         if( (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
           ++it;
-          //rotate newNeigh forward by 1
-      //    std::rotate(newNeigh.begin(), newNeigh.begin() + 1, newNeigh.end());
         }
         //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
         else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
-          //rotate newNeigh backwards by 1
-        //  std::rotate(newNeigh.rbegin(), newNeigh.rbegin() + 1, newNeigh.rend());
         }
         //else just insert after nodeInEl
         else
@@ -404,7 +396,7 @@ public:
       {
         if( newNeigh[i] != neigh[i] )
         {
-          auto neighIt = std::find(neigh.begin(),neigh.end(),newNeigh[i]);
+          auto neighIt = std::find(neigh.begin() + i,neigh.end(),newNeigh[i]);
           std::swap(*neighIt,neigh[i]);
           neighOrientation = ! neighOrientation;
         }
