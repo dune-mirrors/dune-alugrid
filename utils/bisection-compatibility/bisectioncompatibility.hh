@@ -10,9 +10,6 @@
 #include <assert.h>
 #include <random>
 
-#include <dune/common/fmatrix.hh>
-
-
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
 // Also implements checks for compatibility.
@@ -101,24 +98,6 @@ public:
       if(!checkFaceCompatibility(face)) return false;
     }
     return true;
-  }
-
-  double determinant( const int i ) const
-  {
-    Dune::FieldMatrix< double, 4, 3 > p( 0 );
-    for( int j=0; j<4; ++j )
-    {
-      p[ j ] = vertices_[ elements_[ i ][ j ] ].first;
-    }
-
-    Dune::FieldMatrix< double, 3, 3 > matrix( 0 );
-
-    for( int j=0; j<3; ++j )
-    {
-      matrix [j] = p[j+1] - p[0];
-    }
-
-    return matrix.determinant();
   }
 
   bool make6CompatibilityCheck()
