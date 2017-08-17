@@ -150,7 +150,7 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(2,22);
+    calculatevV0(1);
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -843,12 +843,21 @@ private:
       case 1:
         {
           std::fill(containedInV0_.begin(),containedInV0_.end(), false);
+          std::vector<int> numberOfAdjacentRefEdges(maxVertexIndex_, 0);
           //we assume that the edges have been sorted and
           //the refinement edge is, where it belongs
+          if(threshold == 15) threshold = 2;
           for(auto&& el : elements_)
           {
-            containedInV0_[ el[ type0nodes_[ 0 ] ] ] = true;
-            containedInV0_[ el[ type0nodes_[ 1 ] ] ] = true;
+            numberOfAdjacentRefEdges [ el [ type0nodes_[ 0 ] ] ] ++;
+            numberOfAdjacentRefEdges [ el [ type0nodes_[ 1 ] ] ] ++;
+          }
+          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
+          {
+            if(numberOfAdjacentRefEdges[ i ] > threshold )
+            {
+              containedInV0_[ i ] = true;
+            }
           }
         }
         break;
