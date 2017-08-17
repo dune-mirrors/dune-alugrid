@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include <random>
 
 #include <dune/common/fmatrix.hh>
 
@@ -77,8 +78,6 @@ public:
   {
     //build the information about neighbours
     buildNeighbors();
-    //calculate V0,V1
-    calculatevV0();
   }
 
   //check for strong compatibility
@@ -263,6 +262,9 @@ public:
   {
     // convert ordering of refinement edge to stevenson
     alberta2Stevenson();
+
+    //calculate the sets V0 and V1
+    calculatevV0(2);
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -940,11 +942,92 @@ private:
     }
   }
 
-  //This method is supposed to calculate V0 and V1
-  void calculatevV0()
+  /*!
+     \brief This method is supposed to calculate V0 and V1
+     \param variante :
+     1 means collect all longest edges into V0, rest in V1
+     2 means vertices with #(adjacent elements ) < threshold are in V1
+     3 means random vertices are in V1 (for test purposes)
+     everyhting else means V0 = all vertices
+  */
+  void calculatevV0(int variante = 0, int threshold = 15)
   {
-    //For now, everything is in V0
     containedInV0_.resize(maxVertexIndex_,true);
+    //For now, everything is in V0
+    switch (variante) {
+      case 1:
+        {
+          containedInV0_.resize(maxVertexIndex_,false);
+          //we assume that the edges have been sorted and
+          //the refinement edge is, where it belongs
+          for(auto&& el : elements_)
+          {
+            containedInV0_[ el[ type0nodes_[ 0 ] ] ] = true;
+            containedInV0_[ el[ type0nodes_[ 1 ] ] ] = true;
+          }
+        }
+        break;
+      case 2:
+        {
+          std::vector<int> numberOfAdjacentElements(maxVertexIndex_, 0);
+          for(auto&& el : elements_)
+          {
+            for(unsigned int i =0; i < 4; ++i)
+            {
+              numberOfAdjacentElements[ el [ i ] ] ++;
+            }
+          }
+          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
+          {
+            if(numberOfAdjacentElements[ i ] > threshold )
+            {
+              containedInV0_[ i ] = false;
+            }
+          }
+          for(auto&& neigh : neighbours_)
+          {
+            //On the boundary we want to have only type 0 nodes
+            if(neigh.second[1] == neigh.second[0])
+            {
+              for(unsigned int i =0; i < 3 ; ++i)
+              {
+                containedInV0_[ neigh.first[ i ] ] = true ;
+              }
+            }
+          }
+        }
+        break;
+      case 3:
+        {
+          std::default_random_engine generator;
+          std::uniform_int_distribution<int> distribution(1,6);
+          for(unsigned int i = 0; i < maxVertexIndex_; ++i)
+          {
+            int roll = distribution(generator);  // generates number in the range 1..6
+            std::cout << roll;
+            if(roll < 3)
+            {
+              containedInV0_[ i ] = false;
+            }
+          }
+        }
+        break;
+      default: ;
+    }
+    int sizeOfV1 = 0;
+    int sizeOfV0 = 0;
+    for(unsigned int i =0 ; i < maxVertexIndex_; ++i)
+    {
+      if( containedInV0_ [ i ] )
+      {
+        ++sizeOfV0;
+      }
+      else
+      {
+        ++sizeOfV1;
+      }
+    }
+    std::cout << "Size of V0: " << sizeOfV0 << ", Size of V1: " << sizeOfV1 << std::endl << std::endl;
   }
 
 }; //class bisectioncompatibility
