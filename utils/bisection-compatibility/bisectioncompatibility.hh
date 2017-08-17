@@ -838,7 +838,7 @@ private:
     switch (variante) {
       case 1:
         {
-          containedInV0_.resize(maxVertexIndex_,false);
+          std::fill(containedInV0_.begin(),containedInV0_.end(), false);
           //we assume that the edges have been sorted and
           //the refinement edge is, where it belongs
           for(auto&& el : elements_)
