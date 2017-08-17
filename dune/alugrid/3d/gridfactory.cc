@@ -331,7 +331,7 @@ namespace Dune
 
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation )
+  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation, const bool resortElements )
   {
     std::cerr << "Marking longest edge for initial refinement..." << std::endl;
 
@@ -372,22 +372,25 @@ namespace Dune
 
       // mark longest edge as refinement edge
 
-      // rotate element
-      if( shift[ edge ] > 0 )
+      if( resortElements )
       {
-        assert( element.size() == 4 );
-        const auto old( element );
-        const int s = shift[ edge ];
-        for( int j = 0; j < numVertices; ++j )
+        // rotate element
+        if( shift[ edge ] > 0 )
         {
-          element[ j ] = old[ (j+s) % numVertices ];
+          assert( element.size() == 4 );
+          const auto old( element );
+          const int s = shift[ edge ];
+          for( int j = 0; j < numVertices; ++j )
+          {
+            element[ j ] = old[ (j+s) % numVertices ];
+          }
         }
-      }
 
-      if( swapSuccessor[ edge ] > 0 )
-      {
-        std::swap( element[  swapSuccessor[ edge ] ],
-                   element[ (swapSuccessor[ edge ] + 1) % numVertices ] );
+        if( swapSuccessor[ edge ] > 0 )
+        {
+          std::swap( element[  swapSuccessor[ edge ] ],
+                     element[ (swapSuccessor[ edge ] + 1) % numVertices ] );
+        }
       }
 
       /*
@@ -439,7 +442,8 @@ namespace Dune
           maxLength = length;
         }
       }
-      assert( longest == 0 );
+      // assert( longest == 0 );
+      std::cout << "Longest edge = " << longest << "  " << edge << std::endl;
 #endif
 
     }
@@ -492,7 +496,7 @@ namespace Dune
 
         // mark longest edge for initial refinement
         // successive refinement is done via Newest Vertex Bisection
-        markLongestEdge( elementOrientation );
+        // markLongestEdge( elementOrientation );
 
         std::cout << "Making compatible" << std::endl;
         if( bisComp.type0Algorithm() )
@@ -501,6 +505,7 @@ namespace Dune
 
           // obtain new element sorting, orientations, and types
           bisComp.returnElements( elements_, elementOrientation, simplexTypes );
+          markLongestEdge( elementOrientation, false );
         }
         else
           std::cout << "Could not make compatible!" << std::endl;
