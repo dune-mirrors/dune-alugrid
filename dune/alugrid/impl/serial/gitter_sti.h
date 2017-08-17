@@ -681,7 +681,10 @@ namespace ALUGrid
         flagIs2d = 4,
         // if set this indicates that the starting type of a tetrahedron
         // is type 1 otherwise type 0, type 2 not supported yet
-        flagType1 = 5
+        flagType0 = 5,
+        // together with flagType0 determines type by simple
+        // addition
+        flagType1 = 6
       };
 
     protected:
@@ -940,11 +943,14 @@ namespace ALUGrid
       // return true if vertex is a fake vertex (ie vertex in a 2d grid that is not used)
       bool isFakeVertex () const { return isSet( flagNoCoarsen ); }
 
-      // set flag that indicates that element is type 1 initially
+      // set flag that indicates the initial element type
+      void setSimplexTypeFlagZero () { set( flagType0 ); }
+
+      // set flag that indicates  the initial element type
       void setSimplexTypeFlagOne () { set( flagType1 ); }
 
-      // return 0 when macro type was type 0 otherwise 1
-      unsigned char macroSimplexTypeFlag () const { return static_cast<unsigned char> (isSet( flagType1 )); }
+      // return macro type
+      unsigned char macroSimplexTypeFlag () const { return static_cast<unsigned char > (isSet( flagType1 ) ? 2 : isSet(flagType0) ? 1 : 0 ) ; }
     };
 
   public :
