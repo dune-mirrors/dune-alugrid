@@ -129,7 +129,7 @@ namespace Dune
       return faceId;
     }
 
-    static BndPair makeBndPair ( const FaceType &face, int id )
+    static BndPair makeBndPair ( const FaceType &face, const int id )
     {
       BndPair bndPair;
       for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -137,7 +137,7 @@ namespace Dune
         const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
         bndPair.first[ j ] = face[ i ];
       }
-      bndPair.second = 1;
+      bndPair.second = id;
       return bndPair;
     }
 
