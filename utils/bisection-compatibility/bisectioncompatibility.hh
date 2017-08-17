@@ -283,47 +283,32 @@ public:
       doneVertices[vtx] = true;
     }
 
-    doneElements[0] = true;
-    //add faces to activeFaceList, if not boundary
-    //at beginning if face contains ref Edge,
-    //else at the end
-    FaceElementType faceElement;
-    for(unsigned int i = 0; i < 4 ; ++i)
-    {
-      getFace(el0, i, faceElement);
-      //do nothing for boundary
-      if(faceElement.second[0] == faceElement.second[1])
-        continue;
-      auto it = std::find(activeFaceList.begin(),activeFaceList.end(), faceElement );
-      //if face is not in active faces, insert
-      if(it == activeFaceList.end())
-      {
-        //if face does not contain ref Edge
-        if(i != type0faces_[0] && i != type0faces_[1] )
-          activeFaceList.push_back(faceElement);
-        else
-          activeFaceList.push_front(faceElement);
-      }
-      else
-        activeFaceList.erase(it);
-    }
-
     //create the vertex priority List
     const int numberOfElements = elements_.size();
-    for(int counter = 1; counter < numberOfElements ; ++counter)
+    for(int counter = 0; counter < numberOfElements ; ++counter)
     {
-      //take element at first face from activeFaceList
-      faceElement = *activeFaceList.begin();
+      FaceElementType faceElement;
+      if(counter == 0)
+      {
+        FaceType face;
+        getFace(elements_[0], type0faces_[0], face);
+        faceElement = FaceElementType(std::make_pair( face , EdgeType( {0,0} ) ) );
+      }
+      else
+      {
+        //take element at first face from activeFaceList
+        faceElement = *activeFaceList.begin();
+      }
       //el has been worked on
       int elIndex = faceElement.second[0];
       //neigh is to be worked on
       int neighIndex = faceElement.second[1];
       if(!doneElements[elIndex])
       {
-        assert(doneElements[neighIndex]);
+        assert(doneElements[neighIndex] || counter == 0 );
         std::swap(elIndex, neighIndex);
       }
-      assert(!doneElements[neighIndex]);
+      assert(!doneElements[neighIndex] || counter == 0);
       doneElements[neighIndex] = true;
       ElementType el = elements_[elIndex];
       ElementType & neigh = elements_[neighIndex];
@@ -342,7 +327,7 @@ public:
 
         //New orientation of newNeigh using element information
         //this means reflected neighbor
-        newNeigh[nodeInEl] = neigh[nodeInNeigh];
+      //  newNeigh[nodeInEl] = neigh[nodeInNeigh];
 
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
@@ -351,14 +336,14 @@ public:
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
           ++it;
           //rotate newNeigh forward by 1
-          std::rotate(newNeigh.begin(), newNeigh.begin() + 1, newNeigh.end());
+      //    std::rotate(newNeigh.begin(), newNeigh.begin() + 1, newNeigh.end());
         }
         //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
         else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
         {
           it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
           //rotate newNeigh backwards by 1
-          std::rotate(newNeigh.rbegin(), newNeigh.rbegin() + 1, newNeigh.rend());
+        //  std::rotate(newNeigh.rbegin(), newNeigh.rbegin() + 1, newNeigh.rend());
         }
         //else just insert after nodeInEl
         else
@@ -368,7 +353,7 @@ public:
         vertexPriorityList.insert(it, neigh[nodeInNeigh]);
         doneVertices[ neigh [ nodeInNeigh ]  ] = true;
       }
-      else
+
       {
         //New orientation of newNeigh using list information
         auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
@@ -379,6 +364,15 @@ public:
         ++it1;
         auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
         newNeigh[2] = *it2;
+        for(unsigned int i =0 ; i < 4; ++i)
+        {
+          if(neigh[i] == newNeigh[0] || neigh[i] == newNeigh[1] || neigh[i] == newNeigh[2])
+          {
+            continue;
+          }
+          newNeigh[3] = neigh[i];
+          break;
+        }
       }
       //adjust type of newNeigh
       unsigned int type = 0;
@@ -387,7 +381,14 @@ public:
       {
         contained[i] = containedInV0_[newNeigh[i]];
       }
-      if(! ( contained[0] && contained[1] && contained[2] && contained[3] || ( !contained[0] && !contained[1] && !contained[2] && !contained[3] ) ) )
+      //if all are in V0 or all are V1
+      //we do nothing, set type to 0 and keep the order
+      if( ( contained[0] && contained[1] && contained[2] && contained[3] ) || ( !contained[0] && !contained[1] && !contained[2]  &&  !contained[3]  )  )
+      {
+        //do nothing
+        ;
+      }
+      else
       {
         ElementType V0Part(newNeigh);
         ElementType V1Part(newNeigh);
@@ -395,11 +396,13 @@ public:
         {
           if( contained[ i ] )
           {
-            V1Part.erase( std::find(V1Part.begin(),V1Part.end(),newNeigh[i]) );
+            auto it = std::find(V1Part.begin(),V1Part.end(),newNeigh[i]);
+            V1Part.erase( it );
           }
           else
           {
-            V0Part.erase( std::find(V0Part.begin(),V0Part.end(),newNeigh[i]) );
+            auto it = std::find(V0Part.begin(),V0Part.end(),newNeigh[i]);
+            V0Part.erase(it );
             ++type;
           }
         }
