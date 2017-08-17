@@ -160,13 +160,16 @@ public:
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
     std::vector<bool> doneVertices(maxVertexIndex_, false);
+    std::vector< std::list<unsigned int>::iterator > pointerIntoList(maxVertexIndex_);
 
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
-    for(int vtx : el0)
+    for(unsigned int i=0 ; i < 4 ; ++i)
     {
-      vertexPriorityList.push_back ( vtx );
-      doneVertices[vtx] = true;
+      int vtx = el0[ 3 - i ];
+      vertexPriorityList.push_front ( vtx );
+      doneVertices[ vtx ] = true;
+      pointerIntoList[ vtx ] = vertexPriorityList.begin();
     }
 
     //create the vertex priority List
@@ -209,25 +212,26 @@ public:
       //insertion of new vertex
       if( !doneVertices[ neigh [ nodeInNeigh ] ] )
       {
-        auto it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInEl]);
+        auto it = pointerIntoList [ el [ nodeInEl ] ];
 
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
         if( (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          it = pointerIntoList [ el [ nodeInNeigh ] ];
           ++it;
         }
         //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
         else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
         {
-          it = std::find(vertexPriorityList.begin(), vertexPriorityList.end(), el[nodeInNeigh]);
+          it = pointerIntoList [ el [ nodeInNeigh ] ];
         }
         //else just insert after nodeInEl
         else
         {
           ++it;
         }
+        pointerIntoList[ neigh [ nodeInNeigh ] ] = it ;
         vertexPriorityList.insert(it, neigh[nodeInNeigh]);
         doneVertices[ neigh [ nodeInNeigh ]  ] = true;
       }
