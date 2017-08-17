@@ -388,9 +388,9 @@ namespace Dune
       {
         std::swap( element[  swapSuccessor[ edge ] ],
                    element[ (swapSuccessor[ edge ] + 1) % numVertices ] );
-        //std::swap( elements_[ el ][ 1 ], elements_[ el ][ 2 ] );
       }
 
+      /*
       Dune::FieldMatrix< double, 4, 3 > p( 0 );
       Dune::FieldMatrix< double, 3, 3 > matrix( 0 );
 
@@ -422,6 +422,26 @@ namespace Dune
       }
       det = matrix.determinant();
       std::cout << "el = " << el << "  det = " << det << std::endl;
+      */
+
+#ifndef NDEBUG
+      // find longest edge, this should now be 0 for all elements
+      int longest = -1;
+      maxLength = 0;
+      for( int j = 0; j < 6; ++j )
+      {
+        const int vx0 = element[ edges[ j ][ 0 ] ];
+        const int vx1 = element[ edges[ j ][ 1 ] ];
+        double length = (vertices_[ vx0 ].first - vertices_[ vx1 ].first ).two_norm2();
+        if( length > maxLength )
+        {
+          longest = j;
+          maxLength = length;
+        }
+      }
+      assert( longest == 0 );
+#endif
+
     }
   }
 
@@ -456,10 +476,10 @@ namespace Dune
 
 
     bool make6 = true;
-    std::vector< bool > elementOrientation( elements_.size(), true );
+    std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
 
-    if(dimension == 3 && ALUGrid::refinementType == conforming )
+    if( dimension == 3 && ALUGrid::refinementType == conforming )
     {
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
       if(bisComp.make6CompatibilityCheck())
@@ -472,7 +492,7 @@ namespace Dune
 
         // mark longest edge for initial refinement
         // successive refinement is done via Newest Vertex Bisection
-        // markLongestEdge( elementOrientation );
+        markLongestEdge( elementOrientation );
 
         std::cout << "Making compatible" << std::endl;
         if( bisComp.type0Algorithm() )
@@ -671,7 +691,7 @@ namespace Dune
           if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
           {
             assert( !elementOrientation.empty() );
-            orientation = (elementOrientation[ elemIndex ]);
+            orientation = elementOrientation[ elemIndex ];
 
             assert( !simplexTypes.empty() );
             type = simplexTypes[ elemIndex ];
@@ -687,7 +707,11 @@ namespace Dune
       for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
       {
         const BndPair &boundaryId = *it;
-        ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
+        //ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) std::abs( boundaryId.second );
+        ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second ;
+
+        // only positive boundary id's are allowed
+        assert( bndType > 0 );
 
         if( elementType == hexa )
         {
