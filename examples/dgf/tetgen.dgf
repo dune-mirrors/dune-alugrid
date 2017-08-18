@@ -14,6 +14,10 @@ Interval
 1 1 1               % 5 cells in x, 2 in y, and 10 in z direction
 #
 
+GridParameter
+refinementedge longest
+#
+
 BOUNDARYDOMAIN
 default 1 
 #
