@@ -158,11 +158,10 @@ namespace ALUGrid
       os.readObject (v[2]);
       os.readObject (v[3]);
 
-      int readPoint = 0;
-      os.readObject( readPoint );
+      const signed char pointTransmitted = os.get();
 
       // the following makes only sense if information has been transmitted
-      if( readPoint != MacroGridMoverIF::POINTTRANSMITTED )
+      if( pointTransmitted != MacroGridMoverIF::POINTTRANSMITTED )
       {
         std::cerr << "ERROR (fatal): No point transmitted, building ghost cells impossible." << std::endl;
         abort();

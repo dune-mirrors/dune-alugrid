@@ -1,7 +1,9 @@
 #ifndef DUNE_ALUGRID_3D_GRIDVIEW_HH
 #define DUNE_ALUGRID_3D_GRIDVIEW_HH
 
-#include <dune/common/typetraits.hh>
+#include <type_traits>
+
+#include <dune/common/version.hh>
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/capabilities.hh>
@@ -23,7 +25,7 @@ namespace Dune
     typedef ALU3dLevelGridView< GridImp, pitype > GridViewImp;
 
     /** \brief type of the grid */
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename std::remove_const<GridImp>::type Grid;
 
     /** \brief type of the index set */
     typedef typename Grid :: Traits :: LevelIndexSet IndexSet;
@@ -49,8 +51,10 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
+#endif
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
       typedef typename Grid :: template Codim< cd > :: LocalGeometry
@@ -216,7 +220,7 @@ namespace Dune
     typedef ALU3dLeafGridView< GridImp, pitype > GridViewImp;
 
     /** \brief type of the grid */
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename std::remove_const<GridImp>::type Grid;
 
     /** \brief type of the index set */
     typedef typename Grid :: Traits :: LeafIndexSet IndexSet;
@@ -242,8 +246,10 @@ namespace Dune
       Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
       EntityPointer;
+#endif
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
       typedef typename Grid :: template Codim< cd > :: LocalGeometry

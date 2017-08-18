@@ -1,9 +1,10 @@
 #ifndef DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 #define DUNE_ALUGRID_STRUCTUREDGRIDFACTORY_HH
 
+#include <array>
+#include <memory>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/version.hh>
 
 #include <dune/common/classname.hh>
@@ -19,13 +20,11 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
 // include DGF parser implementation for YaspGrid
 #include <dune/grid/io/file/dgfparser/dgfyasp.hh>
-#else
-// include DGF parser implementation for SGrid
-#include <dune/grid/io/file/dgfparser/dgfs.hh>
-#endif
+
+// include DGF parser implementation for ALUGrid
+#include <dune/alugrid/dgf.hh>
 
 namespace Dune
 {
@@ -72,7 +71,6 @@ namespace Dune
       static const int dimension = Grid::dimension;
 
       typedef typename Grid::template Codim< 0 >::Entity Element;
-      typedef typename Grid::template Codim< 0 >::EntityPointer ElementPointer;
 
       typedef typename Element::Geometry::GlobalCoordinate VertexType;
 
@@ -103,6 +101,20 @@ namespace Dune
 
     public:
       template< class Entity >
+      double index( const Entity &entity ) const
+      {
+        alugrid_assert ( Entity::codimension == 0 );
+#ifdef USE_ALUGRID_SFC_ORDERING
+        // get center of entity's geometry
+        VertexType center = entity.geometry().center();
+        // get hilbert index in [0,1]
+        return sfc_.index( center );
+#else
+        return double(indexSet_.index( entity ));
+#endif
+      }
+
+      template< class Entity >
       int rank( const Entity &entity ) const
       {
         alugrid_assert ( Entity::codimension == 0 );
@@ -131,7 +143,6 @@ namespace Dune
         return pSize_-1;
       }
 
-    protected:
       void calculateElementCuts()
       {
         const size_t nElements = indexSet_.size( 0 );
@@ -196,7 +207,7 @@ namespace Dune
       std::vector< long int > elementCuts_ ;
 
 #ifdef USE_ALUGRID_SFC_ORDERING
-      // get element to hilbert index mapping
+      // get element to hilbert (or Z) index mapping
       SpaceFillingCurveOrdering< VertexType > sfc_;
 #endif
       const double maxIndex_ ;
@@ -228,9 +239,7 @@ namespace Dune
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
-#endif
 
       Dune::dgf::IntervalBlock intervalBlock( input );
       if( !intervalBlock.isactive() )
@@ -299,7 +308,7 @@ namespace Dune
       dgfstream << "#" << std::endl;
 
       Dune::GridPtr< Grid > grid( dgfstream, mpiComm );
-      return std::make_shared( grid.release() );
+      return SharedPtrType( grid.release() );
     }
 
     template < class int_t >
@@ -310,7 +319,7 @@ namespace Dune
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( mpiComm );
-      std::string name( "Cartesian ALUGrid via SGrid" );
+      std::string name( "Cartesian ALUGrid via YaspGrid" );
       return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
     }
 
@@ -318,11 +327,7 @@ namespace Dune
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       return entity.subEntities( codim );
-#else
-      return entity.template count< codim > ();
-#endif
     }
 
     template < class int_t >
@@ -335,7 +340,6 @@ namespace Dune
     {
       const int myrank = comm.rank();
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
       std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
@@ -343,14 +347,6 @@ namespace Dune
       CollectiveCommunication commSelf( MPIHelper :: getLocalCommunicator() );
       // create YaspGrid to partition and insert elements that belong to process directly
       CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
-#else
-      typedef SGrid< dim, dimworld, double > CartesianGridType ;
-      FieldVector< int, dim > dims;
-      for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
-
-      // create SGrid to partition and insert elements that belong to process directly
-      CartesianGridType sgrid( dims, lowerLeft, upperRight );
-#endif
 
       typedef typename CartesianGridType :: LeafGridView GridView ;
       typedef typename GridView  :: IndexSet  IndexSet ;
@@ -371,18 +367,30 @@ namespace Dune
 
       // map global vertex ids to local ones
       std::map< IndexType, unsigned int > vtxMap;
+      std::map< double, const Entity > sortedElementList;
 
       const int numVertices = (1 << dim);
       std::vector< unsigned int > vertices( numVertices );
 
-      int nextElementIndex = 0;
       const ElementIterator end = gridView.template end< 0 >();
       for( ElementIterator it = gridView.template begin< 0 >(); it != end; ++it )
       {
         const Entity &entity = *it;
+
         // if the element does not belong to our partition, continue
         if( partitioner.rank( entity ) != myrank )
           continue;
+
+        const double elIndex = partitioner.index( entity );
+        assert( sortedElementList.find( elIndex ) == sortedElementList.end() );
+        sortedElementList.insert( std::make_pair( elIndex, entity ) );
+      }
+
+      int nextElementIndex = 0;
+      const auto endSorted = sortedElementList.end();
+      for( auto it = sortedElementList.begin(); it != endSorted; ++it )
+      {
+        const Entity &entity = (*it).second;
 
         // insert vertices and element
         const typename Entity::Geometry geo = entity.geometry();
@@ -397,6 +405,7 @@ namespace Dune
             factory.insertVertex( geo.corner( i ), vtxId );
           vertices[ i ] = result.first->second;
         }
+
         factory.insertElement( entity.type(), vertices );
         const int elementIndex = nextElementIndex++;
 
@@ -411,11 +420,7 @@ namespace Dune
           if( isec.boundary() )
             factory.insertBoundary( elementIndex, faceNumber );
           // insert process boundary if the neighboring element has a different rank
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
           if( isec.neighbor() && (partitioner.rank( isec.outside() ) != myrank) )
-#else
-          if( isec.neighbor() && (partitioner.rank( *isec.outside() ) != myrank) )
-#endif
             factory.insertProcessBorder( elementIndex, faceNumber );
         }
       }

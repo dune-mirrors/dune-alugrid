@@ -166,8 +166,8 @@ namespace ALUGrid
       virtual std::pair< hface3_GEO *, bool >    InsertUniqueHface (int (&)[3]);
       virtual std::pair< hface4_GEO *, bool >    InsertUniqueHface (int (&)[4]);
 
-      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4] ) { return InsertUniqueTetra( v, 0 ); }
-      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], int);
+      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4] ) { return InsertUniqueTetra( v, SimplexTypeFlag(0,0) ); }
+      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], SimplexTypeFlag );
       virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]);
 
       virtual std::pair< periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], const Gitter::hbndseg::bnd_t (&)[2]);

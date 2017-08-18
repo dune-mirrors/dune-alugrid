@@ -1,0 +1,62 @@
+/** \mainpage DUNE-ALUGrid Documentation
+
+\section Introduction
+
+<a href="https://gitlab.dune-project.org/extensions/dune-alugrid">
+DUNE-ALUGrid
+</a>
+is a
+<a href="http://www.dune-project.org">
+Distributed and Unified Numerics Environment
+</a>
+module which implements the DUNE grid interface providing unstructured
+simplicial and cube grids.
+
+A detailed description of all the new features and some more
+details concerning the inner workings of DUNE-ALUGrid can be found
+in the paper
+<a href="http://arxiv.org/abs/1407.6954">
+<em>The DUNE-ALUGrid Module</em>
+</a>.
+This is the paper we would ask everyone to cite when using DUNE-ALUGrid.
+
+Download via git:
+git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
+
+New features and improvements include
+  - Conforming refinement for the 3D simplex grid,
+  - All grids are now parallel (both, 2D and 3D),
+  - Internal load balancing based on space filling curves making DUNE-ALUGrid
+    self contained also in parallel,
+  - Bindings for fully parallel partitioners using
+    <a href="http://www.cs.sandia.gov/Zoltan/">Zoltan</a>.
+  - Complete user control of the load balancing,
+  - Improved memory footprint.
+  .
+
+The old %ALUGrid version is deprecated and not supported anymore.
+We have removed the special grid types ALUConformGrid, ALUSimplexGrid, and ALUCubeGrid.
+Instead the type of the grid is always of the form
+Dune::ALUGrid< dimgrid, dimworld, eltype, refinetype, communicator >
+(where communicator has a default value).
+The values for eltype are cube, simplex and for refinetype the values are
+conforming, nonconforming defined in the DUNE namespace.
+The GRIDTYPE defines can still be used as before.
+
+The define HAVE_ALUGRID will not work correctly anymore. Since DUNE-ALUGrid is now
+a dune module the correct name for the define is HAVE_DUNE_ALUGRID.
+
+\section License
+
+The DUNE-ALUGrid library, headers and test programs are free open-source software,
+licensed under version 2 or later of the GNU General Public License.
+
+See the file 'LICENSE' for full copying permissions.
+
+\section Installation
+
+For installation instructions please see the
+<a href="http://www.dune-project.org/doc/installation-notes.html">
+DUNE website</a>.
+
+*/

@@ -107,6 +107,52 @@ namespace ALUGrid
 
   }; // end refinement rules
 
+  // Info class for creating tetrahedrons,
+  // bisection simplex type and orientation
+  class SimplexTypeFlag
+  {
+    static constexpr signed char inValid = -127 ;
+  public:
+    signed char _flag;
+
+    // default constructor
+    SimplexTypeFlag() : _flag( inValid ) {}
+
+    // constructor taking orientation and simplex type
+    explicit SimplexTypeFlag( const int orientation,
+                              const int type )
+    {
+      _flag = static_cast<signed char> ( type );
+      alugrid_assert( _flag <= 2 );
+      _flag += static_cast<signed char> (orientation) * 3 ;
+      assert( _flag < 6 );
+    }
+
+    signed char orientation () const
+    {
+      alugrid_assert( _flag != inValid );
+      return _flag / 3 ;
+    }
+
+    signed char type () const
+    {
+      alugrid_assert( _flag != inValid );
+      return _flag % 3 ;
+    }
+
+    template <class stream>
+    void write( stream& s ) const
+    {
+      s.put( _flag );
+    }
+
+    template <class stream>
+    void read( stream& s )
+    {
+      _flag = s.get();
+    }
+  };
+
   // #     #                                    #    ######
   // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######
   // #     #  #       #    #  #    #  #       # #    #     #  #    #  #       #
@@ -289,7 +335,7 @@ namespace ALUGrid
     return isValid( _r );
   }
 
-  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int t) const
+  inline RefinementRules :: Hface4Rule RefinementRules :: Hface4Rule :: rotate (int) const
   {
     switch (_r) {
     case nosplit :

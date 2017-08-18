@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDITERATOR_HH
 
 // System includes
+#include <type_traits>
 
 // Dune includes
 #include <dune/grid/common/grid.hh>
@@ -75,7 +76,7 @@ class ALU3dGridIntersectionIterator
 
   typedef ALU3dGridFaceInfo< dim, dimworld, GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename conditional<
+  typedef typename std::conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
@@ -103,10 +104,11 @@ public:
   typedef ALUTwists< (dim == 3 ) ? GridImp::elementType == tetra ? 3 : 4 : 2, dim-1 > Twists;
   typedef typename Twists::Twist Twist;
 
-  typedef typename GridImp::template Codim<0>::Entity             Entity;
-  typedef typename GridImp::template Codim<1>::Geometry           Geometry;
-  typedef typename GridImp::template Codim<1>::LocalGeometry      LocalGeometry;
-  typedef typename GridImp::template Codim<0>::EntityPointerImpl  EntityPointerImpl;
+  typedef typename GridImp::template Codim<0>::Entity         Entity;
+  typedef typename GridImp::template Codim<0>::EntityImp      EntityImp;
+
+  typedef typename GridImp::template Codim<1>::Geometry       Geometry;
+  typedef typename GridImp::template Codim<1>::LocalGeometry  LocalGeometry;
 
   typedef ALU3dGridIntersectionIterator< GridImp > ImplementationType;
   //! type of the intersection
@@ -130,10 +132,10 @@ public:
   void increment ();
 
   //! access neighbor
-  EntityPointerImpl outside() const;
+  EntityImp outside() const;
 
   //! access entity where iteration started
-  EntityPointerImpl inside() const;
+  EntityImp inside() const;
 
   //! return true if intersection is with boundary.
   bool boundary () const;
@@ -305,7 +307,7 @@ public ALU3dGridIntersectionIterator<GridImp>
 
   typedef ALU3dGridFaceInfo< dim, dimworld,  GridImp::elementType, Comm > FaceInfoType;
 
-  typedef typename conditional<
+  typedef typename std::conditional<
     tetra == GridImp::elementType,
     ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >,
     ALU3dGridGeometricFaceInfoHexa< dim, dimworld, Comm > >::type GeometryInfoType;
@@ -395,7 +397,7 @@ public:
   typedef typename InternalIteratorType :: val_t val_t;
 
   // here the items level will do
-  template <class GridImp, int codim>
+  template <class GridImp, int dim, int codim>
   class GetLevel
   {
   public:
@@ -408,8 +410,8 @@ public:
   };
 
   // level is not needed for codim = 0
-  template <class GridImp>
-  class GetLevel<GridImp,0>
+  template <class GridImp, int dim>
+  class GetLevel<GridImp,dim,0>
   {
   public:
     template <class ItemType>
@@ -419,8 +421,8 @@ public:
     }
   };
 
-  template <class GridImp>
-  class GetLevel<GridImp,3>
+  template <class GridImp, int dim>
+  class GetLevel<GridImp, dim, dim>
   {
   public:
     template <class ItemType>
@@ -468,7 +470,7 @@ protected:
     if( item.first )
     {
       it.updateEntityPointer( item.first ,
-          GetLevel<GridImp,codim>::getLevel(grid, *(item.first) , level) );
+          GetLevel<GridImp,GridImp::dimension,codim>::getLevel(grid, *(item.first) , level) );
     }
     else
       it.updateGhostPointer( *item.second );

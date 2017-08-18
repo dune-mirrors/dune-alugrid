@@ -639,9 +639,11 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
-    int orientation = 0;
-    os.readObject( orientation );
-    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, orientation);
+
+    SimplexTypeFlag elementType;
+    elementType.read( os );
+
+    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, elementType);
     // set unique element number
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs);
@@ -776,11 +778,10 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    int readPoint = 0;
-    os.readObject( readPoint );
+    const signed char pointTransmitted = os.get();
 
     MacroGhostInfoTetra * ghInfo = 0;
-    if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )
+    if( pointTransmitted == MacroGridMoverIF::POINTTRANSMITTED )
     {
       // read ghost data from stream in any case
       ghInfo = new MacroGhostInfoTetra( os );
@@ -798,7 +799,7 @@ namespace ALUGrid
     else
     {
       // create normal bnd face, and make sure that no Point was send
-      alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
+      alugrid_assert ( pointTransmitted == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
       InsertUniqueHbnd3 (v, b, ldbVertexIndex, master );
     }
@@ -825,11 +826,10 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    int readPoint = 0;
-    os.readObject( readPoint );
+    const signed char pointTransmitted = os.get();
 
     MacroGhostInfoHexa* ghInfo = 0;
-    if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )
+    if( pointTransmitted == MacroGridMoverIF::POINTTRANSMITTED )
     {
       // read ghost data from stream
       ghInfo = new MacroGhostInfoHexa(os);
@@ -847,7 +847,7 @@ namespace ALUGrid
     else
     {
       // create normal bnd face, and make sure that no Point was send
-      alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
+      alugrid_assert ( pointTransmitted == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
       InsertUniqueHbnd4 (v, b, ldbVertexIndex, master );
     }

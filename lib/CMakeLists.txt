@@ -12,17 +12,22 @@ dune_add_library(dunealugrid
   _DUNE_TARGET_OBJECTS:parallel_
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc
-  ADD_LIBS ${ZLIB_LIBRARIES})
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
 
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )
 
 # zoltan dependencies
-if( ${ZOLTAN_FOUND} )
-target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
-set_property(TARGET dunealugrid APPEND PROPERTY
-             INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
+if(ZOLTAN_FOUND)
+  target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
+  set_property(TARGET dunealugrid APPEND PROPERTY
+               INCLUDE_DIRECTORIES "${ZOLTAN_INCLUDE_DIRS}")
+endif()
+# zlib dependencies
+if(ZLIB_FOUND)
+  target_link_libraries(dunealugrid ${ZLIB_LIBRARIES})
+  set_property(TARGET dunealugrid APPEND PROPERTY
+               INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
 endif()
 
 # register alu grid to all pkg flags

@@ -108,15 +108,15 @@ namespace ALUGrid
     // to behave like stringstream
     ////////////////////////////////////
     // put char
-    inline void put (const char a)  { write(a); }
+    inline void put (const signed char a)  { write(a); }
 
     // put char with checking buffer size (reserve size before usage)
-    inline void putNoChk (const char a)  { writeUnchecked(a); }
+    inline void putNoChk (const signed char a)  { writeUnchecked(a); }
 
     // get char
-    inline char get ()
+    inline signed char get ()
     {
-      char a;
+      signed char a;
       read(a);
       return a;
     }
@@ -537,13 +537,13 @@ namespace ALUGrid
 
   // streaming operators for ObjectStream ignoring space
   template< class Traits >
-  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const StandardWhiteSpace_t& space )
+  inline BasicObjectStream< Traits > &operator << ( BasicObjectStream< Traits > &os, const StandardWhiteSpace_t& )
   {
     return os;
   }
 
   // streaming operators for ObjectStream ignoring space
-  inline std::ostream& operator << ( std::ostream& os, const StandardWhiteSpace_t& space )
+  inline std::ostream& operator << ( std::ostream& os, const StandardWhiteSpace_t& )
   {
     os << char(' ');
     return os;

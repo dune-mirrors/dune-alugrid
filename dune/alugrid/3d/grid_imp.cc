@@ -202,9 +202,6 @@ namespace Dune
   alu_inline
   ALU3dGrid< dim, dimworld, elType, Comm >::~ALU3dGrid ()
   {
-    delete communications_;
-    delete vertexProjection_;
-    //delete bndPrj_;
     if( bndVec_ )
     {
       const size_t bndSize = bndVec_->size();
@@ -212,21 +209,7 @@ namespace Dune
       {
         delete (*bndVec_)[i];
       }
-      delete bndVec_; bndVec_ = 0;
     }
-
-    for(unsigned int i=0; i<levelIndexVec_.size(); i++) delete levelIndexVec_[i];
-    delete globalIdSet_; globalIdSet_ = 0;
-    delete leafIndexSet_; leafIndexSet_ = 0;
-    delete sizeCache_; sizeCache_ = 0;
-
-    /*
-    if(myGrid().container().iterators_attached())
-    {
-      dwarn << "WRANING: There still exists instances of iterators giving access to this grid which is about to be removed! in: " << __FILE__ << " line: " << __LINE__ << std::endl;
-    }
-    */
-    delete mygrid_; mygrid_ = 0;
   }
 
 
@@ -333,17 +316,17 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
 
     typedef typename IteratorType :: val_t val_t ;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
 
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
-      IMPLElementType * elem = 0;
+      HElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
+        elem = item.first;
       else if( item.second )
-        elem = static_cast<IMPLElementType *> (item.second->getGhost().first);
+        elem = item.second->getGhost().first;
 
       alugrid_assert ( elem );
 
@@ -363,29 +346,34 @@ namespace Dune
     // make sure maxLevel is the same on all processes ????
     //alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));
 
-    if(sizeCache_) delete sizeCache_;
-    sizeCache_ = new SizeCacheType (*this);
+    sizeCache_.reset( new SizeCacheType (*this) );
 
     // unset up2date before recalculating the index sets,
-    // becasue they will use this feature
+    // because they will use this feature
     leafVertexList_.unsetUp2Date();
-    for(size_t i=0; i<MAXL; ++i)
+
+    vertexList_.resize( maxlevel_+1 );
+    levelEdgeList_.resize( maxlevel_+1 );
+
+    for(int i=0; i<=maxlevel_; ++i)
     {
       vertexList_[i].unsetUp2Date();
       levelEdgeList_[i].unsetUp2Date();
     }
 
-    if( comm().size() > 1 )
     {
       //here dimension has to be 3, as this is used ALU internally
-      //  was    for( int i = 0; i < dimension; ++i )
+      //  was for( int i = 0; i < dimension; ++i )
       for( int i = 0; i < 3; ++i )
       {
         ghostLeafList_[i].unsetUp2Date();
-        for(size_t l=0; l<MAXL; ++l) ghostLevelList_[i][l].unsetUp2Date();
+        ghostLevelList_[i].resize( maxlevel_+1 );
+        for(int l=0; l<=maxlevel_; ++l)
+          ghostLevelList_[i][l].unsetUp2Date();
       }
     }
 
+    levelIndexVec_.resize( maxlevel_ + 1 );
     // update all index set that are already in use
     for(size_t i=0; i<levelIndexVec_.size(); ++i)
     {
@@ -414,9 +402,12 @@ namespace Dune
   const typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::LeafIndexSet &
   ALU3dGrid< dim, dimworld, elType, Comm >::leafIndexSet () const
   {
-    if(!leafIndexSet_) leafIndexSet_ = new LeafIndexSetImp ( *this,
-                                                             this->template leafbegin<0>(),
-                                                             this->template leafend<0>() );
+    if(!leafIndexSet_)
+    {
+      leafIndexSet_.reset( new LeafIndexSetImp ( *this,
+                                                 this->template leafbegin<0>(),
+                                                 this->template leafend<0>() ) );
+    }
     return *leafIndexSet_;
   }
 
@@ -426,8 +417,6 @@ namespace Dune
   alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::globalRefine ( int refCount )
   {
-    alugrid_assert ( (refCount + maxLevel()) < MAXL );
-
     for( int count = refCount; count > 0; --count )
     {
       const LeafIteratorType end = leafend();
@@ -506,29 +495,31 @@ namespace Dune
     IteratorType w (*this, maxLevel(), nlinks() );
 
     typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< elType, Comm >::IMPLElementType IMPLElementType;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
 
     for (w.first () ; ! w.done () ; w.next ())
     {
       val_t & item = w.item();
 
       alugrid_assert ( item.first || item.second );
-      IMPLElementType * elem = 0;
+      HElementType * elem = 0;
       if( item.first )
-        elem = static_cast<IMPLElementType *> (item.first);
+      {
+        elem = item.first;
+      }
       else if( item.second )
       {
-        elem = static_cast<IMPLElementType *>( item.second->getGhost().first );
-        alugrid_assert ( elem );
+        elem = item.second->getGhost().first;
       }
+      alugrid_assert ( elem );
+
       if (elem->hasBeenRefined())
       {
         elem->resetRefinedTag();
         // on bisected grids its possible that not only leaf elements where added so
         // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
-        while (elem->up())
+        while ((elem = elem->up()))
         {
-          elem = static_cast<IMPLElementType *>(elem->up());
           elem->resetRefinedTag();
         }
       }
@@ -585,10 +576,8 @@ namespace Dune
   alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::restore( std::istream& stream )
   {
-    // if grid exists delete first
-    if( mygrid_ ) delete mygrid_;
     // create new grid from stream
-    mygrid_ = createALUGrid( stream );
+    mygrid_.reset( createALUGrid( stream ) );
 
     // check for grid
     if( ! mygrid_ )

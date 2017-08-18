@@ -430,9 +430,10 @@ namespace ALUGrid
       int vertexTwist( const int, const int ) const;
       int calculateFace2Twist( const int vx, const myhface_t* ) const;
       int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
+
       // the element type is obtained from the level of the element
       // under the assumption that on level 0 all elements have type 0
-      unsigned char elementType () const { return (_lvl % 3); }
+      unsigned char elementType () const { return ((this->macroSimplexTypeFlag() + _lvl) % 3); }
 
       // sets the new _vxMap for this tetra
       void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int );
@@ -557,8 +558,7 @@ namespace ALUGrid
                     myhface_t *,int,innertetra_t *up, int nChild, double vol);
       // constructor for macro elements
       TetraTop (int,myhface_t *,int,myhface_t *,int,
-                    myhface_t *,int,myhface_t *,int,
-                int );
+                    myhface_t *,int,myhface_t *,int, SimplexTypeFlag );
       virtual ~TetraTop ();
       inline innertetra_t * up ();
       inline const innertetra_t * up () const;
@@ -577,7 +577,7 @@ namespace ALUGrid
       inline int nChild () const;
       inline double volume () const;
 
-      int orientation () const { return ( _vxMap[ 2 ] == 3 ) ? 0 : 1; }
+      SimplexTypeFlag simplexTypeFlag () const { return SimplexTypeFlag( int((_vxMap[ 2 ] == 3 ) ? 0 : 1), this->macroSimplexTypeFlag()); }
     public :
       myrule_t getrule () const;
       myrule_t requestrule () const;

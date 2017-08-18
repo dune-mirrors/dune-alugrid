@@ -1,8 +1,6 @@
 #ifndef DUNE_ALUGRID_ITERATOR_IMP_CC
 #define DUNE_ALUGRID_ITERATOR_IMP_CC
 
-#include <dune/geometry/genericgeometry/topologytypes.hh>
-
 #include "alu3dinclude.hh"
 
 #include "geometry.hh"
@@ -231,7 +229,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointerImpl
+inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
 ALU3dGridIntersectionIterator<GridImp>::outside () const
 {
   alugrid_assert ( neighbor() );
@@ -240,25 +238,25 @@ ALU3dGridIntersectionIterator<GridImp>::outside () const
   if( connector_.ghostBoundary() )
   {
     // create entity pointer with ghost boundary face
-    return EntityPointerImpl( connector_.boundaryFace() );
+    return EntityImp( connector_.boundaryFace() );
   }
 
   alugrid_assert ( &connector_.outerEntity() );
-  return EntityPointerImpl( connector_.outerEntity() );
+  return EntityImp( connector_.outerEntity() );
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::EntityPointerImpl
+inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
 ALU3dGridIntersectionIterator<GridImp>::inside () const
 {
   if( ImplTraits :: isGhost( ghost_ ) )
   {
-    return EntityPointerImpl( *ghost_ );
+    return EntityImp( *ghost_ );
   }
   else
   {
     // make sure that inside is not called for an end iterator
-    return EntityPointerImpl( connector_.innerEntity() );
+    return EntityImp( connector_.innerEntity() );
   }
 }
 
@@ -348,11 +346,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     Coordinate xInside = geometryInInside().global( local );
     Coordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
     const ElementGeometry insideGeom = inside().geometry();
-#else
-    const ElementGeometry insideGeom = inside().dereference().geometry();
-#endif
     insideGeom.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
     outerNormal *= insideGeom.integrationElement( xInside );
     if(connector_.conformanceState() == FaceInfoType::REFINED_OUTER) outerNormal *=0.5;
@@ -387,8 +381,8 @@ type () const
 {
   return GeometryType(
       GridImp::elementType == tetra ?
-        GenericGeometry :: SimplexTopology< dim-1 > :: type :: id :
-        GenericGeometry :: CubeTopology   < dim-1 > :: type :: id,
+        Impl :: SimplexTopology< dim-1 > :: type :: id :
+        Impl :: CubeTopology   < dim-1 > :: type :: id,
           dim-1 );
 }
 

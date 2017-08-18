@@ -298,7 +298,7 @@ namespace ALUGrid
       virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoTetra* );
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
       virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostBuilder&, MacroGhostInfoHexa* );
-      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int);
+      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag );
       virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);
 
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);

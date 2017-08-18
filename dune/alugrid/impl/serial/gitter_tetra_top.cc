@@ -386,8 +386,10 @@ namespace ALUGrid
           // get face neighbour
           neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
 
-          // check refineBalance
-          bool a = neigh.first->refineBalance (r, neigh.second);
+          bool a = true;
+          if(!r.bisection())
+            // check refineBalance
+            a = neigh.first->refineBalance (r, neigh.second);
 
           if (a)
           {
@@ -404,7 +406,20 @@ namespace ALUGrid
               //for bisection we want no hanging nodes
               if(r.bisection())
               {
-                neigh.first->refineBalance (r, neigh.second);
+                //the neighbour may have changed
+                neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+                while(neigh.first->nbLeaf())
+                {
+                  neigh.first->refineBalance (r, neigh.second);
+                  neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+                }
+                for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
+                {
+                  // assert faces are leaf
+                  alugrid_assert(f->leaf());
+                  alugrid_assert(f->nb.front().first->nbLeaf());
+                  alugrid_assert(f->nb.rear().first->nbLeaf());
+                }
               }
             }
             else
@@ -603,6 +618,7 @@ namespace ALUGrid
     // es am Aufrufer die Verfeinerung nochmals anzuforern.
 
     alugrid_assert (b == 0) ;
+
     alugrid_assert (this->leaf ()) ;
     if ( ! this->bndNotifyBalance (r,b) )
     {
@@ -619,8 +635,12 @@ namespace ALUGrid
     else
     {
       myhface_t& face (*(myhface(0)));
+
       // refine face according to rule
       face.refineImmediate (r) ;
+
+      // std::cout << this->level() << " " << face.level() << " " << this->getrule() << " "  << face.getrule() << " " << r <<  " " << &face ;
+
       if(r == myrule_t::iso4)
       {
         // Der Rand verfeinert unbedingt die anliegende Fl"ache und dann
@@ -693,6 +713,8 @@ namespace ALUGrid
         // Der nachfolgende Test bezieht sich auf die Verfeinerungssituation
         // der Fl"ache, da getrule () auf myhface (0)->getrule () umgeleitet
         // ist.
+        // if(this->getrule () != myrule_t::nosplit)
+        //std::cout << this->level() << " " << face.level() << " " << this->getrule() << " " << face.getrule() << " " << r << " " <<   &face;
 
         alugrid_assert (this->getrule () == myrule_t::nosplit) ;
         switch (r) {
@@ -819,7 +841,7 @@ namespace ALUGrid
             myhface_t * f1, int t1, // face, twist
             myhface_t * f2, int t2, // face, twist
             myhface_t * f3, int t3, // face, twist
-            int orientation )
+            SimplexTypeFlag simplexType )
     : A (f0, t0, f1, t1, f2, t2, f3, t3)
     , _bbb (0), _up(0)
     , _inner( 0 )
@@ -835,15 +857,22 @@ namespace ALUGrid
     // set element's index and 2d flag if necessary
     this->setIndexAnd2dFlag( indexManager() );
 
+    // currently, only type 0 and 1 are supported on init
+    // more change needs to be done on DuneIndexProvider to support type 2
+    alugrid_assert( simplexType.type() < 2 );
+
+    // if simplex type is not 0 then we assume type 1
+    if( simplexType.type() > 0 )
+      this->setSimplexTypeFlagOne() ;
+
     // initial mapping is has to be adjusted according
     // to the make-6 algorithm
     // NOTE: the _vxMap numbers only affect the bisection refinement
-    const int mod = 1 - orientation ;
+    const int mod = 1 - simplexType.orientation() ;
     _vxMap[ 0 ] = 0;
     _vxMap[ 1 ] = 1;
     _vxMap[ 2 ] = 2 + mod ;
     _vxMap[ 3 ] = 3 - mod ;
-    // std::cout << "Create Tetra with orientation " << orientation << std::endl;
   }
 
   template< class A > TetraTop < A >::~TetraTop ()
@@ -2170,23 +2199,14 @@ namespace ALUGrid
         // if there is a loop in the mesh
         if(r != getrule ())
         {
+          alugrid_assert( getrule() == myrule_t::nosplit);
           refineImmediate (r) ;
-          if(r.bisection())
-          {
-            TetraTop < A > * child=this->down() ;
-            //if children are nonconforming
-            for(int i =0; i < 2; ++i )
-            {
-              if(child->markForConformingClosure())
-                child->refine();
-              child = child->next();
-            }
-          }
         }
+        _req = myrule_t::nosplit ;
         return true ;
       }
+      _req = myrule_t::nosplit ;
     }
-    _req = myrule_t::nosplit ;
     return true ;
   }
 
@@ -2510,8 +2530,8 @@ namespace ALUGrid
         return myhface(i)->subface(j) ;
       if ( twist(i) == 2 ||  twist(i) == -2 ||  twist(i) == -3 )
         return myhface(i)->subface(!j) ;
-        std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-        return 0;
+      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
+      return 0;
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )

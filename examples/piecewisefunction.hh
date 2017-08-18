@@ -614,12 +614,7 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-      std::shared_ptr< This >
-#else
-      This*
-#endif
-        ptr( new This( data, i, "data" ) );
+      std::shared_ptr< This > ptr( new This( data, i, "data" ) );
       vtkWriter.addCellData( ptr );
     }
   }
@@ -630,25 +625,15 @@ struct VTKData< PiecewiseFunction< GridView, Dune::FieldVector<double,dimRange> 
      * is merely a wrapper for the Data class */
     for( int i = 0; i < dimRange; ++i )
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-      std::shared_ptr< This >
-#else
-      This*
-#endif
-        ptr( new This( data, i, "data" ) );
+      std::shared_ptr< This > ptr( new This( data, i, "data" ) );
       vtkWriter.addCellData( ptr );
     }
   }
   //! add rank function for visualization of the partitioning
   static void addPartitioningData( const int rank, Dune::VTKSequenceWriter< GridView > &vtkWriter )
   {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
     vtkWriter.addCellData( std::shared_ptr< VolumeData< GridView > > ( new VolumeData< GridView >() ) );
     vtkWriter.addCellData( std::shared_ptr< PartitioningData< GridView > > ( new PartitioningData< GridView >(rank) ) );
-#else
-    vtkWriter.addCellData( new VolumeData< GridView >() );
-    vtkWriter.addCellData( new PartitioningData< GridView >(rank) );
-#endif
   }
 
 private:

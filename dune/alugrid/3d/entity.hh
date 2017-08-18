@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDENTITY_HH
 
 // System includes
+#include <type_traits>
 
 // Dune includes
 #include <dune/grid/common/entity.hh>
@@ -45,7 +46,7 @@ class ALU3dGridEntity :
 public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
 {
   // default just returns level
-  template <class GridType, int cdim>
+  template <class GridType, int dm, int cdim>
   struct GetLevel
   {
     template <class ItemType>
@@ -59,7 +60,7 @@ public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
   // this the maximum of levels of elements that have this vertex as sub
   // entity
   template <class GridType>
-  struct GetLevel<GridType,dim>
+  struct GetLevel<GridType,dim,dim>
   {
     template <class ItemType>
     static int getLevel(const GridType & grid, const ItemType & item)
@@ -92,7 +93,9 @@ public:
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   //! typedef of my type
   typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
@@ -136,6 +139,11 @@ public:
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 
+  int subIndex ( int i, unsigned int codim ) const
+  {
+    DUNE_THROW( NotImplemented, "Method subIndex for higher codimension not implemented, yet." );
+  }
+
   // return reference to internal item
   const ItemType& getItem () const { return *(static_cast<ItemType *> (seed_.item())); }
 
@@ -155,7 +163,7 @@ protected:
   //! convert ALUGrid partition type to dune partition type
   PartitionType convertBndId(const HItemType & item) const ;
 
-  //! the cuurent geometry
+  //! the current geometry
   mutable GeometryImpl geo_;
 
   //! the information necessary to make sense of this entity
@@ -185,8 +193,8 @@ template<int dim, class GridImp>
 class ALU3dGridEntity<0,dim,GridImp>
 : public EntityDefaultImplementation<0,dim,GridImp,ALU3dGridEntity>
 {
-  static const int dimworld = remove_const< GridImp >::type::dimensionworld;
-  static const ALU3dGridElementType elementType = remove_const< GridImp >::type::elementType;
+  static const int dimworld = std::remove_const< GridImp >::type::dimensionworld;
+  static const ALU3dGridElementType elementType = std::remove_const< GridImp >::type::elementType;
 
   typedef typename GridImp::MPICommunicatorType Comm;
 
@@ -239,13 +247,18 @@ public:
   typedef LevelIntersectionIteratorWrapper<GridImp>  ALU3dGridLevelIntersectionIteratorType;
 
   typedef typename GridImp::template Codim<0>::Entity        Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   template <int cd>
   struct Codim
   {
     typedef typename GridImp::Traits::template Codim< cd >::Twists::Twist Twist;
+    typedef typename GridImp::template Codim< cd >::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   };
 
   //! typedef of my type
@@ -288,7 +301,7 @@ public:
   //! Provide access to mesh entity i of given codimension. Entities
   //!  are numbered 0 ... count<cc>()-1
   template< int codim >
-  typename Codim< codim >::EntityPointer subEntity ( int i ) const;
+  typename Codim< codim >::Entity subEntity ( int i ) const;
 
   template< int codim >
   typename Codim< codim >::Twist twist ( int i ) const;
@@ -298,7 +311,7 @@ public:
 
   //! Inter-level access to father element on coarser grid.
   //! Assumes that meshes are nested.
-  EntityPointer father () const;
+  Entity father () const;
 
   //! returns true if father entity exists
   bool hasFather () const
@@ -499,13 +512,8 @@ public:
   ThisType & operator = (const ThisType & org);
 
   //! dereferencing
-  Entity
-//#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,4)
-    & // need reference here for older versions
-//#endif
-  dereference () const
+  Entity& dereference () const
   {
-
     // don't dereference empty entity pointer
     alugrid_assert ( seed_.isValid() );
     alugrid_assert ( seed_.item() == & entityImp().getItem() );

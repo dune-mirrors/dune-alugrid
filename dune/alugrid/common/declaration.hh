@@ -1,5 +1,5 @@
-#ifndef DUNE_ALUGRID_FORWARDDECLARATION
-#define DUNE_ALUGRID_FORWARDDECLARATION
+#ifndef DUNE_ALUGRID_COMMON_DECLARATION_HH
+#define DUNE_ALUGRID_COMMON_DECLARATION_HH
 
 #define ALU3DGRID_PARALLEL HAVE_MPI
 
@@ -13,9 +13,18 @@ namespace Dune
 {
 
   //! \brief basic element types for ALUGrid
-  enum ALUGridElementType { simplex, cube };
+  enum ALUGridElementType
+  {
+    simplex, //!< use only simplex elements (i.e., triangles or tetrahedra)
+    cube     //!< use only cube elements (i.e., quadrilaterals or hexahedra)
+  };
+
   //! \brief available refinement types for ALUGrid
-  enum ALUGridRefinementType { conforming, nonconforming };
+  enum ALUGridRefinementType
+  {
+    conforming,   //!< use conforming bisection refinement
+    nonconforming //!< use non-conforming (red) refinement
+  };
 
   //! \brief type of class for specialization of serial ALUGrid (No_Comm as communicator)
   struct ALUGridNoComm
@@ -36,39 +45,24 @@ namespace Dune
 #endif
   } ;
 
-/**
-   \brief [<em> provides \ref Dune::Grid </em>]
-   \brief grid with support for quadrilateral and hexahedral grid (template parameter cube)
-   and simplicial meshes (template parameter simplex) in 2d and 3d.
-   @ingroup GridImplementations
-   @ingroup ALUGrid
-
-   The ALUGrid implements the Dune GridInterface for 2d quadrilateral and 3d hexahedral
-   as well as 2d triangular and  3d tetrahedral meshes.
-   This grid can be locally adapted (non-conforming and conforming bisection)
-   and used in parallel computations using dynamic load balancing.
-
-   @note
-   (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
-
-   \li Available Implementations
-        - quadrilateral and hexahedral elements only nonconforming refinement
-          - Dune::ALUGrid< 2, 2, cube, nonconforming >
-          - Dune::ALUGrid< 2, 3, cube, nonconforming >
-          - Dune::ALUGrid< 3, 3, cube, nonconforming >
-        - simplicial elements and nonconforming refinement
-          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
-          - Dune::ALUGrid< 2, 3, simplex, nonconforming >
-          - Dune::ALUGrid< 3, 3, simplex, nonconforming >
-        - simplicial elements and bisection refinement
-          - Dune::ALUGrid< 2, 2, simplex, conforming >
-          - Dune::ALUGrid< 2, 3, simplex, conforming >
-          - Dune::ALUGrid< 3, 3, simplex, conforming > (work in progress)
-
-   \note template parameter Comm defaults to MPI_Comm, if MPI is available, No_Comm  otherwise.
-
-   For installation instructions see http://www.dune-project.org/external_libraries/install_alugrid.html .
-*/
+  /**
+   * \brief unstructured parallel implementation of the DUNE grid interface
+   *
+   * %ALUGrid implements the DUNE grid interface for 2D quadrilateral and 3D
+   * hexahedral as well as 2D triangular and 3D tetrahedral meshes.
+   * This grid can be locally adapted (non-conforming and conforming bisection)
+   * and used in parallel computations using dynamic load balancing.
+   *
+   * \tparam  dim         dimension of the grid (2 or 3)
+   * \tparam  dimworld    dimension of the surrounding space (dim <= dimworld <=3)
+   * \tparam  elType      type of elements (Dune::simplex or Dune::cube)
+   * \tparam  refineType  type of refinement (Dune::conforming or Dune::nonconforming)
+   * \tparam  Comm        type of communicator (Dune::ALUGridMPIComm or Dune::ALUGridNoComm)
+   *
+   * \note For cube elements, only nonconforming refinement is available.
+   * \note The template parameter Comm defaults to ALUGridMPIComm, if MPI is available.
+   *       Otherwise it defaults to ALUGridNoComm.
+   */
   template <int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType,
             class Comm =
 #if ALU3DGRID_PARALLEL
@@ -83,4 +77,4 @@ namespace Dune
   template <int dim, int dimw, ALUGridElementType elType, class Comm >
   struct ALUGridBaseGrid ;
 }
-#endif // #ifndef DUNE_ALUGRID_FORWARDDECLARATION
+#endif // #ifndef DUNE_ALUGRID_COMMON_DECLARATION_HH

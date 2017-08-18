@@ -39,8 +39,11 @@ namespace ALUGrid
   public:
     class Communication;
 
+    // select serial geometric realizations
     typedef Gitter::Geometric Geometric;
-    typedef GitterDuneImpl::Objects  Objects;
+
+    // select parallel objects from GitterBasisPll
+    typedef GitterBasisPll::ObjectsPll Objects;
 
     // constructor taking filename containing the macro grid
     GitterDunePll ( const int dim, const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )

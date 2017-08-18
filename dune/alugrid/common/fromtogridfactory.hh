@@ -126,14 +126,8 @@ namespace Dune
               factory.insertBoundary( elementIndex, faceNumber );
 
             // for parallel grids we can check if we are at a process border
-#if DUNE_VERSION_NEWER(DUNE_GRID,3,0)
-            const double isParallel = true;
-#else
-            const double isParallel = Capabilities::isParallel< FromGrid > :: v;
-#endif //!DUNE_VERSION_NEWER(DUNE_GRID,3,0)
-            if( isParallel &&
-                intersection.neighbor() &&
-                (*intersection.outside()).partitionType() != InteriorEntity )
+            if( intersection.neighbor() &&
+                intersection.outside().partitionType() != InteriorEntity )
             {
               // insert process boundary if the neighboring element has a different rank
               factory.insertProcessBorder( elementIndex, faceNumber );
@@ -176,15 +170,17 @@ namespace Dune
       return convert( fromGrid, cellData, ordering_ );
     }
 
+    template <class FromGrid>
+    Grid* convert( const FromGrid& fromGrid )
+    {
+      std::vector<int> dummy(0);
+      return convert( fromGrid, dummy, ordering_ );
+    }
   protected:
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       return entity.subEntities( codim );
-#else
-      return entity.template count< codim > ();
-#endif
     }
   };
 
