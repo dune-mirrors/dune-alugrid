@@ -239,6 +239,7 @@ namespace Dune
 
   protected:
     bool generateALUGrid( const ALUGridElementType eltype,
+                          const ALUGridRefinementType refinementtype,
                           std::istream &file,
                           MPICommunicatorType communicator,
                           const std::string &filename );
@@ -401,6 +402,7 @@ namespace Dune
   template < class G >
   inline bool DGFBaseFactory< G > ::
   generateALUGrid( const ALUGridElementType eltype,
+                   const ALUGridRefinementType refinementtype,
                    std::istream &file, MPICommunicatorType communicator,
                    const std::string &filename )
   {
@@ -448,7 +450,7 @@ namespace Dune
           DUNE_THROW( InvalidStateException, "parallel DGF file could not opend" );
         }
         assert( newfile );
-        return generateALUGrid(eltype,newfile,communicator,filename);
+        return generateALUGrid(eltype, refinementtype, newfile, communicator, filename);
       }
     }
 
@@ -555,7 +557,7 @@ namespace Dune
 #endif
 
     // pass longest edge marking (default is off)
-    if( parameter.markLongestEdge() )
+    if( ( refinementtype == conforming ) && parameter.markLongestEdge() )
       factory_.setLongestEdgeFlag();
 
     if( !parameter.dumpFileName().empty() )
@@ -569,7 +571,7 @@ namespace Dune
   inline bool DGFGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
     ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    return BaseType :: generateALUGrid( eltype, file, communicator, filename );
+    return BaseType :: generateALUGrid( eltype, refinementtype, file, communicator, filename );
   }
 
 
