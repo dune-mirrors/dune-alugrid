@@ -15,7 +15,7 @@ Interval
 #
 
 GridParameter
-refinementedge longest
+%refinementedge longest
 #
 
 BOUNDARYDOMAIN
