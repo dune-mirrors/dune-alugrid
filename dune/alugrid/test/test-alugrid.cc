@@ -10,7 +10,7 @@
 #define DUNE_INTERFACECHECK
 #endif
 
-#define NO_2D
+// #define NO_2D
 // #define NO_3D
 
 #include <iostream>
