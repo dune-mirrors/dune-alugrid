@@ -496,7 +496,10 @@ namespace Dune
 
         // mark longest edge for initial refinement
         // successive refinement is done via Newest Vertex Bisection
-        // markLongestEdge( elementOrientation );
+        if( markLongestEdge_ )
+        {
+          markLongestEdge( elementOrientation );
+        }
 
         std::cout << "Making compatible" << std::endl;
         if( bisComp.type0Algorithm() )

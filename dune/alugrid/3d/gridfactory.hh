@@ -335,6 +335,9 @@ namespace Dune
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
+    //! set longest edge marking for biscetion grids (default is off)
+    void setLongestEdgeFlag () { markLongestEdge_ = true ; }
+
   private:
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
     void doInsertBoundary ( int element, int face, int boundaryId );
@@ -391,6 +394,8 @@ namespace Dune
 
     typename SpaceFillingCurveOrderingType :: CurveType curveType_;
     std::vector< unsigned int > ordering_;
+
+    bool markLongestEdge_;
   };
 
 
@@ -495,7 +500,8 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >
@@ -510,7 +516,8 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >
@@ -525,7 +532,8 @@ namespace Dune
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >
