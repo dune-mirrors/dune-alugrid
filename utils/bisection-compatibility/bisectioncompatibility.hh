@@ -75,6 +75,7 @@ public:
   {
     //build the information about neighbours
     buildNeighbors();
+    containedInV0_.resize(maxVertexIndex_,true);
   }
 
   //check for strong compatibility
@@ -135,7 +136,7 @@ public:
     }
     std::cout << " Type: " << types_[ index ] << " V1: ";
     for (size_t i = 0; i < 4; ++i) {
-      if(!containedInV0_[ el [ i ] ] )
+      if( ! containedInV0_[ el [ i ] ] )
         std::cout << el[i] << "," ;
     }
     std::cout <<  std::endl;
@@ -150,7 +151,7 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(1);
+    calculatevV0(2,25);
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -825,6 +826,8 @@ private:
       for(int i=0; i < 4 ; ++i)
         maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
+    //add one  be able to access last vertex
+    maxVertexIndex_++;
   }
 
   /*!
@@ -837,7 +840,6 @@ private:
   */
   void calculatevV0(int variante = 0, int threshold = 15)
   {
-    containedInV0_.resize(maxVertexIndex_,true);
     //For now, everything is in V0
     switch (variante) {
       case 1:
