@@ -683,9 +683,7 @@ namespace ALUGrid
         flagIs2d = 4,
         // if set this indicates that the starting type of a tetrahedron
         // is type 1 otherwise type 0, type 2 not supported yet
-        flagType1 = 5,
-        // isNew flag to tag newly created elements
-        isNew = 6
+        flagType1 = 5
       };
 
     protected:
@@ -1073,23 +1071,20 @@ namespace ALUGrid
     // class with all extensions for helement
     class Dune_helement : public DuneIndexProvider
     {
-    public:
+    protected:
       // abuse ref to refined tag
       using DuneIndexProvider::ref;
       Dune_helement ()
       {
-        // set is new element flag
-        DuneIndexProvider::set( DuneIndexProvider::isNew );
+        // mark as new element by increasing reference counter
+        ++ ref;
       }
     public:
       // reset the _refinedTag to false
-      void resetRefinedTag()
-      {
-        DuneIndexProvider::unset( DuneIndexProvider::isNew );
-      }
+      void resetRefinedTag() { ref.reset(); }
 
       // true if element was refined this adaptation step
-      bool hasBeenRefined () const { return DuneIndexProvider::isSet( DuneIndexProvider::isNew ); }
+      bool hasBeenRefined () const { return ref.positive(); }
     };
 
 
