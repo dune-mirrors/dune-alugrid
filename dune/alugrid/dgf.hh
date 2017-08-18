@@ -554,6 +554,10 @@ namespace Dune
     MPI_Allreduce( &addMissingBoundariesLocal, &addMissingBoundariesGlobal, 1, MPI_INT, MPI_MAX, communicator );
 #endif
 
+    // pass longest edge marking (default is off)
+    if( parameter.markLongestEdge() )
+      factory_.setLongestEdgeFlag();
+
     if( !parameter.dumpFileName().empty() )
       grid_ = factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() );
     else
