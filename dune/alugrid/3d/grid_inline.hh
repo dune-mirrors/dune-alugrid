@@ -24,30 +24,30 @@ namespace Dune
                   const DuneBoundaryProjectionType *bndPrj,
                   const DuneBoundaryProjectionVector *bndVec,
                   const ALUGridRefinementType refinementType )
-    : mygrid_( 0 )
+    : mygrid_()
     , maxlevel_( 0 )
     , coarsenMarked_( 0 )
     , refineMarked_( 0 )
     , geomTypes_() //dim+1, std::vector<GeometryType>(1) )
     , hIndexSet_ (*this)
-    , globalIdSet_( 0 )
+    , globalIdSet_()
     , localIdSet_( *this )
-    , levelIndexVec_(MAXL,0) , leafIndexSet_(0)
-    , sizeCache_ ( 0 )
+    , levelIndexVec_( 1, nullptr ) , leafIndexSet_()
+    , sizeCache_ ()
     , lockPostAdapt_( false )
     , bndPrj_ ( bndPrj )
-    , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : 0 )
-    , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : 0 )
+    , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : nullptr )
+    , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : nullptr )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
   {
-    // generate goemetry storage and geometry type vector
+    // generate geometry storage and geometry type vector
     makeGeometries();
 
     // check macro grid file for keyword
     checkMacroGridFile( macroTriangFilename );
 
-    mygrid_ = createALUGrid( macroTriangFilename );
+    mygrid_.reset( createALUGrid( macroTriangFilename ) );
     alugrid_assert ( mygrid_ );
 
     dverb << "************************************************" << std::endl;
@@ -332,8 +332,6 @@ namespace Dune
   void ALU3dGrid< dim, dimworld, elType, Comm >
     ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
-    alugrid_assert ( (refCount + maxLevel()) < MAXL );
-
     for( int count = refCount; count > 0; --count )
     {
       const LeafIteratorType end = leafend();
@@ -430,7 +428,7 @@ namespace Dune
     loadBalance();
 
     // free memory by reinitializing the grid
-    mygrid_ = GitterImplType :: compress( mygrid_ );
+    mygrid_.reset( GitterImplType :: compress( mygrid_.release() ) );
 
     // update all internal structures
     updateStatus();

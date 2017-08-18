@@ -8,8 +8,8 @@
 
 #include <dune/common/fvector.hh>
 
-#include "problem-transport.hh"
 #include "problem.hh"
+#include "problem-transport.hh"
 
 template< int dimD >
 struct BallData
@@ -135,7 +135,7 @@ struct BallModel : public TransportModel<dimD>
 
   double fixedDt () const
   {
-    return 0.01;
+    return 0.01 / 0.15;
   }
 
   /** \copydoc TransportProblem::indicator */

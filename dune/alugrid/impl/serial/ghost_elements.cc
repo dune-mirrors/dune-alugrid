@@ -110,7 +110,7 @@ namespace ALUGrid
     mgb.InsertNewUniqueVertex(px[0],px[1],px[2],oppVerts[0]);
 
     // InsertUniqueHexa gets the global vertex numbers
-    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->orientation() ).first;
+    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->simplexTypeFlag() ).first;
     assert( ghost );
 
     // increase refcounter since ghost element can exist more than once
@@ -133,7 +133,8 @@ namespace ALUGrid
   //nicht mit -1 durchmultiplizieren zu muessen fuer anderen Geist
   MacroGhostTetra::
   MacroGhostTetra( MacroGhostBuilder & mgb, MacroGhostInfoTetra * allp,
-      Gitter::Geometric::tetra_GEO * orig, alucoord_t (&vec)[3] , double sign) :
+                   Gitter::Geometric::tetra_GEO * orig,
+                   alucoord_t (&vec)[3] , double sign) :
     _ghInfoPtr(allp),
     _ghostPair( (GhostElement_t *)0, -1)
   {
@@ -150,7 +151,7 @@ namespace ALUGrid
                                 orig->myvertex(i)->ident()   );
     }
 
-    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->orientation() ).first;
+    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->simplexTypeFlag() ).first;
     assert( ghost );
     // increase refcounter since ghost element can exist more than once
     ghost->ref++;

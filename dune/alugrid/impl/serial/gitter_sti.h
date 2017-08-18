@@ -466,16 +466,16 @@ namespace ALUGrid
         throw stiExtender_t::AccessPllException();
       }
 
-      virtual void attachElement2( const int destination, const int face ) { abort(); }
+      virtual void attachElement2( const int /* destination */, const int /* face */ ) { abort(); }
 
       // default implementation does nothing
       // this method is overloaded for parallel periodic macro elements
-      virtual void attachPeriodic( const int destination ) {}
+      virtual void attachPeriodic( const int /* destination */ ) {}
 
       // return ldbVertexIndex (default is -1), overloaded in Tetra and Hexa
       virtual int firstLdbVertexIndex() const { return -1; }
       // return ldbVertexIndex, overloaded in TetraPllMacro and HexaPllMacro
-      virtual int otherLdbVertexIndex( const int faceIndex ) const { return firstLdbVertexIndex(); }
+      virtual int otherLdbVertexIndex( const int /* faceIndex */ ) const { return firstLdbVertexIndex(); }
     };
 
     class vertex ;
@@ -681,8 +681,11 @@ namespace ALUGrid
         // if set item belongs to 2d grid (same as edge coarsen which is only set for
         // edges, whereas flagIs2d is only set for elements and faces)
         flagIs2d = 4,
+        // if set this indicates that the starting type of a tetrahedron
+        // is type 1 otherwise type 0, type 2 not supported yet
+        flagType1 = 5,
         // isNew flag to tag newly created elements
-        isNew = 5
+        isNew = 6
       };
 
     protected:
@@ -734,6 +737,22 @@ namespace ALUGrid
       {
         // write my index
         os.write( ((const char *) & _idx ), sizeof(int) );
+      }
+
+      // write index to stream (i.e. ostream or ObjectStream)
+      template <class ostream_t>
+      void doBackupFlags( ostream_t& os ) const
+      {
+        // write flags
+        os.put( _flags );
+      }
+
+      // read index from stream (i.e. istream or ObjectStream)
+      template <class istream_t>
+      void doRestoreFlags( istream_t& is )
+      {
+        // read flags
+        _flags = is.get();
       }
 
       // read index from stream (i.e. istream or ObjectStream)
@@ -932,6 +951,12 @@ namespace ALUGrid
 
       // return true if vertex is a fake vertex (ie vertex in a 2d grid that is not used)
       bool isFakeVertex () const { return isSet( flagNoCoarsen ); }
+
+      // set flag that indicates that element is type 1 initially
+      void setSimplexTypeFlagOne () { set( flagType1 ); }
+
+      // return 0 when macro type was type 0 otherwise 1
+      unsigned char macroSimplexTypeFlag () const { return static_cast<unsigned char> (isSet( flagType1 )); }
     };
 
   public :
@@ -954,12 +979,12 @@ namespace ALUGrid
 
       // backup and restore index of vertices, should be overloaded in
       // derived classes, because some need to go down the hierarchiy
-      virtual void backupIndex  (std::ostream & os ) const { backupIndexErr(); }
-      virtual void restoreIndex (std::istream & is , RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (std::ostream & ) const { backupIndexErr(); }
+      virtual void restoreIndex (std::istream &, RestoreInfo& ) { restoreIndexErr(); }
 
       // same methods for ObjectStream
-      virtual void backupIndex  ( ObjectStream& os ) const { backupIndexErr(); }
-      virtual void restoreIndex ( ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  ( ObjectStream& ) const { backupIndexErr(); }
+      virtual void restoreIndex ( ObjectStream&, RestoreInfo& ) { restoreIndexErr(); }
 
     };
 
@@ -992,11 +1017,11 @@ namespace ALUGrid
 
       // backup and restore index of vertices, should be overloaded in
       // derived classes, because some need to go down the hierarchiy
-      virtual void backupIndex  (std::ostream & os ) const { backupIndexErr(); }
-      virtual void restoreIndex (std::istream & is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (std::ostream & ) const { backupIndexErr(); }
+      virtual void restoreIndex (std::istream &, RestoreInfo& ) { restoreIndexErr(); }
 
-      virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
-      virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (ObjectStream& ) const { backupIndexErr(); }
+      virtual void restoreIndex (ObjectStream&, RestoreInfo& ) { restoreIndexErr(); }
 
       // return true if an edge can be coarsened
       virtual bool canCoarsen() const = 0;
@@ -1036,11 +1061,11 @@ namespace ALUGrid
 
       // backup and restore index of vertices, should be overloaded in
       // derived classes, because some need to go down the hierarchiy
-      virtual void backupIndex  (std::ostream & os ) const { backupIndexErr(); }
-      virtual void restoreIndex (std::istream & is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (std::ostream & ) const { backupIndexErr(); }
+      virtual void restoreIndex (std::istream &, RestoreInfo& ) { restoreIndexErr(); }
 
-      virtual void backupIndex  (ObjectStream& os ) const { backupIndexErr(); }
-      virtual void restoreIndex (ObjectStream& is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (ObjectStream& ) const { backupIndexErr(); }
+      virtual void restoreIndex (ObjectStream&, RestoreInfo& ) { restoreIndexErr(); }
 
     };
 
@@ -1131,14 +1156,15 @@ namespace ALUGrid
       virtual int resetRefinementRequest () = 0;
       virtual int tagForBallRefinement (const alucoord_t (&)[3],double,int) = 0;
       virtual int test () const = 0;
-       int leaf () const;
+      int leaf () const;
 
-      virtual int orientation () const { return 0; }
+      // return element type and orientation
+      virtual SimplexTypeFlag simplexTypeFlag() const { return SimplexTypeFlag(); }
 
       virtual void setGhostBoundaryIds () {}
 
       //! default implementation of ldbVertexIndex calls this method on father
-      //! the assumtion here is, that this method is overloaded approporiately
+      //! the assumption here is, that this method is overloaded appropriately
       //! on the corresponding parallel macro elements
       virtual int ldbVertexIndex () const
       {
@@ -1209,10 +1235,10 @@ namespace ALUGrid
 
       // backup and restore index of vertices, should be overloaded in
       // derived classes, because some need to go down the hierarchiy
-      virtual void backupIndex  (std::ostream & os ) const { backupIndexErr(); }
-      virtual void restoreIndex (std::istream & is, RestoreInfo& ) { restoreIndexErr(); }
+      virtual void backupIndex  (std::ostream &) const { backupIndexErr(); }
+      virtual void restoreIndex (std::istream &, RestoreInfo& ) { restoreIndexErr(); }
 
-      virtual void backupIndex  (ObjectStream & os ) const { backupIndexErr(); }
+      virtual void backupIndex  (ObjectStream &) const { backupIndexErr(); }
       virtual void restoreIndex (ObjectStream &, RestoreInfo& ) { restoreIndexErr(); }
 
       // also in hasFace
@@ -1333,7 +1359,7 @@ namespace ALUGrid
       // info will be filled with the new ghost cells and local face to the
       // internal boundary, default just does nothing
       // implementation see gitter_{tetra,hexa}_top_pll.h
-      virtual void splitGhost ( GhostChildrenInfo & info ) {}
+      virtual void splitGhost ( GhostChildrenInfo&  ) {}
 
       // if ghost element exists, then ghost is coarsened, when bnd is coarsened
       virtual void coarseGhost () {}
@@ -2425,7 +2451,7 @@ namespace ALUGrid
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0;
         virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) = 0;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], int) = 0;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag) = 0;
 
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
         virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
@@ -2582,7 +2608,7 @@ namespace ALUGrid
     // this method just calls adapt
     virtual bool adaptWithoutLoadBalancing();
     // adaptation with callback functionality
-    virtual bool duneAdapt ( AdaptRestrictProlongType & arp );
+    virtual bool duneAdapt ( AdaptRestrictProlongType & );
     virtual bool loadBalance ( GatherScatterType* gs = 0 ) { return false; }
     virtual void refineGlobal ();
     virtual void markForBallRefinement(const alucoord_t (&)[3],double,int);

@@ -1,24 +1,17 @@
-set(TESTS adapt
-          backuprestore
-          sizes
-          threadsafety)
+set(TESTS
+  adapt
+  backuprestore
+  sizes
+  threadsafety
+)
 
 # copy data to build source to make tests work
-file(COPY alugrid.cfg grids
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY alugrid.cfg grids DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(sizes sizes.cc)
-add_executable(adapt adapt.cc)
-add_executable(backuprestore backuprestore.cc)
-add_executable(threadsafety threadsafety.cc)
-
-foreach(i ${TESTS})
-  # target_link_libraries(${i} ${ZLIB_LIBRARIES})
-  # libdunalugrid needs symbols from zoltan. Therefore we need to link
-  # to Zoltan afterwards.
-  dune_target_enable_all_packages(${i})
-endforeach(i ${TESTS})
-# We do not want want to build the tests during make all
-# but just build them on demand
-# We also don't want to build them when make test is called
-# add_dependencies(${_test_target} ${TESTS} ${COMPILE_XFAIL_TESTS})
+# dune 2.5 and higher
+#if(NOT (("${DUNE_COMMON_VERSION_MAJOR}" STREQUAL "2")
+#           AND ("${DUNE_COMMON_VERSION_MINOR}" STREQUAL "4")))
+#  foreach(TEST ${TESTS})
+#    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
+#  endforeach()
+#endif()

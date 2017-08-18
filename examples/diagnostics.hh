@@ -253,7 +253,7 @@ namespace Dune {
 #endif
             file << "# Elements / timestep: sum    max    min    average  " << std::endl;
             file << avgTimes[ size-1 ] << "  " << maxTimes[ size-1 ] << "  " << minTimes[ size-1 ] << "  " << ((size_t)averageElements) << std::endl;
-            file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     ALUGrid-MEMORY (MB)" << std::endl ;
+            file << "# SOLVE          COMM         ADAPT            LB         TIMESTEP     RESTPROL    ALUGrid-MEMORY (MB)" << std::endl ;
 
             // multiply avgTimes with maxThhreads since the sum would be to small otherwise
             for(size_t i=0; i<size; ++i)
@@ -307,17 +307,20 @@ namespace Dune {
                        const double adaptTime,
                        const double lbTime,
                        const double timeStepTime,
+                       const double restProlTime,
                        const std::vector<double>& extraSteps = std::vector<double>() )
     {
-      std::vector< double > times( 5 + extraSteps.size(), 0.0 );
-      times[ 0 ] = dgOperatorTime ;
-      times[ 1 ] = odeSolve ;
-      times[ 2 ] = adaptTime ;
-      times[ 3 ] = lbTime ;
-      times[ 4 ] = timeStepTime ;
+      std::vector< double > times( 6 + extraSteps.size(), 0.0 );
+      int pos = 0;
+      times[ pos++ ] = dgOperatorTime ;
+      times[ pos++ ] = odeSolve ;
+      times[ pos++ ] = adaptTime ;
+      times[ pos++ ] = lbTime ;
+      times[ pos++ ] = timeStepTime ;
+      times[ pos++ ] = restProlTime;
       for(size_t i=0; i<extraSteps.size(); ++i)
       {
-        times[ i+5 ] = extraSteps[ i ];
+        times[ i+pos ] = extraSteps[ i ];
       }
 
       maxDofs_ = std::max( double(maxDofs), maxDofs_ );

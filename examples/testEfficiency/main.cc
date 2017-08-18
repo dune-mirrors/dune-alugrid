@@ -245,6 +245,7 @@ void method ( int problem, int startLvl, int maxLvl,
                          adaptation.adaptationTime(),  // time for adaptation
                          adaptation.loadBalanceTime(), // time for load balance
                          overallTimer.elapsed(),       // time step overall time
+                         0.0, // restProlTime in adaptation
                          getMemoryUsage() );                   // memory usage
 
     }
@@ -320,7 +321,7 @@ catch( const std::exception &e )
   std::cout << "STL ERROR: " << e.what() << std::endl;
   return 1;
 }
-#if ! DUNE_VERSION_NEWER(DUNE_COMMON,3,0)
+#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,5)
 catch( const Dune::Exception &e )
 {
   std::cout << "DUNE ERROR: " << e << std::endl;

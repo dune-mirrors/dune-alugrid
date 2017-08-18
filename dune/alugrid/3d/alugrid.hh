@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU3DGRID_ALUGRID_HH
 #define DUNE_ALU3DGRID_ALUGRID_HH
 
+#include <type_traits>
+
 // 3d version
 #include <dune/alugrid/common/capabilities.hh>
 #include <dune/alugrid/3d/indexsets.hh>
@@ -20,28 +22,9 @@ namespace Dune
   template <class Comm>
   static const char* ALUGridParallelSerial()
   {
-    return ( Conversion< Comm, ALUGridNoComm > :: sameType ) ? "serial" : "parallel";
+    return ( std::is_same< Comm, ALUGridNoComm >::value ) ? "serial" : "parallel";
   }
 
-  /**
-   (see ALUGrid homepage: http://www.mathematik.uni-freiburg.de/IAM/Research/alugrid/)
-
-   \li Available Implementations
-        - quadrilateral and hexahedral elements only nonconforming refinement
-          - Dune::ALUGrid< 2, 2, cube, nonconforming >
-          - Dune::ALUGrid< 2, 3, cube, nonconforming >
-          - Dune::ALUGrid< 3, 3, cube, nonconforming >
-        - simplicial elements and nonconforming refinement
-          - Dune::ALUGrid< 2, 2, simplex, nonconforming >
-          - Dune::ALUGrid< 2, 3, simplex, nonconforming >
-          - Dune::ALUGrid< 3, 3, simplex, nonconforming >
-        - simplicial elements and bisection refinement
-          - Dune::ALUGrid< 2, 2, simplex, conforming >
-          - Dune::ALUGrid< 2, 3, simplex, conforming >
-          - Dune::ALUGrid< 3, 3, simplex, conforming > (work in progress)
-
-   \note template parameter Comm defaults to ALUGridMPIComm, if MPI is available, ALUGridNoComm otherwise.
-  */
   template< int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
   class ALUGrid
   : public ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid
@@ -207,12 +190,6 @@ namespace Dune
     }
 
   private:
-    friend class Conversion< This , HasObjectStream > ;
-    friend class Conversion< const This, HasObjectStream > ;
-
-    friend class Conversion< This, HasHierarchicIndexSet > ;
-    friend class Conversion< const This, HasHierarchicIndexSet > ;
-
     template< class > friend class ALU3dGridFactory;
 
     //! Copy constructor should not be used
@@ -225,4 +202,4 @@ namespace Dune
 } //end  namespace Dune
 
 #undef alu_inline
-#endif
+#endif // #ifndef DUNE_ALU3DGRID_ALUGRID_HH

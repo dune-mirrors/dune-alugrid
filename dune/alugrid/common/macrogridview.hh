@@ -1,9 +1,11 @@
 // -*- tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=8 sw=2 sts=2:
-#ifndef DUNE_MACROGRIDVIEW_HH
-#define DUNE_MACROGRIDVIEW_HH
+#ifndef DUNE_ALUGRID_MACROGRIDVIEW_HH
+#define DUNE_ALUGRID_MACROGRIDVIEW_HH
 
-#include <dune/common/typetraits.hh>
+#include <type_traits>
+
+#include <dune/common/version.hh>
 #include <dune/common/exceptions.hh>
 
 #include <dune/grid/common/capabilities.hh>
@@ -21,7 +23,7 @@ namespace Dune
     typedef MacroGridView< GridImp, pitype > GridViewImp;
 
     /** \brief type of the grid */
-    typedef typename remove_const<GridImp>::type Grid;
+    typedef typename std::remove_const<GridImp>::type Grid;
 
     /** \brief type of the index set */
     typedef typename Grid :: Traits :: LevelIndexSet IndexSet;
@@ -44,8 +46,11 @@ namespace Dune
         Iterator;
 
       typedef typename Grid :: Traits :: template Codim< cd > :: Entity Entity;
+
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid :: Traits :: template Codim< cd > :: EntityPointer
         EntityPointer;
+#endif
 
       typedef typename Grid :: template Codim< cd > :: Geometry Geometry;
       typedef typename Grid :: template Codim< cd > :: LocalGeometry

@@ -1,12 +1,15 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_HH
 #define DUNE_ALU3DGRID_FACTORY_HH
 
+#include <algorithm>
+#include <array>
 #include <map>
+#include <memory>
 #include <vector>
 
-#include <dune/common/array.hh>
 #include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
+#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -15,6 +18,8 @@
 
 #include <dune/alugrid/common/transformation.hh>
 #include <dune/alugrid/3d/alugrid.hh>
+
+#include <dune/alugrid/common/hsfc.hh>
 
 namespace Dune
 {
@@ -45,7 +50,9 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
+#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     };
 
     typedef unsigned int VertexId;
@@ -76,12 +83,13 @@ namespace Dune
 
     // type of vertex coordinates put into the factory
     typedef FieldVector< ctype, dimensionworld > VertexInputType;
+    typedef SpaceFillingCurveOrdering< VertexInputType > SpaceFillingCurveOrderingType;
 
     // type of vertex coordinates stored inside the factory
     typedef FieldVector< ctype, 3 > VertexType;
 
     typedef std::vector< unsigned int > ElementType;
-    typedef array< unsigned int, numFaceCorners > FaceType;
+    typedef std::array< unsigned int, numFaceCorners > FaceType;
 
     struct FaceLess;
 
@@ -98,14 +106,39 @@ namespace Dune
 
     typedef std::vector< Transformation > FaceTransformationVector;
 
-    // copy vertex numbers and store smalled #dimension ones
-    void copyAndSort ( const std::vector< unsigned int > &vertices, FaceType &faceId ) const
+    static void copy ( const std::initializer_list< unsigned int > &vertices, FaceType &faceId )
     {
-      std::vector<unsigned int> tmp( vertices );
-      std::sort( tmp.begin(), tmp.end() );
+      std::copy_n( vertices.begin(), faceId.size(), faceId.begin() );
+    }
 
-      // copy only the first dimension vertices (enough for key)
-      for( size_t i = 0; i < faceId.size(); ++i ) faceId[ i ] = tmp[ i ];
+    static FaceType makeFace ( const std::vector< unsigned int > &vertices )
+    {
+      if( vertices.size() != (dimension == 2 ? 2 : numFaceCorners) )
+        DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+
+      FaceType faceId;
+      if( dimension == 2 )
+      {
+        if( elementType == tetra )
+          copy( { 0, vertices[ 1 ]+1, vertices[ 0 ]+1 }, faceId );
+        else if( elementType == hexa )
+          copy( { 2*vertices[ 0 ], 2*vertices[ 1 ], 2*vertices[ 0 ]+1, 2*vertices[ 1 ]+1 }, faceId );
+      }
+      else if( dimension == 3 )
+        std::copy_n( vertices.begin(), numFaceCorners, faceId.begin() );
+      return faceId;
+    }
+
+    static BndPair makeBndPair ( const FaceType &face, int id )
+    {
+      BndPair bndPair;
+      for( unsigned int i = 0; i < numFaceCorners; ++i )
+      {
+        const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
+        bndPair.first[ j ] = face[ i ];
+      }
+      bndPair.second = 1;
+      return bndPair;
     }
 
   private:
@@ -269,12 +302,7 @@ namespace Dune
     insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
       std::vector< unsigned int > vertices;
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
       const typename Codim< 0 >::Entity& in = intersection.inside();
-#else
-      const typename Codim< 0 >::EntityPointer inPtr = intersection.inside();
-      const typename Codim< 0 >::Entity &in = *inPtr;
-#endif
 
       const Dune::ReferenceElement< double, dimension > &refElem =
           Dune::ReferenceElements< double, dimension >::general( in.type() );
@@ -283,14 +311,12 @@ namespace Dune
       for (int i=0;i<vxSize;++i)
       {
         int vxIdx = refElem.subEntity( faceNr, 1 , i , dimension);
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
         vertices.push_back( insertionIndex( in.template subEntity<dimension>(vxIdx) ) );
-#else
-        vertices.push_back( insertionIndex( *(in.template subEntity<dimension>(vxIdx) ) ) );
-#endif
       }
-      FaceType faceId;
-      copyAndSort( vertices, faceId );
+
+      FaceType faceId = makeFace( vertices );
+      std::sort( faceId.begin(), faceId.end() );
+
       typename BoundaryIdMap::const_iterator pos = insertionOrder_.find( faceId );
       if( pos != insertionOrder_.end() )
         return pos->second;
@@ -323,6 +349,16 @@ namespace Dune
       return vertices_[ id ].first;
     }
 
+    const VertexInputType inputPosition ( const VertexId &id ) const
+    {
+      alugrid_assert ( id < vertices_.size() );
+      VertexType vertex = vertices_[ id ].first;
+      VertexInputType iVtx(0.);
+      for(unsigned i = 0 ; i < dimensionworld ; ++i)
+        iVtx[i] = vertex[i];
+      return iVtx;
+    }
+
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
@@ -351,6 +387,7 @@ namespace Dune
 
     MPICommunicatorType communicator_;
 
+    typename SpaceFillingCurveOrderingType :: CurveType curveType_;
     std::vector< unsigned int > ordering_;
   };
 
@@ -455,7 +492,8 @@ namespace Dune
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
@@ -469,7 +507,8 @@ namespace Dune
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
@@ -483,32 +522,23 @@ namespace Dune
     realGrid_( realGrid ),
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
-    communicator_( communicator )
+    communicator_( communicator ),
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
   {}
 
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices )
   {
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+    FaceType faceId = makeFace( vertices );
 
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
+    boundaryIds_.insert( makeBndPair( faceId, 1 ) );
 
+    std::sort( faceId.begin(), faceId.end() );
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
 
-    boundaryProjections_[ faceId ] = 0;
-
-    BndPair boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-    {
-      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-      boundaryId.first[ j ] = vertices[ i ];
-    }
-    boundaryId.second = 1;
-    boundaryIds_.insert( boundaryId );
+    boundaryProjections_[ faceId ] = nullptr;
 
     insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }
@@ -517,22 +547,12 @@ namespace Dune
   inline void ALU3dGridFactory< ALUGrid > ::
   insertProcessBorder ( const std::vector< unsigned int >& vertices )
   {
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+    FaceType faceId = makeFace( vertices );
 
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
+    boundaryIds_.insert( makeBndPair( faceId, ALU3DSPACE ProcessorBoundary_t ) );
 
-    boundaryProjections_[ faceId ] = 0;
-
-    BndPair boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-    {
-      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-      boundaryId.first[ j ] = vertices[ i ];
-    }
-    boundaryId.second = ALU3DSPACE ProcessorBoundary_t ;
-    boundaryIds_.insert( boundaryId );
+    std::sort( faceId.begin(), faceId.end() );
+    boundaryProjections_[ faceId ] = nullptr;
   }
 
   template< class ALUGrid >
@@ -540,18 +560,10 @@ namespace Dune
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
                           const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
   {
-    if( vertices.size() != numFaceCorners )
-      DUNE_THROW( GridError, "Wrong number of face vertices passed: " << vertices.size() << "." );
+    const std::size_t numVx = vertices.size();
 
-    FaceType faceId;
-    copyAndSort( vertices, faceId );
-
-    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
-      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
-
-    const size_t numVx = vertices.size();
     GeometryType type;
-    if( numVx == 3 )
+    if( elementType == tetra )
       type.makeSimplex( dimension-1 );
     else
       type.makeCube( dimension-1 );
@@ -560,38 +572,37 @@ namespace Dune
     // and BoundarySegmentWrapper which have double as coordinate type
     typedef FieldVector< double, dimensionworld > CoordType;
     std::vector< CoordType > coords( numVx );
-    for( size_t i = 0; i < numVx; ++i )
+    for( std::size_t i = 0; i < numVx; ++i )
     {
+      // adapt vertex index for 2d grids
+      const std::size_t vtx = (dimension == 2 ? (elementType == tetra ? vertices[ i ] + 1 : 2 * vertices[ i ]) : vertices[ i ]);
+
       // if this assertions is thrown vertices were not inserted at first
-      alugrid_assert ( vertices_.size() > vertices[ i ] );
+      alugrid_assert ( vertices_.size() > vtx );
 
       // get global coordinate and copy it
-      const VertexType &x = position( vertices[ i ] );
-      for( unsigned int j = 0; j < dimensionworld; ++j )
-        coords[ i ][ j ] = x[ j ];
+      std::copy_n( position( vtx ).begin(), dimensionworld, coords[ i ].begin() );
     }
 
-    BoundarySegmentWrapperType* prj
-      = new BoundarySegmentWrapperType( type, coords, boundarySegment );
-    boundaryProjections_[ faceId ] = prj;
-#ifdef ALUGRIDDEBUG
+    std::unique_ptr< BoundarySegmentWrapperType > prj( new BoundarySegmentWrapperType( type, coords, boundarySegment ) );
+
     // consistency check
-    for( size_t i = 0; i < numVx; ++i )
+    for( std::size_t i = 0; i < numVx; ++i )
     {
       CoordType global = (*prj)( coords [ i ] );
       if( (global - coords[ i ]).two_norm() > 1e-6 )
-        DUNE_THROW(GridError,"BoundarySegment does not map face vertices to face vertices.");
+        DUNE_THROW( GridError, "BoundarySegment does not map face vertices to face vertices." );
     }
-#endif
 
-    BndPair boundaryId;
-    for( unsigned int i = 0; i < numFaceCorners; ++i )
-    {
-      const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-      boundaryId.first[ j ] = vertices[ i ];
-    }
-    boundaryId.second = 1;
-    boundaryIds_.insert( boundaryId );
+    FaceType faceId = makeFace( vertices );
+
+    boundaryIds_.insert( makeBndPair( faceId, 1 ) );
+
+    std::sort( faceId.begin(), faceId.end() );
+    if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
+      DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
+    boundaryProjections_[ faceId ] = prj.release();
 
     insertionOrder_.insert( std::make_pair( faceId, insertionOrder_.size() ) );
   }

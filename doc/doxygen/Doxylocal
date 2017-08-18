@@ -1,0 +1,12 @@
+INPUT                 += @srcdir@/mainpage.txt \
+                         @top_srcdir@/dune/alugrid
+                         @top_srcdir@/example
+
+EXCLUDE               += @top_srcdir@/dune/alugrid/impl \
+                         @top_srcdir@/dune/alugrid/test
+
+ALIASES              += notcleardoc="\xrefitem notcleardoc \"documentation will be extended\" \"Needs extended documentation\"" \
+                        interfaceclass="\xrefitem interfaceclass \"An interface class\" \"Main interface classes\"" \
+                        newimplementation="\xrefitem newimplementation \"Newly added\" \"New interface implementation and other gadgets\"" 
+
+EXAMPLE_PATH        +=  @top_srcdir@/example

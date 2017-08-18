@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDGRID_HH
 
 //- System includes
+#include <memory>
 #include <vector>
 
 //- Dune includes
@@ -77,8 +78,6 @@ namespace Dune
   class ALU3dGridLocalIdSet;
   template< int, int, ALU3dGridElementType, class >
   class ALU3dGridHierarchicIndexSet;
-  template <class EntityImp>
-  class ALUMemoryProvider;
   template< class >
   class ALU3dGridFactory;
   template <class GridImp, class GeometryImp, int nChild>
@@ -185,6 +184,9 @@ namespace Dune
 
     static void completeGrid ( GitterImplType &grid ) {}
 
+    void print( std::ostream& out ) const
+    {}
+
     CollectiveCommunication ccobj_;
   };
 
@@ -205,7 +207,7 @@ namespace Dune
     : ccobj_( comm ), mpAccess_( comm )
     {}
 
-    int nlinks () const { return mpAccess_.nlinks(); }
+    int nlinks () const { return mpAccess_.sendLinks(); }
 
     GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
                                     const bool conformingRefinement )
@@ -232,6 +234,11 @@ namespace Dune
       int rank = 0;
       MPI_Comm_rank( comm, &rank );
       return rank;
+    }
+
+    void print( std::ostream& out ) const
+    {
+      mpAccess_.printLinkage( out );
     }
 
     static typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder ( GitterImplType &grid )
@@ -267,13 +274,13 @@ namespace Dune
   template<int dim>
   struct ALU3dGridTwists< dim, tetra, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::SimplexTopology< dim >::type::id, dim > Type;
+    typedef TrivialTwists< Impl::SimplexTopology< dim >::type::id, dim > Type;
   };
 
   template<int dim>
   struct ALU3dGridTwists< dim, hexa, 0 >
   {
-    typedef TrivialTwists< GenericGeometry::CubeTopology< dim >::type::id, dim > Type;
+    typedef TrivialTwists< Impl::CubeTopology< dim >::type::id, dim > Type;
   };
 
   template< int dim, ALU3dGridElementType elType >
@@ -367,12 +374,9 @@ namespace Dune
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,4)
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
         typedef EntityImp EntityPointerImpl;
         typedef Entity    EntityPointer;
-#else
-        typedef ALU3dGridEntityPointer< cd, const Grid > EntityPointerImpl;
-        typedef Dune::EntityPointer< const Grid, EntityPointerImpl > EntityPointer;
 #endif
 
         template< PartitionIteratorType pitype >
@@ -488,12 +492,6 @@ namespace Dune
     friend class ALU3dGridGlobalIdSet< dim, dimworld, elType, Comm >;
     friend class ALU3dGridLocalIdSet< dim, dimworld, elType, Comm >;
 
-    friend class Conversion< ThisType, HasObjectStream >;
-    friend class Conversion< const ThisType, HasObjectStream >;
-
-    friend class Conversion< ThisType, HasHierarchicIndexSet >;
-    friend class Conversion< const ThisType, HasHierarchicIndexSet >;
-
     // new intersection iterator is a wrapper which get itersectioniteratoimp as pointers
   public:
     typedef ALU3dGridIntersectionIterator<const ThisType>
@@ -530,10 +528,13 @@ namespace Dune
     struct Codim
       : public BaseType::template Codim< codim >
     {
-      typedef typename Traits::template Codim< codim >::EntityImp         EntityImp;
+      typedef typename Traits::template Codim< codim >::EntityImp   EntityImp;
+      typedef typename Traits::template Codim< codim >::Twists      Twists;
+      typedef typename Twists::Twist                                Twist;
+
+#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-      typedef typename Traits::template Codim< codim >::Twists Twists;
-      typedef typename Twists::Twist Twist;
+#endif
     };
 
   protected:
@@ -607,11 +608,6 @@ namespace Dune
     typedef ALU3dGridHierarchicIterator< const ThisType > HierarchicIteratorImp;
 
     typedef typename ALU3dImplTraits< elType, Comm >::GitterImplType GitterImplType;
-
-    //! max number of levels
-    enum {
-      //! \brief maximal number of levels is 32
-      MAXL = 32 };
 
     //! element chunk for refinement
     enum {
@@ -802,7 +798,9 @@ namespace Dune
     const GlobalIdSet &globalIdSet () const
     {
       if( !globalIdSet_ )
-        globalIdSet_ = new GlobalIdSetImp( *this );
+      {
+        globalIdSet_.reset( new GlobalIdSetImp( *this ) );
+      }
       return *globalIdSet_;
     }
 
@@ -847,9 +845,38 @@ namespace Dune
     //! get level index set of the grid
     const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
     {
-      return *(levelIndexVec_[ level ] = getLevelIndexSet( level ).first);
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      if( ! levelIndexVec_[ level ] )
+      {
+        levelIndexVec_[ level ] = createLevelIndexSet( level );
+      }
+      return (*levelIndexVec_[ level ]);
     }
 
+    /** \brief return instance of level index set
+        \note if index set for this level has not been created then this
+        instance will be deleted once the shared_ptr goes out of scope.
+    */
+    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const
+    {
+      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
+      if( levelIndexVec_[ level ] )
+      {
+        return levelIndexVec_[ level ];
+      }
+      else
+      {
+        return createLevelIndexSet( level );
+      }
+    }
+
+  protected:
+    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const
+    {
+      return std::shared_ptr< LevelIndexSetImp > (new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level ) );
+    }
+
+  public:
     template< int cd >
     typename Codim< cd >::Twists twists ( GeometryType type ) const
     {
@@ -1121,7 +1148,7 @@ namespace Dune
       return communications_->createALUGrid( stream, vertexProjection(), conformingRefinement() );
     }
 
-    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_; }
+    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_.operator -> (); }
 
     // return appropriate ALUGrid builder
     virtual typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder () const
@@ -1133,6 +1160,7 @@ namespace Dune
     virtual void completeGrid ()
     {
       Communications::completeGrid( myGrid() );
+      clearIsNewMarkers();
     }
 
     //! return reference to Dune reference element according to elType
@@ -1197,6 +1225,7 @@ namespace Dune
 
       alugrid_assert ( level >= 0 );
       alugrid_assert ( level <= maxLevel() );
+      alugrid_assert ( level < int(ghostLevelList_[codim-1].size()) );
       return ghostLevelList_[codim-1][level];
     }
 
@@ -1255,15 +1284,6 @@ namespace Dune
     void makeGeometries();
 
   public:
-    std::pair< LevelIndexSetImp *, bool > getLevelIndexSet ( int level ) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      std::pair< LevelIndexSetImp *, bool > indexSet( levelIndexVec_[ level ], bool( levelIndexVec_[ level ] ) );
-      if( !indexSet.second )
-        indexSet.first = new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level );
-      return indexSet;
-    }
-
     // return true if conforming refinement is enabled
     bool conformingRefinement() const
     {
@@ -1276,11 +1296,6 @@ namespace Dune
       return comm().size() > 1 && myGrid().ghostCellsEnabled();
     }
 
-    //! return current thread number
-    static int thread () { return ALU3DSPACE ALUMemoryProvider< int > :: thread(); }
-
-    //! return max number of threads
-    static int maxThreads () { return ALU3DSPACE ALUMemoryProvider< int > :: maxThreads(); }
   protected:
     /////////////////////////////////////////////////////////////////
     //
@@ -1289,7 +1304,7 @@ namespace Dune
     /////////////////////////////////////////////////////////////////
 
     // the real ALU grid
-    mutable GitterImplType *mygrid_;
+    mutable std::unique_ptr< GitterImplType > mygrid_;
 
     // max level of grid
     int maxlevel_;
@@ -1306,31 +1321,31 @@ namespace Dune
     HierarchicIndexSet hIndexSet_;
 
     // out global id set
-    mutable GlobalIdSetImp *globalIdSet_;
+    mutable std::unique_ptr< GlobalIdSetImp > globalIdSet_;
 
     // out global id set
     LocalIdSetImp localIdSet_;
 
     // the level index set ( default type )
-    mutable std::vector < LevelIndexSetImp * > levelIndexVec_;
+    mutable std::vector < std::shared_ptr< LevelIndexSetImp > > levelIndexVec_;
 
     // the leaf index set
-    mutable LeafIndexSetImp * leafIndexSet_;
+    mutable std::unique_ptr< LeafIndexSetImp > leafIndexSet_;
 
-    mutable VertexListType vertexList_[MAXL];
+    mutable std::vector< VertexListType > vertexList_;
 
     //the ghostleaf list is used in alu3diterators, where we use the internal aluIterators
     // the vertex codim there is 3, so the list has to fulfill that
     mutable ALU3dGridItemListType ghostLeafList_[ 3 ];
-    mutable ALU3dGridItemListType ghostLevelList_[ 3 ][MAXL];
+    mutable std::vector< ALU3dGridItemListType > ghostLevelList_[ 3 ];
 
-    mutable ALU3dGridItemListType levelEdgeList_[MAXL];
+    mutable std::vector< ALU3dGridItemListType > levelEdgeList_;
 
     mutable LeafVertexListType leafVertexList_;
 
     // the type of our size cache
     typedef SizeCache<MyType> SizeCacheType;
-    SizeCacheType * sizeCache_;
+    std::unique_ptr< SizeCacheType > sizeCache_;
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
@@ -1339,13 +1354,13 @@ namespace Dune
     const DuneBoundaryProjectionType* bndPrj_;
 
     // pointer to Dune boundary projection
-    const DuneBoundaryProjectionVector* bndVec_;
+    std::unique_ptr< const DuneBoundaryProjectionVector > bndVec_;
 
     // boundary projection for vertices
-    ALUGridBoundaryProjectionType* vertexProjection_ ;
+    std::unique_ptr< ALUGridBoundaryProjectionType > vertexProjection_ ;
 
     // pointer to communications object
-    Communications *communications_;
+    std::unique_ptr< Communications > communications_;
 
     // refinement type (nonconforming or conforming)
     const ALUGridRefinementType refinementType_ ;
@@ -1365,13 +1380,13 @@ namespace Dune
       static const bool v = true;
     };
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isParallel< ALU3dGrid< dim, dimworld, elType, Comm > >
     {
       static const bool v = true;
     };
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,3,0)
+#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isLevelwiseConforming< ALU3dGrid< dim, dimworld, elType, Comm > >

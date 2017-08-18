@@ -1371,9 +1371,14 @@ namespace ALUGrid
   }
 
   template< class A > typename Periodic4Top < A >:: myhface4_t * Periodic4Top < A >::subface (int i, int j) {
-    return (myhface4(i)->getrule() == myhface4_t::myrule_t::iso4) ?
-    myhface4(i)->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) : // Zeile aus dem Hexaeder
-    (abort (), (myhface4_t *)0);
+    typedef typename myhface4_t::myrule_t  facerule_t ;
+    myhface4_t * face = myhface4(i);
+    const facerule_t facerule = face->getrule();
+    return ( facerule == facerule_t::iso4 ) ?
+            ( face->is2d() ) ?
+              ((twist(i) < 0) ? face->subface((j+1)%2): face->subface(j) )
+              : face->subface(twist(i) < 0 ? (9 - j + twist(i)) % 4 : (j + twist(i)) % 4) :
+              (abort (), (myhface4_t *)0);
   }
 
   template< class A > const typename Periodic4Top < A >:: myhface4_t * Periodic4Top < A >::subface (int i, int j) const {
