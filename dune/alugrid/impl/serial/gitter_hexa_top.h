@@ -1046,6 +1046,8 @@ namespace ALUGrid
     ghostpair_STI p ( gh, gFace );
     // check that faces match
 
+#ifndef NDEBUG
+    // make sure the ghost face is represented in the hexahedron
     if( gh )
     {
       myhface4_t* ghFace = ((Gitter::Geometric::hexa_GEO*) gh)->myhface( gFace );
@@ -1062,6 +1064,7 @@ namespace ALUGrid
             double diff = ( vx->Point()[ d ] - vx2->Point()[ d ]);
             sum += ( diff * diff );
           }
+
           if( std::sqrt( sum ) < 1e-10 )
           {
             found = true;
@@ -1071,6 +1074,7 @@ namespace ALUGrid
         assert( found );
       }
     }
+#endif
 
     // store boundary id
     setBoundaryId( _bt );

@@ -162,8 +162,7 @@ namespace ALUGrid
     typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
     const myhface3_t & face = static_cast<const myhface3_t &> (f);
-    const bndid_t bndid = face.bndId ();
-    alugrid_assert( bndid ==  Gitter::hbndseg_STI::closure );
+    alugrid_assert( iface.bndId () ==  Gitter::hbndseg_STI::closure );
 
     myhface3_t & myface = *(myhface3(face_nr));
 
@@ -376,8 +375,7 @@ namespace ALUGrid
      typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
      const myhface4_t & face = static_cast<const myhface4_t &> (f);
-     const bndid_t bndid = face.bndId();
-     alugrid_assert( bndid == Gitter::hbndseg_STI::closure );
+     alugrid_assert( face.bndId() == Gitter::hbndseg_STI::closure );
 
      myhface4_t & myface = *(myhface4(face_nr));
 

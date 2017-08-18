@@ -1078,7 +1078,8 @@ namespace ALUGrid
       using DuneIndexProvider::ref;
       Dune_helement ()
       {
-        // set is new element flag
+        // set is new element flag (ref cannot be used anymore
+        // since it is also used for refcounting ghost elements)
         DuneIndexProvider::set( DuneIndexProvider::isNew );
       }
     public:
