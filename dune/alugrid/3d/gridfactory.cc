@@ -505,7 +505,7 @@ namespace Dune
         if( bisComp.type0Algorithm() )
         {
           std::cout << "Grid is compatible!!" << std::endl;
-
+          std::cout << "Not strong compatible Macro Faces: " << bisComp.stronglyCompatibleFaces() << std::endl << std::endl;
           // obtain new element sorting, orientations, and types
           bisComp.returnElements( elements_, elementOrientation, simplexTypes );
           markLongestEdge( elementOrientation, false );
