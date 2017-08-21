@@ -10,6 +10,8 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/timer.hh>
 
+#include <dune/alugrid/common/meshquality.hh>
+
 /** numerical scheme **/
 #include "piecewisefunction.hh"
 #include "fvscheme.hh"
@@ -77,6 +79,9 @@ void method ( int problem, int startLvl, int maxLvl,
 
   // create the diagnostics object
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
+
+  // investigate mesh quality
+  meshQuality( grid.leafGridView() );
 
   /* ... some global refinement steps */
   if( verboseRank )
