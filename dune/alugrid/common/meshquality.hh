@@ -19,6 +19,9 @@ namespace Dune {
     double minVolEdgeRatio = 1e308;
     double maxVolEdgeRatio = 0;
 
+    double globalMinEdge = 1e308;
+    double globalMaxEdge = 0;
+
     for( const auto& element : elements( gridView ) )
     {
       const double vol = element.geometry().volume();
@@ -32,10 +35,14 @@ namespace Dune {
         const auto& edge = element.template subEntity<dim-1>( e );
         const auto& geo  = edge.geometry();
         assert( geo.corners() == 2 );
-        double edgeLength = ( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
+        //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
+        double edgeLength = geo.volume();
         minEdge = std::min( minEdge, edgeLength );
         maxEdge = std::max( maxEdge, edgeLength );
       }
+
+      globalMinEdge = std::min( minEdge, globalMinEdge );
+      globalMaxEdge = std::max( maxEdge, globalMaxEdge );
 
       minVolEdgeRatio = std::min( minVolEdgeRatio, ( vol / minEdge ) );
       maxVolEdgeRatio = std::max( maxVolEdgeRatio, ( vol / maxEdge ) );
@@ -46,7 +53,9 @@ namespace Dune {
 
     if( gridView.grid().comm().rank() == 0 )
     {
+      std::cout << "MeshQuality: minEdge     = " << globalMinEdge << std::endl;
       std::cout << "MeshQuality: vol/minEdge = " << minVolEdgeRatio << std::endl;
+      std::cout << "MeshQuality: maxEdge     = " << globalMaxEdge << std::endl;
       std::cout << "MeshQuality: vol/maxEdge = " << maxVolEdgeRatio << std::endl;
     }
   }
