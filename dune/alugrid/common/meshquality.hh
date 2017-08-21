@@ -16,18 +16,21 @@ namespace Dune {
   {
     static const int dim = GridView::dimension;
 
-    double minVolEdgeRatio = 1e308;
-    double maxVolEdgeRatio = 0;
+    double minVolShortestEdgeRatio = 1e308;
+    double maxVolShortestEdgeRatio = 0;
+    double avgVolShortestEdgeRatio = 0;
 
-    double globalMinEdge = 1e308;
-    double globalMaxEdge = 0;
+    double minVolLongestEdgeRatio = 1e308;
+    double maxVolLongestEdgeRatio = 0;
+    double avgVolLongestEdgeRatio = 0;
 
-    for( const auto& element : elements( gridView ) )
+    size_t nElements = 0;
+    for( const auto& element : elements( gridView, Dune::Partitions::interiorBorder ) )
     {
       const double vol = element.geometry().volume();
 
-      double minEdge = 1e308 ;
-      double maxEdge = 0;
+      double shortestEdge = 1e308 ;
+      double longestEdge = 0;
 
       const int edges = element.subEntities( dim-1 );
       for( int e = 0 ; e < edges ; ++ e )
@@ -37,26 +40,40 @@ namespace Dune {
         assert( geo.corners() == 2 );
         //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
         double edgeLength = geo.volume();
-        minEdge = std::min( minEdge, edgeLength );
-        maxEdge = std::max( maxEdge, edgeLength );
+        shortestEdge = std::min( shortestEdge, edgeLength );
+        longestEdge  = std::max( longestEdge,  edgeLength );
       }
 
-      globalMinEdge = std::min( minEdge, globalMinEdge );
-      globalMaxEdge = std::max( maxEdge, globalMaxEdge );
+      const double volShortest = vol / shortestEdge;
+      minVolShortestEdgeRatio  = std::min( minVolShortestEdgeRatio, volShortest );
+      maxVolShortestEdgeRatio  = std::max( maxVolShortestEdgeRatio, volShortest );
+      avgVolShortestEdgeRatio += volShortest;
 
-      minVolEdgeRatio = std::min( minVolEdgeRatio, ( vol / minEdge ) );
-      maxVolEdgeRatio = std::max( maxVolEdgeRatio, ( vol / maxEdge ) );
+      const double volLongest = vol / longestEdge ;
+      minVolLongestEdgeRatio = std::min( minVolLongestEdgeRatio, volLongest );
+      maxVolLongestEdgeRatio = std::max( maxVolLongestEdgeRatio, volLongest );
+      avgVolLongestEdgeRatio += volLongest;
+
+      ++ nElements;
     }
 
-    minVolEdgeRatio = gridView.grid().comm().min( minVolEdgeRatio );
-    maxVolEdgeRatio = gridView.grid().comm().max( maxVolEdgeRatio );
+    nElements = gridView.grid().comm().sum( nElements );
+
+    minVolShortestEdgeRatio = gridView.grid().comm().min( minVolShortestEdgeRatio );
+    maxVolShortestEdgeRatio = gridView.grid().comm().max( maxVolShortestEdgeRatio );
+    avgVolShortestEdgeRatio = gridView.grid().comm().sum( avgVolShortestEdgeRatio );
+
+    minVolLongestEdgeRatio = gridView.grid().comm().min( minVolLongestEdgeRatio );
+    maxVolLongestEdgeRatio = gridView.grid().comm().max( maxVolLongestEdgeRatio );
+    avgVolLongestEdgeRatio = gridView.grid().comm().sum( avgVolLongestEdgeRatio );
+
+    avgVolShortestEdgeRatio /= double(nElements);
+    avgVolLongestEdgeRatio /= double(nElements);
 
     if( gridView.grid().comm().rank() == 0 )
     {
-      std::cout << "MeshQuality: minEdge     = " << globalMinEdge << std::endl;
-      std::cout << "MeshQuality: vol/minEdge = " << minVolEdgeRatio << std::endl;
-      std::cout << "MeshQuality: maxEdge     = " << globalMaxEdge << std::endl;
-      std::cout << "MeshQuality: vol/maxEdge = " << maxVolEdgeRatio << std::endl;
+      std::cout << "MeshQuality: Volume / Longest   " << minVolLongestEdgeRatio << " " << maxVolLongestEdgeRatio << " " << avgVolLongestEdgeRatio << std::endl;
+      std::cout << "MeshQuality: Volume / Shortest  " << minVolShortestEdgeRatio << " " << maxVolShortestEdgeRatio << " " << avgVolShortestEdgeRatio << std::endl;
     }
   }
 

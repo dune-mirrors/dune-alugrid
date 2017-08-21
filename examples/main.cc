@@ -196,9 +196,13 @@ void method ( int problem, int startLvl, int maxLvl,
     {
       if( vtkOut )
       {
+        // print mesh quality again
+        meshQuality( gridView );
+
         /* visualize with VTK */
         vtkOut->write( time );
       }
+
       /* set saveStep for next save point */
       saveStep += saveInterval;
 
