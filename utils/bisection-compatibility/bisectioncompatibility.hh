@@ -51,9 +51,9 @@ protected:
   //the faces opposite of type 0 nodes
   EdgeType type0faces_;
   //The interior node of a type 1 element
-  int type1node_;  // = stevensonRefinement_ ? 1 : 2;
+  unsigned int type1node_;  // = stevensonRefinement_ ? 1 : 2;
   //the face opposite of the interior node
-  int type1face_;  // = 3 - type1node_ ;
+  unsigned int type1face_;  // = 3 - type1node_ ;
 
 public:
   //constructor taking elements
