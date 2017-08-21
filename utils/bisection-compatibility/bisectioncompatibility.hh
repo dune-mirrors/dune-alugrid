@@ -83,13 +83,19 @@ public:
   {
     int result = 0;
     bool verbose = false;
+    unsigned int bndFaces = 0;
     for(auto&& face : neighbours_)
     {
-      if(! checkStrongCompatibility(face, verbose))
+      if( face.second[0] == face.second[1] )
+      {
+        bndFaces++;
+      }
+      else if(! checkStrongCompatibility(face, verbose))
       {
         ++result;
       }
     }
+    std::cout << "Not strong compatible Macro Faces: " << result << " Inner Faces: " << neighbours_.size() - bndFaces << " Total Faces: " << neighbours_.size() << std::endl << std::endl;
     return result;
   }
 
