@@ -82,10 +82,13 @@ public:
   int stronglyCompatibleFaces ()
   {
     int result = 0;
+    bool verbose = false;
     for(auto&& face : neighbours_)
     {
-      if(! checkStrongCompatibility(face))
+      if(! checkStrongCompatibility(face, verbose))
+      {
         ++result;
+      }
     }
     return result;
   }
@@ -582,37 +585,77 @@ private:
     return true;
   }
 
-   //check face for strong compatibility
-   //this check currently only works for a global ordered set of vertices
+  //check face for strong compatibility
   bool checkStrongCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = false)
   {
     int elIndex = face.second[0];
     int neighIndex = face.second[1];
+    bool result = false;
+    //if we are not boundary
     if(elIndex != neighIndex)
     {
-      int elFaceIndex = getFaceIndex(elements_[elIndex], face.first);
-      int neighFaceIndex = getFaceIndex(elements_[neighIndex], face.first);
-      //if the local face indices coincide, they are reflected neighbors
-      // if the refinement edge is not contained in the shared face, we
-      // have reflected neighbors of the children, if the face is in the same direction
-      // and the other edge of the refinement edge is the missing one.
-      if( elFaceIndex != neighFaceIndex ||
-         !(elFaceIndex == type0faces_[0] && neighFaceIndex == type0faces_[1]) ||
-         !(elFaceIndex == type0faces_[1] && neighFaceIndex == type0faces_[0]) )
+      int elType = types_[elIndex];
+      int neighType = types_[neighIndex];
+      unsigned int elFaceIndex = getFaceIndex(elements_[elIndex], face.first);
+      unsigned int elNodeIndex = 3 - elFaceIndex;
+      unsigned int neighFaceIndex = getFaceIndex(elements_[neighIndex], face.first);
+      unsigned int neighNodeIndex = 3 - neighFaceIndex;
+      if(elType == neighType)
       {
-        if (verbose)
+        //if the local face indices coincide, they are reflected neighbors
+        // if the refinement edge is not contained in the shared face, we
+        // have reflected neighbors of the children, if the face is in the same direction
+        // and the other edge of the refinement edge is the missing one.
+        if( elNodeIndex == neighNodeIndex ||
+           (elNodeIndex == type0nodes_[0] && neighNodeIndex == type0nodes_[1]) ||
+           (elNodeIndex == type0nodes_[1] && neighNodeIndex == type0nodes_[0]) )
+        { result = true; }
+      }
+      else
+      {
+        if( elType % 3  == (neighType +1) %3 )
         {
-         /* std::cerr << "Face: " << face.first[0] << ", " << face.first[1] << ", " << face.first[2]
-          << " has refinement edge: " << edge1[0] << ", " << edge1[1] <<
-          " from one side and: " << edge2[0] << ", " << edge2[1] <<
-          " from the other." << std::endl; */
-          printElement(elIndex);
-          printElement(neighIndex);
+          std::swap(elType, neighType);
+          std::swap(elNodeIndex, neighNodeIndex);
+          std::swap(elFaceIndex, neighFaceIndex);
+          std::swap(elIndex, neighIndex);
         }
-        return false;
+        switch (elType) {
+          case 0:
+            assert(neighType == 1);
+            if( ( neighNodeIndex == type1node_ ) && ( elNodeIndex == type0nodes_[0] || elNodeIndex == type0nodes_[1] ) )
+            { result = true; }
+            break;
+          case 1:
+            assert(neighType == 2);
+            if( ( neighNodeIndex == type1node_ ) && ( elNodeIndex == type0nodes_[0] || elNodeIndex == type0nodes_[1] ) )
+            { result = true; }
+            break;
+          case 2:
+            assert(neighType == 0);
+            if( ( neighNodeIndex == type1node_ ) && ( elNodeIndex == type0nodes_[0] || elNodeIndex == type0nodes_[1] ) )
+            { result = true; }
+            break;
+          default:
+            std::cerr << "No other types than 0,1,2 implemented. Aborting" << std::endl;
+            abort();
+        }
       }
     }
-    return true;
+    else //boundary faces
+    {
+      result =true;
+    }
+    if (verbose && result == false )
+    {
+     /* std::cerr << "Face: " << face.first[0] << ", " << face.first[1] << ", " << face.first[2]
+      << " has refinement edge: " << edge1[0] << ", " << edge1[1] <<
+      " from one side and: " << edge2[0] << ", " << edge2[1] <<
+      " from the other." << std::endl; */
+      printElement(elIndex);
+      printElement(neighIndex);
+    }
+    return result;
   }
 
   void fixNode(ElementType& el, int node)
