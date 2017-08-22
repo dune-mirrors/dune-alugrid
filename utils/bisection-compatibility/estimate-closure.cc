@@ -39,10 +39,11 @@ void estimateClosure ( GridType &grid , int level = 0 )
 
   typedef typename GridType::GlobalIdSet IndexSetType;
   typedef typename IndexSetType::IdType IdType;
+  typedef typename GridType::template Codim< 0 >::Entity EntityType;
 
   const IndexSetType & macroIdSet = grid.globalIdSet();
   std::map< IdType, size_t > elementClosure;
-
+  std::set< IdType > doneElements;
 
   typedef typename GridType::LeafGridView  LeafGridViewType;
   Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution" + level, "./", ".", Dune::VTK::nonconforming );
@@ -54,14 +55,24 @@ void estimateClosure ( GridType &grid , int level = 0 )
 
   size_t maxClosure = 0;
   //loop over all macro elements.
-  for( const auto & macroEntity : Dune::elements( grid.leafGridView( ) ) )
+  while( doneElements.size() < macroSize )
   {
-    //if elementClosure calculated - continue
-    const IdType macroId =  macroIdSet.id( macroEntity );
-    if( elementClosure.find( macroId ) != elementClosure.end() )
+    EntityType  macroEntity;// = *(grid.leafGridView().template begin< 0 >() );
+    IdType macroId;
+    //find new elements
+    for(const auto & entity : Dune::elements(grid.leafGridView() ) )
     {
-      continue;
+      const IdType id =  macroIdSet.id( entity );
+      if( doneElements.find( id ) == doneElements.end() )
+      {
+        doneElements.insert(id);
+        macroEntity = entity;
+        macroId = id;
+        break;
+      }
     }
+    if( elementClosure.find( macroId ) != elementClosure.end() ) continue;
+
     //mark for refinement
     grid.mark( 1, macroEntity );
     //adapt
