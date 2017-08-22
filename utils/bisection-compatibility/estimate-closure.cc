@@ -15,18 +15,37 @@
 
 
 template< class GridType >
-void estimateClosure ( GridType &grid )
+void estimateClosure ( GridType &grid , int level = 0 )
 {
-  const std::size_t macroSize =grid.levelGridView(0).size(0);
+  //refine up to level
+  for(int  i = 0; i < level; ++i)
+  {
+    for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
+    {
+      if( entity.level() < level )
+      {
+        grid.mark( 1, entity );
+      }
+      else if( entity.level() > level )
+      {
+        grid.mark( -1, entity );
+      }
+    }
+    grid.preAdapt();
+    grid.adapt();
+    grid.postAdapt();
+  }
+  const size_t macroSize = grid.leafGridView().size( 0 );
+  const size_t nElements = grid.levelGridView( level ).size( 0 );
 
-  typedef typename GridType::LevelIndexSet LevelIndexSetType;
-  typedef typename LevelIndexSetType::IndexType IdType;
+  typedef typename GridType::GlobalIdSet IndexSetType;
+  typedef typename IndexSetType::IdType IdType;
 
-  const LevelIndexSetType & macroIdSet = grid.levelIndexSet(0);
+  const IndexSetType & macroIdSet = grid.globalIdSet();
   std::map< IdType, size_t > elementClosure;
 
   typedef typename GridType::LeafGridView  LeafGridViewType;
-  Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution", "./", ".", Dune::VTK::nonconforming );
+  Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution" + level, "./", ".", Dune::VTK::nonconforming );
 
   std::shared_ptr< VolumeData< LeafGridViewType >  > ptr( new VolumeData< LeafGridViewType > ( ) );
   vtkout.addCellData( ptr );
@@ -35,10 +54,14 @@ void estimateClosure ( GridType &grid )
 
   size_t maxClosure = 0;
   //loop over all macro elements.
-  for( const auto & macroEntity : Dune::elements( grid.levelGridView(0) ) )
+  for( const auto & macroEntity : Dune::elements( grid.levelGridView( level ) ) )
   {
     //if elementClosure calculated - continue
-    const IdType macroId =  macroIdSet.index(macroEntity);
+    const IdType macroId =  macroIdSet.id( macroEntity );
+    if( elementClosure.find( macroId ) != elementClosure.end() )
+    {
+      continue;
+    }
     //mark for refinement
     grid.mark( 1, macroEntity );
     //adapt
@@ -47,25 +70,49 @@ void estimateClosure ( GridType &grid )
     grid.postAdapt();
     //loop over macro elements
     size_t closure = grid.leafGridView().size(0) - macroSize;
+    for( const auto & entity : Dune::elements( grid.levelGridView( level ) ) )
+    {
+      const auto id = macroIdSet.id( entity );
+      if( ! entity.isLeaf() )
+      {
+        elementClosure[ id ] = elementClosure[ id ] == 0 ? closure : std::min( closure, elementClosure[ id ] );
+      }
+    }
     elementClosure[ macroId ] = closure;
     if(closure > maxClosure)
     {
       maxClosure = closure;
+      std::cout << "New maximum: " << maxClosure << std::endl;
       vtkout.write( double( closure ) );
     }
-    while( grid.leafGridView().size(0) != macroSize )
+    std::cout << "Before: "<< grid.leafGridView().size(0) << ", after: ";
+    //refine up to level
+    for(int  i = 0; i <  closure *  (level + 1); ++i)
     {
-      for( const auto & entity : Dune::elements( grid.leafGridView() ) )
+      if( grid.leafGridView().size(0) == macroSize ) break;
+      for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
       {
-        if(entity.level() > 0 )
+        grid.mark( -1, entity );
+      }
+      grid.preAdapt();
+      grid.adapt();
+      grid.postAdapt();
+    }
+    //refine up to level
+    for(int  i = 0; i < level ; ++i)
+    {
+      for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
+      {
+        if( entity.level() < level )
         {
-          grid.mark( -1, entity );
+          grid.mark( 1, entity );
         }
       }
       grid.preAdapt();
       grid.adapt();
       grid.postAdapt();
     }
+    std::cout << grid.leafGridView().size(0) << std::endl;
   }
 
   size_t minClosure = 1e10;
@@ -77,7 +124,7 @@ void estimateClosure ( GridType &grid )
     minClosure = std::min( closure.second , minClosure );
     avgClosure += closure.second ;
   }
-  avgClosure /=  macroSize;
+  avgClosure /=  nElements;
 
   std::cout << "Closure (min, max, avg): " << minClosure << " " << maxClosure << " " << avgClosure << std::endl << std::endl;
 }
@@ -96,6 +143,7 @@ int main (int argc , char **argv) {
       GridType & grid = *gridPtr;
       grid.loadBalance();
       estimateClosure( grid );
+      estimateClosure( grid, 3);
     }
   }
   catch( Dune::Exception &e )
