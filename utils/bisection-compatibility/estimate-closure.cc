@@ -46,7 +46,7 @@ void estimateClosure ( GridType &grid , int level = 0 )
   std::set< IdType > doneElements;
 
   typedef typename GridType::LeafGridView  LeafGridViewType;
-  Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution" + level, "./", ".", Dune::VTK::nonconforming );
+  Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution" + std::to_string(level), "./", ".", Dune::VTK::nonconforming );
 
   std::shared_ptr< VolumeData< LeafGridViewType >  > ptr( new VolumeData< LeafGridViewType > ( ) );
   vtkout.addCellData( ptr );
@@ -55,9 +55,11 @@ void estimateClosure ( GridType &grid , int level = 0 )
 
   size_t maxClosure = 0;
   //loop over all macro elements.
-  while( doneElements.size() < macroSize )
+  size_t done = 0;
+  while(  done < macroSize )
   {
-    EntityType  macroEntity;// = *(grid.leafGridView().template begin< 0 >() );
+    std::cerr << doneElements.size() << " " ;
+    EntityType macroEntity;
     IdType macroId;
     //find new elements
     for(const auto & entity : Dune::elements(grid.leafGridView() ) )
@@ -65,13 +67,16 @@ void estimateClosure ( GridType &grid , int level = 0 )
       const IdType id =  macroIdSet.id( entity );
       if( doneElements.find( id ) == doneElements.end() )
       {
-        doneElements.insert(id);
         macroEntity = entity;
         macroId = id;
         break;
       }
     }
-    if( elementClosure.find( macroId ) != elementClosure.end() ) continue;
+    if( macroEntity == EntityType() )
+      break;
+    ++done;
+    doneElements.insert( macroId );
+
 
     //mark for refinement
     grid.mark( 1, macroEntity );
@@ -81,12 +86,13 @@ void estimateClosure ( GridType &grid , int level = 0 )
     grid.postAdapt();
     //loop over macro elements
     size_t closure = grid.leafGridView().size(0) - macroSize;
-    for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
+    for( const auto & entity : Dune::elements( grid.levelGridView( level ) ) )
     {
       const auto id = macroIdSet.id( entity );
       if( ! entity.isLeaf() )
       {
         elementClosure[ id ] = elementClosure[ id ] == 0 ? closure : std::min( closure, elementClosure[ id ] );
+        doneElements.insert( id );
       }
     }
     elementClosure[ macroId ] = closure;
@@ -96,11 +102,9 @@ void estimateClosure ( GridType &grid , int level = 0 )
       std::cout << "New maximum: " << maxClosure << std::endl;
       vtkout.write( double( closure ) );
     }
-    std::cout << "Before: "<< grid.leafGridView().size(0) << ", after: ";
     //refine up to level
-    for(int  i = 0; i <  closure *  (level + 1); ++i)
+    while(grid.maxLevel() > level)
     {
-      if( grid.leafGridView().size(0) == macroSize ) break;
       for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
       {
         grid.mark( -1, entity );
@@ -123,7 +127,6 @@ void estimateClosure ( GridType &grid , int level = 0 )
       grid.adapt();
       grid.postAdapt();
     }
-    std::cout << grid.leafGridView().size(0) << std::endl;
   }
 
   size_t minClosure = 1e10;
