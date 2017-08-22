@@ -7,6 +7,8 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/grid/common/rangegenerators.hh>
+#include <dune/grid/io/file/vtk/vtksequencewriter.hh>
+
 
 #include <dune/alugrid/dgf.hh>
 #include <dune/alugrid/grid.hh>
@@ -23,52 +25,46 @@ void estimateClosure ( GridType &grid )
   const LevelIndexSetType & macroIdSet = grid.levelIndexSet(0);
   std::map< IdType, size_t > elementClosure;
 
+  typedef typename GridType::LeafGridView  LeafGridView;
+  Dune::VTKSequenceWriter< LeafGridView > vtkout(  grid.leafGridView(), "solution", "./", ".", Dune::VTK::nonconforming );
 
+  vtkout.write(0.0);
+
+  size_t maxClosure = 0;
   //loop over all macro elements.
   for( const auto & macroEntity : Dune::elements( grid.levelGridView(0) ) )
   {
     //if elementClosure calculated - continue
-    if( elementClosure[ macroIdSet.index(macroEntity) ] > 0 )
+    const IdType macroId =  macroIdSet.index(macroEntity);
+    //mark for refinement
+    grid.mark( 1, macroEntity );
+    //adapt
+    grid.preAdapt();
+    grid.adapt();
+    grid.postAdapt();
+    //loop over macro elements
+    size_t closure = grid.leafGridView().size(0) - macroSize;
+    elementClosure[ macroId ] = closure;
+    if(closure > maxClosure)
     {
-      continue;
+      maxClosure = closure;
+      vtkout.write( double( closure ) );
     }
-    //otherwise
-    else
+    while( grid.leafGridView().size(0) != macroSize )
     {
-      //mark for refinement
-      grid.mark( 1, macroEntity );
-      //adapt
+      for( const auto & entity : Dune::elements( grid.leafGridView() ) )
+      {
+        if(entity.level() > 0 )
+        {
+          grid.mark( -1, entity );
+        }
+      }
       grid.preAdapt();
       grid.adapt();
       grid.postAdapt();
-      for(int i = 0 ; i < 5 ; ++i)
-      {
-        //loop over macro elements
-        size_t closure = grid.leafGridView().size(0) - macroSize;
-        //loop over macro elements
-        for( const auto & entity : Dune::elements( grid.levelGridView(0) ) )
-        {
-          //if refined && elementClosure = closure
-          if( !entity.isLeaf() )
-          {
-            elementClosure[ macroIdSet.index(macroEntity) ] = elementClosure[ macroIdSet.index(macroEntity) ] == 0 ? closure : std::min( closure, elementClosure[ macroIdSet.index(macroEntity) ] );
-          }
-        }
-        for( const auto & entity : Dune::elements( grid.leafGridView() ) )
-        {
-          if(entity.level() > 0 )
-          {
-            grid.mark( -1, entity );
-          }
-        }
-        grid.preAdapt();
-        grid.adapt();
-        grid.postAdapt();
-      }
     }
   }
 
-  size_t maxClosure = 0;
   size_t minClosure = 1e10;
   size_t avgClosure = 0;
 
