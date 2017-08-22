@@ -160,7 +160,7 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(2,25);
+    calculatevV0(1,12);
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
