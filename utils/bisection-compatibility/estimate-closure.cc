@@ -8,7 +8,7 @@
 
 #include <dune/grid/common/rangegenerators.hh>
 #include <dune/grid/io/file/vtk/vtksequencewriter.hh>
-
+#include "../../examples/piecewisefunction.hh"
 
 #include <dune/alugrid/dgf.hh>
 #include <dune/alugrid/grid.hh>
@@ -25,8 +25,11 @@ void estimateClosure ( GridType &grid )
   const LevelIndexSetType & macroIdSet = grid.levelIndexSet(0);
   std::map< IdType, size_t > elementClosure;
 
-  typedef typename GridType::LeafGridView  LeafGridView;
-  Dune::VTKSequenceWriter< LeafGridView > vtkout(  grid.leafGridView(), "solution", "./", ".", Dune::VTK::nonconforming );
+  typedef typename GridType::LeafGridView  LeafGridViewType;
+  Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution", "./", ".", Dune::VTK::nonconforming );
+
+  std::shared_ptr< VolumeData< LeafGridViewType >  > ptr( new VolumeData< LeafGridViewType > ( ) );
+  vtkout.addCellData( ptr );
 
   vtkout.write(0.0);
 
