@@ -108,7 +108,11 @@ void estimateClosure ( GridType &grid , int level = 0 )
     {
       for( const auto & entity : Dune::elements( leafGridView ) )
       {
-        grid.mark( -1, entity );
+        // if level -1  => infinite loop ...
+        if(entity.level() > level - 2)
+        {
+          grid.mark( -1, entity );
+        }
       }
       grid.preAdapt();
       grid.adapt();
@@ -158,7 +162,8 @@ int main (int argc , char **argv) {
       GridType & grid = *gridPtr;
       grid.loadBalance();
       estimateClosure( grid );
-      estimateClosure( grid, 3);
+      estimateClosure( grid, 3 );
+      estimateClosure( grid, 6 );
     }
   }
   catch( Dune::Exception &e )
