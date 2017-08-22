@@ -36,13 +36,13 @@ void estimateClosure ( GridType &grid , int level = 0 )
     grid.postAdapt();
   }
   const size_t macroSize = grid.leafGridView().size( 0 );
-  const size_t nElements = grid.levelGridView( level ).size( 0 );
 
   typedef typename GridType::GlobalIdSet IndexSetType;
   typedef typename IndexSetType::IdType IdType;
 
   const IndexSetType & macroIdSet = grid.globalIdSet();
   std::map< IdType, size_t > elementClosure;
+
 
   typedef typename GridType::LeafGridView  LeafGridViewType;
   Dune::VTKSequenceWriter< LeafGridViewType > vtkout(  grid.leafGridView(), "solution" + level, "./", ".", Dune::VTK::nonconforming );
@@ -54,7 +54,7 @@ void estimateClosure ( GridType &grid , int level = 0 )
 
   size_t maxClosure = 0;
   //loop over all macro elements.
-  for( const auto & macroEntity : Dune::elements( grid.levelGridView( level ) ) )
+  for( const auto & macroEntity : Dune::elements( grid.leafGridView( ) ) )
   {
     //if elementClosure calculated - continue
     const IdType macroId =  macroIdSet.id( macroEntity );
@@ -70,7 +70,7 @@ void estimateClosure ( GridType &grid , int level = 0 )
     grid.postAdapt();
     //loop over macro elements
     size_t closure = grid.leafGridView().size(0) - macroSize;
-    for( const auto & entity : Dune::elements( grid.levelGridView( level ) ) )
+    for( const auto & entity : Dune::elements( grid.leafGridView( ) ) )
     {
       const auto id = macroIdSet.id( entity );
       if( ! entity.isLeaf() )
@@ -124,7 +124,7 @@ void estimateClosure ( GridType &grid , int level = 0 )
     minClosure = std::min( closure.second , minClosure );
     avgClosure += closure.second ;
   }
-  avgClosure /=  nElements;
+  avgClosure /=  macroSize;
 
   std::cout << "Closure (min, max, avg): " << minClosure << " " << maxClosure << " " << avgClosure << std::endl << std::endl;
 }
