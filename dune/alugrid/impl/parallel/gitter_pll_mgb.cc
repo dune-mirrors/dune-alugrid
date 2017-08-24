@@ -563,6 +563,8 @@ namespace ALUGrid
       }
     }
 
+    myBuilder().recomputeBndSegmentIndices();
+
     this->_finalized = true;
     return;
   }

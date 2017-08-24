@@ -29,8 +29,11 @@ namespace ALUGrid
       ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
       const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
       void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+      virtual int segmentIndex () const { return _segmentIndex; }
+      virtual void setSegmentIndex( const int idx ) { _segmentIndex = idx; }
     private :
       mypllx_t * _mxt ;
+      int _segmentIndex ;
   } ;
 
   template < class A, class X, class MX > class Hbnd3PllInternal {
@@ -145,7 +148,10 @@ namespace ALUGrid
   //
   template < class A, class MX > inline Hbnd3PllExternal < A, MX > ::
   Hbnd3PllExternal (myhface3_t * f, int t, const bnd_t bt)
-      : Hbnd3Top < A > (0,f,t,bt), _mxt (new MX (*this)) {
+      : Hbnd3Top < A > (0,f,t,bt),
+        _mxt (new MX (*this)),
+        _segmentIndex( this->getIndex() )
+  {
     this->restoreFollowFace () ;
     return ;
   }
