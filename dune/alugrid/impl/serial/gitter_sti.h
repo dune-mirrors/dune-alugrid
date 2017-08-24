@@ -1126,6 +1126,8 @@ namespace ALUGrid
 
       // return index of boundary segment
       virtual int segmentIndex (const int) const { return -1; }
+      // set segment index
+      virtual void setSegmentIndex( const int ) {}
 
       // return true if further refinement is needed to create conforming closure
       virtual bool markForConformingClosure () = 0;
@@ -1279,8 +1281,9 @@ namespace ALUGrid
         none = DuneIndexProvider::interior, // also the value of interior items
         closure = DuneIndexProvider::border,  // also the value of border items
         ghost_closure = DuneIndexProvider::ghost , // also the value of ghost items
-        periodic = 254, // periodic boundaries (deprecated)
-        undefined = 255 } bnd_t;
+        closure_2d = 233, // fake boundary for 2d elements
+        periodic   = 254, // periodic boundaries (deprecated)
+        undefined  = 255 } bnd_t;
 
       // returns true if bnd id is in range
       static bool bndRangeCheck (const int pbt)
@@ -1298,7 +1301,8 @@ namespace ALUGrid
       virtual bnd_t bndtype () const = 0;
 
       // return index of boundary segment
-      virtual int   segmentIndex () const = 0;
+      virtual int  segmentIndex () const = 0;
+      virtual void setSegmentIndex( const int )  {}
 
       // for dune
       virtual hbndseg * up () = 0;
@@ -2414,7 +2418,8 @@ namespace ALUGrid
 
       protected :
         BuilderIF ()
-          : _computeLinkage( true ),
+          : _numMacroBndSegments( 0 ),
+            _computeLinkage( true ),
             _vertexElementLinkageComputed( false )
         {}
 
@@ -2482,8 +2487,11 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
+        size_t _numMacroBndSegments; // number of boundary segments on macro level
+
         bool _computeLinkage ; // if true vertexLinkageEstimate is done
         bool _vertexElementLinkageComputed;
+
 
       public :
         void disableLinkageCheck() { _computeLinkage = true ; }
@@ -2500,6 +2508,8 @@ namespace ALUGrid
 
         // return number of macro boundary segments
         virtual size_t numMacroBndSegments() const;
+
+        virtual void recomputeBndSegmentIndices() ;
 
         // compress all index manager
         virtual void compressIndexManagers();
