@@ -76,8 +76,6 @@ namespace Dune
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
     static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
 
-    static const unsigned int boundaryId2d = 87;
-
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
