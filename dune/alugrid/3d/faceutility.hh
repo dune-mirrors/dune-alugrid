@@ -164,8 +164,8 @@ namespace Dune
     int  innerTwist_;
     int  outerTwist_;
 
-    int  segmentIndex_;
-    int  bndId_;
+    mutable int segmentIndex_;
+    int bndId_;
 
     enum boundary_t { noBoundary          = 0, // no boundary, outside is normal element
                       periodicBoundary    = 1, // periodic boundary

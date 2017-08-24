@@ -1,5 +1,4 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
-//#define DUNE_GRID_CHECK_USE_DEPRECATED_ENTITY_AND_INTERSECTION_INTERFACE 1
 
 #include <config.h>
 
@@ -25,22 +24,6 @@
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 #include <dune/alugrid/dgf.hh>
-
-// disable boundarySegmentIndex check because it's broken
-template < class GridImp, Dune::PartitionIteratorType pitype >
-void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLevelGridViewTraits< const GridImp, pitype > > &gridView )
-{
-  if( gridView.grid().comm().rank() == 0 )
-    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LevelGridView" << std::endl;
-}
-
-// disable boundarySegmentIndex check because it's broken
-template < class GridImp, Dune::PartitionIteratorType pitype >
-void checkBoundarySegmentIndex ( const Dune::GridView< Dune::ALU3dLeafGridViewTraits< const GridImp, pitype > > &gridView )
-{
-  if( gridView.grid().comm().rank() == 0 )
-    std::cerr << "WARNING: checkBoundarySegmentIndex is disabled for ALUGrid::LeafGridView" << std::endl;
-}
 
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
