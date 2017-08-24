@@ -1244,6 +1244,7 @@ namespace ALUGrid
   Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
+  , _segmentIndex( this->getIndex() )
   {
     // don't allow erase
     set( flagLock );
@@ -1287,6 +1288,20 @@ namespace ALUGrid
       alugrid_assert (  myhface3( 1 )->getIndex() == faceIndex  );
       return myneighbour( 0 ).first->firstLdbVertexIndex();
     }
+  }
+
+  template < class A >
+  int Periodic3PllXBaseMacro< A >::segmentIndex( const int fce ) const
+  {
+    assert( fce == 0 || fce == 1 );
+    // segment has two indices, therefore 2 * segIdx + fce
+    return ( 2 * _segmentIndex + fce );
+  }
+
+  template < class A >
+  void Periodic3PllXBaseMacro< A >::setSegmentIndex( const int idx )
+  {
+    _segmentIndex = idx;
   }
 
   template < class A >
@@ -1417,6 +1432,7 @@ namespace ALUGrid
   Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
     : A(level, f0, s0, f1, s1, bt )
     , _moveTo ( -1 )
+    , _segmentIndex( this->getIndex() )
   {
     // don't allow erase
     set( flagLock );
@@ -1459,6 +1475,20 @@ namespace ALUGrid
       alugrid_assert (  myhface4( 1 )->getIndex() == faceIndex );
       return myneighbour( 0 ).first->firstLdbVertexIndex();
     }
+  }
+
+  template < class A >
+  int Periodic4PllXBaseMacro< A >::segmentIndex( const int fce ) const
+  {
+    assert( fce == 0 || fce == 1 );
+    // segment has two indices, therefore 2 * segIdx + fce
+    return ( 2 * _segmentIndex + fce );
+  }
+
+  template < class A >
+  void Periodic4PllXBaseMacro< A >::setSegmentIndex( const int idx )
+  {
+    _segmentIndex = idx;
   }
 
   template < class A >

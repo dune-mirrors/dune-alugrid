@@ -152,6 +152,7 @@ namespace Dune
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
+        // compute segment already since it's complicated to obtain
         segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
         bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
 
@@ -218,8 +219,8 @@ namespace Dune
         {
           // get outer twist
           outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
-          // store segment index
-          segmentIndex_ = boundaryFace().segmentIndex();
+          // compute segment index when needed
+          // segmentIndex_ = boundaryFace().segmentIndex();
           bndId_ = boundaryFace().bndtype();
         }
       }
@@ -365,6 +366,13 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::segmentIndex() const
   {
+    // only compute segment index when needed since it might be expensive
+    if( segmentIndex_ < 0 )
+    {
+      // for periodic boundary it's already computed.
+      assert( bndType_ == domainBoundary );
+      segmentIndex_ = boundaryFace().segmentIndex();
+    }
     alugrid_assert ( segmentIndex_ >= 0 );
     return segmentIndex_;
   }

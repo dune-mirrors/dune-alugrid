@@ -364,7 +364,6 @@ namespace ALUGrid
     private :
       innerbndseg_t * _bbb, * _dwn, * _up;
       const bnd_t _bt; // type of boundary
-      int _segmentIndex; // index of macro boundary segment
       const unsigned char _lvl;
 
       inline bool coarse ();
@@ -382,7 +381,6 @@ namespace ALUGrid
       bool bndNotifyCoarsen ();
       void restoreFollowFace ();
       int level () const;
-      int segmentIndex () const;
       innerbndseg_t * next ();
       innerbndseg_t * down ();
       const innerbndseg_t * next () const;
@@ -536,7 +534,6 @@ namespace ALUGrid
       innerperiodic4_t * _dwn, * _bbb, * _up;
       // we need two indices since this pointer
       // is available on the two periodic sides
-      int _segmentIndex[ 2 ];
       bnd_t _bt[ 2 ];
       unsigned char _lvl;
       const signed char _nChild;
@@ -577,7 +574,6 @@ namespace ALUGrid
       inline const innerface_t * innerHface () const;
       inline int level () const;
       inline int nChild () const;
-      inline int segmentIndex (const int) const;
       inline bnd_t bndtype (const int i) const
       {
         alugrid_assert ( i==0 || i == 1 );
@@ -1076,16 +1072,14 @@ namespace ALUGrid
     }
 #endif
 
-    // store boundary id
-    setBoundaryId( _bt );
-
     this->setGhost ( p );
 
     // get index from manager
     this->setIndex( indexManager().getIndex() );
 
-    // store segment index
-    _segmentIndex = ( _up ) ? ( _up->_segmentIndex ) : this->getIndex(); // get segment index from father
+    // store boundary id
+    setBoundaryId( _bt );
+    return;
   }
 
   template < class A > inline Hbnd4Top < A >::
@@ -1097,9 +1091,6 @@ namespace ALUGrid
   {
     // get index from manager
     this->setIndex( indexManager().getIndex() );
-
-    // store segment by using index
-    _segmentIndex = this->getIndex();
 
     // store boundary id
     setBoundaryId( _bt );
@@ -1131,10 +1122,6 @@ namespace ALUGrid
       face.myvertex(i)->setBndId( id );
       face.myhedge(i)->setBndId( id );
     }
-  }
-
-  template < class A > inline int Hbnd4Top < A >::segmentIndex () const {
-    return _segmentIndex;
   }
 
   template < class A > inline int Hbnd4Top < A >::level () const {
@@ -1384,13 +1371,6 @@ namespace ALUGrid
     // Anforderung zur Balancierung aus einem anliegenden Element direkt verfeinert.
 
     return true;
-  }
-
-  template< class A >
-  inline int Periodic4Top < A >::segmentIndex ( const int fce ) const
-  {
-    alugrid_assert ( fce == 0 || fce == 1 );
-    return _segmentIndex[ fce ];
   }
 
 } // namespace ALUGrid
