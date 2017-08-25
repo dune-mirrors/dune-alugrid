@@ -44,6 +44,7 @@ endif()
 find_package(SIONlib)
 find_package(DLMalloc)
 find_package(ZOLTAN)
+find_package(METIS)
 
 # check for phtreads
 include(FindPThreads)
