@@ -203,7 +203,7 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
   typedef Dune::FaceTopologyMapping< Dune::hexa > CubeFaceMapping;
 
   // get reference element
-  const Dune::ReferenceElement< ctype, dim > &refElem = Dune::ReferenceElements< ctype, dim >::general( en.type() );
+  const auto& refElem = Dune::ReferenceElements< ctype, dim >::general( en.type() );
 
   const int vxSize = refElem.size( face, 1, dim );
   typedef Dune::FieldVector< ctype, dim > CoordinateVectorType;
