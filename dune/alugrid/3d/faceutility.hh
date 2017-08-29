@@ -268,7 +268,7 @@ namespace Dune
 
     //- constructors and destructors
     ALU3dGridGeometricFaceInfoBase(const ConnectorType &);
-    ALU3dGridGeometricFaceInfoBase(const ALU3dGridGeometricFaceInfoBase &);
+    ALU3dGridGeometricFaceInfoBase(const ALU3dGridGeometricFaceInfoBase &) = default;
 
     //! reset status of faceGeomInfo
     void resetFaceGeom();
@@ -298,6 +298,8 @@ namespace Dune
     //- private data
     const ConnectorType& connector_;
 
+    std::array< FieldVector< alu3d_ctype, 2 >, type == tetra ? 3 : 4 > childLocal_;
+
     mutable CoordinateType coordsSelfLocal_;
     mutable CoordinateType coordsNeighborLocal_;
 
@@ -306,16 +308,10 @@ namespace Dune
 
     inline static const ReferenceElementType& getReferenceElement()
     {
+
       return (type == tetra) ?
         ReferenceElementContainerType :: simplex() :
         ReferenceElementContainerType :: cube();
-    }
-
-    inline static const ReferenceFaceType& getReferenceFace()
-    {
-      return (type == tetra) ?
-        ReferenceFaceContainerType :: simplex() :
-        ReferenceFaceContainerType :: cube();
     }
   };
 
@@ -499,12 +495,6 @@ namespace Dune
         ReferenceElementContainerType :: cube();
     }
 
-    inline static const ReferenceFaceType& getReferenceFace()
-    {
-      return (type == tetra) ?
-        ReferenceFaceContainerType :: simplex() :
-        ReferenceFaceContainerType :: cube();
-    }
   };
 
   //! Helper class which provides geometric face information for the

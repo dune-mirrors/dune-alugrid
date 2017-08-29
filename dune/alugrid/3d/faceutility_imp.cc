@@ -485,7 +485,18 @@ namespace Dune
     coordsNeighborLocal_(-1.0),
     generatedGlobal_(false),
     generatedLocal_(false)
-  {}
+  {
+    const Dune::GeometryType face( type == tetra ? Dune::GeometryType::simplex : Dune::GeometryType::cube , 2 );
+    const auto refFace = Dune::referenceElement< alu3d_ctype, 2 >( face );
+
+    // do the mappings
+    const int numCorners = refFace.size( 2 );
+    alugrid_assert( numCorners == int(childLocal_.size()) );
+    for( int i = 0; i < numCorners; ++i )
+    {
+      childLocal_[ i ] = refFace.position( i, 2 );
+    }
+  }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline void
@@ -495,16 +506,6 @@ namespace Dune
     generatedGlobal_ = false;
     generatedLocal_  = false;
   }
-
-  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >::
-  ALU3dGridGeometricFaceInfoBase ( const ALU3dGridGeometricFaceInfoBase &orig )
-  : connector_(orig.connector_),
-    coordsSelfLocal_(orig.coordsSelfLocal_),
-    coordsNeighborLocal_(orig.coordsNeighborLocal_),
-    generatedGlobal_(orig.generatedGlobal_),
-    generatedLocal_(orig.generatedLocal_)
-  {}
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >::CoordinateType&

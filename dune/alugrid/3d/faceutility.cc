@@ -83,20 +83,16 @@ namespace Dune
     CoordinateType cornerCoords;
     referenceElementCoordinatesRefined ( side, cornerCoords );
 
-    typename Base::SurfaceMappingType *referenceElementMapping = Base::buildSurfaceMapping( cornerCoords );
+    std::unique_ptr< typename Base::SurfaceMappingType > referenceElementMapping( Base::buildSurfaceMapping( cornerCoords ) );
 
     NonConformingMappingType faceMapper( connector_.face().parentRule(), connector_.face().nChild() );
 
-    const ReferenceFaceType& refFace = getReferenceFace();
     // do the mappings
-    const int numCorners = refFace.size( 2 );
+    const int numCorners = childLocal_.size();
     for( int i = 0; i < numCorners; ++i )
     {
-      const FieldVector< alu3d_ctype, 2 > &childLocal = refFace.position( i, 2 );
-      alu3dMap2World( *referenceElementMapping, faceMapper.child2parent( childLocal ), result[ i ] );
+      alu3dMap2World( *referenceElementMapping, faceMapper.child2parent( childLocal_[ i ] ), result[ i ] );
     }
-
-    delete referenceElementMapping;
   }
 
   template<  int dimworld, ALU3dGridElementType type, class Comm >
