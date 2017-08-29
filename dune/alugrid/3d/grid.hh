@@ -566,8 +566,15 @@ namespace Dune
     //! Type of the leaf index set, needed by data handle
     typedef typename GridFamily::LeafIndexSetImp LeafIndexSetImp;
 
-    //! reference element type
-    typedef ReferenceElement< alu3d_ctype, dimension > ReferenceElementType;
+    // type of container for reference elements
+    typedef ReferenceElements< alu3d_ctype, dim > ReferenceElementContainerType;
+    // type of container for reference faces
+    typedef ReferenceElements< alu3d_ctype, dim-1 > ReferenceFaceContainerType;
+
+    // type of reference element
+    typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceElementType;
+    // type of reference face
+    typedef std::decay_t< decltype( ReferenceFaceContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceFaceType;
 
     //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;
@@ -1164,11 +1171,21 @@ namespace Dune
     }
 
     //! return reference to Dune reference element according to elType
-    static const ReferenceElementType & referenceElement()
+    static const ReferenceElementType& referenceElement()
     {
-      return ( elType == tetra ) ?
-          ReferenceElements< alu3d_ctype, dimension > :: simplex()
-        : ReferenceElements< alu3d_ctype, dimension > :: cube();
+      static const auto& refElem = ( elType == tetra ) ?
+          Dune::ReferenceElements< alu3d_ctype, dimension >::simplex() :
+          Dune::ReferenceElements< alu3d_ctype, dimension >::cube();
+      return refElem ;
+    }
+
+    //! return reference to Dune face reference element according to elType
+    static const ReferenceFaceType& faceReferenceElement()
+    {
+      static const auto& refElem = ( elType == tetra ) ?
+          Dune::ReferenceElements< alu3d_ctype, dimension-1 >::simplex() :
+          Dune::ReferenceElements< alu3d_ctype, dimension-1 >::cube();
+      return refElem ;
     }
 
     template < class EntitySeed >
