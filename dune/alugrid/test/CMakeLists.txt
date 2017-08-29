@@ -5,6 +5,7 @@ set(TESTS
   test-twists
   test-hierarchic
   test-ball-projection
+  test-backup-restore
 )
 
 foreach(TEST ${TESTS})
