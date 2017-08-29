@@ -230,8 +230,8 @@ namespace Dune
         // create factory for the reference element grid
         ReferenceGridFactory< Grid > factory;
 
-        const Dune::ReferenceElement< ctype, dimension > &refElem
-          = Dune::ReferenceElements< ctype, dimension >::general( type );
+        const auto& refElem =
+          Dune::ReferenceElements< ctype, dimension >::general( type );
 
         // insert vertices
         FieldVector<ctype, dimensionworld> pos( 0 );
