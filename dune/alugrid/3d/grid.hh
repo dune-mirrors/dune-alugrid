@@ -1173,7 +1173,7 @@ namespace Dune
     //! return reference to Dune reference element according to elType
     static const ReferenceElementType& referenceElement()
     {
-      static const auto refElem = ( elType == tetra ) ?
+      static const auto& refElem = ( elType == tetra ) ?
           Dune::ReferenceElements< alu3d_ctype, dimension >::simplex() :
           Dune::ReferenceElements< alu3d_ctype, dimension >::cube();
       return refElem ;
@@ -1182,7 +1182,7 @@ namespace Dune
     //! return reference to Dune face reference element according to elType
     static const ReferenceFaceType& faceReferenceElement()
     {
-      static const auto refElem = ( elType == tetra ) ?
+      static const auto& refElem = ( elType == tetra ) ?
           Dune::ReferenceElements< alu3d_ctype, dimension-1 >::simplex() :
           Dune::ReferenceElements< alu3d_ctype, dimension-1 >::cube();
       return refElem ;

@@ -486,8 +486,9 @@ namespace Dune
     generatedGlobal_(false),
     generatedLocal_(false)
   {
-    const Dune::GeometryType face( type == tetra ? Dune::GeometryType::simplex : Dune::GeometryType::cube , 2 );
-    const auto refFace = Dune::referenceElement< alu3d_ctype, 2 >( face );
+    const auto& refFace = (type == tetra) ?
+      Dune::ReferenceElements< alu3d_ctype, 2 >::simplex() :
+      Dune::ReferenceElements< alu3d_ctype, 2 >::cube() ;
 
     // do the mappings
     const int numCorners = refFace.size( 2 );

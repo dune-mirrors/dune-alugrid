@@ -155,7 +155,7 @@ namespace Dune
 
       const int face = intersection.indexInInside();
 
-      const auto refElem =
+      const auto& refElem =
         ReferenceElements< double, dimension >::general( entity.type() );
       int corners = refElem.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
@@ -182,7 +182,7 @@ namespace Dune
 
       const int face = intersection.indexInInside();
 
-      const auto refElem =
+      const auto& refElem =
         ReferenceElements< double, dimension >::general( entity.type() );
       int corners = refElem.size( face, 1, dimension );
       std :: vector< unsigned int > bound( corners );
