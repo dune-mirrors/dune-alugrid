@@ -520,7 +520,6 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   //if( checkTwist )
   //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
-  /*
   for(int i=0; i<mxl; i++)
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
@@ -531,10 +530,10 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     // if( checkTwist )
     //  checkTwists( grid.leafGridView(), NoMapTwist() );
   }
-  */
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
+
   writeFile( grid.levelGridView( 0 ), "level" );
   writeFile( grid.leafGridView(), "leaf" );
 
@@ -859,7 +858,7 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          filename = "./dgf/unitcube3.dgf";
+          filename = "./dgf/simplex-testgrid-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
@@ -868,13 +867,11 @@ int main (int argc , char **argv) {
 
         checkCapabilities< false >( grid );
 
-        /*
         {
           std::cout << "Check serial grid" << std::endl;
           checkALUSerial(grid,
                          (mysize == 1) ? 1 : 0 );
         }
-        */
 
         // perform parallel check only when more then one proc
         if(mysize > 1)
