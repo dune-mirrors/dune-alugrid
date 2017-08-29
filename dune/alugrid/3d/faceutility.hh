@@ -2,6 +2,7 @@
 #define DUNE_ALU3DGRIDFACEUTILITY_HH
 
 #include <type_traits>
+#include <utility>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -246,9 +247,9 @@ namespace Dune
     typedef ReferenceElements< alu3d_ctype, 2 > ReferenceFaceContainerType;
 
     // type of reference element
-    typedef ReferenceElement<alu3d_ctype, 3> ReferenceElementType;
+    typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceElementType;
     // type of reference face
-    typedef ReferenceElement<alu3d_ctype, 2> ReferenceFaceType;
+    typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
     enum { numVerticesPerFace =
@@ -429,9 +430,9 @@ namespace Dune
     typedef ReferenceElements< alu3d_ctype, 1 > ReferenceFaceContainerType;
 
     // type of reference element
-    typedef ReferenceElement<alu3d_ctype, 2> ReferenceElementType;
+    typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceElementType;
     // type of reference face
-    typedef ReferenceElement<alu3d_ctype, 1> ReferenceFaceType;
+    typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceFaceType;
 
     enum SideIdentifier { INNER, OUTER };
     enum { numVerticesPerFace = 2 }; // A face in 2d is an edge
