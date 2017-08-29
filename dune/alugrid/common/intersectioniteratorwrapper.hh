@@ -180,8 +180,8 @@ public:
   //! coordinates for higher order boundary
   const NormalType centerUnitOuterNormal ( ) const
   {
-    const ReferenceElement<ctype, dim-1> & refElement =
-         ReferenceElements<ctype, dim-1>::general( type() );
+    const auto& refElement = GridImp::faceReferenceElement();
+    assert( refElement.type() == type() );
     return unitOuterNormal(refElement.position(0,0));
   }
 

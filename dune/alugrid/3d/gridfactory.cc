@@ -1061,7 +1061,6 @@ namespace Dune
 
       if( pos == faceMap.end() )
       {
-        std::cerr << "Key: " << key << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
