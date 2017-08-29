@@ -17,6 +17,12 @@ dune_add_library(dunealugrid
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )
 
+# METIS dependencies
+if(METIS_FOUND)
+  target_link_libraries(dunealugrid ${METIS_LIBRARIES})
+  set_property(TARGET dunealugrid APPEND PROPERTY
+              INCLUDE_DIRECTORIES "${METIS_INCLUDE_DIRS}")
+endif()
 # zoltan dependencies
 if(ZOLTAN_FOUND)
   target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
@@ -35,11 +41,11 @@ dune_register_package_flags(LIBRARIES "${DUNE_ALUGRID_LIBRARY}"
                             INCLUDE_DIRS "${DUNE_ALUGRID_INCLUDEDIRS}")
 
 ####################################################################
-#### general warning: avoid such and similar commands here 
+#### general warning: avoid such and similar commands here
 #### as they will not influence anything after the library
 #### is build!!! (as long as you do not call the export() function
 #add_dune_zlib_flags(dunealugrid)
 #####################################################################
-          
+
 install(FILES dunealugridam2cmake.lib
   DESTINATION ${CMAKE_INSTALL_BINDIR}/../lib)
