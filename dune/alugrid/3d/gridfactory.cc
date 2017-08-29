@@ -5,10 +5,12 @@
 #include <config.h>
 #endif
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -406,7 +408,7 @@ namespace Dune
       for( unsigned int el = 0; el<elemSize; ++el )
       {
         const size_t elemIndex = ordering[ el ];
-        array< unsigned int, numCorners > element;
+        std::array< unsigned int, numCorners > element;
         for( unsigned int i = 0; i < numCorners; ++i )
         {
           const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );

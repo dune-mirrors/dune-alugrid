@@ -291,7 +291,7 @@ namespace Dune
     static SharedPtrType
     createSimplexGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                         const FieldVector<ctype,dimworld>& upperRight,
-                        const array< int_t, dim>& elements,
+                        const std::array< int_t, dim>& elements,
                         MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       // create DGF interval block and use DGF parser to create simplex grid
@@ -315,7 +315,7 @@ namespace Dune
     static SharedPtrType
     createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                      const FieldVector<ctype,dimworld>& upperRight,
-                     const array< int_t, dim>& elements,
+                     const std::array< int_t, dim>& elements,
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( mpiComm );
@@ -334,7 +334,7 @@ namespace Dune
     static SharedPtrType
     createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
                          const FieldVector<ctype,dimworld>& upperRight,
-                         const array< int_t, dim>& elements,
+                         const std::array< int_t, dim>& elements,
                          const CollectiveCommunication& comm,
                          const std::string& name )
     {
