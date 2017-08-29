@@ -92,7 +92,7 @@ namespace Dune
     bool success = true;
 
     const GeometryType type = twists.type();
-    const ReferenceElement< double, dimension > &refElement = ReferenceElements< double, dimension >::general( type );
+    const auto& refElement = ReferenceElements< double, dimension >::general( type );
     const int corners = refElement.size( dimension );
 
 

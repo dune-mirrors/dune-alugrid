@@ -1,8 +1,3 @@
-#make libdunealugrid known locally
-set(DUNE_ALUGRID_LIBRARY "${PROJECT_BINARY_DIR}/lib/libdunealugrid.a"
-  CACHE FILEPATH "path to local libs in dune-alugrid" )
-mark_as_advanced(DUNE_ALUGRID_LIBRARY)
-
 #define available alugrid types
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
@@ -44,6 +39,7 @@ endif()
 find_package(SIONlib)
 find_package(DLMalloc)
 find_package(ZOLTAN)
+find_package(METIS)
 
 # check for phtreads
 include(FindPThreads)

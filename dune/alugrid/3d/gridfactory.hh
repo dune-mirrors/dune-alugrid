@@ -326,7 +326,7 @@ namespace Dune
   private:
     unsigned int boundaryInsertionIndex ( const typename Codim< 0 >::Entity &entity, int face ) const
     {
-      const auto &refElem = Dune::ReferenceElements< double, dimension >::general( entity.type() );
+      const auto& refElem = Dune::ReferenceElements< double, dimension >::general( entity.type() );
       const int vxSize = refElem.size( face, 1, dimension );
       std::vector< unsigned int > vertices( vxSize );
       for( int i = 0; i < vxSize; ++i )
