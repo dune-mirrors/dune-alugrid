@@ -152,6 +152,7 @@ namespace Dune
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
         // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
+        // compute segment already since it's complicated to obtain
         segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
         bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
 
@@ -218,8 +219,8 @@ namespace Dune
         {
           // get outer twist
           outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
-          // store segment index
-          segmentIndex_ = boundaryFace().segmentIndex();
+          // compute segment index when needed
+          // segmentIndex_ = boundaryFace().segmentIndex();
           bndId_ = boundaryFace().bndtype();
         }
       }
@@ -365,6 +366,13 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::segmentIndex() const
   {
+    // only compute segment index when needed since it might be expensive
+    if( segmentIndex_ < 0 )
+    {
+      // for periodic boundary it's already computed.
+      assert( bndType_ == domainBoundary );
+      segmentIndex_ = boundaryFace().segmentIndex();
+    }
     alugrid_assert ( segmentIndex_ >= 0 );
     return segmentIndex_;
   }
@@ -477,7 +485,19 @@ namespace Dune
     coordsNeighborLocal_(-1.0),
     generatedGlobal_(false),
     generatedLocal_(false)
-  {}
+  {
+    const auto& refFace = (type == tetra) ?
+      Dune::ReferenceElements< alu3d_ctype, 2 >::simplex() :
+      Dune::ReferenceElements< alu3d_ctype, 2 >::cube() ;
+
+    // do the mappings
+    const int numCorners = refFace.size( 2 );
+    alugrid_assert( numCorners == int(childLocal_.size()) );
+    for( int i = 0; i < numCorners; ++i )
+    {
+      childLocal_[ i ] = refFace.position( i, 2 );
+    }
+  }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline void
@@ -487,16 +507,6 @@ namespace Dune
     generatedGlobal_ = false;
     generatedLocal_  = false;
   }
-
-  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >::
-  ALU3dGridGeometricFaceInfoBase ( const ALU3dGridGeometricFaceInfoBase &orig )
-  : connector_(orig.connector_),
-    coordsSelfLocal_(orig.coordsSelfLocal_),
-    coordsNeighborLocal_(orig.coordsNeighborLocal_),
-    generatedGlobal_(orig.generatedGlobal_),
-    generatedLocal_(orig.generatedLocal_)
-  {}
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline const typename ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >::CoordinateType&

@@ -129,9 +129,8 @@ void method ( const std::string& gridFileName,
   {
     std::stringstream restore ;
     // write backup to hard drive using SIONlib
-    restoreSION( "sioncheckpoint", rank, restore );
-
-    restoreGrid( "sionrestore", restore );
+    if( restoreSION( "sioncheckpoint", rank, restore ) )
+      restoreGrid( "sionrestore", restore );
   }
 
   // restore grid from file stream

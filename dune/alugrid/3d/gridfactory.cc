@@ -5,10 +5,12 @@
 #include <config.h>
 #endif
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -103,6 +105,7 @@ namespace Dune
                        const std::vector< VertexId > &vertices )
   {
     assertGeometryType( geometry );
+    const unsigned int boundaryId2d = ALU3DSPACE Gitter::hbndseg_STI::closure_2d;
 
     if( geometry.dim() != dimension )
       DUNE_THROW( GridError, "Only 3-dimensional elements can be inserted "
@@ -405,7 +408,7 @@ namespace Dune
       for( unsigned int el = 0; el<elemSize; ++el )
       {
         const size_t elemIndex = ordering[ el ];
-        array< unsigned int, numCorners > element;
+        std::array< unsigned int, numCorners > element;
         for( unsigned int i = 0; i < numCorners; ++i )
         {
           const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
@@ -465,11 +468,13 @@ namespace Dune
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
         // if no projection given we use global projection, otherwise identity
-        if( ! projection && !(it->second == int(boundaryId2d)) && globalProjection_ )
+        if( ! projection &&
+            !(it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) &&
+            globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
-          // delete in desctructor of ALUGrid
+          // delete in destructor of ALUGrid
           projection = new ProjectionWrapperType( *globalProjection_ );
           alugrid_assert ( projection );
         }
@@ -547,6 +552,9 @@ namespace Dune
       {
         const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
+        assert( dimension == 3 ? bndType != ALU3DSPACE Gitter::hbndseg::closure_2d : true );
+        // first insert all real boundaries
+        if( dimension == 2 && bndType == ALU3DSPACE Gitter::hbndseg::closure_2d ) continue;
 
         if( elementType == hexa )
         {
@@ -568,6 +576,40 @@ namespace Dune
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
+      }
+
+      if( dimension == 2 )
+      {
+        const BoundaryIdIteratorType endB = boundaryIds_.end();
+        for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+        {
+          const BndPair &boundaryId = *it;
+          ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
+          assert( dimension == 3 ? bndType != ALU3DSPACE Gitter::hbndseg::closure_2d : true );
+          // now insert all closure_2d boundaries
+          if( bndType != ALU3DSPACE Gitter::hbndseg::closure_2d ) continue;
+
+          if( elementType == hexa )
+          {
+            int bndface[ 4 ];
+            for( unsigned int i = 0; i < numFaceCorners; ++i )
+            {
+              bndface[ i ] = globalId( boundaryId.first[ i ] );
+            }
+            mgb.InsertUniqueHbnd4( bndface, bndType );
+          }
+          else if( elementType == tetra )
+          {
+            int bndface[ 3 ];
+            for( unsigned int i = 0; i < numFaceCorners; ++i )
+            {
+              bndface[ i ] = globalId( boundaryId.first[ i ] );
+            }
+            mgb.InsertUniqueHbnd3( bndface, bndType );
+          }
+          else
+            DUNE_THROW( GridError, "Invalid element type");
+        }
       }
 
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
@@ -1019,7 +1061,6 @@ namespace Dune
 
       if( pos == faceMap.end() )
       {
-        std::cerr << "Key: " << key << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
