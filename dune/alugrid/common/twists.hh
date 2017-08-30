@@ -61,18 +61,24 @@ namespace Dune
     template< class ctype >
     struct CoordVector
     {
+      // type of container for reference elements
+      typedef ReferenceElements< ctype, 2 > ReferenceElementContainerType;
+
+      // type of reference element
+      typedef std::decay_t< decltype( ReferenceElementContainerType::general( std::declval< const Dune::GeometryType & >() ) ) > ReferenceElementType;
+
       CoordVector ( const Twist &twist )
         : twist_( twist ),
           refElement_( ReferenceElements< ctype, 2 >::general( twist.type() ) )
       {}
 
-      const FieldVector< ctype, 2 > &operator[] ( int i ) const { return refElement().position( twist_( i ), 2 ); }
+      const FieldVector< ctype, 2 > operator[] ( int i ) const { return refElement().position( twist_( i ), 2 ); }
 
-      const ReferenceElement< ctype, 2 > &refElement () const { return refElement_; }
+      const ReferenceElementType& refElement () const { return refElement_; }
 
     private:
       const Twist &twist_;
-      const ReferenceElement< ctype, 2 > &refElement_;
+      const ReferenceElementType& refElement_;
     };
 
   public:

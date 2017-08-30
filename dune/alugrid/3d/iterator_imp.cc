@@ -340,8 +340,8 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
     typedef typename GridImp::template Codim<0>::Geometry ElementGeometry;
 
     NormalType outerNormal;
-    const ReferenceElement< alu3d_ctype, dim > &refElement =
-       ReferenceElements< alu3d_ctype, dim >::cube();
+
+    const auto& refElement = GridImp::referenceElement();
 
     Coordinate xInside = geometryInInside().global( local );
     Coordinate refNormal = refElement.integrationOuterNormal( indexInInside() );

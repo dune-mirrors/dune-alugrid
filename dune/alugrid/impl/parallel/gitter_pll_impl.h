@@ -335,6 +335,8 @@ namespace ALUGrid
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
       virtual int otherLdbVertexIndex( const int faceIndex ) const;
+      virtual void setSegmentIndex( const int idx );
+      virtual int segmentIndex ( const int fce ) const;
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -348,6 +350,7 @@ namespace ALUGrid
       }
     private :
       int _moveTo;
+      int _segmentIndex;
   };
 
   // ######                                                          #
@@ -417,6 +420,8 @@ namespace ALUGrid
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
       virtual int otherLdbVertexIndex( const int faceIndex ) const;
+      virtual void setSegmentIndex( const int idx );
+      virtual int segmentIndex ( const int fce ) const;
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -426,6 +431,7 @@ namespace ALUGrid
       virtual bool erasable () const;
     private :
       int _moveTo;
+      int _segmentIndex;
   };
 
   // #     #

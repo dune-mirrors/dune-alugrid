@@ -76,8 +76,6 @@ namespace Dune
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
     static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
 
-    static const unsigned int boundaryId2d = 87;
-
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
 
@@ -298,42 +296,44 @@ namespace Dune
         return Grid::getRealImplementation( entity ).getIndex();
     }
 
-    virtual unsigned int
-    insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
+    virtual unsigned int insertionIndex ( const typename Grid::LevelIntersection &intersection ) const
     {
-      std::vector< unsigned int > vertices;
-      const typename Codim< 0 >::Entity& in = intersection.inside();
-
-      const Dune::ReferenceElement< double, dimension > &refElem =
-          Dune::ReferenceElements< double, dimension >::general( in.type() );
-      int faceNr = intersection.indexInInside();
-      const int vxSize = refElem.size( faceNr, 1, dimension );
-      for (int i=0;i<vxSize;++i)
-      {
-        int vxIdx = refElem.subEntity( faceNr, 1 , i , dimension);
-        vertices.push_back( insertionIndex( in.template subEntity<dimension>(vxIdx) ) );
-      }
-
-      FaceType faceId = makeFace( vertices );
-      std::sort( faceId.begin(), faceId.end() );
-
-      typename BoundaryIdMap::const_iterator pos = insertionOrder_.find( faceId );
-      if( pos != insertionOrder_.end() )
-        return pos->second;
-      else
-        return std::numeric_limits<unsigned int>::max();
+      return boundaryInsertionIndex( intersection.inside(), intersection.indexInInside() );
     }
 
-    virtual bool
-    wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    virtual unsigned int insertionIndex ( const typename Grid::LeafIntersection &intersection ) const
     {
-      return intersection.boundary() &&
-             (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
+      return boundaryInsertionIndex( intersection.inside(), intersection.indexInInside() );
+    }
+
+    virtual bool wasInserted ( const typename Grid::LevelIntersection &intersection ) const
+    {
+      return intersection.boundary() && (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
+    }
+
+    virtual bool wasInserted ( const typename Grid::LeafIntersection &intersection ) const
+    {
+      return intersection.boundary() && (insertionIndex(intersection) < std::numeric_limits<unsigned int>::max());
     }
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
   private:
+    unsigned int boundaryInsertionIndex ( const typename Codim< 0 >::Entity &entity, int face ) const
+    {
+      const auto& refElem = Dune::ReferenceElements< double, dimension >::general( entity.type() );
+      const int vxSize = refElem.size( face, 1, dimension );
+      std::vector< unsigned int > vertices( vxSize );
+      for( int i = 0; i < vxSize; ++i )
+        vertices[ i ] = insertionIndex( entity.template subEntity< dimension >( refElem.subEntity( face, 1, i, dimension ) ) );
+
+      FaceType faceId = makeFace( vertices );
+      std::sort( faceId.begin(), faceId.end() );
+
+      const auto pos = insertionOrder_.find( faceId );
+      return (pos != insertionOrder_.end() ? pos->second : std::numeric_limits< unsigned int >::max());
+    }
+
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
     void doInsertBoundary ( int element, int face, int boundaryId );
 
