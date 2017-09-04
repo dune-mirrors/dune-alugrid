@@ -440,13 +440,13 @@ void checkLevelIndexNonConform(GridType & grid)
 }
 
 template <class GridView>
-void writeFile( const GridView& gridView )
+void writeFile( const GridView& gridView , int sequence = 0 )
 {
   Dune::DGFWriter< GridView > writer( gridView );
   writer.write( "dump.dgf" );
 
   Dune::VTKWriter< GridView > vtk( gridView );
-  vtk.write( "dump.vtk" );
+  vtk.write( "dump-" + std::to_string( sequence ) );
 }
 
 template <class GridType>
@@ -521,8 +521,12 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     //  checkTwists( grid.leafGridView(), NoMapTwist() );
   }
 
+  writeFile( grid.leafGridView(), 1 );
+
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
+
+  writeFile( grid.leafGridView(), 2 );
 
   // check iterators
   checkALUIterators( grid );
