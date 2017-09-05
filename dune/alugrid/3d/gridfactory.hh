@@ -94,7 +94,7 @@ namespace Dune
     typedef std::vector< std::pair< VertexType, GlobalIdType > > VertexVector;
     typedef std::vector< ElementType > ElementVector;
     typedef std::pair< FaceType, int > BndPair ;
-    typedef std::map< FaceType,  int > BoundaryIdMap;
+    typedef std::map < FaceType, int > BoundaryIdMap;
     typedef std::vector< std::pair< BndPair, BndPair > > PeriodicBoundaryVector;
     typedef std::pair< unsigned int, int > SubEntity;
     typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
