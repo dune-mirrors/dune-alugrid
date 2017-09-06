@@ -482,8 +482,8 @@ namespace Dune
       bndProjections = new BoundaryProjectionVector( boundarySegments,
                                                     (DuneBoundaryProjectionType*) 0 );
       const auto endB = boundaryIds.end();
-      int segmentIndex = 0;
-      for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentIndex )
+      int segmentId = 0;
+      for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
       {
         // generate boundary segment pointer
         FaceType faceId ( (*it).first);
@@ -504,7 +504,7 @@ namespace Dune
         }
 
         // copy pointer
-        (*bndProjections)[ segmentIndex ] = projection;
+        (*bndProjections)[ segmentId ] = projection;
       }
     }
 

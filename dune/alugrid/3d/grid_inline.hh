@@ -403,9 +403,13 @@ namespace Dune
 
     if( changed )
     {
+      // reset boundary segment index
+      macroBoundarySegmentIndexSet_.invalidate();
+
       // reset size and things
       // maxLevel does not need to be recalculated
       calcExtras();
+
 
       // build new Id Set. Only do that after calcExtras, because here
       // the item lists are needed

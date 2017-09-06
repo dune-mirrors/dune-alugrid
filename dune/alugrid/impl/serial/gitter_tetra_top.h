@@ -175,6 +175,7 @@ namespace ALUGrid
     private :
       innerbndseg_t * _bbb, * _dwn , * _up;
 
+      int _segmentId; // segment index of macro face
       const bnd_t _bt; // type of boundary
       unsigned char _lvl;
 
@@ -196,6 +197,7 @@ namespace ALUGrid
       bool bndNotifyCoarsen ();
       void restoreFollowFace ();
       inline int level () const;
+      inline int segmentId () const;
       inline innerbndseg_t * next ();
       inline innerbndseg_t * down ();
       inline const innerbndseg_t * next () const;
@@ -641,6 +643,7 @@ namespace ALUGrid
       innerperiodic3_t * _dwn, * _bbb, * _up;
       // we need two indices since this pointer
       // is available on the two periodic sides
+      int _segmentId[ 2 ];
       bnd_t _bt[ 2 ];
       const unsigned char _lvl;
       const signed char _nChild;
@@ -681,6 +684,7 @@ namespace ALUGrid
       inline const innerface_t * innerHface () const;
       inline int level () const;
       inline int nChild () const;
+      inline int segmentId (const int) const;
       inline bnd_t bndtype (const int i) const
       {
         alugrid_assert ( i==0 || i==1 );
@@ -912,6 +916,9 @@ namespace ALUGrid
     // set index of boundary segment
     this->setIndex( indexManager().getIndex() );
 
+    // for macro bnd faces store current index as segment index
+    _segmentId = this->getIndex();
+
     // set boundary id
     setBoundaryId( _bt );
     return;
@@ -933,6 +940,9 @@ namespace ALUGrid
 
     // set index of boundary segment
     this->setIndex( indexManager().getIndex() );
+
+    // get segment index from father if existent
+    _segmentId = (_up) ? _up->_segmentId : this->getIndex();
 
     setBoundaryId( _bt );
     return;
@@ -964,6 +974,10 @@ namespace ALUGrid
       face.myvertex(i)->setBndId( id );
       face.myhedge(i)->setBndId( id );
     }
+  }
+
+  template < class A > inline int Hbnd3Top < A > :: segmentId () const {
+    return _segmentId;
   }
 
   template < class A > inline int Hbnd3Top < A > :: level () const {
@@ -1162,6 +1176,10 @@ namespace ALUGrid
     // get index
     this->setIndex( im.getIndex() );
 
+    // take macro index as segment index
+    _segmentId[ 0 ] = this->getIndex();
+    _segmentId[ 1 ] = im.getIndex();
+
     // store boundary ids
     _bt[ 0 ] = bt[ 0 ];
     _bt[ 1 ] = bt[ 1 ];
@@ -1180,6 +1198,8 @@ namespace ALUGrid
 
     // get segment index from father
     alugrid_assert ( _up );
+    _segmentId[ 0 ] = _up->_segmentId[ 0 ];
+    _segmentId[ 1 ] = _up->_segmentId[ 1 ];
 
     // store boundary ids
     _bt[ 0 ] = _up->_bt[ 0 ];
@@ -1192,6 +1212,8 @@ namespace ALUGrid
     IndexManagerType& im = indexManager();
     // free indices
     im.freeIndex( this->getIndex() );
+    // only on macro boundary free segment index
+    if( level() == 0 ) im.freeIndex( _segmentId[ 1 ] );
 
     // delete down and next
     if (_bbb) delete _bbb;
@@ -1200,6 +1222,11 @@ namespace ALUGrid
 
   template < class A > inline int Periodic3Top < A > :: level () const {
     return _lvl;
+  }
+
+  template < class A > inline int Periodic3Top < A > :: segmentId (const int fce) const {
+    alugrid_assert ( fce == 0  || fce == 1 );
+    return _segmentId[ fce ];
   }
 
   template < class A > inline int Periodic3Top < A > :: nChild () const {
