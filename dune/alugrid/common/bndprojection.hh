@@ -38,12 +38,12 @@ namespace Dune {
 
     //! projection operator
     int operator () (const coord_t &orig,
-                     const int segmentIndex,
+                     const int segmentId,
                      coord_t &prj) const
     {
       // get boundary projection
       const DuneBoundaryProjectionType* bndPrj =
-        grid_.boundaryProjection( segmentIndex );
+        grid_.boundaryProjection( segmentId );
 
       // if pointer is zero we do nothing, i.e. identity mapping
       if( bndPrj )

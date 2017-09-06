@@ -32,7 +32,7 @@ namespace Dune
   // ---------------------------
 
   //! hierarchic index set of ALU3dGrid
-    template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   class ALU3dGridHierarchicIndexSet
   : public IndexSet< ALU3dGrid< dim, dimworld, elType, Comm >, ALU3dGridHierarchicIndexSet< dim, dimworld, elType, Comm > >
   {

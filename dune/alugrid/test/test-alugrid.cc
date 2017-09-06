@@ -780,6 +780,7 @@ int main (int argc , char **argv) {
           if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
           checkALUParallel(grid,0,2);
         }
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);

@@ -1315,6 +1315,11 @@ namespace ALUGrid
     // get index
     this->setIndex( im.getIndex() );
 
+    // take macro index as segment index
+    _segmentId[ 0 ] = this->getIndex();
+    // get additional segment index
+    _segmentId[ 1 ] = im.getIndex();
+
     // store bnd id
     _bt[ 0 ] = bt[ 0 ];
     _bt[ 1 ] = bt[ 1 ];
@@ -1331,6 +1336,9 @@ namespace ALUGrid
     this->setIndex( indexManager().getIndex() );
 
     alugrid_assert ( _up );
+    // get segment index from father
+    _segmentId[ 0 ] = _up->_segmentId[ 0 ];
+    _segmentId[ 1 ] = _up->_segmentId[ 1 ];
 
     // copy bnd ids from father
     _bt[ 0 ] = _up->_bt[ 0 ];
@@ -1343,6 +1351,7 @@ namespace ALUGrid
 
     // free index
     im.freeIndex( this->getIndex() );
+    if( level() == 0 ) im.freeIndex( _segmentId[ 1 ] );
 
     // delete down and next
     if (_bbb) delete _bbb;
