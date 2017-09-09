@@ -56,14 +56,6 @@ namespace ALUGrid
             virtual int ghostLevel () const;
             virtual bool ghostLeaf () const;
 
-            virtual int segmentIndex () const
-            {
-              const auto* up = this->up();
-              // for parallel macro boundary segmentIndex is overloaded
-              // for serial application getIndex is sufficient
-              return ( up ) ? up->segmentIndex() : this->getIndex();
-            }
-
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
             virtual const ghostpair_STI & getGhost () const
@@ -90,12 +82,6 @@ namespace ALUGrid
             virtual inline bnd_t bndtype () const;
             virtual int ghostLevel () const;
             virtual bool ghostLeaf () const;
-
-            virtual int segmentIndex () const
-            {
-              const auto* up = this->up();
-              return ( up ) ? up->segmentIndex() : this->getIndex();
-            }
 
             // default implementation is doing nothing for these 3 methods
             // these methods are overloades just on HbndPll
@@ -218,13 +204,6 @@ namespace ALUGrid
         // do nothing here
         virtual void resetGhostIndices() {}
 
-        virtual int segmentIndex ( const int fce ) const
-        {
-          const auto* up = this->up();
-          // fce is either 0 or 1, so segmentIndex is computed using getIndex
-          return ( up ) ? up->segmentIndex( fce ) : (2 * this->getIndex() + fce);
-        }
-
       public:
     };
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL;
@@ -299,12 +278,6 @@ namespace ALUGrid
         // so nothing here
         virtual void resetGhostIndices() {}
 
-        virtual int segmentIndex ( const int fce ) const
-        {
-          const auto* up = this->up();
-          // fce is either 0 or 1, so segmentIndex is computed using getIndex
-          return ( up ) ? up->segmentIndex( fce ) : (2 * this->getIndex() + fce);
-        }
       public:
       };
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL;

@@ -18,7 +18,7 @@ namespace ALUGrid
     virtual ~VertexProjection() {}
     // projection method
     virtual int operator()(const coord_t (&p)[dim],
-                           const int segmentIndex,
+                           const int segmentId,
                            coord_t (&ret)[dim]) const = 0;
   };
 

@@ -1,4 +1,5 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
+#define ALUGRID_CHECK_GLOBALIDSET_UNIQUENESS
 
 #include <config.h>
 
@@ -531,10 +532,12 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     //  checkTwists( grid.leafGridView(), NoMapTwist() );
   }
 
+  writeFile( grid.leafGridView(), 1 );
+
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
 
-  writeFile( grid.levelGridView( 0 ), "level" );
+  //writeFile( grid.levelGridView( 0 ), "level" );
   writeFile( grid.leafGridView(), "leaf" );
 
   // check iterators
@@ -791,6 +794,7 @@ int main (int argc , char **argv) {
           if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
           checkALUParallel(grid,0,2);
         }
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);

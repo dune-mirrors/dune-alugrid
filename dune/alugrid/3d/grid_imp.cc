@@ -231,7 +231,7 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   size_t ALU3dGrid< dim, dimworld, elType, Comm >::numBoundarySegments () const
   {
-    return myGrid().numMacroBndSegments();
+    return macroBoundarySegmentIndexSet().size();
   }
 
 
