@@ -1131,9 +1131,7 @@ namespace ALUGrid
       virtual int nEdges() const = 0;
 
       // return index of boundary segment
-      virtual int segmentIndex (const int) const { return -1; }
-      // set segment index
-      virtual void setSegmentIndex( const int ) {}
+      virtual int segmentId (const int) const { return -1; }
 
       // return true if further refinement is needed to create conforming closure
       virtual bool markForConformingClosure () = 0;
@@ -1307,8 +1305,7 @@ namespace ALUGrid
       virtual bnd_t bndtype () const = 0;
 
       // return index of boundary segment
-      virtual int  segmentIndex () const = 0;
-      virtual void setSegmentIndex( const int )  {}
+      virtual int   segmentId () const = 0;
 
       // for dune
       virtual hbndseg * up () = 0;
@@ -2424,8 +2421,7 @@ namespace ALUGrid
 
       protected :
         BuilderIF ()
-          : _numMacroBndSegments( 0 ),
-            _computeLinkage( true ),
+          : _computeLinkage( true ),
             _vertexElementLinkageComputed( false )
         {}
 
@@ -2493,11 +2489,8 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
-        size_t _numMacroBndSegments; // number of boundary segments on macro level
-
         bool _computeLinkage ; // if true vertexLinkageEstimate is done
         bool _vertexElementLinkageComputed;
-
 
       public :
         void disableLinkageCheck() { _computeLinkage = true ; }
@@ -2514,8 +2507,6 @@ namespace ALUGrid
 
         // return number of macro boundary segments
         virtual size_t numMacroBndSegments() const;
-
-        virtual void recomputeBndSegmentIndices() ;
 
         // compress all index manager
         virtual void compressIndexManagers();
@@ -4213,7 +4204,7 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg3::postRefinement ()
   {
-    ProjectVertexPair pv( projection(), segmentIndex() );
+    ProjectVertexPair pv( projection(), segmentId() );
     if ( pv.first )
     {
       myhface(0)->projectVertex( pv );
@@ -4305,7 +4296,7 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg4::postRefinement ()
   {
-    ProjectVertexPair pv( projection(), segmentIndex() );
+    ProjectVertexPair pv( projection(), segmentId() );
     if( pv.first )
     {
       myhface(0)->projectVertex( pv );

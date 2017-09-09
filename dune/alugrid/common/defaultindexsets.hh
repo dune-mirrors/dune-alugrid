@@ -344,6 +344,95 @@ namespace Dune
     const int level_;
   };
 
+
+  /*! \brief
+    DefaultBoundarySegmentIndexSet creates an index set for the macro boundary segments
+   */
+  template <class Grid>
+  class DefaultBoundarySegmentIndexSet
+  {
+  public:
+    //! type of index
+    typedef int IndexType;
+
+  public:
+    struct Index
+    {
+      IndexType index_;
+      Index() : index_( -1 ) {}
+      int index() const { return index_; }
+      void set( const int index ) { index_ = index; }
+    };
+
+    //! type of geometry types
+    typedef std::vector< Index > SegmentIndexVectorType;
+  protected:
+    SegmentIndexVectorType segmentIndex_;
+    int numSegments_;
+
+  public:
+    DefaultBoundarySegmentIndexSet()
+      : segmentIndex_(),
+        numSegments_( -1 )
+    {
+    }
+
+    //! return LevelIndex of given entity
+    IndexType index ( const int segmentId ) const
+    {
+      alugrid_assert( valid() );
+      alugrid_assert( segmentId < int(segmentIndex_.size() ) );
+      alugrid_assert( segmentIndex_[ segmentId ].index() >= 0 );
+      return segmentIndex_[ segmentId ].index();
+    }
+
+    IndexType size() const
+    {
+      alugrid_assert( valid() );
+      return numSegments_;
+    }
+
+    //! do calculation of the index set, has to be called when grid was
+    //! changed or if index set is created
+    template <class GridViewType>
+    void update( const GridViewType& gridView )
+    {
+      numSegments_ = 0 ;
+      segmentIndex_.clear();
+
+      const auto end = gridView.template end<0, Interior_Partition> ();
+      for( auto it = gridView.template begin<0, Interior_Partition> (); it != end; ++ it )
+      {
+        const auto& entity = *it;
+        const auto endi = gridView.iend( entity );
+        for( auto i = gridView.ibegin( entity ); i != endi; ++i )
+        {
+          const auto& intersection = *i;
+          if( intersection.boundary() )
+          {
+            const int id = Grid::getRealImplementation( intersection ).segmentId();
+            if( int(segmentIndex_.size()) <= id )
+              segmentIndex_.resize( id+1 );
+            if( segmentIndex_[ id ].index() < 0 )
+              segmentIndex_[ id ].set( numSegments_ ++ );
+          }
+        }
+      }
+
+      // if segment index is consecutive use identity
+      if( numSegments_ == int(segmentIndex_.size()) )
+      {
+        for( int i=0; i<numSegments_; ++ i )
+        {
+          segmentIndex_[ i ].set( i );
+        }
+      }
+    }
+
+    bool valid () const { return numSegments_ >= 0; }
+    void invalidate () { numSegments_ = -1; }
+  };
+
 } // namespace Dune
 
 #endif // #ifndef DUNE_ALUGRID_DEFAULTINDEXSETS_HH

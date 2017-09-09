@@ -472,7 +472,6 @@ namespace Dune
   ALUGrid *ALU3dGridFactory< ALUGrid >
     ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    typedef typename BoundaryIdMap :: iterator  BoundaryIdIteratorType;
     BoundaryProjectionVector* bndProjections = 0;
 
     correctElementOrientation();
@@ -529,6 +528,31 @@ namespace Dune
     if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 )
       recreateBoundaryIds();
 
+    // sort boundary ids to insert real boundaries first and then fake
+    // boundaries
+    std::vector< BndPair > boundaryIds;
+    boundaryIds.reserve( boundaryIds_.size() );
+    for( const auto& bndId : boundaryIds_ )
+    {
+      ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) bndId.second;
+      // skip fake boundaries first
+      if( dimension == 2 && bndType == ALU3DSPACE Gitter::hbndseg::closure_2d ) continue;
+      boundaryIds.push_back( bndId );
+    }
+
+    for( const auto& bndId : boundaryIds_ )
+    {
+      ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) bndId.second;
+      // now insert fake boundaries
+      if( dimension == 2 && bndType == ALU3DSPACE Gitter::hbndseg::closure_2d )
+      {
+        boundaryIds.push_back( bndId );
+      }
+    }
+
+    assert( boundaryIds.size() == boundaryIds_.size() );
+    boundaryIds_.clear();
+
     // if dump file should be written
     if( allowGridGeneration_ && !temporary )
     {
@@ -580,7 +604,7 @@ namespace Dune
         out << std :: endl;
       }
 
-      out << int(periodicBoundaries_.size()) << " " << int(boundaryIds_.size()) << std :: endl;
+      out << int(periodicBoundaries_.size()) << " " << int(boundaryIds.size()) << std :: endl;
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
@@ -592,10 +616,10 @@ namespace Dune
           out << " " << facePair.second.first[ numFaceCorners == 3 ? (3 - i) % 3 : i ];
         out << std::endl;
       }
-      const BoundaryIdIteratorType endB = boundaryIds_.end();
-      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+      const auto endB = boundaryIds.end();
+      for( auto it = boundaryIds.begin(); it != endB; ++it )
       {
-        const std::pair< FaceType, int > &boundaryId = *it;
+        const BndPair& boundaryId = *it;
         out << -boundaryId.second;
         for( unsigned int i = 0; i < numFaceCorners; ++i )
           out << " " << boundaryId.first[ i ];
@@ -608,7 +632,7 @@ namespace Dune
       out.close();
     } // if( allowGridGeneration_ && !temporary )
 
-    const size_t boundarySegments = boundaryIds_.size();
+    const size_t boundarySegments = boundaryIds.size();
 
     const size_t bndProjectionSize = boundaryProjections_.size();
     if( bndProjectionSize > 0 || (globalProjection_ && dimension == 2) )
@@ -616,9 +640,9 @@ namespace Dune
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
                                                     (DuneBoundaryProjectionType*) 0 );
-      const BoundaryIdIteratorType endB = boundaryIds_.end();
-      int segmentIndex = 0;
-      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it, ++segmentIndex )
+      const auto endB = boundaryIds.end();
+      int segmentId = 0;
+      for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
       {
         // generate boundary segment pointer
         FaceType faceId ( (*it).first);
@@ -639,7 +663,7 @@ namespace Dune
         }
 
         // copy pointer
-        (*bndProjections)[ segmentIndex ] = projection;
+        (*bndProjections)[ segmentId ] = projection;
       }
     }
 
@@ -716,14 +740,12 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type");
       }
 
-      const BoundaryIdIteratorType endB = boundaryIds_.end();
-      for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
+      const auto endB = boundaryIds.end();
+      for( auto it = boundaryIds.begin(); it != endB; ++it )
       {
         const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
         assert( dimension == 3 ? bndType != ALU3DSPACE Gitter::hbndseg::closure_2d : true );
-        // first insert all real boundaries
-        if( dimension == 2 && bndType == ALU3DSPACE Gitter::hbndseg::closure_2d ) continue;
 
         // only positive boundary id's are allowed
         assert( bndType > 0 );
@@ -748,40 +770,6 @@ namespace Dune
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
-      }
-
-      if( dimension == 2 )
-      {
-        const BoundaryIdIteratorType endB = boundaryIds_.end();
-        for( BoundaryIdIteratorType it = boundaryIds_.begin(); it != endB; ++it )
-        {
-          const BndPair &boundaryId = *it;
-          ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
-          assert( dimension == 3 ? bndType != ALU3DSPACE Gitter::hbndseg::closure_2d : true );
-          // now insert all closure_2d boundaries
-          if( bndType != ALU3DSPACE Gitter::hbndseg::closure_2d ) continue;
-
-          if( elementType == hexa )
-          {
-            int bndface[ 4 ];
-            for( unsigned int i = 0; i < numFaceCorners; ++i )
-            {
-              bndface[ i ] = globalId( boundaryId.first[ i ] );
-            }
-            mgb.InsertUniqueHbnd4( bndface, bndType );
-          }
-          else if( elementType == tetra )
-          {
-            int bndface[ 3 ];
-            for( unsigned int i = 0; i < numFaceCorners; ++i )
-            {
-              bndface[ i ] = globalId( boundaryId.first[ i ] );
-            }
-            mgb.InsertUniqueHbnd3( bndface, bndType );
-          }
-          else
-            DUNE_THROW( GridError, "Invalid element type");
-        }
       }
 
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
@@ -825,8 +813,6 @@ namespace Dune
     VertexVector().swap( vertices_ );
     // clear elements
     ElementVector().swap( elements_ );
-    // free memory
-    boundaryIds_.clear();
 
     if( realGrid_ )
     {
