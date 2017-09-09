@@ -977,94 +977,11 @@ namespace ALUGrid
 
   size_t Gitter::Geometric::BuilderIF::numMacroBndSegments() const
   {
-    return _numMacroBndSegments;
-  }
-
-  void Gitter::Geometric::BuilderIF::recomputeBndSegmentIndices()
-  {
-    size_t segmentIdx = 0;
-
-    for( auto* peri : _periodic3List )
-    {
-      peri->setSegmentIndex( segmentIdx );
-      ++segmentIdx;
-    }
-
-    for( auto* peri : _periodic4List )
-    {
-      peri->setSegmentIndex( segmentIdx );
-      ++segmentIdx;
-    }
-
-    // all periodic faces are counted twice, that is why we
-    // now need to increase the counter to double it's value
-    segmentIdx *= 2;
-
-    for( auto* hbnd : _hbndseg3List )
-    {
-      const auto bndType = hbnd->bndtype();
-      if( bndType >= Gitter::hbndseg_STI::closure ) continue;
-      hbnd->setSegmentIndex( segmentIdx );
-      ++segmentIdx;
-    }
-
-    for( auto* hbnd : _hbndseg4List )
-    {
-      const auto bndType = hbnd->bndtype();
-      if( bndType >= Gitter::hbndseg_STI::closure ) continue;
-      hbnd->setSegmentIndex( segmentIdx );
-      ++segmentIdx;
-    }
-
-    // store current segmentIdx as number
-    _numMacroBndSegments = segmentIdx;
-
-#ifndef NDEBUG
-    {
-      std::vector< bool > segments( _numMacroBndSegments, false );
-
-      for( const auto* peri : _periodic3List )
-      {
-        for( int fce=0; fce<2; ++fce )
-        {
-          const int segIdx = peri->segmentIndex( fce );
-          assert( ! segments[ segIdx ] );
-          segments[ segIdx ] = true;
-        }
-      }
-      for( const auto* peri : _periodic4List )
-      {
-        for( int fce=0; fce<2; ++fce )
-        {
-          const int segIdx = peri->segmentIndex( fce );
-          assert( ! segments[ segIdx ] );
-          segments[ segIdx ] = true;
-        }
-      }
-
-      for( const auto* hbnd : _hbndseg3List )
-      {
-        const auto bndType = hbnd->bndtype();
-        if( bndType >= Gitter::hbndseg_STI::closure ) continue;
-        const int segIdx = hbnd->segmentIndex();
-        assert( ! segments[ segIdx ] );
-        segments[ segIdx ] = true;
-      }
-      for( const auto* hbnd : _hbndseg4List )
-      {
-        const auto bndType = hbnd->bndtype();
-        if( bndType >= Gitter::hbndseg_STI::closure ) continue;
-        const int segIdx = hbnd->segmentIndex();
-        assert( ! segments[ segIdx ] );
-        segments[ segIdx ] = true;
-      }
-
-      for( size_t i=0; i<_numMacroBndSegments; ++i )
-      {
-        assert( segments[ i ] );
-      }
-    }
-#endif
+    // count periodic boundaries twice
+    return _hbndseg3List.size() +
+           _hbndseg4List.size() +
+           (2 * _periodic3List.size()) +
+           (2 * _periodic4List.size());
   }
 
   // compress all index manager
