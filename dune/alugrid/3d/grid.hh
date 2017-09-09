@@ -637,6 +637,8 @@ namespace Dune
     typedef ALU3dGridVertexList< Comm > VertexListType;
     typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType;
 
+    typedef DefaultBoundarySegmentIndexSet< ThisType > BoundarySegmentIndexSetType;
+
   public:
     //! Constructor which reads an ALU3dGrid Macro Triang file
     //! or given GridFile
@@ -1168,6 +1170,8 @@ namespace Dune
     {
       Communications::completeGrid( myGrid() );
       clearIsNewMarkers();
+      // update macro boundary segment index
+      macroBoundarySegmentIndexSet_.invalidate();
     }
 
     //! return reference to Dune reference element according to elType
@@ -1276,7 +1280,7 @@ namespace Dune
     void checkMacroGrid ();
 
     //! return boudanry projection for given segment Id
-    const DuneBoundaryProjectionType* boundaryProjection(const int segmentIndex) const
+    const DuneBoundaryProjectionType* boundaryProjection(const int segmentId) const
     {
       if( bndPrj_ )
       {
@@ -1286,8 +1290,8 @@ namespace Dune
       {
         // pointer can be zero (which is emulates the identity mapping then)
         alugrid_assert ( bndVec_ );
-        alugrid_assert ( segmentIndex < (int) bndVec_->size() );
-        return (*bndVec_)[ segmentIndex ];
+        alugrid_assert ( segmentId < (int) bndVec_->size() );
+        return (*bndVec_)[ segmentId ];
       }
     }
 
@@ -1311,6 +1315,16 @@ namespace Dune
     bool ghostCellsEnabled () const
     {
       return comm().size() > 1 && myGrid().ghostCellsEnabled();
+    }
+
+    const BoundarySegmentIndexSetType& macroBoundarySegmentIndexSet() const
+    {
+      if( ! macroBoundarySegmentIndexSet_.valid() )
+      {
+        macroBoundarySegmentIndexSet_.update( macroGridView() );
+      }
+      alugrid_assert( macroBoundarySegmentIndexSet_.valid() );
+      return macroBoundarySegmentIndexSet_;
     }
 
   protected:
@@ -1363,6 +1377,9 @@ namespace Dune
     // the type of our size cache
     typedef SizeCache<MyType> SizeCacheType;
     std::unique_ptr< SizeCacheType > sizeCache_;
+
+    // macro boundary segment index
+    mutable BoundarySegmentIndexSetType macroBoundarySegmentIndexSet_;
 
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;

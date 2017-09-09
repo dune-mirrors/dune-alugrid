@@ -68,7 +68,7 @@ public:
     if(end)
       it().done( en );
     else
-      it().first( en, wLevel, grid.conformingRefinement(), grid.ghostCellsEnabled() );
+      it().first( en, wLevel, grid );
   }
 
   operator bool () const { return bool( itPtr_ ); }
@@ -116,6 +116,9 @@ public:
 
   //! return the boundary segment index
   size_t boundarySegmentIndex() const { return it().boundarySegmentIndex(); }
+
+  //! return the segment index (non-consecutive)
+  int segmentId() const { return it().segmentId(); }
 
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started.

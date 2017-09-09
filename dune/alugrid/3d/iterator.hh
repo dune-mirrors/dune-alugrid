@@ -149,6 +149,9 @@ public:
   //! return the boundary segment index
   size_t boundarySegmentIndex() const;
 
+  //! return the segment id (non-consecutive)
+  int segmentId() const;
+
   //! intersection of codimension 1 of this neighbor with element where
   //! iteration started.
   //! Here returned element is in LOCAL coordinates of the element
@@ -229,9 +232,7 @@ protected:
 
   // reset IntersectionIterator to first neighbour
   template <class EntityType>
-  void first(const EntityType & en, int wLevel,
-             const bool conformingRefinement,
-             const bool ghostCellsEnabled );
+  void first(const EntityType & en, int wLevel, const GridImp& grid );
 
   // set new face
   void setNewFace(const GEOFaceType& newFace);
@@ -269,6 +270,9 @@ protected:
 
   //! current pointer to ghost face if iterator was started from ghost element
   const BNDFaceType* ghost_;
+
+  //! pointer to grid implementation
+  const GridImp* grid_;
 
   mutable int innerLevel_;
   mutable int index_;
@@ -328,6 +332,7 @@ public ALU3dGridIntersectionIterator<GridImp>
 protected:
   using BaseType :: item_;
   using BaseType :: ghost_;
+  using BaseType :: grid_;
   using BaseType :: innerLevel_;
   using BaseType :: index_;
   using BaseType :: connector_;
@@ -352,9 +357,7 @@ public:
 
   // reset IntersectionIterator to first neighbour
   template <class EntityType>
-  void first(const EntityType & en, int wLevel,
-             const bool conformingRefinement,
-             const bool ghostCellsEnabled );
+  void first(const EntityType & en, int wLevel, const GridImp& grid );
 
   //! return true if across the edge an neighbor on this level exists
   bool neighbor () const;
