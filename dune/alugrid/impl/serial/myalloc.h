@@ -89,7 +89,7 @@ namespace ALUGrid
     public :
 
       // new version of operator new
-      void * operator new (size_t) throw (OutOfMemoryException) ;
+      void * operator new (size_t)
       // corresponding version of operator delete
       void operator delete (void *,size_t) ;
   } ;
