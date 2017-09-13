@@ -194,7 +194,7 @@ namespace ALUGrid
     }
 
     // increments the read position without actualy read data
-    inline void removeObject(const size_t length) throw (EOFException)
+    inline void removeObject(const size_t length)
     {
       _rb += length;
 #ifndef NO_OBJECTSTREAM_DEBUG
@@ -210,7 +210,7 @@ namespace ALUGrid
     }
 
     // static alloc of char buffer for use in mpAccess_MPI
-    inline static char * allocateBuffer(const size_t newSize) throw (OutOfMemoryException)
+    inline static char * allocateBuffer(const size_t newSize)
     {
       // do nothing for size = 0
       if( newSize == 0 ) return 0;
@@ -270,7 +270,7 @@ namespace ALUGrid
 
   protected:
     // reallocated the buffer if necessary
-    inline void reallocateBuffer(size_t newSize) throw (OutOfMemoryException)
+    inline void reallocateBuffer(size_t newSize)
     {
       alugrid_assert ( _owner );
       _len += _bufChunk;
@@ -291,7 +291,7 @@ namespace ALUGrid
     }
 
     // assign buffer
-    inline void assign(const BasicObjectStreamImpl & os) throw (OutOfMemoryException)
+    inline void assign(const BasicObjectStreamImpl & os)
     {
       alugrid_assert ( _buf == 0 );
       if( os._len > 0 )
