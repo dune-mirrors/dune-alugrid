@@ -15,7 +15,7 @@ namespace Dune
     outerFaceNumber_(-1),
     innerTwist_(-665),
     outerTwist_(-665),
-    segmentIndex_( -1 ),
+    segmentId_( -1 ),
     bndId_( -1 ),
     bndType_( noBoundary ),
     conformanceState_(UNDEFINED),
@@ -51,7 +51,7 @@ namespace Dune
     innerFaceNumber_ = -1;
     outerFaceNumber_ = -1;
     bndType_ = noBoundary;
-    segmentIndex_ = -1;
+    segmentId_ = -1;
     bndId_ = 0; // inner face
 
     // points face from inner element away?
@@ -151,9 +151,9 @@ namespace Dune
         alugrid_assert ( dynamic_cast< const GEOPeriodicType* > ( outerElement_ ) );
         const GEOPeriodicType* periodicClosure = static_cast< const GEOPeriodicType* > ( outerElement_ ) ;
 
-        // previously, the segmentIndex( 1 - outerFaceNumber_ ) was used, why?
+        // previously, the segmentId( 1 - outerFaceNumber_ ) was used, why?
         // compute segment already since it's complicated to obtain
-        segmentIndex_ = periodicClosure->segmentIndex( outerFaceNumber_ );
+        segmentId_ = periodicClosure->segmentId( outerFaceNumber_ );
         bndId_  = periodicClosure->bndtype( outerFaceNumber_ );
 
         const GEOFaceType* face = ImplTraits::getFace( *periodicClosure, 1 - outerFaceNumber_ );
@@ -220,7 +220,7 @@ namespace Dune
           // get outer twist
           outerTwist_ = boundaryFace().twist(outerALUFaceIndex());
           // compute segment index when needed
-          // segmentIndex_ = boundaryFace().segmentIndex();
+          segmentId_ = boundaryFace().segmentId();
           bndId_ = boundaryFace().bndtype();
         }
       }
@@ -275,7 +275,7 @@ namespace Dune
     outerFaceNumber_(orig.outerFaceNumber_),
     innerTwist_(orig.innerTwist_),
     outerTwist_(orig.outerTwist_),
-    segmentIndex_( orig.segmentIndex_ ),
+    segmentId_( orig.segmentId_ ),
     bndId_( orig.bndId_ ),
     bndType_( orig.bndType_ ),
     conformanceState_(orig.conformanceState_),
@@ -364,17 +364,10 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::segmentIndex() const
+  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::segmentId() const
   {
-    // only compute segment index when needed since it might be expensive
-    if( segmentIndex_ < 0 )
-    {
-      // for periodic boundary it's already computed.
-      assert( bndType_ == domainBoundary );
-      segmentIndex_ = boundaryFace().segmentIndex();
-    }
-    alugrid_assert ( segmentIndex_ >= 0 );
-    return segmentIndex_;
+    alugrid_assert ( segmentId_ >= 0 );
+    return segmentId_;
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >

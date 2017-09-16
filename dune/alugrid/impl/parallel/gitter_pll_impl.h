@@ -335,8 +335,6 @@ namespace ALUGrid
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
       virtual int otherLdbVertexIndex( const int faceIndex ) const;
-      virtual void setSegmentIndex( const int idx );
-      virtual int segmentIndex ( const int fce ) const;
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -350,7 +348,6 @@ namespace ALUGrid
       }
     private :
       int _moveTo;
-      int _segmentIndex;
   };
 
   // ######                                                          #
@@ -420,8 +417,6 @@ namespace ALUGrid
       virtual void attachPeriodic( const int destination );
       virtual std::pair<int,int> insideLdbVertexIndex() const;
       virtual int otherLdbVertexIndex( const int faceIndex ) const;
-      virtual void setSegmentIndex( const int idx );
-      virtual int segmentIndex ( const int fce ) const;
     public :
       virtual void attach2 (int);
       virtual void unattach2 (int);
@@ -431,7 +426,6 @@ namespace ALUGrid
       virtual bool erasable () const;
     private :
       int _moveTo;
-      int _segmentIndex;
   };
 
   // #     #
@@ -645,8 +639,8 @@ namespace ALUGrid
         {
           alugrid_assert ( &map == &ims.linkagePatterns() );
         }
-        virtual VertexPllXIF_t & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const VertexPllXIF_t & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual VertexPllXIF_t & accessPllX () { return *this; }
+        virtual const VertexPllXIF_t & accessPllX () const { return *this; }
       };
 
       ///////////////////////////////////////////////////////////////
@@ -724,8 +718,8 @@ namespace ALUGrid
         inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                               myhface3_t *f2, int s2, myhface3_t *f3, int s3)
           : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
       typedef TetraTop < TetraEmptyPll > tetra_IMPL;
 
@@ -735,8 +729,8 @@ namespace ALUGrid
         inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
                                    myhface3_t *f2, int s2, myhface3_t *f3, int s3, SimplexTypeFlag elementType)
           : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, elementType) {} // 0 == level 0
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
 
      /////////////////////////////////
@@ -750,8 +744,8 @@ namespace ALUGrid
       public :
         inline Periodic3EmptyPll (myhface3_t * f0, int s0, myhface3_t *f1, int s1 )
           : Periodic3PllXBase< Periodic3Empty >( f0, s0, f1, s1 ) {}
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
       typedef Periodic3Top < Periodic3EmptyPll > periodic3_IMPL;
 
@@ -761,8 +755,8 @@ namespace ALUGrid
         Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1,
                                 const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1, bt ) {}
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
 
   // ######                                                          #
@@ -782,8 +776,8 @@ namespace ALUGrid
         inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1)
           : Periodic4PllXBase< Periodic4Empty >( f0, s0, f1, s1 ) {}
 
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
       typedef Periodic4Top < Periodic4EmptyPll > periodic4_IMPL;
 
@@ -794,8 +788,8 @@ namespace ALUGrid
                                 const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1, bt ) {}
 
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
 
       ///////////////////////////////////////////////////////////////
@@ -812,8 +806,8 @@ namespace ALUGrid
                              myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                              myhface4_t *f4, int s4, myhface4_t *f5, int s5)
           : HexaPllBaseX< HexaEmpty >(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
       typedef HexaTop < HexaEmptyPll > hexa_IMPL;
 
@@ -824,8 +818,8 @@ namespace ALUGrid
                                  myhface4_t *f2, int s2, myhface4_t *f3, int s3,
                                  myhface4_t *f4, int s4, myhface4_t *f5, int s5)
           : HexaPllBaseXMacro< hexa_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
-        virtual ElementPllXIF & accessPllX () throw (Parallel::AccessPllException) { return *this; }
-        virtual const ElementPllXIF & accessPllX () const throw (Parallel::AccessPllException) { return *this; }
+        virtual ElementPllXIF & accessPllX () { return *this; }
+        virtual const ElementPllXIF & accessPllX () const { return *this; }
       };
 
       // Die Randelemente des verteilten Gitters werden aus Templates
