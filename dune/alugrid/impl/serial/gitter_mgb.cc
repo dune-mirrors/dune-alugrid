@@ -800,9 +800,6 @@ namespace ALUGrid
         }
       }
     }
-
-    myBuilder().recomputeBndSegmentIndices();
-
     _finalized = true;
     return;
   }

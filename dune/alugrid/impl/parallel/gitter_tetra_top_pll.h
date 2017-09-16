@@ -26,14 +26,11 @@ namespace ALUGrid
     public :
       inline Hbnd3PllExternal (myhface3_t *, int, const bnd_t bt) ;
       inline ~Hbnd3PllExternal () ;
-      ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-      const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-      void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
-      virtual int segmentIndex () const { return _segmentIndex; }
-      virtual void setSegmentIndex( const int idx ) { _segmentIndex = idx; }
+      ElementPllXIF_t & accessPllX () ;
+      const ElementPllXIF_t & accessPllX () const ;
+      void detachPllXFromMacro () ;
     private :
       mypllx_t * _mxt ;
-      int _segmentIndex ;
   } ;
 
   template < class A, class X, class MX > class Hbnd3PllInternal {
@@ -64,9 +61,9 @@ namespace ALUGrid
           virtual bool lockedAgainstCoarsening () const ;
         public :
           bnd_t bndtype () const ;
-          ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-          const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-          void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+          ElementPllXIF_t & accessPllX () ;
+          const ElementPllXIF_t & accessPllX () const ;
+          void detachPllXFromMacro () ;
 
         private :
           mypllx_t _ext ;
@@ -116,9 +113,9 @@ namespace ALUGrid
                         BuilderIF& , MacroGhostInfoTetra* ) ;
           HbndPllMacro (myhface3_t *,int, const bnd_t bt, BuilderIF& ) ;
          ~HbndPllMacro () ;
-          ElementPllXIF_t & accessPllX () throw (Parallel :: AccessPllException) ;
-          const ElementPllXIF_t & accessPllX () const throw (Parallel :: AccessPllException) ;
-          void detachPllXFromMacro () throw (Parallel :: AccessPllException) ;
+          ElementPllXIF_t & accessPllX () ;
+          const ElementPllXIF_t & accessPllX () const ;
+          void detachPllXFromMacro () ;
           inline int ghostLevel () const ;
 
           // return mxt's ldbVertexIndex, otherwise the default is returned which is wrong
@@ -149,10 +146,7 @@ namespace ALUGrid
   //
   template < class A, class MX > inline Hbnd3PllExternal < A, MX > ::
   Hbnd3PllExternal (myhface3_t * f, int t, const bnd_t bt)
-      : Hbnd3Top < A > (0,f,t,bt),
-        _mxt (new MX (*this)),
-        _segmentIndex( this->getIndex() )
-  {
+      : Hbnd3Top < A > (0,f,t,bt), _mxt (new MX (*this)) {
     this->restoreFollowFace () ;
     return ;
   }
@@ -163,17 +157,17 @@ namespace ALUGrid
     return ;
   }
 
-  template < class A, class MX > ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () throw (Parallel :: AccessPllException) {
+  template < class A, class MX > ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () {
     alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
-  template < class A, class MX > const ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () const throw (Parallel :: AccessPllException) {
+  template < class A, class MX > const ElementPllXIF_t & Hbnd3PllExternal < A, MX > :: accessPllX () const {
     alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
-  template < class A, class MX > void Hbnd3PllExternal < A, MX > :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
+  template < class A, class MX > void Hbnd3PllExternal < A, MX > :: detachPllXFromMacro () {
     delete _mxt ;
     _mxt = 0 ;
     return ;
@@ -190,16 +184,16 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPll ::
-  accessPllX () throw (Parallel :: AccessPllException) {
+  accessPllX () {
     return _ext ;
   }
 
   template < class A, class X, class MX > const ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPll ::
-  accessPllX () const throw (Parallel :: AccessPllException) {
+  accessPllX () const {
     return _ext ;
   }
 
-  template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: HbndPll :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
+  template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: HbndPll :: detachPllXFromMacro () {
     abort () ;
     return ;
   }
@@ -274,17 +268,17 @@ namespace ALUGrid
     return ;
   }
 
-  template < class A, class X, class MX > ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () throw (Parallel :: AccessPllException) {
+  template < class A, class X, class MX > ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () {
     alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
-  template < class A, class X, class MX > const ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () const throw (Parallel :: AccessPllException) {
+  template < class A, class X, class MX > const ElementPllXIF_t & Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: accessPllX () const {
     alugrid_assert (_mxt) ;
     return * _mxt ;
   }
 
-  template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: detachPllXFromMacro () throw (Parallel :: AccessPllException) {
+  template < class A, class X, class MX > void Hbnd3PllInternal < A, X, MX > :: HbndPllMacro :: detachPllXFromMacro () {
     delete _mxt ;
     _mxt = 0 ;
     return ;

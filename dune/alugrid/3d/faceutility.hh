@@ -123,8 +123,8 @@ namespace Dune
 
     int outsideLevel() const;
 
-    //! return boundary segment index if intersection is with domain boundary
-    int segmentIndex() const;
+    //! return boundary segment id if intersection is with domain boundary
+    int segmentId() const;
 
     //! return boundary id if intersection is with domain boundary
     int boundaryId() const;
@@ -165,7 +165,7 @@ namespace Dune
     int  innerTwist_;
     int  outerTwist_;
 
-    mutable int segmentIndex_;
+    mutable int segmentId_;
     int bndId_;
 
     enum boundary_t { noBoundary          = 0, // no boundary, outside is normal element

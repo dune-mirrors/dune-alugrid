@@ -450,14 +450,14 @@ namespace ALUGrid
       // returns true if a vertex projection is set
       virtual bool hasVertexProjection () const { abort(); return false; }
 
-      virtual ElementPllXIF& accessPllX () throw (stiExtender_t::AccessPllException)
+      virtual ElementPllXIF& accessPllX ()
       {
         std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
         abort();
         throw stiExtender_t::AccessPllException();
       }
 
-      virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t::AccessPllException)
+      virtual const ElementPllXIF& accessPllX () const
       {
         std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
         abort();
@@ -635,17 +635,17 @@ namespace ALUGrid
       public:
         virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t;
-        virtual VertexPllXIF & accessPllX () throw (AccessPllException)
+        virtual VertexPllXIF & accessPllX ()
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
-        virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
+        virtual const VertexPllXIF & accessPllX () const
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
-        virtual void detachPllXFromMacro () throw (AccessPllException)
+        virtual void detachPllXFromMacro ()
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
@@ -1125,9 +1125,7 @@ namespace ALUGrid
       virtual int nEdges() const = 0;
 
       // return index of boundary segment
-      virtual int segmentIndex (const int) const { return -1; }
-      // set segment index
-      virtual void setSegmentIndex( const int ) {}
+      virtual int segmentId (const int) const { return -1; }
 
       // return true if further refinement is needed to create conforming closure
       virtual bool markForConformingClosure () = 0;
@@ -1281,7 +1279,7 @@ namespace ALUGrid
         none = DuneIndexProvider::interior, // also the value of interior items
         closure = DuneIndexProvider::border,  // also the value of border items
         ghost_closure = DuneIndexProvider::ghost , // also the value of ghost items
-        closure_2d = 233, // fake boundary for 2d elements
+        closure_2d = 203, // fake boundary for 2d elements
         periodic   = 254, // periodic boundaries (deprecated)
         undefined  = 255 } bnd_t;
 
@@ -1301,8 +1299,7 @@ namespace ALUGrid
       virtual bnd_t bndtype () const = 0;
 
       // return index of boundary segment
-      virtual int  segmentIndex () const = 0;
-      virtual void setSegmentIndex( const int )  {}
+      virtual int   segmentId () const = 0;
 
       // for dune
       virtual hbndseg * up () = 0;
@@ -2418,8 +2415,7 @@ namespace ALUGrid
 
       protected :
         BuilderIF ()
-          : _numMacroBndSegments( 0 ),
-            _computeLinkage( true ),
+          : _computeLinkage( true ),
             _vertexElementLinkageComputed( false )
         {}
 
@@ -2487,11 +2483,8 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
-        size_t _numMacroBndSegments; // number of boundary segments on macro level
-
         bool _computeLinkage ; // if true vertexLinkageEstimate is done
         bool _vertexElementLinkageComputed;
-
 
       public :
         void disableLinkageCheck() { _computeLinkage = true ; }
@@ -2508,8 +2501,6 @@ namespace ALUGrid
 
         // return number of macro boundary segments
         virtual size_t numMacroBndSegments() const;
-
-        virtual void recomputeBndSegmentIndices() ;
 
         // compress all index manager
         virtual void compressIndexManagers();
@@ -4207,7 +4198,7 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg3::postRefinement ()
   {
-    ProjectVertexPair pv( projection(), segmentIndex() );
+    ProjectVertexPair pv( projection(), segmentId() );
     if ( pv.first )
     {
       myhface(0)->projectVertex( pv );
@@ -4299,7 +4290,7 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg4::postRefinement ()
   {
-    ProjectVertexPair pv( projection(), segmentIndex() );
+    ProjectVertexPair pv( projection(), segmentId() );
     if( pv.first )
     {
       myhface(0)->projectVertex( pv );

@@ -26,8 +26,9 @@ inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const bool levelIntersectionIterator) :
   connector_( levelIntersectionIterator ),
   geoProvider_(connector_),
-  item_(0),
-  ghost_(0),
+  item_( nullptr ),
+  ghost_( nullptr ),
+  grid_( nullptr ),
   index_(-1)
 {
 }
@@ -36,8 +37,9 @@ template<class GridImp>
 inline void
 ALU3dGridIntersectionIterator<GridImp> :: done ()
 {
-  item_  = 0;
-  ghost_ = 0;
+  item_  = nullptr;
+  ghost_ = nullptr;
+  grid_  = nullptr;
   // index < 0 indicates end iterator
   index_ = -1;
 }
@@ -46,7 +48,7 @@ template<class GridImp>
 inline void ALU3dGridIntersectionIterator<GridImp> ::
 setFirstItem (const HElementType & elem, int wLevel)
 {
-  ghost_      = 0;
+  ghost_      = nullptr;
   item_       = static_cast<const IMPLElementType *> (&elem);
 
   // Get first face
@@ -83,9 +85,7 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
 template<class GridImp>
 template <class EntityType>
 inline void ALU3dGridIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel,
-       const bool conformingRefinement,
-       const bool ghostCellsEnabled )
+first (const EntityType & en, int wLevel, const GridImp& grid )
 {
   if( ! en.isLeaf() && en.level()>0)
   {
@@ -93,8 +93,11 @@ first (const EntityType & en, int wLevel,
     return ;
   }
 
+  // store grid point for boundarySegmentIndex
+  grid_ = &grid;
+
   // adjust connector flags
-  connector_.setFlags( conformingRefinement, ghostCellsEnabled );
+  connector_.setFlags( grid.conformingRefinement(), grid.ghostCellsEnabled() );
 
   innerLevel_ = en.level();
   index_  = 0;
@@ -121,7 +124,8 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
   connector_(org.connector_),
   geoProvider_(connector_),
   item_(org.item_),
-  ghost_(org.ghost_)
+  ghost_(org.ghost_),
+  grid_( org.grid_ )
 {
   if(org.item_)
   { // else it's a end iterator
@@ -149,6 +153,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     // else it's a end iterator
     item_       = org.item_;
     ghost_      = org.ghost_;
+    grid_       = org.grid_;
     innerLevel_ = org.innerLevel_;
     index_      = org.index_;
     connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
@@ -400,7 +405,17 @@ ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 {
   alugrid_assert ( item_ );
   alugrid_assert ( boundary() );
-  return connector_.segmentIndex();
+  alugrid_assert ( grid_ );
+  return grid_->macroBoundarySegmentIndexSet().index( segmentId() );
+}
+
+template<class GridImp>
+inline int
+ALU3dGridIntersectionIterator<GridImp>::segmentId() const
+{
+  alugrid_assert ( item_ );
+  alugrid_assert ( boundary() );
+  return connector_.segmentId();
 }
 
 template< class GridImp >
@@ -497,10 +512,13 @@ ALU3dGridLevelIntersectionIterator()
 template<class GridImp>
 template <class EntityType>
 inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel,
-       const bool conformingRefinement, const bool ghostCellsEnabled )
+first (const EntityType & en, int wLevel, const GridImp& grid )
 {
-  connector_.setFlags( conformingRefinement, ghostCellsEnabled );
+  // store grid point for boundarySegmentIndex
+  grid_ = &grid;
+
+  // adjust connector flags
+  connector_.setFlags( grid.conformingRefinement(), grid.ghostCellsEnabled() );
 
   // if given Entity is not leaf, we create an end iterator
   index_  = 0;

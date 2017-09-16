@@ -74,14 +74,10 @@ namespace Dune
 
     geomTypes_.clear();
     geomTypes_.resize( dimension+1 );
-    GeometryType tmpType;
     for( int codim = 0; codim <= dimension; ++codim )
     {
-      if (elType == tetra)
-        tmpType.makeSimplex( dimension - codim );
-      else
-        tmpType.makeCube( dimension - codim );
-
+      GeometryType tmpType( elType == tetra ? GeometryType::simplex : GeometryType::cube,
+                            dimension - codim );
       geomTypes_[ codim ].push_back( tmpType );
     }
   }
@@ -403,9 +399,13 @@ namespace Dune
 
     if( changed )
     {
+      // reset boundary segment index
+      macroBoundarySegmentIndexSet_.invalidate();
+
       // reset size and things
       // maxLevel does not need to be recalculated
       calcExtras();
+
 
       // build new Id Set. Only do that after calcExtras, because here
       // the item lists are needed
