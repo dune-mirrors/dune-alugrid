@@ -43,7 +43,9 @@ add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
 if(NOT (${DUNE_COMMON_VERSION} VERSION_LESS 2.6))
-  dune_python_install_package(PATH "python")
+  if(DUNE_PYTHON_pip_FOUND)
+    dune_python_install_package(PATH "python")
+  endif()
 endif()
 
 
