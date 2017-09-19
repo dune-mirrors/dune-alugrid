@@ -6,9 +6,11 @@ logger = logging.getLogger(__name__)
 
 import dune.common.checkconfiguration as checkconfiguration
 
-def aluGrid(constructor, dimgrid, dimworld=None, elementType=None, **parameters):
-    from dune.grid.grid_generator import module
+def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, **parameters):
+    from dune.grid.grid_generator import module, getDimgrid
 
+    if not dimgrid:
+        dimgrid = getDimgrid(constructor)
     try:
         checkconfiguration.preprocessorTest([ ("#if HAVE_DUNE_ALUGRID","ALUGrid is not available") ])
     except checkconfiguration.ConfigurationError as err:
@@ -51,15 +53,15 @@ def aluGrid(constructor, dimgrid, dimworld=None, elementType=None, **parameters)
     return gridModule.LeafGrid(gridModule.reader(constructor))
 
 
-def aluConformGrid(constructor, dimgrid, dimworld=None, **parameters):
+def aluConformGrid(constructor, dimgrid=None, dimworld=None, **parameters):
     return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming")
 
 
-def aluCubeGrid(constructor, dimgrid, dimworld=None, **parameters):
+def aluCubeGrid(constructor, dimgrid=None, dimworld=None, **parameters):
     return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::cube", refinement="Dune::nonconforming")
 
 
-def aluSimplexGrid(constructor, dimgrid, dimworld=None):
+def aluSimplexGrid(constructor, dimgrid=None, dimworld=None):
     return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::nonconforming")
 
 
