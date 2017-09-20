@@ -74,11 +74,14 @@ namespace Dune
 
     geomTypes_.clear();
     geomTypes_.resize( dimension+1 );
-    for( int codim = 0; codim <= dimension; ++codim )
+
+    geomTypes_[ 0 ].push_back( ALU3dGridGeometry< dim,   dimworld, const ThisType >().type() );
+    geomTypes_[ 1 ].push_back( ALU3dGridGeometry< dim-1, dimworld, const ThisType >().type() );
+    geomTypes_[ 2 ].push_back( ALU3dGridGeometry< dim-2, dimworld, const ThisType >().type() );
+
+    if( dimension == 3 )
     {
-      GeometryType tmpType( elType == tetra ? GeometryType::simplex : GeometryType::cube,
-                            dimension - codim );
-      geomTypes_[ codim ].push_back( tmpType );
+      geomTypes_[ 3 ].push_back( ALU3dGridGeometry< 0, dimworld, const ThisType >().type() );
     }
   }
 
