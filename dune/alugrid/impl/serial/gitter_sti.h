@@ -450,14 +450,14 @@ namespace ALUGrid
       // returns true if a vertex projection is set
       virtual bool hasVertexProjection () const { abort(); return false; }
 
-      virtual ElementPllXIF& accessPllX () throw (stiExtender_t::AccessPllException)
+      virtual ElementPllXIF& accessPllX ()
       {
         std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
         abort();
         throw stiExtender_t::AccessPllException();
       }
 
-      virtual const ElementPllXIF& accessPllX () const throw (stiExtender_t::AccessPllException)
+      virtual const ElementPllXIF& accessPllX () const
       {
         std::cerr << "ERROR: hasFace::accessPllX has not been overloaded." << std::endl;
         abort();
@@ -635,17 +635,17 @@ namespace ALUGrid
       public:
         virtual ~VertexIF () {}
         typedef class Key1SLZ identifier_t;
-        virtual VertexPllXIF & accessPllX () throw (AccessPllException)
+        virtual VertexPllXIF & accessPllX ()
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
-        virtual const VertexPllXIF & accessPllX () const throw (AccessPllException)
+        virtual const VertexPllXIF & accessPllX () const
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
         }
-        virtual void detachPllXFromMacro () throw (AccessPllException)
+        virtual void detachPllXFromMacro ()
         {
           alugrid_assert ((abort (), (std::cerr << "  FEHLER in " << __FILE__ << " " << __LINE__ << std::endl)));
           throw AccessPllException ();
@@ -1285,7 +1285,7 @@ namespace ALUGrid
         none = DuneIndexProvider::interior, // also the value of interior items
         closure = DuneIndexProvider::border,  // also the value of border items
         ghost_closure = DuneIndexProvider::ghost , // also the value of ghost items
-        closure_2d = 233, // fake boundary for 2d elements
+        closure_2d = 203, // fake boundary for 2d elements
         periodic   = 254, // periodic boundaries (deprecated)
         undefined  = 255 } bnd_t;
 
