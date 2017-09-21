@@ -172,7 +172,7 @@ namespace ALUGrid
   }
 #endif // end ALUGRID_USES_DLMALLOC
 
-  void* MyAlloc::operator new ( size_t s ) throw (OutOfMemoryException)
+  void* MyAlloc::operator new ( size_t s )
   {
 #ifndef DONT_USE_ALUGRID_ALLOC
     // increase memory usage counter
