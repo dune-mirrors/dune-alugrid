@@ -1090,10 +1090,11 @@ namespace ALUGrid
           //if( item->isBorder() ) continue ;
           if( item->isGhost() )
           {
-            const int idx = item->getIndex();
             //For the 2d grid do not write non-2d vertices in ghost list
             if( GridImp::dimension == 2 && codim == 3 && !(item->is2d())  ) continue;
+
             // check if idx was already found
+            const int idx = item->getIndex();
             if( visited.find(idx) == visitedEnd )
             {
               ghList.getItemList().push_back( (void *) item );

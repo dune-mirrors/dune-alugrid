@@ -16,11 +16,24 @@ namespace ALUGrid
   void GitterBasis::Objects::TetraEmpty::
   os2VertexData ( ObjectStream &os, GatherScatterType &gs, int borderFace )
   {
-      //for the 2d case we do not want to transmit data for
-      //non-2d elements
+    //for the 2d case we do not want to transmit data for
+    //non-2d elements
     if(!is2d() || myvertex(borderFace)->is2d())
-    // only one opposite vertex for tetras
-    gs.setData( os, *myvertex( borderFace ) );
+    {
+      // read previously send stream
+      int size;
+      os.read( size );
+      vertex_STI& vertex = *myvertex( borderFace );
+      if( vertex.isGhost() )
+      {
+        // only one opposite vertex for tetras
+        gs.setData( os, *myvertex( borderFace ) );
+      }
+      else
+      {
+        os.removeObject( size );
+      }
+    }
   }
 
   void GitterBasis::Objects::TetraEmpty ::
@@ -30,9 +43,22 @@ namespace ALUGrid
       Gitter::Geometric::tetra_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
     alugrid_assert ( numEdges == 3 );
+    SmallObjectStream osTmp;
     for(int e = 0; e<numEdges; ++e)
     {
-      gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
+      // read previously send stream
+      int size;
+      os.read( size );
+      hedge_STI& edge = *myhedge1( edgesNotOnFace[e] );
+      // only scatter data on ghost items
+      if( edge.isGhost() )
+      {
+        gs.setData( os, edge );
+      }
+      else
+      {
+        os.removeObject( size );
+      }
     }
   }
 
@@ -43,12 +69,26 @@ namespace ALUGrid
       Gitter::Geometric::tetra_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
     alugrid_assert ( numFaces == 3 );
+    SmallObjectStream osTmp;
     for (int i = 0; i <numFaces; ++i)
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
-      if( !is2d() ||myhface3( facesNotOnFace[i] )->is2d())
-      gs.setData( os, *myhface3( facesNotOnFace[i] ) );
+      hface_STI& face = *myhface3( facesNotOnFace[i] );
+      if( !is2d() || face.is2d() )
+      {
+        // read previously send stream
+        int size;
+        os.read( size );
+        if( face.isGhost() )
+        {
+          gs.setData( os, face );
+        }
+        else
+        {
+          os.removeObject( size );
+        }
+      }
     }
   }
 
@@ -62,7 +102,13 @@ namespace ALUGrid
     //for the 2d case we do not want to transmit data for
     //non-2d elements
     if(!is2d() || myvertex(borderFace)->is2d())
-    gs.sendData( os, *myvertex(borderFace) );
+    {
+      SmallObjectStream osTmp;
+      gs.sendData( osTmp, *myvertex(borderFace) );
+
+      os.write( int(osTmp.size()) );
+      os.writeStream( osTmp );
+    }
   }
 
   void GitterBasis::Objects::TetraEmpty ::
@@ -72,9 +118,14 @@ namespace ALUGrid
       Gitter::Geometric::tetra_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
     alugrid_assert ( numEdges == 3 );
+    SmallObjectStream osTmp;
     for(int e=0; e<numEdges; ++e)
     {
-      gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
+      osTmp.clear();
+      gs.sendData( osTmp, *myhedge1( edgesNotOnFace[e] ) );
+      // write to real stream
+      os.write( int(osTmp.size()) );
+      os.writeStream(osTmp);
     }
   }
 
@@ -85,12 +136,19 @@ namespace ALUGrid
       Gitter::Geometric::tetra_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
     alugrid_assert ( numFaces == 3 );
+    SmallObjectStream osTmp;
     for (int i = 0; i <numFaces; ++i)
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
       if( !is2d() ||myhface3( facesNotOnFace[i] )->is2d())
-      gs.sendData( os,  *myhface3( facesNotOnFace[i] ) );
+      {
+        osTmp.clear();
+        gs.sendData( osTmp,  *myhface3( facesNotOnFace[i] ) );
+        // write to real stream
+        os.write( int(osTmp.size()) );
+        os.writeStream(osTmp);
+      }
     }
   }
 
@@ -162,7 +220,7 @@ namespace ALUGrid
     typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
     const myhface3_t & face = static_cast<const myhface3_t &> (f);
-    alugrid_assert( iface.bndId () ==  Gitter::hbndseg_STI::closure );
+    alugrid_assert( face.bndId () ==  Gitter::hbndseg_STI::border );
 
     myhface3_t & myface = *(myhface3(face_nr));
 
@@ -223,8 +281,20 @@ namespace ALUGrid
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
-      if(!is2d() || myvertex(verticesNotOnFace[i])->is2d() )
-      gs.setData( os, *myvertex( verticesNotOnFace[i] ) );
+      vertex_STI& vertex = *myvertex( verticesNotOnFace[i] );
+      if(!is2d() || vertex.is2d() )
+      {
+        int size;
+        os.read( size );
+        if( vertex.isGhost() )
+        {
+          gs.setData( os, *myvertex( verticesNotOnFace[i] ) );
+        }
+        else
+        {
+          os.removeObject( size );
+        }
+      }
     }
   }
 
@@ -238,7 +308,19 @@ namespace ALUGrid
     alugrid_assert ( numEdges == 8 );
     for(int e = 0; e<numEdges; ++e)
     {
-      gs.setData( os, *myhedge1( edgesNotOnFace[e] ) );
+      // read previously send stream
+      int size;
+      os.read( size );
+      hedge_STI& edge = *myhedge1( edgesNotOnFace[e] );
+      // only scatter data on ghost items
+      if( edge.isGhost() )
+      {
+        gs.setData( os, edge );
+      }
+      else
+      {
+        os.removeObject( size );
+      }
     }
   }
 
@@ -254,8 +336,21 @@ namespace ALUGrid
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
-      if(!is2d() || myhface4( facesNotOnFace[i])->is2d())
-      gs.setData( os, *myhface4( facesNotOnFace[i] ) );
+      hface_STI& face = *myhface4( facesNotOnFace[i] );
+      if(!is2d() || face.is2d())
+      {
+        // read previously send stream
+        int size;
+        os.read( size );
+        if( face.isGhost() )
+        {
+          gs.setData( os, *myhface4( facesNotOnFace[i] ) );
+        }
+        else
+        {
+          os.removeObject( size );
+        }
+      }
     }
   }
 
@@ -269,12 +364,20 @@ namespace ALUGrid
       Gitter::Geometric::hexa_GEO::verticesNotOnFace( borderFace );
     const int numVertices = verticesNotOnFace.size();
     alugrid_assert ( numVertices == 4 );
+    SmallObjectStream osTmp;
     for (int i = 0; i <numVertices; ++i)
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
       if(!is2d() || myvertex(verticesNotOnFace[i])->is2d())
-      gs.sendData( os, *myvertex( verticesNotOnFace[i] ) );
+      {
+        // clear stream from previous data
+        osTmp.clear();
+        gs.sendData( osTmp, *myvertex( verticesNotOnFace[i] ) );
+        // write to real stream
+        os.write( int(osTmp.size()) );
+        os.writeStream(osTmp);
+      }
     }
   }
 
@@ -285,9 +388,17 @@ namespace ALUGrid
       Gitter::Geometric::hexa_GEO::edgesNotOnFace( borderFace );
     const int numEdges = edgesNotOnFace.size();
     alugrid_assert ( numEdges == 8 );
+
+    SmallObjectStream osTmp;
     for(int e=0; e<numEdges; ++e)
     {
-      gs.sendData( os, *myhedge1( edgesNotOnFace[e] ) );
+      // clear stream from previous data
+      osTmp.clear();
+      // gather data
+      gs.sendData( osTmp, *myhedge1( edgesNotOnFace[e] ) );
+      // write to real stream
+      os.write( int(osTmp.size()) );
+      os.writeStream(osTmp);
     }
   }
 
@@ -298,12 +409,21 @@ namespace ALUGrid
       Gitter::Geometric::hexa_GEO::facesNotOnFace( borderFace );
     const int numFaces = facesNotOnFace.size();
     alugrid_assert ( numFaces == 5 );
+    SmallObjectStream osTmp;
     for (int i = 0; i < numFaces; ++i)
     {
       //for the 2d case we do not want to transmit data for
       //non-2d elements
       if( !is2d() ||myhface4( facesNotOnFace[i] )->is2d())
-      gs.sendData( os, *myhface4( facesNotOnFace[i] ) );
+      {
+        // clear tmp stream
+        osTmp.clear();
+        // gather data
+        gs.sendData( osTmp, *myhface4( facesNotOnFace[i] ) );
+        // write to real stream
+        os.write( int(osTmp.size()) );
+        os.writeStream(osTmp);
+      }
     }
   }
 
@@ -375,7 +495,7 @@ namespace ALUGrid
      typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
      const myhface4_t & face = static_cast<const myhface4_t &> (f);
-     alugrid_assert( face.bndId() == Gitter::hbndseg_STI::closure );
+     // alugrid_assert( face.bndId() == Gitter::hbndseg_STI::border );
 
      myhface4_t & myface = *(myhface4(face_nr));
 
@@ -384,10 +504,13 @@ namespace ALUGrid
      IndexManagerType & vxIm = ims.get(BuilderIF::IM_Vertices);
      IndexManagerType & edIm = ims.get(BuilderIF::IM_Edges);
 
-     // set index of face
-     myface.setIndex( ims.get(BuilderIF::IM_Faces) , face.getIndex ());
-     // set bnd id of face
-     myface.setBorderBndId();
+     if( ! myface.isBorder() )
+     {
+       // set index of face
+       myface.setIndex( ims.get(BuilderIF::IM_Faces) , face.getIndex ());
+       // set bnd id of face
+       myface.setBorderBndId();
+     }
 
      for (int i = 0; i < 4; ++i)
      {
@@ -400,12 +523,18 @@ namespace ALUGrid
               face.myvertex(i)->Point()[2])<1e-8);
 
        vertex_GEO * vx = myface.myvertex(i);
-       vx->setIndex(vxIm, face.myvertex(i)->getIndex());
-       vx->setBorderBndId();
+       if( !vx->isBorder() )
+       {
+         vx->setIndex(vxIm, face.myvertex(i)->getIndex());
+         vx->setBorderBndId();
+       }
 
        hedge1_GEO * edge = myface.myhedge1(i);
-       edge->setIndex(edIm, face.myhedge1(i)->getIndex());
-       edge->setBorderBndId();
+       if( ! edge->isBorder() )
+       {
+         edge->setIndex(edIm, face.myhedge1(i)->getIndex());
+         edge->setBorderBndId();
+       }
      }
   }
 

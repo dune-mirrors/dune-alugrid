@@ -812,12 +812,15 @@ namespace ALUGrid
       //for the ghost helements, set index from outside
       void setIndex ( IndexManagerType & im, const int index )
       {
-        // free old index
-        freeIndex(im);
-        // set given index
-        setIndex(index);
-        // now it's a copy
-        set( flagCopy );
+        //if( isGhost() )
+        {
+          // free old index
+          freeIndex(im);
+          // set given index
+          setIndex(index);
+          // now it's a copy
+          set( flagCopy );
+        }
       }
 
       //for the ghost helements, set index from outside
@@ -878,6 +881,7 @@ namespace ALUGrid
       void setGhostBndId ()
       {
         // overwrite id with ghost value
+        // only when it is interior (default)
         if( isInterior() ) _bndid = ghost;
       }
 

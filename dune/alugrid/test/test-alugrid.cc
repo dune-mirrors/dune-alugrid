@@ -10,7 +10,7 @@
 #define DUNE_INTERFACECHECK
 #endif
 
-// #define NO_2D
+#define NO_2D
 // #define NO_3D
 
 #include <iostream>
@@ -532,7 +532,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     //  checkTwists( grid.leafGridView(), NoMapTwist() );
   }
 
-  writeFile( grid.leafGridView(), 1 );
+  // writeFile( grid.leafGridView(), 1 );
 
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);

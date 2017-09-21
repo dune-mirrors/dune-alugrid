@@ -102,7 +102,7 @@ namespace ALUGrid
     void setData ( ObjectStreamType & str , HElementType & elem )
     {
       // one of this should be either true
-      alugrid_assert ( this->containsItem( elem ) || elem.isGhost() );
+      // alugrid_assert ( this->containsItem( elem ) || elem.isGhost() );
 
       // set element and then start
       setElement(elem);
