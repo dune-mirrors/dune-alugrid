@@ -193,7 +193,7 @@ namespace ALUGrid
       write(os._buf,os._wb);
     }
 
-    // increments the read position without actualy read data
+    // increments the read position without actually read data
     inline void removeObject(const size_t length)
     {
       _rb += length;

@@ -15,7 +15,7 @@ namespace ALUGrid
     {
       _ghostPair = gpair;
       alugrid_assert ( _ghostPair.first );
-      // copy indices from internal boundry to myhface(.) of ghost
+      // copy indices from internal boundary to myhface(.) of ghost
       _ghostPair.first->setIndicesAndBndId( *this->myhface(0), _ghostPair.second );
     }
     else

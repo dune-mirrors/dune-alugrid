@@ -1077,6 +1077,7 @@ namespace ALUGrid
 #endif
 
     this->setGhost ( p );
+    alugrid_assert( p.first ? _bt == Gitter::hbndseg_STI::closure : true );
 
     // get index from manager
     this->setIndex( indexManager().getIndex() );
