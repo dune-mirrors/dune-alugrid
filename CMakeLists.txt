@@ -42,13 +42,12 @@ add_subdirectory(lib)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
-if(NOT (${DUNE_COMMON_VERSION} VERSION_LESS 2.6))
-  if(DUNE_PYTHON_pip_FOUND)
-    add_subdirectory("python")
+if(dune-corepy_FOUND)
+  add_subdirectory(python)
+  if(NOT (${DUNE_COMMON_VERSION} VERSION_LESS 2.6))
     dune_python_install_package(PATH "python")
   endif()
 endif()
-
 
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
