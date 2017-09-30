@@ -4,10 +4,10 @@ import sys
 import logging
 logger = logging.getLogger(__name__)
 
-from dune.common.checkconfiguration import have, preprocessorTest, ConfigurationError
+from dune.common.checkconfiguration import assertHave, preprocessorTest, ConfigurationError
 
 try:
-    have("HAVE_DUNE_ALUGRID")
+    assertHave("HAVE_DUNE_ALUGRID")
 
     def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, **parameters):
         from dune.grid.grid_generator import module, getDimgrid
