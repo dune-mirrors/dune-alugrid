@@ -41,17 +41,36 @@ namespace Dune {
     double maxAreaLongestEdgeRatio = 0;
     double avgAreaLongestEdgeRatio = 0;
 
+    double minSine = 1e308;
+    double maxSine = 0;
+
+    // TODO: number of elements connected to one edge
+    // TODO: number of elements connected to one vertex
+
     //in a regular tetrahedron, we have
     // volume = (sqrt(2)/12)*edge^3
     // faceArea = (sqrt(3)/4) *edge^2
-    static const double factorEdge = std::sqrt(2.) / double(12);
-    static const double factorFaceEdge =  std::sqrt( 3. ) / 4.;
-    static const double factorFace = factorEdge * std::pow( ( 1. / factorFaceEdge ), 1.5 )  ;
+
+    const double factorEdgeTet = std::sqrt(2.) / double(12);
+    const double factorFaceEdgeTet =  std::sqrt( 3. ) / 4.;
+    const double factorFaceTet = factorEdgeTet * std::pow( ( 1. / factorFaceEdgeTet ), 1.5 )  ;
+
+    std::vector< double > faceVols;
+
+    const auto& indexSet = gridView.indexSet();
+
+    std::vector< int > nElementsPerEdge( indexSet.size( dim-1 ), 0 );
+    std::vector< int > nElementsPerVertex( indexSet.size( dim ), 0 );
 
     size_t nElements = 0;
     for( const auto& element : elements( gridView, Dune::Partitions::interiorBorder ) )
     {
       const double vol = element.geometry().volume();
+      const Dune::GeometryType geomType = element.type();
+
+      const double factorEdge     = geomType.isCube() ? 1.0 : factorEdgeTet;
+      const double factorFaceEdge = geomType.isCube() ? 1.0 : factorFaceEdgeTet;
+      const double factorFace     = geomType.isCube() ? 1.0 : factorFaceTet;
 
       double shortestEdge = 1e308 ;
       double longestEdge = 0;
@@ -66,12 +85,17 @@ namespace Dune {
         double edgeLength = geo.volume();
         shortestEdge = std::min( shortestEdge, edgeLength );
         longestEdge  = std::max( longestEdge,  edgeLength );
+
+        const int idx = indexSet.subIndex( element, e, dim-1 );
+        ++(nElementsPerEdge[ idx ]);
       }
 
       double smallestFace = 1e308 ;
       double biggestFace = 0;
 
       const int faces = element.subEntities( dim-2 );
+      faceVols.clear();
+      faceVols.reserve( faces );
       for( int f = 0 ; f < faces ; ++ f )
       {
         const auto& face = element.template subEntity<dim-2>( f );
@@ -79,6 +103,8 @@ namespace Dune {
         assert( geo.corners() == 3 );
         //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
         double faceSize = geo.volume();
+        faceVols.push_back( faceSize );
+
         smallestFace = std::min( smallestFace, faceSize );
         biggestFace  = std::max( biggestFace,  faceSize );
 
@@ -115,6 +141,25 @@ namespace Dune {
         avgAreaLongestEdgeRatio += areaLongest;
       }
 
+      const int vertices = element.subEntities( dim );
+
+      for ( int i=0; i<vertices; ++i )
+      {
+        const int idx = indexSet.subIndex( element, i, dim );
+        ++(nElementsPerVertex[ idx ]);
+
+        double sine = (vol * 6.0);
+        sine *= sine;
+        for( int f=0; f<faces; ++f )
+        {
+          if( f == 3-i ) continue ;
+          sine /= (faceVols[ f ] * 2.0);
+        }
+
+        minSine = std::min( minSine, sine );
+        maxSine = std::max( maxSine, sine );
+      }
+
       //in a regular tetrahedron, we have
       // volume = (sqrt(2)/12)*edge^3
       shortestEdge = factorEdge * std::pow( shortestEdge, 3 );
@@ -149,6 +194,28 @@ namespace Dune {
       ++ nElements;
     }
 
+    int maxElementsEdge = 0;
+    int minElementsEdge = 100000000;
+    double avgElementsEdge = 0;
+    double nEdges = nElementsPerEdge.size();
+    for( const auto& nElem : nElementsPerEdge )
+    {
+      maxElementsEdge = std::max( maxElementsEdge, nElem );
+      minElementsEdge = std::min( minElementsEdge, nElem );
+      avgElementsEdge += nElem;
+    }
+
+    int maxElementsVertex = 0;
+    int minElementsVertex = 100000000;
+    double avgElementsVertex = 0;
+    double nVertices = nElementsPerVertex.size();
+    for( const auto& nElem : nElementsPerVertex )
+    {
+      minElementsVertex = std::min( minElementsVertex, nElem );
+      maxElementsVertex = std::max( maxElementsVertex, nElem );
+      avgElementsVertex += nElem;
+    }
+
     nElements = gridView.grid().comm().sum( nElements );
 
     minVolShortestEdgeRatio = gridView.grid().comm().min( minVolShortestEdgeRatio );
@@ -181,6 +248,23 @@ namespace Dune {
     maxAreaLongestEdgeRatio = gridView.grid().comm().max( maxAreaLongestEdgeRatio );
     avgAreaLongestEdgeRatio = gridView.grid().comm().sum( avgAreaLongestEdgeRatio );
 
+    minSine = gridView.grid().comm().min( minSine );
+    maxSine = gridView.grid().comm().max( maxSine );
+
+    minElementsEdge   = gridView.grid().comm().min( minElementsEdge );
+    minElementsVertex = gridView.grid().comm().min( minElementsVertex );
+    maxElementsEdge   = gridView.grid().comm().max( maxElementsEdge );
+    maxElementsVertex = gridView.grid().comm().max( maxElementsVertex );
+
+    nEdges    = gridView.grid().comm().sum( nEdges );
+    nVertices = gridView.grid().comm().sum( nVertices );
+
+    avgElementsVertex = gridView.grid().comm().sum( avgElementsVertex );
+    avgElementsEdge   = gridView.grid().comm().sum( avgElementsEdge );
+
+    avgElementsEdge   /= nEdges;
+    avgElementsVertex /= nVertices;
+
     avgAreaShortestEdgeRatio /= double(4 * nElements);
     avgAreaLongestEdgeRatio /= double(4 * nElements);
 
@@ -194,7 +278,11 @@ namespace Dune {
       out << std::setw(space) << minVolBiggestFaceRatio << " " << maxVolBiggestFaceRatio << " " << avgVolBiggestFaceRatio << " ";
       out << std::setw(space) << minVolSmallestFaceRatio << " " << maxVolSmallestFaceRatio << " " << avgVolSmallestFaceRatio << " ";
       out << std::setw(space) << minAreaLongestEdgeRatio << " " << maxAreaLongestEdgeRatio << " " << avgAreaLongestEdgeRatio << " ";
-      out << std::setw(space) << minAreaShortestEdgeRatio << " " << maxAreaShortestEdgeRatio << " " << avgAreaShortestEdgeRatio << std::endl;
+      out << std::setw(space) << minAreaShortestEdgeRatio << " " << maxAreaShortestEdgeRatio << " " << avgAreaShortestEdgeRatio << " ";
+      out << std::setw(space) << minSine << " " << maxSine << " ";
+      out << std::setw(space) << minElementsEdge << " " << maxElementsEdge << " " << avgElementsEdge << " ";
+      out << std::setw(space) << minElementsVertex << " " << maxElementsVertex << " " << avgElementsVertex << " ";
+      out << std::endl;
     }
   }
 
