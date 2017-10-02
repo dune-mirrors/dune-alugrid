@@ -1,0 +1,15 @@
+set(qualitydir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/quality)
+
+configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
+
+foreach(variant quality)
+  string(TOUPPER ${variant} variant_upper)
+  add_executable(main_${variant} main.cc )
+  dune_target_enable_all_packages(main_${variant})
+  set_property(TARGET main_${variant} APPEND PROPERTY LINK_LIBRARIES dunealugrid)
+  target_compile_definitions(main_${variant} PRIVATE ${variant_upper})
+  target_compile_definitions(main_${variant} PRIVATE "ALUGRID_COUNT_GLOBALCOMM")
+  target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CONFORM" "GRIDDIM=3" "WORLDDIM=3")
+endforeach()
+
+install(FILES ${examples_HEADERS} DESTINATION ${examplesdir})
