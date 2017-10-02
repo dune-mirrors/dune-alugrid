@@ -915,31 +915,19 @@ private:
       case 2:
         {
           std::vector<int> numberOfAdjacentElements(maxVertexIndex_, 0);
+          std::vector<bool> vertexOnBoundary(maxVertexIndex_, false);
           for(auto&& neigh : neighbours_)
           {
-            //On the boundary we want the 2d threshold (6)
+            //We want to treat boundary vertices differently
             if(neigh.second[1] == neigh.second[0])
             {
               for(unsigned int i =0; i < 3 ; ++i)
               {
-                numberOfAdjacentElements[ neigh.first [ i ] ] ++;
+                vertexOnBoundary[ neigh.first [ i ] ] =true;
               }
             }
           }
-          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
-          {
-            int n = numberOfAdjacentElements[ i ];
-            if( n == 0) ;
-            else if( n < 6 )
-            {
-              containedInV0_[ i ] = false;
-            }
-            else
-            {
-              numberOfAdjacentElements[ i ] = threshold;
-            }
-          }
-          //for inner vertices, we want the standard threshold
+          //calculate numberOfAdjacentElements
           for(auto&& el : elements_)
           {
             for(unsigned int i =0; i < 4; ++i)
@@ -949,7 +937,8 @@ private:
           }
           for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
           {
-            if(numberOfAdjacentElements[ i ] < threshold )
+            double bound = vertexOnBoundary[ i ] ? threshold / 2. : threshold ;
+            if(numberOfAdjacentElements[ i ] < bound )
             {
               containedInV0_[ i ] = false;
             }
