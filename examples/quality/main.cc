@@ -13,7 +13,6 @@
 #include <dune/alugrid/common/meshquality.hh>
 
 #define BALL 1
-#define NO_OUPTUT
 
 /** numerical scheme **/
 #include "piecewisefunction.hh"
