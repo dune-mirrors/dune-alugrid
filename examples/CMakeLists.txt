@@ -3,6 +3,7 @@ add_subdirectory(callback)
 add_subdirectory(communication)
 add_subdirectory(dgf)
 add_subdirectory(loadbalance)
+add_subdirectory(quality)
 add_subdirectory(testEfficiency)
 
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
