@@ -22,30 +22,21 @@ struct GlobalRefineData
 
   const static int dimDomain = DomainType::dimension;
 
-  explicit GlobalRefineData (const int problem) : problem_( dimDomain == 3 ? problem : 0)
+  explicit GlobalRefineData (const int problem)
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
     std::ostringstream dgfFileName;
-    if( problem_ == 1 )
-      dgfFileName << path << "/dgf/cube_hc_512.dgf";
-    else if ( problem_ == 2 )
-      dgfFileName << path << "/dgf/cube_hc_4096.dgf";
-    else if ( problem_ == 3 )
-      dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-    else if ( problem_ == 4 )
-      dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
-    else
-      dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
+    dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
     return dgfFileName.str();
   }
 
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return saveInterval();
+    return 2.0 * saveInterval();
   }
 
   int bndType( const DomainType &normal, const DomainType &x, const double time) const
@@ -71,9 +62,6 @@ struct GlobalRefineData
   {
     return 0.05;
   }
-
-private:
-  const int problem_;
 };
 
 // BallModel
