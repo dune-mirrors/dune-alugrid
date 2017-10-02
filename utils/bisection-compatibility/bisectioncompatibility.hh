@@ -10,6 +10,27 @@
 #include <assert.h>
 #include <random>
 
+struct BisectionCompatibilityParameters
+{
+  static int& variant ()
+  {
+    static int var = 0; // default is every vertex in set V0
+    return var;
+  }
+
+  static int& threshold ()
+  {
+    static int var = 2; // default is 2 for threshold
+    return var;
+  }
+
+  static int& useAnnouncedEdge ()
+  {
+    static int var = 1 ;  // default is use announced edges
+    return var;
+  }
+};
+
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
 // Also implements checks for compatibility.
@@ -59,9 +80,9 @@ protected:
   // 1 = longest edge,
   // 2 = least adjacent elements,
   // 3 = random ordering
-  const int variant_   = 0 ;
-  const int threshold_ = 2 ;
-  const bool useAnnouncedEdge = false ;
+  const int variant_   = BisectionCompatibilityParameters::variant() ;
+  const int threshold_ = BisectionCompatibilityParameters::threshold() ;
+  const bool useAnnouncedEdge_ = BisectionCompatibilityParameters::useAnnouncedEdge();
 
 public:
   //constructor taking elements
@@ -168,8 +189,8 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(1,6);
-    const bool useAnnounced = true;
+    calculateV0( variant_, threshold_ );
+    const bool useAnnounced = useAnnouncedEdge_;
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -896,7 +917,7 @@ private:
      3 means random vertices are in V1 (for test purposes)
      everyhting else means V0 = all vertices
   */
-  void calculatevV0(int variante = 0, int threshold = 15)
+  void calculateV0(int variante = 0, int threshold = 15)
   {
     //For now, everything is in V0
     switch (variante) {
