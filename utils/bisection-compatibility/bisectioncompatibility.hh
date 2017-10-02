@@ -55,6 +55,14 @@ protected:
   //the face opposite of the interior node
   unsigned int type1face_;  // = 3 - type1node_ ;
 
+  // 0 = put all vertices in V0,
+  // 1 = longest edge,
+  // 2 = least adjacent elements,
+  // 3 = random ordering
+  const int variant_   = 0 ;
+  const int threshold_ = 2 ;
+  const bool useAnnouncedEdge = false ;
+
 public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
