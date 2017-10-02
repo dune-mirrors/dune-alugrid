@@ -175,11 +175,11 @@ void method ( int problem, int startLvl, int maxLvl,
     /* check if data should be written */
     if( time >= saveStep )
     {
+      // print mesh quality again
+      meshQuality( gridView, time, meshqlty );
+
       if( vtkOut )
       {
-        // print mesh quality again
-        meshQuality( gridView, time, meshqlty );
-
         /* visualize with VTK */
         vtkOut->write( time );
       }
@@ -262,12 +262,27 @@ try
   /* initialize MPI, finalize is done automatically on exit */
   Dune::MPIHelper &mpi = Dune::MPIHelper::instance( argc, argv );
 
+  int variant = 0;
+  int threshold = 2;
+  int useAnnouncedEdge = 1 ;
+
   if( argc < 2 )
   {
     /* display usage */
     if( mpi.rank() == 0 )
-      std::cout << "Usage: " << argv[ 0 ] << " [problem-nr] [startLevel] [maxLevel]" << std::endl;
-    return 0;
+    {
+      std::cout << "Usage: " << argv[ 0 ] << " [variant] [threshold] [useAnnouncedEdge]" << std::endl;
+      std::cout << "variant = [0,1,2,3]" << std::endl;
+      std::cout << "threshold = 0,...,25" << std::endl;
+      std::cout << "useAnncounedEdge = 0, 1" << std::endl;
+      std::cout << "Using default values variant = " << variant << ", threshold = " << threshold << ", useAnnouncedEdge = " << useAnnouncedEdge  << std::endl;
+    }
+  }
+  else
+  {
+    variant   = argc >= 2 ? atoi( argv[1] ) : variant;
+    threshold = argc >= 3 ? atoi( argv[2] ) : threshold;
+    useAnnouncedEdge = argc >= 4 ? atoi( argv[3] ) : useAnnouncedEdge;
   }
 
 #if HAVE_ALUGRID
@@ -275,17 +290,21 @@ try
     std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
 #endif
 
+  BisectionCompatibilityParameters::variant() = variant;
+  BisectionCompatibilityParameters::threshold() = threshold;
+  BisectionCompatibilityParameters::useAnnouncedEdge() = useAnnouncedEdge;
+
   // meassure program time
   Dune::Timer timer ;
 
   /* create problem */
-  const int problem = (argc > 1 ? atoi( argv[ 1 ] ) : 0);
+  const int problem = 0;
 
   /* get level to use for computationa */
-  const int startLevel = (argc > 2 ? atoi( argv[ 2 ] ) : 0);
-  const int maxLevel = (argc > 3 ? atoi( argv[ 3 ] ) : startLevel);
+  const int startLevel = 0;
+  const int maxLevel = 1; // only one level of refinement needed
 
-  const char* path = (argc > 4) ? argv[ 4 ] : "./";
+  const char* path = "./";
   method( problem, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI

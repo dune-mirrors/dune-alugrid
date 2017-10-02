@@ -36,7 +36,7 @@ struct GlobalRefineData
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return 2.0 * saveInterval();
+    return saveInterval();
   }
 
   int bndType( const DomainType &normal, const DomainType &x, const double time) const
