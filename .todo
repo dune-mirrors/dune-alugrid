@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<todo version="0.1.20">
+    <note priority="veryhigh" time="1506933619">
+        Geometry meassures
+        <note priority="veryhigh" time="1506933715">
+            Paper of Krizek (Martin)
+        </note>
+        <note priority="veryhigh" time="1506934118">
+            Keep number of closure elements small
+        </note>
+        <note priority="veryhigh" time="1506934128">
+            Keep angles large
+        </note>
+    </note>
+    <note priority="high" time="1506933748">
+        Tests
+        <note priority="high" time="1506933768">
+            Ball refinement for various geometries (Robert), at least level 9
+        </note>
+    </note>
+    <note priority="high" time="1506933893">
+        Refinement of one element to measure closure (Robert), macro level, level 3, level 6
+        <note priority="high" time="1506933979">
+            Print number of weak compatible elements/faces
+        </note>
+        <note priority="high" time="1506934015">
+            Number of weak compatible faces per vertex
+        </note>
+    </note>
+    <note priority="medium" time="1506934165">
+        Parameter study
+    </note>
+    <note priority="low" time="1506934716">
+        Important numbers (all averages)
+        <note priority="low" time="1506934735">
+            Vol/longEdge(min)
+        </note>
+        <note priority="low" time="1506934745">
+            Vol/ShortEdge(max)
+        </note>
+        <note priority="low" time="1506934776">
+            Vol/largeFace(min)
+        </note>
+        <note priority="low" time="1506934787">
+            Vol/smallFace(max)
+        </note>
+        <note priority="low" time="1506934804">
+            Area/longEdge(min)
+        </note>
+        <note priority="low" time="1506934837">
+            Area/shortEdge(max)
+        </note>
+    </note>
+</todo>
