@@ -31,7 +31,7 @@
 // method
 // ------
 void method ( int problem, int startLvl, int maxLvl,
-              const char* outpath, const int mpiSize  )
+              const char* outpath, const int mpiSize )
 {
   typedef Dune::GridSelector::GridType Grid;
 
@@ -80,8 +80,9 @@ void method ( int problem, int startLvl, int maxLvl,
   // create the diagnostics object
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
 
+  std::ofstream meshqlty ( "meshquality.gnu" );
   // investigate mesh quality
-  meshQuality( grid.leafGridView() );
+  meshQuality( grid.leafGridView(), 0.0, meshqlty );
 
   /* ... some global refinement steps */
   if( verboseRank )
@@ -197,7 +198,7 @@ void method ( int problem, int startLvl, int maxLvl,
       if( vtkOut )
       {
         // print mesh quality again
-        meshQuality( gridView );
+        meshQuality( gridView, time, meshqlty );
 
         /* visualize with VTK */
         vtkOut->write( time );
