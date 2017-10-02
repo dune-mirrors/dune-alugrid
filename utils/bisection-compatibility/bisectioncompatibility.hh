@@ -160,7 +160,8 @@ public:
     alberta2Stevenson();
 
     //calculate the sets V0 and V1
-    calculatevV0(2,25);
+    calculatevV0(1,6);
+    const bool useAnnounced = true;
 
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
@@ -226,13 +227,13 @@ public:
 
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
-        if( (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
+        if( useAnnounced && (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
           it = pointerIntoList [ el [ nodeInNeigh ] ];
           ++it;
         }
         //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
-        else if (nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] )
+        else if ( useAnnounced && ( nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] ) )
         {
           it = pointerIntoList [ el [ nodeInNeigh ] ];
         }
