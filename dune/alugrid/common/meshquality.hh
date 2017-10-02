@@ -13,7 +13,7 @@
 namespace Dune {
 
   template <class GridView>
-  static void meshQuality( const GridView& gridView )
+  static void meshQuality( const GridView& gridView, const double time, std::ostream& out )
   {
     static const int dim = GridView::dimension;
 
@@ -186,12 +186,15 @@ namespace Dune {
 
     if( gridView.grid().comm().rank() == 0 )
     {
-      std::cout << "MeshQuality: Volume / Longest Edge  " << minVolLongestEdgeRatio << " " << maxVolLongestEdgeRatio << " " << avgVolLongestEdgeRatio << std::endl;
-      std::cout << "MeshQuality: Volume / Shortest Edge " << minVolShortestEdgeRatio << " " << maxVolShortestEdgeRatio << " " << avgVolShortestEdgeRatio << std::endl << std::endl;
-      std::cout << "MeshQuality: Volume / Biggest Face  " << minVolBiggestFaceRatio << " " << maxVolBiggestFaceRatio << " " << avgVolBiggestFaceRatio << std::endl;
-      std::cout << "MeshQuality: Volume / Smallest Face " << minVolSmallestFaceRatio << " " << maxVolSmallestFaceRatio << " " << avgVolSmallestFaceRatio << std::endl << std::endl;
-      std::cout << "MeshQuality: Area / Longest Edge  " << minAreaLongestEdgeRatio << " " << maxAreaLongestEdgeRatio << " " << avgAreaLongestEdgeRatio << std::endl;
-      std::cout << "MeshQuality: Area / Shortest Edge " << minAreaShortestEdgeRatio << " " << maxAreaShortestEdgeRatio << " " << avgAreaShortestEdgeRatio << std::endl << std::endl;
+      int space = 18;
+      out << "# MeshQuality: time=1    V/LE(min=2,max=3,avg=4)      V/SE(min=5,max=6,avg=7)     V/LF(min=8,max=9,avg=10)     V/SF(min=11,max=12,avg=13)     A/LE(min=14,max=15,avg=16)     A/SE(min=17,max=18,avg=19)  " << std::endl;
+      out << time << " ";
+      out << std::setw(space) << minVolLongestEdgeRatio << " " << maxVolLongestEdgeRatio << " " << avgVolLongestEdgeRatio << " ";
+      out << std::setw(space) << minVolShortestEdgeRatio << " " << maxVolShortestEdgeRatio << " " << avgVolShortestEdgeRatio << " " ;
+      out << std::setw(space) << minVolBiggestFaceRatio << " " << maxVolBiggestFaceRatio << " " << avgVolBiggestFaceRatio << " ";
+      out << std::setw(space) << minVolSmallestFaceRatio << " " << maxVolSmallestFaceRatio << " " << avgVolSmallestFaceRatio << " ";
+      out << std::setw(space) << minAreaLongestEdgeRatio << " " << maxAreaLongestEdgeRatio << " " << avgAreaLongestEdgeRatio << " ";
+      out << std::setw(space) << minAreaShortestEdgeRatio << " " << maxAreaShortestEdgeRatio << " " << avgAreaShortestEdgeRatio << std::endl;
     }
   }
 
