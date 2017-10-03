@@ -1005,7 +1005,6 @@ private:
           std::vector<int> numberOfAdjacentRefEdges(maxVertexIndex_, 0);
           //we assume that the edges have been sorted and
           //the refinement edge is, where it belongs
-          if(threshold == 15) threshold = 2;
           for(auto&& el : elements_)
           {
             numberOfAdjacentRefEdges [ el [ type0nodes_[ 0 ] ] ] ++;
@@ -1013,7 +1012,7 @@ private:
           }
           for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
           {
-            if(numberOfAdjacentRefEdges[ i ] > threshold )
+            if(numberOfAdjacentRefEdges[ i ] >= threshold )
             {
               containedInV0_[ i ] = true;
             }
