@@ -123,17 +123,14 @@ public:
       else if(! checkStrongCompatibility(face, verbose))
       {
         ++result;
-      }
-      else
-      {
         for(size_t i =0; i < 3; ++i)
         {
           ++(nonCompatFacesAtVertex[face.first[i]]);
         }
       }
     }
-    std::cout << "Not strong compatible Macro Faces: " << result << " Inner Faces: " << neighbours_.size() - bndFaces << " Total Faces: " << neighbours_.size()  << std::endl;
-    std::cout << "Maximum Number of not strong compatible Macro Faces at a Vertex " << *(std::max_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " Minimum: " << *(std::min_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " Average: " << (std::accumulate(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end(), 0.0) / nonCompatFacesAtVertex.size() ) << std::endl << std::endl;
+    std::cout << "NotStrongCompatibleMacroFaces"  << " InnerFaces "  << " TotalFaces " << "Maximum/Vertex " << " Minimum/Vertex "  << std::endl;
+    std::cout << result << " " << neighbours_.size() - bndFaces << " " << neighbours_.size() << " " <<  *(std::max_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " " << *(std::min_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << std::endl << std::endl;
     return result;
   }
 
@@ -1015,7 +1012,7 @@ private:
         ++sizeOfV1;
       }
     }
-    std::cout << "Size of V0: " << sizeOfV0 << ", Size of V1: " << sizeOfV1 << std::endl << std::endl;
+    std::cout << "#V0 #V1" << std::endl   << sizeOfV0 << " " << sizeOfV1 << std::endl;
   }
 
 }; //class bisectioncompatibility
