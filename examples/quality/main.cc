@@ -29,7 +29,7 @@
 
 // method
 // ------
-void method ( int problem, int startLvl, int maxLvl,
+void method ( const std::string& dgffile, int startLvl, int maxLvl,
               const char* outpath, const int mpiSize )
 {
   typedef Dune::GridSelector::GridType Grid;
@@ -39,12 +39,11 @@ void method ( int problem, int startLvl, int maxLvl,
 
   /** type of pde to solve **/
   typedef GlobalRefineModel< Grid::dimensionworld > ModelType;
-  ModelType model( problem );
+  ModelType model( 0 );
 
   /* Grid construction ... */
-  std::string name = model.problem().gridFile( "./", mpiSize );
   // create grid pointer and release to free memory of GridPtr
-  Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
+  Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( dgffile ).release();
 
   Grid &grid = *gridPtr;
 
@@ -266,24 +265,28 @@ try
   int threshold = 2;
   int useAnnouncedEdge = 1 ;
 
-  if( argc < 2 )
+  if( argc < 3 )
   {
     /* display usage */
     if( mpi.rank() == 0 )
     {
-      std::cout << "Usage: " << argv[ 0 ] << " [variant] [threshold] [useAnnouncedEdge]" << std::endl;
+      std::cout << "Usage: " << argv[ 0 ] << " [dgffile] [variant] [threshold] [useAnnouncedEdge]" << std::endl;
       std::cout << "variant = [0,1,2,3]" << std::endl;
       std::cout << "threshold = 0,...,25" << std::endl;
       std::cout << "useAnncounedEdge = 0, 1" << std::endl;
       std::cout << "Using default values variant = " << variant << ", threshold = " << threshold << ", useAnnouncedEdge = " << useAnnouncedEdge  << std::endl;
     }
+    if( argc < 2 )
+      return 0;
   }
   else
   {
-    variant   = argc >= 2 ? atoi( argv[1] ) : variant;
-    threshold = argc >= 3 ? atoi( argv[2] ) : threshold;
-    useAnnouncedEdge = argc >= 4 ? atoi( argv[3] ) : useAnnouncedEdge;
+    variant   = argc >= 3 ? atoi( argv[2] ) : variant;
+    threshold = argc >= 4 ? atoi( argv[3] ) : threshold;
+    useAnnouncedEdge = argc >= 5 ? atoi( argv[4] ) : useAnnouncedEdge;
   }
+
+  std::string dgffile( argv[1] );
 
 #if HAVE_ALUGRID
   if( mpi.rank() == 0 )
@@ -297,15 +300,12 @@ try
   // meassure program time
   Dune::Timer timer ;
 
-  /* create problem */
-  const int problem = 0;
-
   /* get level to use for computationa */
   const int startLevel = 0;
   const int maxLevel = 1; // only one level of refinement needed
 
   const char* path = "./";
-  method( problem, startLevel, maxLevel, path, mpi.size() );
+  method( dgffile, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI
   MPI_Barrier ( MPI_COMM_WORLD );
