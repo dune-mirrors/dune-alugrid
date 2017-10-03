@@ -30,7 +30,7 @@
 // method
 // ------
 void method ( const std::string& dgffile, int startLvl, int maxLvl,
-              const char* outpath, const int mpiSize )
+              const std::string outpath, const int mpiSize )
 {
   typedef Dune::GridSelector::GridType Grid;
 
@@ -62,7 +62,7 @@ void method ( const std::string& dgffile, int startLvl, int maxLvl,
   // create the diagnostics object
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
 
-  std::ofstream meshqlty ( "meshquality.gnu" );
+  std::ofstream meshqlty (  outpath  + "meshquality.gnu" );
   // investigate mesh quality
   meshQuality( grid.leafGridView(), 0.0, meshqlty );
 
@@ -304,7 +304,9 @@ try
   const int startLevel = 0;
   const int maxLevel = 1; // only one level of refinement needed
 
-  const char* path = "./";
+  std::size_t pos1 = dgffile.find("/dgf/") + 5;
+  std::size_t pos2 = dgffile.find(".dgf");
+  const std::string path =  "./meshquality/" + dgffile.substr(pos1, pos2-pos1) + "/" + std::to_string( variant) + "-" + std::to_string(threshold) + "-" + std::to_string(useAnnouncedEdge) + "-" ;
   method( dgffile, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI
