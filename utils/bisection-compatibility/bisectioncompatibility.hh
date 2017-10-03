@@ -995,7 +995,7 @@ private:
      3 means random vertices are in V1 (for test purposes)
      everyhting else means V0 = all vertices
   */
-  void calculateV0(int variante = 0, int threshold = 15)
+  void calculateV0(int variante, int threshold)
   {
     //For now, everything is in V0
     switch (variante) {
