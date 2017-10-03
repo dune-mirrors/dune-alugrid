@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <random>
 
+#include <dune/common/timer.hh>
+
 struct BisectionCompatibilityParameters
 {
   static int& variant ()
@@ -205,24 +207,26 @@ public:
     vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
-    std::vector<bool> doneVertices(maxVertexIndex_, false);
-    std::vector< std::list<unsigned int>::iterator > pointerIntoList(maxVertexIndex_);
+
+    std::vector< std::pair< double, int > > vertexOrder( maxVertexIndex_+1 , std::make_pair(-1.0, -1 ) );
 
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
     for(unsigned int i=0 ; i < 4 ; ++i)
     {
-      int vtx = el0[ 3 - i ];
-      vertexPriorityList.push_front ( vtx );
-      doneVertices[ vtx ] = true;
-      pointerIntoList[ vtx ] = vertexPriorityList.begin();
+      int vtx = el0[ i ];
+      vertexOrder[ vtx ].first = i+1;
+      // previous vertex index or -1
+      vertexOrder[ vtx ].second = i > 0 ? el0[ i-1 ] : -1;
     }
 
+    const unsigned int l1 = -1;
     //create the vertex priority List
     const int numberOfElements = elements_.size();
+    Dune::Timer timer;
     for(int counter = 0; counter < numberOfElements ; ++counter)
     {
-      FaceElementType faceElement;
+      FaceElementType faceElement = std::make_pair( FaceType({l1,l1,l1}), EdgeType( {l1,l1}) );
       if(counter == 0)
       {
         FaceType face;
@@ -231,11 +235,26 @@ public:
       }
       else
       {
+        assert( ! activeFaceList.empty() );
         //take element at first face from activeFaceList
-        faceElement = *activeFaceList.begin();
+        auto it = activeFaceList.begin();
+        int el1 = it->second[ 0 ];
+        int el2 = it->second[ 1 ];
+
+        while( doneElements[ el1 ] && doneElements[ el2 ] )
+        {
+          activeFaceList.erase( it++ );
+          assert( it != activeFaceList.end() );
+          el1 = it->second[ 0 ];
+          el2 = it->second[ 1 ];
+        }
+
+        faceElement = *it;
       }
+
       //el has been worked on
       int elIndex = faceElement.second[0];
+
       //neigh is to be worked on
       int neighIndex = faceElement.second[1];
       if(!doneElements[elIndex])
@@ -243,6 +262,7 @@ public:
         assert(doneElements[neighIndex] || counter == 0 );
         std::swap(elIndex, neighIndex);
       }
+
       assert(!doneElements[neighIndex] || counter == 0);
       doneElements[neighIndex] = true;
       ElementType el = elements_[elIndex];
@@ -255,11 +275,14 @@ public:
       //helper element that contains neigh
       // in the ordering of vertexPriorityList
       ElementType newNeigh(el);
-      //insertion of new vertex
-      if( !doneVertices[ neigh [ nodeInNeigh ] ] )
-      {
-        auto it = pointerIntoList [ el [ nodeInEl ] ];
 
+      //insertion of new vertex
+      if( vertexOrder[ neigh [ nodeInNeigh ] ].first < 0 )
+      {
+        auto& vxPair = vertexOrder[ el [ nodeInEl ] ];
+        assert( vxPair.first >= 0 );
+
+        /*
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
         if( useAnnounced && (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
@@ -277,31 +300,66 @@ public:
         {
           ++it;
         }
-        pointerIntoList[ neigh [ nodeInNeigh ] ] = it ;
-        vertexPriorityList.insert(it, neigh[nodeInNeigh]);
-        doneVertices[ neigh [ nodeInNeigh ]  ] = true;
+        */
+
+        //pointerIntoList[ neigh [ nodeInNeigh ] ] = it ;
+
+        const int prevIdx = vxPair.second ;
+        double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexOrder[ prevIdx ].first;
+        double newOrder = 0.5 * (vxPair.first + prevOrder);
+
+        vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( newOrder, prevIdx );
+        vxPair.second = neigh [ nodeInNeigh ];
+        assert( vxPair.first > newOrder );
+
+        const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
+        if( (vxPair.first - newOrder) < eps )
+        {
+          std::cout << "Rescale vertex order weights." << std::endl;
+          std::map< double, int > newVertexOrder;
+          const int size = vertexOrder.size();
+          for( int j=0; j<size; ++j )
+          {
+            if( vertexOrder[ j ].first > 0.0 )
+            {
+              newVertexOrder.insert( std::make_pair( vertexOrder[ j ].first, j ) );
+            }
+          }
+
+          int count = 1;
+          for( const auto& vx: newVertexOrder )
+          {
+            assert( vx.second >=0 && vx.second < size );
+            vertexOrder[ vx.second ].first = count++ ;
+          }
+
+          for( int j=0; j<size; ++j )
+          {
+            if( vertexOrder[ j ].first > 0.0 && vertexOrder[ j ].second >= 0 )
+            {
+              if( vertexOrder[ j ].first <= vertexOrder[ vertexOrder[ j ].second ].first )
+                std::abort();
+            }
+          }
+        }
       }
 
       {
-        //New orientation of newNeigh using list information
-        auto it0 = std::find_first_of(vertexPriorityList.begin(), vertexPriorityList.end(), neigh.begin(), neigh.end());
-        newNeigh[0] = *it0;
-        ++it0;
-        auto it1 = std::find_first_of(it0,vertexPriorityList.end(), neigh.begin(), neigh.end());
-        newNeigh[1] = *it1;
-        ++it1;
-        auto it2 = std::find_first_of(it1,vertexPriorityList.end(), neigh.begin(), neigh.end());
-        newNeigh[2] = *it2;
-        for(unsigned int i =0 ; i < 4; ++i)
+        // sort vertices in ascending order
+        std::map< double, int > vx;
+        for( int j=0; j<4; ++j )
         {
-          if(neigh[i] == newNeigh[0] || neigh[i] == newNeigh[1] || neigh[i] == newNeigh[2])
-          {
-            continue;
-          }
-          newNeigh[3] = neigh[i];
-          break;
+          assert( vertexOrder[ neigh[ j ] ].first >= 0 );
+          vx.insert( std::make_pair( vertexOrder[ neigh[ j ] ].first, j ) );
+        }
+
+        int count = 0;
+        for( const auto& vxItem : vx )
+        {
+          newNeigh[ count++ ] = neigh[ vxItem.second ] ;
         }
       }
+
       //adjust type of newNeigh
       unsigned int type = 0;
       bool contained[4];
@@ -330,7 +388,7 @@ public:
           else
           {
             auto it = std::find(V0Part.begin(),V0Part.end(),newNeigh[i]);
-            V0Part.erase(it );
+            V0Part.erase( it );
             ++type;
           }
         }
@@ -366,9 +424,11 @@ public:
         //do nothing for boundary
         if(faceElement.second[0] == faceElement.second[1])
           continue;
-        auto it = std::find(activeFaceList.begin(),activeFaceList.end(), faceElement );
+
+        //auto it = std::find(activeFaceList.begin(),activeFaceList.end(), faceElement );
+
         //if face is not in active faces, insert
-        if(it == activeFaceList.end())
+        //if(it == activeFaceList.end())
         {
           //if face does not contain ref Edge
           if(i != type0faces_[0] && i != type0faces_[1] )
@@ -376,11 +436,19 @@ public:
           else
             activeFaceList.push_front(faceElement);
         }
-        else
-          activeFaceList.erase(it);
+        //else
+        //  activeFaceList.erase(it);
       }
-    }
-    assert(activeFaceList.empty());
+
+      const int onePercent = numberOfElements / 100 ;
+      if( counter % onePercent == 0 )
+      {
+        std::cout << "Done: element " <<  counter << " of " << numberOfElements << " time used = " << timer.elapsed() << std::endl;
+        timer.reset();
+      }
+    }// end elements ?
+
+    // assert(activeFaceList.empty());
     return compatibilityCheck();
   }
 
