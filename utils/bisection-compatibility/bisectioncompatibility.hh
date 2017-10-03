@@ -203,12 +203,11 @@ public:
     // all elements are type 0
     std::fill( types_.begin(), types_.end(), 0 );
 
-    std::list<unsigned int> vertexPriorityList;
-    vertexPriorityList.clear();
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
 
-    std::vector< std::pair< double, int > > vertexOrder( maxVertexIndex_+1 , std::make_pair(-1.0, -1 ) );
+    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( maxVertexIndex_+1 , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
+    const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
 
     ElementType el0 = elements_[0];
     //orientate E_0 (add vertices to vertexPriorityList)
@@ -217,7 +216,8 @@ public:
       int vtx = el0[ i ];
       vertexOrder[ vtx ].first = i+1;
       // previous vertex index or -1
-      vertexOrder[ vtx ].second = i > 0 ? el0[ i-1 ] : -1;
+      vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
+      vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
     }
 
     const unsigned int l1 = -1;
@@ -276,70 +276,81 @@ public:
       // in the ordering of vertexPriorityList
       ElementType newNeigh(el);
 
-      //insertion of new vertex
+      //insertion of new vertex before nodeInEl
       if( vertexOrder[ neigh [ nodeInNeigh ] ].first < 0 )
       {
-        auto& vxPair = vertexOrder[ el [ nodeInEl ] ];
-        assert( vxPair.first >= 0 );
+        int vxIndex = el[ nodeInEl ];
 
-        /*
         //this takes care that the children will be reflected neighbors
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
         if( useAnnounced && (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
-          it = pointerIntoList [ el [ nodeInNeigh ] ];
-          ++it;
-        }
-        //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
-        else if ( useAnnounced && ( nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] ) )
-        {
-          it = pointerIntoList [ el [ nodeInNeigh ] ];
-        }
-        //else just insert after nodeInEl
-        else
-        {
-          ++it;
-        }
-        */
-
-        //pointerIntoList[ neigh [ nodeInNeigh ] ] = it ;
-
-        const int prevIdx = vxPair.second ;
-        double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexOrder[ prevIdx ].first;
-        double newOrder = 0.5 * (vxPair.first + prevOrder);
-
-        vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( newOrder, prevIdx );
-        vxPair.second = neigh [ nodeInNeigh ];
-        assert( vxPair.first > newOrder );
-
-        const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
-        if( (vxPair.first - newOrder) < eps )
-        {
-          std::cout << "Rescale vertex order weights." << std::endl;
-          std::map< double, int > newVertexOrder;
-          const int size = vertexOrder.size();
-          for( int j=0; j<size; ++j )
+          auto& vxPair = vertexOrder[ el[ nodeInNeigh ] ];
+          // got to next vertex
+          vxIndex = vxPair.second.second;
+          if( vxIndex == -2 )
           {
-            if( vertexOrder[ j ].first > 0.0 )
-            {
-              newVertexOrder.insert( std::make_pair( vertexOrder[ j ].first, j ) );
-            }
+            vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( vxPair.first+1.0, std::make_pair( el[ nodeInNeigh ], -2 ) );
+            vxPair.second.second = neigh [ nodeInNeigh ];
+          }
+        }
+
+        if( vxIndex >= 0 )
+        {
+          //if nodeInNeigh = 0 && nodeInEl = 3 insert before el[0]
+          if ( useAnnounced && ( nodeInEl == type0nodes_[1] && nodeInNeigh == type0nodes_[0] ) )
+          {
+            vxIndex = el[ nodeInNeigh ];
           }
 
-          int count = 1;
-          for( const auto& vx: newVertexOrder )
-          {
-            assert( vx.second >=0 && vx.second < size );
-            vertexOrder[ vx.second ].first = count++ ;
-          }
+          auto& vxPair = vertexOrder[ vxIndex ];
+          assert( vxPair.first >= 0 );
 
-          for( int j=0; j<size; ++j )
+          // new vertex weight is average between previous and this one
+          const int prevIdx = vxPair.second.first ;
+          double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexOrder[ prevIdx ].first;
+          double newOrder = 0.5 * (vxPair.first + prevOrder);
+
+          vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( newOrder, std::make_pair( prevIdx, vxIndex ) );
+          if( prevIdx >= 0 )
+            vertexOrder[ prevIdx ].second.second = neigh [ nodeInNeigh ];
+          vxPair.second.first = neigh [ nodeInNeigh ];
+          assert( vxPair.first > newOrder );
+
+          if( (vxPair.first - newOrder) < eps )
           {
-            if( vertexOrder[ j ].first > 0.0 && vertexOrder[ j ].second >= 0 )
+#ifndef NDEBUG
+            Dune::Timer restimer;
+            std::cout << "Rescale vertex order weights." << std::endl;
+#endif
+            std::map< double, int > newVertexOrder;
+            const int size = vertexOrder.size();
+            for( int j=0; j<size; ++j )
             {
-              if( vertexOrder[ j ].first <= vertexOrder[ vertexOrder[ j ].second ].first )
-                std::abort();
+              if( vertexOrder[ j ].first > 0.0 )
+              {
+                newVertexOrder.insert( std::make_pair( vertexOrder[ j ].first, j ) );
+              }
             }
+
+            int count = 1;
+            for( const auto& vx: newVertexOrder )
+            {
+              assert( vx.second >=0 && vx.second < size );
+              vertexOrder[ vx.second ].first = count++ ;
+            }
+
+            for( int j=0; j<size; ++j )
+            {
+              if( vertexOrder[ j ].first > 0.0 && vertexOrder[ j ].second.first >= 0 )
+              {
+                if( vertexOrder[ j ].first <= vertexOrder[ vertexOrder[ j ].second.first ].first )
+                  std::abort();
+              }
+            }
+#ifndef NDEBUG
+            std::cout << "Rescale done, time = " << restimer.elapsed() << std::endl;
+#endif
           }
         }
       }
@@ -349,7 +360,7 @@ public:
         std::map< double, int > vx;
         for( int j=0; j<4; ++j )
         {
-          assert( vertexOrder[ neigh[ j ] ].first >= 0 );
+          assert( vertexOrder[ neigh[ j ] ].first > 0 );
           vx.insert( std::make_pair( vertexOrder[ neigh[ j ] ].first, j ) );
         }
 
@@ -425,30 +436,23 @@ public:
         if(faceElement.second[0] == faceElement.second[1])
           continue;
 
-        //auto it = std::find(activeFaceList.begin(),activeFaceList.end(), faceElement );
-
-        //if face is not in active faces, insert
-        //if(it == activeFaceList.end())
-        {
-          //if face does not contain ref Edge
-          if(i != type0faces_[0] && i != type0faces_[1] )
-            activeFaceList.push_back(faceElement);
-          else
-            activeFaceList.push_front(faceElement);
-        }
-        //else
-        //  activeFaceList.erase(it);
+        //if face does not contain ref Edge
+        if(i != type0faces_[0] && i != type0faces_[1] )
+          activeFaceList.push_back(faceElement);
+        else
+          activeFaceList.push_front(faceElement);
       }
 
+#ifndef NDEBUG
       const int onePercent = numberOfElements / 100 ;
       if( counter % onePercent == 0 )
       {
         std::cout << "Done: element " <<  counter << " of " << numberOfElements << " time used = " << timer.elapsed() << std::endl;
         timer.reset();
       }
+#endif
     }// end elements ?
 
-    // assert(activeFaceList.empty());
     return compatibilityCheck();
   }
 
