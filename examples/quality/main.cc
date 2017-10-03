@@ -47,17 +47,17 @@ void method ( const std::string& dgffile, int startLvl, int maxLvl,
 
   Grid &grid = *gridPtr;
 
-  if( grid.comm().size() == 1 )
-  {
-    ALUGridSFC::printSpaceFillingCurve( grid.leafGridView() );
-  }
+  //if( grid.comm().size() == 1 )
+  //{
+  // ALUGridSFC::printSpaceFillingCurve( grid.leafGridView() );
+  //}
 
   grid.loadBalance();
   //grid.finalizeGridCreation() ;
   const bool verboseRank = grid.comm().rank() == 0 ;
 
   // avoid output here
-  std::string outPath( "none" );
+  std::string outPath( "./" );
 
   // create the diagnostics object
   Dune::Diagnostics< Grid> diagnostics( grid.comm(), 1);
