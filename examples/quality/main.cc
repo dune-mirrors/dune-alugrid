@@ -42,7 +42,7 @@ void method ( int problem, int startLvl, int maxLvl,
   ModelType model( problem );
 
   /* Grid construction ... */
-  std::string name = model.problem().gridFile( "./", mpiSize );
+  std::string name = model.problem().gridFile( "../", mpiSize );
   // create grid pointer and release to free memory of GridPtr
   Grid* gridPtr = Dune::CreateParallelGrid< Grid >::create( name ).release();
 

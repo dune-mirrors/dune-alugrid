@@ -113,6 +113,7 @@ public:
     int result = 0;
     bool verbose = false;
     unsigned int bndFaces = 0;
+    std::vector<int> nonCompatFacesAtVertex(maxVertexIndex_, 0 );
     for(auto&& face : neighbours_)
     {
       if( face.second[0] == face.second[1] )
@@ -123,8 +124,16 @@ public:
       {
         ++result;
       }
+      else
+      {
+        for(size_t i =0; i < 3; ++i)
+        {
+          ++(nonCompatFacesAtVertex[face.first[i]]);
+        }
+      }
     }
-    std::cout << "Not strong compatible Macro Faces: " << result << " Inner Faces: " << neighbours_.size() - bndFaces << " Total Faces: " << neighbours_.size() << std::endl << std::endl;
+    std::cout << "Not strong compatible Macro Faces: " << result << " Inner Faces: " << neighbours_.size() - bndFaces << " Total Faces: " << neighbours_.size()  << std::endl;
+    std::cout << "Maximum Number of not strong compatible Macro Faces at a Vertex " << *(std::max_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " Minimum: " << *(std::min_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " Average: " << (std::accumulate(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end(), 0.0) / nonCompatFacesAtVertex.size() ) << std::endl << std::endl;
     return result;
   }
 
