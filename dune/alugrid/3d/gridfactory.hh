@@ -424,7 +424,7 @@ namespace Dune
     {
       if( !geometry.isSimplex() )
         DUNE_THROW( GridError, "Only simplex geometries can be inserted into "
-                               "ALUGrid< 3, 3, simplex, refrule >." );
+                               "ALUGrid< 3, 3, simplex, refrule >." << geometry  );
     }
     else
     {
