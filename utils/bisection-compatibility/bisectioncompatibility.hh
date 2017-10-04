@@ -209,16 +209,6 @@ public:
     std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( maxVertexIndex_+1 , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
     const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
 
-    ElementType el0 = elements_[0];
-    //orientate E_0 (add vertices to vertexPriorityList)
-    for(unsigned int i=0 ; i < 4 ; ++i)
-    {
-      int vtx = el0[ i ];
-      vertexOrder[ vtx ].first = i+1;
-      // previous vertex index or -1
-      vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
-      vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
-    }
 
     const unsigned int l1 = -1;
     //create the vertex priority List
@@ -230,8 +220,19 @@ public:
       if(counter == 0)
       {
         FaceType face;
-        getFace(elements_[0], type0faces_[0], face);
+        const ElementType& el0 = elements_[0];
+        getFace(el0, type0faces_[0], face);
         faceElement = FaceElementType(std::make_pair( face , EdgeType( {0,0} ) ) );
+
+        //orientate E_0 (add vertices to vertexPriorityList)
+        for(unsigned int i=0 ; i < 4 ; ++i)
+        {
+          int vtx = el0[ i ];
+          vertexOrder[ vtx ].first = i+1;
+          // previous vertex index or -1
+          vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
+          vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
+        }
       }
       else
       {
@@ -244,6 +245,26 @@ public:
         while( doneElements[ el1 ] && doneElements[ el2 ] )
         {
           activeFaceList.erase( it++ );
+          /*
+          if( it == activeFaceList.end() )
+          {
+            FaceType face;
+            const ElementType& el0 = elements_[0];
+            getFace(el0, type0faces_[0], face);
+            faceElement = FaceElementType(std::make_pair( face , EdgeType( {0,0} ) ) );
+
+            //orientate E_0 (add vertices to vertexPriorityList)
+            for(unsigned int i=0 ; i < 4 ; ++i)
+            {
+              int vtx = el0[ i ];
+              vertexOrder[ vtx ].first = i+1;
+              // previous vertex index or -1
+              vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
+              vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
+            }
+          }
+          */
+
           assert( it != activeFaceList.end() );
           el1 = it->second[ 0 ];
           el2 = it->second[ 1 ];
