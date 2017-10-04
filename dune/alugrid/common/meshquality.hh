@@ -43,6 +43,7 @@ namespace Dune {
 
     double minSine = 1e308;
     double maxSine = 0;
+    double avgSine = 0;
 
     // TODO: number of elements connected to one edge
     // TODO: number of elements connected to one vertex
@@ -143,6 +144,7 @@ namespace Dune {
 
       const int vertices = element.subEntities( dim );
 
+      double sumSine = 0 ;
       for ( int i=0; i<vertices; ++i )
       {
         const int idx = indexSet.subIndex( element, i, dim );
@@ -156,9 +158,13 @@ namespace Dune {
           sine /= (faceVols[ f ] * 2.0);
         }
 
-        minSine = std::min( minSine, sine );
-        maxSine = std::max( maxSine, sine );
+        minSine  = std::min( minSine, sine );
+        maxSine  = std::max( maxSine, sine );
+        sumSine += sine ;
       }
+
+      sumSine /= double(vertices);
+      avgSine += sumSine ;
 
       //in a regular tetrahedron, we have
       // volume = (sqrt(2)/12)*edge^3
@@ -248,8 +254,11 @@ namespace Dune {
     maxAreaLongestEdgeRatio = gridView.grid().comm().max( maxAreaLongestEdgeRatio );
     avgAreaLongestEdgeRatio = gridView.grid().comm().sum( avgAreaLongestEdgeRatio );
 
+    avgSine /= double(nElements);
+
     minSine = gridView.grid().comm().min( minSine );
     maxSine = gridView.grid().comm().max( maxSine );
+    avgSine = gridView.grid().comm().sum( avgSine );
 
     minElementsEdge   = gridView.grid().comm().min( minElementsEdge );
     minElementsVertex = gridView.grid().comm().min( minElementsVertex );
@@ -279,7 +288,7 @@ namespace Dune {
       out << std::setw(space) << minVolSmallestFaceRatio << " " << maxVolSmallestFaceRatio << " " << avgVolSmallestFaceRatio << " ";
       out << std::setw(space) << minAreaLongestEdgeRatio << " " << maxAreaLongestEdgeRatio << " " << avgAreaLongestEdgeRatio << " ";
       out << std::setw(space) << minAreaShortestEdgeRatio << " " << maxAreaShortestEdgeRatio << " " << avgAreaShortestEdgeRatio << " ";
-      out << std::setw(space) << minSine << " " << maxSine << " ";
+      out << std::setw(space) << minSine << " " << maxSine << " " << avgSine << " ";
       out << std::setw(space) << minElementsEdge << " " << maxElementsEdge << " " << avgElementsEdge << " ";
       out << std::setw(space) << minElementsVertex << " " << maxElementsVertex << " " << avgElementsVertex << " ";
       out << std::endl;
