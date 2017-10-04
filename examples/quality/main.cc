@@ -308,8 +308,9 @@ try
 
   std::size_t pos1 = dgffile.find("/dgf/") + 5;
   std::size_t pos2 = dgffile.find(".dgf");
-  const std::string path =  "./meshquality/" + dgffile.substr(pos1, pos2-pos1) + "/" + std::to_string( variant) + "-" + std::to_string(threshold) + "-" + std::to_string(useAnnouncedEdge) + "-" ;
+  std::string path =  "./meshquality/" + dgffile.substr(pos1, pos2-pos1) + "/";
   Dune::Fem::createDirectory( path );
+  path += std::to_string( variant) + "-" + std::to_string(threshold) + "-" + std::to_string(useAnnouncedEdge) + "-" ;
   method( dgffile, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI
