@@ -12,6 +12,8 @@
 
 #include <dune/alugrid/common/meshquality.hh>
 
+#include "io.hh"
+
 #define BALL 1
 
 /** numerical scheme **/
@@ -307,6 +309,7 @@ try
   std::size_t pos1 = dgffile.find("/dgf/") + 5;
   std::size_t pos2 = dgffile.find(".dgf");
   const std::string path =  "./meshquality/" + dgffile.substr(pos1, pos2-pos1) + "/" + std::to_string( variant) + "-" + std::to_string(threshold) + "-" + std::to_string(useAnnouncedEdge) + "-" ;
+  Dune::Fem::createDirectory( path );
   method( dgffile, startLevel, maxLevel, path, mpi.size() );
 
 #ifdef HAVE_MPI

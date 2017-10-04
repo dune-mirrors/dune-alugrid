@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILDDIR=${HOME}/software/dune/dune-alugrid/build-optim/examples/quality
+BUILDDIR=${PWD}
 
 cd ${BUILDDIR}
 
