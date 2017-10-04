@@ -1,14 +1,17 @@
 <?xml version="1.0"?>
 <todo version="0.1.20">
-    <note priority="veryhigh" time="1506933619">
+    <note priority="veryhigh" time="1506933619" done="1507128136">
         Geometry meassures
-        <note priority="veryhigh" time="1506933715">
+        <comment>
+            done
+        </comment>
+        <note priority="veryhigh" time="1506933715" done="0">
             Paper of Krizek (Martin)
         </note>
-        <note priority="veryhigh" time="1506934118">
+        <note priority="veryhigh" time="1506934118" done="0">
             Keep number of closure elements small
         </note>
-        <note priority="veryhigh" time="1506934128">
+        <note priority="veryhigh" time="1506934128" done="0">
             Keep angles large
         </note>
     </note>
