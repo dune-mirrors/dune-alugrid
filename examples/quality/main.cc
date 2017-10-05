@@ -100,6 +100,16 @@ void method ( const std::string& dgffile, int startLvl, int maxLvl,
   typedef LeafAdaptation< Grid, DataType > AdaptationType;
   AdaptationType adaptation( grid, model.problem().balanceStep(), initialBalanceCounter );
 
+  if( vtkOut )
+  {
+    /* output the initial grid and the solution */
+    vtkOut->write( 0.0 );
+  }
+
+  /* print info about initialization */
+  if ( verboseRank )
+    std::cout << "Intialization done!" << std::endl;
+
   for( int i = 0; i < maxLevel; ++i )
   {
     // mark grid for initial refinement
@@ -112,137 +122,17 @@ void method ( const std::string& dgffile, int startLvl, int maxLvl,
     solution.initialize( model.problem() );
   }
 
+  meshQuality( grid.leafGridView(), 1.0, meshqlty );
+
   if( vtkOut )
   {
     /* output the initial grid and the solution */
-    vtkOut->write( 0.0 );
+    vtkOut->write( 1.0 );
   }
-
-  /* prepare for time stepping scheme */
-  /* final time for simulation */
-  const double endTime = model.problem().endTime();
-  /* interval for saving data */
-  const double saveInterval = model.problem().saveInterval();
-  /* first point where data is saved */
-  double saveStep = saveInterval;
-  /* cfl number */
-  double cfl = 0.15;
-  /* vector to store update */
-  DataType update( gridView );
 
   /* print info about initialization */
   if ( verboseRank )
-    std::cout << "Intialization done!" << std::endl;
-
-  /* now do the time stepping */
-  unsigned int step = 0;
-  double time = 0.0;
-  const unsigned int maxTimeSteps = model.problem().maxTimeSteps();
-  while ( time < endTime )
-  {
-    Dune::Timer overallTimer ;
-
-    // update vector might not be of the right size if grid has changed
-    update.resize();
-    // set update to zero
-    update.clear();
-    double dt;
-
-    Dune :: Timer solveTimer ;
-    dt = scheme( time, solution, update ) ;
-    dt *= cfl;
-    // stop time
-    const double solveTime = solveTimer.elapsed();
-
-    Dune :: Timer commTimer ;
-    // minimize time step over all processes
-    dt = solution.gridView().comm().min( dt );
-    // communicate update
-    update.communicate();
-    const double commTime = commTimer.elapsed();
-
-    // update solution
-    solution.axpy( dt, update );
-
-    /* augment time */
-    time += dt;
-    ++step;
-
-    /* mark the grid for adaptation */
-    GridMarker< Grid > gridMarker( grid, startLevel, maxLevel );
-    size_t elements = scheme.mark( time, solution, gridMarker );
-
-#ifndef NO_OUTPUT
-    /* check if data should be written */
-    if( time >= saveStep )
-    {
-      // print mesh quality again
-      meshQuality( gridView, time, meshqlty );
-
-      if( vtkOut )
-      {
-        /* visualize with VTK */
-        vtkOut->write( time );
-      }
-
-      /* set saveStep for next save point */
-      saveStep += saveInterval;
-
-      size_t elemBuff[ 2 ] = { elements, adaptation.newElements() };
-
-      //size_t sumElements = gridView.grid().comm().sum( elements );
-      gridView.grid().comm().sum( &elemBuff[0], 2 );
-      size_t sumElements = elemBuff[ 0 ];
-      size_t newElements = elemBuff[ 1 ];
-
-      size_t minElements = gridView.grid().comm().min( elements );
-      size_t maxElements = gridView.grid().comm().max( elements );
-      double imbalance = double(maxElements)/double(minElements);
-
-
-      /* print info about time, timestep size and counter */
-      if ( verboseRank )
-      {
-        std::cout << "elements = " << sumElements ;
-        std::cout << " ("<<minElements << "," << maxElements << "," << imbalance << "), new = " << newElements;
-        std::cout << "   maxLevel = " << grid.maxLevel();
-        std::cout << "   step = " << step;
-        std::cout << "   time = " << time;
-        std::cout << "   dt = " << dt;
-        std::cout << std::endl;
-      }
-    }
-#endif
-
-    /* call adaptation algorithm */
-    if( gridMarker.marked() )
-      adaptation( solution );
-
-    {
-      // write times to run file
-      diagnostics.write( time, dt,                     // time and time step
-                         elements,                     // number of elements
-                         ModelType::dimRange,          // number of dofs per element (max)
-                         solveTime,                    // time for operator evaluation
-                         commTime + adaptation.communicationTime(), // communication time
-                         adaptation.adaptationTime(),  // time for adaptation
-                         adaptation.loadBalanceTime(), // time for load balance
-                         overallTimer.elapsed(),       // time step overall time
-                         adaptation.restProlTime(),
-                         getMemoryUsage() );                   // memory usage
-
-    }
-
-    // abort when maximal number of time steps is reached (default is disabled)
-    if( step >= maxTimeSteps )
-      break ;
-  }
-
-  if( vtkOut )
-  {
-    /* output final result */
-    vtkOut->write( time );
-  }
+    std::cout << "Refinement done!" << std::endl;
 
   // flush diagnostics
   diagnostics.flush();
@@ -306,7 +196,7 @@ try
   const int startLevel = 0;
   const int maxLevel = 1; // only one level of refinement needed
 
-  std::size_t pos1 = dgffile.find("/dgf/") + 5;
+  std::size_t pos1 = 0;//dgffile.find("/dgf/") + 5;
   std::size_t pos2 = dgffile.find(".dgf");
   std::string path =  "./meshquality/" + dgffile.substr(pos1, pos2-pos1) + "/";
   Dune::Fem::createDirectory( path );
