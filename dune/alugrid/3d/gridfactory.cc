@@ -487,6 +487,8 @@ namespace Dune
 
     if( dimension == 3 && ALUGrid::refinementType == conforming )
     {
+      Dune::Timer timer;
+
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
       if(bisComp.make6CompatibilityCheck())
       {
@@ -515,6 +517,9 @@ namespace Dune
         else
           std::cout << "Could not make compatible!" << std::endl;
       }
+
+      std::cout << "BisectionCompatibility done:" << std::endl;
+      std::cout << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
     }
 
     numFacesInserted_ = boundaryIds_.size();
