@@ -146,7 +146,7 @@ void estimateClosure ( GridType &grid , int level = 0 )
   }
   avgClosure /=  macroSize;
 
-  std::cout << "Closure (min, max, avg): " << minClosure << " " << maxClosure << " " << avgClosure << std::endl << std::endl;
+  std::cout << "Closure"<< level<<" (min, max, avg): " << minClosure << " " << maxClosure << " " << avgClosure << std::endl << std::endl;
 }
 
 
