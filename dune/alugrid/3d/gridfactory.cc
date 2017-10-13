@@ -446,7 +446,7 @@ namespace Dune
         }
       }
       // assert( longest == 0 );
-      std::cout << "Longest edge = " << longest << "  " << edge << std::endl;
+      // std::cout << "Longest edge = " << longest << "  " << edge << std::endl;
 #endif
 
     }
