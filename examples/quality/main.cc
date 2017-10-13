@@ -156,6 +156,7 @@ try
   int variant = 0;
   int threshold = 2;
   int useAnnouncedEdge = 1 ;
+  int maxLevel = 1;
 
   if( argc < 3 )
   {
@@ -176,6 +177,7 @@ try
     variant   = argc >= 3 ? atoi( argv[2] ) : variant;
     threshold = argc >= 4 ? atoi( argv[3] ) : threshold;
     useAnnouncedEdge = argc >= 5 ? atoi( argv[4] ) : useAnnouncedEdge;
+    maxLevel = (argc >= 6 ) ? atoi( argv[ 5 ] ) : maxLevel;
   }
 
   std::string dgffile( argv[1] );
@@ -194,7 +196,6 @@ try
 
   /* get level to use for computationa */
   const int startLevel = 0;
-  const int maxLevel = 1; // only one level of refinement needed
 
   std::size_t pos1 = 0;//dgffile.find("/dgf/") + 5;
   std::size_t pos2 = dgffile.find(".dgf");
