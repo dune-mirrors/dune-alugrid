@@ -58,8 +58,8 @@ protected:
   std::vector<bool> elementOrientation_;
   //the neighbouring structure
   FaceMapType neighbours_;
-  //The maximum Vertex Index
-  unsigned int maxVertexIndex_;
+  // the number of vertices
+  const size_t nVertices_;
   //A tag vector for vertices to
   //decide whether they are in V_1 or v_0
   std::vector<bool> containedInV0_;
@@ -95,8 +95,8 @@ public:
     : vertices_( vertices ),
       elements_( elements ),
       elementOrientation_(elements_.size(), true),
-      maxVertexIndex_( vertices_.size() ),
-      containedInV0_(maxVertexIndex_,true),
+      nVertices_( vertices_.size() ),
+      containedInV0_(nVertices_,true),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
       type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
@@ -116,7 +116,7 @@ public:
     int result = 0;
     bool verbose = false;
     unsigned int bndFaces = 0;
-    std::vector<int> nonCompatFacesAtVertex(maxVertexIndex_, 0 );
+    std::vector<int> nonCompatFacesAtVertex(nVertices_, 0 );
     for(auto&& face : neighbours_)
     {
       if( face.second[0] == face.second[1] )
@@ -207,8 +207,8 @@ public:
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
 
-    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( maxVertexIndex_ , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
-    const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
+    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( nVertices_ , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
+    const double eps = std::numeric_limits< double >::epsilon() * double(nVertices_) * 10.0;
 
 
     const unsigned int l1 = -1;
@@ -494,8 +494,8 @@ public:
     //the finished elements. The number indicates the fixed node
     //if it is -1, the element has not been touched yet.
     std::vector<int> nodePriority;
-    nodePriority.resize(maxVertexIndex_ , -1);
-    int currNodePriority =maxVertexIndex_;
+    nodePriority.resize(nVertices_ , -1);
+    int currNodePriority =nVertices_;
 
     const unsigned int numberOfElements = elements_.size();
     //walk over all elements
@@ -1002,11 +1002,7 @@ private:
         }
       }
       ++index;
-      //for(int i=0; i < 4 ; ++i)
-      //  maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
-    //add one  be able to access last vertex
-    //maxVertexIndex_++;
   }
 
   /*!
@@ -1024,7 +1020,7 @@ private:
       case 1:
         {
           std::fill(containedInV0_.begin(),containedInV0_.end(), false);
-          std::vector<int> numberOfAdjacentRefEdges(maxVertexIndex_, 0);
+          std::vector<int> numberOfAdjacentRefEdges(nVertices_, 0);
           //we assume that the edges have been sorted and
           //the refinement edge is, where it belongs
           for(auto&& el : elements_)
@@ -1032,7 +1028,7 @@ private:
             numberOfAdjacentRefEdges [ el [ type0nodes_[ 0 ] ] ] ++;
             numberOfAdjacentRefEdges [ el [ type0nodes_[ 1 ] ] ] ++;
           }
-          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
+          for(unsigned int i = 0; i <nVertices_ ; ++i)
           {
             if(numberOfAdjacentRefEdges[ i ] >= threshold )
             {
@@ -1043,8 +1039,8 @@ private:
         break;
       case 2:
         {
-          std::vector<int> numberOfAdjacentElements(maxVertexIndex_, 0);
-          std::vector<bool> vertexOnBoundary(maxVertexIndex_, false);
+          std::vector<int> numberOfAdjacentElements(nVertices_, 0);
+          std::vector<bool> vertexOnBoundary(nVertices_, false);
           for(auto&& neigh : neighbours_)
           {
             //We want to treat boundary vertices differently
@@ -1064,7 +1060,7 @@ private:
               numberOfAdjacentElements[ el [ i ] ] ++;
             }
           }
-          for(unsigned int i = 0; i <maxVertexIndex_ ; ++i)
+          for(unsigned int i = 0; i <nVertices_ ; ++i)
           {
             double bound = vertexOnBoundary[ i ] ? threshold / 2. : threshold ;
             if(numberOfAdjacentElements[ i ] < bound )
@@ -1079,7 +1075,7 @@ private:
         {
           std::default_random_engine generator;
           std::uniform_int_distribution<int> distribution(1,6);
-          for(unsigned int i = 0; i < maxVertexIndex_; ++i)
+          for(unsigned int i = 0; i < nVertices_; ++i)
           {
             int roll = distribution(generator);  // generates number in the range 1..6
             std::cout << roll;
@@ -1094,7 +1090,7 @@ private:
     }
     int sizeOfV1 = 0;
     int sizeOfV0 = 0;
-    for(unsigned int i =0 ; i < maxVertexIndex_; ++i)
+    for(unsigned int i =0 ; i < nVertices_; ++i)
     {
       if( containedInV0_ [ i ] )
       {
