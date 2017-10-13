@@ -95,7 +95,7 @@ public:
     : vertices_( vertices ),
       elements_( elements ),
       elementOrientation_(elements_.size(), true),
-      maxVertexIndex_(0),
+      maxVertexIndex_( vertices_.size() ),
       containedInV0_(maxVertexIndex_,true),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
@@ -105,8 +105,9 @@ public:
       type1face_( 3 - type1node_ )
   {
     //build the information about neighbours
+    Dune::Timer timer;
     buildNeighbors();
-    containedInV0_.resize(maxVertexIndex_,true);
+    std::cout << "Build neighbors took " << timer.elapsed() << " sec." << std::endl;
   }
 
   //check for strong compatibility
@@ -206,7 +207,7 @@ public:
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
 
-    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( maxVertexIndex_+1 , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
+    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( maxVertexIndex_ , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
     const double eps = std::numeric_limits< double >::epsilon() * double(maxVertexIndex_) * 10.0;
 
 
@@ -493,7 +494,7 @@ public:
     //the finished elements. The number indicates the fixed node
     //if it is -1, the element has not been touched yet.
     std::vector<int> nodePriority;
-    nodePriority.resize(maxVertexIndex_ +1, -1);
+    nodePriority.resize(maxVertexIndex_ , -1);
     int currNodePriority =maxVertexIndex_;
 
     const unsigned int numberOfElements = elements_.size();
@@ -982,30 +983,30 @@ private:
     EdgeType indexPair;
 
     unsigned int index = 0;
+    const auto nend = neighbours_.end();
     for(auto&& el : elements_)
     {
       for(int i = 0; i< 4; ++i)
       {
         getFace(el, i, face);
         auto faceInList = neighbours_.find(face);
-        if(faceInList == neighbours_.end())
+        if(faceInList == nend)
         {
           indexPair = {index, index};
           neighbours_.insert(std::make_pair (face, indexPair ) );
         }
         else
         {
-          faceInList = neighbours_.find(face);
           assert(faceInList != neighbours_.end());
           faceInList->second[1] = index;
         }
       }
       ++index;
-      for(int i=0; i < 4 ; ++i)
-        maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
+      //for(int i=0; i < 4 ; ++i)
+      //  maxVertexIndex_ = std::max(maxVertexIndex_, el[i]);
     }
     //add one  be able to access last vertex
-    maxVertexIndex_++;
+    //maxVertexIndex_++;
   }
 
   /*!
