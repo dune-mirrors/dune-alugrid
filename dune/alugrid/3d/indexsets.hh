@@ -161,7 +161,6 @@ namespace Dune
       out << "[" << this->_a << "," << this->_b << "," << this->_c << "," << this->_d << "]";
     }
 
-#ifdef HAVE_DUNE_HASH
     inline friend std::size_t hash_value(const ALUMacroKey& arg)
     {
       std::size_t seed = 0;
@@ -171,8 +170,6 @@ namespace Dune
       hash_combine(seed,arg._d);
       return seed;
     }
-#endif // HAVE_DUNE_HASH
-
   };
 
   template <class MacroKeyImp>
@@ -263,8 +260,6 @@ namespace Dune
       out << "(" << getKey() << "," << nChild_ << "," << codimLevel_ << ")";
     }
 
-#ifdef HAVE_DUNE_HASH
-
     inline friend std::size_t hash_value(const ALUGridId& arg)
     {
       std::size_t seed = hash<MacroKeyImp>()(arg.getKey());
@@ -272,8 +267,6 @@ namespace Dune
       hash_combine(seed,arg.codimLevel_);
       return seed;
     }
-
-#endif // HAVE_DUNE_HASH
 
   protected:
     // returns true is the id is lesser then org
@@ -304,10 +297,8 @@ namespace Dune
 
 } // drop out of namespace Dune, as hash definitions have to be done in global namespace
 
-#if HAVE_DUNE_HASH
 DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(),DUNE_HASH_TYPE(Dune::ALUMacroKey))
 DUNE_DEFINE_HASH(DUNE_HASH_TEMPLATE_ARGS(typename MacroKeyImp),DUNE_HASH_TYPE(Dune::ALUGridId<MacroKeyImp>))
-#endif
 
 namespace Dune {
 
