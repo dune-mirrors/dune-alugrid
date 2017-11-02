@@ -467,7 +467,7 @@ public:
 
 #ifndef NDEBUG
       const int onePercent = numberOfElements / 100 ;
-      if( counter % onePercent == 0 )
+      if( onePercent > 0 && counter % onePercent == 0 )
       {
         std::cout << "Done: element " <<  counter << " of " << numberOfElements << " time used = " << timer.elapsed() << std::endl;
         timer.reset();
