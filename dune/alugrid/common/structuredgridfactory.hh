@@ -11,6 +11,7 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/version.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
@@ -42,8 +43,12 @@ namespace Dune
   {
   public:
     typedef ALUGrid< dim, dimworld, eltype, refineType, Comm > Grid;
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
+    typedef std::unique_ptr< Grid > SharedPtrType;
+#else // #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
     // mygrid_ptr in GridPtr is a derived from std::shared_ptr and implements a method release
     typedef typename Dune::GridPtr< Grid > :: mygrid_ptr  SharedPtrType;
+#endif // #else // #if DUNE_VERSION_NEWER(DUNE_GRID, 2, 6)
 
   protected:
     typedef StructuredGridFactory< Grid > This;
