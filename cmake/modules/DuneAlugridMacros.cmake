@@ -9,9 +9,15 @@ dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 
-#if (ENABLE_GRID_SELECTOR)
+# for ALUGrid module we write a separate grid selector file to avoid
+# dependencies of the library files to all headers, for all other module
+# the grid selection defs are written to config.h
+if(DUNE_GRID_GRIDTYPE_SELECTOR AND ALUGRID_EXTRA_GRIDSELECTOR_FILE)
+  file(WRITE "${CMAKE_BINARY_DIR}/gridselector.hh" "#include <config.h>\n${GRIDSELECTOR_GRIDS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include${CMAKE_BINARY_DIR}/gridselector.hh")
+else()
   set(ALUGRID_CONFIG_H_BOTTOM "${ALUGRID_CONFIG_H_BOTTOM} ${GRIDSELECTOR_GRIDS}")
-#endif (ENABLE_GRID_SELECTOR)
+endif()
 
 # avoid conflicts with normal ALUGrid
 if( ALUGRID_CPPFLAGS )
