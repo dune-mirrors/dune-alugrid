@@ -5,6 +5,9 @@ project("dune-alugrid" C CXX)
 set(BUILD_DOCS 1)
 set(DUNE_REENABLE_ADD_TEST TRUE)
 
+# grid selector in separate file to avoid excessive dependencies
+set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
+
 # general stuff
 cmake_minimum_required(VERSION 2.8.12)
 
