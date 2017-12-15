@@ -46,16 +46,9 @@ find_package(SIONlib)
 find_package(DLMalloc)
 find_package(ZOLTAN)
 find_package(METIS)
-if( METIS_FOUND )
-  # check if metis header compiles, otherwise disable METIS
-  check_cxx_source_compiles("
-  #include <metis.h>
-  int main () { return 0; }
-  " METIS_FOUND)
-  if(NOT METIS_FOUND )
-    unset(HAVE_METIS)
-  endif()
-endif ()
+if( METIS_FOUND AND ALUGRID_DISABLE_METIS )
+  unset( HAVE_METIS )
+endif()
 
 # check for phtreads
 include(FindPThreads)
