@@ -1,6 +1,29 @@
 Copyright holders:
 ==================
 
+2016          Marco Agnese
+2014          Martin Alkaemper
+2016--2017    Martin Alkämper
+2014          Markus Blatt
+2005          Adrian Burri
+2006--2017    Andreas Dedner
+2005--2014    Christoph Gersbacher
+2016          Carsten Gräser
+2016          Christoph Grüninger
+2014          Claus-Justus Heine
+2017          Stephan Hilb
+2016          Dominic Kempf
+2004--2017    Robert Klöfkorn
+2013--2016    Tobias Malkmus
+2017          Steffen Müthing
+2010--2017    Martin Nolte
+2015--2016    Elias Pipping
+2012          Tom Ranner
+2014--2017    alkaemper
+2015          dunebot
+2013          hfr100
+
+
 The DUNE library and headers are licensed under version 2 of the GNU
 General Public License (see below), with a special exception for
 linking and compiling against DUNE, the so-called "runtime exception."
