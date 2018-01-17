@@ -1,5 +1,7 @@
 add_subdirectory(alugrid)
 
-add_python_targets(dune
-  __init__
-)
+if(dune-python_FOUND)
+  add_python_targets(dune
+    __init__
+  )
+endif()
