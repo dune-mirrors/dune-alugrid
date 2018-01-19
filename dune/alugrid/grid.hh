@@ -16,6 +16,7 @@
 #include <dune/alugrid/3d/alugrid.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
+#include <dune/alugrid/dgf.hh>
 #include <dune/alugrid/common/structuredgridfactory.hh>
 #include <dune/alugrid/common/persistentcontainer.hh>
 #include <dune/alugrid/common/backuprestore.hh>
