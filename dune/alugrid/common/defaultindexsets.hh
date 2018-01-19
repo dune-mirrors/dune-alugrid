@@ -3,7 +3,6 @@
 
 #include <type_traits>
 #include <vector>
-#include <rpc/rpc.h>
 
 #include <dune/common/version.hh>
 
