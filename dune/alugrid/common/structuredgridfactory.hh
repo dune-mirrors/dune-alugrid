@@ -306,8 +306,12 @@ namespace Dune
         dgfstream << elements[ i ] << " ";
       dgfstream << std::endl;
       dgfstream << "#" << std::endl;
+      dgfstream << "Cube" << std::endl;
+      dgfstream << "#" << std::endl;
       dgfstream << "Simplex" << std::endl;
       dgfstream << "#" << std::endl;
+
+      std::cout << dgfstream.str() << std::endl;
 
       Dune::GridPtr< Grid > grid( dgfstream, mpiComm );
       return SharedPtrType( grid.release() );
@@ -340,10 +344,13 @@ namespace Dune
                          const CollectiveCommunication& comm,
                          const std::string& name )
     {
+      /*
       if( comm.rank() == 0 )
       {
         std::cerr <<"Warning: using DGF Parser until bug in StructuredGridFactory is fixed!" << std::endl;
       }
+      */
+      // TODO: Use the code below and fix "no point transmitted in ALUGrid"
       return createSimplexGrid( lowerLeft, upperRight, elements );
 
       const int myrank = comm.rank();
