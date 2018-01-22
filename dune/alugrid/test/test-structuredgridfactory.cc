@@ -22,12 +22,14 @@ int main (int argc , char **argv)
     typedef double ctype;
     Dune::FieldVector< ctype, dim > lower ( 0 );
     Dune::FieldVector< ctype, dim > upper ( 1 );
-    std::array<unsigned int, dim> elements = {{ 4, 4 ,4 }} ;
+    std::array<unsigned int, dim> elements = {{ 8, 8, 8 }} ;
 
     auto gridPtr = Dune::StructuredGridFactory< GridType > :: createCubeGrid( lower, upper, elements );
 
     Dune::VTKWriter< typename GridType::LeafGridView > writer( gridPtr->leafGridView() );
-    writer.write( "dump.vtu" );
+    if( gridPtr->comm().rank() == 0 )
+      std::cout <<"Writing VTK output! " << std::endl;
+    writer.write( "dump" );
 
   }
   catch( Dune::Exception &e )

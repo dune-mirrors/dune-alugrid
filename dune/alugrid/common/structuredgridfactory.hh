@@ -344,15 +344,6 @@ namespace Dune
                          const CollectiveCommunication& comm,
                          const std::string& name )
     {
-      /*
-      if( comm.rank() == 0 )
-      {
-        std::cerr <<"Warning: using DGF Parser until bug in StructuredGridFactory is fixed!" << std::endl;
-      }
-      */
-      // TODO: Use the code below and fix "no point transmitted in ALUGrid"
-      return createSimplexGrid( lowerLeft, upperRight, elements );
-
       const int myrank = comm.rank();
 
       typedef YaspGrid< dimworld, EquidistantOffsetCoordinates<double,dimworld> > CartesianGridType ;
