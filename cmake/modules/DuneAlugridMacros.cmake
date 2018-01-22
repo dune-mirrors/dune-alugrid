@@ -46,6 +46,9 @@ find_package(SIONlib)
 find_package(DLMalloc)
 find_package(ZOLTAN)
 find_package(METIS)
+if( METIS_FOUND AND ALUGRID_DISABLE_METIS )
+  unset( HAVE_METIS )
+endif()
 
 # check for phtreads
 include(FindPThreads)
