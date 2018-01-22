@@ -155,8 +155,7 @@ namespace ALUGrid
       os.readObject (v[2]);
       os.readObject (v[3]);
 
-      int readPoint = 0;
-      os.readObject( readPoint );
+      const char readPoint = os.get();
 
       // the following makes only sense if information has been transmitted
       if( readPoint != MacroGridMoverIF::POINTTRANSMITTED )
