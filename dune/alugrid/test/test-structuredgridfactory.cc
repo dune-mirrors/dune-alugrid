@@ -1,4 +1,5 @@
 #define DISABLE_DEPRECATED_METHOD_CHECK 1
+#define USE_ALUGRID_SFC_ORDERING 1
 
 #include <config.h>
 

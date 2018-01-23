@@ -93,10 +93,24 @@ namespace Dune
         pSize_( comm_.size() ),
         elementCuts_( pSize_, -1 ),
 #ifdef USE_ALUGRID_SFC_ORDERING
-        sfc_( lowerLeft, upperRight, comm_ ),
+        sfc_( SpaceFillingCurveOrderingType::ZCurve, lowerLeft, upperRight, comm_ ),
 #endif
-        maxIndex_( double(indexSet_.size(0)-1) )
+        maxIndex_( -1.0 )
       {
+#ifdef USE_ALUGRID_SFC_ORDERING
+        const auto end = gridView_.template end< 0 > ();
+        for( auto it = gridView_.template begin< 0 > (); it != end; ++it )
+        {
+          VertexType center = (*it).geometry().center();
+          // get hilbert index in [0,1]
+          const double hidx = sfc_.index( center );
+          maxIndex_ = std::max( maxIndex_, hidx );
+        }
+
+        // adjust with number of elements
+        maxIndex_ /= indexSet_.size( 0 );
+#endif
+
         // compute decomposition of sfc
         calculateElementCuts();
       }
@@ -126,7 +140,8 @@ namespace Dune
         // get hilbert index in [0,1]
         const double hidx = sfc_.index( center );
         // transform to element index
-        const long int index = (hidx * maxIndex_);
+        const long int index = (hidx / maxIndex_);
+        //std::cout << "sfc index = " << hidx << " " << index << std::endl;
 #else
         const long int index = indexSet_.index( entity );
 #endif
@@ -212,7 +227,7 @@ namespace Dune
       // get element to hilbert (or Z) index mapping
       SpaceFillingCurveOrdering< VertexType > sfc_;
 #endif
-      const double maxIndex_ ;
+      double maxIndex_ ;
     };
 
   public:
