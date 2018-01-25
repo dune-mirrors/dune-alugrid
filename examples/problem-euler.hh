@@ -64,10 +64,13 @@ public:
   int bndType( const DomainType &normal, const DomainType &x, const double time) const
   {
     if (normal[0]<-0.1 && x[0]<0.1)
-      return 1;
+      return 1; // inflow
     else if (normal[0]>0.1 && x[0]>1)
-      return 2;
-    return 3;
+      return 2; // outflow
+    else if (normal[0]>0.1 && x[0] >= 0.59 && x[0] <= 0.61 )
+      return 4; // slip
+
+    return 3; // reflection
   }
 
   //! \copydoc ProblemData::endTime
@@ -400,6 +403,19 @@ struct EulerModel
     return *problem_;
   }
 
+  double pressure( const double gamma, const RangeType &u ) const
+  {
+    assert( u[0] >= 1e-10 );
+    double v = u[1]*u[1] ;
+    for( int i=2; i<dimDomain+1; ++i )
+      v += u[i]*u[i];
+
+    const double rhoe = u[dimDomain+1]-0.5*(v)/u[0];
+
+    assert( rhoe>1e-10 );
+    return (gamma-1.0)*rhoe;
+  }
+
   /** \copydoc TransportProblem::numericalFlux */
   double numericalFlux ( const DomainType &normal,
                          const double time,
@@ -407,18 +423,10 @@ struct EulerModel
                          const RangeType &uLeft, const RangeType &uRight,
                          RangeType &flux ) const
   {
-    // calculate unit normal
-    DomainType unitNormal( normal );
-    const double faceVol = normal.two_norm();
-    unitNormal *= 1.0 / faceVol;
+    assert( std::abs( normal.two_norm() - 1.0 ) < 1e-12 );
 
     // apply numerical flux
-    const double dt = numFlux_.numFlux( uLeft, uRight, unitNormal, flux );
-
-    // apply face volume
-    flux *= faceVol;
-
-    return dt * faceVol;
+    return numFlux_.numFlux( uLeft, uRight, normal, flux );
   }
 
   /** \brief boundary ids for different types of boundary typical for the
@@ -433,8 +441,21 @@ struct EulerModel
                         const RangeType& uLeft,
                         RangeType &flux ) const
   {
+    int bndType = problem_->bndType(normal,xGlobal,time);
+    if( bndType == 4 ) // slip
+    {
+      flux = 0;
+      // slip boundary
+      const double p = pressure(1.4, uLeft);
+      for (int i=0;i<dimDomain; ++i)
+      {
+        flux[i+1] = normal[i] * p;
+      }
+      return 0.;
+    }
+
     RangeType uRight;
-    boundaryValue(normal,time,xGlobal,uLeft,uRight);
+    boundaryValue(bndType, normal,time,xGlobal,uLeft,uRight);
     return numericalFlux(normal,time,xGlobal,uLeft,uRight,flux);
   }
 
@@ -454,7 +475,8 @@ struct EulerModel
                              const RangeType& uLeft) const
   {
     RangeType uRight;
-    boundaryValue(normal,time,xGlobal,uLeft,uRight);
+    int bndType = problem_->bndType(normal,xGlobal,time);
+    boundaryValue( bndType, normal,time,xGlobal,uLeft,uRight);
     return indicator( normal,time,xGlobal, uLeft, uRight );
   }
 
@@ -462,18 +484,18 @@ private:
   /** \brief the boundary flux inserts a ghost cell value into the
    *         numerical flux - this function computes these values for the
    *         different boundary types */
-  void boundaryValue( const DomainType &normal,
+  void boundaryValue( const int bndType,
+                      const DomainType &normal,
                       const double time,
                       const DomainType &xGlobal,
                       const RangeType& uLeft,
                       RangeType& uRight) const
   {
-    int bndType = problem_->bndType(normal,xGlobal,time);
     if (bndType == 1) // Dirichlet
       uRight = problem().boundaryValue(xGlobal,time);
     else if (bndType == 2) // Neumann
       uRight = uLeft;
-    else
+    else if (bndType == 3)
       {
         DomainType unitNormal( normal );
         const double faceVol = normal.two_norm();
@@ -488,7 +510,7 @@ private:
       }
   }
 
-  /** \brief rotate the veclocity field into the face frame of reference */
+  /** \brief rotate the velocity field into the face frame of reference */
   void
   rotate( const DomainType &normal, const RangeType &u, RangeType &u_rot) const
   {
