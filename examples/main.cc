@@ -237,8 +237,8 @@ void method ( int problem, int startLvl, int maxLvl,
                          adaptation.adaptationTime(),  // time for adaptation
                          adaptation.loadBalanceTime(), // time for load balance
                          overallTimer.elapsed(),       // time step overall time
-                         adaptation.restProlTime(),
-                         getMemoryUsage() );                   // memory usage
+                         adaptation.restProlTime(),    // adaptation restrict prolong
+                         getMemoryUsage() );           // memory usage
 
     }
 

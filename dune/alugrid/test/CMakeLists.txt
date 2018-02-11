@@ -2,6 +2,7 @@ set(TESTS
   test-alugrid
   test-adaptivity
   test-fromtogridfactory
+  test-structuredgridfactory
   test-twists
   test-hierarchic
   test-ball-projection

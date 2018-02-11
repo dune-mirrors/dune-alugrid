@@ -73,6 +73,7 @@ public:
     solution_( 0 ),
     adaptTimer_(),
     adaptTime_( 0.0 ),
+    restProlTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
   {}
@@ -88,6 +89,8 @@ public:
 
   //! return time spent for the last adapation in sec
   double adaptationTime() const { return adaptTime_; }
+  //! return time spent for the last adapation in sec
+  double restProlTime() const { return restProlTime_; }
   //! return time spent for the last load balancing in sec
   double loadBalanceTime() const { return lbTime_; }
   //! return time spent for the last communication in sec
@@ -135,6 +138,7 @@ private:
   Dune :: Timer      adaptTimer_ ;
 
   double adaptTime_;
+  double restProlTime_;
   double lbTime_;
   double commTime_;
 };
@@ -151,6 +155,7 @@ inline void LeafAdaptation< Grid, Vector,LoadBalanceHandle >::operator() ( Vecto
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
   commTime_  = 0.0;
+  restProlTime_ = 0.0;
 
   // reset timer
   adaptTimer_.reset() ;
