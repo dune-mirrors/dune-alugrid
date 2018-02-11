@@ -286,7 +286,7 @@ protected:
 
 public:
   // used by SharedPointer
-  void invalidate() {}
+  void invalidate() { done(); }
   // refCount used by SharedPointer
   unsigned int refCount_;
 };
