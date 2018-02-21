@@ -14,7 +14,8 @@ simplex
 #
 
 boundarydomain
-default 3          % default is 3 = reflection 
-1   -1 -1   0 1    % inflow 
-2    3  0   4 1    % outflow 
+default 3            % default is 3 = reflection 
+1   -1 -1   0 1      % inflow 
+2    3  0   4 1      % outflow 
+4   0.6 -1  0.61 0.2 % slip
 #
