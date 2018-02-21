@@ -74,6 +74,7 @@ public:
     balanceStep_( balanceStep ),
     balanceCounter_( balanceCounter < 0 ? balanceStep-1 : balanceCounter ),
     adaptTime_( 0.0 ),
+    restProlTime_( 0.0 ),
     lbTime_( 0.0 ),
     commTime_( 0.0 )
   {}
@@ -89,6 +90,8 @@ public:
 
   //! return time spent for the last adapation in sec
   double adaptationTime() const { return adaptTime_; }
+  //! return time spent for the last adapation in sec
+  double restProlTime() const { return restProlTime_; }
   //! return time spent for the last load balancing in sec
   double loadBalanceTime() const { return lbTime_; }
   //! return time spent for the last communication in sec
@@ -154,6 +157,7 @@ private:
   int balanceCounter_;
 
   double adaptTime_;
+  double restProlTime_;
   double lbTime_;
   double commTime_;
 };
@@ -170,6 +174,7 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
   adaptTime_ = 0.0;
   lbTime_    = 0.0;
   commTime_  = 0.0;
+  restProlTime_ = 0.0;
 
   // reset timer
   adaptTimer_.reset() ;
@@ -194,8 +199,14 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
       hierarchicRestrict( *it, container_ );
   }
 
+  restProlTime_ = adaptTimer_.elapsed();
+  adaptTimer_.reset();
+
   // adapt grid, returns true if new elements were created
   const bool refined = grid_.adapt();
+
+  adaptTime_ = adaptTimer_.elapsed();
+  adaptTimer_.reset();
 
   // interpolate all new cells to leaf level
   if( refined )
@@ -205,9 +216,15 @@ inline void LeafAdaptation< Grid, Vector >::operator() ( Vector &solution )
     for( LevelIterator it = grid_.template lbegin< 0, partition >( 0 ); it != end; ++it )
       hierarchicProlong( *it, container_ );
   }
+
+  restProlTime_ += adaptTimer_.elapsed();
+
 #else // CALLBACK_ADAPTATION
   // callback adaptation, see interface methods above
   grid_.adapt( *this );
+
+  adaptTime_ = adaptTimer_.elapsed();
+
 #endif // CALLBACK_ADAPTATION
 
   // reset adaptation information in grid
