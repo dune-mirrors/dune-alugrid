@@ -54,7 +54,7 @@ namespace Dune {
   alu_inline void ALU3dGridEntity<cd,dim,GridImp> ::
   setElement(const HItemType & item, const GridImp& grid)
   {
-    setElement( item, GetLevel<GridImp,cd>::getLevel(grid,item) );
+    setElement( item, GetLevel<GridImp,dim,cd>::getLevel(grid,item) );
   }
 
   template<int cd, int dim, class GridImp>
