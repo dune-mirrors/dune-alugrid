@@ -46,7 +46,7 @@ class ALU3dGridEntity :
 public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
 {
   // default just returns level
-  template <class GridType, int cdim>
+  template <class GridType, int dm, int cdim>
   struct GetLevel
   {
     template <class ItemType>
@@ -60,7 +60,7 @@ public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
   // this the maximum of levels of elements that have this vertex as sub
   // entity
   template <class GridType>
-  struct GetLevel<GridType,dim>
+  struct GetLevel<GridType,dim,dim>
   {
     template <class ItemType>
     static int getLevel(const GridType & grid, const ItemType & item)
