@@ -4,7 +4,7 @@ import sys
 import logging
 logger = logging.getLogger(__name__)
 
-from dune.common.checkconfiguration import assertHave, preprocessorAssert, ConfigurationError
+from dune.common.checkconfiguration import assertHave, ConfigurationError
 
 try:
     assertHave("HAVE_DUNE_ALUGRID")
@@ -14,14 +14,6 @@ try:
 
         if not dimgrid:
             dimgrid = getDimgrid(constructor)
-        try:
-            preprocessorAssert([ ("#if HAVE_DUNE_ALUGRID","ALUGrid is not available") ])
-        except checkconfiguration.ConfigurationError as err:
-            if logger.getEffectiveLevel() == logging.DEBUG:
-                raise
-            else:
-                print("configuration error while creating an ALUGrid, exiting...")
-                sys.exit(-1)
 
         if dimworld is None:
             dimworld = dimgrid
