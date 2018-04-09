@@ -400,7 +400,7 @@ public:
   typedef typename InternalIteratorType :: val_t val_t;
 
   // here the items level will do
-  template <class GridImp, int codim>
+  template <class GridImp, int dim, int codim>
   class GetLevel
   {
   public:
@@ -413,8 +413,8 @@ public:
   };
 
   // level is not needed for codim = 0
-  template <class GridImp>
-  class GetLevel<GridImp,0>
+  template <class GridImp, int dim>
+  class GetLevel<GridImp,dim,0>
   {
   public:
     template <class ItemType>
@@ -424,8 +424,8 @@ public:
     }
   };
 
-  template <class GridImp>
-  class GetLevel<GridImp,3>
+  template <class GridImp, int dim>
+  class GetLevel<GridImp, dim, dim>
   {
   public:
     template <class ItemType>
@@ -473,7 +473,7 @@ protected:
     if( item.first )
     {
       it.updateEntityPointer( item.first ,
-          GetLevel<GridImp,codim>::getLevel(grid, *(item.first) , level) );
+          GetLevel<GridImp,GridImp::dimension,codim>::getLevel(grid, *(item.first) , level) );
     }
     else
       it.updateGhostPointer( *item.second );
