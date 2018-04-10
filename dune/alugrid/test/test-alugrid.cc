@@ -717,8 +717,9 @@ int main (int argc , char **argv) {
           filename = "./dgf/cube-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
+
         GridType & grid = *gridPtr;
-        grid.loadBalance();
 
         checkCapabilities< false >( grid );
 
@@ -762,8 +763,8 @@ int main (int argc , char **argv) {
           filename = "./dgf/simplex-testgrid-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        grid.loadBalance();
 
         checkCapabilities< false >( grid );
 
@@ -806,8 +807,8 @@ int main (int argc , char **argv) {
         else
           filename = "./dgf/simplex-testgrid-2-2.dgf";
         Dune::GridPtr<GridType> gridPtr( filename );
+        gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        grid.loadBalance();
 
         checkCapabilities< true >( grid );
 
@@ -835,8 +836,8 @@ int main (int argc , char **argv) {
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
+        surfaceGridPtr.loadBalance();
         SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
-        surfaceGrid.loadBalance();
         checkCapabilities< true >( surfaceGrid );
         checkALUSerial( surfaceGrid, 1 );
       }
@@ -853,8 +854,8 @@ int main (int argc , char **argv) {
 
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        grid.loadBalance();
 
         checkCapabilities< false >( grid );
 
@@ -884,8 +885,8 @@ int main (int argc , char **argv) {
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        grid.loadBalance();
         checkCapabilities< false >( grid );
 
         {
@@ -914,8 +915,8 @@ int main (int argc , char **argv) {
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        grid.loadBalance();
         checkCapabilities< true >( grid );
 
         {
