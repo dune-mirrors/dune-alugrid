@@ -19,6 +19,46 @@
 namespace ALUGrid
 {
 
+  namespace detail {
+
+    template <int dimension>
+    struct Contains
+    {
+      //This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
+      //So we have to adapt things to the user view, that writes it with
+      // 2,codimension
+      // return true if dim,codim combination is contained in data set
+
+      template <class DataCollector>
+      static bool contains(const DataCollector& dc, const int dim, const int cd)
+      {
+        //dimension is GridImp::dimension
+        if(dim == dimension)
+        {
+          //the original call
+          return dc.contains(dim,cd);
+        }
+        //adaptation for 2d
+        else if(dimension == 2)
+        {
+          //we do not want to transmit edge data
+          if(cd == 2)
+            return false;
+          else if (cd == 3)
+            return dc.contains(dimension, 2);
+          else
+            return dc.contains(dimension, cd);
+        }
+        //
+        else
+        {
+          std::cerr << "DataHandle.contains called with non-matching dim and codim" << std::endl;
+          return false;
+        }
+      }
+    };
+  } // end namespace detail
+
   //! the corresponding interface class is defined in bsinclude.hh
   template< class GridType, class DataCollectorType, int codim >
   class GatherScatterBaseImpl
@@ -61,35 +101,10 @@ namespace ALUGrid
     {
     }
 
-    //This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
-    //So we have to adapt things to the user view, that writes it with
-    // 2,codimension
     // return true if dim,codim combination is contained in data set
     bool contains(int dim, int cd) const
     {
-      //dimension is GridImp::dimension
-      if(dim == dimension)
-      {
-        //the original call
-        return dc_.contains(dim,cd);
-      }
-      //adaptation for 2d
-      else if(dimension == 2)
-      {
-        //we do not want to transmit edge data
-        if(cd == 2)
-          return false;
-        else if (cd == 3)
-          return dc_.contains(dimension, 2);
-        else
-          return dc_.contains(dimension, cd);
-      }
-      //
-      else
-      {
-        std::cerr << "DataHandle.contains called with non-matching dim and codim" << std::endl;
-        return false;
-      }
+      return detail::Contains< dimension >::contains( dc_, dim, cd );
     }
 
     // returns true, if element is contained in set of comm interface
@@ -162,13 +177,13 @@ namespace ALUGrid
   //
   //***********************************************************
 
-  //! the corresponding interface class is defined in bsinclude.hh
+  //! the corresponding interface class is defined in alu3dinclude.hh
   template <class GridType, class DataCollectorType >
   class GatherScatterBaseImpl<GridType,DataCollectorType,0> : public GatherScatter
   {
   protected:
     enum { codim = 0 };
-    enum { dim = GridType::dimension };
+    enum { dimension = GridType::dimension };
     const GridType & grid_;
     typedef typename GridType::template Codim<0>::Entity       EntityType;
     typedef typename GridType::template Codim<0>::EntityImp    RealEntityType;
@@ -176,13 +191,13 @@ namespace ALUGrid
     typedef typename GridType::MPICommunicatorType Comm;
 
     typedef Dune::ALU3dImplTraits< GridType::elementType, Comm > ImplTraits;
-    typedef typename ImplTraits::template Codim< dim, codim >::ImplementationType ImplElementType;
-    typedef typename ImplTraits::template Codim< dim, codim >::InterfaceType HElementType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::ImplementationType ImplElementType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::InterfaceType HElementType;
 
-    typedef typename ImplTraits::template Codim< dim, 1 >::InterfaceType HFaceType;
+    typedef typename ImplTraits::template Codim< dimension, 1 >::InterfaceType HFaceType;
 
-    typedef typename ImplTraits::template Codim< dim, codim >::GhostInterfaceType HGhostType;
-    typedef typename ImplTraits::template Codim< dim, codim >::GhostImplementationType ImplGhostType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::GhostInterfaceType HGhostType;
+    typedef typename ImplTraits::template Codim< dimension, codim >::GhostImplementationType ImplGhostType;
 
     typedef typename ImplTraits::PllElementType PllElementType;
 
@@ -213,10 +228,13 @@ namespace ALUGrid
       , dc_(dc) , variableSize_ ( ! dc_.fixedsize( EntityType :: dimension, codim ))
     {}
 
+    // This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
+    // So we have to adapt things to the user view, that writes it with
+    // 2,codimension
     // return true if dim,codim combination is contained in data set
-    bool contains(int dim, int codim) const
+    bool contains(int dim, int cd) const
     {
-      return dc_.contains(dim,codim);
+      return detail::Contains< dimension >::contains( dc_, dim, cd );
     }
 
     // return true if item might from entity belonging to data set
