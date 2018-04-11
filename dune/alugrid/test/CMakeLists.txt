@@ -7,6 +7,7 @@ set(TESTS
   test-hierarchic
   test-ball-projection
   test-backup-restore
+  test-gmsh
 )
 
 foreach(TEST ${TESTS})
@@ -14,3 +15,4 @@ foreach(TEST ${TESTS})
 endforeach()
 
 add_subdirectory(dgf)
+add_subdirectory(gmsh)
