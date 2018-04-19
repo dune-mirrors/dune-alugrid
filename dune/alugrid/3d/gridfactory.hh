@@ -320,6 +320,10 @@ namespace Dune
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
+    /** \brief Return the Communication used by the grid factory
+     *
+     * Use the Communication available from the grid.
+     */
     Communication comm() const
     {
       return Communication(communicator_);
