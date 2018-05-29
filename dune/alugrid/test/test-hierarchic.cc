@@ -23,6 +23,7 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
@@ -47,7 +48,7 @@ int main (int argc , char **argv) {
     using Grid = Dune::ALUGrid<2, 2, Dune::ALUGridElementType::simplex, Dune::ALUGridRefinementType::nonconforming>;
 
     Dune::GridFactory<Grid> factory;
-    Dune::GeometryType dSimplex(Dune::GeometryType::simplex, 2);
+    Dune::GeometryType dSimplex = Dune::GeometryTypes::simplex(2);
 
     factory.insertVertex({0, 0});
     factory.insertVertex({1, 0});
