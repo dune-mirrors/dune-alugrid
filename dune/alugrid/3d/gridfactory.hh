@@ -65,6 +65,8 @@ namespace Dune
     //! type of matrix from world coordinates to world coordinates
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
+    typedef typename Grid::CollectiveCommunication Communication;
+
   private:
     static_assert ( (elementType == tetra || elementType == hexa),
                     "ALU3dGridFactory supports only grids containing "
@@ -317,6 +319,15 @@ namespace Dune
     }
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
+
+    /** \brief Return the Communication used by the grid factory
+     *
+     * Use the Communication available from the grid.
+     */
+    Communication comm() const
+    {
+      return Communication(communicator_);
+    }
 
   private:
     unsigned int boundaryInsertionIndex ( const typename Codim< 0 >::Entity &entity, int face ) const
