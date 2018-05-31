@@ -1,5 +1,6 @@
 Module: dune-alugrid
 Version: 2.7
+Maintainer: gitlab.dune-project.org/extensions/dune-alugrid
 Whitespace-Hook: Yes
 Depends: dune-grid (>= 2.6)
 Suggests: dune-python dune-corepy
