@@ -62,7 +62,7 @@ namespace Dune
     template< int codim >
     int index ( const typename GridType::Traits::template Codim< codim >::Entity &entity ) const
     {
-      return GridType::getRealImplementation( entity ).getIndex();
+      return entity.impl().getIndex();
     }
 
     template< class Entity >
@@ -76,7 +76,7 @@ namespace Dune
     int subIndex ( const typename GridType::Traits::template Codim< cd >::Entity &e, int i, unsigned int codim ) const
     {
       // call method subIndex on real implementation
-      return GridType::getRealImplementation( e ).subIndex( i, codim );
+      return e.impl().subIndex( i, codim );
     }
 
     //! return size of indexset, i.e. maxindex+1

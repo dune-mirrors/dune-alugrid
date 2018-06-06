@@ -281,8 +281,8 @@ namespace Dune
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      alugrid_assert( Grid::getRealImplementation( entity ).getIndex() < int(ordering_.size()) );
-      return ordering_[ Grid::getRealImplementation( entity ).getIndex() ];
+      alugrid_assert( entity.impl().getIndex() < int(ordering_.size()) );
+      return ordering_[ entity.impl().getIndex() ];
     }
 
     virtual unsigned int
@@ -290,12 +290,12 @@ namespace Dune
     {
       if(dimension == 2 && elementType == hexa )
         // for quadrilaterals we simply half the number, see gridfactory.cc doInsertVertex
-        return Grid::getRealImplementation( entity ).getIndex()/2;
+        return entity.impl().getIndex()/2;
       else if ( dimension == 2 && elementType == tetra )
         // for triangles we have to substract 1, see gridfactory.cc doInsertVertex
-        return Grid::getRealImplementation( entity ).getIndex() - 1;
+        return entity.impl().getIndex() - 1;
       else  // dimension 3
-        return Grid::getRealImplementation( entity ).getIndex();
+        return entity.impl().getIndex();
     }
 
     virtual unsigned int insertionIndex ( const typename Grid::LevelIntersection &intersection ) const

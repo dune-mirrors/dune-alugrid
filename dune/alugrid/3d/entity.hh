@@ -547,7 +547,7 @@ protected:
 
   // return reference to internal entity implementation
   EntityImp & entityImp () const {
-    return GridImp :: getRealImplementation(entity_);
+    return entity_.impl();
   }
 };
 

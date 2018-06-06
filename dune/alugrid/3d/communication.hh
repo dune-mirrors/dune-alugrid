@@ -214,10 +214,10 @@ namespace Dune
 
       Storage ( const Grid &grid, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, grid.maxLevel() ),
-          vertexGatherScatter_( grid, vertex, Grid::getRealImplementation( vertex ), dataHandle ),
-          edgeGatherScatter_( grid, edge, Grid::getRealImplementation( edge ), dataHandle ),
-          faceGatherScatter_( grid, face, Grid::getRealImplementation( face ), dataHandle ),
-          elementGatherScatter_( grid, element, Grid::getRealImplementation( element ), dataHandle )
+          vertexGatherScatter_( grid, vertex, vertex.impl(), dataHandle ),
+          edgeGatherScatter_( grid, edge, edge.impl(), dataHandle ),
+          faceGatherScatter_( grid, face, face.impl(), dataHandle ),
+          elementGatherScatter_( grid, element, element.impl(), dataHandle )
       {}
 
       GatherScatter &vertexGatherScatter () { return vertexGatherScatter_; }
@@ -284,10 +284,10 @@ namespace Dune
       Storage ( const Grid &grid, int level, CommDataHandleIF &dataHandle )
         : Base::Storage( grid, level ),
           indexSet_( grid.accessLevelIndexSet( level ) ),
-          vertexGatherScatter_( grid, vertex, Grid::getRealImplementation( vertex ), dataHandle, *indexSet_, level ),
-          edgeGatherScatter_( grid, edge, Grid::getRealImplementation( edge ), dataHandle, *indexSet_, level ),
-          faceGatherScatter_( grid, face, Grid::getRealImplementation( face ), dataHandle, *indexSet_, level ),
-          elementGatherScatter_( grid, element, Grid::getRealImplementation( element ), dataHandle, *indexSet_, level )
+          vertexGatherScatter_( grid, vertex, vertex.impl(), dataHandle, *indexSet_, level ),
+          edgeGatherScatter_( grid, edge, edge.impl(), dataHandle, *indexSet_, level ),
+          faceGatherScatter_( grid, face, face.impl(), dataHandle, *indexSet_, level ),
+          elementGatherScatter_( grid, element, element.impl(), dataHandle, *indexSet_, level )
       {}
 
       GatherScatter &vertexGatherScatter () { return vertexGatherScatter_; }
