@@ -305,7 +305,7 @@ namespace Dune
   inline bool ALU3dGrid< dim, dimworld, elType, Comm >
     ::mark ( int ref, const typename Traits::template Codim< 0 >::Entity &entity )
   {
-    bool marked = (this->getRealImplementation( entity )).mark( ref, conformingRefinement() );
+    bool marked = entity.impl().mark( ref, conformingRefinement() );
     if(marked)
       {
         if(ref > 0) ++refineMarked_;
@@ -320,7 +320,7 @@ namespace Dune
   inline int ALU3dGrid< dim, dimworld, elType, Comm >
     ::getMark ( const typename Traits::template Codim< 0 >::Entity &entity ) const
   {
-    return this->getRealImplementation( entity ).getMark();
+    return entity.impl().getMark();
   }
 
 

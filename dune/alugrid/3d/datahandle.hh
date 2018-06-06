@@ -759,7 +759,7 @@ namespace ALUGrid
   protected:
     EntityType& setEntity( HElementType& elem )
     {
-      GridType::getRealImplementation( entity_ ).setElement( elem );
+      entity_.impl().setElement( elem );
       return entity_ ;
     }
 
@@ -1096,7 +1096,7 @@ namespace ALUGrid
     //! restrict data for elements
     int preCoarsening ( HElementType & father )
     {
-      grid_.getRealImplementation( entity_ ).setElement( father );
+      entity_.impl().setElement( father );
       rp_.preCoarsening( entity_ );
 
       // reset refinement marker
@@ -1107,7 +1107,7 @@ namespace ALUGrid
     //! prolong data for elements
     int postRefinement ( HElementType & father )
     {
-      grid_.getRealImplementation( entity_ ).setElement( father );
+      entity_.impl().setElement( father );
       rp_.postRefinement( entity_ );
 
       // reset refinement markers
