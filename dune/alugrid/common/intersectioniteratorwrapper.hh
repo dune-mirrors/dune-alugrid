@@ -320,9 +320,9 @@ protected:
   Intersection intersection_;
 
   // return reference to real implementation
-  IntersectionImp& impl() { return GridImp :: getRealImplementation( intersection_ ); }
+  IntersectionImp& impl() { return intersection_.impl(); }
   // return reference to real implementation
-  const IntersectionImp& impl() const { return GridImp :: getRealImplementation( intersection_ ); }
+  const IntersectionImp& impl() const { return intersection_.impl(); }
 }; // end class IntersectionIteratorWrapper
 
 //! \brief Class that wraps IntersectionIteratorImp of a grid and gets it's
@@ -424,9 +424,9 @@ protected:
   Intersection intersection_;
 
   // return reference to real implementation
-  IntersectionImp& impl() { return GridImp :: getRealImplementation( intersection_ ); }
+  IntersectionImp& impl() { return intersection_.impl(); }
   // return reference to real implementation
-  const IntersectionImp& impl() const { return GridImp :: getRealImplementation( intersection_ ); }
+  const IntersectionImp& impl() const { return intersection_.impl(); }
 }; // end class IntersectionIteratorWrapper
 
 } // end namespace Dune

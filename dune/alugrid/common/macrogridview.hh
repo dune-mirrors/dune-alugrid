@@ -226,26 +226,26 @@ namespace Dune
     /** \brief return master rank for entities with partitionType != InteriorEntity */
     int master ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).master();
+      return entity.impl().master();
     }
 
     /** \brief return unique id of macro entity for usage with graph partitioning software */
     int macroId ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).macroId();
+      return entity.impl().macroId();
     }
 
     /** \brief return weight associated with the given macro entity */
     int weight ( const typename Codim< 0 > :: Entity &entity ) const
     {
-      return Grid::getRealImplementation( entity ).weight();
+      return entity.impl().weight();
     }
 
     /** \brief return weight associated with the macro intersection,
                i.e. the graph edge between the two neighboring entities */
     int weight ( const Intersection &intersection ) const
     {
-      return Grid::getRealImplementation( intersection ).weight();
+      return intersection.impl().weight();
     }
 
     DUNE_DEPRECATED

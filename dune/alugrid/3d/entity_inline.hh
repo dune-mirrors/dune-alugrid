@@ -245,7 +245,7 @@ namespace Dune {
   inline ALU3dGridEntityPointerBase<codim,GridImp> ::
   ALU3dGridEntityPointerBase(const ALU3dGridEntityPointerType & org)
     : seed_( org.seed_ )
-    , entity_( GridImp::getRealImplementation(org.entity_) )
+    , entity_( org.entity_.impl() )
   {
     alugrid_assert( seed_   == org.seed_ );
     alugrid_assert( entity_ == org.entity_ );
