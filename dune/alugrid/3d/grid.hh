@@ -688,7 +688,7 @@ namespace Dune
     ileafbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
       return LefInterItWrapperType( *this,
-                                    getRealImplementation( entity ),
+                                    entity.impl(),
                                     entity.level(), false );
     }
 
@@ -696,7 +696,7 @@ namespace Dune
     ileafend( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
       return LefInterItWrapperType( *this,
-                                    getRealImplementation( entity ),
+                                    entity.impl(),
                                     entity.level(), true );
     }
 
@@ -704,7 +704,7 @@ namespace Dune
     ilevelbegin( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
       return LvlInterItWrapperType( *this,
-                                    getRealImplementation( entity ),
+                                    entity.impl(),
                                     entity.level(), false );
     }
 
@@ -712,7 +712,7 @@ namespace Dune
     ilevelend( const typename Traits::template Codim< 0 >::Entity& entity ) const
     {
       return LvlInterItWrapperType( *this,
-                                    getRealImplementation( entity ),
+                                    entity.impl(),
                                     entity.level(), true );
     }
 
@@ -1126,15 +1126,13 @@ namespace Dune
       return Communications::defaultComm();
     }
 
-    using BaseType :: getRealImplementation ;
-
     template< class IntersectionType >
     static const typename BaseType
       :: template ReturnImplementationType< IntersectionType >
       :: ImplementationType &
     getRealIntersection ( const IntersectionType &intersection )
     {
-      return getRealImplementation( intersection );
+      return intersection.impl();
     }
 
     //! deliver all geometry types used in this grid

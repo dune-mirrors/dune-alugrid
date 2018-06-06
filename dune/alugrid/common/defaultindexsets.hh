@@ -409,7 +409,7 @@ namespace Dune
           const auto& intersection = *i;
           if( intersection.boundary() )
           {
-            const int id = Grid::getRealImplementation( intersection ).segmentId();
+            const int id = intersection.impl().segmentId();
             if( int(segmentIndex_.size()) <= id )
               segmentIndex_.resize( id+1 );
             if( segmentIndex_[ id ].index() < 0 )
