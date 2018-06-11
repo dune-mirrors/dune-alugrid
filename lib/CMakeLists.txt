@@ -3,8 +3,7 @@ dune_add_library(dunealugrid
   _DUNE_TARGET_OBJECTS:serial_
   _DUNE_TARGET_OBJECTS:parallel_
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc)
 
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )

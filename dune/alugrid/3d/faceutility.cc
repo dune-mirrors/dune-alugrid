@@ -41,7 +41,7 @@ namespace Dune
     // this is the new implementation using FieldVector
     // see mappings.hh
     // we have to swap the vertices, because
-    // local face numbering in Dune is different to ALUGrid (see topology.cc)
+    // local face numbering in Dune is different to ALUGrid (see topology.hh)
     return new SurfaceMappingType(
         face.myvertex( FaceTopo::dune2aluVertex(0) )->Point(),
         face.myvertex( FaceTopo::dune2aluVertex(1) )->Point(),
