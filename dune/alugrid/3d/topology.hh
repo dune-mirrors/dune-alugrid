@@ -206,19 +206,16 @@ namespace Dune {
     }
 
     // for each aluTwist apply additional mapping
-    static inline int aluTwistMap(const int aluTwist) {
-      // this map has been calculated by grid/test/checktwists.cc
-      // and the dune-fem twist calculator
-      // this should be revised after the release 2.1
-      return Base::aluTwistMap[ aluTwist + ((type == tetra) ? 3 : 4) ];
-    }
-  };
+    static int aluTwistMap(const int aluTwist);
+  private:
+    const static int dune2aluVertex_[EntityCount<type>::numVerticesPerFace];
+    const static int alu2duneVertex_[EntityCount<type>::numVerticesPerFace];
 
-  template<>
-  inline int FaceTopologyMapping<tetra>::twistedDuneIndex(const int duneIdx, const int aluTwist) {
-    // apply alu2dune twist mapping (only for tetra)
-    const int twist = Base::alu2duneTwist[aluTwist + 3 ];
-    return alu2duneVertex( dune2aluVertex(duneIdx) , twist );
-  }
+    const static int dune2aluEdge_[EntityCount<type>::numEdgesPerFace];
+    const static int alu2duneEdge_[EntityCount<type>::numEdgesPerFace];
+
+    const static int alu2duneTwist_[ 2 * EntityCount<type>::numVerticesPerFace ];
+    const static int aluTwistMap_[ 2 * EntityCount<type>::numVerticesPerFace ];
+  };
 } // end namespace Dune
 #endif
