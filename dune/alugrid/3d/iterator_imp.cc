@@ -339,7 +339,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
   alugrid_assert (item_ != 0);
 
-  if(GridImp::dimension == 2 && GridImp::dimensionworld == 3 && GridImp::elementType == hexa)
+  if(GridImp::dimension == 2 && GridImp::dimensionworld == 3)
   {
     typedef typename LocalGeometry::GlobalCoordinate Coordinate;
     typedef typename GridImp::template Codim<0>::Geometry ElementGeometry;
