@@ -264,7 +264,7 @@ namespace Dune
      *
      *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved
      */
-    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection );
+    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection, const bool projectInside = (dimension != dimensionworld) );
 
     /** \brief add a face transformation (for periodic identification)
      *
@@ -401,6 +401,7 @@ namespace Dune
     ElementVector elements_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
+    bool projectInside_;
     const DuneBoundaryProjectionType* globalProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
@@ -513,6 +514,7 @@ namespace Dune
     :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                           bool removeGeneratedFile )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
+    projectInside_(false),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
@@ -529,6 +531,7 @@ namespace Dune
     :: ALU3dGridFactory ( const std::string &filename,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
+    projectInside_(false),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
@@ -545,6 +548,7 @@ namespace Dune
     :: ALU3dGridFactory ( const bool realGrid,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
+    projectInside_(false),
     globalProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( realGrid ),
