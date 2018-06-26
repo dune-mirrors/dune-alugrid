@@ -860,7 +860,8 @@ namespace Dune
       }
       else if(dimworld == 3)
       {
-        //we want the outer normal orthogonal to the intersection and to the normal of the inner element,  with length of the intersection
+#if 0  //implemented in  iterator_imp.cc
+       //we want the outer normal orthogonal to the intersection and to the normal of the inner element,  with length of the intersection
         const GEOElementType * innerElement (0);
         if(this->connector_.innerBoundary())
           innerElement  =  static_cast<const GEOElementType * > (this->connector_.innerFace().getGhost().first) ;
@@ -884,6 +885,7 @@ namespace Dune
         outerNormal_[0] = normal[2] * (_p1[1] - _p2[1]) - normal[1] * (_p1[2] - _p2[2]);
         outerNormal_[1] = normal[0] * (_p1[2] - _p2[2]) - normal[2] * (_p1[0] - _p2[0]);
         outerNormal_[2] = normal[1] * (_p1[0] - _p2[0]) - normal[0] * (_p1[1] - _p2[1]);
+#endif
       }
 
       normalUp2Date_ = true;
