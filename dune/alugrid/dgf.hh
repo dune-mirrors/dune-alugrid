@@ -513,8 +513,17 @@ namespace Dune
       const DuneBoundaryProjection< dimworld > *projection
         = projectionBlock.defaultProjection< dimworld >();
 
-      if( projection != 0 )
-        factory_.insertBoundaryProjection( *projection );
+      //True, if we want to project inner vertices
+      const bool projectInside = (dimworld != dimgrid);
+      //True, if we want to project boundary vertices
+      const bool projectBoundary = (projection != 0);
+
+      //Currently, we only allow ONE global projection, so
+      //we just insert this projection once
+      //If we want to allow multiple projections,
+      //we need to change the dgf parser first.
+      if( projectBoundary )
+        factory_.insertBoundaryProjection( *projection, projectInside );
 
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       GeometryType type( faceTopoId, dimgrid-1 );

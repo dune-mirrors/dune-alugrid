@@ -960,4 +960,9 @@ SIMPLEX
 BOUNDARYSEGMENTS
 #
 
+PROJECTION
+function p(x) = x / |x|
+default p
+#
+
 #

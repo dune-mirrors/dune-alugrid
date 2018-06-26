@@ -201,11 +201,13 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > ::
-  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection )
+  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool projectInside)
   {
-    if( globalProjection_ )
+     std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+      if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
+    projectInside_ = projectInside;
     globalProjection_ = &bndProjection;
   }
 
@@ -492,9 +494,9 @@ namespace Dune
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
         // if no projection given we use global projection, otherwise identity
-        if( ! projection &&
-            !(it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) &&
-            globalProjection_ )
+        if( ! projection
+            && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
+            && globalProjection_ )
         {
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
