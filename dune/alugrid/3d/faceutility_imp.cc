@@ -858,35 +858,8 @@ namespace Dune
         outerNormal_[0] = factor * (_p2[1]-_p1[1]);
         outerNormal_[1] = factor * (_p1[0]-_p2[0]);
       }
-      else if(dimworld == 3)
-      {
-#if 0  //implemented in  iterator_imp.cc
-       //we want the outer normal orthogonal to the intersection and to the normal of the inner element,  with length of the intersection
-        const GEOElementType * innerElement (0);
-        if(this->connector_.innerBoundary())
-          innerElement  =  static_cast<const GEOElementType * > (this->connector_.innerFace().getGhost().first) ;
-        else
-          innerElement = static_cast<const GEOElementType * > (&(this->connector_.innerEntity() ));
-        //get the vertex that is opposed to the intersection
-        const alu3d_ctype (&_p3)[3] = innerElement->myvertex(this->connector_.innerALUFaceIndex())->Point();
-
-        FieldVector<alu3d_ctype, 3> normal;
-
-        // calculate normal of the element
-        normal[0] = (_p2[1] - _p3[1]) * (_p1[2] - _p2[2]) - (_p2[2] - _p3[2]) * (_p1[1] - _p2[1]) ;
-        normal[1] = (_p2[2] - _p3[2]) * (_p1[0] - _p2[0]) - (_p2[0] - _p3[0]) * (_p1[2] - _p2[2]) ;
-        normal[2] = (_p2[0] - _p3[0]) * (_p1[1] - _p2[1]) - (_p2[1] - _p3[1]) * (_p1[0] - _p2[0]) ;
-
-        //normalize
-        normal *= (1.0/normal.two_norm());
-
-        //calculate cross product of element normal and intersection
-        //we do not need to include the factor, this is encoded in the order of p1, p2
-        outerNormal_[0] = normal[2] * (_p1[1] - _p2[1]) - normal[1] * (_p1[2] - _p2[2]);
-        outerNormal_[1] = normal[0] * (_p1[2] - _p2[2]) - normal[2] * (_p1[0] - _p2[0]);
-        outerNormal_[2] = normal[1] * (_p1[0] - _p2[0]) - normal[0] * (_p1[1] - _p2[1]);
-#endif
-      }
+      //implemented in iterator_imp.cc
+      //else if(dimworld == 3)
 
       normalUp2Date_ = true;
     } // end if mapp ...
@@ -958,49 +931,8 @@ namespace Dune
         outerNormal_[0] = factor * (_p0[1] - _p3[1]);
         outerNormal_[1] = factor * (_p3[0] - _p0[0]);
       }
-      else if(dimworld == 3)
-      {
-        //Teh following is an adaption of
-        //
-        //    const ReferenceElement< alu2d_ctype, dim > &refElement =
-        //    ReferenceElements< alu2d_ctype, dim >::cube();
-        //    typename LocalGeometry::GlobalCoordinate xInside = geometryInInside().global( local );
-        //   typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( indexInInside() );
-        //    inside()->geometry().jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal );
-        //   outerNormal *= inside()->geometry().integrationElement( xInside );
-        //
-        // from the calculation of the former 2d code
-        // also it does not work for some reason - so this is implemented in iterator_imp.cc
-
-
-        /*
-        typedef typename ALU3dGrid<2, dimworld, hexa, Comm>::template Codim<1>::LocalGeometry LocalGeometry;
-        typedef Dune :: ALU3dGridGeometry< 2, dimworld, ALU3dGrid<2, dimworld, hexa, Comm> > GeometryImpl;
-        //generate the local geometries - if not already present
-        this->generateLocalGeometries();
-        //get the inside entity
-        const GEOElementType &inner = this->connector_.innerEntity();
-
-         //Get the 2d cube reference Element
-       const ReferenceElement< alu3d_ctype, 2 > &refElement =
-        ReferenceElements< alu3d_ctype, 2 >::cube();
-        //get xInside in the geometryInInside coordinates
-        typename LocalGeometry::GlobalCoordinate xInside = this->intersectionSelfLocal()[1];
-        xInside *= local[0];
-        xInside.axpy(1-local[0] , this->intersectionSelfLocal()[0]);
-
-        // get the normal of the reference element on the current face (DUNE index from the inside)
-        typename LocalGeometry::GlobalCoordinate refNormal = refElement.integrationOuterNormal( ElementTopologyMapping<hexa>::alu2duneFace(this->connector_.innerALUFaceIndex()) );
-
-        //construct the inner geometry
-        GeometryImpl geo ;
-        geo.buildGeom(inner.myvertex(0)->Point(), inner.myvertex(1)->Point(), inner.myvertex(3)->Point(), inner.myvertex(2)->Point());
-        //map the reference Normal back to the inner geometry
-        geo.jacobianInverseTransposed( xInside ).mv( refNormal, outerNormal_ );
-        outerNormal_ *= geo.integrationElement( xInside );
-
-        */
-      }
+      //implemented in iterator_imp.cc
+      //else if(dimworld == 3)
 
       normalUp2Date_ = true;
     } // end if mapp ...
