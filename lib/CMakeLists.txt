@@ -30,7 +30,7 @@ endif()
 
 # workaround for clang 6, which runs into an infinite loop on gitter_mgb.cc and gitter_pll_mgb.cc
 # when optimization level is -O2 or higher
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 6.0.0 AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0.0)
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 5.9.9 AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 7.0.0)
   string(TOUPPER ${CMAKE_BUILD_TYPE} _build_type_upper)
   set(_flags "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_build_type_upper}}")
   string(REGEX MATCH " -O(2|3|fast) " _opt_level ${_flags})
