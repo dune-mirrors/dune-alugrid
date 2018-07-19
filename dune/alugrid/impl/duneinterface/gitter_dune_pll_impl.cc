@@ -190,7 +190,7 @@ namespace ALUGrid
         }
       }
     }
-    catch( ObjectStream::EOFException )
+    catch( ObjectStream::EOFException& )
     {
       std::cerr << "ERROR (fatal): GitterDunePll::unpackOnMaster EOF encountered." << std::endl;
       alugrid_assert(0);
@@ -1222,7 +1222,7 @@ namespace ALUGrid
         }
       }
     }
-    catch (Parallel:: AccessPllException)
+    catch (Parallel:: AccessPllException&)
     {
       std::cerr << "  FEHLER Parallel::AccessPllException entstanden in: " << __FILE__ << " " << __LINE__ << std::endl;
     }
