@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/to_unique_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/version.hh>
 
@@ -272,11 +273,11 @@ namespace Dune
      *
      *  The caller takes responsibility for deleing the grid.
      */
-    Grid *createGrid ();
+    ToUniquePtr<Grid> createGrid ();
 
-    Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
 
-    Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
+    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
