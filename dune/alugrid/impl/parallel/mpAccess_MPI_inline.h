@@ -54,7 +54,7 @@ namespace ALUGrid
     // duplicate mpi communicator
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
-    return 0 ; // return NULL pointer to initialize _mpimaxsum
+    return nullptr ; // return NULL pointer to initialize _mpimaxsum
   }
 
   inline int MpAccessMPI::getSize()
@@ -94,15 +94,16 @@ namespace ALUGrid
 
   inline MpAccessMPI::~MpAccessMPI ()
   {
-    if( _minmaxsum )
-    {
-      delete _minmaxsum;
-      _minmaxsum = 0 ;
-    }
+    _minmaxsum.reset();
 
-    // free mpi communicator
-    MY_INT_TEST MPI_Comm_free (&_mpiComm);
-    alugrid_assert (test == MPI_SUCCESS);
+    int wasFinalized = -1;
+    MPI_Finalized( &wasFinalized );
+    if( !wasFinalized)
+    {
+      // free mpi communicator
+      MY_INT_TEST MPI_Comm_free (&_mpiComm);
+      alugrid_assert (test == MPI_SUCCESS);
+    }
   }
 
   inline int MpAccessMPI::barrier () const {
@@ -305,8 +306,13 @@ namespace ALUGrid
 
     ~MinMaxSumOp()
     {
-      MPI_Op_free (&_op);
-      MPI_Type_free(&_mpi_minmaxsum_t);
+      int wasFinalized = -1;
+      MPI_Finalized( &wasFinalized );
+      if( !wasFinalized)
+      {
+        MPI_Op_free (&_op);
+        MPI_Type_free(&_mpi_minmaxsum_t);
+      }
     }
 
     const MpAccessMPI& _mpAccess;
@@ -349,7 +355,9 @@ namespace ALUGrid
   inline void MpAccessMPI::initMinMaxSum()
   {
     if( ! _minmaxsum )
-      _minmaxsum = new MinMaxSumOp( *this );
+    {
+      _minmaxsum.reset( new MinMaxSumOp( *this ) );
+    }
   }
 
   inline MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
