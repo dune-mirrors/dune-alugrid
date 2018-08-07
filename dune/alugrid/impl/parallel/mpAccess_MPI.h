@@ -1,6 +1,8 @@
 #ifndef MPACCESS_MPI_H_INCLUDED
 #define MPACCESS_MPI_H_INCLUDED
 
+#include <memory>
+
 #include "mpAccess.h"
 
 // the following implementation is only available in case MPI is available
@@ -42,7 +44,7 @@ namespace ALUGrid
     // the MPI communicator
     MPI_Comm _mpiComm ;
     // pointer to minmaxsum communication
-    const MinMaxSumIF* _minmaxsum;
+    std::unique_ptr< MinMaxSumIF > _minmaxsum;
     // number of processors
     const int _psize;
     // my processor number
