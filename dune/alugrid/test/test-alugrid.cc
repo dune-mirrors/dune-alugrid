@@ -476,7 +476,20 @@ void checkGrid( GridType& grid )
   }
 }
 
+template <class GridType>
+void checkForPeriodicBoundaries( GridType& grid )
+{
+  for (const auto& element : elements(grid.leafGridView()))
+  {
+    for (const auto& intersection : intersections(grid.leafGridView(), element))
+    {
+      if (intersection.neighbor() && intersection.boundary())
+        return;
+    }
+  }
 
+  DUNE_THROW( Dune::InvalidStateException, "No periodic boundaries found!" );
+}
 
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
@@ -853,25 +866,42 @@ int main (int argc , char **argv) {
           filename = "./dgf/simplex-testgrid-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
-        Dune::GridPtr< GridType > gridPtr( filename );
-        gridPtr.loadBalance();
-        GridType & grid = *gridPtr;
-
-        checkCapabilities< false >( grid );
-
         {
-          std::cout << "Check serial grid" << std::endl;
-          checkALUSerial(grid,
-                         (mysize == 1) ? 1 : 0 );
+          Dune::GridPtr< GridType > gridPtr( filename );
+          gridPtr.loadBalance();
+          GridType & grid = *gridPtr;
+
+          checkCapabilities< false >( grid );
+
+          {
+            std::cout << "Check serial grid" << std::endl;
+            checkALUSerial(grid,
+                           (mysize == 1) ? 1 : 0 );
+          }
+
+          // perform parallel check only when more then one proc
+          if(mysize > 1)
+          {
+            if (myrank == 0) std::cout << "Check conform grid" << std::endl;
+            checkALUParallel(grid,1,0);
+            if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
+            checkALUParallel(grid,0,2);
+          }
         }
 
-        // perform parallel check only when more then one proc
-        if(mysize > 1)
+        // check periodic capabilities
         {
-          if (myrank == 0) std::cout << "Check conform grid" << std::endl;
-          checkALUParallel(grid,1,0);
-          if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
-          checkALUParallel(grid,0,2);
+          filename = "./dgf/periodic.dgf";
+          Dune::GridPtr< GridType > gridPtr( filename );
+          gridPtr.loadBalance();
+          GridType & grid = *gridPtr;
+
+          {
+            std::cout << "Check periodic grid" << std::endl;
+            checkALUSerial(grid,
+                           (mysize == 1) ? 1 : 0 );
+            checkForPeriodicBoundaries( grid );
+          }
         }
       }
 
