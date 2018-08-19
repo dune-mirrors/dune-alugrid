@@ -1010,6 +1010,9 @@ namespace Dune
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
+    // list of face that should be removed
+    std::vector< FaceType > toBeDeletedFaces;
+    toBeDeletedFaces.reserve( faceMap.size() / 10 + 1);
 
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
@@ -1051,15 +1054,24 @@ namespace Dune
       }
 
       reinsertBoundary( faceMap, pos, bndIt->second );
-      faceMap.erase( pos );
+      toBeDeletedFaces.push_back( key );
     }
 
     //the search for the periodic neighbour also deletes the
     //found faces from the boundaryIds_ - thus it has to be done
     //after the recreation of the Ids_, because of correctElementOrientation
-    for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+    if( !faceTransformations_.empty() )
     {
-      searchPeriodicNeighbor( faceMap, it, defaultId );
+      for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+      {
+        searchPeriodicNeighbor( faceMap, it, defaultId );
+      }
+    }
+
+    // erase faces that are boundries
+    for( const auto& key : toBeDeletedFaces )
+    {
+      faceMap.erase( key );
     }
 
     // communicate unidentified boundaries and find process borders)
