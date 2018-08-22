@@ -975,6 +975,17 @@ namespace Dune
       const FaceMapIterator fend = faceMap.end();
       for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
       {
+        //for dimension == 2 we do not want to search
+        // the artificially introduced faces
+        if(dimension == 2)
+        {
+          if(elementType == hexa)
+            if(fit->second.second > 3)
+              continue;
+          if(elementType == tetra)
+            if(fit->second.second > 2)
+              continue;
+        }
         FaceType key2;
         generateFace( fit->second, key2 );
 
@@ -1064,6 +1075,17 @@ namespace Dune
     {
       for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
       {
+        //for dimension == 2 we do not want to search
+        // the artificially introduced faces
+        if(dimension == 2)
+        {
+          if(elementType == hexa)
+            if(it->second.second > 3)
+              continue;
+          if(elementType == tetra)
+            if(it->second.second > 2)
+              continue;
+        }
         searchPeriodicNeighbor( faceMap, it, defaultId );
       }
     }
