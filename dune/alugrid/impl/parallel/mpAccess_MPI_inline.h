@@ -126,24 +126,9 @@ namespace ALUGrid
   }
 
   template < class A > std::vector< std::vector< A > >
-  inline doGcollectV (const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm)
+  inline doGcollectV (const int np, const int me,
+                      const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm)
   {
-    int np, me, test;
-
-    test = MPI_Comm_rank (comm, & me);
-    if (test != MPI_SUCCESS)
-    {
-      std::cerr << "ERROR (fatal): Unable to obtain rank in MPI communicator." << std::endl;
-      abort();
-    }
-
-    test = MPI_Comm_size (comm, & np);
-    if (test != MPI_SUCCESS)
-    {
-      std::cerr << "ERROR (fatal): Unable to obtain size of MPI communicator." << std::endl;
-      abort();
-    }
-
     int * rcounts = new int [np];
     int * displ = new int [np];
     alugrid_assert (rcounts);
@@ -161,7 +146,7 @@ namespace ALUGrid
       A * y = new A [ln];
       alugrid_assert (x && y);
       std::copy (in.begin(), in.end(), y);
-      test = MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+      MY_INT_TEST MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
       delete [] y;
       y = 0;
       alugrid_assert (test == MPI_SUCCESS);
@@ -447,12 +432,12 @@ namespace ALUGrid
 
   inline std::vector< std::vector< int > > MpAccessMPI::gcollect (const std::vector< int > & v) const {
     incrementAllgatherCalls();
-    return doGcollectV (v, MPI_INT, _mpiComm);
+    return doGcollectV (psize(), myrank(), v, MPI_INT, _mpiComm);
   }
 
   inline std::vector< std::vector< double > > MpAccessMPI::gcollect (const std::vector< double > & v) const {
     incrementAllgatherCalls();
-    return doGcollectV (v, MPI_DOUBLE, _mpiComm);
+    return doGcollectV (psize(), myrank(), v, MPI_DOUBLE, _mpiComm);
   }
 
   inline std::vector< ObjectStream > MpAccessMPI::
