@@ -137,8 +137,8 @@ namespace ALUGrid
       int ln = in.size ();
       {
         MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
+        alugrid_assert (test == MPI_SUCCESS);
       }
-      alugrid_assert (test == MPI_SUCCESS);
       displ [0] = 0;
       {for (int j = 1; j < np; j ++) {
         displ [j] = displ [j-1] + rcounts [j-1];
@@ -150,10 +150,10 @@ namespace ALUGrid
       std::copy (in.begin(), in.end(), y);
       {
         MY_INT_TEST MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+        alugrid_assert (test == MPI_SUCCESS);
       }
       delete [] y;
       y = 0;
-      alugrid_assert (test == MPI_SUCCESS);
       {for (int i = 0; i < np; i ++ ) {
         res [i].reserve (rcounts [i]);
         std::copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i]));
