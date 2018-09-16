@@ -135,7 +135,9 @@ namespace ALUGrid
     std::vector< std::vector< A > > res (np);
     {
       int ln = in.size ();
-      MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
+      {
+        MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
+      }
       alugrid_assert (test == MPI_SUCCESS);
       displ [0] = 0;
       {for (int j = 1; j < np; j ++) {
@@ -146,7 +148,9 @@ namespace ALUGrid
       A * y = new A [ln];
       alugrid_assert (x && y);
       std::copy (in.begin(), in.end(), y);
-      MY_INT_TEST MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+      {
+        MY_INT_TEST MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+      }
       delete [] y;
       y = 0;
       alugrid_assert (test == MPI_SUCCESS);
