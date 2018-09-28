@@ -54,7 +54,7 @@ namespace ALUGrid
     // duplicate mpi communicator
     MY_INT_TEST MPI_Comm_dup ( mpicomm, &_mpiComm);
     alugrid_assert (test == MPI_SUCCESS);
-    return 0 ; // return NULL pointer to initialize _mpimaxsum
+    return nullptr ; // return NULL pointer to initialize _mpimaxsum
   }
 
   inline int MpAccessMPI::getSize()
@@ -94,15 +94,16 @@ namespace ALUGrid
 
   inline MpAccessMPI::~MpAccessMPI ()
   {
-    if( _minmaxsum )
-    {
-      delete _minmaxsum;
-      _minmaxsum = 0 ;
-    }
+    _minmaxsum.reset();
 
-    // free mpi communicator
-    MY_INT_TEST MPI_Comm_free (&_mpiComm);
-    alugrid_assert (test == MPI_SUCCESS);
+    int wasFinalized = -1;
+    MPI_Finalized( &wasFinalized );
+    if( !wasFinalized)
+    {
+      // free mpi communicator
+      MY_INT_TEST MPI_Comm_free (&_mpiComm);
+      alugrid_assert (test == MPI_SUCCESS);
+    }
   }
 
   inline int MpAccessMPI::barrier () const {
@@ -125,32 +126,19 @@ namespace ALUGrid
   }
 
   template < class A > std::vector< std::vector< A > >
-  inline doGcollectV (const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm)
+  inline doGcollectV (const int np, const int me,
+                      const std::vector< A > & in, MPI_Datatype mpiType, MPI_Comm comm)
   {
-    int np, me, test;
-
-    test = MPI_Comm_rank (comm, & me);
-    if (test != MPI_SUCCESS)
-    {
-      std::cerr << "ERROR (fatal): Unable to obtain rank in MPI communicator." << std::endl;
-      abort();
-    }
-
-    test = MPI_Comm_size (comm, & np);
-    if (test != MPI_SUCCESS)
-    {
-      std::cerr << "ERROR (fatal): Unable to obtain size of MPI communicator." << std::endl;
-      abort();
-    }
-
     int * rcounts = new int [np];
     int * displ = new int [np];
     alugrid_assert (rcounts);
     std::vector< std::vector< A > > res (np);
     {
       int ln = in.size ();
-      MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
-      alugrid_assert (test == MPI_SUCCESS);
+      {
+        MY_INT_TEST MPI_Allgather (& ln, 1, MPI_INT, rcounts, 1, MPI_INT, comm);
+        alugrid_assert (test == MPI_SUCCESS);
+      }
       displ [0] = 0;
       {for (int j = 1; j < np; j ++) {
         displ [j] = displ [j-1] + rcounts [j-1];
@@ -160,10 +148,12 @@ namespace ALUGrid
       A * y = new A [ln];
       alugrid_assert (x && y);
       std::copy (in.begin(), in.end(), y);
-      test = MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+      {
+        MY_INT_TEST MPI_Allgatherv (y, ln, mpiType, x, rcounts, displ, mpiType, comm);
+        alugrid_assert (test == MPI_SUCCESS);
+      }
       delete [] y;
       y = 0;
-      alugrid_assert (test == MPI_SUCCESS);
       {for (int i = 0; i < np; i ++ ) {
         res [i].reserve (rcounts [i]);
         std::copy (x + displ [i], x + displ [i] + rcounts [i], back_inserter(res [i]));
@@ -305,8 +295,13 @@ namespace ALUGrid
 
     ~MinMaxSumOp()
     {
-      MPI_Op_free (&_op);
-      MPI_Type_free(&_mpi_minmaxsum_t);
+      int wasFinalized = -1;
+      MPI_Finalized( &wasFinalized );
+      if( !wasFinalized)
+      {
+        MPI_Op_free (&_op);
+        MPI_Type_free(&_mpi_minmaxsum_t);
+      }
     }
 
     const MpAccessMPI& _mpAccess;
@@ -349,7 +344,9 @@ namespace ALUGrid
   inline void MpAccessMPI::initMinMaxSum()
   {
     if( ! _minmaxsum )
-      _minmaxsum = new MinMaxSumOp( *this );
+    {
+      _minmaxsum.reset( new MinMaxSumOp( *this ) );
+    }
   }
 
   inline MpAccessMPI::minmaxsum_t  MpAccessMPI::minmaxsum( double value ) const
@@ -439,12 +436,12 @@ namespace ALUGrid
 
   inline std::vector< std::vector< int > > MpAccessMPI::gcollect (const std::vector< int > & v) const {
     incrementAllgatherCalls();
-    return doGcollectV (v, MPI_INT, _mpiComm);
+    return doGcollectV (psize(), myrank(), v, MPI_INT, _mpiComm);
   }
 
   inline std::vector< std::vector< double > > MpAccessMPI::gcollect (const std::vector< double > & v) const {
     incrementAllgatherCalls();
-    return doGcollectV (v, MPI_DOUBLE, _mpiComm);
+    return doGcollectV (psize(), myrank(), v, MPI_DOUBLE, _mpiComm);
   }
 
   inline std::vector< ObjectStream > MpAccessMPI::

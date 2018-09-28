@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <dune/common/shared_ptr.hh>
+#include <dune/common/to_unique_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/version.hh>
 
@@ -64,6 +65,8 @@ namespace Dune
     typedef typename Transformation::WorldVector WorldVector;
     //! type of matrix from world coordinates to world coordinates
     typedef typename Transformation::WorldMatrix WorldMatrix;
+
+    typedef typename Grid::CollectiveCommunication Communication;
 
   private:
     static_assert ( (elementType == tetra || elementType == hexa),
@@ -272,17 +275,17 @@ namespace Dune
      *
      *  The caller takes responsibility for deleing the grid.
      */
-    Grid *createGrid ();
+    ToUniquePtr<Grid> createGrid ();
 
-    Grid *createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
 
-    Grid *createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
+    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
     {
-      alugrid_assert( Grid::getRealImplementation( entity ).getIndex() < int(ordering_.size()) );
-      return ordering_[ Grid::getRealImplementation( entity ).getIndex() ];
+      alugrid_assert( entity.impl().getIndex() < int(ordering_.size()) );
+      return ordering_[ entity.impl().getIndex() ];
     }
 
     virtual unsigned int
@@ -290,12 +293,12 @@ namespace Dune
     {
       if(dimension == 2 && elementType == hexa )
         // for quadrilaterals we simply half the number, see gridfactory.cc doInsertVertex
-        return Grid::getRealImplementation( entity ).getIndex()/2;
+        return entity.impl().getIndex()/2;
       else if ( dimension == 2 && elementType == tetra )
         // for triangles we have to substract 1, see gridfactory.cc doInsertVertex
-        return Grid::getRealImplementation( entity ).getIndex() - 1;
+        return entity.impl().getIndex() - 1;
       else  // dimension 3
-        return Grid::getRealImplementation( entity ).getIndex();
+        return entity.impl().getIndex();
     }
 
     virtual unsigned int insertionIndex ( const typename Grid::LevelIntersection &intersection ) const
@@ -320,8 +323,18 @@ namespace Dune
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
+
     //! set longest edge marking for biscetion grids (default is off)
     void setLongestEdgeFlag () { markLongestEdge_ = true ; }
+
+    /** \brief Return the Communication used by the grid factory
+     *
+     * Use the Communication available from the grid.
+     */
+    Communication comm() const
+    {
+      return Communication(communicator_);
+    }
 
   private:
     unsigned int boundaryInsertionIndex ( const typename Codim< 0 >::Entity &entity, int face ) const

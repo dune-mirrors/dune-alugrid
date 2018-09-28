@@ -560,9 +560,9 @@ namespace Dune
       factory_.setLongestEdgeFlag();
 
     if( !parameter.dumpFileName().empty() )
-      grid_ = factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() );
+      grid_ = factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() ).release();
     else
-      grid_ = factory_.createGrid( addMissingBoundariesGlobal, true, filename );
+      grid_ = factory_.createGrid( addMissingBoundariesGlobal, true, filename ).release();
     return true;
   }
 
