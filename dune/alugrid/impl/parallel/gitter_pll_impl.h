@@ -953,7 +953,7 @@ namespace ALUGrid
     try {
       i = os.get();
     }
-    catch( ObjectStream::EOFException )
+    catch( ObjectStream::EOFException& )
     {
       std::cerr << "ERROR (fatal): EdgePllBaseX< A >::setRefinementRequest EOF encountered." << std::endl;
       abort();

@@ -343,7 +343,7 @@ namespace ALUGrid
           os.read(c);
         }
       }
-      catch( ObjectStream::EOFException )
+      catch( ObjectStream::EOFException& )
       {
         std::cerr << "ERROR (fatal): EdgePllBaseXMacro< A >::unpackSelf EOF encountered." << std::endl;
         alugrid_assert(0);
@@ -619,7 +619,7 @@ namespace ALUGrid
       this->myhface ().backup ( os );
       os.put( ObjectStream::ENDOFSTREAM );
     }
-    catch( ObjectStream::OutOfMemoryException )
+    catch( ObjectStream::OutOfMemoryException& )
     {
       std::cerr << "ERROR (fatal): Out of memory." << std::endl;
       alugrid_assert(0);
@@ -637,7 +637,7 @@ namespace ALUGrid
       this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
       this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
     }
-    catch( Parallel::AccessPllException )
+    catch( Parallel::AccessPllException& )
     {
       std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
       alugrid_assert(0);
@@ -684,7 +684,7 @@ namespace ALUGrid
         while( c != ObjectStream::ENDOFSTREAM )
           os.read( c );
       }
-      catch( ObjectStream::EOFException )
+      catch( ObjectStream::EOFException& )
       {
         std::cerr << "ERROR (fatal): FacePllBaseXMacro < A >::unpackSelf EOF encountered." << std::endl;
         alugrid_assert(0);
@@ -722,7 +722,7 @@ namespace ALUGrid
     {
       ru = os.get();
     }
-    catch( ObjectStream::EOFException )
+    catch( ObjectStream::EOFException& )
     {
       std::cerr << "ERROR (fatal): EOF encountered in BndsegPllBaseXClosure::setRefinementRequest( ... )" << std::endl;
       alugrid_assert(0);
@@ -812,7 +812,7 @@ namespace ALUGrid
       alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
 
     }
-    catch (ObjectStream::EOFException)
+    catch (ObjectStream::EOFException&)
     {
       return;
       std::cerr << "ERROR (fatal): BndsegPllBaseXClosure < A >::readDynamicState EOF encountered." << std::endl;
@@ -830,7 +830,7 @@ namespace ALUGrid
       os.readObject ( _master );
       alugrid_assert ( _master != this->myhbnd().myvertex(0,0)->indexManagerStorage ().myrank() );
     }
-    catch (ObjectStream :: EOFException)
+    catch (ObjectStream :: EOFException&)
     {
       std::cerr << "**ERROR (fatal): BndsegPllBaseXMacroClosure < A >::readStaticState EOF encountered." << std::endl ;
       alugrid_assert(0);
@@ -1989,7 +1989,7 @@ namespace ALUGrid
         for (w.first (); ! w.done (); w.next ()) w.item ().detachPllXFromMacro ();
       }
     }
-    catch( Parallel::AccessPllException )
+    catch( Parallel::AccessPllException& )
     {
       std::cerr << "WARNING (ignored): Ignoring AccessPllException." << std::endl;
     }

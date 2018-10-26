@@ -289,7 +289,7 @@ namespace ALUGrid
           }
         }
       }
-      catch( Parallel::AccessPllException )
+      catch( Parallel::AccessPllException& )
       {
         std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
         abort();
@@ -319,7 +319,7 @@ namespace ALUGrid
           }
         }
       }
-      catch (Parallel::AccessPllException)
+      catch (Parallel::AccessPllException&)
       {
         std::cerr << "ERROR (fatal): AccessPllException caught." << std::endl;
         abort();
@@ -1095,7 +1095,7 @@ namespace ALUGrid
         // reset edge coarsen flags to avoid problems with coarsening
         // Gitter::resetEdgeCoarsenFlags ();
       }
-      catch( Parallel::AccessPllException )
+      catch( Parallel::AccessPllException& )
       {
         std::cerr << "ERROR( fatal ): AccessPllException caught during coarsening of element hierarchy." << std::endl;
         abort ();
@@ -1125,7 +1125,7 @@ namespace ALUGrid
         }
 
       }
-      catch( Parallel::AccessPllException )
+      catch( Parallel::AccessPllException& )
       {
         std::cerr << "ERROR (fatal): AccessPllException caught when coarsening area trees." << std::endl;
         abort();
@@ -1162,7 +1162,7 @@ namespace ALUGrid
           mpAccess().exchange( edgeData );
         }
       }
-      catch( Parallel::AccessPllException )
+      catch( Parallel::AccessPllException& )
       {
         std::cerr << "ERROR (fatal): AccessPllException caught when coarsening edge trees." << std::endl;
         abort();
@@ -1266,7 +1266,7 @@ namespace ALUGrid
         }
       }}
     }
-    catch( Parallel::AccessPllException )
+    catch( Parallel::AccessPllException& )
     {
       std::cerr << "ERROR (fatal): Parallel::AccessPllException caught." << std::endl;
       abort();
@@ -1362,7 +1362,7 @@ namespace ALUGrid
       PackUnpackStaticState data( containerPll () );
       mpAccess ().exchange ( data );
     }
-    catch (Parallel ::  AccessPllException)
+    catch (Parallel ::  AccessPllException&)
     {
       std::cerr << "  FEHLER Parallel :: AccessPllException entstanden" << std::endl ;
     }
@@ -1389,7 +1389,7 @@ namespace ALUGrid
         PackUnpackDynamicState data( this->containerPll() );
         mpAccess().exchange( data );
       }
-      catch( Parallel:: AccessPllException )
+      catch( Parallel:: AccessPllException& )
       {
         std::cerr << "ERROR: Parallel::AccessPllException caught." << std::endl;
       }
