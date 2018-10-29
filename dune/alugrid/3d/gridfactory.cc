@@ -975,6 +975,17 @@ namespace Dune
       const FaceMapIterator fend = faceMap.end();
       for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
       {
+        //for dimension == 2 we do not want to search
+        // the artificially introduced faces
+        if(dimension == 2)
+        {
+          if(elementType == hexa)
+            if(fit->second.second > 3)
+              continue;
+          if(elementType == tetra)
+            if(fit->second.second > 2)
+              continue;
+        }
         FaceType key2;
         generateFace( fit->second, key2 );
 
@@ -1010,6 +1021,9 @@ namespace Dune
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
+    // list of face that should be removed
+    std::vector< FaceType > toBeDeletedFaces;
+    toBeDeletedFaces.reserve( faceMap.size() / 10 + 1);
 
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
@@ -1051,15 +1065,35 @@ namespace Dune
       }
 
       reinsertBoundary( faceMap, pos, bndIt->second );
-      faceMap.erase( pos );
+      toBeDeletedFaces.push_back( key );
     }
 
     //the search for the periodic neighbour also deletes the
     //found faces from the boundaryIds_ - thus it has to be done
     //after the recreation of the Ids_, because of correctElementOrientation
-    for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+    if( !faceTransformations_.empty() )
     {
-      searchPeriodicNeighbor( faceMap, it, defaultId );
+      for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+      {
+        //for dimension == 2 we do not want to search
+        // the artificially introduced faces
+        if(dimension == 2)
+        {
+          if(elementType == hexa)
+            if(it->second.second > 3)
+              continue;
+          if(elementType == tetra)
+            if(it->second.second > 2)
+              continue;
+        }
+        searchPeriodicNeighbor( faceMap, it, defaultId );
+      }
+    }
+
+    // erase faces that are boundries
+    for( const auto& key : toBeDeletedFaces )
+    {
+      faceMap.erase( key );
     }
 
     // communicate unidentified boundaries and find process borders)
