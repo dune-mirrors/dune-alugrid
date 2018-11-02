@@ -20,6 +20,8 @@
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 
+#include <utils/bisection-compatibility/bisectioncompatibility.hh>
+
 #if COMPILE_ALUGRID_INLINE
 #define alu_inline inline
 #else
@@ -332,7 +334,128 @@ namespace Dune
 
   template< class ALUGrid >
   alu_inline
+  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation, const bool resortElements )
+  {
+    std::cerr << "Marking longest edge for initial refinement..." << std::endl;
+
+    // DUNE reference element edge numbering
+    static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {1,2}, {0,3}, {1,3}, {2,3} };
+
+    static const int swapSuccessor[ 6 ] = { -1, 1, -1, -1, 3, -1 };
+
+    // DUNE reference element
+    static const int shift[ 6 ] = { 0, 0, 1, 3, 0, 2 };
+
+    const int numVertices = 4;
+
+    //create the vertex priority List
+    const int numberOfElements = elements_.size();
+
+    for(int el = 0; el < numberOfElements ; ++el )
+    {
+      auto& element = elements_[ el ];
+      assert( int(element.size()) == numVertices );
+
+      // find longest edge
+      int edge = -1;
+      double maxLength = 0;
+      for( int j = 0; j < 6; ++j )
+      {
+        const int vx0 = element[ edges[ j ][ 0 ] ];
+        const int vx1 = element[ edges[ j ][ 1 ] ];
+        double length = (vertices_[ vx0 ].first - vertices_[ vx1 ].first ).two_norm2();
+        if( length > maxLength )
+        {
+          edge = j;
+          maxLength = length;
+        }
+      }
+
+      assert( edge >= 0 && edge <= 5 );
+
+      // mark longest edge as refinement edge
+
+      if( resortElements )
+      {
+        // rotate element
+        if( shift[ edge ] > 0 )
+        {
+          assert( element.size() == 4 );
+          const auto old( element );
+          const int s = shift[ edge ];
+          for( int j = 0; j < numVertices; ++j )
+          {
+            element[ j ] = old[ (j+s) % numVertices ];
+          }
+        }
+
+        if( swapSuccessor[ edge ] > 0 )
+        {
+          std::swap( element[  swapSuccessor[ edge ] ],
+                     element[ (swapSuccessor[ edge ] + 1) % numVertices ] );
+        }
+      }
+
+      /*
+      Dune::FieldMatrix< double, 4, 3 > p( 0 );
+      Dune::FieldMatrix< double, 3, 3 > matrix( 0 );
+
+      for( int j=0; j<4; ++j )
+      {
+        p[ j ] = vertices_[ element[ j ] ].first;
+      }
+
+      for( int j=0; j<3; ++j )
+      {
+        matrix [j] = p[j+1] - p[0];
+      }
+
+      double det = matrix.determinant();
+      std::cout << "el = " << el << "  det = " << det << std::endl;
+      if( det > 0 )
+      {
+        std::swap( element[ 2 ], element[ 3 ] );
+      }
+
+      for( int j=0; j<4; ++j )
+      {
+        p[ j ] = vertices_[ element[ j ] ].first;
+      }
+
+      for( int j=0; j<3; ++j )
+      {
+        matrix [j] = p[j+1] - p[0];
+      }
+      det = matrix.determinant();
+      std::cout << "el = " << el << "  det = " << det << std::endl;
+      */
+
+#ifndef NDEBUG
+      // find longest edge, this should now be 0 for all elements
+      int longest = -1;
+      maxLength = 0;
+      for( int j = 0; j < 6; ++j )
+      {
+        const int vx0 = element[ edges[ j ][ 0 ] ];
+        const int vx1 = element[ edges[ j ][ 1 ] ];
+        double length = (vertices_[ vx0 ].first - vertices_[ vx1 ].first ).two_norm2();
+        if( length > maxLength )
+        {
+          longest = j;
+          maxLength = length;
+        }
+      }
+      // assert( longest == 0 );
+      // std::cout << "Longest edge = " << longest << "  " << edge << std::endl;
+#endif
+
+    }
+  }
+
+  template< class ALUGrid >
+  alu_inline
   ToUniquePtr<ALUGrid> ALU3dGridFactory< ALUGrid >::createGrid ()
+
   {
     return createGrid( true, true, "" );
   }
@@ -358,6 +481,48 @@ namespace Dune
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
+
+    bool make6 = true;
+    std::vector< bool > elementOrientation;
+    std::vector< int  > simplexTypes;
+
+    if( dimension == 3 && ALUGrid::refinementType == conforming )
+    {
+      Dune::Timer timer;
+
+      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
+      if(bisComp.make6CompatibilityCheck())
+      {
+        std::cout << "Grid is compatible!" << std::endl;
+      }
+      else
+      {
+        make6 = false;
+
+        // mark longest edge for initial refinement
+        // successive refinement is done via Newest Vertex Bisection
+        if( markLongestEdge_ )
+        {
+          markLongestEdge( elementOrientation );
+        }
+
+        std::cout << "Making compatible" << std::endl;
+        if( bisComp.type0Algorithm() )
+        {
+          std::cout << "Grid is compatible!!" << std::endl;
+          bisComp.stronglyCompatibleFaces();
+          // obtain new element sorting, orientations, and types
+          bisComp.returnElements( elements_, elementOrientation, simplexTypes );
+          markLongestEdge( elementOrientation, false );
+        }
+        else
+          std::cout << "Could not make compatible!" << std::endl;
+      }
+
+      std::cout << "BisectionCompatibility done:" << std::endl;
+      std::cout << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+    }
+
     numFacesInserted_ = boundaryIds_.size();
 
     //We need dimension == 2 here, because it is correcting the face orientation
@@ -366,7 +531,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2)
+    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 )
       recreateBoundaryIds();
 
     // sort boundary ids to insert real boundaries first and then fake
@@ -564,7 +729,17 @@ namespace Dune
           }
 
           // bisection element type: orientation and type (default 0)
-          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (elemIndex % 2) : 0), 0 );
+          int type = 0;
+          int orientation = (dimension == 3 ? (elemIndex % 2) : 0);
+          if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
+          {
+            assert( !elementOrientation.empty() );
+            orientation = elementOrientation[ elemIndex ];
+
+            assert( !simplexTypes.empty() );
+            type = simplexTypes[ elemIndex ];
+          }
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( orientation, type );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else
@@ -577,6 +752,9 @@ namespace Dune
         const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
         assert( dimension == 3 ? bndType != ALU3DSPACE Gitter::hbndseg::closure_2d : true );
+
+        // only positive boundary id's are allowed
+        assert( bndType > 0 );
 
         if( elementType == hexa )
         {

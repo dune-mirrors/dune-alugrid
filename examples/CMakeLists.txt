@@ -3,18 +3,19 @@ add_subdirectory(callback)
 add_subdirectory(communication)
 add_subdirectory(dgf)
 add_subdirectory(loadbalance)
+add_subdirectory(quality)
 add_subdirectory(testEfficiency)
 
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
-set(examples_HEADERS adaptation.hh  
-                     diagnostics.hh  
-                     paralleldgf.hh        
-                     problem-ball.hh   
+set(examples_HEADERS adaptation.hh
+                     diagnostics.hh
+                     paralleldgf.hh
+                     problem-ball.hh
                      problem-transport.hh
-                     datamap.hh     
-                     fvscheme.hh     
-                     piecewisefunction.hh  
-                     problem-euler.hh  
+                     datamap.hh
+                     fvscheme.hh
+                     piecewisefunction.hh
+                     problem-euler.hh
                      problem.hh)
 
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
@@ -28,7 +29,7 @@ foreach(variant ball euler transport)
   if("${variant}" STREQUAL "ball")
     target_compile_definitions(main_${variant} PRIVATE "ALUGRID_COUNT_GLOBALCOMM")
   endif()
-  target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CUBE" "GRIDDIM=3" "WORLDDIM=3")
+    target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CONFORM" "GRIDDIM=3" "WORLDDIM=3")
 
   foreach(type cube simplex conform)
     string(TOUPPER ${type} type_upper)

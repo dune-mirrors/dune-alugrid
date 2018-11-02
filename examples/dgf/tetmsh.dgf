@@ -1,0 +1,21 @@
+DGF
+Simplexgenerator
+min-angle 45        % quality enhancment 
+max-area 0.0001         % maximum element area restriction
+display 0              % show result using the Tetgen viewer
+
+% to use TetGen from a certain path, uncomment this path line
+%path $HOME/bin         % path to Tetgen
+file dgf/Dec1 mesh
+dimension 3
+#
+
+GridParameter
+%refinementedge longest
+#
+
+BOUNDARYDOMAIN
+default 1 
+#
+# examplegrid7.dgf
+

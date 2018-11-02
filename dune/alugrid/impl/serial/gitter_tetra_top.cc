@@ -415,10 +415,11 @@ namespace ALUGrid
                 }
                 for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
                 {
-                  // assert faces are leaf
-                  alugrid_assert(f->leaf());
-                  alugrid_assert(f->nb.front().first->nbLeaf());
-                  alugrid_assert(f->nb.rear().first->nbLeaf());
+                  // assert faces are leaf - this is not true anymore with weak compatibility
+               //   alugrid_assert(f->leaf());
+                 // alugrid_assert(f->nb.front().first->nbLeaf());
+                  //alugrid_assert(f->nb.rear().first->nbLeaf());
+                ;
                 }
               }
             }
@@ -859,11 +860,13 @@ namespace ALUGrid
 
     // currently, only type 0 and 1 are supported on init
     // more change needs to be done on DuneIndexProvider to support type 2
-    alugrid_assert( simplexType.type() < 2 );
+    //alugrid_assert( simplexType.type() < 2 );
 
     // if simplex type is not 0 then we assume type 1
-    if( simplexType.type() > 0 )
+    if( simplexType.type() > 1 )
       this->setSimplexTypeFlagOne() ;
+    if( simplexType.type() % 2 )
+      this->setSimplexTypeFlagZero() ;
 
     // initial mapping is has to be adjusted according
     // to the make-6 algorithm

@@ -130,7 +130,7 @@ namespace Dune
       return faceId;
     }
 
-    static BndPair makeBndPair ( const FaceType &face, int id )
+    static BndPair makeBndPair ( const FaceType &face, const int id )
     {
       BndPair bndPair;
       for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -138,9 +138,11 @@ namespace Dune
         const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
         bndPair.first[ j ] = face[ i ];
       }
-      bndPair.second = 1;
+      bndPair.second = id;
       return bndPair;
     }
+
+    void markLongestEdge( std::vector< bool >& elementOrientation, const bool resortElements = true  ) ;
 
   private:
     // return grid object
@@ -321,6 +323,10 @@ namespace Dune
 
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
+
+    //! set longest edge marking for biscetion grids (default is off)
+    void setLongestEdgeFlag () { markLongestEdge_ = true ; }
+
     /** \brief Return the Communication used by the grid factory
      *
      * Use the Communication available from the grid.
@@ -401,6 +407,8 @@ namespace Dune
 
     typename SpaceFillingCurveOrderingType :: CurveType curveType_;
     std::vector< unsigned int > ordering_;
+
+    bool markLongestEdge_;
   };
 
 
@@ -429,7 +437,7 @@ namespace Dune
     {
       if( !geometry.isSimplex() )
         DUNE_THROW( GridError, "Only simplex geometries can be inserted into "
-                               "ALUGrid< 3, 3, simplex, refrule >." );
+                               "ALUGrid< 3, 3, simplex, refrule >." << geometry  );
     }
     else
     {
@@ -505,7 +513,8 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >
@@ -520,7 +529,8 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >
@@ -535,7 +545,8 @@ namespace Dune
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve )
+    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    markLongestEdge_( false )
   {}
 
   template< class ALUGrid >

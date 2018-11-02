@@ -15,6 +15,14 @@ set( DGFS
   sb3d.dgf
   unitcube2d.dgf
   unitcube3d.dgf
+  tet.0.msh.dgf
+  tet.00.msh.dgf
+  tet.1.msh.dgf
+  tet.2.msh.dgf
+  tet.3.msh.dgf
+  tet.4.msh.dgf
+  tet.5.msh.dgf
+  tet.6.msh.dgf
 )
 
 foreach( dgf ${DGFS} )

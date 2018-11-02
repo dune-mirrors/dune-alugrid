@@ -1,5 +1,5 @@
-#ifndef Problem_BALL_HH
-#define Problem_BALL_HH
+#ifndef Problem_GLOBALREF_HH
+#define Problem_GLOBALREF_HH
 
 #include <cmath>
 #include <cassert>
@@ -12,7 +12,7 @@
 #include "problem-transport.hh"
 
 template< int dimD >
-struct BallData
+struct GlobalRefineData
 : public ProblemData< dimD,1 >
 {
   typedef ProblemData< dimD,1 > Base;
@@ -22,30 +22,21 @@ struct BallData
 
   const static int dimDomain = DomainType::dimension;
 
-  explicit BallData (const int problem) : c_(0.5), r0_(0.3), problem_( dimDomain == 3 ? problem : 0)
+  explicit GlobalRefineData (const int problem)
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
     std::ostringstream dgfFileName;
-    if( problem_ == 1 )
-      dgfFileName << path << "/dgf/cube_hc_512.dgf";
-    else if ( problem_ == 2 )
-      dgfFileName << path << "/dgf/cube_hc_4096.dgf";
-    else if ( problem_ == 3 )
-      dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-    else if ( problem_ == 4 )
-      dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
-    else
-      dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
+    dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
     return dgfFileName.str();
   }
 
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return 1.0;
+    return saveInterval();
   }
 
   int bndType( const DomainType &normal, const DomainType &x, const double time) const
@@ -57,14 +48,7 @@ struct BallData
   double adaptationIndicator ( const DomainType& x, double time,
                                const RangeType& uLeft, const RangeType &uRight ) const
   {
-    DomainType xx(x);
-    xx -= c_;
-    DomainType y(0);
-    y[0] = std::cos(time*2.*M_PI)*r0_;
-    y[1] = std::sin(time*2.*M_PI)*r0_;
-    xx -= y;
-    double r = xx.two_norm();
-    return ( (r>0.15 && r<0.25)? 1 : 0 );
+    return true ;
   }
 
   //! \copydoc ProblemData::refineTol
@@ -76,13 +60,8 @@ struct BallData
   //! \copydoc ProblemData::saveInterval
   double saveInterval() const
   {
-    return 0.1;
+    return 0.05;
   }
-
-private:
-  DomainType c_;
-  double r0_;
-  const int problem_;
 };
 
 // BallModel
@@ -91,7 +70,7 @@ private:
 /** \brief Problem describing the Euler equation of gas dynamics
  */
 template <int dimD>
-struct BallModel : public TransportModel<dimD>
+struct GlobalRefineModel : public TransportModel<dimD>
 {
   typedef ProblemData< dimD,1 > Problem;
 
@@ -105,7 +84,7 @@ struct BallModel : public TransportModel<dimD>
   /** \brief constructor
    *  \param problem switch between different data settings
    */
-  BallModel( unsigned int problem )
+  GlobalRefineModel( unsigned int problem )
   : problem_( 0 )
   {
     switch( problem )
@@ -114,17 +93,17 @@ struct BallModel : public TransportModel<dimD>
     case 1:
     case 2:
     case 3:
-      problem_ = new BallData< dimDomain >( problem );
+      problem_ = new GlobalRefineData< dimDomain >( problem );
       break;
 
     default:
       std::cerr << "ProblemData not defined - using problem 1!" << std::endl;
-      problem_ = new BallData< dimDomain >( problem );
+      problem_ = new GlobalRefineData< dimDomain >( problem );
     }
   }
 
   /** \brief destructor */
-  ~BallModel()
+  ~GlobalRefineModel()
   {
     delete problem_;
   }
