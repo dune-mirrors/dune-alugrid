@@ -10,6 +10,8 @@
 #include <dune/grid/common/adaptcallback.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 
+#include <dune/alugrid/common/alugrid_assert.hh>
+
 /** @file
  @author Robert Kloefkorn
  @brief Provides default index set implementations for Level- and
