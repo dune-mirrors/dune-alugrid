@@ -521,7 +521,7 @@ namespace ALUGrid
         osv[ link ].reset();
       }
     }
-    catch( MyAlloc :: OutOfMemoryException )
+    catch( MyAlloc :: OutOfMemoryException& )
     {
       std::cerr << "MacroGitterPll::vertexLinkageEstimateGCollect: out of memory" << std::endl;
       abort();

@@ -217,12 +217,12 @@ namespace ALUGrid
         osv_i.reset();
       }
     }
-    catch (ObjectStream::EOFException)
+    catch (ObjectStream::EOFException&)
     {
       std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
       abort();
     }
-    catch( ObjectStream::OutOfMemoryException )
+    catch( ObjectStream::OutOfMemoryException& )
     {
       std::cerr << "ERRPR (fatal): Out Of Memory." << std::endl;
       abort();
@@ -372,12 +372,12 @@ namespace ALUGrid
         }
       }
     }
-    catch( ObjectStream::EOFException )
+    catch( ObjectStream::EOFException& )
     {
       std::cerr << "ERROR (fatal): EOF encountered." << std::endl;
       abort();
     }
-    catch( ObjectStream::OutOfMemoryException )
+    catch( ObjectStream::OutOfMemoryException& )
     {
       std::cerr << "ERROR (fatal): Out of memory." << std::endl;
       abort();
