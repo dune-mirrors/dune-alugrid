@@ -454,24 +454,24 @@ namespace Dune
 
   template< class ALUGrid >
   alu_inline
-  ToUniquePtr<ALUGrid> ALU3dGridFactory< ALUGrid >::createGrid ()
-
+  typename ALU3dGridFactory< ALUGrid >::GridPtrType
+  ALU3dGridFactory< ALUGrid >::createGrid ()
   {
     return createGrid( true, true, "" );
   }
 
   template< class ALUGrid >
   alu_inline
-  ToUniquePtr<ALUGrid> ALU3dGridFactory< ALUGrid >
-    ::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  typename ALU3dGridFactory< ALUGrid >::GridPtrType
+  ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );
   }
 
   template< class ALUGrid >
   alu_inline
-  ToUniquePtr<ALUGrid> ALU3dGridFactory< ALUGrid >
-    ::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
+  typename ALU3dGridFactory< ALUGrid >::GridPtrType
+  ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     BoundaryProjectionVector* bndProjections = 0;
 

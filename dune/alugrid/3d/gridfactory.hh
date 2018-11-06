@@ -68,6 +68,12 @@ namespace Dune
 
     typedef typename Grid::CollectiveCommunication Communication;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 7)
+    typedef ToUniquePtr< Grid > GridPtrType;
+#else
+    typedef Grid*  GridPtrType;
+#endif
+
   private:
     static_assert ( (elementType == tetra || elementType == hexa),
                     "ALU3dGridFactory supports only grids containing "
@@ -275,11 +281,11 @@ namespace Dune
      *
      *  The caller takes responsibility for deleing the grid.
      */
-    ToUniquePtr<Grid> createGrid ();
+    GridPtrType createGrid ();
 
-    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+    GridPtrType createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
 
-    ToUniquePtr<Grid> createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
+    GridPtrType createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
