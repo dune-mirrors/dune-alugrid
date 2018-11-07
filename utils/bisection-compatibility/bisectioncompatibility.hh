@@ -99,8 +99,8 @@ public:
       containedInV0_(nVertices_,true),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
-      type0nodes_( stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ),
-      type0faces_( stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ),
+      type0nodes_( stevensonRefinement_ ? EdgeType({{0,3}}) : EdgeType({{0,1}}) ),
+      type0faces_( stevensonRefinement_ ? EdgeType({{3,0}}) : EdgeType({{3,2}}) ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
       type1face_( 3 - type1node_ )
   {
