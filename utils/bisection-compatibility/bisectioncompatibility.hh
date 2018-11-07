@@ -99,8 +99,8 @@ public:
       containedInV0_(nVertices_,true),
       types_(elements_.size(), 0),
       stevensonRefinement_(stevenson),
-      type0nodes_( stevensonRefinement_ ? EdgeType({{0,3}}) : EdgeType({{0,1}}) ),
-      type0faces_( stevensonRefinement_ ? EdgeType({{3,0}}) : EdgeType({{3,2}}) ),
+      type0nodes_( stevensonRefinement_ ? EdgeType{0,3} : EdgeType{0,1} ),
+      type0faces_( stevensonRefinement_ ? EdgeType{3,0} : EdgeType{3,2} ),
       type1node_( stevensonRefinement_ ? 1 : 2 ),
       type1face_( 3 - type1node_ )
   {
@@ -217,13 +217,13 @@ public:
     Dune::Timer timer;
     for(int counter = 0; counter < numberOfElements ; ++counter)
     {
-      FaceElementType faceElement = std::make_pair( FaceType({l1,l1,l1}), EdgeType( {l1,l1}) );
+      FaceElementType faceElement = std::make_pair( FaceType{l1,l1,l1}, EdgeType{l1,l1} );
       if(counter == 0)
       {
         FaceType face;
         const ElementType& el0 = elements_[0];
         getFace(el0, type0faces_[0], face);
-        faceElement = FaceElementType(std::make_pair( face , EdgeType( {0,0} ) ) );
+        faceElement = FaceElementType(std::make_pair( face , EdgeType{0,0} ) );
 
         //orientate E_0 (add vertices to vertexPriorityList)
         for(unsigned int i=0 ; i < 4 ; ++i)
@@ -672,8 +672,8 @@ private:
 
     // swap refinement flags
     stevensonRefinement_ = ! stevensonRefinement_;
-    type0nodes_ = stevensonRefinement_ ? EdgeType({0,3}) : EdgeType({0,1}) ;
-    type0faces_ = stevensonRefinement_ ? EdgeType({3,0}) : EdgeType({3,2}) ;
+    type0nodes_ = stevensonRefinement_ ? EdgeType{0,3} : EdgeType{0,1} ;
+    type0faces_ = stevensonRefinement_ ? EdgeType{3,0} : EdgeType{3,2} ;
     type1node_ = stevensonRefinement_ ? 1 : 2 ;
     type1face_ = ( 3 -  type1node_ );
   }
