@@ -396,40 +396,8 @@ namespace Dune
         }
       }
 
+
       /*
-      Dune::FieldMatrix< double, 4, 3 > p( 0 );
-      Dune::FieldMatrix< double, 3, 3 > matrix( 0 );
-
-      for( int j=0; j<4; ++j )
-      {
-        p[ j ] = vertices_[ element[ j ] ].first;
-      }
-
-      for( int j=0; j<3; ++j )
-      {
-        matrix [j] = p[j+1] - p[0];
-      }
-
-      double det = matrix.determinant();
-      std::cout << "el = " << el << "  det = " << det << std::endl;
-      if( det > 0 )
-      {
-        std::swap( element[ 2 ], element[ 3 ] );
-      }
-
-      for( int j=0; j<4; ++j )
-      {
-        p[ j ] = vertices_[ element[ j ] ].first;
-      }
-
-      for( int j=0; j<3; ++j )
-      {
-        matrix [j] = p[j+1] - p[0];
-      }
-      det = matrix.determinant();
-      std::cout << "el = " << el << "  det = " << det << std::endl;
-      */
-
 #ifndef NDEBUG
       // find longest edge, this should now be 0 for all elements
       int longest = -1;
@@ -445,9 +413,10 @@ namespace Dune
           maxLength = length;
         }
       }
-      // assert( longest == 0 );
+      assert( longest == 0 );
       // std::cout << "Longest edge = " << longest << "  " << edge << std::endl;
 #endif
+      */
 
     }
   }
