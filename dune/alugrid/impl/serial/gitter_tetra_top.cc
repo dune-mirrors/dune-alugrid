@@ -2658,8 +2658,8 @@ namespace ALUGrid
   {
     if (r != balrule_t::iso4)
     {
-      std::cerr << "**WARNUNG (IGNORIERT) in Periodic3Top < A >::refineBalance (..) nachschauen, Datei "
-         << __FILE__ << " Zeile " << __LINE__ << std::endl ;
+      std::cerr << "**WARNING (IGNORED) in Periodic3Top < A >::refineBalance (..) , file "
+         << __FILE__ << " line " << __LINE__ << " periodic refinement is only implemented for isometric refinement!" << std::endl ;
 
     // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
     // falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
