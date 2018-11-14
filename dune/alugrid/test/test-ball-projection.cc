@@ -7,6 +7,9 @@
 #include <dune/alugrid/grid.hh>
 #include <dune/alugrid/dgf.hh>
 
+#include <dune/grid/common/partitionset.hh>
+#include <dune/grid/common/rangegenerators.hh>
+
 //#include <dune/grid/albertagrid.hh>
 //#include <dune/grid/albertagrid/dgfparser.hh>
 
@@ -16,18 +19,25 @@ void algorithm ( HGridType &grid, const int step )
   int n = 0;
   double volume = 0;
 
-  const auto end = grid.template leafend<0>();
-  for( auto it = grid.template leafbegin<0>(); it != end; ++it )
+  const auto gridView = grid.leafGridView();
+
+  for( const auto& entity : Dune::elements( gridView, Dune::Partitions::interior ) )
   {
-    volume += it->geometry().volume();
-    n++;
+    volume += entity.geometry().volume();
+    ++n;
   }
 
-  std::cout << "level: " << step
-            << " elements: " << n
-            << " volume: " << volume
-            << " error: " << std::abs( volume - 4.0 * M_PI / 3.0 )
-            << std::endl;
+  volume = gridView.comm().sum( volume );
+  n = gridView.comm().sum( n );
+
+  if( gridView.comm().rank() == 0 )
+  {
+    std::cout << "level: " << step
+              << " elements: " << n
+              << " volume: " << volume
+              << " error: " << std::abs( volume - 4.0 * M_PI / 3.0 )
+              << std::endl;
+  }
 }
 
 // main
@@ -36,8 +46,7 @@ void algorithm ( HGridType &grid, const int step )
 int main ( int argc, char **argv )
 try
 {
-  //Dune::MPIHelper &mpihelper =
-  Dune::MPIHelper::instance( argc, argv );
+  Dune::MPIHelper &mpihelper = Dune::MPIHelper::instance( argc, argv );
 
   // create grid from DGF file
   const std::string gridFile = "dgf/ball.dgf";
@@ -45,10 +54,11 @@ try
   {
     // type of hierarchical grid
     typedef Dune :: ALUGrid< 3, 3, Dune::simplex, Dune::conforming > HGridType;
-    std::cout << "Dune :: ALUGrid< 3, 3, Dune::simplex, Dune::conforming >" << std::endl;
+
+    std::cout << "P[ " << mpihelper.rank() << " ]:  Dune :: ALUGrid< 3, 3, Dune::simplex, Dune::conforming >" << std::endl;
 
     // the method rank and size from MPIManager are static
-    std::cout << "Loading macro bulk grid: " << gridFile << std::endl;
+    std::cout << "P[ " << mpihelper.rank() << " ]:  Loading macro bulk grid: " << gridFile << std::endl;
 
     // construct macro using the DGF Parser
     Dune::GridPtr< HGridType > gridPtr( gridFile );

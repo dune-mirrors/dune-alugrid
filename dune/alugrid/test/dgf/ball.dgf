@@ -22,6 +22,7 @@ SIMPLEX
 
 BOUNDARYDOMAIN
 default 1
+#
 
 PROJECTION
 function p(x) = x / |x|
