@@ -455,14 +455,25 @@ namespace Dune
     std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
 
-    if( dimension == 3 && ALUGrid::refinementType == conforming )
+    if( dimension == 3 && ALUGrid::refinementType == conforming && ! elements_.empty() )
     {
       Dune::Timer timer;
 
+      if( rank_ > 0 )
+        DUNE_THROW( Dune::GridError, "AluGrid< d, 3, simplex, conforming > can only be read on one core" );
+
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
-      if(bisComp.make6CompatibilityCheck())
+
+      std::string rankstr ;
       {
-        std::cout << "Grid is compatible!" << std::endl;
+        std::stringstream str;
+        str << "P[ " << rank_ << " ]: ";
+        rankstr = str.str();
+      }
+
+      if( bisComp.make6CompatibilityCheck()  )
+      {
+        std::cout << rankstr << "Grid is compatible!" << std::endl;
       }
       else
       {
@@ -475,21 +486,21 @@ namespace Dune
           markLongestEdge( elementOrientation );
         }
 
-        std::cout << "Making compatible" << std::endl;
+        std::cout << rankstr << "Making compatible" << std::endl;
         if( bisComp.type0Algorithm() )
         {
-          std::cout << "Grid is compatible!!" << std::endl;
+          std::cout << rankstr << "Grid is compatible!!" << std::endl;
           bisComp.stronglyCompatibleFaces();
           // obtain new element sorting, orientations, and types
           bisComp.returnElements( elements_, elementOrientation, simplexTypes );
           markLongestEdge( elementOrientation, false );
         }
         else
-          std::cout << "Could not make compatible!" << std::endl;
+          std::cout << rankstr << "Could not make compatible!" << std::endl;
       }
 
-      std::cout << "BisectionCompatibility done:" << std::endl;
-      std::cout << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+      std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
+      std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
     }
 
     numFacesInserted_ = boundaryIds_.size();
