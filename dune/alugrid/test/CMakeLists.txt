@@ -2,6 +2,7 @@ set(TESTS
   test-alugrid
   test-adaptivity
   test-fromtogridfactory
+  test-iterators
   test-structuredgridfactory
   test-twists
   test-hierarchic
@@ -10,7 +11,6 @@ set(TESTS
   test-gmsh
 )
 
-#  test-iterators
 foreach(TEST ${TESTS})
   dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
 endforeach()
