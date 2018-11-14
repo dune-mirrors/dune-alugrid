@@ -389,7 +389,15 @@ public:
   template <class EntityImp>
   LevelIntersectionIteratorWrapper(const GridImp& grid, const EntityImp & en, int wLevel , bool end )
   : intersection_( IntersectionImp( grid, en, wLevel, end ) )
-  {}
+  {
+    if( wLevel > 0 && grid.conformingRefinement() )
+    {
+      // conceptually the level intersection iterator does not work for
+      // bisection type grids, only on the macro level. Therefore,
+      // an exception is thrown here
+      DUNE_THROW( NotImplemented, "LevelIntersectionIterator does not work for bisection refinement type grids on higher levels!");
+    }
+  }
 
   //! The copy constructor
   LevelIntersectionIteratorWrapper(const ThisType & org)

@@ -85,8 +85,14 @@ void checkIntersections( GridType& grid )
   auto level_view = grid.levelView(1);
   for (auto && entity : Dune::elements(level_view)) {
     std::cout << "entity " << level_view.indexSet().index(entity) << std::endl;
+    try {
     for (auto&& intersection : Dune::intersections(level_view, entity))
       std::cout << "  intersection " << intersection.indexInInside() << std::endl;
+    }
+    catch ( const Dune::NotImplemented& e )
+    {
+      std::cout << e.what() << std::endl;
+    }
   }
 }
 
