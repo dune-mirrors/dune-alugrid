@@ -3,6 +3,7 @@ set(TESTS
   test-adaptivity
   test-fromtogridfactory
   test-structuredgridfactory
+  test-iterators
   test-twists
   test-hierarchic
   test-ball-projection

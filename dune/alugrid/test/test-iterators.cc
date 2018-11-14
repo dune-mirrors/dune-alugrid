@@ -8,18 +8,15 @@
 #include <string>
 
 #include <dune/common/tupleutility.hh>
-#include <dune/common/tuples.hh>
 #include <dune/common/parallel/mpihelper.hh>
 
 #include <dune/geometry/referenceelements.hh>
-#include <dune/geometry/genericgeometry/codimtable.hh>
 
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
-#include <dune/grid/test/checkintersectionit.cc>
+#include <dune/grid/test/checkintersectionit.hh>
 //#include "checktwists.cc"
 
-#include <dune/grid/io/visual/grapegriddisplay.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 #include <dune/alugrid/dgf.hh>
@@ -81,6 +78,19 @@ void checkIteratorCodim(GridType & grid)
 }
 
 template <class GridType>
+void checkIntersections( GridType& grid )
+{
+  grid.globalRefine(1);
+
+  auto level_view = grid.levelView(1);
+  for (auto && entity : Dune::elements(level_view)) {
+    std::cout << "entity " << level_view.indexSet().index(entity) << std::endl;
+    for (auto&& intersection : Dune::intersections(level_view, entity))
+      std::cout << "  intersection " << intersection.indexInInside() << std::endl;
+  }
+}
+
+template <class GridType>
 void checkIterators( GridType& grid )
 {
   checkIteratorCodim< 0 > ( grid );
@@ -105,12 +115,6 @@ void checkALUSerial(GridType & grid, int mxl = 2, const bool display = false)
 {
 
   writeFile( grid.leafGridView() );
-
-  if( display )
-  {
-    Dune::GrapeGridDisplay< GridType > grape( grid );
-    grape.display();
-  }
 
   std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
@@ -187,6 +191,8 @@ int main (int argc , char **argv) {
         std::cout << "Begin Cube test" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
 
+        checkIntersections( *gridPtr );
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
@@ -211,6 +217,8 @@ int main (int argc , char **argv) {
         std::cout << "begin simplex test nonconforming" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
 
+        checkIntersections( *gridPtr );
+
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
@@ -232,6 +240,8 @@ int main (int argc , char **argv) {
         Dune::GridPtr<GridType> gridPtr( filename );
         std::cout << "begin simplex test conforming" << std::endl;
         checkALUSerial(*gridPtr, 2, display);
+
+        checkIntersections( *gridPtr );
 
         //CircleBoundaryProjection<2> bndPrj;
         //GridType grid("alu2d.triangle", &bndPrj );
