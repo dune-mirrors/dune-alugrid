@@ -338,6 +338,4 @@ namespace ALUGrid
 
 } // namespace ALUGrid
 
-//#include "mapp_tetra_3d_ext.h"
-
 #endif // #ifndef MAPP_TETRA_3D_H_INCLUDED

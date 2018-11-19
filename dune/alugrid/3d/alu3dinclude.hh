@@ -19,7 +19,6 @@
 #include <dune/alugrid/impl/serial/gitter_sti.h>
 
 #include <dune/alugrid/impl/serial/gitter_hexa_top.h>
-#include <dune/alugrid/impl/serial/mapp_tetra_3d_ext.h>
 #include <dune/alugrid/impl/serial/gitter_tetra_top.h>
 #include <dune/alugrid/impl/serial/walk.h>
 #include <dune/alugrid/impl/serial/gitter_impl.h>
