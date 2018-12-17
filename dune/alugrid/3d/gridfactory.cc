@@ -455,12 +455,20 @@ namespace Dune
     std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
 
-    if( dimension == 3 && ALUGrid::refinementType == conforming && ! elements_.empty() )
-    {
-      Dune::Timer timer;
+    const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
 
-      if( rank_ > 0 )
-        DUNE_THROW( Dune::GridError, "AluGrid< d, 3, simplex, conforming > can only be read on one core" );
+    // BisectionCompatibility only works in serial because of the sorting
+    // algorithm, therefore it needs to be run as a preprocessing step in case a
+    // parallel bisection compatible grid should be read
+    if( dimension == 3 && ALUGrid::refinementType == conforming && numNonEmptyPartitions > 1 )
+    {
+      std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
+    }
+    else if( dimension == 3 && ALUGrid::refinementType == conforming && ! elements_.empty() )
+    {
+      assert( numNonEmptyPartitions == 1 );
+
+      Dune::Timer timer;
 
       BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
 
