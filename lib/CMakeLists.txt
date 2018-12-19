@@ -14,7 +14,7 @@ dune_add_library(dunealugrid
   _DUNE_TARGET_OBJECTS:parallel_
   ${ALUGRID_LIB_SOURCES}
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/nonconfmappings.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
 
 if( DUNE_ALUGRID_COMPILE_BINDINGS )

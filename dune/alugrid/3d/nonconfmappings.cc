@@ -1,13 +1,8 @@
 #include "config.h"
-#include "mappings.hh"
+#include "nonconfmappings.hh"
 
 namespace Dune
 {
-
-  const double TrilinearMapping :: _epsilon = 1.0e-8 ;
-  const double BilinearSurfaceMapping :: _epsilon = 1.0e-8 ;
-  const double SurfaceNormalCalculator :: _epsilon = 1.0e-8 ;
-
 
 
   // Implementation of NonConformingFaceMapping

@@ -6,7 +6,8 @@
 
 #include <dune/geometry/referenceelements.hh>
 
-#include "mappings.hh"
+#include "../impl/serial/mappings.hh"
+#include "nonconfmappings.hh"
 #include "alu3dinclude.hh"
 #include "topology.hh"
 

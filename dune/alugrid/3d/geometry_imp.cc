@@ -7,7 +7,6 @@
 //#define COMPILE_INTO_ALUGRID_LIB 1
 
 #include "grid.hh"
-#include "mappings.hh"
 #include "geometry.hh"
 #include <dune/alugrid/common/twists.hh>
 

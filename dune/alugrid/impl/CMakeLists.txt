@@ -19,6 +19,7 @@ dune_add_library(serial OBJECT
         serial/mapp_cube_3d.cc
         serial/mapp_tetra_3d.cc
         serial/myalloc.cc
+        serial/mappings.cc
         duneinterface/gitter_dune_impl.cc)
 
 dune_add_library(parallel OBJECT

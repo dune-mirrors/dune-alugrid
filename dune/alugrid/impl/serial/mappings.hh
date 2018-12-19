@@ -5,48 +5,43 @@
 #include <limits>
 #include <cmath>
 
+#include "gitter_sti.h"
+
 // Dune includes
 #include <dune/common/fvector.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/exceptions.hh>
+#include "../../3d/aluinline.hh"
 
-// Local includes
-#include "alu3dinclude.hh"
-
+using namespace ALUGrid;
 namespace Dune {
 
-  static const alu3d_ctype ALUnumericEpsilon = 10.0 * std::numeric_limits< alu3d_ctype >::epsilon();
-
-  template<int mydim, int coorddim, class GridImp>
-  class ALU3dGridGeometry;
-
-  template<int dim, int dimworld, ALU3dGridElementType, class >
-  class ALU3dGrid;
+  static const alucoord_t ALUnumericEpsilon = 10.0 * std::numeric_limits< alucoord_t >::epsilon();
 
   //! A trilinear mapping from the Dune reference hexahedron into the physical
   //! space (same as in mapp_cube_3d.h, but for a different reference hexahedron)
   class TrilinearMapping
   {
   public:
-    typedef alu3d_ctype double_t[3];
-    typedef FieldVector<alu3d_ctype, 3> coord_t;
-    typedef FieldMatrix<alu3d_ctype, 3, 3> mat_t;
+    typedef alucoord_t double_t[3];
+    typedef Dune::FieldVector<alucoord_t, 3> coord_t;
+    typedef Dune::FieldMatrix<alucoord_t, 3, 3> mat_t;
   private:
-    static const double _epsilon ;
+    static constexpr double _epsilon  = 1.0e-8;
 
     // the internal mapping
-    alu3d_ctype a [8][3] ;
+    alucoord_t a [8][3] ;
     mat_t Df;
     mat_t Dfi;
     mat_t invTransposed_;
-    alu3d_ctype DetDf ;
+    alucoord_t DetDf ;
 
     bool calcedDet_;
     bool calcedLinear_;
     bool calcedInv_;
     bool affine_;
 
-    void linear (const alu3d_ctype, const alu3d_ctype, const alu3d_ctype) ;
+    void linear (const alucoord_t, const alucoord_t, const alucoord_t) ;
     void linear (const coord_t&) ;
     void inverse (const coord_t&) ;
   public :
@@ -61,11 +56,11 @@ namespace Dune {
     TrilinearMapping (const TrilinearMapping &) ;
 
     ~TrilinearMapping () {}
-    alu3d_ctype det (const coord_t&) ;
+    alucoord_t det (const coord_t&) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
     const mat_t& jacobianTransposed(const coord_t&);
     void map2world (const coord_t&, coord_t&) const ;
-    void map2world (const alu3d_ctype , const alu3d_ctype , const alu3d_ctype ,
+    void map2world (const alucoord_t , const alucoord_t , const alucoord_t ,
                     coord_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
 
@@ -88,16 +83,16 @@ namespace Dune {
   {
   public:
     // our coordinate types
-    typedef FieldVector<alu3d_ctype, 3> coord3_t;
-    typedef FieldVector<alu3d_ctype, 2> coord2_t;
+    typedef Dune::FieldVector<alucoord_t, 3> coord3_t;
+    typedef Dune::FieldVector<alucoord_t, 2> coord2_t;
 
     // type of coordinate vectors from elements
-    typedef alu3d_ctype double3_t[3];
+    typedef alucoord_t double3_t[3];
   protected:
 
-    alu3d_ctype _n [3][3] ;
+    alucoord_t _n [3][3] ;
 
-    static const double _epsilon ;
+    static constexpr double _epsilon = 1.0e-8;
 
     bool _affine;
 
@@ -113,10 +108,10 @@ namespace Dune {
 
     // calcuates normal
     void normal(const coord2_t&, coord3_t&) const ;
-    void normal(const alu3d_ctype, const alu3d_ctype, coord3_t&)const;
+    void normal(const alucoord_t, const alucoord_t, coord3_t&)const;
 
     void negativeNormal(const coord2_t&, coord3_t&) const ;
-    void negativeNormal(const alu3d_ctype, const alu3d_ctype, coord3_t&)const;
+    void negativeNormal(const alucoord_t, const alucoord_t, coord3_t&)const;
 
   public:
     // builds _b and _n, called from the constructors
@@ -130,7 +125,7 @@ namespace Dune {
     template <class vector_t>
     void buildMapping (const vector_t & , const vector_t & ,
                        const vector_t & , const vector_t & ,
-                       alu3d_ctype (&_b)[4][3] );
+                       alucoord_t (&_b)[4][3] );
   } ;
 
 
@@ -145,30 +140,30 @@ namespace Dune {
     typedef SurfaceNormalCalculator BaseType;
 
     using BaseType :: _n;
-    static const double _epsilon;
+    static constexpr double _epsilon = 1.0e-8;
 
     // our coordinate types
-    typedef FieldVector<alu3d_ctype, 3> coord3_t;
-    typedef FieldVector<alu3d_ctype, 2> coord2_t;
+    typedef Dune::FieldVector<alucoord_t, 3> coord3_t;
+    typedef Dune::FieldVector<alucoord_t, 2> coord2_t;
 
     // type of coordinate vectors from elements
-    typedef alu3d_ctype double3_t[3];
+    typedef alucoord_t double3_t[3];
 
     // type for helper matrices
-    typedef FieldMatrix<alu3d_ctype,3,3> mat3_t;
+    typedef Dune::FieldMatrix<alucoord_t,3,3> mat3_t;
 
     // type for inverse matrices
-    typedef FieldMatrix<alu3d_ctype,2,3> matrix_t;
+    typedef Dune::FieldMatrix<alucoord_t,2,3> matrix_t;
 
     // type for inverse matrices
-    typedef FieldMatrix<alu3d_ctype,3,2> inv_t;
+    typedef Dune::FieldMatrix<alucoord_t,3,2> inv_t;
 
-    alu3d_ctype _b [4][3] ;
+    alucoord_t _b [4][3] ;
 
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
     mutable matrix_t matrix_;
-    mutable alu3d_ctype DetDf;
+    mutable alucoord_t DetDf;
 
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
@@ -181,7 +176,7 @@ namespace Dune {
     //! Constructor creating empty mapping with double , i.e. zero
     BilinearSurfaceMapping ();
 
-    //! Constructor getting FieldVectors
+    //! Constructor getting Dune::FieldVectors
     BilinearSurfaceMapping (const coord3_t&, const coord3_t&,
                             const coord3_t&, const coord3_t&) ;
     //! Constructor for double[3]
@@ -196,7 +191,7 @@ namespace Dune {
     const matrix_t& jacobianTransposed(const coord2_t&) const ;
 
     // calculates determinant of face mapping using the normal
-    alu3d_ctype det(const coord2_t&) const;
+    alucoord_t det(const coord2_t&) const;
 
     // maps from local coordinates to global coordinates
     void world2map(const coord3_t &, coord2_t & ) const;
@@ -204,11 +199,11 @@ namespace Dune {
     // maps form global coordinates to local (within reference element)
     // coordinates
     void map2world(const coord2_t&, coord3_t&) const ;
-    void map2world(const alu3d_ctype ,const alu3d_ctype , coord3_t&) const ;
+    void map2world(const alucoord_t ,const alucoord_t , coord3_t&) const ;
 
   private:
-    void map2worldnormal(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype , coord3_t&)const;
-    void map2worldlinear(const alu3d_ctype, const alu3d_ctype, const alu3d_ctype ) const;
+    void map2worldnormal(const alucoord_t, const alucoord_t, const alucoord_t , coord3_t&)const;
+    void map2worldlinear(const alucoord_t, const alucoord_t, const alucoord_t ) const;
 
   public:
     // builds _b and _n, called from the constructors
@@ -225,13 +220,13 @@ namespace Dune {
   class BilinearMapping
   {
   public:
-    typedef alu3d_ctype ctype;
+    typedef alucoord_t ctype;
 
-    typedef FieldVector< ctype, cdim > world_t;
-    typedef FieldVector< ctype, 2 > map_t;
+    typedef Dune::FieldVector< ctype, cdim > world_t;
+    typedef Dune::FieldVector< ctype, 2 > map_t;
 
-    typedef FieldMatrix< ctype, 2, cdim > matrix_t;
-    typedef FieldMatrix< ctype, cdim, 2 > inv_t;
+    typedef Dune::FieldMatrix< ctype, 2, cdim > matrix_t;
+    typedef Dune::FieldMatrix< ctype, cdim, 2 > inv_t;
 
   protected:
     ctype _b [4][cdim];
@@ -268,8 +263,8 @@ namespace Dune {
                         const vector_t &, const vector_t & );
 
   protected:
-    static void multTransposedMatrix ( const matrix_t &, FieldMatrix< ctype, 2, 2 > & );
-    static void multMatrix ( const matrix_t &, const FieldMatrix< ctype, 2, 2 > &, inv_t & );
+    static void multTransposedMatrix ( const matrix_t &, Dune::FieldMatrix< ctype, 2, 2 > & );
+    static void multMatrix ( const matrix_t &, const Dune::FieldMatrix< ctype, 2, 2 > &, inv_t & );
 
     void map2worldlinear ( const ctype, const ctype ) const;
     void inverse ( const map_t & ) const;
@@ -282,15 +277,15 @@ namespace Dune {
   class LinearMapping
   {
   public:
-    typedef alu3d_ctype ctype;
+    typedef alucoord_t ctype;
 
     typedef ctype double_t[ cdim ];
 
-    typedef FieldVector< ctype, cdim > world_t;
-    typedef FieldVector< ctype, mydim > map_t;
+    typedef Dune::FieldVector< ctype, cdim > world_t;
+    typedef Dune::FieldVector< ctype, mydim > map_t;
 
-    typedef FieldMatrix< ctype, mydim, cdim > matrix_t;
-    typedef FieldMatrix< ctype, cdim, mydim > inv_t;
+    typedef Dune::FieldMatrix< ctype, mydim, cdim > matrix_t;
+    typedef Dune::FieldMatrix< ctype, cdim, mydim > inv_t;
 
   protected:
     matrix_t      _matrix;        //!< transformation matrix (transposed)
@@ -343,10 +338,10 @@ namespace Dune {
     void calculateDeterminant (const map_t&) const;
 
     void multTransposedMatrix(const matrix_t& matrix,
-                              FieldMatrix<ctype, mydim, mydim>& result) const;
+                              Dune::FieldMatrix<ctype, mydim, mydim>& result) const;
 
     void multMatrix ( const matrix_t& A,
-                      const FieldMatrix< ctype, mydim, mydim> &B,
+                      const Dune::FieldMatrix< ctype, mydim, mydim> &B,
                       inv_t& ret ) const ;
 
   public:
@@ -370,83 +365,10 @@ namespace Dune {
     template <class vector_t>
     void buildMapping (const vector_t & );
   } ;
-
-
-  ///////////////////////////////////////////////////////////////////
-  //
-  // NonConforming Mappings
-  //
-  ///////////////////////////////////////////////////////////////////
-
-
-  //! General form of non-conforming face mapping
-  //! This class is empty and needs to be specialised
-  template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  class NonConformingFaceMapping;
-
-  //! Non-conforming face mappings for tetrahedra
-  template< int dim, int dimworld, class Comm >
-  class NonConformingFaceMapping< dim, dimworld, tetra, Comm >
-  {
-  public:
-    typedef FieldVector< alu3d_ctype, 3 > CoordinateType;
-    typedef typename ALU3dImplTraits< tetra, Comm >::HfaceRuleType RefinementRuleType;
-
-    NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
-    : rule_( rule ), nChild_( nChild )
-    {}
-
-    void child2parent ( const CoordinateType &childCoordinates,
-                        CoordinateType &parentCoordinates) const;
-
-    CoordinateType child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const;
-
-  private:
-    void child2parentNosplit(const CoordinateType& childCoordinates,
-                             CoordinateType& parentCoordinates) const;
-    void child2parentE01(const CoordinateType& childCoordinates,
-                         CoordinateType& parentCoordinates) const;
-    void child2parentE12(const CoordinateType& childCoordinates,
-                         CoordinateType& parentCoordinates) const;
-    void child2parentE20(const CoordinateType& childCoordinates,
-                         CoordinateType& parentCoordinates) const;
-    void child2parentIso4(const CoordinateType& childCoordinates,
-                          CoordinateType& parentCoordinates) const;
-
-    RefinementRuleType rule_;
-    int nChild_;
-  };
-
-  //! Non-conforming face mappings for hexahedra
-  template< int dim, int dimworld, class Comm >
-  class NonConformingFaceMapping< dim, dimworld, hexa, Comm >
-  {
-  public:
-    typedef FieldVector< alu3d_ctype, 2 > CoordinateType;
-    typedef typename ALU3dImplTraits< hexa, Comm >::HfaceRuleType RefinementRuleType;
-
-    NonConformingFaceMapping ( RefinementRuleType rule, int nChild )
-    : rule_( rule ), nChild_( nChild )
-    {}
-
-    void child2parent ( const CoordinateType &childCoordinates,
-                        CoordinateType &parentCoordinates) const;
-
-    CoordinateType child2parent ( const FieldVector< alu3d_ctype, 2 > &childCoordinates ) const;
-
-  private:
-    void child2parentNosplit(const CoordinateType& childCoordinates,
-                             CoordinateType& parentCoordinates) const;
-    void child2parentIso4(const CoordinateType& childCoordinates,
-                          CoordinateType& parentCoordinates) const;
-
-    RefinementRuleType rule_;
-    int nChild_;
-  };
-
 } // end namespace Dune
 
 #if COMPILE_ALUGRID_INLINE
-  #include "mappings_imp.cc"
+#include "mappings.cc"
 #endif
+
 #endif
