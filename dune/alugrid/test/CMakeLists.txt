@@ -18,4 +18,7 @@ endforeach()
 add_subdirectory(dgf)
 add_subdirectory(gmsh)
 
-dune_install( checkintersectionit.hh  checktwists.hh  insertgrid.hh )
+set(alutestdir ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/test)
+set(alugridtest_HEADERS checkintersectionit.hh  checktwists.hh  insertgrid.hh )
+
+install( FILES ${alugridtest_HEADERS} DESTINATION ${alutestdir} )
