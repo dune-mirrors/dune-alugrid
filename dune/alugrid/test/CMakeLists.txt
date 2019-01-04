@@ -17,3 +17,5 @@ endforeach()
 
 add_subdirectory(dgf)
 add_subdirectory(gmsh)
+
+dune_install( checkintersectionit.hh  checktwists.hh  insertgrid.hh )

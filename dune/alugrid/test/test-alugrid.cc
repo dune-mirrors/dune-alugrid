@@ -28,10 +28,13 @@
 
 #include <dune/grid/test/gridcheck.hh>
 #include <dune/grid/test/checkgeometryinfather.hh>
-#include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
+
+// use overloaded test because intersection test fails for manifold
+// intersections, there is some discussion needed.
+#include <dune/alugrid/test/checkintersectionit.hh>
 //#include "checktwists.cc"
 
 #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
