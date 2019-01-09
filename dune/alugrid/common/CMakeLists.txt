@@ -19,5 +19,5 @@ set(alucommon_HEADERS alugrid_assert.hh
                       typetraits.hh
                       writeparalleldgf.hh
    )
-# installation of the header files                  
+# installation of the header files
 install(FILES ${alucommon_HEADERS} DESTINATION ${alucommondir})
