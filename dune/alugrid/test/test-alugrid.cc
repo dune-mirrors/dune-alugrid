@@ -555,8 +555,11 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
   // check the method geometryInFather()
-  std::cout << "  CHECKING: geometry in father" << std::endl;
-  checkGeometryInFather(grid);
+  if( GridType::dimension == GridType::dimensionworld )
+  {
+    std::cout << "  CHECKING: geometry in father" << std::endl;
+    checkGeometryInFather(grid);
+  }
   // check the intersection iterator and the geometries it returns
   std::cout << "  CHECKING: intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
