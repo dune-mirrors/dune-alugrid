@@ -331,11 +331,11 @@ namespace Dune
   void ALU3dGrid< dim, dimworld, elType, Comm >
     ::globalRefine ( int refCount, AdaptDataHandleInterface< GridImp, DataHandle > &handle )
   {
-    for( int count = refCount; count > 0; --count )
+    for( int count = std::abs(refCount); count > 0; --count )
     {
       const LeafIteratorType end = leafend();
       for( LeafIteratorType it = leafbegin(); it != end; ++it )
-        mark( 1 , *it );
+        mark( refCount>0?1:-1 , *it );
       adapt( handle );
     }
   }
