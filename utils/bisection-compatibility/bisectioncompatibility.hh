@@ -695,7 +695,7 @@ private:
   }
 
   //check face for compatibility
-  bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = true)
+  bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = false)
   {
     EdgeType edge1,edge2;
     int elIndex = face.second[0];
