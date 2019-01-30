@@ -633,9 +633,10 @@ namespace ALUGrid
     _child( 0 )
   {
     //std::cout << a << b << std::endl;
-    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
     if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
+    //dont assert length > 0 for fake edges
+    else alugrid_assert ( isRealLine() );
     return;
   }
 
@@ -648,9 +649,10 @@ namespace ALUGrid
     _child( nChild )
   {
     alugrid_assert ( _child == 0 || _child == 1 );
-    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
     if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
+    //dont assert length > 0 for fake edges
+    else alugrid_assert ( isRealLine() );
     return;
   }
 
