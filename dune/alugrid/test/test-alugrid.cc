@@ -564,9 +564,11 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
+  std::cout << "  CHECKING: Iterator Assignment" << std::endl;
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
 
+  std::cout << "  CHECKING: Nonconforming Index Sets" << std::endl;
   // check level index sets on nonconforming grids
   checkLevelIndexNonConform(grid);
 

@@ -205,7 +205,9 @@ namespace Dune
   void ALU3dGridFactory< ALUGrid > ::
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool projectInside)
   {
-     std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+#ifndef NDEBUG
+      std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+#endif
       if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
@@ -483,7 +485,9 @@ namespace Dune
 
       if( bisComp.make6CompatibilityCheck()  )
       {
+#ifndef NDEBUG
         std::cout << rankstr << "Grid is compatible!" << std::endl;
+#endif
       }
       else
       {
@@ -495,22 +499,28 @@ namespace Dune
         {
           markLongestEdge( elementOrientation );
         }
-
+#ifndef NDEBUG
         std::cout << rankstr << "Making compatible" << std::endl;
+#endif
         if( bisComp.type0Algorithm() )
         {
+#ifndef NDEBUG
           std::cout << rankstr << "Grid is compatible!!" << std::endl;
+#endif
           bisComp.stronglyCompatibleFaces();
           // obtain new element sorting, orientations, and types
           bisComp.returnElements( elements_, elementOrientation, simplexTypes );
           markLongestEdge( elementOrientation, false );
         }
+#ifndef NDEBUG
         else
           std::cout << rankstr << "Could not make compatible!" << std::endl;
+#endif
       }
-
+#ifndef NDEBUG
       std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
       std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+#endif
     }
 
     numFacesInserted_ = boundaryIds_.size();
