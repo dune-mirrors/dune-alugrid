@@ -831,7 +831,12 @@ namespace ALUGrid
                         myvertex(3)->Point())).integrate1 (0.0) );
     //if( std::abs( calculatedVolume - _volume ) >1e-10 )
     //  std::cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << std::endl;
-    alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+
+    //In the 2d case the 3d volume may be 0, so do not divide by it
+    if(this->is2d())
+      alugrid_assert ( std::abs( calculatedVolume - _volume ) < 1e-10 );
+    else
+      alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
   }
 

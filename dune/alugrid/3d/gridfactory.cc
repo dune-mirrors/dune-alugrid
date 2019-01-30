@@ -79,7 +79,7 @@ namespace Dune
         if(vertices_.size() == 0)
         {
           // fake vertex that every tetra is connected to
-          vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
+          vertices_.push_back( std::make_pair( VertexType{0.0,0.0,1.0}, 0 ) );
         }
 
         //setting the global id to odd is convenience
