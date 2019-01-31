@@ -811,6 +811,22 @@ namespace ALUGrid
       alugrid_assert ( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
       alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
 
+      //only transmit vertices if numVerticesProjected > 0
+      //number is number of all vertices communicated
+      unsigned char numVerticesProjected = 0;
+      os.read( numVerticesProjected );
+
+      if( numVerticesProjected > 0)
+      {
+        std::vector<std::array<double,3> > projectedVertices;
+        projectedVertices.resize(numVerticesProjected);
+        for(unsigned i = 0; i < numVerticesProjected; ++i)
+        {
+          for(int j = 0 ; j < 3 ; ++j)
+            os.read( projectedVertices[i][j] );
+        }
+        //TODO: assign vertices to ghost
+      }
     }
     catch (ObjectStream::EOFException&)
     {
@@ -918,6 +934,30 @@ namespace ALUGrid
     const unsigned char lvl = mytetra().level();
     os.write( lvl );
     os.put( char( mytetra().leaf() ) );
+
+    bool hasVertexProjection = false;
+    for(int i = 0 ; i < 4; ++i)
+    {
+      if(mytetra().myneighbour( i ).first->hasVertexProjection())
+      {
+        hasVertexProjection = true;
+        break;
+      }
+    }
+    //Put numVertices of the element
+    //>0 means, that at least one vertex has been projected
+    const unsigned char numVerticesProjected = hasVertexProjection ? 4 : 0;
+    os.write( numVerticesProjected );
+    if( numVerticesProjected > 0 )
+    {
+      for(unsigned i = 0; i < numVerticesProjected; ++i)
+        //write all coordinates into stream (dim always 3)
+        for(int j = 0; j < 3 ; ++j)
+        {
+          double coord = mytetra().myvertex(i)->Point()[j];
+          os.write( coord );
+        }
+    }
     return;
   }
 
@@ -1602,6 +1642,30 @@ namespace ALUGrid
     const unsigned char lvl = myhexa().level();
     os.write( lvl );
     os.put( char( myhexa().leaf() ) );
+
+    bool hasVertexProjection = false;
+    for(int i = 0 ; i < 6; ++i)
+    {
+      if(myhexa().myneighbour( i ).first->hasVertexProjection())
+      {
+        hasVertexProjection = true;
+        break;
+      }
+    }
+    //Put numVertices of the element
+    //>0 means, that at least one vertex has been projected
+    const unsigned char numVerticesProjected = hasVertexProjection ? 8 : 0;
+    os.write( numVerticesProjected );
+    if( numVerticesProjected > 0 )
+    {
+      for(unsigned i = 0; i < numVerticesProjected; ++i)
+        //write all coordinates into stream (dim always 3)
+        for(int j = 0; j < 3 ; ++j)
+        {
+          double coord = myhexa().myvertex(i)->Point()[j];
+          os.write( coord );
+        }
+    }
   }
 
   template < class A >
