@@ -1174,7 +1174,7 @@ namespace ALUGrid
         return (alugrid_assert (0),-1);
       }
 
-      virtual void projectVertices( const std::array< std::array<alucoord_t,3>, 8 >& ) const { abort(); }
+      virtual void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { abort(); }
 
       using ElementPllXIF::writeDynamicState;
       using ElementPllXIF::readDynamicState;
@@ -1359,7 +1359,7 @@ namespace ALUGrid
       virtual void restoreFollowFace () = 0;
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
-      virtual void projectGhostElement( const std::array< std::array<alucoord_t,3>, 8 >& ) { abort(); }
+      virtual void projectGhostElement( const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { abort(); }
     };
 
 

@@ -431,6 +431,21 @@ namespace ALUGrid
       int calculateFace2Twist( const int vx, const myhface_t* ) const;
       int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
 
+      // change coordinates of this element (for ghost elements only)
+      void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+      {
+        // this should only be called for ghost elements
+        alugrid_assert( this->isGhost() );
+
+        for( int i=0; i < 4; ++i )
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(i));
+          vx->setCoordinates( newCoords[ i ] );
+        }
+
+        _volume = volume;
+      }
+
       // the element type is obtained from the level of the element
       // under the assumption that on level 0 all elements have type 0
       unsigned char elementType () const { return ((this->macroSimplexTypeFlag() + _lvl) % 3); }
@@ -444,7 +459,7 @@ namespace ALUGrid
     private :
       innertetra_t * _bbb, * _up; // 16 byte
       inner_t * _inner;           //  8 byte
-      const double _volume;       //  8 byte
+      double _volume;             //  8 byte
 
       const unsigned char _lvl;  // 1 byte
       signed char _nChild;       // 1 byte
