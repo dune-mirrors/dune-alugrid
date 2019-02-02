@@ -811,8 +811,8 @@ namespace ALUGrid
       alugrid_assert ( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
       alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
 
-      //only transmit vertices if numVerticesProjected > 0
-      //number is number of all vertices communicated
+      // only transmitted vertices if numVerticesProjected > 0
+      // number is number of all vertices communicated
       const int numVerticesProjected = os.get();
 
       if( numVerticesProjected > 0)
@@ -825,7 +825,11 @@ namespace ALUGrid
             os.read( projectedVertices[ i ][ j ] );
           }
         }
-        myhbnd().projectGhostElement( projectedVertices );
+
+        double vol = 0;
+        os.read( vol );
+
+        myhbnd().projectGhostElement( projectedVertices, vol );
       }
     }
     catch (ObjectStream::EOFException&)
@@ -933,22 +937,28 @@ namespace ALUGrid
 
     const unsigned char lvl = mytetra().level();
     os.write( lvl );
-    os.put( char( mytetra().leaf() ) );
+    bool leaf = mytetra().leaf();
+    os.put( char( leaf ) );
 
     bool hasVertexProjection = false;
-    for(int i = 0 ; i < 4; ++i)
+    // only leaf elements may have changed their coordinates
+    if( leaf )
     {
-      if(mytetra().myneighbour( i ).first->hasVertexProjection())
+      for(int i = 0 ; i < 4; ++i)
       {
-        hasVertexProjection = true;
-        break;
+        if(mytetra().myneighbour( i ).first->hasVertexProjection())
+        {
+          hasVertexProjection = true;
+          break;
+        }
       }
     }
 
-    //Put numVertices of the element
-    //>0 means, that at least one vertex has been projected
+    // Put numVertices of the element
+    // >0 means, that at least one vertex has been projected
     const int numVerticesProjected = hasVertexProjection ? 4 : 0;
     os.put( numVerticesProjected );
+
     if( numVerticesProjected > 0 )
     {
       for(int i = 0; i < numVerticesProjected; ++i)
@@ -959,7 +969,12 @@ namespace ALUGrid
         {
           os.write( point[ j ] );
         }
+
       }
+
+      // also store volume since the projection of vertices will change this
+      const double vol = mytetra().volume();
+      os.write( vol );
     }
     return;
   }
@@ -1644,25 +1659,31 @@ namespace ALUGrid
     // to determine leafEntity or not
     const unsigned char lvl = myhexa().level();
     os.write( lvl );
-    os.put( char( myhexa().leaf() ) );
+    const bool leaf = myhexa().leaf();
+
+    os.put( char( leaf ) );
 
     bool hasVertexProjection = false;
-    for(int i = 0 ; i < 6; ++i)
+    // only leaf elements may have changed their coordinates
+    if( leaf )
     {
-      if(myhexa().myneighbour( i ).first->hasVertexProjection())
+      for(int i = 0 ; i < 6; ++i)
       {
-        hasVertexProjection = true;
-        break;
+        if(myhexa().myneighbour( i ).first->hasVertexProjection())
+        {
+          hasVertexProjection = true;
+          break;
+        }
       }
     }
 
-    //Put numVertices of the element
-    //>0 means, that at least one vertex has been projected
+    // Put numVertices of the element
+    // >0 means, that at least one vertex has been projected
     const int numVerticesProjected = hasVertexProjection ? 8 : 0;
     os.put( numVerticesProjected );
+
     if( numVerticesProjected > 0 )
     {
-
       for(int i = 0; i < numVerticesProjected; ++i)
       {
         const alucoord_t (&point)[ 3 ] = myhexa().myvertex(i)->Point();
@@ -1672,6 +1693,10 @@ namespace ALUGrid
           os.write( point[ j ] );
         }
       }
+
+      // also store volume since the projection of vertices will change this
+      const double vol = myhexa().volume();
+      os.write( vol );
     }
   }
 

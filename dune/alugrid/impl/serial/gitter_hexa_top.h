@@ -494,6 +494,22 @@ namespace ALUGrid
       int calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const ;
       int calculateFace3Twist( const int (&vx)[4], const myhface4_t* subFace, const int thirdVx ) const ;
       bool checkHexa( const innerhexa_t* hexa, const int  ) const;
+
+      // change coordinates of this element (for ghost elements only)
+      void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+      {
+        // this should only be called for ghost elements
+        alugrid_assert( this->isGhost() );
+
+        for( int i=0; i < 8; ++i )
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(i));
+          vx->setCoordinates( newCoords[ i ] );
+        }
+
+        _volume = volume;
+      }
+
     protected:
       // non-virtual methods of down and innerVertex
       innerhexa_t* dwnPtr();
