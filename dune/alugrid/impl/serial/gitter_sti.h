@@ -1174,6 +1174,8 @@ namespace ALUGrid
         return (alugrid_assert (0),-1);
       }
 
+      virtual void projectVertices( const std::array< std::array<alucoord_t,3>, 8 >& ) const { abort(); }
+
       using ElementPllXIF::writeDynamicState;
       using ElementPllXIF::readDynamicState;
 
@@ -1357,6 +1359,7 @@ namespace ALUGrid
       virtual void restoreFollowFace () = 0;
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
+      virtual void projectGhostElement( const std::array< std::array<alucoord_t,3>, 8 >& ) { abort(); }
     };
 
 
@@ -1545,6 +1548,15 @@ namespace ALUGrid
 
         // return coordinates of vertex
         const alucoord_t (& Point () const) [3] { return _c; }
+
+        // set new coordinates (using for projecting ghost elements)
+        void setCoordinates( const std::array< alucoord_t, 3 >& coords )
+        {
+          _c[ 0 ] = coords[ 0 ];
+          _c[ 1 ] = coords[ 1 ];
+          _c[ 2 ] = coords[ 2 ];
+        }
+
         // return level of vertex
         int level () const { return lvl(); }
 
@@ -2065,8 +2077,8 @@ namespace ALUGrid
 
       protected :
         Hexa (myhface_t *, int, myhface_t *, int,
-                     myhface_t *, int, myhface_t *, int,
-                     myhface_t *, int, myhface_t *, int);
+              myhface_t *, int, myhface_t *, int,
+              myhface_t *, int, myhface_t *, int);
         int postRefinement ();
         int preCoarsening ();
 
@@ -4204,6 +4216,9 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg3::postRefinement ()
   {
+    // don't project vertices on internal borders
+    if( this->isBorder() ) return 0;
+
     ProjectVertexPair pv( projection(), segmentId() );
     if ( pv.first )
     {
@@ -4296,6 +4311,9 @@ namespace ALUGrid
 
   inline int Gitter::Geometric::hbndseg4::postRefinement ()
   {
+    // don't project vertices on internal borders
+    if( this->isBorder() ) return 0;
+
     ProjectVertexPair pv( projection(), segmentId() );
     if( pv.first )
     {
