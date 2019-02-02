@@ -813,19 +813,19 @@ namespace ALUGrid
 
       //only transmit vertices if numVerticesProjected > 0
       //number is number of all vertices communicated
-      unsigned char numVerticesProjected = 0;
-      os.read( numVerticesProjected );
+      const int numVerticesProjected = os.get();
 
       if( numVerticesProjected > 0)
       {
-        std::vector<std::array<double,3> > projectedVertices;
-        projectedVertices.resize(numVerticesProjected);
-        for(unsigned i = 0; i < numVerticesProjected; ++i)
+        std::array< std::array<alucoord_t,3>, 8 > projectedVertices;
+        for(int i = 0; i < numVerticesProjected; ++i)
         {
           for(int j = 0 ; j < 3 ; ++j)
-            os.read( projectedVertices[i][j] );
+          {
+            os.read( projectedVertices[ i ][ j ] );
+          }
         }
-        //TODO: assign vertices to ghost
+        myhbnd().projectGhostElement( projectedVertices );
       }
     }
     catch (ObjectStream::EOFException&)
@@ -944,19 +944,22 @@ namespace ALUGrid
         break;
       }
     }
+
     //Put numVertices of the element
     //>0 means, that at least one vertex has been projected
-    const unsigned char numVerticesProjected = hasVertexProjection ? 4 : 0;
-    os.write( numVerticesProjected );
+    const int numVerticesProjected = hasVertexProjection ? 4 : 0;
+    os.put( numVerticesProjected );
     if( numVerticesProjected > 0 )
     {
-      for(unsigned i = 0; i < numVerticesProjected; ++i)
+      for(int i = 0; i < numVerticesProjected; ++i)
+      {
+        const alucoord_t (&point)[ 3 ] = mytetra().myvertex(i)->Point();
         //write all coordinates into stream (dim always 3)
         for(int j = 0; j < 3 ; ++j)
         {
-          double coord = mytetra().myvertex(i)->Point()[j];
-          os.write( coord );
+          os.write( point[ j ] );
         }
+      }
     }
     return;
   }
@@ -1652,19 +1655,23 @@ namespace ALUGrid
         break;
       }
     }
+
     //Put numVertices of the element
     //>0 means, that at least one vertex has been projected
-    const unsigned char numVerticesProjected = hasVertexProjection ? 8 : 0;
-    os.write( numVerticesProjected );
+    const int numVerticesProjected = hasVertexProjection ? 8 : 0;
+    os.put( numVerticesProjected );
     if( numVerticesProjected > 0 )
     {
-      for(unsigned i = 0; i < numVerticesProjected; ++i)
+
+      for(int i = 0; i < numVerticesProjected; ++i)
+      {
+        const alucoord_t (&point)[ 3 ] = myhexa().myvertex(i)->Point();
         //write all coordinates into stream (dim always 3)
         for(int j = 0; j < 3 ; ++j)
         {
-          double coord = myhexa().myvertex(i)->Point()[j];
-          os.write( coord );
+          os.write( point[ j ] );
         }
+      }
     }
   }
 
