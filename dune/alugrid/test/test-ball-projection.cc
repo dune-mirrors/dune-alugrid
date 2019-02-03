@@ -10,11 +10,14 @@
 #include <dune/grid/common/partitionset.hh>
 #include <dune/grid/common/rangegenerators.hh>
 
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
+
+
 //#include <dune/grid/albertagrid.hh>
 //#include <dune/grid/albertagrid/dgfparser.hh>
 
 template <class HGridType >
-void algorithm ( HGridType &grid, const int step )
+void algorithm ( HGridType &grid, const int step, const bool writeVTK = false )
 {
   int n = 0;
   double volume = 0;
@@ -38,6 +41,13 @@ void algorithm ( HGridType &grid, const int step )
               << " error: " << std::abs( volume - 4.0 * M_PI / 3.0 )
               << std::endl;
   }
+
+  // Write VTK
+  std::ostringstream vtkName;
+  vtkName << "test-ball-ref-" << step;
+  Dune::VTKWriter<typename HGridType::LeafGridView> vtkWriter( gridView );
+  vtkWriter.write( vtkName.str() );
+
 }
 
 // main
@@ -69,7 +79,7 @@ try
 
     const int refineStepsForHalf = Dune::DGFGridInfo< HGridType >::refineStepsForHalf();
 
-    for( int step = 0; step <= 5; ++step )
+    for( int step = 0; step < 5; ++step )
     {
       // refine globally such that grid with is bisected
       // and all memory is adjusted correctly
