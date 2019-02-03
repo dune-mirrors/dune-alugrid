@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <dune/common/version.hh>
+#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
@@ -34,11 +35,17 @@ namespace Dune
   protected:
     typedef FromToGridFactory< Grid > This;
 
+#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 7)
+    typedef ToUniquePtr< Grid > GridPtrType;
+#else
+    typedef Grid*  GridPtrType;
+#endif
+
     std::vector< unsigned int > ordering_ ;
 
   public:
     template <class FromGrid, class Vector>
-    Grid* convert( const FromGrid& grid, Vector& cellData, std::vector<unsigned int>& ordering )
+    GridPtrType convert( const FromGrid& grid, Vector& cellData, std::vector<unsigned int>& ordering )
     {
       int rank = 0;
 #if HAVE_MPI
@@ -137,7 +144,7 @@ namespace Dune
       }
 
       // create grid pointer (behaving like a shared_ptr)
-      Grid* newgrid = factory.createGrid( true, true, std::string("FromToGrid") );
+      GridPtrType newgrid = factory.createGrid( true, true, std::string("FromToGrid") );
 
       if( ! cellData.empty() )
       {
@@ -165,13 +172,13 @@ namespace Dune
     }
 
     template <class FromGrid, class Vector>
-    Grid* convert( const FromGrid& fromGrid, Vector& cellData )
+    GridPtrType convert( const FromGrid& fromGrid, Vector& cellData )
     {
       return convert( fromGrid, cellData, ordering_ );
     }
 
     template <class FromGrid>
-    Grid* convert( const FromGrid& fromGrid )
+    GridPtrType convert( const FromGrid& fromGrid )
     {
       std::vector<int> dummy(0);
       return convert( fromGrid, dummy, ordering_ );
