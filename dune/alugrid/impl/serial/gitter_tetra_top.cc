@@ -802,9 +802,7 @@ namespace ALUGrid
     : A (f0, t0, f1, t1, f2, t2, f3, t3),
       _bbb (0), _up(up)
     , _inner( 0 )
-    , _volume( vol < 0.0 ? quadraturTetra3D< VolumeCalc >(
-                             LinearMapping ( myvertex(0)->Point(), myvertex( 1 )->Point(), myvertex( 2 )->Point(), myvertex( 3 )->Point() ) ).integrate1( 0.0 )
-                         : vol )
+    , _volume( vol < 0.0 ? computeVolume() : vol )
     , _lvl (l)
     , _nChild(nChild)
     , _rule (myrule_t::nosplit)
@@ -823,14 +821,7 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
     // check that _volume has the correct value
-    const double calculatedVolume =
-      std::abs( quadraturTetra3D < VolumeCalc > (
-        LinearMapping ( myvertex(0)->Point(),
-                        myvertex(1)->Point(),
-                        myvertex(2)->Point(),
-                        myvertex(3)->Point())).integrate1 (0.0) );
-    //if( std::abs( calculatedVolume - _volume ) >1e-10 )
-    //  std::cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << std::endl;
+    const double calculatedVolume = computeVolume();
 
     //In the 2d case the 3d volume may be 0, so do not divide by it
     if(this->is2d())
