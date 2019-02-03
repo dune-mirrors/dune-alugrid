@@ -446,6 +446,17 @@ namespace ALUGrid
         _volume = volume;
       }
 
+      double computeVolume() const
+      {
+        // use std::abs to compute volume because in some of the 2d cases this
+        // could be negative
+        return std::abs( quadraturTetra3D< VolumeCalc >(
+                            LinearMapping ( myvertex(0)->Point(),
+                                            myvertex(1)->Point(),
+                                            myvertex(2)->Point(),
+                                            myvertex(3)->Point() ) ).integrate1( 0.0 ) );
+      }
+
       // the element type is obtained from the level of the element
       // under the assumption that on level 0 all elements have type 0
       unsigned char elementType () const { return ((this->macroSimplexTypeFlag() + _lvl) % 3); }
