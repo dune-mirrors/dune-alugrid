@@ -940,19 +940,8 @@ namespace ALUGrid
     bool leaf = mytetra().leaf();
     os.put( char( leaf ) );
 
-    bool hasVertexProjection = false;
     // only leaf elements may have changed their coordinates
-    if( leaf )
-    {
-      for(int i = 0 ; i < 4; ++i)
-      {
-        if(mytetra().myneighbour( i ).first->hasVertexProjection())
-        {
-          hasVertexProjection = true;
-          break;
-        }
-      }
-    }
+    const bool hasVertexProjection = leaf ? bool(this->myGrid()->vertexProjection()) : false ;
 
     // Put numVertices of the element
     // >0 means, that at least one vertex has been projected
@@ -1663,19 +1652,8 @@ namespace ALUGrid
 
     os.put( char( leaf ) );
 
-    bool hasVertexProjection = false;
     // only leaf elements may have changed their coordinates
-    if( leaf )
-    {
-      for(int i = 0 ; i < 6; ++i)
-      {
-        if(myhexa().myneighbour( i ).first->hasVertexProjection())
-        {
-          hasVertexProjection = true;
-          break;
-        }
-      }
-    }
+    const bool hasVertexProjection = leaf ? bool(this->myGrid()->vertexProjection()) : false ;
 
     // Put numVertices of the element
     // >0 means, that at least one vertex has been projected
