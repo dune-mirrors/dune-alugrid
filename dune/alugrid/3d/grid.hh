@@ -1277,7 +1277,7 @@ namespace Dune
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
 
-    //! return boudanry projection for given segment Id
+    //! return boundary projection for given segment Id
     const DuneBoundaryProjectionType* boundaryProjection(const int segmentId) const
     {
       if( bndPrj_ )

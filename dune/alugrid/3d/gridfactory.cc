@@ -206,9 +206,9 @@ namespace Dune
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool projectInside)
   {
 #ifndef NDEBUG
-      std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+    std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
 #endif
-      if( globalProjection_ )
+    if( globalProjection_ )
       DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
 
     projectInside_ = projectInside;
@@ -232,6 +232,7 @@ namespace Dune
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
     boundaryProjections_[ faceId ] = projection;
   }
 
@@ -423,6 +424,55 @@ namespace Dune
       */
 
     }
+  }
+
+  template< class ALUGrid >
+  alu_inline
+  typename ALU3dGridFactory< ALUGrid >::BoundaryProjectionVector*
+  ALU3dGridFactory< ALUGrid >::commSegmentMapping( ALU3DSPACE ObjectStream& buffer )
+  {
+    typename ALUGrid::CollectiveCommunication comm( communicator_ );
+
+    int size = ( rank_ == 0 ) ? buffer.size() : 0;
+    // broadcase size for memory reserve
+    comm.broadcast( &size, 1 , 0 );
+
+    if( rank_ > 0 )
+    buffer.reserve( size );
+
+    comm.broadcast( buffer.raw(), size, 0 );
+    buffer.seekp( size );
+
+    // unpack boundary segment mapping
+    if( rank_ > 0 )
+    {
+      size_t segments = 0;
+      buffer.read( segments );
+      if( segments > 0 )
+      {
+        // the memory is freed by the grid on destruction
+        BoundaryProjectionVector* bndProjections =
+          new BoundaryProjectionVector( segments, (DuneBoundaryProjectionType*) 0 );
+
+        const auto end = boundaryProjections_.end();
+        for( size_t i=0; i<segments; ++i )
+        {
+          FaceType faceId;
+          buffer.read( faceId );
+          size_t segmentId = -1;
+          buffer.read( segmentId );
+          auto it = boundaryProjections_.find( faceId );
+          if( it == end )
+          {
+            std::cout << "Couldn't find " << faceId << std::endl;
+            DUNE_THROW(InvalidStateException,"Boundary projections need to be inserted on all cores since these cannot be distributed during load balancing!");
+          }
+          (*bndProjections)[ segmentId ] = it->second;
+        }
+        return bndProjections;
+      }
+    }
+    return nullptr;
   }
 
   template< class ALUGrid >
@@ -638,16 +688,27 @@ namespace Dune
       out.close();
     } // if( allowGridGeneration_ && !temporary )
 
-    const size_t boundarySegments = boundaryIds.size();
+    typename ALUGrid::CollectiveCommunication comm( communicator_ );
+    ALU3DSPACE ObjectStream buffer;
 
+    const size_t boundarySegments = boundaryIds.size();
     const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 || (globalProjection_ && dimension == 2) )
+
+    std::cout << boundarySegments << " " << bndProjectionSize << " sizes "<<
+      std::endl;
+
+    // check boundary segment projections
+    bool communicateBoundaries = false ;
+    if( (boundarySegments > 0) && (bndProjectionSize > 0 || (globalProjection_ && dimension == 2)) )
     {
+      // write number of boundary segments
+      buffer.write( boundarySegments );
+
       // the memory is freed by the grid on destruction
       bndProjections = new BoundaryProjectionVector( boundarySegments,
-                                                    (DuneBoundaryProjectionType*) 0 );
+                                                     (DuneBoundaryProjectionType*) 0 );
       const auto endB = boundaryIds.end();
-      int segmentId = 0;
+      size_t segmentId = 0;
       for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
       {
         // generate boundary segment pointer
@@ -667,9 +728,97 @@ namespace Dune
           projection = new ProjectionWrapperType( *globalProjection_ );
           alugrid_assert ( projection );
         }
+        /*
+        else
+        {
+          const BoundarySegmentWrapperType* ptr = dynamic_cast< const
+               BoundarySegmentWrapperType* > (projection);
+          if( ptr )
+          {
+            std::cout << "Found bndprj " << ptr << std::endl;
+            communicateBoundaries = true;
+          }
+        }
+        */
 
         // copy pointer
         (*bndProjections)[ segmentId ] = projection;
+
+        // write mapping from faceId to segmentId
+        buffer.write( faceId );
+        buffer.write( segmentId );
+      }
+    }
+
+    communicateBoundaries = comm.max( communicateBoundaries );
+    if( communicateBoundaries )
+    {
+      /*
+      buffer.clear();
+
+      std::cout << "Communicate Gmsh Boundaries" << std::endl;
+      int size = 0;
+      if( rank_ == 0 )
+      {
+        alugrid_assert( bndProjections );
+        BoundaryProjectionVector& bndProj = (*bndProjections);
+        size_t nseg = bndProj.size();
+        buffer.write( nseg );
+        for( size_t i=0; i<nseg; ++i )
+        {
+          std::cout << bndProj[i] << " ptr " << std::endl;
+          const BoundarySegmentWrapperType* ptr = dynamic_cast< const BoundarySegmentWrapperType* > ( bndProj[i] );
+          if( ptr )
+          {
+            buffer.put( 1 );
+            ptr->backup( buffer );
+          }
+          else
+            buffer.put( 0 );
+        }
+
+        size = buffer.size();
+      }
+
+      // broadcase size for memory reserve
+      comm.broadcast( &size, 1 , 0 );
+
+      if( rank_ > 0 )
+      buffer.reserve( size );
+
+      comm.broadcast( buffer.raw(), size, 0 );
+      buffer.seekp( size );
+
+      if( rank_ > 0 )
+      {
+        size_t nseg = 0;
+        buffer.read( nseg );
+        if( bndProjections )
+          delete bndProjections;
+        // the memory is freed by the grid on destruction
+        bndProjections = new BoundaryProjectionVector( nseg, (DuneBoundaryProjectionType*) 0 );
+        for( size_t i=0; i<nseg; ++i )
+        {
+          char hasProj = buffer.get();
+          if( hasProj )
+          {
+            (*bndProjections)[ i ] = BoundarySegmentWrapperType::restore(buffer);
+            std::cout << "Inserted bnd prj " << (*bndProjections)[ i ] << std::endl;
+          }
+        }
+      }
+      buffer.clear();
+      */
+    }
+    else
+    {
+      BoundaryProjectionVector* newBndProj = commSegmentMapping( buffer );
+      if( newBndProj )
+      {
+        if( bndProjections )
+          delete bndProjections;
+        //alugrid_assert( ! bndProjections );
+        bndProjections = newBndProj;
       }
     }
 

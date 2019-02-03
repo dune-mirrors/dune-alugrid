@@ -392,6 +392,8 @@ namespace Dune
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
+    BoundaryProjectionVector* commSegmentMapping( ALU3DSPACE ObjectStream& buffer );
+
     // sort elements according to hilbert space filling curve (if Zoltan is available)
     void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< unsigned int >& ordering );
 
