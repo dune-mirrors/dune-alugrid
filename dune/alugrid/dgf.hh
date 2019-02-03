@@ -473,6 +473,11 @@ namespace Dune
       }
     }
 
+    const unsigned int elemTopoId = (eltype == simplex) ?
+            Dune::Impl::SimplexTopology< dimgrid >::type::id : Dune::Impl::CubeTopology< dimgrid >::type::id ;
+    const unsigned int faceTopoId = (eltype == simplex) ?
+            Dune::Impl::SimplexTopology< dimgrid-1 >::type::id : Dune::Impl::CubeTopology< dimgrid-1 >::type::id ;
+
     GlobalVertexIndexBlock vertexIndex( file );
     const bool globalVertexIndexFound = vertexIndex.isactive();
     if( rank == 0 || globalVertexIndexFound )
@@ -508,10 +513,6 @@ namespace Dune
         }
       }
 
-      const unsigned int elemTopoId = (eltype == simplex) ?
-              Dune::Impl::SimplexTopology< dimgrid >::type::id : Dune::Impl::CubeTopology< dimgrid >::type::id ;
-      const unsigned int faceTopoId = (eltype == simplex) ?
-              Dune::Impl::SimplexTopology< dimgrid-1 >::type::id : Dune::Impl::CubeTopology< dimgrid-1 >::type::id ;
       GeometryType elementType( elemTopoId, dimgrid );
 
       const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
@@ -530,32 +531,32 @@ namespace Dune
         }
       }
 
-      dgf::ProjectionBlock projectionBlock( file, dimworld );
+    } // end rank == 0 || globalVertexIndexBlock
+
+    dgf::ProjectionBlock projectionBlock( file, dimworld );
+    const DuneBoundaryProjection< dimworld > *projection
+      = projectionBlock.defaultProjection< dimworld >();
+
+    //True, if we want to project inner vertices
+    const bool projectInside = (dimworld != dimgrid);
+    //True, if we want to project boundary vertices
+    const bool projectBoundary = (projection != 0);
+
+    //Currently, we only allow ONE global projection, so
+    //we just insert this projection once
+    //If we want to allow multiple projections,
+    //we need to change the dgf parser first.
+    if( projectBoundary )
+      factory_.insertBoundaryProjection( *projection, projectInside );
+
+    const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+    GeometryType type( faceTopoId, dimgrid-1 );
+    for( size_t i = 0; i < numBoundaryProjections; ++i )
+    {
+      const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
       const DuneBoundaryProjection< dimworld > *projection
-        = projectionBlock.defaultProjection< dimworld >();
-
-      //True, if we want to project inner vertices
-      const bool projectInside = (dimworld != dimgrid);
-      //True, if we want to project boundary vertices
-      const bool projectBoundary = (projection != 0);
-
-      //Currently, we only allow ONE global projection, so
-      //we just insert this projection once
-      //If we want to allow multiple projections,
-      //we need to change the dgf parser first.
-      if( projectBoundary )
-        factory_.insertBoundaryProjection( *projection, projectInside );
-
-      const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
-      GeometryType type( faceTopoId, dimgrid-1 );
-      for( size_t i = 0; i < numBoundaryProjections; ++i )
-      {
-
-        const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
-        const DuneBoundaryProjection< dimworld > *projection
-          = projectionBlock.boundaryProjection< dimworld >( i );
-        factory_.insertBoundaryProjection( type, vertices, projection );
-      }
+        = projectionBlock.boundaryProjection< dimworld >( i );
+      factory_.insertBoundaryProjection( type, vertices, projection );
     }
 
     typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
