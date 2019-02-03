@@ -67,8 +67,11 @@ namespace ALUGrid
             virtual void projectGhostElement( const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
             {
               ghostpair_STI gp = getGhost();
-              assert( gp.first );
-              gp.first->changeVertexCoordinates( newCoords, volume );
+              // ghost element may not exists (i.e. bisection refined grids)
+              if( gp.first )
+              {
+                gp.first->changeVertexCoordinates( newCoords, volume );
+              }
             }
 
             // default implementation returns 0
