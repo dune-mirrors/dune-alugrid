@@ -429,7 +429,7 @@ namespace Dune
   /* @brief Communicate Segment Mapping to ranks > 0
    *
    * @param[in] the Objectstream buffer containing
-   *            numBoundarySegments | (FaceId | SegmentId)s
+   *            numBoundarySegments | (FaceId | SegmentId | isGlobalProjection)s
    *
    * @return On rank 0 always returns nullptr, otherwise the complete faceId/segmentId mapping
   */
@@ -445,7 +445,7 @@ namespace Dune
     comm.broadcast( &size, 1 , 0 );
 
     if( rank_ > 0 )
-    buffer.reserve( size );
+      buffer.reserve( size );
 
     comm.broadcast( buffer.raw(), size, 0 );
     buffer.seekp( size );
@@ -470,14 +470,22 @@ namespace Dune
           buffer.read( faceId );
           size_t segmentId = -1;
           buffer.read( segmentId );
-          //check whether the correct boundary projection had been inserted on the core
+          bool isGlobalProjection = false;
+          if( globalProjection_ )
+          {
+            buffer.read( isGlobalProjection );
+          }
+           //check whether the correct boundary projection had been inserted on the core
           auto it = boundaryProjections_.find( faceId );
-          if( it == end )
+          if( it != end || isGlobalProjection )
+          {
+            (*bndProjections)[ segmentId ] = it->second;
+          }
+          else
           {
             std::cout << "Couldn't find " << faceId << std::endl;
             DUNE_THROW(InvalidStateException,"Boundary projections need to be inserted on all cores since these cannot be distributed during load balancing!");
           }
-          (*bndProjections)[ segmentId ] = it->second;
         }
         return bndProjections;
       }
@@ -724,6 +732,7 @@ namespace Dune
       size_t segmentId = 0;
       for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
       {
+        bool isGlobalProjection = false;
         // generate boundary segment pointer
         FaceType faceId ( (*it).first);
         std::sort( faceId.begin(), faceId.end() );
@@ -735,6 +744,7 @@ namespace Dune
             && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
             && globalProjection_ )
         {
+          isGlobalProjection = true;
           typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
           // we need to wrap the global projection because of
           // delete in destructor of ALUGrid
@@ -757,9 +767,11 @@ namespace Dune
         // copy pointer
         (*bndProjections)[ segmentId ] = projection;
 
-        // write mapping from faceId to segmentId
+        // write mapping from faceId to segmentId and whether we use the global projection
         buffer.write( faceId );
         buffer.write( segmentId );
+        if( globalProjection_ )
+          buffer.write( isGlobalProjection );
       }
     }
 
