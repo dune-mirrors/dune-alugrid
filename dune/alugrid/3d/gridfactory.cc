@@ -711,6 +711,9 @@ namespace Dune
     bool communicateBoundaries = false ;
     if( (boundarySegments > 0) && (bndProjectionSize > 0 || (globalProjection_ && dimension == 2)) )
     {
+      //if we have projections, the boundaries need to be communicated
+      //(comm.size > 0) could also be checked
+      communicateBoundaries = true;
       // write number of boundary segments
       buffer.write( boundarySegments );
 
@@ -818,10 +821,9 @@ namespace Dune
         }
       }
       buffer.clear();
-      */
     }
     else
-    {
+    {*/
       BoundaryProjectionVector* newBndProj = commSegmentMapping( buffer );
       //commSegmentMapping always returns nullptr on rank 0
       if( newBndProj )
