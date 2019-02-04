@@ -426,6 +426,13 @@ namespace Dune
     }
   }
 
+  /* @brief Communicate Segment Mapping to ranks > 0
+   *
+   * @param[in] the Objectstream buffer containing
+   *            numBoundarySegments | (FaceId | SegmentId)s
+   *
+   * @return On rank 0 always returns nullptr, otherwise the complete faceId/segmentId mapping
+  */
   template< class ALUGrid >
   alu_inline
   typename ALU3dGridFactory< ALUGrid >::BoundaryProjectionVector*
@@ -447,6 +454,7 @@ namespace Dune
     if( rank_ > 0 )
     {
       size_t segments = 0;
+      //Read total number of segments
       buffer.read( segments );
       if( segments > 0 )
       {
@@ -457,10 +465,12 @@ namespace Dune
         const auto end = boundaryProjections_.end();
         for( size_t i=0; i<segments; ++i )
         {
+          //get faceid and segmentid from stream
           FaceType faceId;
           buffer.read( faceId );
           size_t segmentId = -1;
           buffer.read( segmentId );
+          //check whether the correct boundary projection had been inserted on the core
           auto it = boundaryProjections_.find( faceId );
           if( it == end )
           {
@@ -813,6 +823,7 @@ namespace Dune
     else
     {
       BoundaryProjectionVector* newBndProj = commSegmentMapping( buffer );
+      //commSegmentMapping always returns nullptr on rank 0
       if( newBndProj )
       {
         if( bndProjections )
