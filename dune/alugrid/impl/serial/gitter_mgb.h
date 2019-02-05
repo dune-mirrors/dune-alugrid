@@ -18,7 +18,14 @@ namespace ALUGrid
   template< class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end)
   {
     RandomAccessIterator middle = std::min_element( begin,end );
-    int pos = (middle == begin ? 0 : (std::rotate( begin, middle, end ), end - middle));
+
+    int pos = 0;
+    if ( middle != begin )
+    {
+      std::rotate( begin, middle, end );
+      pos = end - middle;
+    }
+
     if( *(begin + 1) < *(end - 1) )
       return pos;
     else
