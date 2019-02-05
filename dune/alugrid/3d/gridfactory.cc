@@ -426,73 +426,6 @@ namespace Dune
     }
   }
 
-  /* @brief Communicate Segment Mapping to ranks > 0
-   *
-   * @param[in] the Objectstream buffer containing
-   *            numBoundarySegments | (FaceId | SegmentId | isGlobalProjection)s
-   *
-   * @return On rank 0 always returns nullptr, otherwise the complete faceId/segmentId mapping
-  */
-  template< class ALUGrid >
-  alu_inline
-  typename ALU3dGridFactory< ALUGrid >::BoundaryProjectionVector*
-  ALU3dGridFactory< ALUGrid >::commSegmentMapping( ALU3DSPACE ObjectStream& buffer )
-  {
-    typename ALUGrid::CollectiveCommunication comm( communicator_ );
-
-    int size = ( rank_ == 0 ) ? buffer.size() : 0;
-    // broadcase size for memory reserve
-    comm.broadcast( &size, 1 , 0 );
-
-    if( rank_ > 0 )
-      buffer.reserve( size );
-
-    comm.broadcast( buffer.raw(), size, 0 );
-    buffer.seekp( size );
-
-    // unpack boundary segment mapping
-    if( rank_ > 0 )
-    {
-      size_t segments = 0;
-      //Read total number of segments
-      buffer.read( segments );
-      if( segments > 0 )
-      {
-        // the memory is freed by the grid on destruction
-        BoundaryProjectionVector* bndProjections =
-          new BoundaryProjectionVector( segments, (DuneBoundaryProjectionType*) 0 );
-
-        const auto end = boundaryProjections_.end();
-        for( size_t i=0; i<segments; ++i )
-        {
-          //get faceid and segmentid from stream
-          FaceType faceId;
-          buffer.read( faceId );
-          size_t segmentId = -1;
-          buffer.read( segmentId );
-          bool isGlobalProjection = false;
-          if( globalProjection_ )
-          {
-            buffer.read( isGlobalProjection );
-          }
-           //check whether the correct boundary projection had been inserted on the core
-          auto it = boundaryProjections_.find( faceId );
-          if( it != end || isGlobalProjection )
-          {
-            (*bndProjections)[ segmentId ] = it->second;
-          }
-          else
-          {
-            std::cout << "Couldn't find " << faceId << std::endl;
-            DUNE_THROW(InvalidStateException,"Boundary projections need to be inserted on all cores since these cannot be distributed during load balancing!");
-          }
-        }
-        return bndProjections;
-      }
-    }
-    return nullptr;
-  }
-
   template< class ALUGrid >
   alu_inline
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
@@ -514,8 +447,6 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    BoundaryProjectionVector* bndProjections = 0;
-
     correctElementOrientation();
 
     std::vector< unsigned int >& ordering = ordering_;
@@ -709,160 +640,12 @@ namespace Dune
     typename ALUGrid::CollectiveCommunication comm( communicator_ );
     ALU3DSPACE ObjectStream buffer;
 
-    const size_t boundarySegments = boundaryIds.size();
-    const size_t bndProjectionSize = boundaryProjections_.size();
-
-    std::cout << boundarySegments << " " << bndProjectionSize << " sizes "<<
-      std::endl;
-
-    // check boundary segment projections
-    bool communicateBoundaries = false ;
-    if( (boundarySegments > 0) && (bndProjectionSize > 0 || (globalProjection_ && dimension == 2)) )
-    {
-      //if we have projections, the boundaries need to be communicated
-      //(comm.size > 0) could also be checked
-      communicateBoundaries = true;
-      // write number of boundary segments
-      buffer.write( boundarySegments );
-
-      // the memory is freed by the grid on destruction
-      bndProjections = new BoundaryProjectionVector( boundarySegments,
-                                                     (DuneBoundaryProjectionType*) 0 );
-      const auto endB = boundaryIds.end();
-      size_t segmentId = 0;
-      for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
-      {
-        bool isGlobalProjection = false;
-        // generate boundary segment pointer
-        FaceType faceId ( (*it).first);
-        std::sort( faceId.begin(), faceId.end() );
-
-        const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
-
-        // if no projection given we use global projection, otherwise identity
-        if( ! projection
-            && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
-            && globalProjection_ )
-        {
-          isGlobalProjection = true;
-          typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
-          // we need to wrap the global projection because of
-          // delete in destructor of ALUGrid
-          projection = new ProjectionWrapperType( *globalProjection_ );
-          alugrid_assert ( projection );
-        }
-        /*
-        else
-        {
-          const BoundarySegmentWrapperType* ptr = dynamic_cast< const
-               BoundarySegmentWrapperType* > (projection);
-          if( ptr )
-          {
-            std::cout << "Found bndprj " << ptr << std::endl;
-            communicateBoundaries = true;
-          }
-        }
-        */
-
-        // copy pointer
-        (*bndProjections)[ segmentId ] = projection;
-
-        // write mapping from faceId to segmentId and whether we use the global projection
-        buffer.write( faceId );
-        buffer.write( segmentId );
-        if( globalProjection_ )
-          buffer.write( isGlobalProjection );
-      }
-    }
-
-    communicateBoundaries = comm.max( communicateBoundaries );
-    if( communicateBoundaries )
-    {
-      /*
-      buffer.clear();
-
-      std::cout << "Communicate Gmsh Boundaries" << std::endl;
-      int size = 0;
-      if( rank_ == 0 )
-      {
-        alugrid_assert( bndProjections );
-        BoundaryProjectionVector& bndProj = (*bndProjections);
-        size_t nseg = bndProj.size();
-        buffer.write( nseg );
-        for( size_t i=0; i<nseg; ++i )
-        {
-          std::cout << bndProj[i] << " ptr " << std::endl;
-          const BoundarySegmentWrapperType* ptr = dynamic_cast< const BoundarySegmentWrapperType* > ( bndProj[i] );
-          if( ptr )
-          {
-            buffer.put( 1 );
-            ptr->backup( buffer );
-          }
-          else
-            buffer.put( 0 );
-        }
-
-        size = buffer.size();
-      }
-
-      // broadcase size for memory reserve
-      comm.broadcast( &size, 1 , 0 );
-
-      if( rank_ > 0 )
-      buffer.reserve( size );
-
-      comm.broadcast( buffer.raw(), size, 0 );
-      buffer.seekp( size );
-
-      if( rank_ > 0 )
-      {
-        size_t nseg = 0;
-        buffer.read( nseg );
-        if( bndProjections )
-          delete bndProjections;
-        // the memory is freed by the grid on destruction
-        bndProjections = new BoundaryProjectionVector( nseg, (DuneBoundaryProjectionType*) 0 );
-        for( size_t i=0; i<nseg; ++i )
-        {
-          char hasProj = buffer.get();
-          if( hasProj )
-          {
-            (*bndProjections)[ i ] = BoundarySegmentWrapperType::restore(buffer);
-            std::cout << "Inserted bnd prj " << (*bndProjections)[ i ] << std::endl;
-          }
-        }
-      }
-      buffer.clear();
-    }
-    else
-    {*/
-      BoundaryProjectionVector* newBndProj = commSegmentMapping( buffer );
-      //commSegmentMapping always returns nullptr on rank 0
-      if( newBndProj )
-      {
-        if( bndProjections )
-          delete bndProjections;
-        //alugrid_assert( ! bndProjections );
-        bndProjections = newBndProj;
-      }
-    }
-
-    // free memory
-    boundaryProjections_.clear();
-
-    // if we have a vector reset global projection
-    // because empty positions are filled with global projection anyway
-    if( bndProjections ) globalProjection_ = 0;
+    BoundaryProjectionVector* bndProjections = 0;
 
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
     Grid* grid = createGridObj( bndProjections , name );
     alugrid_assert ( grid );
-
-    // remove pointers
-    globalProjection_ = 0;
-    // is removed by grid instance
-    bndProjections    = 0;
 
     // insert grid using ALUGrid macro grid builder
     if( !vertices_.empty() )
@@ -930,6 +713,27 @@ namespace Dune
         // only positive boundary id's are allowed
         assert( bndType > 0 );
 
+        // generate boundary segment pointer
+        FaceType faceId ( boundaryId.first);
+        std::sort( faceId.begin(), faceId.end() );
+        const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
+
+        // if no projection given we use global projection, otherwise identity
+        if( ! projection
+            && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
+            && globalProjection_ )
+        {
+          // TODO: replace this with shared pointer to avoid BoundaryProjectionWrapper
+          typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
+          // we need to wrap the global projection because of
+          // delete in destructor of ALUGrid
+          projection = new ProjectionWrapperType( *globalProjection_ );
+          alugrid_assert ( projection );
+        }
+
+        typedef ALUGridBoundaryProjection2< Grid > Projection ;
+        ALU3DSPACE ProjectVertexPtr pv( new Projection( projection ) );
+
         if( elementType == hexa )
         {
           int bndface[ 4 ];
@@ -937,7 +741,7 @@ namespace Dune
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd4( bndface, bndType );
+          mgb.InsertUniqueHbnd4( bndface, bndType, pv );
         }
         else if( elementType == tetra )
         {
@@ -946,7 +750,7 @@ namespace Dune
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd3( bndface, bndType );
+          mgb.InsertUniqueHbnd3( bndface, bndType, pv );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
@@ -988,6 +792,9 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type" );
       }
     }
+
+    // free memory
+    boundaryProjections_.clear();
 
     // clear vertices
     VertexVector().swap( vertices_ );

@@ -80,6 +80,7 @@ namespace Dune
                     "tetrahedrons or hexahedrons exclusively." );
 
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
+    typedef ALUGridBoundaryProjection2< Grid > ALUProjectionType;
 
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
@@ -392,8 +393,6 @@ namespace Dune
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
-    BoundaryProjectionVector* commSegmentMapping( ALU3DSPACE ObjectStream& buffer );
-
     // sort elements according to hilbert space filling curve (if Zoltan is available)
     void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< unsigned int >& ordering );
 
@@ -525,7 +524,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline
@@ -542,7 +544,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline
@@ -559,7 +564,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::

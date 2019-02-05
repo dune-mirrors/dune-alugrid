@@ -30,8 +30,7 @@ void testReadingAndWritingGrid( const std::string& path, const std::string& grid
   std::vector<int> elementsIDs;
   const std::string inputName(path+gridName+".msh");
   std::cout<<"Reading mesh file "<<inputName<<std::endl;
-  if(Dune::MPIHelper::getCollectiveCommunication().rank() == 0)
-    GmshReader<GridType>::read(gridFactory,inputName,boundaryIDs,elementsIDs);
+  GmshReader<GridType>::read(gridFactory,inputName,boundaryIDs,elementsIDs);
   auto grid=std::unique_ptr<GridType>(gridFactory.createGrid());
 
   // Reorder boundary IDs according to the inserction index
