@@ -817,6 +817,8 @@ namespace ALUGrid
 
       if( numVerticesProjected > 0)
       {
+        const int fce = os.get();
+
         std::array< std::array<alucoord_t,3>, 8 > projectedVertices;
         for(int i = 0; i < numVerticesProjected; ++i)
         {
@@ -829,7 +831,7 @@ namespace ALUGrid
         double vol = 0;
         os.read( vol );
 
-        myhbnd().projectGhostElement( projectedVertices, vol );
+        myhbnd().projectGhostElement( fce, projectedVertices, vol );
       }
     }
     catch (ObjectStream::EOFException&)
@@ -940,25 +942,34 @@ namespace ALUGrid
     bool leaf = mytetra().leaf();
     os.put( char( leaf ) );
 
-    // only leaf elements may have changed their coordinates
-    const bool hasVertexProjection = leaf ? bool(this->myGrid()->vertexProjection()) : false ;
-
     // Put numVertices of the element
     // >0 means, that at least one vertex has been projected
-    const int numVerticesProjected = hasVertexProjection ? 4 : 0;
+    const int numVerticesProjected = mytetra().vertexWasProjected() ? 4 : 0;
     os.put( numVerticesProjected );
 
     if( numVerticesProjected > 0 )
     {
-      for(int i = 0; i < numVerticesProjected; ++i)
-      {
-        const alucoord_t (&point)[ 3 ] = mytetra().myvertex(i)->Point();
-        //write all coordinates into stream (dim always 3)
-        for(int j = 0; j < 3 ; ++j)
-        {
-          os.write( point[ j ] );
-        }
+      // store local face number
+      signed char fce = face ;
+      os.put( fce );
 
+      const auto& f = *(mytetra().myhface( face ));
+      // write coordinates of the face
+      for(int vx=0; vx<3; ++vx)
+      {
+        //const alucoord_t (&p)[3] = mytetra().myvertex(face, vx)->Point();
+        const alucoord_t (&p)[3] = f.myvertex(vx)->Point();
+        os.write( p[0] );
+        os.write( p[1] );
+        os.write( p[2] );
+      }
+
+      {
+        // write point opposite to face
+        const alucoord_t (&p)[3] = mytetra().myvertex(face)->Point();
+        os.write( p[0] );
+        os.write( p[1] );
+        os.write( p[2] );
       }
 
       // also store volume since the projection of vertices will change this
@@ -1652,24 +1663,35 @@ namespace ALUGrid
 
     os.put( char( leaf ) );
 
-    // only leaf elements may have changed their coordinates
-    const bool hasVertexProjection = leaf ? bool(this->myGrid()->vertexProjection()) : false ;
-
     // Put numVertices of the element
     // >0 means, that at least one vertex has been projected
-    const int numVerticesProjected = hasVertexProjection ? 8 : 0;
+    const int numVerticesProjected = myhexa().vertexWasProjected() ? 8 : 0;
     os.put( numVerticesProjected );
 
     if( numVerticesProjected > 0 )
     {
-      for(int i = 0; i < numVerticesProjected; ++i)
+      signed char fce = face ;
+      os.put( fce );
+
+      const auto& f1 = *(myhexa().myhface( face ));
+      // store inside face
+      for(int vx=0; vx<4; ++vx)
       {
-        const alucoord_t (&point)[ 3 ] = myhexa().myvertex(i)->Point();
-        //write all coordinates into stream (dim always 3)
-        for(int j = 0; j < 3 ; ++j)
-        {
-          os.write( point[ j ] );
-        }
+        const alucoord_t (&p)[3] = f1.myvertex(vx)->Point();
+        os.writeObject ( p[0] );
+        os.writeObject ( p[1] );
+        os.writeObject ( p[2] );
+      }
+
+      // store opposite face
+      const int oppFace = Gitter::Geometric::Hexa::oppositeFace[face];
+      const auto& f2 = *(myhexa().myhface( oppFace ));
+      for(int vx=0; vx<4; ++vx)
+      {
+        const alucoord_t (&p)[3] = f2.myvertex(vx)->Point();
+        os.writeObject ( p[0] );
+        os.writeObject ( p[1] );
+        os.writeObject ( p[2] );
       }
 
       // also store volume since the projection of vertices will change this

@@ -198,18 +198,18 @@ namespace ALUGrid
         return InsertUniquePeriodic( v, bnd );
       }
 
-      virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int);
-      virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int);
+      virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
+      virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
 
-      virtual bool InsertUniqueHbnd3 (int (&v)[3], Gitter::hbndseg::bnd_t bt )
+      virtual bool InsertUniqueHbnd3 (int (&v)[3], Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
       {
         // ldbVertexIndex = -1
-        return InsertUniqueHbnd3( v, bt, int(-1), int(-1) );
+        return InsertUniqueHbnd3( v, bt, int(-1), int(-1), pv );
       }
-      virtual bool InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg::bnd_t bt)
+      virtual bool InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
       {
         // ldbVertexIndex = -1
-        return InsertUniqueHbnd4( v, bt, int(-1), int(-1) );
+        return InsertUniqueHbnd4( v, bt, int(-1), int(-1), pv );
       }
 
     public :

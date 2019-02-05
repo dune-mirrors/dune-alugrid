@@ -5,6 +5,7 @@
 #include <limits>
 #include <list>
 #include <mutex>
+#include <memory>
 #include <vector>
 #include <utility>
 
@@ -14,6 +15,7 @@
 #include "../projectvertex.h"
 
 #include "myalloc.h"
+#include "serialize.h"
 #include "parallel.h"
 #include "refcount.hh"
 #include "refinementrules.h"
@@ -21,13 +23,12 @@
 
 namespace ALUGrid
 {
-
   // interface class for projecting vertices for boundary adjustment
-  typedef VertexProjection< 3, alucoord_t > ProjectVertex;
   // see ../projectvertex.h
+  typedef VertexProjection< ObjectStream, 3, alucoord_t >  ProjectVertex;
+  typedef std::shared_ptr< ProjectVertex >                 ProjectVertexPtr;
 
   // pair of projection and bnd segment index
-  typedef std::pair< const ProjectVertex *, const int > ProjectVertexPair;
 
   typedef enum ALUElementType { triangle=3, quadrilateral=2, tetra=4 , hexa=7 , hexa_periodic , tetra_periodic } grid_t;
 
@@ -943,6 +944,12 @@ namespace ALUGrid
       // return true if vertex is a fake vertex (ie vertex in a 2d grid that is not used)
       bool isFakeVertex () const { return isSet( flagNoCoarsen ); }
 
+      // indicate that vertex coordinates were changed by projection
+      void setVertexWasProjected() { set( flagNonAffine ); }
+
+      // return true if vertex coordinates were changed by projection
+      bool wasProjected () const { return isSet( flagNonAffine ); }
+
       // set flag that indicates the initial element type
       void setSimplexTypeFlagZero () { set( flagType0 ); }
 
@@ -965,7 +972,7 @@ namespace ALUGrid
       virtual int level () const = 0;
 
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-      virtual void project(const ProjectVertexPair &pv) = 0;
+      virtual void project(const ProjectVertex &pv) = 0;
 
       // Extrainteger, damit die Element zu Vertex Zuordnug klappt,
       // wenn die Daten zur Visualisierung mit GRAPE rausgeschrieben
@@ -1007,7 +1014,7 @@ namespace ALUGrid
       virtual void restore (ObjectStream &) = 0;
 
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-      virtual void projectInnerVertex(const ProjectVertexPair &pv) = 0;
+      virtual void projectInnerVertex(const ProjectVertex &pv) = 0;
 
       // backup and restore index of vertices, should be overloaded in
       // derived classes, because some need to go down the hierarchiy
@@ -1048,7 +1055,7 @@ namespace ALUGrid
       virtual void restore (ObjectStream &) = 0;
 
       // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-      virtual void projectVertex(const ProjectVertexPair &pv) = 0;
+      virtual void projectVertex(const ProjectVertex &pv) = 0;
 
       // returns true if element conected to face is leaf
       virtual bool isInteriorLeaf() const = 0;
@@ -1133,6 +1140,9 @@ namespace ALUGrid
       // return index of boundary segment
       virtual int segmentId (const int) const { return -1; }
 
+      // return if at least one of the vertex's coordinates was changed through projection
+      virtual bool vertexWasProjected () const { return false; }
+
       // return true if further refinement is needed to create conforming closure
       virtual bool markForConformingClosure () = 0;
       // mark edges for allow or disallow coarsening
@@ -1174,7 +1184,7 @@ namespace ALUGrid
         return (alugrid_assert (0),-1);
       }
 
-      virtual void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { abort(); }
+      virtual void changeVertexCoordinates( const int, const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { std::abort(); }
 
       using ElementPllXIF::writeDynamicState;
       using ElementPllXIF::readDynamicState;
@@ -1284,8 +1294,9 @@ namespace ALUGrid
       virtual ~hbndseg () {}
 
       typedef enum {
-        none = DuneIndexProvider::interior, // also the value of interior items
-        closure = DuneIndexProvider::border,  // also the value of border items
+        // interior = 0 , border = 211 , ghost = 222
+        none = DuneIndexProvider::interior,        // also the value of interior items
+        closure = DuneIndexProvider::border,       // also the value of border items
         ghost_closure = DuneIndexProvider::ghost , // also the value of ghost items
         closure_2d = 203, // fake boundary for 2d elements
         periodic   = 254, // periodic boundaries (deprecated)
@@ -1345,6 +1356,9 @@ namespace ALUGrid
         return 0;
       }
 
+      //! store shared pointer to boundary projection object (pass empty pointer to remove)
+      virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr ) = 0;
+
     protected:
       // if ghost element exists, then ghost is splitted, when bnd is splitted
       // info will be filled with the new ghost cells and local face to the
@@ -1359,7 +1373,7 @@ namespace ALUGrid
       virtual void restoreFollowFace () = 0;
       virtual void attachleafs() { abort(); }
       virtual void detachleafs() { abort(); }
-      virtual void projectGhostElement( const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { abort(); }
+      virtual void projectGhostElement( const int, const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { std::abort(); }
     };
 
 
@@ -1561,7 +1575,7 @@ namespace ALUGrid
         int level () const { return lvl(); }
 
         // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-        virtual void project(const ProjectVertexPair &pv);
+        virtual void project(const ProjectVertex &pv);
 
         // overload backupIndex and restoreIndex for std::streams
         void backupIndex  (std::ostream & os ) const;
@@ -1578,6 +1592,7 @@ namespace ALUGrid
         const Gitter* myGrid() const { return _indexManagerStorage.myGrid(); }
         IndexManagerStorageType& indexManagerStorage () { return _indexManagerStorage; }
         const IndexManagerStorageType& indexManagerStorage () const { return _indexManagerStorage; }
+
       protected:
         IndexManagerType& indexManager() {
           return _indexManagerStorage.get( IndexManagerStorageType::IM_Vertices );
@@ -1924,6 +1939,17 @@ namespace ALUGrid
         // returns false because only bnd segments have projections
         virtual bool hasVertexProjection () const { return false; }
 
+        // return if at least one of the vertex's coordinates was changed through projection
+        virtual bool vertexWasProjected () const
+        {
+          for( int i=0; i<4; ++i )
+          {
+            if( myvertex( i )->wasProjected() )
+              return true;
+          }
+          return false;
+        }
+
       public :
         // return the rule that lead to this tetra
         virtual myrule_t getrule () const = 0;
@@ -2143,6 +2169,18 @@ namespace ALUGrid
 
         // returns false because only bnd segments have projections
         virtual bool hasVertexProjection () const { return false; }
+
+        // return if at least one of the vertex's coordinates was changed through projection
+        virtual bool vertexWasProjected () const
+        {
+          for( int i=0; i<8; ++i )
+          {
+            if( myvertex( i )->wasProjected() )
+              return true;
+          }
+          return false;
+        }
+
       public :
         virtual myrule_t getrule () const = 0;
         virtual myrule_t requestrule () const = 0;
@@ -2288,7 +2326,6 @@ namespace ALUGrid
         int postRefinement ();
         int preCoarsening ();
         bool lockedAgainstCoarsening () const { return false; }
-        bool hasVertexProjection() const { return (projection() != 0); }
       public :
         virtual ~hbndseg3 ();
         myrule_t getrule () const;
@@ -2316,14 +2353,30 @@ namespace ALUGrid
         // unmark edges and vertices as leaf
         virtual void detachleafs();
 
-      protected :
-        // no projection for ghost faces
-        const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        //! store shared pointer to boundary projection object (pass empty pointer to remove)
+        virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
+        {
+          if( pvPtr && pvPtr->valid() )
+          {
+            _pvPtr = pvPtr;
+          }
+          else
+            _pvPtr.reset();
+        }
 
-      private:
-        myhface_t * _face;
-        int _twist;
+        bool hasVertexProjection() const { return bool(_pvPtr); }
+        // no projection for ghost faces
+        //const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        //ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; } //( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+
+      protected :
+        myhface_t*       _face;   //  8 bytes
+        ProjectVertexPtr _pvPtr;  // 16 bytes
+
+        int _twist;               //  4 bytes
+        unsigned char _lvl;       //  1 byte    = 8 bytes
       public:
       } hbndseg3_GEO;
 
@@ -2348,7 +2401,6 @@ namespace ALUGrid
         int postRefinement ();
         int preCoarsening ();
         bool lockedAgainstCoarsening () const { return false; }
-        bool hasVertexProjection() const { return (projection() != 0); }
       public :
         virtual ~hbndseg4 ();
         myrule_t getrule () const;
@@ -2371,14 +2423,27 @@ namespace ALUGrid
 
         virtual void detachleafs();
 
-      protected :
+        //! store shared pointer to boundary projection object (pass empty pointer to remove)
+        virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
+        {
+          if( pvPtr && pvPtr->valid() )
+          {
+            _pvPtr = pvPtr;
+          }
+          else
+            _pvPtr.reset();
+        }
+        bool hasVertexProjection() const { return bool(_pvPtr); }
         // no projection for ghost faces
-        const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
 
-      private:
-        myhface_t * _face;
-        int _twist;
+      protected :
+        myhface_t*       _face;   //  8 bytes
+        ProjectVertexPtr _pvPtr;  // 16 bytes
+
+        int _twist;               //  4 bytes
+        unsigned char _lvl;       //  1 byte   = 8 bytes
 
       public:
       } hbndseg4_GEO;
@@ -3168,17 +3233,19 @@ namespace ALUGrid
     return;
   }
 
-  inline void Gitter::Geometric::VertexGeo::project(const ProjectVertexPair &pv)
+  inline void Gitter::Geometric::VertexGeo::project(const ProjectVertex &pv)
   {
     // copy current coordinates
     const alucoord_t p[3] = {_c[0],_c[1],_c[2]};
     // call projection operator
-    alugrid_assert ( pv.first );
-    const int ok = (*pv.first)( p, pv.second, _c );
+    const int ok = pv( p, _c );
+
+    // affine geometry flag not used for vertices
+    this->setVertexWasProjected();
 
     if ( ! ok )
     {
-      std::cerr << "ERROR in Gitter::Geometric::VertexGeo::project( const ProjectVertexPair &pv ): boundary projection not possible." << std::endl;
+      std::cerr << "ERROR in Gitter::Geometric::VertexGeo::project( const ProjectVertex &pv ): boundary projection not possible." << std::endl;
       for( int i = 0; i < 3; ++i )
         _c[ i ] = p[ i ];
     }
@@ -4217,12 +4284,11 @@ namespace ALUGrid
   inline int Gitter::Geometric::hbndseg3::postRefinement ()
   {
     // don't project vertices on internal borders
-    if( this->isBorder() ) return 0;
+    if( this->bndtype() >= closure_2d ) return 0;
 
-    ProjectVertexPair pv( projection(), segmentId() );
-    if ( pv.first )
+    if ( hasVertexProjection() )
     {
-      myhface(0)->projectVertex( pv );
+      myhface(0)->projectVertex( projection() );
     }
     return 0;
   }
@@ -4314,10 +4380,9 @@ namespace ALUGrid
     // don't project vertices on internal borders
     if( this->isBorder() ) return 0;
 
-    ProjectVertexPair pv( projection(), segmentId() );
-    if( pv.first )
+    if( hasVertexProjection() )
     {
-      myhface(0)->projectVertex( pv );
+      myhface(0)->projectVertex( projection() );
     }
     return 0;
   }

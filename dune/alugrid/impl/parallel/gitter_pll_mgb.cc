@@ -794,10 +794,12 @@ namespace ALUGrid
     }
     else
     {
+      ProjectVertexPtr pv; // internal faces don't have vertex projection
+
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master );
+      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -842,10 +844,12 @@ namespace ALUGrid
     }
     else
     {
+      ProjectVertexPtr pv; // internal faces don't have vertex projection
+
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master );
+      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -859,9 +863,19 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
+
+    // check if projection was transmitted
+    const signed char hasProjection = os.get();
+    ProjectVertexPtr pv;
+    if( hasProjection )
+    {
+      // restore vertex projection object
+      pv.reset( ProjectVertex::restore( os ) );
+    }
+
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
+    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
@@ -872,9 +886,19 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
+
+    // check if projection was transmitted
+    const signed char hasProjection = os.get();
+    ProjectVertexPtr pv;
+    if( hasProjection )
+    {
+      // restore vertex projection object
+      pv.reset( ProjectVertex::restore( os ) );
+    }
+
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
+    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 

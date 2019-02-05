@@ -362,10 +362,11 @@ namespace ALUGrid
         return myhface4(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType::IM_Bnd );
       }
     private :
-      innerbndseg_t * _bbb, * _dwn, * _up;
-      const bnd_t _bt; // type of boundary
-      int _segmentId; // index of macro boundary segment
-      const unsigned char _lvl;
+      innerbndseg_t * _bbb, * _dwn, * _up;     // 24 bytes
+      const bnd_t _bt; // type of boundary     //  4 bytes
+      int _segmentId; // index of macro boundary segment (4 bytes)
+
+      using A :: _lvl; // declared in hbndseg4_GEO for memory padding
 
       inline bool coarse ();
       inline void append (innerbndseg_t *);
@@ -496,15 +497,22 @@ namespace ALUGrid
       bool checkHexa( const innerhexa_t* hexa, const int  ) const;
 
       // change coordinates of this element (for ghost elements only)
-      void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+      void changeVertexCoordinates( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
       {
         // this should only be called for ghost elements
         alugrid_assert( this->isGhost() );
 
-        for( int i=0; i < 8; ++i )
+        for( int i=0; i < 4; ++i )
         {
-          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(i));
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(face, i));
           vx->setCoordinates( newCoords[ i ] );
+        }
+
+        const int oppFace = Gitter::Geometric::Hexa::oppositeFace[face];
+        for( int i=0; i < 4; ++i )
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(oppFace, i));
+          vx->setCoordinates( newCoords[ i+4 ] );
         }
 
         _volume = volume;
@@ -1056,9 +1064,11 @@ namespace ALUGrid
   Hbnd4Top (int l, myhface4_t * f, int i,
             innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) :
     A (f, i), _bbb (0), _dwn (0), _up(up) ,
-    _bt(_up->_bt),
-    _lvl (l)
+    _bt(_up->_bt)
   {
+    // set level (declared in hbndseg4_GEO for memory reasons)
+    _lvl = l ;
+
     // store ghost element
     typedef Gitter::ghostpair_STI ghostpair_STI;
     ghostpair_STI p ( gh, gFace );
@@ -1078,9 +1088,11 @@ namespace ALUGrid
   Hbnd4Top (int l, myhface4_t * f, int i, const bnd_t bt )
     : A (f, i),
       _bbb (0), _dwn (0), _up(0) ,
-      _bt(bt),
-      _lvl (l)
+      _bt(bt)
   {
+    // set level (declared in hbndseg4_GEO for memory reasons)
+    _lvl = l ;
+
     // get index from manager
     this->setIndex( indexManager().getIndex() );
 

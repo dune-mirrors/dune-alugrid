@@ -1125,6 +1125,13 @@ namespace ALUGrid
       for (int i = 0; i < myhface_t::polygonlength; ++i)
         os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
     }
+
+    const signed char hasProjection = myhbnd ().hasVertexProjection();
+    os.put( hasProjection );
+    if( hasProjection )
+    {
+      myhbnd ().projection().backup( os );
+    }
     return;
   }
 

@@ -178,6 +178,7 @@ namespace ALUGrid
 
     for (int i = 0; i < 3; ++i)
     {
+      /*
 #ifdef ALUGRIDDEBUG
       // this test will (and should) fail for vertex projections
       if( ! this->myGrid()->vertexProjection() )
@@ -191,6 +192,7 @@ namespace ALUGrid
                face.myvertex(i)->Point()[2])<1e-8);
       }
 #endif
+*/
 
       vertex_GEO * vx = myface.myvertex(i);
       vx->setIndex( vxIm , face.myvertex(i)->getIndex() );
