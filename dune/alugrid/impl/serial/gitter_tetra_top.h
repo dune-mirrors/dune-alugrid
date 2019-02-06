@@ -990,10 +990,18 @@ namespace ALUGrid
     // set index of boundary segment
     this->setIndex( indexManager().getIndex() );
 
-    // get segment index from father if existent
-    _segmentId = (_up) ? _up->_segmentId : this->getIndex();
+    if( _up )
+    {
+      // get segment index from father if existent
+      _segmentId = _up->_segmentId;
+      // set boundary projection from father
+      this->_pvPtr = _up->_pvPtr;
+    }
+    else
+      _segmentId = this->getIndex();
 
     setBoundaryId( _bt );
+
     return;
   }
 
