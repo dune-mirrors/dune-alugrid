@@ -200,21 +200,6 @@ namespace Dune
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   alu_inline
-  ALU3dGrid< dim, dimworld, elType, Comm >::~ALU3dGrid ()
-  {
-    if( bndVec_ )
-    {
-      const size_t bndSize = bndVec_->size();
-      for(size_t i=0; i<bndSize; ++i)
-      {
-        delete (*bndVec_)[i];
-      }
-    }
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline
   int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int level, int codim ) const
   {
     // if we dont have this level return 0

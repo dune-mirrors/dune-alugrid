@@ -350,10 +350,10 @@ namespace ALUGrid
     public :
       // Gitter is a reference to our grid
       // constructors creating macro grids from streams
-      MacroGitterBasis ( const int, Gitter *, std::istream & );
+      MacroGitterBasis ( const int, Gitter *, const ProjectVertexPtrPair& ptr, std::istream & );
 
       // constructor creating an empty macro grid
-      MacroGitterBasis ( const int, Gitter * );
+      MacroGitterBasis ( const int, Gitter *, const ProjectVertexPtrPair& ptr );
 
       virtual ~MacroGitterBasis () {}
     };
@@ -364,7 +364,6 @@ namespace ALUGrid
   : public GitterBasis
   {
     MacroGitterBasis*  _macrogitter;
-    ProjectVertex*     _ppv;
   public:
     Makrogitter & container ();
     const Makrogitter & container () const;
@@ -375,14 +374,14 @@ namespace ALUGrid
     std::size_t numMacroBndSegments() const;
 
     explicit GitterBasisImpl ( const int );
-    GitterBasisImpl ( const int, std::istream &, ProjectVertex *);
-    GitterBasisImpl ( const int, const char *, ProjectVertex* );
+    GitterBasisImpl ( const int, std::istream &, const ProjectVertexPtrPair& );
+    GitterBasisImpl ( const int, const char *, const ProjectVertexPtrPair& );
     ~GitterBasisImpl ();
 
     virtual void printMemUsage ();
 
     // return pointer to vertex projection
-    virtual ProjectVertex* vertexProjection() const;
+    // virtual ProjectVertex* vertexProjection() const;
   };
 
 
@@ -579,11 +578,6 @@ namespace ALUGrid
   //  --GitterBasisImpl
   //
   ////////////////////////////////////////////////////////////////
-  inline ProjectVertex*  GitterBasisImpl::vertexProjection() const
-  {
-    return _ppv;
-  }
-
   inline Gitter::Makrogitter & GitterBasisImpl::container () { return *_macrogitter; }
 
   inline const Gitter::Makrogitter & GitterBasisImpl::container () const { return *_macrogitter; }

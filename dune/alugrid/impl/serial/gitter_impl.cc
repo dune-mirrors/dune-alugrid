@@ -401,6 +401,7 @@ namespace ALUGrid
 
     for (int i = 0; i < 4; ++i)
     {
+      /*
 #ifdef ALUGRIDDEBUG
       // this test will (and should) fail for vertex projections
       if( ! this->myGrid()->vertexProjection() )
@@ -414,6 +415,7 @@ namespace ALUGrid
                face.myvertex(i)->Point()[2])<1e-8);
       }
 #endif
+*/
 
       vertex_GEO * vx = myface.myvertex(i);
       vx->setIndex(vxIm, face.myvertex(i)->getIndex());
@@ -444,37 +446,36 @@ namespace ALUGrid
   //  --GitterBasisImpl
   //
   //////////////////////////////////////////////////////////////////
-  GitterBasisImpl::GitterBasisImpl ( const int dim ) : _macrogitter (0) , _ppv(0)
+  GitterBasisImpl::GitterBasisImpl ( const int dim ) : _macrogitter (0)
   {
-    _macrogitter = new MacroGitterBasis ( dim, this );
+    ProjectVertexPtrPair ppv; // = std::make_pair( ProjectVertexPtr(), ProjectVertexPtr() );
+    _macrogitter = new MacroGitterBasis ( dim, this, ppv );
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisImpl::GitterBasisImpl ( const int dim, std::istream &in, ProjectVertex *ppv )
-  : _macrogitter( 0 ),
-    _ppv( ppv )
+  GitterBasisImpl::GitterBasisImpl ( const int dim, std::istream &in, const ProjectVertexPtrPair& ppv )
+  : _macrogitter( 0 )
   {
-    _macrogitter = new MacroGitterBasis ( dim, this, in );
+    _macrogitter = new MacroGitterBasis ( dim, this, ppv, in );
     alugrid_assert (_macrogitter);
     _macrogitter->dumpInfo();
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisImpl::GitterBasisImpl ( const int dim, const char *file, ProjectVertex *ppv )
-  : _macrogitter( 0 ),
-    _ppv( ppv )
+  GitterBasisImpl::GitterBasisImpl ( const int dim, const char *file, const ProjectVertexPtrPair& ppv )
+  : _macrogitter( 0 )
   {
     std::ifstream in( file );
     if( !in )
     {
       std::cerr << "ERROR (ignored): Cannot open file '" << (file ? file : "") << "' in GitterBasisImpl::GitterBasisImpl( const char * )." << std::endl;
-      _macrogitter = new MacroGitterBasis( dim, this );
+      _macrogitter = new MacroGitterBasis( dim, this, ppv );
     }
     else
-      _macrogitter = new MacroGitterBasis( dim, this, in );
+      _macrogitter = new MacroGitterBasis( dim, this, ppv, in );
 
     _macrogitter->dumpInfo();
     alugrid_assert ( _macrogitter );
@@ -483,15 +484,17 @@ namespace ALUGrid
 
   GitterBasisImpl::~GitterBasisImpl () { delete _macrogitter; }
 
-  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter *mygrid, std::istream &in )
+  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter *mygrid, const ProjectVertexPtrPair& ppv, std::istream &in )
   {
     this->indexManagerStorage().setDimAndGrid( dim, mygrid );
+    this->setProjections( ppv );
     macrogridBuilder( in );
   }
 
-  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter * mygrid )
+  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter * mygrid, const ProjectVertexPtrPair& ppv )
   {
     this->indexManagerStorage().setDimAndGrid( dim, mygrid );
+    this->setProjections( ppv );
   }
 
   GitterBasis::VertexGeo * GitterBasis::MacroGitterBasis::insert_vertex (double x, double y, double z, int id) {

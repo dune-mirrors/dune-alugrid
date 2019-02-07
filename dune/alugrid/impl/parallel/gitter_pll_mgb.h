@@ -30,6 +30,8 @@ namespace ALUGrid
       void unpackHbnd4Int (ObjectStream &);
       void unpackHbnd4Ext (ObjectStream &);
 
+      ProjectVertexPtr unpackVertexProjection(ObjectStream &);
+
       // creates Hbnd3IntStorage with ghost info if needed
       bool InsertUniqueHbnd3_withPoint (int (&)[3],
                                         Gitter::hbndseg::bnd_t,

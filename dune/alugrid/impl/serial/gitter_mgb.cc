@@ -391,15 +391,6 @@ namespace ALUGrid
     if(init) initialize();
   }
 
-  // deprecated constructor, project vertex has been removed
-  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, ProjectVertex* )
-   : _initialized(false)
-   , _finalized(false)
-   , _mgb (b)
-  {
-    initialize();
-  }
-
   void MacroGridBuilder::initialize ()
   {
     {

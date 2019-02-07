@@ -39,10 +39,7 @@ namespace Dune
 
    public:
     //! type of boundary projection
-    typedef typename BaseType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
-
-    //! type of boundary projection
-    typedef typename BaseType :: DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
+    typedef typename BaseType :: ALUGridVertexProjectionPointerType  ALUGridVertexProjectionPointerType;
 
     enum { dimension=BaseType::dimension,  dimensionworld=BaseType::dimensionworld};
     static const ALUGridRefinementType refinementType = refineType;
@@ -70,10 +67,9 @@ namespace Dune
     //!                   stdout.
     ALUGrid(const std::string macroName,
             const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
-            const DuneBoundaryProjectionType* bndProject = 0,
-            const DuneBoundaryProjectionVector* bndVector = 0,
+            const ALUGridVertexProjectionPointerType& bndPrj = ALUGridVertexProjectionPointerType(),
             const bool verb = true ) :
-      BaseType(macroName, mpiComm, bndProject, bndVector, refineType )
+      BaseType(macroName, mpiComm, bndPrj, refineType )
     {
       const bool verbose = verb && this->comm().rank() == 0;
       if( verbose )
@@ -105,11 +101,10 @@ namespace Dune
     //! \param verb       Whether to write a notice about grid creation to
     //!                   stdout.
     ALUGrid(const MPICommunicatorType mpiComm,
-            const DuneBoundaryProjectionType* bndProject ,
-            const DuneBoundaryProjectionVector* bndVector,
+            const ALUGridVertexProjectionPointerType& bndPrj,
             const std::string macroName,
             const bool verb = true ) :
-      BaseType("", mpiComm, bndProject, bndVector, refineType )
+      BaseType("", mpiComm, bndPrj, refineType )
     {
       const bool verbose = verb && this->comm().rank() == 0;
       if( verbose )
@@ -125,10 +120,7 @@ namespace Dune
 
     //! constructor creating empty grid, empty string creates empty grid
     ALUGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
-      BaseType("", mpiComm,
-      (const DuneBoundaryProjectionType *) 0,
-      (const DuneBoundaryProjectionVector* ) 0,
-      refineType )
+      BaseType("", mpiComm, ALUGridVertexProjectionPointerType(), refineType )
     {
       if(this->comm().rank() == 0)
       {

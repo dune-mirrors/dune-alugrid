@@ -153,9 +153,11 @@ namespace Dune
 
   private:
     // return grid object
-    virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
+    virtual Grid* createGridObj( const std::string& name ) const
     {
-      return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
+      typedef ALUGridBoundaryProjection2< Grid > Projection ;
+      ALU3DSPACE ProjectVertexPtr pv( new Projection( globalProjection_, Projection::global ) );
+      return new Grid( communicator_, pv, name, realGrid_ );
     }
 
   protected:

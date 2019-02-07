@@ -856,6 +856,27 @@ namespace ALUGrid
     if( ghInfo ) delete ghInfo;
   }
 
+  ProjectVertexPtr ParallelGridMover::unpackVertexProjection( ObjectStream & os)
+  {
+    ProjectVertexPtr pv;
+    const signed char projectionType = os.get();
+    if( projectionType == ProjectVertex :: global )
+    {
+      pv = myBuilder ().globalProjection();
+    }
+    else if( projectionType == ProjectVertex :: surface )
+    {
+      pv = myBuilder ().surfaceProjection();
+    }
+    else if( projectionType == ProjectVertex :: segment )
+    {
+      // restore vertex projection object
+      pv.reset( ProjectVertex::restore( os ) );
+    }
+
+    return pv;
+  }
+
   void ParallelGridMover::unpackHbnd3Ext (ObjectStream & os)
   {
     int b, v [3];
@@ -864,14 +885,7 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    // check if projection was transmitted
-    const signed char hasProjection = os.get();
-    ProjectVertexPtr pv;
-    if( hasProjection )
-    {
-      // restore vertex projection object
-      pv.reset( ProjectVertex::restore( os ) );
-    }
+    ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;
@@ -879,7 +893,8 @@ namespace ALUGrid
     return;
   }
 
-  void ParallelGridMover::unpackHbnd4Ext (ObjectStream & os) {
+  void ParallelGridMover::unpackHbnd4Ext (ObjectStream & os)
+  {
     int b, v [4];
     os.readObject (b);
     os.readObject (v[0]);
@@ -887,14 +902,7 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    // check if projection was transmitted
-    const signed char hasProjection = os.get();
-    ProjectVertexPtr pv;
-    if( hasProjection )
-    {
-      // restore vertex projection object
-      pv.reset( ProjectVertex::restore( os ) );
-    }
+    ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;

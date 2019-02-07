@@ -27,6 +27,7 @@ namespace ALUGrid
   // see ../projectvertex.h
   typedef VertexProjection< ObjectStream, 3, alucoord_t >  ProjectVertex;
   typedef std::shared_ptr< ProjectVertex >                 ProjectVertexPtr;
+  typedef std::pair< ProjectVertexPtr , ProjectVertexPtr > ProjectVertexPtrPair;
 
   // pair of projection and bnd segment index
 
@@ -1359,6 +1360,12 @@ namespace ALUGrid
       //! store shared pointer to boundary projection object (pass empty pointer to remove)
       virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr ) = 0;
 
+      //! return type of projection if set, otherwise none
+      virtual typename ProjectVertex::ProjectionType projectionType() const
+      {
+        return ProjectVertex::none;
+      }
+
     protected:
       // if ghost element exists, then ghost is splitted, when bnd is splitted
       // info will be filled with the new ghost cells and local face to the
@@ -2356,7 +2363,7 @@ namespace ALUGrid
         //! store shared pointer to boundary projection object (pass empty pointer to remove)
         virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
         {
-          if( pvPtr && pvPtr->valid() )
+          if( pvPtr && pvPtr->projectionType() != ProjectVertex::none )
           {
             _pvPtr = pvPtr;
           }
@@ -2364,12 +2371,16 @@ namespace ALUGrid
             _pvPtr.reset();
         }
 
+        //! return type of projection if set, otherwise none
+        virtual typename ProjectVertex::ProjectionType projectionType() const
+        {
+          return ( _pvPtr ) ? _pvPtr->projectionType() : ProjectVertex::none;
+        }
+
         bool hasVertexProjection() const { return bool(_pvPtr); }
         // no projection for ghost faces
-        //const ProjectVertex* projection() const { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        //ProjectVertex* projection() { return ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; } //( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; }
+        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; }
 
       protected :
         myhface_t*       _face;   //  8 bytes
@@ -2426,17 +2437,25 @@ namespace ALUGrid
         //! store shared pointer to boundary projection object (pass empty pointer to remove)
         virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
         {
-          if( pvPtr && pvPtr->valid() )
+          if( pvPtr && pvPtr->projectionType() != ProjectVertex::none )
           {
             _pvPtr = pvPtr;
           }
           else
             _pvPtr.reset();
         }
+
+        //! return type of projection if set, otherwise none
+        virtual typename ProjectVertex::ProjectionType projectionType() const
+        {
+          return ( _pvPtr ) ? _pvPtr->projectionType() : ProjectVertex::none;
+        }
+
         bool hasVertexProjection() const { return bool(_pvPtr); }
+
         // no projection for ghost faces
-        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
-        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; } // ( this->isGhost() ) ? 0 : _face->myvertex(0)->myGrid()->vertexProjection(); }
+        const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; }
+        ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; }
 
       protected :
         myhface_t*       _face;   //  8 bytes
@@ -2566,6 +2585,9 @@ namespace ALUGrid
         // index provider, for every codim one , 4 is for boundary
         IndexManagerStorageType _indexManagerStorage;
 
+        // pair of projection pointers first = global, second = surface
+        ProjectVertexPtrPair  _projections;
+
         bool _computeLinkage ; // if true vertexLinkageEstimate is done
         bool _vertexElementLinkageComputed;
 
@@ -2582,6 +2604,9 @@ namespace ALUGrid
         // return reference to indexManagerStorage
         virtual IndexManagerStorageType& indexManagerStorage();
 
+        virtual const ProjectVertexPtr& globalProjection()  const { return _projections.first;  }
+        virtual const ProjectVertexPtr& surfaceProjection() const { return _projections.second; }
+
         // return number of macro boundary segments
         virtual size_t numMacroBndSegments() const;
 
@@ -2594,6 +2619,12 @@ namespace ALUGrid
         friend class ParallelGridMover;
 
       protected:
+        void setProjections( const ProjectVertexPtrPair& ppv )
+        {
+          _projections.first  = ppv.first;
+          _projections.second = ppv.second;
+        }
+
         template <class ostream_t>
         void dumpMacroGridImpl (ostream_t &) const;
       };
@@ -2656,7 +2687,7 @@ namespace ALUGrid
     virtual int postRefinement( hbndseg_STI & ) { return 0; }
 
     // return pointer to vertex projection
-    virtual ProjectVertex* vertexProjection() const = 0;
+    // virtual ProjectVertex* vertexProjection() const = 0;
 
     virtual void fullIntegrityCheck ();
     virtual void printsize ();

@@ -216,8 +216,6 @@ namespace ALUGrid
       static bool debugOption (int);
 
       MacroGridBuilder (BuilderIF &, const bool init = true);
-      // deprecated
-      MacroGridBuilder (BuilderIF &, ProjectVertex* );
       virtual ~MacroGridBuilder ();
 
       template <class stream_t>

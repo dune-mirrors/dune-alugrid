@@ -2058,9 +2058,9 @@ namespace ALUGrid
   //  --MacroGitterBasisPll
   ////////////////////////////////////////////////////////////////
   GitterBasisPll::MacroGitterBasisPll::
-  MacroGitterBasisPll ( const int dim, GitterBasisPll * mygrid, std::istream &in )
+  MacroGitterBasisPll ( const int dim, GitterBasisPll * mygrid, const ProjectVertexPtrPair& ppv, std::istream &in )
     : GitterPll::MacroGitterPll (),
-      GitterBasis:: MacroGitterBasis (dim, mygrid),
+      GitterBasis:: MacroGitterBasis (dim, mygrid, ppv),
       _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     macrogridBuilder (in );
@@ -2068,9 +2068,9 @@ namespace ALUGrid
   }
 
   GitterBasisPll::MacroGitterBasisPll::
-  MacroGitterBasisPll (const int dim, GitterBasisPll * mygrid)
+  MacroGitterBasisPll (const int dim, GitterBasisPll * mygrid, const ProjectVertexPtrPair& ppv)
    : GitterPll::MacroGitterPll () ,
-     GitterBasis::MacroGitterBasis (dim, mygrid),
+     GitterBasis::MacroGitterBasis (dim, mygrid, ppv),
      _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
@@ -2280,9 +2280,10 @@ namespace ALUGrid
 
   GitterBasisPll::GitterBasisPll (const int dim, MpAccessLocal & mpa)
     : GitterPll(mpa),
-      _mpaccess(mpa), _macrogitter (0) , _ppv( 0 )
+      _mpaccess(mpa), _macrogitter (0)
   {
-    _macrogitter = new MacroGitterBasisPll (dim, this);
+    ProjectVertexPtrPair ppv;
+    _macrogitter = new MacroGitterBasisPll (dim, this, ppv);
 
     dumpInfo();
 
@@ -2291,11 +2292,10 @@ namespace ALUGrid
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( const int dim, const std::string &filename, MpAccessLocal & mpa, ProjectVertex* ppv )
+  GitterBasisPll::GitterBasisPll ( const int dim, const std::string &filename, MpAccessLocal & mpa, const ProjectVertexPtrPair& ppv )
   : GitterPll( mpa ),
     _mpaccess( mpa ),
-    _macrogitter( 0 ),
-    _ppv( ppv )
+    _macrogitter( 0 )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll (const char * = \"" << filename << "\" ...)" << std::endl, 1) : 1);
 
@@ -2311,7 +2311,7 @@ namespace ALUGrid
 
       std::ifstream in( extendedName.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (dim, this, in);
+        _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
       else
       {
         alugrid_assert (debugOption (5) ?
@@ -2342,11 +2342,11 @@ namespace ALUGrid
     {
       std::ifstream in( filename.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (dim, this, in);
+        _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
     }
 
     // create empty macro gitter
-    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this);
+    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this, ppv);
 
     dumpInfo();
 
@@ -2355,15 +2355,14 @@ namespace ALUGrid
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &mpa, ProjectVertex *ppv )
+  GitterBasisPll::GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &mpa, const ProjectVertexPtrPair& ppv )
   : GitterPll( mpa ),
     _mpaccess( mpa ),
-    _macrogitter( 0 ),
-    _ppv( ppv )
+    _macrogitter( 0 )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << &in << "\" ...)" << std::endl, 1) : 1);
 
-    _macrogitter = new MacroGitterBasisPll (dim, this, in);
+    _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
 
     dumpInfo();
 

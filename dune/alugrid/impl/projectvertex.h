@@ -14,6 +14,13 @@ namespace ALUGrid
     VertexProjection () {}
 
   public:
+    typedef signed char ProjectionType;
+    // Vertex projection identifiers for load balancing
+    static const signed char none    = 0;
+    static const signed char global  = 1;
+    static const signed char surface = 2;
+    static const signed char segment = 3;
+
     typedef ThisType* factory_t( Buffer& buffer );
     typedef factory_t*  factoryptr_t ;
 
@@ -43,7 +50,7 @@ namespace ALUGrid
 
     virtual void backup( Buffer& ) const { std::abort(); }
 
-    virtual bool valid () const { return false; }
+    virtual ProjectionType projectionType () const = 0 ;
 
     static ThisType* restore( Buffer& buffer )
     {

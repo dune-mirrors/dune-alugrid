@@ -640,17 +640,15 @@ namespace Dune
     typename ALUGrid::CollectiveCommunication comm( communicator_ );
     ALU3DSPACE ObjectStream buffer;
 
-    BoundaryProjectionVector* bndProjections = 0;
-
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
-    Grid* grid = createGridObj( bndProjections , name );
+    Grid* grid = createGridObj( name );
     alugrid_assert ( grid );
 
     // insert grid using ALUGrid macro grid builder
     if( !vertices_.empty() )
     {
-      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder(), grid->vertexProjection() );
+      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder() );
 
       // now start inserting grid
       const int vxSize = vertices_.size();
@@ -732,7 +730,7 @@ namespace Dune
         }
 
         typedef ALUGridBoundaryProjection2< Grid > Projection ;
-        ALU3DSPACE ProjectVertexPtr pv( new Projection( projection ) );
+        ALU3DSPACE ProjectVertexPtr pv( new Projection( projection, Projection::segment ) );
 
         if( elementType == hexa )
         {

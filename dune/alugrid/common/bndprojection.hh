@@ -65,8 +65,8 @@ namespace Dune {
   template < class GridImp, class ctype = double >
   class ALUGridBoundaryProjection2 : public GridImp :: ALUGridVertexProjectionType
   {
-    typedef typename GridImp :: ALUGridVertexProjectionType         BaseType;
-    typedef ALUGridBoundaryProjection2< GridImp, ctype >   ThisType;
+    typedef typename GridImp :: ALUGridVertexProjectionType   BaseType;
+    typedef ALUGridBoundaryProjection2< GridImp, ctype >      ThisType;
 
     typedef GridImp GridType;
     // type of double coordinate vector
@@ -79,20 +79,32 @@ namespace Dune {
     typedef typename GridType :: DuneBoundaryProjectionType DuneBoundaryProjectionType;
 
     typedef std::unique_ptr< const DuneBoundaryProjectionType >  DuneBoundaryProjectionPointerType;
+
+
+    // type of projection (i.e. integer identifier)
+    typedef typename BaseType :: ProjectionType  ProjectionType;
+
+    using BaseType :: none;
+    using BaseType :: global;
+    using BaseType :: surface;
+    using BaseType :: segment;
+
   protected:
     DuneBoundaryProjectionPointerType projection_;
+    ProjectionType projectionType_;
 
   public:
+
     //! type of coordinate vector
     typedef typename DuneBoundaryProjectionType :: CoordinateType CoordinateType;
 
     //! constructor storing reference to boundary projection implementation
-    ALUGridBoundaryProjection2( const DuneBoundaryProjectionType* ptr )
-      : projection_( ptr )
+    ALUGridBoundaryProjection2( const DuneBoundaryProjectionType* ptr, const ProjectionType pt = BaseType::none )
+      : projection_( ptr ), projectionType_( (projection_) ? pt : BaseType::none )
     {
     }
 
-    bool valid () const { return bool(projection_); }
+    ProjectionType projectionType() const { return projectionType_; }
 
     //! (old) method projection vertices defaults to segment 0
     int operator () (const coord_t &orig,
@@ -118,11 +130,17 @@ namespace Dune {
       return 1;
     }
 
-    void backup( BufferType& buffer ) const
+    void backup( BufferType& os ) const
     {
+      // store whether projection is global (i.e. exists one on all cores)
       if( projection_ )
       {
-        projection_->toBuffer( buffer );
+        os.put( 1 );
+        projection_->toBuffer( os );
+      }
+      else
+      {
+        os.put( 0 );
       }
     }
 
@@ -131,9 +149,15 @@ namespace Dune {
       BaseType :: setFactoryMethod( &factory );
     }
 
-    static BaseType* factory( BufferType& buffer )
+    static BaseType* factory( BufferType& os )
     {
-      return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( buffer ) );
+      const bool hasProjection = os.get();
+      if( hasProjection )
+      {
+        return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( os ) );
+      }
+      else
+        return nullptr;
     }
   };
 

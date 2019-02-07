@@ -46,7 +46,7 @@ namespace ALUGrid
     typedef GitterBasisPll::ObjectsPll Objects;
 
     // constructor taking filename containing the macro grid
-    GitterDunePll ( const int dim, const char * filename, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+    GitterDunePll ( const int dim, const char * filename, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
     : GitterBasisPll( dim, filename, mp, ppv ),
       balanceGrid_ ( false )
     {
@@ -55,7 +55,7 @@ namespace ALUGrid
     }
 
     // constructor taking std::istream containing the macro grid
-    GitterDunePll ( const int dim, std::istream &in, MpAccessLocal &mp, ProjectVertex *ppv = 0 )
+    GitterDunePll ( const int dim, std::istream &in, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
     : GitterBasisPll( dim, in, mp, ppv ),
       balanceGrid_( false )
     {
@@ -65,7 +65,7 @@ namespace ALUGrid
 
     // constructor creating empty grid
     GitterDunePll (const int dim, MpAccessLocal &mp)
-      : GitterBasisPll (dim, "", mp, 0)
+      : GitterBasisPll (dim, "", mp, ProjectVertexPtrPair() )
       , balanceGrid_ (false)
     {
       // build ghost cells after the macro grid has been assembled
