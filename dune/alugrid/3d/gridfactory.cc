@@ -701,6 +701,21 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type");
       }
 
+      typedef ALUGridBoundaryProjection2< Grid > Projection ;
+      ALU3DSPACE ProjectVertexPtr globalProjection;
+      if( globalProjection_ )
+      {
+        globalProjection.reset( new Projection( globalProjection_, Projection::global ) );
+      }
+
+      // TODO: create new pointer for specific surface projection
+      const DuneBoundaryProjectionType* surfaceProjection_ = globalProjection_;
+      ALU3DSPACE ProjectVertexPtr surfaceProjection;
+      if( projectInside_ )
+      {
+        surfaceProjection.reset( new Projection( surfaceProjection_, Projection::surface ) );
+      }
+
       const auto endB = boundaryIds.end();
       for( auto it = boundaryIds.begin(); it != endB; ++it )
       {
@@ -716,21 +731,21 @@ namespace Dune
         std::sort( faceId.begin(), faceId.end() );
         const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
 
-        // if no projection given we use global projection, otherwise identity
-        if( ! projection
-            && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
-            && globalProjection_ )
-        {
-          // TODO: replace this with shared pointer to avoid BoundaryProjectionWrapper
-          typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
-          // we need to wrap the global projection because of
-          // delete in destructor of ALUGrid
-          projection = new ProjectionWrapperType( *globalProjection_ );
-          alugrid_assert ( projection );
-        }
+        ALU3DSPACE ProjectVertexPtr pv;
 
-        typedef ALUGridBoundaryProjection2< Grid > Projection ;
-        ALU3DSPACE ProjectVertexPtr pv( new Projection( projection, Projection::segment ) );
+        if( projection )
+        {
+          pv.reset( new Projection( projection, Projection::segment ) );
+        }
+        else if( ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
+                 && surfaceProjection )
+        {
+          pv = surfaceProjection;
+        }
+        else if ( globalProjection )
+        {
+          pv = globalProjection;
+        }
 
         if( elementType == hexa )
         {
