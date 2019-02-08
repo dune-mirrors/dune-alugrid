@@ -203,16 +203,23 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > ::
-  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool projectInside)
+  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool isSurfaceProjection )
   {
 #ifndef NDEBUG
-    std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+    std::cout << "Inserting Surface Projection:" << std::boolalpha << isSurfaceProjection << std::endl << std::endl;
 #endif
-    if( globalProjection_ )
-      DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
-
-    projectInside_ = projectInside;
-    globalProjection_ = &bndProjection;
+    if( isSurfaceProjection )
+    {
+      if( surfaceProjection_ )
+        DUNE_THROW(InvalidStateException,"You can only insert one Surface Projection");
+      surfaceProjection_ = &bndProjection;
+    }
+    else
+    {
+      if( globalProjection_ )
+        DUNE_THROW(InvalidStateException,"You can only insert one global boundary Projection");
+      globalProjection_ = &bndProjection;
+    }
   }
 
 
@@ -705,10 +712,8 @@ namespace Dune
         globalProjection.reset( new Projection( globalProjection_, Projection::global ) );
       }
 
-      // TODO: create new pointer for specific surface projection
-      const DuneBoundaryProjectionType* surfaceProjection_ = globalProjection_;
       ALU3DSPACE ProjectVertexPtr surfaceProjection;
-      if( projectInside_ )
+      if( surfaceProjection_ )
       {
         surfaceProjection.reset( new Projection( surfaceProjection_, Projection::surface ) );
       }
@@ -734,8 +739,8 @@ namespace Dune
         {
           pv.reset( new Projection( projection, Projection::segment ) );
         }
-        else if( ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
-                 && surfaceProjection )
+        else if( (it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)
+                 && surfaceProjection ) )
         {
           pv = surfaceProjection;
         }

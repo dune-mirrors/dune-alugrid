@@ -156,7 +156,9 @@ namespace Dune
     virtual Grid* createGridObj( const std::string& name ) const
     {
       typedef ALUGridBoundaryProjection2< Grid > Projection ;
-      ALU3DSPACE ProjectVertexPtr pv( new Projection( globalProjection_, Projection::global ) );
+      ALU3DSPACE ProjectVertexPtr gpv( new Projection( globalProjection_, Projection::global ) );
+      ALU3DSPACE ProjectVertexPtr spv( new Projection( surfaceProjection_, Projection::surface ) );
+      ALU3DSPACE ProjectVertexPtrPair pv = std::make_pair( gpv, spv );
       return new Grid( communicator_, pv, name, realGrid_ );
     }
 
@@ -267,7 +269,7 @@ namespace Dune
      *
      *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved
      */
-    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection, const bool projectInside = (dimension != dimensionworld) );
+    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection, const bool isSurfaceProjection = (dimension != dimensionworld) );
 
     /** \brief add a face transformation (for periodic identification)
      *
@@ -404,8 +406,8 @@ namespace Dune
     ElementVector elements_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
-    bool projectInside_;
     const DuneBoundaryProjectionType* globalProjection_ ;
+    const DuneBoundaryProjectionType* surfaceProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
     unsigned int numFacesInserted_;
@@ -517,8 +519,8 @@ namespace Dune
     :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                           bool removeGeneratedFile )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
@@ -537,8 +539,8 @@ namespace Dune
     :: ALU3dGridFactory ( const std::string &filename,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
@@ -557,8 +559,8 @@ namespace Dune
     :: ALU3dGridFactory ( const bool realGrid,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( realGrid ),
     allowGridGeneration_( true ),

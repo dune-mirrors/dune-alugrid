@@ -21,7 +21,7 @@ namespace Dune
   inline ALU3dGrid< dim, dimworld, elType, Comm >
     ::ALU3dGrid ( const std::string &macroTriangFilename,
                   const MPICommunicatorType mpiComm,
-                  const ALUGridVertexProjectionPointerType& bndPrj,
+                  const ALUGridVertexProjectionPairType& bndPrj,
                   const ALUGridRefinementType refinementType )
     : mygrid_()
     , maxlevel_( 0 )
@@ -34,7 +34,7 @@ namespace Dune
     , levelIndexVec_( 1, nullptr ) , leafIndexSet_()
     , sizeCache_ ()
     , lockPostAdapt_( false )
-    , vertexProjection_( bndPrj )
+    , vertexProjections_( bndPrj )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
   {

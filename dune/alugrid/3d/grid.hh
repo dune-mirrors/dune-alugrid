@@ -642,7 +642,7 @@ namespace Dune
     //! or given GridFile
     ALU3dGrid ( const std::string &macroTriangFilename,
                 const MPICommunicatorType mpiComm,
-                const ALUGridVertexProjectionPointerType& bndPrj,
+                const ALUGridVertexProjectionPairType& bndPrj,
                 const ALUGridRefinementType refinementType );
 
     //! \brief Desctructor
@@ -1154,7 +1154,7 @@ namespace Dune
 
     ALUGridVertexProjectionPairType vertexProjections() const
     {
-      return std::make_pair( vertexProjection_, nullptr );
+      return  vertexProjections_ ;
     }
 
     // return appropriate ALUGrid builder
@@ -1367,7 +1367,9 @@ namespace Dune
     bool lockPostAdapt_;
 
     // boundary projection for vertices
-    ALUGridVertexProjectionPointerType vertexProjection_ ;
+    // pair: first is globalProjection_ for boundaries
+    // second is surfaceProjection_ for manifolds
+    ALUGridVertexProjectionPairType vertexProjections_ ;
 
     // pointer to communications object
     std::unique_ptr< Communications > communications_;

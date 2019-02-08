@@ -39,7 +39,7 @@ namespace Dune
 
    public:
     //! type of boundary projection
-    typedef typename BaseType :: ALUGridVertexProjectionPointerType  ALUGridVertexProjectionPointerType;
+    typedef typename BaseType :: ALUGridVertexProjectionPairType  ALUGridVertexProjectionPairType;
 
     enum { dimension=BaseType::dimension,  dimensionworld=BaseType::dimensionworld};
     static const ALUGridRefinementType refinementType = refineType;
@@ -67,7 +67,7 @@ namespace Dune
     //!                   stdout.
     ALUGrid(const std::string macroName,
             const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
-            const ALUGridVertexProjectionPointerType& bndPrj = ALUGridVertexProjectionPointerType(),
+            const ALUGridVertexProjectionPairType& bndPrj = ALUGridVertexProjectionPairType(),
             const bool verb = true ) :
       BaseType(macroName, mpiComm, bndPrj, refineType )
     {
@@ -101,7 +101,7 @@ namespace Dune
     //! \param verb       Whether to write a notice about grid creation to
     //!                   stdout.
     ALUGrid(const MPICommunicatorType mpiComm,
-            const ALUGridVertexProjectionPointerType& bndPrj,
+            const ALUGridVertexProjectionPairType& bndPrj,
             const std::string macroName,
             const bool verb = true ) :
       BaseType("", mpiComm, bndPrj, refineType )
@@ -120,7 +120,7 @@ namespace Dune
 
     //! constructor creating empty grid, empty string creates empty grid
     ALUGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
-      BaseType("", mpiComm, ALUGridVertexProjectionPointerType(), refineType )
+      BaseType("", mpiComm, ALUGridVertexProjectionPairType(), refineType )
     {
       if(this->comm().rank() == 0)
       {
