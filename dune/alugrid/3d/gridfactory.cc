@@ -637,9 +637,6 @@ namespace Dune
       out.close();
     } // if( allowGridGeneration_ && !temporary )
 
-    typename ALUGrid::CollectiveCommunication comm( communicator_ );
-    ALU3DSPACE ObjectStream buffer;
-
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
     Grid* grid = createGridObj( name );
