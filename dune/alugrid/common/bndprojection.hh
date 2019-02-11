@@ -154,7 +154,7 @@ namespace Dune {
       const bool hasProjection = os.get();
       if( hasProjection )
       {
-        return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( os ) );
+        return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( os ), segment );
       }
       else
         return nullptr;
