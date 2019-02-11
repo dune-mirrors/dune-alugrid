@@ -544,34 +544,37 @@ namespace Dune
     if( projection )
       factory_.insertBoundaryProjection( *projection );
 
-    const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
-    GeometryType type( faceTopoId, dimgrid-1 );
-    for( size_t i = 0; i < numBoundaryProjections; ++i )
+    if( rank == 0 || globalVertexIndexFound )
     {
-      const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
-      const DuneBoundaryProjection< dimworld > *projection
-        = projectionBlock.boundaryProjection< dimworld >( i );
-      factory_.insertBoundaryProjection( type, vertices, projection );
-    }
+      const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
+      GeometryType type( faceTopoId, dimgrid-1 );
+      for( size_t i = 0; i < numBoundaryProjections; ++i )
+      {
+        const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
+        const DuneBoundaryProjection< dimworld > *projection
+          = projectionBlock.boundaryProjection< dimworld >( i );
+        factory_.insertBoundaryProjection( type, vertices, projection );
+      }
 
-    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
-    dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
-    const int size = trafoBlock.numTransformations();
-    for( int k = 0; k < size; ++k )
-    {
-      const Transformation &trafo = trafoBlock.transformation( k );
+      typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+      dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
+      const int size = trafoBlock.numTransformations();
+      for( int k = 0; k < size; ++k )
+      {
+        const Transformation &trafo = trafoBlock.transformation( k );
 
-      typename GridFactory::WorldMatrix matrix;
-      for( int i = 0; i < dimworld; ++i )
-        for( int j = 0; j < dimworld; ++j )
-          matrix[ i ][ j ] = trafo.matrix( i, j );
+        typename GridFactory::WorldMatrix matrix;
+        for( int i = 0; i < dimworld; ++i )
+          for( int j = 0; j < dimworld; ++j )
+            matrix[ i ][ j ] = trafo.matrix( i, j );
 
-      typename GridFactory::WorldVector shift;
-      for( int i = 0; i < dimworld; ++i )
-        shift[ i ] = trafo.shift[ i ];
+        typename GridFactory::WorldVector shift;
+        for( int i = 0; i < dimworld; ++i )
+          shift[ i ] = trafo.shift[ i ];
 
-      factory_.insertFaceTransformation( matrix, shift );
-    }
+        factory_.insertFaceTransformation( matrix, shift );
+      }
+    } // end rank == 0 || globalVertexIndexBlock
 
     int addMissingBoundariesLocal = (dgf_.nofelements > 0) && dgf_.facemap.empty();
     int addMissingBoundariesGlobal = addMissingBoundariesLocal;
