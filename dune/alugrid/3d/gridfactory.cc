@@ -531,6 +531,12 @@ namespace Dune
 
     numFacesInserted_ = boundaryIds_.size();
 
+    //Communicate faceTransformations_ as they are only inserted  on rank 0
+    int size = faceTransformations_.size();
+    comm().broadcast(&size, 1, 0);
+    faceTransformations_.resize(size);
+    comm().broadcast(&faceTransformations_, faceTransformations_.size(), 0);
+
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
     //guerantee beforehand to have the right 3d face orientation
