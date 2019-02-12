@@ -531,19 +531,23 @@ namespace Dune
 
     numFacesInserted_ = boundaryIds_.size();
 
-    //Communicate faceTransformations_ as they are only inserted  on rank 0
-    int size = faceTransformations_.size();
-    comm().broadcast(&size, 1, 0);
-    faceTransformations_.resize(size);
-    comm().broadcast(&faceTransformations_, size, 0);
-
+    bool faceTrafoEmpty = faceTransformations_.empty();
+    if(comm().size() > 1)
+    {
+      //Communicate faceTransformations_
+      //This only works for Serial read-in on rank 0
+      int size = faceTransformations_.size();
+      comm().broadcast(&size, 1, 0);
+      if(size > 0)
+        faceTrafoEmpty = false;
+    }
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
     //guerantee beforehand to have the right 3d face orientation
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 )
+    if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 )
       recreateBoundaryIds();
 
     // sort boundary ids to insert real boundaries first and then fake

@@ -20,13 +20,6 @@ namespace Dune
       shift_( shift )
     {}
 
-    //Default constructor needed for resize of transformations
-    //vector in gridfactory
-    ALUGridTransformation ()
-    : matrix_( 0 ),
-      shift_( 0 )
-    {}
-
     WorldVector evaluate ( const WorldVector &x ) const
     {
       WorldVector y = shift_;
