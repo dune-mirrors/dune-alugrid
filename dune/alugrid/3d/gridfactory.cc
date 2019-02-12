@@ -212,13 +212,13 @@ namespace Dune
     {
       if( surfaceProjection_ )
         DUNE_THROW(InvalidStateException,"You can only insert one Surface Projection");
-      surfaceProjection_ = &bndProjection;
+      surfaceProjection_.reset(new Projection (&bndProjection, Projection :: surface) );
     }
     else
     {
       if( globalProjection_ )
         DUNE_THROW(InvalidStateException,"You can only insert one global boundary Projection");
-      globalProjection_ = &bndProjection;
+      globalProjection_.reset(new Projection (&bndProjection, Projection :: global) );
     }
   }
 
@@ -705,18 +705,6 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type");
       }
 
-      typedef ALUGridBoundaryProjection2< Grid > Projection ;
-      ALU3DSPACE ProjectVertexPtr globalProjection;
-      if( globalProjection_ )
-      {
-        globalProjection.reset( new Projection( globalProjection_, Projection::global ) );
-      }
-
-      ALU3DSPACE ProjectVertexPtr surfaceProjection;
-      if( surfaceProjection_ )
-      {
-        surfaceProjection.reset( new Projection( surfaceProjection_, Projection::surface ) );
-      }
 
       const auto endB = boundaryIds.end();
       for( auto it = boundaryIds.begin(); it != endB; ++it )
@@ -740,13 +728,13 @@ namespace Dune
           pv.reset( new Projection( projection, Projection::segment ) );
         }
         else if( (it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)
-                 && surfaceProjection ) )
+                 && surfaceProjection_ ) )
         {
-          pv = surfaceProjection;
+          pv = surfaceProjection_;
         }
-        else if ( globalProjection )
+        else if ( globalProjection_ )
         {
-          pv = globalProjection;
+          pv = globalProjection_;
         }
 
         if( elementType == hexa )

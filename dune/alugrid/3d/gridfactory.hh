@@ -46,6 +46,7 @@ namespace Dune
 
     //! \brief type of boundary projection class
     typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
+    typedef ALUGridBoundaryProjection2< Grid > Projection ;
 
     template< int codim >
     struct Codim
@@ -156,9 +157,7 @@ namespace Dune
     virtual Grid* createGridObj( const std::string& name ) const
     {
       typedef ALUGridBoundaryProjection2< Grid > Projection ;
-      ALU3DSPACE ProjectVertexPtr gpv( new Projection( globalProjection_, Projection::global ) );
-      ALU3DSPACE ProjectVertexPtr spv( new Projection( surfaceProjection_, Projection::surface ) );
-      ALU3DSPACE ProjectVertexPtrPair pv = std::make_pair( gpv, spv );
+      ALU3DSPACE ProjectVertexPtrPair pv = std::make_pair( globalProjection_, surfaceProjection_ );
       return new Grid( communicator_, pv, name, realGrid_ );
     }
 
@@ -406,8 +405,8 @@ namespace Dune
     ElementVector elements_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
-    const DuneBoundaryProjectionType* globalProjection_ ;
-    const DuneBoundaryProjectionType* surfaceProjection_ ;
+    ALU3DSPACE ProjectVertexPtr globalProjection_ ;
+    ALU3DSPACE ProjectVertexPtr surfaceProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
     unsigned int numFacesInserted_;

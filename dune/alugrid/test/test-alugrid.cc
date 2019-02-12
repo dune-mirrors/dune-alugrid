@@ -577,6 +577,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   checkGeometryLifetime( grid.leafGridView() );
 
   // check persistent container
+  std::cout << "  CHECKING: persistent container" << std::endl;
   checkPersistentContainer( grid );
 
   std::cout << std::endl << std::endl;
