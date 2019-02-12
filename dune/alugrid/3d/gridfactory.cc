@@ -535,7 +535,7 @@ namespace Dune
     int size = faceTransformations_.size();
     comm().broadcast(&size, 1, 0);
     faceTransformations_.resize(size);
-    comm().broadcast(&faceTransformations_, faceTransformations_.size(), 0);
+    comm().broadcast(&faceTransformations_, size, 0);
 
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
