@@ -723,7 +723,7 @@ namespace ALUGrid
                                int master,
                                MacroGhostInfoTetra * ghInfo)
   {
-    int twst = cyclicReorder (v,v+3);
+    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
     if (_hbnd3Int.find (key) == _hbnd3Int.end ())
@@ -745,7 +745,7 @@ namespace ALUGrid
                                int master,
                                MacroGhostInfoHexa* ghInfo)
   {
-    int twst = cyclicReorder (v,v+4);
+    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
     if (_hbnd4Int.find (key) == _hbnd4Int.end ())

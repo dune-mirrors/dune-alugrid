@@ -42,7 +42,7 @@ namespace ALUGrid
 
   std::pair< Gitter::Geometric::hface3_GEO *, bool > MacroGridBuilder::
   InsertUniqueHface (int (&v)[3]) {
-    cyclicReorder (v,v+3);
+    cyclicReorder (v);
     faceKey_t key (v[0],v[1],v[2]);
     std::pair< faceMap_t::iterator, bool > result = _face3Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
@@ -58,7 +58,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::hface4_GEO *, bool > MacroGridBuilder::InsertUniqueHface (int (&v)[4]) {
-    cyclicReorder (v,v+4);
+    cyclicReorder (v);
     faceKey_t key (v[0],v[1],v[2]);
     std::pair< faceMap_t::iterator, bool > result = _face4Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
@@ -93,7 +93,7 @@ namespace ALUGrid
         x [0] = v [Tetra::prototype [fce][0]];
         x [1] = v [Tetra::prototype [fce][1]];
         x [2] = v [Tetra::prototype [fce][2]];
-        twst [fce] = cyclicReorder (x,x+3);
+        twst [fce] = cyclicReorder (x);
         face [fce] =  InsertUniqueHface (x).first;
       }
       result.first->second = myBuilder ().insert_tetra (face,twst, elementType);
@@ -117,7 +117,7 @@ namespace ALUGrid
         x [1] = v [Hexa::prototype [fce][1]];
         x [2] = v [Hexa::prototype [fce][2]];
         x [3] = v [Hexa::prototype [fce][3]];
-        twst [fce] = cyclicReorder (x,x+4);
+        twst [fce] = cyclicReorder (x);
         face [fce] =  InsertUniqueHface (x).first;
       }
       result.first->second = myBuilder ().insert_hexa (face,twst);
@@ -128,7 +128,7 @@ namespace ALUGrid
   bool MacroGridBuilder::
   InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
-    int twst = cyclicReorder (v,v+3);
+    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     if (bt == Gitter::hbndseg_STI::closure)
     {
@@ -157,7 +157,7 @@ namespace ALUGrid
   bool MacroGridBuilder::
   InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
-    int twst = cyclicReorder (v,v+4);
+    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     if (bt == Gitter::hbndseg_STI::closure)
     {
@@ -203,7 +203,7 @@ namespace ALUGrid
         x [0] = v [Periodic3::prototype [fce][0]];
         x [1] = v [Periodic3::prototype [fce][1]];
         x [2] = v [Periodic3::prototype [fce][2]];
-        twst [fce] = cyclicReorder (x,x+3);
+        twst [fce] = cyclicReorder (x);
         face [fce] = InsertUniqueHface (x).first;
       }
       periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst,bt);
@@ -236,7 +236,7 @@ namespace ALUGrid
         x [1] = v [Periodic4::prototype [fce][1]];
         x [2] = v [Periodic4::prototype [fce][2]];
         x [3] = v [Periodic4::prototype [fce][3]];
-        twst [fce] = cyclicReorder (x,x+4);
+        twst [fce] = cyclicReorder (x);
         face [fce] = InsertUniqueHface (x).first;
       }
       periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst,bt);
