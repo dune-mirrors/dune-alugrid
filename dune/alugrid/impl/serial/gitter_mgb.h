@@ -15,16 +15,11 @@
 namespace ALUGrid
 {
 
-  template< class RandomAccessIterator > inline int cyclicReorder (RandomAccessIterator begin, RandomAccessIterator end)
+  // sorts v in ascending order and returns twist
+  inline int cyclicReorder( int *begin, int *end )
   {
-    RandomAccessIterator middle = std::min_element( begin,end );
-
-    int pos = 0;
-    if ( middle != begin )
-    {
-      std::rotate( begin, middle, end );
-      pos = end - middle;
-    }
+    int * middle = std::min_element( begin, end );
+    int pos = (middle == begin ? 0 : (std::rotate( begin, middle, end ), end - middle));
 
     if( *(begin + 1) < *(end - 1) )
       return pos;
@@ -34,6 +29,13 @@ namespace ALUGrid
       std::rotate( begin, end - 1, end );
       return -pos - 1;
     }
+  }
+
+  // sorts v in ascending order and returns twist
+  template <int dim>
+  inline int cyclicReorder( int (&v)[ dim ] )
+  {
+    return cyclicReorder( v, v+dim );
   }
 
   class MacroGridBuilder
