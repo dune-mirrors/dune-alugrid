@@ -15,19 +15,39 @@
 namespace ALUGrid
 {
 
+  // re-implementation of std::rotate due to compiler bug in clang
+  inline void rotateVec( int* first, int* middle, int* last)
+  {
+    int * next = middle;
+    while (first!=next)
+    {
+      std::swap (*first++,*next++);
+      if (next==last)
+        next=middle;
+      else if (first==middle)
+        middle=next;
+    }
+  }
+
   // sorts v in ascending order and returns twist
   inline int cyclicReorder( int *begin, int *end )
   {
-    int * middle = std::min_element( begin, end );
-    int pos = (middle == begin ? 0 : (std::rotate( begin, middle, end ), end - middle));
+    int* middle = std::min_element( begin, end );
+
+    int twst = 0;
+    if( middle != begin )
+    {
+      rotateVec( begin, middle, end );
+      twst = end - middle;
+    }
 
     if( *(begin + 1) < *(end - 1) )
-      return pos;
+      return twst;
     else
     {
       std::reverse( begin, end );
-      std::rotate( begin, end - 1, end );
-      return -pos - 1;
+      rotateVec( begin, end - 1, end );
+      return -twst - 1;
     }
   }
 
