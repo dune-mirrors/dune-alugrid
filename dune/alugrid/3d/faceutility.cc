@@ -43,10 +43,10 @@ namespace Dune
     // we have to swap the vertices, because
     // local face numbering in Dune is different to ALUGrid (see topology.cc)
     return new SurfaceMappingType(
-        face.myvertex( FaceTopo::dune2aluVertex(0) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(1) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(2) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(3) )->Point() );
+        face.myvertex( 0 )->Point(),
+        face.myvertex( 1 )->Point(),
+        face.myvertex( 2 )->Point(),
+        face.myvertex( 3 )->Point() );
   }
 
 

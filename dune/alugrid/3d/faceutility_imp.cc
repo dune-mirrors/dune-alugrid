@@ -389,28 +389,7 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::duneTwist(const int faceIdx, const int aluTwist) const
   {
-    typedef ElementTopologyMapping<type> ElementTopo;
-    typedef FaceTopologyMapping<type> FaceTopo;
-
-    const int mappedZero =
-      FaceTopo::twist(ElementTopo::dune2aluFaceVertex( faceIdx, 0), aluTwist);
-
-    const int twist =
-      (ElementTopo::faceOrientation( faceIdx ) * sign(aluTwist) < 0 ?
-       mappedZero : -mappedZero-1);
-    // see topology.* files for aluTwistMap
-    if( dim == 2 )
-    {
-      // in 2d twists are either 0 or 1, but because
-      // of the underlying 3d alu grid they could be different
-      // therefore we adjust to the right range
-      const int duneTwst = FaceTopo :: aluTwistMap( twist );
-      return (duneTwst == 0) ? 0 : 1;
-    }
-    else
-    {
-      return FaceTopo :: aluTwistMap( twist );
-    }
+    return 0;
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
@@ -552,9 +531,9 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
-      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
+      geo.buildGeom( face.myvertex(0)->Point() ,
+                     face.myvertex(1)->Point() ,
+                     face.myvertex(2)->Point() );
 
       this->generatedGlobal_ = true ;
     }
@@ -625,10 +604,10 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
-      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(3))->Point() );
+      geo.buildGeom( face.myvertex(0)->Point() ,
+                     face.myvertex(1)->Point() ,
+                     face.myvertex(2)->Point() ,
+                     face.myvertex(3)->Point() );
       this->generatedGlobal_ = true ;
     }
   }
@@ -648,10 +627,10 @@ namespace Dune
       const GEOFaceType & face = connector_.face();
       // update mapping to actual face
       mappingGlobal_.buildMapping(
-        face.myvertex( FaceTopo::dune2aluVertex(0) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(1) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(2) )->Point(),
-        face.myvertex( FaceTopo::dune2aluVertex(3) )->Point()
+        face.myvertex( 0 )->Point(),
+        face.myvertex( 1 )->Point(),
+        face.myvertex( 2 )->Point(),
+        face.myvertex( 3 )->Point()
         );
       mappingGlobalUp2Date_ = true;
     }
@@ -708,19 +687,9 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline int ALU3dGridGeometricFaceInfoBase< dim, dimworld, type, Comm >::
   globalVertexIndex(const int duneFaceIndex,
-                    const int aluFaceTwist,
                     const int duneFaceVertexIndex) const
   {
-    const int localALUIndex =
-      FaceTopo::dune2aluVertex(duneFaceVertexIndex,
-                               aluFaceTwist);
-
-    // get local ALU vertex number on the element's face
-    const int localDuneIndex = ElementTopo::
-        alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex),
-                           localALUIndex);
-
-    return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 3);
+    return getReferenceElement().subEntity(duneFaceIndex, 1, duneFaceVertexIndex, 3);
   }
 
 
@@ -732,18 +701,14 @@ namespace Dune
     // this is a dune face index
     const int faceIndex =
       (side == INNER ?
-       ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()) :
-       ElementTopo::alu2duneFace(connector_.outerALUFaceIndex()));
-    const int faceTwist =
-      (side == INNER ?
-       connector_.innerTwist() :
-       connector_.outerTwist());
+       connector_.innerALUFaceIndex() :
+       connector_.outerALUFaceIndex());
 
     const ReferenceElementType& refElem = getReferenceElement();
 
     for (int i = 0; i < numVerticesPerFace; ++i)
     {
-      int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i);
+      int duneVertexIndex = globalVertexIndex(faceIndex,  i);
       result[i] = refElem.position(duneVertexIndex, 3);
     }
   }
@@ -828,8 +793,8 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
-      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(1))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(2))->Point() );
+      geo.buildGeom( face.myvertex(1)->Point() ,
+                     face.myvertex(2)->Point() );
 
       this->generatedGlobal_ = true ;
     }
@@ -903,8 +868,8 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
 
-      geo.buildGeom( face.myvertex(FaceTopo::dune2aluVertex(0))->Point() ,
-                     face.myvertex(FaceTopo::dune2aluVertex(1))->Point() );
+      geo.buildGeom( face.myvertex(0)->Point() ,
+                     face.myvertex(1)->Point() );
       this->generatedGlobal_ = true ;
     }
   }
@@ -981,20 +946,10 @@ namespace Dune
   template<  int dimworld, ALU3dGridElementType type, class Comm >
   inline int ALU3dGridGeometricFaceInfoBase< 2, dimworld, type, Comm >::
   globalVertexIndex(const int duneFaceIndex,
-                    const int aluFaceTwist,
                     const int duneFaceVertexIndex) const
   {
+    //TODO: get this right!
     //we want vertices 1,2 of the real 3d DUNE face for tetras and 0,1 for hexas
-    const  int localALUIndex =
-      FaceTopo::dune2aluVertex(type == tetra ? duneFaceVertexIndex + 1 : duneFaceVertexIndex,
-                               aluFaceTwist);
-
-    // get local DUNE vertex number on the element's face - for tetra map  1,2 of real 3d face back to 0,1 by subtracting 1
-    const int localDuneIndex = (type == tetra) ?
-                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex) - 1
-                             :
-                             ElementTopo::alu2duneFaceVertex(ElementTopo::dune2aluFace(duneFaceIndex), localALUIndex)
-                             ;
 
    /* std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
     std::cout << "aluFaceTwist: " << aluFaceTwist << std::endl;
@@ -1002,8 +957,8 @@ namespace Dune
     std::cout << "localALUIndex: " << localALUIndex << std::endl;
     std::cout << "localDuneIndex: " << localDuneIndex << std::endl;
     std ::cout << "ReferenceElementindex: " << getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2) << std::endl << std::endl; */
-    assert( localDuneIndex == 0 || localDuneIndex == 1 );
-    return getReferenceElement().subEntity(duneFaceIndex, 1, localDuneIndex, 2);
+    assert( duneFaceVertexIndex == 0 || duneFaceVertexIndex == 1 );
+    return getReferenceElement().subEntity(duneFaceIndex, 1, duneFaceVertexIndex, 2);
   }
 
 
@@ -1015,18 +970,14 @@ namespace Dune
     // this is a dune face index
     const int faceIndex =
       (side == INNER ?
-       ElementTopo::alu2duneFace(connector_.innerALUFaceIndex()) :
-       ElementTopo::alu2duneFace(connector_.outerALUFaceIndex()));
-    const int faceTwist =
-      (side == INNER ?
-       connector_.innerTwist() :
-       connector_.outerTwist());
+       connector_.innerALUFaceIndex() :
+       connector_.outerALUFaceIndex());
 
     const ReferenceElementType& refElem = getReferenceElement();
 
     for (int i = 0; i < numVerticesPerFace; ++i)
     {
-      int duneVertexIndex = globalVertexIndex(faceIndex, faceTwist, i);
+      int duneVertexIndex = globalVertexIndex(faceIndex, i);
       result[i] = refElem.position(duneVertexIndex, 2);
     }
   }

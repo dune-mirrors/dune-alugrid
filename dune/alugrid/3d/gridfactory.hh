@@ -139,8 +139,7 @@ namespace Dune
       BndPair bndPair;
       for( unsigned int i = 0; i < numFaceCorners; ++i )
       {
-        const unsigned int j = FaceTopologyMappingType::dune2aluVertex( i );
-        bndPair.first[ j ] = face[ i ];
+        bndPair.first[ i ] = face[ i ];
       }
       bndPair.second = id;
       return bndPair;

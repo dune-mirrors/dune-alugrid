@@ -224,18 +224,8 @@ int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
     // now check mapping with twist
     for(int i=0; i<vxSize; ++i)
     {
-      int twistedDuneIndex = -1;
-      if( localGeom.type().isCube() )
-      {
-        twistedDuneIndex = CubeFaceMapping::twistedDuneIndex( i, twist );
-      }
-      else
-      {
-        twistedDuneIndex = SimplexFaceMapping::twistedDuneIndex( i, twist );
-      }
-
       // get face vertices of number in self face
-      int vxIdx = refElem.subEntity( face, 1 , twistedDuneIndex , dim);
+      int vxIdx = refElem.subEntity( face, 1 , i , dim);
 
       // get position in reference element of vertex i
       CoordinateVectorType refPos = refElem.position( vxIdx, dim );

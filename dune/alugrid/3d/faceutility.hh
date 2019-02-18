@@ -287,7 +287,6 @@ namespace Dune
     void generateLocalGeometries() const;
 
     int globalVertexIndex(const int duneFaceIndex,
-                          const int faceTwist,
                           const int duneFaceVertexIndex) const;
 
     void referenceElementCoordinatesRefined(SideIdentifier side,
@@ -471,7 +470,6 @@ namespace Dune
     //- private methods
 
     int globalVertexIndex(const int duneFaceIndex,
-                          const int faceTwist,
                           const int duneFaceVertexIndex) const;
 
     void referenceElementCoordinatesRefined(SideIdentifier side,

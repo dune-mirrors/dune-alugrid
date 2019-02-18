@@ -653,8 +653,7 @@ namespace Dune
         std::array< unsigned int, numCorners > element;
         for( unsigned int i = 0; i < numCorners; ++i )
         {
-          const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-          element[ j ] = elements_[ elemIndex ][ i ];
+          element[ i ] = elements_[ elemIndex ][ i ];
         }
 
         out << element[ 0 ];
@@ -720,8 +719,7 @@ namespace Dune
           int element[ 8 ];
           for( unsigned int i = 0; i < 8; ++i )
           {
-            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            element[ i ] = globalId( elements_[ elemIndex ][ i ] );
           }
           mgb.InsertUniqueHexa( element );
         }
@@ -730,8 +728,7 @@ namespace Dune
           int element[ 4 ];
           for( unsigned int i = 0; i < 4; ++i )
           {
-            const unsigned int j = ElementTopologyMappingType::dune2aluVertex( i );
-            element[ j ] = globalId( elements_[ elemIndex ][ i ] );
+            element[ i ] = globalId( elements_[ elemIndex ][ i ] );
           }
 
           // bisection element type: orientation and type (default 0)

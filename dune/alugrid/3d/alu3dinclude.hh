@@ -443,14 +443,14 @@ namespace Dune
     getFace( const typename ALU3dImplTraits< tetra, Comm >::GEOElementType& elem, int index)
     {
       alugrid_assert (index >= 0 && index < 4);
-      return elem.myhface( ElementTopologyMapping< tetra >::dune2aluFace(index) );
+      return elem.myhface( index );
     }
 
     static const typename ALU3dImplTraits< hexa, Comm >::GEOFaceType*
     getFace( const typename ALU3dImplTraits< hexa, Comm >::GEOElementType &elem, int index )
     {
       alugrid_assert (index >= 0 && index < 6);
-      return elem.myhface( ElementTopologyMapping< hexa >::dune2aluFace(index) );
+      return elem.myhface( index );
     }
   };
 

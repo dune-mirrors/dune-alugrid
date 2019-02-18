@@ -173,16 +173,6 @@ buildGeom(const IMPLElementType& item)
 
   if ( elementType == hexa )
   {
-    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex
-    alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(2) == 3 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(3) == 2 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(4) == 4 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(5) == 5 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(6) == 7 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(7) == 6 );
 
     if( mydim == 3 ) // hexahedron
     {
@@ -207,13 +197,6 @@ buildGeom(const IMPLElementType& item)
   }
   else if( elementType == tetra )
   {
-    // if this assertion is thrown, use ElementTopo::dune2aluVertex instead
-    // of number when calling myvertex
-    alugrid_assert ( ElementTopo::dune2aluVertex(0) == 0 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(1) == 1 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(2) == 2 );
-    alugrid_assert ( ElementTopo::dune2aluVertex(3) == 3 );
-
     if( mydim == 3 ) // tetrahedron
     {
       // update geo impl
