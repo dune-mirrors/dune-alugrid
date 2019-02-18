@@ -212,13 +212,13 @@ namespace Dune
     {
       if( surfaceProjection_ )
         DUNE_THROW(InvalidStateException,"You can only insert one Surface Projection");
-      surfaceProjection_.reset(new Projection (&bndProjection, Projection :: surface) );
+      surfaceProjection_.reset(new ALUProjectionType (&bndProjection, ALUProjectionType :: surface) );
     }
     else
     {
       if( globalProjection_ )
         DUNE_THROW(InvalidStateException,"You can only insert one global boundary Projection");
-      globalProjection_.reset(new Projection (&bndProjection, Projection :: global) );
+      globalProjection_.reset(new ALUProjectionType (&bndProjection, ALUProjectionType :: global) );
     }
   }
 
@@ -735,7 +735,7 @@ namespace Dune
 
         if( projection )
         {
-          pv.reset( new Projection( projection, Projection::segment ) );
+          pv.reset( new ALUProjectionType( projection, ALUProjectionType::segment ) );
         }
         else if( (it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)
                  && surfaceProjection_ ) )

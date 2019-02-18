@@ -44,10 +44,6 @@ namespace Dune
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
-    //! \brief type of boundary projection class
-    typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
-    typedef ALUGridBoundaryProjection2< Grid > Projection ;
-
     template< int codim >
     struct Codim
     {
@@ -80,8 +76,11 @@ namespace Dune
                     "ALU3dGridFactory supports only grids containing "
                     "tetrahedrons or hexahedrons exclusively." );
 
+    //! \brief type of boundary projection class
+    typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
+
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
-    typedef ALUGridBoundaryProjection2< Grid > ALUProjectionType;
+    typedef ALUGridBoundaryProjection< Grid > ALUProjectionType;
 
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
@@ -156,7 +155,6 @@ namespace Dune
     // return grid object
     virtual Grid* createGridObj( const std::string& name ) const
     {
-      typedef ALUGridBoundaryProjection2< Grid > Projection ;
       ALU3DSPACE ProjectVertexPtrPair pv = std::make_pair( globalProjection_, surfaceProjection_ );
       return new Grid( communicator_, pv, name, realGrid_ );
     }
