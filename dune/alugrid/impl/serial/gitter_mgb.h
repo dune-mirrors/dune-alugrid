@@ -29,7 +29,7 @@ namespace ALUGrid
     }
   }
 
-  // sorts v in ascending order and returns twist
+  // cyclic re-ordering of v and computing of twist
   inline int cyclicReorder( int *begin, int *end )
   {
     int* middle = std::min_element( begin, end );
@@ -42,7 +42,9 @@ namespace ALUGrid
     }
 
     if( *(begin + 1) < *(end - 1) )
+    {
       return twst;
+    }
     else
     {
       std::reverse( begin, end );
