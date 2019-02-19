@@ -11,8 +11,7 @@
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include <dune/alugrid/impl/binaryio.hh>
 
-#include "mapp_cube_3d.h"
-#include "mapp_tetra_3d.h"
+#include "mappings.hh"
 #include "gitter_sti.h"
 #include "gitter_mgb.h"
 #include "walk.h"

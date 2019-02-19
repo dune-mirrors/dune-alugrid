@@ -16,8 +16,6 @@ dune_add_library(serial OBJECT
         serial/gitter_mgb.cc
         serial/gitter_sti.cc
         serial/gitter_tetra_top.cc
-        serial/mapp_cube_3d.cc
-        serial/mapp_tetra_3d.cc
         serial/myalloc.cc
         serial/mappings.cc
         duneinterface/gitter_dune_impl.cc)

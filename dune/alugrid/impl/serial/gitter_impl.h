@@ -6,8 +6,6 @@
 
 #include "gitter_sti.h"
 
-#include "mapp_tetra_3d.h"
-
 #include "gitter_hexa_top.h"
 #include "gitter_tetra_top.h"
 

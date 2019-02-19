@@ -1,7 +1,7 @@
 // (c) Robert Kloefkorn 2010
 #include <config.h>
 
-#include "mapp_cube_3d.h"
+#include "mappings.hh"
 #include "gitter_hexa_top.h"
 #include "gitter_impl.h"
 
@@ -578,8 +578,8 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point());
-    // calculate volume
-    _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
+    //TODO calculate volume
+    _volume = -1.;
 
     // check whether mapping is affine
     if( ! trMap.affine() )
@@ -637,19 +637,14 @@ namespace ALUGrid
 #endif
 
       // calculate volume
-      _volume = QuadraturCube3D < VolumeCalc > (triMap).integrate2 (0.0);
+      _volume = -1.;
       // make as non-affine geometry
       this->setNonAffineGeometry();
     }
 
     // make sure that given volume is the same as calulated
 #ifdef ALUGRIDDEBUG
-    const double calculatedVolume =
-        QuadraturCube3D < VolumeCalc >
-         (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
-                            myvertex(2)->Point(), myvertex(3)->Point(),
-                            myvertex(4)->Point(), myvertex(5)->Point(),
-                            myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
+    const double calculatedVolume = -1.;
      alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 

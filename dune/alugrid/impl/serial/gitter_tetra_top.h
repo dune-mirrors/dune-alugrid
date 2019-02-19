@@ -6,7 +6,7 @@
 
 #include "gitter_sti.h"
 #include "gitter_hexa_top.h"
-#include "mapp_tetra_3d.h"
+#include "mappings.hh"
 
 namespace ALUGrid
 {

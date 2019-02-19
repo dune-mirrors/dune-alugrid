@@ -13,8 +13,9 @@
 #include <dune/common/exceptions.hh>
 #include "../../3d/aluinline.hh"
 
-using namespace ALUGrid;
-namespace Dune {
+
+
+namespace ALUGrid {
 
   static const alucoord_t ALUnumericEpsilon = 10.0 * std::numeric_limits< alucoord_t >::epsilon();
 
@@ -50,6 +51,11 @@ namespace Dune {
                       const coord_t&, const coord_t&,
                       const coord_t&, const coord_t&);
 
+    TrilinearMapping (const double_t&, const double_t&,
+                      const double_t&, const double_t&,
+                      const double_t&, const double_t&,
+                      const double_t&, const double_t&);
+
     // only to call from geometry class
     TrilinearMapping () {}
 
@@ -62,8 +68,30 @@ namespace Dune {
     void map2world (const coord_t&, coord_t&) const ;
     void map2world (const alucoord_t , const alucoord_t , const alucoord_t ,
                     coord_t&) const ;
+    void map2world (const alucoord_t , const alucoord_t , const alucoord_t ,
+        double_t&) const ;
     void world2map (const coord_t&, coord_t&) ;
 
+    static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
+        const alucoord_t (&p4)[3], const alucoord_t (&p5)[3], const alucoord_t (&p6)[3], const alucoord_t (&p7)[3],
+        alucoord_t (&barycenter)[3])
+    {
+      barycenter[0] = 0.125 * (p0[0] + p1[0] + p2[0] + p3[0] + p4[0] + p5[0] + p6[0] + p7[0]);
+      barycenter[1] = 0.125 * (p0[1] + p1[1] + p2[1] + p3[1] + p4[1] + p5[1] + p6[1] + p7[1]);
+      barycenter[2] = 0.125 * (p0[2] + p1[2] + p2[2] + p3[2] + p4[2] + p5[2] + p6[2] + p7[2]);
+
+#ifdef ALUGRIDDEBUG
+      {
+        TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
+        alucoord_t p[3];
+        map.map2world(.0, .0, .0, p);
+        for(int j=0; j<3; ++j)
+        {
+          alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
+        }
+      }
+#endif
+    }
     template <class vector_t>
     void buildMapping(const vector_t&, const vector_t&,
                       const vector_t&, const vector_t&,
@@ -127,6 +155,24 @@ namespace Dune {
                        const vector_t & , const vector_t & ,
                        alucoord_t (&_b)[4][3] );
   } ;
+
+
+  //! A Linear Surface Mapping
+  //This is the linear surface Mapping from mapp_tetra3d
+  class LinearSurfaceMapping {
+    const alucoord_t (&_p0)[3], (&_p1)[3], (&_p2)[3] ;
+    alucoord_t _b [3][3] ;
+  protected:
+    alucoord_t _n [3] ;
+  public :
+      inline LinearSurfaceMapping (const alucoord_t (&)[3], const alucoord_t (&)[3], const alucoord_t (&)[3]) ;
+      inline LinearSurfaceMapping (const LinearSurfaceMapping &) ;
+     ~LinearSurfaceMapping() { }
+      inline void map2world(const alucoord_t (&)[3], alucoord_t (&)[3]) const ;
+      inline void map2world(alucoord_t x, alucoord_t y, alucoord_t z, alucoord_t (&w)[3]) const ;
+      inline void normal(alucoord_t (&)[3]) const;
+  } ;
+
 
 
   //! A bilinear surface mapping
@@ -200,6 +246,26 @@ namespace Dune {
     // coordinates
     void map2world(const coord2_t&, coord3_t&) const ;
     void map2world(const alucoord_t ,const alucoord_t , coord3_t&) const ;
+
+    static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3], const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
+        alucoord_t (&barycenter)[3])
+    {
+      barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
+      barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
+      barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
+
+#ifdef ALUGRIDDEBUG
+      {
+        BilinearSurfaceMapping map(p0,p1,p2,p3);
+        alucoord_t p[3];
+        map.map2world(.0, .0, p);
+        for(int j=0; j<3; ++j)
+        {
+          alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
+        }
+      }
+#endif
+    }
 
   private:
     void map2worldnormal(const alucoord_t, const alucoord_t, const alucoord_t , coord3_t&)const;
@@ -327,6 +393,26 @@ namespace Dune {
     // coordinates
     void map2world(const map_t &, world_t &) const ;
 
+    static inline void barycenter(const alucoord_t (&p0)[3], const alucoord_t (&p1)[3],
+        const alucoord_t (&p2)[3], const alucoord_t (&p3)[3],
+        alucoord_t (&barycenter)[3])
+    {
+      //make sure we only call this method internally
+      alugrid_assert(cdim == 3 && mydim == 3);
+      barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
+      barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
+      barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
+#ifdef ALUGRIDDEBUG
+      LinearMapping<3,3> map(p0,p1,p2,p3);
+      alucoord_t p[3] ;
+      map.map2world(.25, .25, .25, .25, p) ;
+      for(int j=0; j<3; ++j)
+      {
+        alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
+      }
+#endif
+    }
+
   protected:
     // calculate inverse
     void inverse (const map_t&) const;
@@ -365,7 +451,16 @@ namespace Dune {
     template <class vector_t>
     void buildMapping (const vector_t & );
   } ;
-} // end namespace Dune
+} // end namespace
+
+namespace Dune {
+  using ::ALUGrid::LinearMapping;
+  using ::ALUGrid::BilinearMapping;
+  using ::ALUGrid::BilinearSurfaceMapping;
+  using ::ALUGrid::SurfaceNormalCalculator;
+  using ::ALUGrid::TrilinearMapping;
+}
+
 
 #if COMPILE_ALUGRID_INLINE
 #include "mappings.cc"

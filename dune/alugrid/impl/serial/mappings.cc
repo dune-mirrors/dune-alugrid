@@ -4,7 +4,7 @@
 #include "config.h"
 #include "mappings.hh"
 
-namespace Dune
+namespace ALUGrid
 {
 
   //- Trilinear mapping (from alu3dmappings.hh)
@@ -13,6 +13,16 @@ namespace Dune
                     const coord_t& p2, const coord_t& p3,
                     const coord_t& p4, const coord_t& p5,
                     const coord_t& p6, const coord_t& p7)
+  {
+    buildMapping(p0,p1,p2,p3,p4,p5,p6,p7);
+    return ;
+  }
+
+  alu_inline TrilinearMapping ::
+  TrilinearMapping (const double_t& p0, const double_t& p1,
+                    const double_t& p2, const double_t& p3,
+                    const double_t& p4, const double_t& p5,
+                    const double_t& p6, const double_t& p7)
   {
     buildMapping(p0,p1,p2,p3,p4,p5,p6,p7);
     return ;
@@ -84,14 +94,14 @@ namespace Dune
     return ;
   }
 
-  alu_inline const FieldMatrix<alucoord_t, 3, 3>&
+  alu_inline const Dune::FieldMatrix<alucoord_t, 3, 3>&
   TrilinearMapping::jacobianTransposed(const coord_t& p)
   {
     linear( p );
     return Df;
   }
 
-  alu_inline const FieldMatrix<alucoord_t, 3, 3>&
+  alu_inline const Dune::FieldMatrix<alucoord_t, 3, 3>&
   TrilinearMapping::jacobianInverseTransposed(const coord_t& p)
   {
     // calculate inverse if not calculated or not affine
@@ -114,6 +124,20 @@ namespace Dune
   map2world(const coord_t& p, coord_t& world) const
   {
     map2world(p[0], p[1], p[2], world);
+    return ;
+  }
+
+  alu_inline void TrilinearMapping ::
+  map2world(const alucoord_t x, const alucoord_t y,
+            const alucoord_t z, double_t& world ) const
+  {
+    const alucoord_t yz  = y * z ;
+    const alucoord_t xz  = x * z ;
+    const alucoord_t xy  = x * y ;
+    const alucoord_t xyz = x * yz ;
+    world [0] = a [0][0] + a [1][0] * x + a [2][0] * y + a [3][0] * z + a [4][0] * xy + a [5][0] * yz + a [6][0] * xz + a [7][0] * xyz ;
+    world [1] = a [0][1] + a [1][1] * x + a [2][1] * y + a [3][1] * z + a [4][1] * xy + a [5][1] * yz + a [6][1] * xz + a [7][1] * xyz ;
+    world [2] = a [0][2] + a [1][2] * x + a [2][2] * y + a [3][2] * z + a [4][2] * xy + a [5][2] * yz + a [6][2] * xz + a [7][2] * xyz ;
     return ;
   }
 
@@ -361,7 +385,65 @@ namespace Dune
     return ;
   }
 
+  // LinearSurfaceMapping
+  // -------------------
 
+  alu_inline LinearSurfaceMapping :: LinearSurfaceMapping (const alucoord_t (&x0)[3],
+      const alucoord_t (&x1)[3], const alucoord_t (&x2)[3])
+    : _p0 (x0), _p1 (x1), _p2 (x2) {
+    _b[0][0] = _p0[0] ;
+    _b[0][1] = _p0[1] ;
+    _b[0][2] = _p0[2] ;
+    _b[1][0] = _p1[0] ;
+    _b[1][1] = _p1[1] ;
+    _b[1][2] = _p1[2] ;
+    _b[2][0] = _p2[0] ;
+    _b[2][1] = _p2[1] ;
+    _b[2][2] = _p2[2] ;
+
+          // Vorsicht: Im Unterschied zu der Originalversion von Mario ist
+          // die Dreiecksfl"achennormale hier mit -1/2 skaliert, wobei
+          // das Vorzeichen auf die widerspr"uchlichen Konventionen bei
+          // Dreiecks- und Vierecksfl"achen zur"uckgeht.
+
+    _n[0] = -0.5 * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2])) ;
+    _n[1] = -0.5 * ((_p1[2]-_p0[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p0[0])) ;
+    _n[2] = -0.5 * ((_p1[0]-_p0[0]) *(_p2[1]-_p1[1]) - (_p2[0]-_p1[0]) *(_p1[1]-_p0[1])) ;
+
+    return ;
+  }
+
+  alu_inline LinearSurfaceMapping :: LinearSurfaceMapping (const LinearSurfaceMapping & m) : _p0(m._p0), _p1(m._p1), _p2(m._p2) {
+    memcpy(_b, m._b, sizeof(alucoord_t [3][3])) ;
+    memcpy(_n, m._n, sizeof(alucoord_t [3])) ;
+    return ;
+  }
+
+  alu_inline void LinearSurfaceMapping :: map2world (const alucoord_t (&map)[3], alucoord_t (&wld)[3]) const {
+    alucoord_t x = map [0] ;
+    alucoord_t y = map [1] ;
+    alucoord_t z = map [2] ;
+    wld[0] =  x * _b[0][0] + y * _b[1][0] + z * _b[2][0] ;
+    wld[1] =  x * _b[0][1] + y * _b[1][1] + z * _b[2][1] ;
+    wld[2] =  x * _b[0][2] + y * _b[1][2] + z * _b[2][2] ;
+    return ;
+  }
+
+  alu_inline void LinearSurfaceMapping :: map2world(alucoord_t x, alucoord_t y, alucoord_t z, alucoord_t (&w)[3]) const {
+    alucoord_t p [3] ;
+    p[0] = x ;
+    p[1] = y ;
+    p[2] = z ;
+    map2world (p,w) ;
+    return ;
+  }
+
+  alu_inline void LinearSurfaceMapping :: normal (alucoord_t (&normal)[3]) const {
+    normal[0] = _n[0] ;
+    normal[1] = _n[1] ;
+    normal[2] = _n[2] ;
+    return ;
+  }
 
   // BilinearSurfaceMapping
   // ----------------------
@@ -773,7 +855,7 @@ namespace Dune
 
   template< int cdim >
   alu_inline void BilinearMapping< cdim >
-    ::multTransposedMatrix ( const matrix_t &A, FieldMatrix< ctype, 2, 2 > &C )
+    ::multTransposedMatrix ( const matrix_t &A, Dune::FieldMatrix< ctype, 2, 2 > &C )
   {
     for( int i = 0; i < 2; ++i )
     {
@@ -789,7 +871,7 @@ namespace Dune
 
   template< int cdim >
   alu_inline void BilinearMapping< cdim >
-    ::multMatrix ( const matrix_t &A, const FieldMatrix< ctype, 2, 2 > &B, inv_t &C )
+    ::multMatrix ( const matrix_t &A, const Dune::FieldMatrix< ctype, 2, 2 > &B, inv_t &C )
   {
     for( int i = 0; i < cdim; ++i )
       for( int j = 0; j < 2; ++j )
@@ -819,7 +901,7 @@ namespace Dune
     if( !calcedInv_ )
     {
       map2worldlinear ( m[0], m[1] );
-      det_ = std::abs( FMatrixHelp::invertMatrix( matrix_, invTransposed_ ) );
+      det_ = std::abs( Dune::FMatrixHelp::invertMatrix( matrix_, invTransposed_ ) );
       calcedDet_ = calcedInv_ = affine();
     }
   }
@@ -830,10 +912,10 @@ namespace Dune
     // use least squares approach
     if( !calcedInv_ )
     {
-      FieldMatrix< ctype, 2, 2 > AT_A, inv_AT_A;
+      Dune::FieldMatrix< ctype, 2, 2 > AT_A, inv_AT_A;
       map2worldlinear ( m[0], m[1] );
       multTransposedMatrix( matrix_, AT_A );
-      FMatrixHelp::invertMatrix( AT_A, inv_AT_A );
+      Dune::FMatrixHelp::invertMatrix( AT_A, inv_AT_A );
       multMatrix( matrix_, inv_AT_A, invTransposed_ );
       calcedInv_ = affine();
     }
@@ -1049,14 +1131,13 @@ namespace Dune
     jacobianInverseTransposed( local ).mtv(globalCoord, local);
   }
 
-
   // tetra mapping
   template <int cdim, int mydim>
   alu_inline void LinearMapping<cdim, mydim> ::
   inverse(const map_t& local) const
   {
     // invert transposed matrix and return determinant
-    _det = std::abs( FMatrixHelp::invertMatrix(_matrix , _invTransposed ) );
+    _det = std::abs( Dune::FMatrixHelp::invertMatrix(_matrix , _invTransposed ) );
     // set flag
     _calcedDet = _calcedInv = true ;
   }
@@ -1121,15 +1202,15 @@ namespace Dune
   inverseCodimOne(const map_t&) const
   {
     // use least squares approach
-    FieldMatrix<ctype, mydim, mydim> AT_A;
+    Dune::FieldMatrix<ctype, mydim, mydim> AT_A;
 
     // calc ret = A^T*A
     multTransposedMatrix(_matrix, AT_A );
 
     // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< ctype, mydim, mydim> inv_AT_A;
+    Dune::FieldMatrix< ctype, mydim, mydim> inv_AT_A;
 
-    FMatrixHelp :: invertMatrix( AT_A, inv_AT_A );
+    Dune::FMatrixHelp :: invertMatrix( AT_A, inv_AT_A );
     multMatrix( _matrix, inv_AT_A, _invTransposed );
 
     // set flag
@@ -1173,7 +1254,7 @@ namespace Dune
   template <int cdim, int mydim>
   alu_inline void LinearMapping<cdim, mydim> ::
   multTransposedMatrix(const matrix_t& matrix,
-                       FieldMatrix<ctype, mydim, mydim>& result) const
+                       Dune::FieldMatrix<ctype, mydim, mydim>& result) const
   {
     typedef typename matrix_t::size_type size_type;
     for(size_type i=0; i<mydim; ++i)
@@ -1192,7 +1273,7 @@ namespace Dune
   template <int cdim, int mydim>
   alu_inline void LinearMapping<cdim, mydim> ::
   multMatrix ( const matrix_t &A,
-               const FieldMatrix< ctype, mydim, mydim > &B,
+               const Dune::FieldMatrix< ctype, mydim, mydim > &B,
                inv_t& ret ) const
   {
     //! calculates ret = A * B
@@ -1214,14 +1295,14 @@ namespace Dune
   alu_inline void LinearMapping<3, 1> ::
   inverse(const map_t&) const
   {
-    FieldMatrix<ctype, 1, 1> AT_A_;
+    Dune::FieldMatrix<ctype, 1, 1> AT_A_;
 
     // calc ret = A^T*A
     multTransposedMatrix(_matrix, AT_A_ );
 
     // calc Jinv_ = A (A^T*A)^-1
-    FieldMatrix< ctype, 1, 1 > inv_AT_A;
-    FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
+    Dune::FieldMatrix< ctype, 1, 1 > inv_AT_A;
+    Dune::FMatrixHelp :: invertMatrix( AT_A_, inv_AT_A );
     multMatrix( _matrix, inv_AT_A, _invTransposed );
 
     // set flag

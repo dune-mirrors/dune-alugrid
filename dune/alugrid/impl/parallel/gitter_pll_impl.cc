@@ -7,8 +7,7 @@
 #include <sstream>
 
 #include "../serial/gatherscatter.hh"
-#include "../serial/mapp_cube_3d.h"
-#include "../serial/mapp_tetra_3d.h"
+#include "../serial/mappings.hh"
 
 #include "gitter_pll_ldb.h"
 #include "gitter_pll_impl.h"
@@ -1004,7 +1003,7 @@ namespace ALUGrid
   template < class A >
   void TetraPllXBaseMacro< A >::computeBaryCenter( alucoord_t (&center)[3] ) const
   {
-    LinearMapping::barycenter(
+    LinearMapping<3,3>::barycenter(
         mytetra ().myvertex (0)->Point (),
         mytetra ().myvertex (1)->Point (),
         mytetra ().myvertex (2)->Point (),

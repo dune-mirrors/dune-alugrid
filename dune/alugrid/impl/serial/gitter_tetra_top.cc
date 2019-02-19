@@ -1,7 +1,7 @@
 // (c) Robert Kloefkorn 2010
 #include <config.h>
 
-#include "mapp_tetra_3d.h"
+#include "mappings.hh"
 #include "gitter_tetra_top.h"
 #include "gitter_impl.h"
 
@@ -823,15 +823,10 @@ namespace ALUGrid
     this->_bndid = _up->bndId();
 
 #ifdef ALUGRIDDEBUG
-    // check that _volume has the correct value
-    const double calculatedVolume = computeVolume();
-    const double myvol = volume();
-
-    //In the 2d case the 3d volume may be 0, so do not divide by it
-    if(this->is2d())
-      alugrid_assert ( std::abs( calculatedVolume - myvol ) < 1e-10 );
-    else
-      alugrid_assert ( std::abs( calculatedVolume - myvol ) / myvol < 1e-10 );
+    //TODO  check that _volume has the correct value
+    //if( std::abs( calculatedVolume - _volume ) >1e-10 )
+    //  std::cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << std::endl;
+  //  alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
   }
 
