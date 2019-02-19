@@ -1182,6 +1182,7 @@ namespace Dune
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
+
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
     {
@@ -1319,11 +1320,11 @@ namespace Dune
           const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
           if( pos_gl != globalFaceMap.end() )
           {
-            const FaceIterator pos = faceMap.find( pos_gl->second );
+            FaceIterator pos = faceMap.find( pos_gl->second );
             if ( pos != faceMap.end() )
             {
               reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
-              faceMap.erase( pos );
+              pos = faceMap.erase( pos );
             }
             else
             {
