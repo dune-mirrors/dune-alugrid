@@ -531,16 +531,8 @@ namespace Dune
 
     numFacesInserted_ = boundaryIds_.size();
 
-    bool faceTrafoEmpty = faceTransformations_.empty();
-    if(comm().size() > 1)
-    {
-      //Communicate faceTransformations_
-      //This only works for Serial read-in on rank 0
-      int size = faceTransformations_.size();
-      comm().broadcast(&size, 1, 0);
-      if(size > 0)
-        faceTrafoEmpty = false;
-    }
+    const bool faceTrafoEmpty = comm().max( faceTransformations_.empty() );
+
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
     //guerantee beforehand to have the right 3d face orientation
@@ -859,7 +851,6 @@ namespace Dune
       // A 2d face type, as we want to work in 2d
       typedef std::array<unsigned int, 2>  Face2Type;
 
-      const int numFaces = (elementType == tetra) ? 3 : 4;
       //the nextIndex denotes the indices of the 2d element
       //inside the 3d element in circular order
       std::vector <unsigned int> nextIndex ({1,2,3});
@@ -888,7 +879,7 @@ namespace Dune
       ElementType &element = elements_[0];
       //choose orientation as given by first inserted element and
       //build oriented faces and add to list of active faces
-      for(int i = 0; i < numFaces ; ++i)
+      for(unsigned int i = 0; i < numFaces ; ++i)
       {
         Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%numFaces ] ]}};
         //this is the twist with respect to the global face orientation
@@ -1133,7 +1124,8 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos,
+    ::searchPeriodicNeighbor ( FaceMap &faceMap,
+                               typename FaceMap::iterator& pos,
                                const int defaultId )
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
@@ -1144,18 +1136,15 @@ namespace Dune
       FaceType key1;
       generateFace( pos->second, key1 );
 
-      const FaceMapIterator fend = faceMap.end();
-      for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
+      for( FaceMapIterator fit = faceMap.begin(); fit != faceMap.end(); ++fit )
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          if(elementType == hexa)
-            if(fit->second.second > 3)
+          if(elementType == hexa  && fit->second.second > 3)
               continue;
-          if(elementType == tetra)
-            if(fit->second.second > 2)
+          if(elementType == tetra && fit->second.second > 2)
               continue;
         }
         FaceType key2;
@@ -1167,8 +1156,8 @@ namespace Dune
           if( identifyFaces( *trit, key1, key2, defaultId) ||
               identifyFaces( *trit, key2, key1, defaultId) )
           {
-            faceMap.erase( fit );
-            faceMap.erase( pos );
+            fit = faceMap.erase( fit );
+            pos = faceMap.erase( pos );
             return;
           }
         }
@@ -1193,10 +1182,6 @@ namespace Dune
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
-    // list of face that should be removed
-    std::vector< FaceType > toBeDeletedFaces;
-    toBeDeletedFaces.reserve( faceMap.size() / 10 + 1);
-
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
     {
@@ -1206,9 +1191,10 @@ namespace Dune
         generateFace( elements_[ n ], face, key );
         std::sort( key.begin(), key.end() );
 
-        const FaceIterator pos = faceMap.find( key );
-        if( pos != faceMap.end() )
+        if( faceMap.find( key ) != faceMap.end() )
+        {
           faceMap.erase( key );
+        }
         else
         {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
@@ -1216,11 +1202,13 @@ namespace Dune
       }
     }
 
-
     // swap current boundary ids with an empty vector
     BoundaryIdMap boundaryIds;
     boundaryIds_.swap( boundaryIds );
     alugrid_assert ( boundaryIds_.size() == 0 );
+
+    // list of face that should be removed
+    std::set< FaceType > toBeDeletedFaces;
 
     // add all current boundary ids again (with their reordered keys)
     typedef typename BoundaryIdMap::iterator BoundaryIterator;
@@ -1229,7 +1217,7 @@ namespace Dune
     {
       FaceType key = bndIt->first;
       std::sort( key.begin(), key.end() );
-      const FaceIterator pos = faceMap.find( key );
+      FaceIterator pos = faceMap.find( key );
 
       if( pos == faceMap.end() )
       {
@@ -1237,7 +1225,7 @@ namespace Dune
       }
 
       reinsertBoundary( faceMap, pos, bndIt->second );
-      toBeDeletedFaces.push_back( key );
+      toBeDeletedFaces.insert( key );
     }
 
     //the search for the periodic neighbour also deletes the
@@ -1245,19 +1233,18 @@ namespace Dune
     //after the recreation of the Ids_, because of correctElementOrientation
     if( !faceTransformations_.empty() )
     {
-      for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+      for(auto it = faceMap.begin(); it != faceMap.end(); ++it)
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          if(elementType == hexa)
-            if(it->second.second > 3)
+          if(elementType == hexa  && it->second.second > 3)
               continue;
-          if(elementType == tetra)
-            if(it->second.second > 2)
+          if(elementType == tetra && it->second.second > 2)
               continue;
         }
+
         searchPeriodicNeighbor( faceMap, it, defaultId );
       }
     }

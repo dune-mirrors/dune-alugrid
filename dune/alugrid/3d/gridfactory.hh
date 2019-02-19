@@ -390,7 +390,7 @@ namespace Dune
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
     void correctElementOrientation ();
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
-    void searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos, const int defaultId  );
+    void searchPeriodicNeighbor ( FaceMap &faceMap, typename FaceMap::iterator &pos, const int defaultId  );
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
