@@ -91,7 +91,7 @@ namespace Dune {
 
     static BaseType* factory( BufferType& os )
     {
-      return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( os ), segment );
+      return new ThisType( DuneBoundaryProjectionType::restoreFromBuffer( os ).release(), segment );
     }
   };
 
