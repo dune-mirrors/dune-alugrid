@@ -482,16 +482,26 @@ void checkGrid( GridType& grid )
 template <class GridType>
 void checkForPeriodicBoundaries( GridType& grid )
 {
+  bool foundPeriodicBnd = false ;
   for (const auto& element : elements(grid.leafGridView()))
   {
     for (const auto& intersection : intersections(grid.leafGridView(), element))
     {
       if (intersection.neighbor() && intersection.boundary())
-        return;
+      {
+        foundPeriodicBnd = true ;
+      }
     }
   }
 
-  DUNE_THROW( Dune::InvalidStateException, "No periodic boundaries found!" );
+  // check if some process has found periodic bnds
+  // due to load balancing issues periodic bnds
+  // might only end up on one core
+  foundPeriodicBnd = grid.comm().max( foundPeriodicBnd );
+  if( ! foundPeriodicBnd )
+  {
+    DUNE_THROW( Dune::InvalidStateException, "No periodic boundaries found!" );
+  }
 }
 
 template <class GridType>
