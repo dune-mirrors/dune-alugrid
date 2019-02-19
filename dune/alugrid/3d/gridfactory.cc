@@ -948,7 +948,7 @@ namespace Dune
                 break;
 
               //build the faces of outerElement with twists
-              for (int f = 0 ; f< numFaces ; ++f)
+              for (unsigned int f = 0 ; f< numFaces ; ++f)
               {
                 Face2Type face =  {{ outerElement[ nextIndex[ f%numFaces ] ],outerElement[nextIndex[(f+1)%numFaces]] }} ;
                 int twist = face[0] < face[1] ? 0 : -1;
