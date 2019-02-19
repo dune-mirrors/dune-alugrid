@@ -850,6 +850,8 @@ namespace Dune
     {
       // A 2d face type, as we want to work in 2d
       typedef std::array<unsigned int, 2>  Face2Type;
+      // this is different from numFaces which could be 2d only
+      const int num3dFaces = (elementType == tetra) ? 3 : 4;
 
       //the nextIndex denotes the indices of the 2d element
       //inside the 3d element in circular order
@@ -875,13 +877,14 @@ namespace Dune
       //The Faces already worked on
       std::set< Face2Type > doneFaces;
 
+
       //get first element
       ElementType &element = elements_[0];
       //choose orientation as given by first inserted element and
       //build oriented faces and add to list of active faces
-      for(unsigned int i = 0; i < numFaces ; ++i)
+      for(int i = 0; i < num3dFaces ; ++i)
       {
-        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%numFaces ] ]}};
+        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%num3dFaces ] ]}};
         //this is the twist with respect to the global face orientation
         // we need it once from each side
         int twist = face[0] < face[1] ? 0 : -1;
@@ -922,7 +925,7 @@ namespace Dune
           {
             if (outerElement[nextIndex[i]] == currentFace[0])
             {
-              if( outerElement[ nextIndex[(i+1)%numFaces] ] == currentFace[1]  )
+              if( outerElement[ nextIndex[(i+1)%num3dFaces] ] == currentFace[1]  )
               {
                 if(twist == 0)
                 {
@@ -933,7 +936,7 @@ namespace Dune
                 }
                 found =true;
               }
-              else if(outerElement[nextIndex[(i-1+numFaces)%numFaces]] == currentFace[1] )
+              else if(outerElement[nextIndex[(i-1+num3dFaces)%num3dFaces]] == currentFace[1] )
               {
                 if(twist < 0)
                 {
@@ -948,9 +951,9 @@ namespace Dune
                 break;
 
               //build the faces of outerElement with twists
-              for (unsigned int f = 0 ; f< numFaces ; ++f)
+              for (int f = 0 ; f< num3dFaces ; ++f)
               {
-                Face2Type face =  {{ outerElement[ nextIndex[ f%numFaces ] ],outerElement[nextIndex[(f+1)%numFaces]] }} ;
+                Face2Type face =  {{ outerElement[ nextIndex[ f%num3dFaces ] ],outerElement[nextIndex[(f+1)%num3dFaces]] }} ;
                 int twist = face[0] < face[1] ? 0 : -1;
                 std::sort(face.begin(),face.end());
                 if(face == currentFace) continue;
