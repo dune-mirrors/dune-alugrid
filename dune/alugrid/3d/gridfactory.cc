@@ -1129,7 +1129,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::searchPeriodicNeighbor ( FaceMap &faceMap, const typename FaceMap::iterator &pos,
+    ::searchPeriodicNeighbor ( FaceMap &faceMap, typename FaceMap::iterator &pos,
                                const int defaultId )
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
@@ -1140,18 +1140,15 @@ namespace Dune
       FaceType key1;
       generateFace( pos->second, key1 );
 
-      const FaceMapIterator fend = faceMap.end();
-      for( FaceMapIterator fit = faceMap.begin(); fit != fend; ++fit )
+      for( FaceMapIterator fit = faceMap.begin(); fit != faceMap.end(); ++fit )
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          if(elementType == hexa)
-            if(fit->second.second > 3)
+          if(elementType == hexa  && fit->second.second > 3)
               continue;
-          if(elementType == tetra)
-            if(fit->second.second > 2)
+          if(elementType == tetra && fit->second.second > 2)
               continue;
         }
         FaceType key2;
@@ -1163,8 +1160,8 @@ namespace Dune
           if( identifyFaces( *trit, key1, key2, defaultId) ||
               identifyFaces( *trit, key2, key1, defaultId) )
           {
-            faceMap.erase( fit );
-            faceMap.erase( pos );
+            fit = faceMap.erase( fit );
+            pos = faceMap.erase( pos );
             return;
           }
         }
@@ -1189,9 +1186,6 @@ namespace Dune
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
-    // list of face that should be removed
-    std::vector< FaceType > toBeDeletedFaces;
-    toBeDeletedFaces.reserve( faceMap.size() / 10 + 1);
 
     const unsigned int numElements = elements_.size();
     for( unsigned int n = 0; n < numElements; ++n )
@@ -1218,6 +1212,9 @@ namespace Dune
     boundaryIds_.swap( boundaryIds );
     alugrid_assert ( boundaryIds_.size() == 0 );
 
+    // list of face that should be removed
+    std::set< FaceType > toBeDeletedFaces;
+
     // add all current boundary ids again (with their reordered keys)
     typedef typename BoundaryIdMap::iterator BoundaryIterator;
     const BoundaryIterator bndEnd = boundaryIds.end();
@@ -1233,7 +1230,7 @@ namespace Dune
       }
 
       reinsertBoundary( faceMap, pos, bndIt->second );
-      toBeDeletedFaces.push_back( key );
+      toBeDeletedFaces.insert( key );
     }
 
     //the search for the periodic neighbour also deletes the
@@ -1247,11 +1244,9 @@ namespace Dune
         // the artificially introduced faces
         if(dimension == 2)
         {
-          if(elementType == hexa)
-            if(it->second.second > 3)
+          if(elementType == hexa  && it->second.second > 3)
               continue;
-          if(elementType == tetra)
-            if(it->second.second > 2)
+          if(elementType == tetra && it->second.second > 2)
               continue;
         }
         searchPeriodicNeighbor( faceMap, it, defaultId );
@@ -1328,11 +1323,11 @@ namespace Dune
           const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
           if( pos_gl != globalFaceMap.end() )
           {
-            const FaceIterator pos = faceMap.find( pos_gl->second );
+            FaceIterator pos = faceMap.find( pos_gl->second );
             if ( pos != faceMap.end() )
             {
               reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
-              faceMap.erase( pos );
+              pos = faceMap.erase( pos );
             }
             else
             {
