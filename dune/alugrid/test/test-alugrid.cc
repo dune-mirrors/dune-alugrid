@@ -633,7 +633,7 @@ int main (int argc , char **argv) {
     }
     else
     {
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube>" << std::endl;
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube|3dperiodic>" << std::endl;
     }
 
     const char *newfilename = 0;
@@ -659,11 +659,13 @@ int main (int argc , char **argv) {
     bool testALU3dSimplex = initialize ;
     bool testALU3dConform = initialize ;
     bool testALU3dCube    = initialize ;
+    bool testALU3dPeriodic    = initialize ;
     if( key == "3d" )
     {
       testALU3dSimplex = true ;
       testALU3dConform = true ;
       testALU3dCube    = true ;
+      testALU3dPeriodic = true ;
     }
     if( key == "3dnonc" )
     {
@@ -673,6 +675,7 @@ int main (int argc , char **argv) {
     if( key == "3dsimp" ) testALU3dSimplex = true ;
     if( key == "3dconf" ) testALU3dConform = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
+    if( key == "3dperiodic" ) testALU3dPeriodic    = true ;
 #endif // #ifndef NO_3D
 
     // extra-environment to check destruction
@@ -907,20 +910,26 @@ int main (int argc , char **argv) {
             checkALUParallel(grid,0,2);
           }
         }
+      }
 
+      if( testALU3dPeriodic )
+      {
         // check periodic capabilities
-        {
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
           filename = "./dgf/periodic.dgf";
-          Dune::GridPtr< GridType > gridPtr( filename );
-          gridPtr.loadBalance();
-          GridType & grid = *gridPtr;
+        typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
+        Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
+        GridType & grid = *gridPtr;
 
-          {
-            std::cout << "Check periodic grid" << std::endl;
-            checkALUSerial(grid,
-                           (mysize == 1) ? 1 : 0 );
-            checkForPeriodicBoundaries( grid );
-          }
+        {
+          std::cout << "Check periodic grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+          checkForPeriodicBoundaries( grid );
         }
       }
 
