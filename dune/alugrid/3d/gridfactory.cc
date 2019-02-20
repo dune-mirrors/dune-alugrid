@@ -531,7 +531,7 @@ namespace Dune
 
     numFacesInserted_ = boundaryIds_.size();
 
-    const bool faceTrafoEmpty = comm().max( faceTransformations_.empty() );
+    const bool faceTrafoEmpty = bool(comm().min( int(faceTransformations_.empty()) ));
 
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
@@ -1117,7 +1117,6 @@ namespace Dune
 
     BndPair bnd0 ( key0, bndId[ 0 ] );
     BndPair bnd1 ( key1, bndId[ 1 ] );
-
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
     return true;
@@ -1248,7 +1247,6 @@ namespace Dune
           if(elementType == tetra && it->second.second > 2)
               continue;
         }
-
         searchPeriodicNeighbor( faceMap, it, defaultId );
       }
     }
