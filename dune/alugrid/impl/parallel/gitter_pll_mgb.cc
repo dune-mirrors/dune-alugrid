@@ -1017,7 +1017,7 @@ namespace ALUGrid
     void pack( const int link, ObjectStream& os )
     {
       std::cerr << "ERROR: UnpackLBData::pack should not be called!" << std::endl;
-      abort();
+      std::abort();
     }
 
     // work that can be done between send and receive,
@@ -1059,6 +1059,22 @@ namespace ALUGrid
     // in case gatherScatter is given check for overloaded partitioning
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
 
+    bool periodicBoundariesPresent = false ;
+    {
+      // check whether periodic elements are present
+      AccessIterator < hperiodic_STI >::Handle w (containerPll ());
+      // if periodic boundaries are present then only some
+      // partitioning methods do work
+      w.first ();
+      if( ! w.done() )
+      {
+        // remove precomputed graph sizes since that was changed during the
+        // manual set of destinations for periodic elements
+        db.clearGraphSizesVector();
+        periodicBoundariesPresent = true;
+      }
+    }
+
     // default partitioning method
     // for user defined paritioning gatherScatter.partitioning() was called in gitter_pll_sti.cc before
     // calling this method and returned true - that method should thus already have compute the
@@ -1068,7 +1084,7 @@ namespace ALUGrid
       db.repartition (mpa, LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
 
     // get graph sizes from data base, this is only used for the serial partitioners
-    if( ! userDefinedPartitioning )
+    if( ! userDefinedPartitioning && ! periodicBoundariesPresent )
     {
       _graphSizes = db.graphSizes();
     }
@@ -1148,7 +1164,16 @@ namespace ALUGrid
         {
           // iterate over all periodic elements and set 'to' of first neighbour
           AccessIterator < hperiodic_STI >::Handle w (containerPll ());
-          for (w.first (); ! w.done (); w.next ())
+          // if periodic boundaries are present then only some
+          // partitioning methods do work
+          w.first ();
+          if( ! w.done() && ! db.methodConsitentWithPeriodicBnd( _ldbMethod ) )
+          {
+            std::cerr << "ERROR: Partitioning method " << _ldbMethod << " does not work with periodic boundaries! Select a different method!" << std::endl;
+            std::abort();
+          }
+
+          for (; ! w.done (); w.next ())
           {
             // get both ldbVertices from the elements of a periodic closure
             std::pair< int, int > ldbVx = w.item().insideLdbVertexIndex();
