@@ -1068,6 +1068,12 @@ namespace ALUGrid
       w.first ();
       if( ! w.done() )
       {
+        if( ! db.methodConsitentWithPeriodicBnd( _ldbMethod ) )
+        {
+          std::cerr << "ERROR: Partitioning method " << _ldbMethod << " does not work with periodic boundaries! Select a different method!" << std::endl;
+          std::abort();
+        }
+
         // remove precomputed graph sizes since that was changed during the
         // manual set of destinations for periodic elements
         db.clearGraphSizesVector();
@@ -1164,16 +1170,7 @@ namespace ALUGrid
         {
           // iterate over all periodic elements and set 'to' of first neighbour
           AccessIterator < hperiodic_STI >::Handle w (containerPll ());
-          // if periodic boundaries are present then only some
-          // partitioning methods do work
-          w.first ();
-          if( ! w.done() && ! db.methodConsitentWithPeriodicBnd( _ldbMethod ) )
-          {
-            std::cerr << "ERROR: Partitioning method " << _ldbMethod << " does not work with periodic boundaries! Select a different method!" << std::endl;
-            std::abort();
-          }
-
-          for (; ! w.done (); w.next ())
+          for (w.first (); ! w.done (); w.next ())
           {
             // get both ldbVertices from the elements of a periodic closure
             std::pair< int, int > ldbVx = w.item().insideLdbVertexIndex();
