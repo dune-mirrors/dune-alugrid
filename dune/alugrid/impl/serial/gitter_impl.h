@@ -247,7 +247,8 @@ namespace ALUGrid
         ~Periodic3Empty () {}
         // do nothing here
         virtual void resetGhostIndices() {}
-
+        // return MPI rank of master which is always the same as myrank
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
       public:
     };
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL;
@@ -322,6 +323,8 @@ namespace ALUGrid
         // so nothing here
         virtual void resetGhostIndices() {}
 
+        // return MPI rank of master which is always the same as myrank
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
       public:
       };
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL;

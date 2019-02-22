@@ -1394,7 +1394,7 @@ namespace ALUGrid
       // return the ldbVertexIndex of the first element (inside)
       virtual std::pair<int,int> insideLdbVertexIndex() const
       {
-        abort();
+        std::abort();
         return std::pair<int,int> (-1,-1);
       }
 
