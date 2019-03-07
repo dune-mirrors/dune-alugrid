@@ -61,31 +61,6 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  void
-  ALU3dGrid< dim, dimworld, elType, Comm >::makeGeometries()
-  {
-    // instantiate the static memory pool by creating an object
-    ALU3dGridGeometry< 0,   dimworld, const ThisType >();
-    ALU3dGridGeometry< 1,   dimworld, const ThisType >();
-    ALU3dGridGeometry< 2,   dimworld, const ThisType >();
-    ALU3dGridGeometry< dim, dimworld, const ThisType >();
-
-    alugrid_assert ( elType == tetra || elType == hexa );
-
-    geomTypes_.clear();
-    geomTypes_.resize( dimension+1 );
-
-    geomTypes_[ 0 ].push_back( ALU3dGridGeometry< dim,   dimworld, const ThisType >().type() );
-    geomTypes_[ 1 ].push_back( ALU3dGridGeometry< dim-1, dimworld, const ThisType >().type() );
-    geomTypes_[ 2 ].push_back( ALU3dGridGeometry< dim-2, dimworld, const ThisType >().type() );
-
-    if( dimension == 3 )
-    {
-      geomTypes_[ 3 ].push_back( ALU3dGridGeometry< 0, dimworld, const ThisType >().type() );
-    }
-  }
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   inline int ALU3dGrid< dim, dimworld, elType, Comm >::global_size ( int codim ) const
   {
     // return actual size of hierarchical index set
@@ -386,58 +361,6 @@ namespace Dune
     }
 
     return refined;
-  }
-
-
-
-  // load balance grid ( lbData might be a pointer to NULL )
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  inline bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
-  {
-    if( comm().size() <= 1 )
-        return false;
-
-    // call load Balance
-    const bool changed = myGrid().loadBalance( lbData );
-
-    if( changed )
-    {
-      // reset boundary segment index
-      macroBoundarySegmentIndexSet_.invalidate();
-
-      // reset size and things
-      // maxLevel does not need to be recalculated
-      calcExtras();
-
-
-      // build new Id Set. Only do that after calcExtras, because here
-      // the item lists are needed
-      if( globalIdSet_ )
-        globalIdSet_->updateIdSet();
-
-      // compress data if lbData is valid and has user data
-      if( lbData && lbData->hasUserData() )
-        lbData->compress() ;
-      else // this only needs to be done if no user is present
-        clearIsNewMarkers();
-    }
-    return changed;
-  }
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  inline void ALU3dGrid< dim, dimworld, elType, Comm >::finalizeGridCreation()
-  {
-    // distribute the grid
-    loadBalance();
-
-    // free memory by reinitializing the grid
-    mygrid_.reset( GitterImplType :: compress( mygrid_.release() ) );
-
-    // update all internal structures
-    updateStatus();
-
-    // call post adapt
-    clearIsNewMarkers();
   }
 
 

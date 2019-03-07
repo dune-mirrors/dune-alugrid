@@ -39,6 +39,8 @@
 /* Define to the revision of dune-alugrid*/
 #define DUNE_ALUGRID_VERSION_REVISION ${DUNE_ALUGRID_VERSION_REVISION}
 
+/* Define to build more .cc into library */
+#cmakedefine DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB 1
 
 /* Define if we have dlmalloc */
 #cmakedefine HAVE_DLMALLOC 1

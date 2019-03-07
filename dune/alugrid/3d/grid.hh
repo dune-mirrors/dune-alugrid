@@ -403,10 +403,10 @@ namespace Dune
       typedef typename Partition< All_Partition > :: LevelGridView   LevelGridView;
 
       //! Type of the level index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
+      typedef DefaultIndexSet< Grid, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
 
       //! Type of the leaf index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp;
+      typedef DefaultIndexSet< Grid, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp;
 
       typedef IndexSet< Grid, LevelIndexSetImp > LevelIndexSet;
       typedef IndexSet< Grid, LeafIndexSetImp > LeafIndexSet;
@@ -852,38 +852,16 @@ namespace Dune
     const typename Traits :: LeafIndexSet & leafIndexSet () const;
 
     //! get level index set of the grid
-    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      if( ! levelIndexVec_[ level ] )
-      {
-        levelIndexVec_[ level ] = createLevelIndexSet( level );
-      }
-      return (*levelIndexVec_[ level ]);
-    }
+    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
 
     /** \brief return instance of level index set
         \note if index set for this level has not been created then this
         instance will be deleted once the shared_ptr goes out of scope.
     */
-    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      if( levelIndexVec_[ level ] )
-      {
-        return levelIndexVec_[ level ];
-      }
-      else
-      {
-        return createLevelIndexSet( level );
-      }
-    }
+    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const;
 
   protected:
-    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const
-    {
-      return std::shared_ptr< LevelIndexSetImp > (new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level ) );
-    }
+    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const;
 
   public:
     template< int cd >
@@ -1437,7 +1415,7 @@ namespace Dune
 } // end namespace Dune
 
 #include "grid_inline.hh"
-#if COMPILE_ALUGRID_INLINE
+//#if COMPILE_ALUGRID_INLINE
   #include "grid_imp.cc"
-#endif
+//#endif
 #endif

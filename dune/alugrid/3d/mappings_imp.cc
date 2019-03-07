@@ -1303,7 +1303,11 @@ namespace Dune {
     return _invTransposed;
   }
 
-#if COMPILE_ALUGRID_LIB
+#if ! COMPILE_ALUGRID_INLINE
+  namespace {
+    typedef const alu3d_ctype* dummyFunction( void );
+  }
+
   // Instantiation
   class TrilinearMapping ;
   template void TrilinearMapping::buildMapping< TrilinearMapping::coord_t >
@@ -1315,15 +1319,15 @@ namespace Dune {
      const TrilinearMapping::coord_t& ,
      const TrilinearMapping::coord_t& ,
      const TrilinearMapping::coord_t& );
-  template void TrilinearMapping::buildMapping< TrilinearMapping::double_t >
-    (const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& ,
-     const TrilinearMapping::double_t& );
+  template void TrilinearMapping::buildMapping< alu3d_ctype const* >
+    (alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const&,
+     alu3d_ctype const* const& );
 
   class SurfaceNormalCalculator ;
 
@@ -1359,63 +1363,63 @@ namespace Dune {
       const LinearMapping<3, 3>::world_t&,
       const LinearMapping<3, 3>::world_t&,
       const LinearMapping<3, 3>::world_t& );
-  template void LinearMapping<3, 3>::buildMapping< LinearMapping<3, 3>::double_t >
-    ( const LinearMapping<3, 3>::double_t&,
-      const LinearMapping<3, 3>::double_t&,
-      const LinearMapping<3, 3>::double_t&,
-      const LinearMapping<3, 3>::double_t& );
+  template void LinearMapping<3, 3>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const&,
+      alu3d_ctype const* const&,
+      alu3d_ctype const* const&,
+      alu3d_ctype const* const& );
 
   template class LinearMapping<3, 2> ;
   template void LinearMapping<3, 2>::buildMapping< LinearMapping<3, 2>::world_t >
     ( const LinearMapping<3, 2>::world_t&,
       const LinearMapping<3, 2>::world_t&,
       const LinearMapping<3, 2>::world_t&);
-  template void LinearMapping<3, 2>::buildMapping< LinearMapping<3, 2>::double_t >
-    ( const LinearMapping<3, 2>::double_t&,
-      const LinearMapping<3, 2>::double_t&,
-      const LinearMapping<3, 2>::double_t&);
+  template void LinearMapping<3, 2>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const&,
+      alu3d_ctype const* const&,
+      alu3d_ctype const* const& );
 
   template class LinearMapping<2, 2> ;
   template void LinearMapping<2, 2>::buildMapping< LinearMapping<2, 2>::world_t >
     ( const LinearMapping<2, 2>::world_t&,
       const LinearMapping<2, 2>::world_t&,
       const LinearMapping<2, 2>::world_t&);
-  template void LinearMapping<2, 2>::buildMapping< LinearMapping<2, 2>::double_t >
-    ( const LinearMapping<2, 2>::double_t&,
-      const LinearMapping<2, 2>::double_t&,
-      const LinearMapping<2, 2>::double_t&);
+  template void LinearMapping<2, 2>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const&,
+      alu3d_ctype const* const&,
+      alu3d_ctype const* const& );
 
   template class LinearMapping<3, 1> ;
   template void LinearMapping<3, 1>::buildMapping< LinearMapping<3, 1>::world_t >
     ( const LinearMapping<3, 1>::world_t&,
       const LinearMapping<3, 1>::world_t& );
-  template void LinearMapping<3, 1>::buildMapping< LinearMapping<3, 1>::double_t >
-    ( const LinearMapping<3, 1>::double_t&,
-      const LinearMapping<3, 1>::double_t& );
+  template void LinearMapping<3, 1>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const&,
+      alu3d_ctype const* const& );
 
   template class LinearMapping<2, 1> ;
   template void LinearMapping<2, 1>::buildMapping< LinearMapping<2, 1>::world_t >
     ( const LinearMapping<2, 1>::world_t&,
       const LinearMapping<2, 1>::world_t& );
-  template void LinearMapping<2, 1>::buildMapping< LinearMapping<2, 1>::double_t >
-    ( const LinearMapping<2, 1>::double_t&,
-      const LinearMapping<2, 1>::double_t& );
+  template void LinearMapping<2, 1>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const&,
+      alu3d_ctype const* const& );
   /// wtf?
   template void LinearMapping<2, 1>::buildMapping< LinearMapping<3, 1>::world_t >
     ( const LinearMapping<3, 1>::world_t&,
       const LinearMapping<3, 1>::world_t& );
 
   template class LinearMapping<3, 0> ;
-  template void LinearMapping<3, 0>::buildMapping< LinearMapping<3, 0>::double_t >
-    ( const LinearMapping<3, 0>::double_t& );
   template void LinearMapping<3, 0>::buildMapping< LinearMapping<3, 0>::world_t >
     ( const LinearMapping<3, 0>::world_t& );
+  template void LinearMapping<3, 0>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const& );
 
   template class LinearMapping<2, 0> ;
   template void LinearMapping<2, 0>::buildMapping< LinearMapping<2, 0>::world_t >
     ( const LinearMapping<2, 0>::world_t& );
-  template void LinearMapping<2, 0>::buildMapping< LinearMapping<2, 0>::double_t >
-    ( const LinearMapping<2, 0>::double_t& );
+  template void LinearMapping<2, 0>::buildMapping< alu3d_ctype const* >
+    ( alu3d_ctype const* const& );
 
   template class BilinearMapping< 2 > ;
   template void BilinearMapping< 2 >::buildMapping< BilinearMapping< 2 >::world_t >
@@ -1430,7 +1434,7 @@ namespace Dune {
       const BilinearMapping< 3 >::world_t&,
       const BilinearMapping< 3 >::world_t&,
       const BilinearMapping< 3 >::world_t& );
-#endif
+#endif // ! COMPILE_ALUGRID_INLINE
 
 } // end namespace Dune
 #endif // end DUNE_ALUGRID_MAPPINGS_IMP_CC

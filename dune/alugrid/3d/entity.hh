@@ -11,6 +11,7 @@
 
 // Local includes
 #include "alu3dinclude.hh"
+#include "indexsets.hh"
 #include "iterator.hh"
 #include "entityseed.hh"
 
@@ -691,5 +692,4 @@ protected:
 #if COMPILE_ALUGRID_INLINE
   #include "entity_imp.cc"
 #endif
-
 #endif

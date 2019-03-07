@@ -706,7 +706,7 @@ namespace Dune
     const JacobianTransposed& jacobianTransposed (const LocalCoordinate& local) const;
 
     //! returns true if mapping is affine
-    inline bool affine () const;
+    bool affine () const;
 
     //! returns volume of geometry
     ctype volume () const;
@@ -742,8 +742,8 @@ namespace Dune
                    const coord_t& p1);
 
     //! build geometry of local coordinates relative to father
-    template <class GeometryType>
-    bool buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom);
+    template <class Geometry>
+    bool buildGeomInFather(const Geometry &fatherGeom , const Geometry &myGeom);
 
     //! print internal data
     //! no interface method

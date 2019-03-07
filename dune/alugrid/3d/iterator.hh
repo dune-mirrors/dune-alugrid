@@ -231,8 +231,7 @@ protected:
                        const BNDFaceType& bnd, int wLevel);
 
   // reset IntersectionIterator to first neighbour
-  template <class EntityType>
-  void first(const EntityType & en, int wLevel, const GridImp& grid );
+  void first(const EntityImp& en, int wLevel, const GridImp& grid );
 
   // set new face
   void setNewFace(const GEOFaceType& newFace);
@@ -327,6 +326,8 @@ public ALU3dGridIntersectionIterator<GridImp>
   typedef ALU3dGridIntersectionIterator<GridImp>      BaseType;
   typedef ALU3dGridLevelIntersectionIterator<GridImp> ThisType;
 
+  typedef typename BaseType :: EntityImp  EntityImp;
+
   friend class ALU3dGridEntity<0,dim,GridImp>;
   friend class IntersectionIteratorWrapper<GridImp,ThisType>;
 protected:
@@ -356,8 +357,7 @@ public:
   void increment ();
 
   // reset IntersectionIterator to first neighbour
-  template <class EntityType>
-  void first(const EntityType & en, int wLevel, const GridImp& grid );
+  void first(const EntityImp& en, int wLevel, const GridImp& grid );
 
   //! return true if across the edge an neighbor on this level exists
   bool neighbor () const;
@@ -550,7 +550,9 @@ private:
 template<int cd, PartitionIteratorType pitype, class GridImp>
 class ALU3dGridLevelIterator
 : public ALU3dGridEntityPointer< cd, GridImp >,
-  public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, typename GridImp::MPICommunicatorType > >
+  public ALU3dGridTreeIterator<typename ALU3DSPACE IteratorSTI<
+        typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, typename GridImp::MPICommunicatorType >::val_t > >
+  //ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, typename GridImp::MPICommunicatorType > >
 {
   enum { dim       = GridImp::dimension };
   enum { dimworld  = GridImp::dimensionworld };
@@ -563,7 +565,11 @@ class ALU3dGridLevelIterator
   friend class ALU3dGridEntity<0,dim,GridImp>;
   friend class ALU3dGrid< dim, dimworld, GridImp::elementType, Comm >;
 
-  friend class ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > >;
+  friend class ALU3dGridTreeIterator<
+    typename ALU3DSPACE IteratorSTI<
+        typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, typename GridImp::MPICommunicatorType >::val_t >
+    //ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm >
+    >;
   typedef ALU3dGridEntityPointer< cd, GridImp > BaseType;
 
 public:
@@ -573,9 +579,11 @@ public:
   //! typedef of my type
   typedef ALU3dGridLevelIterator<cd,pitype,GridImp> ThisType;
   // the wrapper for the original iterator of the ALU3dGrid
-  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > IteratorType;
-  typedef IteratorType InternalIteratorType;
+  //typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, pitype, Comm > IteratorType;
+
   typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cd == 2) ? 3 : cd, Comm >::val_t val_t;
+  typedef typename ALU3DSPACE IteratorSTI< val_t > IteratorType ;
+  typedef IteratorType InternalIteratorType;
 
   /** \brief default constructor */
   ALU3dGridLevelIterator () : grid_( nullptr ), iter_(), level_( 0 ) {}
@@ -635,7 +643,8 @@ private:
 template<int cdim, PartitionIteratorType pitype, class GridImp>
 class ALU3dGridLeafIterator
 : public ALU3dGridEntityPointer< cdim, GridImp >,
-  public ALU3dGridTreeIterator< ALU3DSPACE ALU3dGridLeafIteratorWrapper< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, pitype, typename GridImp::MPICommunicatorType > >
+  public ALU3dGridTreeIterator<typename ALU3DSPACE IteratorSTI<
+        typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, typename GridImp::MPICommunicatorType >::val_t > >
 {
   enum { dim = GridImp :: dimension };
 
@@ -649,11 +658,11 @@ class ALU3dGridLeafIterator
 public:
   typedef typename GridImp::template Codim<cdim>::Entity Entity;
 
-  typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, pitype, Comm > IteratorType ;
+  typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, Comm >::val_t val_t;
+  typedef typename ALU3DSPACE IteratorSTI< val_t > IteratorType ;
   friend class ALU3dGridTreeIterator< IteratorType > ;
 
   typedef IteratorType InternalIteratorType;
-  typedef typename ALU3DSPACE IteratorElType< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, Comm >::val_t val_t;
 
   typedef ALU3dGridLeafIterator<cdim, pitype, GridImp> ThisType;
 
@@ -827,6 +836,7 @@ private:
 
 } // end namespace Dune
 
-#include "iterator_imp.cc"
-
+#if COMPILE_ALUGRID_INLINE
+  #include "iterator.cc"
 #endif
+#endif // header guard

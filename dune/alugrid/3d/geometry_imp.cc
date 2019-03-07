@@ -1,17 +1,21 @@
 #ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
+//#if COMPILE_ALUGRID_INLINE
+//#define COMPILE_INTO_ALUGRID_LIB 0
+//#endif
+//#define COMPILE_INTO_ALUGRID_LIB 1
+
 #include "grid.hh"
 #include "mappings.hh"
 #include "geometry.hh"
 #include <dune/alugrid/common/twists.hh>
 
-
 namespace Dune {
 // --Geometry
 
 template< int mydim, int cdim, class GridImp>
-inline GeometryType
+alu_inline GeometryType
 ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
 {
   return GeometryType( (elementType == tetra) ?
@@ -21,14 +25,14 @@ ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline int
+alu_inline int
 ALU3dGridGeometry<mydim, cdim, GridImp >::corners() const
 {
   return corners_;
 }
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
+alu_inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 corner (int i) const
 {
@@ -37,7 +41,7 @@ corner (int i) const
 
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
+alu_inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::GlobalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 global (const LocalCoordinate& local) const
 {
@@ -47,7 +51,7 @@ global (const LocalCoordinate& local) const
 }
 
 template< int mydim, int cdim, class GridImp >
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::LocalCoordinate
+alu_inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::LocalCoordinate
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 local (const GlobalCoordinate& global) const
 {
@@ -57,7 +61,7 @@ local (const GlobalCoordinate& global) const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
+alu_inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 integrationElement (const LocalCoordinate& local) const
 {
@@ -72,7 +76,7 @@ integrationElement (const LocalCoordinate& local) const
 }
 
 template<int mydim, int cdim, class GridImp>
-inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
+alu_inline typename ALU3dGridGeometry<mydim, cdim, GridImp >::ctype
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 volume () const
 {
@@ -95,7 +99,7 @@ volume () const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 affine() const
 {
@@ -103,7 +107,7 @@ affine() const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianInverseTransposed&
+alu_inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianInverseTransposed&
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 jacobianInverseTransposed (const LocalCoordinate& local) const
 {
@@ -111,7 +115,7 @@ jacobianInverseTransposed (const LocalCoordinate& local) const
 }
 
 template< int mydim, int cdim, class GridImp>
-inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianTransposed&
+alu_inline const typename ALU3dGridGeometry<mydim, cdim, GridImp >::JacobianTransposed&
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 jacobianTransposed (const LocalCoordinate& local) const
 {
@@ -119,7 +123,7 @@ jacobianTransposed (const LocalCoordinate& local) const
 }
 
 template <int mydim, int cdim, class GridImp>
-inline void
+alu_inline void
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 print (std::ostream& ss) const
 {
@@ -135,10 +139,10 @@ print (std::ostream& ss) const
 
 // built Geometry
 template <int mydim, int cdim, class GridImp>
-template <class GeometryType>
-inline bool
+template <class Geometry>
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
+buildGeomInFather(const Geometry &fatherGeom, const Geometry &myGeom)
 {
   // update geo impl
   geoImpl().updateInFather( fatherGeom, myGeom );
@@ -162,7 +166,7 @@ buildGeomInFather(const GeometryType &fatherGeom , const GeometryType & myGeom)
 
 //--hexaBuildGeom
 template <int mydim, int cdim, class GridImp>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const IMPLElementType& item)
 {
@@ -239,7 +243,7 @@ buildGeom(const IMPLElementType& item)
 
 // buildFaceGeom
 template <int mydim, int cdim, class GridImp>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HFaceType & item, int t)
 {
@@ -296,7 +300,7 @@ buildGeom(const HFaceType & item, int t)
 // --buildFaceGeom
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const coord_t& p0,
           const coord_t& p1,
@@ -311,7 +315,7 @@ buildGeom(const coord_t& p0,
 // --buildFaceGeom
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const coord_t& p0,
           const coord_t& p1,
@@ -326,7 +330,7 @@ buildGeom(const coord_t& p0,
 // --buildFaceGeom for edges
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const coord_t& p0,
           const coord_t& p1)
@@ -339,7 +343,7 @@ buildGeom(const coord_t& p0,
 
 
 template <int mydim, int cdim, class GridImp> // for faces
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const FaceCoordinatesType& coords)
 {
@@ -358,10 +362,11 @@ buildGeom(const FaceCoordinatesType& coords)
     else if ( mydim == 1 )
       return buildGeom( coords[0], coords[1] );
   }
+  return false;
 }
 
 template <int mydim, int cdim, class GridImp> // for edges
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const HEdgeType & item, int twist)
 {
@@ -390,7 +395,7 @@ buildGeom(const HEdgeType & item, int twist)
 }
 
 template <int mydim, int cdim, class GridImp> // for Vertices ,i.e. Points
-inline bool
+alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
 buildGeom(const VertexType & item, int twist)
 {
@@ -398,6 +403,78 @@ buildGeom(const VertexType & item, int twist)
   geoImpl().update( static_cast<const GEOVertexType &> (item).Point() );
   return true;
 }
+
+
+#if COMPILE_INTO_ALUGRID_LIB
+  // Instantiation - 2-2
+  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+
+
+  // Instantiation with MPI
+  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+
+  // Instantiation -2-3
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+
+  // Instantiation with MPI
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+
+
+  // Instantiation  -3-3
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+
+  // Instantiation with MPI
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+
+#endif // COMPILE_INTO_ALUGRID_LIB
 
 } // end namespace Dune
 #endif // end DUNE_ALUGRID_GEOMETRY_IMP_CC
