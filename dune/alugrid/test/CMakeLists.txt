@@ -19,7 +19,7 @@ foreach(TEST ${TESTS})
 endforeach()
 
 # the extra tests are only enabled in torture mode
-if(TORTURE_TESTS)
+if(ALUGRID_TORTURE_TESTS)
   foreach(TEST ${EXTRA_TESTS})
     dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
   endforeach()
