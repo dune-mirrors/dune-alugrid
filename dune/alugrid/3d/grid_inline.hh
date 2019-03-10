@@ -150,7 +150,6 @@ namespace Dune
   inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
   ALU3dGrid< dim, dimworld, elType, Comm >::leafbegin () const
   {
-    alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator< cd, pitype, const ThisType >( *this, maxlevel_, true );
   }
 
@@ -174,7 +173,6 @@ namespace Dune
   inline typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::template Codim< cd >::template Partition< pitype >::LeafIterator
   ALU3dGrid< dim, dimworld, elType, Comm >::leafend () const
   {
-    alugrid_assert ( level >= 0 );
     return ALU3dGridLeafIterator<cd, pitype, const MyType> ( *this, maxlevel_);
   }
 
