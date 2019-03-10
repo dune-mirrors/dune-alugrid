@@ -1,21 +1,18 @@
 #ifndef DUNE_ALUGRID_GRID_IMP_CC
 #define DUNE_ALUGRID_GRID_IMP_CC
 
-// Dune includes
-#include <dune/common/stdstreams.hh>
-
-#include "alu3diterators_imp.cc"
-
-// Local includes
-#include "entity.hh"
-#include "iterator.hh"
-#include "datahandle.hh"
+// config.h is included via cmd line argument
+#if DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB
+#warning "Compiling grid_im.cc into lib"
+#endif
 
 #include "grid.hh"
+
+#include "alu3diterators_imp.cc"
 #include "aluinline.hh"
 
 // alu_inline might be defined differently
-#define alu_inline_tmp inline
+#define alu_inline_tmp alu_inline
 
 namespace Dune
 {
@@ -38,7 +35,7 @@ namespace Dune
     if( vxList.size() < vxsize ) vxList.reserve(vxsize);
     std::vector<int> visited_(vxsize);
 
-    for(unsigned int i=0; i<vxsize; i++)
+    for(unsigned int i=0; i<vxsize; ++i)
     {
       visited_[i] = 0;
     }
@@ -179,11 +176,6 @@ namespace Dune
     up2Date_ = true;
   }
 
-
-
-  // ALU3dGrid
-  // ---------
-
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   alu_inline_tmp
   void
@@ -211,7 +203,6 @@ namespace Dune
   }
 
 
-
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   alu_inline_tmp
   const ALU3dGrid< dim, dimworld, elType, Comm > &
@@ -219,101 +210,6 @@ namespace Dune
   {
     DUNE_THROW(GridError,"Do not use assignment operator of ALU3dGrid! \n");
     return (*this);
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  ALU3dGrid< dim, dimworld, elType, Comm >::~ALU3dGrid ()
-  {
-    if( bndVec_ )
-    {
-      const size_t bndSize = bndVec_->size();
-      for(size_t i=0; i<bndSize; ++i)
-      {
-        delete (*bndVec_)[i];
-      }
-    }
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int level, int codim ) const
-  {
-    // if we dont have this level return 0
-    if( (level > maxlevel_) || (level < 0) ) return 0;
-
-    alugrid_assert ( codim >= 0);
-    alugrid_assert ( codim < dimension+1 );
-
-    alugrid_assert ( sizeCache_ );
-    return sizeCache_->size(level,codim);
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  size_t ALU3dGrid< dim, dimworld, elType, Comm >::numBoundarySegments () const
-  {
-    return macroBoundarySegmentIndexSet().size();
-  }
-
-
-  // --size
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int level, GeometryType type ) const
-  {
-    if(elType == tetra && !type.isSimplex()) return 0;
-    if(elType == hexa  && !type.isCube   ()) return 0;
-    return size( level, dimension - type.dim() );
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int codim ) const
-  {
-    alugrid_assert ( codim >= 0 );
-    alugrid_assert ( codim <= dimension );
-
-    alugrid_assert ( sizeCache_ );
-    return sizeCache_->size(codim);
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::size ( GeometryType type ) const
-  {
-    if(elType == tetra && !type.isSimplex()) return 0;
-    if(elType == hexa  && !type.isCube   ()) return 0;
-    return size( dimension - type.dim() );
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::ghostSize ( int codim ) const
-  {
-    return ( ghostCellsEnabled() && codim == 0 ) ? 1 : 0 ;
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  int ALU3dGrid< dim, dimworld, elType, Comm >::ghostSize ( int level, int codim ) const
-  {
-    return ghostSize( codim );
-  }
-
-  // calc all necessary things that might have changed
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  void ALU3dGrid< dim, dimworld, elType, Comm >::updateStatus()
-  {
-    calcMaxLevel();
-    calcExtras();
   }
 
 
@@ -349,289 +245,8 @@ namespace Dune
   }
 
 
-  // --calcExtras
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  void ALU3dGrid< dim, dimworld, elType, Comm >::calcExtras ()
-  {
-    // make sure maxLevel is the same on all processes ????
-    //alugrid_assert ( maxlevel_ == comm().max( maxlevel_ ));
-
-    sizeCache_.reset( new SizeCacheType (*this) );
-
-    // unset up2date before recalculating the index sets,
-    // because they will use this feature
-    leafVertexList_.unsetUp2Date();
-
-    vertexList_.resize( maxlevel_+1 );
-    levelEdgeList_.resize( maxlevel_+1 );
-
-    for(int i=0; i<=maxlevel_; ++i)
-    {
-      vertexList_[i].unsetUp2Date();
-      levelEdgeList_[i].unsetUp2Date();
-    }
-
-    {
-      //here dimension has to be 3, as this is used ALU internally
-      //  was for( int i = 0; i < dimension; ++i )
-      for( int i = 0; i < 3; ++i )
-      {
-        ghostLeafList_[i].unsetUp2Date();
-        ghostLevelList_[i].resize( maxlevel_+1 );
-        for(int l=0; l<=maxlevel_; ++l)
-          ghostLevelList_[i][l].unsetUp2Date();
-      }
-    }
-
-    levelIndexVec_.resize( maxlevel_ + 1 );
-    // update all index set that are already in use
-    for(size_t i=0; i<levelIndexVec_.size(); ++i)
-    {
-      if(levelIndexVec_[i])
-      {
-        (*(levelIndexVec_[i])).calcNewIndex( this->template lbegin<0>( i ),
-                                             this->template lend<0>( i ) );
-      }
-    }
-
-    if(leafIndexSet_)
-    {
-      leafIndexSet_->calcNewIndex( this->template leafbegin<0>(), this->template leafend<0>() );
-    }
-
-    // build global ID set new (to be revised)
-    if( globalIdSet_ ) globalIdSet_->updateIdSet();
-
-    coarsenMarked_ = 0;
-    refineMarked_  = 0;
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  const typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::LeafIndexSet &
-  ALU3dGrid< dim, dimworld, elType, Comm >::leafIndexSet () const
-  {
-    if(!leafIndexSet_)
-    {
-      leafIndexSet_.reset( new LeafIndexSetImp ( *this,
-                                                 this->template leafbegin<0>(),
-                                                 this->template leafend<0>() ) );
-    }
-    return *leafIndexSet_;
-  }
-
-  //! get level index set of the grid
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  const typename ALU3dGrid< dim, dimworld, elType, Comm >::Traits::LevelIndexSet &
-  ALU3dGrid< dim, dimworld, elType, Comm >::levelIndexSet (int level) const
-  {
-    assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-    if( ! levelIndexVec_[ level ] )
-    {
-      levelIndexVec_[ level ] = createLevelIndexSet( level );
-    }
-    return (*levelIndexVec_[ level ]);
-  }
-
-  /** \brief return instance of level index set
-      \note if index set for this level has not been created then this
-      instance will be deleted once the shared_ptr goes out of scope.
-  */
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  std::shared_ptr< typename ALU3dGrid< dim, dimworld, elType, Comm >::LevelIndexSetImp >
-  ALU3dGrid< dim, dimworld, elType, Comm >::accessLevelIndexSet ( int level ) const
-  {
-    assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-    if( levelIndexVec_[ level ] )
-    {
-      return levelIndexVec_[ level ];
-    }
-    else
-    {
-      return createLevelIndexSet( level );
-    }
-  }
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  std::shared_ptr< typename ALU3dGrid< dim, dimworld, elType, Comm >::LevelIndexSetImp >
-  ALU3dGrid< dim, dimworld, elType, Comm >::createLevelIndexSet ( int level ) const
-  {
-    return std::shared_ptr< LevelIndexSetImp > (new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level ) );
-  }
-
-
-  // load balance grid ( lbData might be a pointer to NULL )
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
-  {
-    if( comm().size() <= 1 )
-        return false;
-
-    // call load Balance
-    const bool changed = myGrid().loadBalance( lbData );
-
-    if( changed )
-    {
-      // reset boundary segment index
-      macroBoundarySegmentIndexSet_.invalidate();
-
-      // reset size and things
-      // maxLevel does not need to be recalculated
-      calcExtras();
-
-
-      // build new Id Set. Only do that after calcExtras, because here
-      // the item lists are needed
-      if( globalIdSet_ )
-        globalIdSet_->updateIdSet();
-
-      // compress data if lbData is valid and has user data
-      if( lbData && lbData->hasUserData() )
-        lbData->compress() ;
-      else // this only needs to be done if no user is present
-        clearIsNewMarkers();
-    }
-    return changed;
-  }
-
-
-  // global refine
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  void ALU3dGrid< dim, dimworld, elType, Comm >::globalRefine ( int refCount )
-  {
-    for( int count = std::abs(refCount); count > 0; --count )
-    {
-      const LeafIteratorType end = leafend();
-      for( LeafIteratorType it = leafbegin(); it != end; ++it )
-        mark( refCount>0?1:-1, *it );
-      preAdapt();
-      adapt();
-      postAdapt();
-    }
-  }
-
-  // preprocess grid
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  bool ALU3dGrid< dim, dimworld, elType, Comm >::preAdapt()
-  {
-    return (coarsenMarked_ > 0);
-  }
-
-
-  // adapt grid
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  bool ALU3dGrid< dim, dimworld, elType, Comm >::adapt ()
-  {
-    bool ref = false;
-
-    if( lockPostAdapt_ == true )
-    {
-      DUNE_THROW(InvalidStateException,"Make sure that postAdapt is called after adapt was called and returned true!");
-    }
-
-    bool mightCoarse = preAdapt();
-    // if prallel run, then adapt also global id set
-    if(globalIdSet_)
-    {
-      //std::cout << "Start adapt with globalIdSet prolong \n";
-      int defaultChunk = newElementsChunk_;
-      int actChunk     = refineEstimate_ * refineMarked_;
-
-      // guess how many new elements we get
-      int newElements = std::max( actChunk , defaultChunk );
-
-      globalIdSet_->setChunkSize( newElements );
-      ref = myGrid().duneAdapt(*globalIdSet_); // adapt grid
-    }
-    else
-    {
-      ref = myGrid().adaptWithoutLoadBalancing();
-    }
-
-    // in parallel this is different
-    if( this->comm().size() == 1 )
-    {
-      ref = ref && refineMarked_ > 0;
-    }
-
-    if(ref || mightCoarse)
-    {
-      // calcs maxlevel and other extras
-      updateStatus();
-
-      // notify that postAdapt must be called
-      lockPostAdapt_ = true;
-    }
-    return ref;
-  }
-
-  // post process grid
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  void ALU3dGrid< dim, dimworld, elType, Comm >::clearIsNewMarkers ()
-  {
-    // old fashioned way
-    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
-    IteratorType w (*this, maxLevel(), nlinks() );
-
-    typedef typename IteratorType::val_t val_t;
-    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
-
-    for (w.first () ; ! w.done () ; w.next ())
-    {
-      val_t & item = w.item();
-
-      alugrid_assert ( item.first || item.second );
-      HElementType * elem = 0;
-      if( item.first )
-      {
-        elem = item.first;
-      }
-      else if( item.second )
-      {
-        elem = item.second->getGhost().first;
-      }
-      alugrid_assert ( elem );
-
-      if (elem->hasBeenRefined())
-      {
-        elem->resetRefinedTag();
-        // on bisected grids its possible that not only leaf elements where added so
-        // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
-        while ((elem = elem->up()))
-        {
-          elem->resetRefinedTag();
-        }
-      }
-    }
-  }
-
-
-  // post process grid
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  void ALU3dGrid< dim, dimworld, elType, Comm >::postAdapt ()
-  {
-    if( lockPostAdapt_ )
-    {
-      // clear all isNew markers on entities
-      clearIsNewMarkers();
-
-      // make that postAdapt has been called
-      lockPostAdapt_ = false;
-    }
-  }
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  inline bool ALU3dGrid< dim, dimworld, elType, Comm >
+  alu_inline_tmp bool ALU3dGrid< dim, dimworld, elType, Comm >
     ::writeMacroGrid ( const std::string path, const std::string name,
                        const ALU3DSPACE MacroFileHeader::Format format ) const
   {
@@ -777,6 +392,96 @@ namespace Dune
     clearIsNewMarkers();
   }
 
+  // load balance grid ( lbData might be a pointer to NULL )
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  alu_inline_tmp bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
+  {
+    if( comm().size() <= 1 )
+        return false;
+
+    // call load Balance
+    const bool changed = myGrid().loadBalance( lbData );
+
+    if( changed )
+    {
+      // reset boundary segment index
+      macroBoundarySegmentIndexSet_.invalidate();
+
+      // reset size and things
+      // maxLevel does not need to be recalculated
+      calcExtras();
+
+
+      // build new Id Set. Only do that after calcExtras, because here
+      // the item lists are needed
+      if( globalIdSet_ )
+        globalIdSet_->updateIdSet();
+
+      // compress data if lbData is valid and has user data
+      if( lbData && lbData->hasUserData() )
+        lbData->compress() ;
+      else // this only needs to be done if no user is present
+        clearIsNewMarkers();
+    }
+    return changed;
+  }
+
+
+  // post process grid
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  alu_inline_tmp
+  void ALU3dGrid< dim, dimworld, elType, Comm >::postAdapt ()
+  {
+    if( lockPostAdapt_ )
+    {
+      // clear all isNew markers on entities
+      clearIsNewMarkers();
+
+      // make that postAdapt has been called
+      lockPostAdapt_ = false;
+    }
+  }
+
+  // post process grid
+  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
+  alu_inline_tmp
+  void ALU3dGrid< dim, dimworld, elType, Comm >::clearIsNewMarkers ()
+  {
+    // old fashioned way
+    typedef ALU3DSPACE ALU3dGridLeafIteratorWrapper< 0, All_Partition, Comm > IteratorType;
+    IteratorType w (*this, maxLevel(), nlinks() );
+
+    typedef typename IteratorType::val_t val_t;
+    typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
+
+    for (w.first () ; ! w.done () ; w.next ())
+    {
+      val_t & item = w.item();
+
+      alugrid_assert ( item.first || item.second );
+      HElementType * elem = 0;
+      if( item.first )
+      {
+        elem = item.first;
+      }
+      else if( item.second )
+      {
+        elem = item.second->getGhost().first;
+      }
+      alugrid_assert ( elem );
+
+      if (elem->hasBeenRefined())
+      {
+        elem->resetRefinedTag();
+        // on bisected grids its possible that not only leaf elements where added so
+        // we have to move up the hierarchy to make sure that the refined tag on parents are also removed
+        while ((elem = elem->up()))
+        {
+          elem->resetRefinedTag();
+        }
+      }
+    }
+  }
 
 
 #if ! COMPILE_ALUGRID_INLINE
@@ -786,6 +491,70 @@ namespace Dune
 
   template class ALU3dGrid< 2, 2, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 2, 2, tetra, ALUGridMPIComm >;
+
+#if 0
+  // codim 0
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0 > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0 > (int level) const;
+
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::Partition< All_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, All_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::Partition< All_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, All_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< Interior_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, Interior_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< Interior_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, Interior_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< InteriorBorder_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, InteriorBorder_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< InteriorBorder_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, InteriorBorder_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< Overlap_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, Overlap_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< Overlap_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, Overlap_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< OverlapFront_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, OverlapFront_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits:: Codim< 0 >::template Partition< OverlapFront_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, OverlapFront_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits:: Codim< 0 >::template Partition< Ghost_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 0, Ghost_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::template Partition< Ghost_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 0, Ghost_Partition > (int level) const;
+
+  // codim 1
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 1 >::Partition< All_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, All_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 1 >::Partition< All_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, All_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< Interior_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, Interior_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< Interior_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, Interior_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< InteriorBorder_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, InteriorBorder_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< InteriorBorder_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, InteriorBorder_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< Overlap_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, Overlap_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< Overlap_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, Overlap_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< OverlapFront_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, OverlapFront_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits:: Codim< 1 >::template Partition< OverlapFront_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, OverlapFront_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits:: Codim< 1 >::template Partition< Ghost_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: lbegin< 1, Ghost_Partition > (int level) const;
+  template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 1 >::template Partition< Ghost_Partition >::LevelIterator
+    ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: lbegin< 1, Ghost_Partition > (int level) const;
+
+  //template ALU3dGrid< 2, 2, hexa, ALUGridNoComm >::Traits::Codim< 0 >::LeafIterator
+  //  ALU3dGrid< 2, 2, hexa, ALUGridNoComm > :: leafbegin< 0 > () const;
+  //template ALU3dGrid< 2, 2, tetra, ALUGridNoComm >::Traits::Codim< 0 >::LeafIterator
+  //  ALU3dGrid< 2, 2, tetra, ALUGridNoComm > :: leafbegin< 0 > () const;
+#endif
 
   //2-3
   template class ALU3dGrid< 2, 3, hexa, ALUGridNoComm >;
@@ -800,6 +569,29 @@ namespace Dune
 
   template class ALU3dGrid< 3, 3, hexa, ALUGridMPIComm >;
   template class ALU3dGrid< 3, 3, tetra, ALUGridMPIComm >;
+
+  /*
+  // Instantiation
+  template class ALUGrid< 2, 2, simplex, conforming, ALUGridNoComm >;
+  template class ALUGrid< 2, 2, simplex, nonconforming, ALUGridNoComm >;
+  template class ALUGrid< 2, 3, simplex, conforming, ALUGridNoComm >;
+  template class ALUGrid< 2, 3, simplex, nonconforming, ALUGridNoComm >;
+  template class ALUGrid< 3, 3, simplex, conforming, ALUGridNoComm >;
+  template class ALUGrid< 3, 3, simplex, nonconforming, ALUGridNoComm >;
+  template class ALUGrid< 2, 2, cube, nonconforming, ALUGridNoComm >;
+  template class ALUGrid< 2, 3, cube, nonconforming, ALUGridNoComm >;
+  template class ALUGrid< 3, 3, cube, nonconforming, ALUGridNoComm >;
+
+  template class ALUGrid< 2, 2, simplex, conforming, ALUGridMPIComm >;
+  template class ALUGrid< 2, 2, simplex, nonconforming, ALUGridMPIComm >;
+  template class ALUGrid< 2, 3, simplex, conforming, ALUGridMPIComm >;
+  template class ALUGrid< 2, 3, simplex, nonconforming, ALUGridMPIComm >;
+  template class ALUGrid< 3, 3, simplex, conforming, ALUGridMPIComm >;
+  template class ALUGrid< 3, 3, simplex, nonconforming, ALUGridMPIComm >;
+  template class ALUGrid< 2, 2, cube, nonconforming, ALUGridMPIComm >;
+  template class ALUGrid< 2, 3, cube, nonconforming, ALUGridMPIComm >;
+  template class ALUGrid< 3, 3, cube, nonconforming, ALUGridMPIComm >;
+  */
 
 #endif // #if COMPILE_ALUGRID_LIB
 

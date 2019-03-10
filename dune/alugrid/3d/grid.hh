@@ -716,39 +716,6 @@ namespace Dune
                                     entity.level(), true );
     }
 
-  private:
-    //! General definiton for a leaf iterator
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin(int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend(int level) const;
-
-    //! General definiton for a leaf iterator
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafbegin(int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend(int level) const;
-
-    //! Iterator to first entity of codim 0 on leaf level (All_Partition)
-    LeafIteratorType leafbegin (int level) const;
-
-    //! one past the end on this leaf level (codim 0 and All_Partition)
-    LeafIteratorType leafend (int level) const;
-
-    //! Iterator to first entity of codim 0 on leaf level (All_Partition)
-    LeafIteratorType leafbegin () const;
-
-    //! one past the end on this leaf level (codim 0 and All_Partition)
-    LeafIteratorType leafend () const;
-
   public:
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
@@ -769,17 +736,6 @@ namespace Dune
     template <int codim>
     typename Traits::template Codim<codim>::LeafIterator
     leafend() const;
-
-  private:
-    //! General definiton for a leaf iterator
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    createLeafIteratorBegin (int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    createLeafIteratorEnd(int level) const;
 
   public:
     //! number of grid entities per level and codim
@@ -1415,7 +1371,7 @@ namespace Dune
 } // end namespace Dune
 
 #include "grid_inline.hh"
-//#if COMPILE_ALUGRID_INLINE
+#if COMPILE_ALUGRID_INLINE
   #include "grid_imp.cc"
-//#endif
+#endif
 #endif

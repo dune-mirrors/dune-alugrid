@@ -2,6 +2,7 @@
 #define DUNE_ALUGRID_DEFAULTINDEXSETS_HH
 
 #include <type_traits>
+#include <memory>
 #include <vector>
 
 #include <dune/common/version.hh>
@@ -90,7 +91,7 @@ namespace Dune
     };
 
     typedef PersistentContainer< GridType, Index > PersistentContainerType ;
-    typedef std::vector< PersistentContainerType* > PersistentContainerVectorType;
+    typedef std::vector< std::unique_ptr< PersistentContainerType > > PersistentContainerVectorType;
 
   private:
     typedef DefaultIndexSet<GridType, IteratorType > ThisType;
@@ -159,6 +160,9 @@ namespace Dune
       }
     };
 
+    // no copying
+    DefaultIndexSet( const DefaultIndexSet& org ) = delete;
+
   public:
     //! import default implementation of subIndex<cc>
     //! \todo remove after next release
@@ -166,26 +170,21 @@ namespace Dune
 
     //! create index set by using the given begin and end iterator
     //! for the given level (level == -1 means leaf level)
-    DefaultIndexSet( const GridType & grid ,
+    DefaultIndexSet( const GridType& grid ,
                      const IteratorType& begin,
                      const IteratorType& end,
                      const int level = -1 )
     : grid_(grid),
-      indexContainers_( ncodim, (PersistentContainerType *) 0),
+      indexContainers_( ncodim ),
       size_( ncodim, -1 ),
       level_(level)
     {
       for( int codim=0; codim < ncodim; ++codim )
-        indexContainers_[ codim ] = new PersistentContainerType( grid, codim );
+      {
+        indexContainers_[ codim ].reset( new PersistentContainerType( grid, codim ) );
+      }
 
       calcNewIndex (begin, end);
-    }
-
-    //! desctructor deleting persistent containers
-    ~DefaultIndexSet ()
-    {
-      for( int codim=0; codim < ncodim; ++codim )
-        delete indexContainers_[ codim ];
     }
 
     const PersistentContainerType& indexContainer( const size_t codim ) const
@@ -226,6 +225,7 @@ namespace Dune
 #ifdef ALUGRIDDEBUG
       const int codim = cd;
       //const bool isLeaf = (codim == 0) ? en.isLeaf() : true ;
+
       alugrid_assert ( (codim == dim) ? (true) : ( level_ < 0 ) || (level_ == en.level() ));
       alugrid_assert ( indexContainer( cd )[ en ].index() >= 0 );
 #endif

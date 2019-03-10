@@ -3,7 +3,7 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/iterator.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/indexsets.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings_imp.cc
-    #    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/grid_imp.cc
+    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/grid_imp.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/entity_imp.cc)
 endif()
 
@@ -16,6 +16,10 @@ dune_add_library(dunealugrid
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
+
+if( DUNE_ALUGRID_COMPILE_BINDINGS )
+  target_compile_options(dunealugrid PRIVATE -include${CMAKE_BINARY_DIR}/config.h)
+endif()
 
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )
