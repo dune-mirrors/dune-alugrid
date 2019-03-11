@@ -1,11 +1,9 @@
 #ifndef DUNE_ALUGRID_ITERATOR_CC
 #define DUNE_ALUGRID_ITERATOR_CC
 
-#include "aluinline.hh"
-#if ! COMPILE_ALUGRID_INLINE
-#include <config.h>
-#endif
+// config.h is included via cmd line argument
 
+#include "aluinline.hh"
 #include "alu3dinclude.hh"
 
 #include "geometry.hh"
@@ -1007,7 +1005,7 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-#endif // end COMPILE_ALUGRID_LIB
+#endif // ! COMPILE_ALUGRID_INLINE
 
 } // end namespace Dune
 #endif // DUNE_ALUGRID_ITERATOR_IMP_CC

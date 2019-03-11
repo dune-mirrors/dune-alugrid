@@ -2,9 +2,8 @@
 #define DUNE_ALUGRID_GRID_IMP_CC
 
 // config.h is included via cmd line argument
-#if DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB
-#warning "Compiling grid_im.cc into lib"
-#endif
+
+#include <dune/common/stdstreams.hh>
 
 #include "grid.hh"
 
@@ -330,7 +329,7 @@ namespace Dune
     }
     else if ( id == oldAluId )
     {
-      derr << "\nKeyword '" << oldAluId << "' is deprecated! Change it to '" << aluid << "' in file '" << filename<<"'! \n";
+      std::cerr << "\nKeyword '" << oldAluId << "' is deprecated! Change it to '" << aluid << "' in file '" << filename<<"'! \n";
       return ;
     }
     else
@@ -354,8 +353,8 @@ namespace Dune
       ALU3dGridElementType type = (ALU3dGridElementType) w->item().type();
       if( type != elType )
       {
-        derr << "\nERROR: " << elType2Name(elType) << " Grid tries to read a ";
-        derr << elType2Name(type) << " macro grid file! \n\n";
+        std::cerr << "\nERROR: " << elType2Name(elType) << " Grid tries to read a ";
+        std::cerr << elType2Name(type) << " macro grid file! \n\n";
         alugrid_assert (type == elType);
         DUNE_THROW(GridError,"\nERROR: " << elType2Name(elType) << " Grid tries to read a " << elType2Name(type) << " macro grid file! ");
       }

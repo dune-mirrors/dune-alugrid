@@ -1,11 +1,9 @@
 #ifndef DUNE_ALU3DGRIDINDEXSETS_CC
 #define DUNE_ALU3DGRIDINDEXSETS_CC
 
-#include "aluinline.hh"
-#if ! COMPILE_ALUGRID_INLINE
-#include <config.h>
-#endif
+// config.h is included via cmd line argument
 
+#include "aluinline.hh"
 #include "indexsets.hh"
 #include "alu3diterators_imp.cc"
 
