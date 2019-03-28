@@ -22,7 +22,7 @@ namespace Dune {
 
 // --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> ::
+alu_inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const bool levelIntersectionIterator) :
   connector_( levelIntersectionIterator ),
   geoProvider_(connector_),
@@ -34,7 +34,7 @@ ALU3dGridIntersectionIterator(const bool levelIntersectionIterator) :
 }
 
 template<class GridImp>
-inline void
+alu_inline void
 ALU3dGridIntersectionIterator<GridImp> :: done ()
 {
   item_  = nullptr;
@@ -45,7 +45,7 @@ ALU3dGridIntersectionIterator<GridImp> :: done ()
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> ::
+alu_inline void ALU3dGridIntersectionIterator<GridImp> ::
 setFirstItem (const HElementType & elem, int wLevel)
 {
   ghost_      = nullptr;
@@ -62,7 +62,7 @@ setFirstItem (const HElementType & elem, int wLevel)
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> ::
+alu_inline void ALU3dGridIntersectionIterator<GridImp> ::
 setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
 {
   // get correct face number
@@ -83,9 +83,8 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
 }
 
 template<class GridImp>
-template <class EntityType>
-inline void ALU3dGridIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel, const GridImp& grid )
+alu_inline void ALU3dGridIntersectionIterator<GridImp> ::
+first (const EntityImp& en, int wLevel, const GridImp& grid )
 {
   if( ! en.isLeaf() && en.level()>0)
   {
@@ -119,7 +118,7 @@ first (const EntityType & en, int wLevel, const GridImp& grid )
 
 // copy constructor
 template<class GridImp>
-inline ALU3dGridIntersectionIterator<GridImp> ::
+alu_inline ALU3dGridIntersectionIterator<GridImp> ::
 ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org) :
   connector_(org.connector_),
   geoProvider_(connector_),
@@ -141,7 +140,7 @@ ALU3dGridIntersectionIterator(const ALU3dGridIntersectionIterator<GridImp> & org
 
 // copy constructor
 template<class GridImp>
-inline void
+alu_inline void
 ALU3dGridIntersectionIterator<GridImp> ::
 assign(const ALU3dGridIntersectionIterator<GridImp> & org)
 {
@@ -168,7 +167,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
 
 // check whether entities are the same or whether iterator is done
 template<class GridImp>
-inline bool ALU3dGridIntersectionIterator<GridImp> ::
+alu_inline bool ALU3dGridIntersectionIterator<GridImp> ::
 equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
 {
   // this method is only to check equality of real iterators and end
@@ -179,7 +178,7 @@ equals (const ALU3dGridIntersectionIterator<GridImp> & i ) const
 }
 
 template<class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
+alu_inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 {
   // leaf increment
   alugrid_assert (item_);
@@ -234,7 +233,7 @@ inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
 
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
+alu_inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
 ALU3dGridIntersectionIterator<GridImp>::outside () const
 {
   alugrid_assert ( neighbor() );
@@ -251,7 +250,7 @@ ALU3dGridIntersectionIterator<GridImp>::outside () const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
+alu_inline typename ALU3dGridIntersectionIterator<GridImp>::EntityImp
 ALU3dGridIntersectionIterator<GridImp>::inside () const
 {
   if( ImplTraits :: isGhost( ghost_ ) )
@@ -266,19 +265,19 @@ ALU3dGridIntersectionIterator<GridImp>::inside () const
 }
 
 template<class GridImp>
-inline bool ALU3dGridIntersectionIterator<GridImp> :: boundary () const
+alu_inline bool ALU3dGridIntersectionIterator<GridImp> :: boundary () const
 {
   return connector_.boundary();
 }
 
 template<class GridImp>
-inline bool ALU3dGridIntersectionIterator<GridImp> :: neighbor () const
+alu_inline bool ALU3dGridIntersectionIterator<GridImp> :: neighbor () const
 {
   return connector_.neighbor();
 }
 
 template<class GridImp>
-inline int
+alu_inline int
 ALU3dGridIntersectionIterator< GridImp >::indexInInside () const
 {
   alugrid_assert (ElementTopo::dune2aluFace(index_) == connector_.innerALUFaceIndex());
@@ -286,7 +285,7 @@ ALU3dGridIntersectionIterator< GridImp >::indexInInside () const
 }
 
 template< class GridImp >
-inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
+alu_inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
 ALU3dGridIntersectionIterator< GridImp >::geometryInInside () const
 {
   buildLocalGeometries();
@@ -295,28 +294,28 @@ ALU3dGridIntersectionIterator< GridImp >::geometryInInside () const
 
 
 template< class GridImp >
-inline int
+alu_inline int
 ALU3dGridIntersectionIterator< GridImp >::indexInOutside () const
 {
   return ElementTopo::alu2duneFace( connector_.outerALUFaceIndex() );
 }
 
 template< class GridImp >
-inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
+alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInInside () const
 {
   return Twist( connector_.duneTwist( indexInInside(), connector_.innerTwist() ) );
 }
 
 template< class GridImp >
-inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
+alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInOutside () const
 {
   return Twist( connector_.duneTwist( indexInOutside(), connector_.outerTwist() ) );
 }
 
 template< class GridImp >
-inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
+alu_inline typename ALU3dGridIntersectionIterator< GridImp >::LocalGeometry
 ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
 {
   alugrid_assert (neighbor());
@@ -325,7 +324,7 @@ ALU3dGridIntersectionIterator< GridImp >::geometryInOutside () const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
+alu_inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 integrationOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
@@ -333,7 +332,7 @@ integrationOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
+alu_inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
@@ -362,7 +361,7 @@ outerNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 }
 
 template<class GridImp>
-inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
+alu_inline typename ALU3dGridIntersectionIterator<GridImp>::NormalType
 ALU3dGridIntersectionIterator<GridImp>::
 unitOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 {
@@ -372,7 +371,7 @@ unitOuterNormal(const FieldVector<alu3d_ctype, dim-1>& local) const
 }
 
 template< class GridImp >
-inline typename ALU3dGridIntersectionIterator< GridImp >::Geometry
+alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Geometry
 ALU3dGridIntersectionIterator< GridImp >::geometry () const
 {
   geoProvider_.buildGlobalGeom( intersectionGlobal_ );
@@ -380,7 +379,7 @@ ALU3dGridIntersectionIterator< GridImp >::geometry () const
 }
 
 template<class GridImp>
-inline GeometryType
+alu_inline GeometryType
 ALU3dGridIntersectionIterator<GridImp>::
 type () const
 {
@@ -392,7 +391,7 @@ type () const
 }
 
 template<class GridImp>
-inline int
+alu_inline int
 ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
 {
   alugrid_assert ( item_ );
@@ -400,7 +399,7 @@ ALU3dGridIntersectionIterator<GridImp>::boundaryId () const
 }
 
 template<class GridImp>
-inline size_t
+alu_inline size_t
 ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 {
   alugrid_assert ( item_ );
@@ -410,7 +409,7 @@ ALU3dGridIntersectionIterator<GridImp>::boundarySegmentIndex() const
 }
 
 template<class GridImp>
-inline int
+alu_inline int
 ALU3dGridIntersectionIterator<GridImp>::segmentId() const
 {
   alugrid_assert ( item_ );
@@ -419,7 +418,7 @@ ALU3dGridIntersectionIterator<GridImp>::segmentId() const
 }
 
 template< class GridImp >
-inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() const
+alu_inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() const
 {
   intersectionSelfLocal_.buildGeom( geoProvider_.intersectionSelfLocal() );
   if ( !connector_.outerBoundary() )
@@ -427,7 +426,7 @@ inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries() con
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
+alu_inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTriangleBndType& bnd, int index) const
 {
@@ -435,7 +434,7 @@ getFace(const GEOTriangleBndType& bnd, int index) const
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
+alu_inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOQuadBndType& bnd, int index) const
 {
@@ -443,7 +442,7 @@ getFace(const GEOQuadBndType& bnd, int index) const
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
+alu_inline const typename ALU3dImplTraits< tetra, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOTetraElementType& elem, int index) const
 {
@@ -452,7 +451,7 @@ getFace(const GEOTetraElementType& elem, int index) const
 }
 
 template <class GridImp>
-inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
+alu_inline const typename ALU3dImplTraits< hexa, typename GridImp::MPICommunicatorType >::GEOFaceType *
 ALU3dGridIntersectionIterator<GridImp>::
 getFace(const GEOHexaElementType& elem, int index) const
 {
@@ -461,7 +460,7 @@ getFace(const GEOHexaElementType& elem, int index) const
 }
 
 template <class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp>::
+alu_inline void ALU3dGridIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ! ghost_ );
@@ -472,7 +471,7 @@ setNewFace(const GEOFaceType& newFace)
 }
 
 template <class GridImp>
-inline void ALU3dGridIntersectionIterator<GridImp>::
+alu_inline void ALU3dGridIntersectionIterator<GridImp>::
 setGhostFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ghost_ );
@@ -482,7 +481,7 @@ setGhostFace(const GEOFaceType& newFace)
 }
 
 template <class GridImp>
-inline int
+alu_inline int
 ALU3dGridIntersectionIterator<GridImp>::
 level() const {
   alugrid_assert ( item_ && (innerLevel_ == item_->level()) );
@@ -501,7 +500,7 @@ level() const {
 
 // --IntersectionIterator
 template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+alu_inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator()
   : ALU3dGridIntersectionIterator<GridImp>( true )
   , levelNeighbor_(false)
@@ -510,9 +509,8 @@ ALU3dGridLevelIntersectionIterator()
 }
 
 template<class GridImp>
-template <class EntityType>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
-first (const EntityType & en, int wLevel, const GridImp& grid )
+alu_inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+first (const EntityImp& en, int wLevel, const GridImp& grid )
 {
   // store grid point for boundarySegmentIndex
   grid_ = &grid;
@@ -540,7 +538,7 @@ first (const EntityType & en, int wLevel, const GridImp& grid )
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+alu_inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
 setFirstItem (const HElementType & elem, int wLevel)
 {
   ghost_       = 0;
@@ -553,7 +551,7 @@ setFirstItem (const HElementType & elem, int wLevel)
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
+alu_inline void ALU3dGridLevelIntersectionIterator<GridImp> ::
 setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel)
 {
   // store ghost for method inside
@@ -573,7 +571,7 @@ setInteriorItem (const HElementType & elem, const BNDFaceType& ghost, int wLevel
 
 // copy constructor
 template<class GridImp>
-inline ALU3dGridLevelIntersectionIterator<GridImp> ::
+alu_inline ALU3dGridLevelIntersectionIterator<GridImp> ::
 ALU3dGridLevelIntersectionIterator(const ThisType & org)
   : ALU3dGridIntersectionIterator<GridImp>(org)
   , levelNeighbor_(org.levelNeighbor_)
@@ -583,7 +581,7 @@ ALU3dGridLevelIntersectionIterator(const ThisType & org)
 
 // copy constructor
 template<class GridImp>
-inline void
+alu_inline void
 ALU3dGridLevelIntersectionIterator<GridImp> ::
 assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 {
@@ -593,7 +591,7 @@ assign(const ALU3dGridLevelIntersectionIterator<GridImp> & org)
 }
 
 template<class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
+alu_inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 {
   // level increment
   alugrid_assert ( item_ );
@@ -618,13 +616,13 @@ inline void ALU3dGridLevelIntersectionIterator<GridImp> :: increment ()
 }
 
 template<class GridImp>
-inline bool ALU3dGridLevelIntersectionIterator<GridImp>::neighbor () const
+alu_inline bool ALU3dGridLevelIntersectionIterator<GridImp>::neighbor () const
 {
   return levelNeighbor_ && (BaseType :: neighbor());
 }
 
 template <class GridImp>
-inline void ALU3dGridLevelIntersectionIterator<GridImp>::
+alu_inline void ALU3dGridLevelIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( item_->level() == innerLevel_ );
@@ -654,9 +652,5 @@ setNewFace(const GEOFaceType& newFace)
 }
 
 } // end namespace Dune
-
-#if COMPILE_ALUGRID_INLINE
-  #include "iterator.cc"
-#endif
 
 #endif // DUNE_ALUGRID_ITERATOR_IMP_CC

@@ -403,10 +403,10 @@ namespace Dune
       typedef typename Partition< All_Partition > :: LevelGridView   LevelGridView;
 
       //! Type of the level index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
+      typedef DefaultIndexSet< Grid, typename Codim< 0 > :: LevelIterator > LevelIndexSetImp;
 
       //! Type of the leaf index set
-      typedef DefaultIndexSet< GridImp, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp;
+      typedef DefaultIndexSet< Grid, typename Codim< 0 > :: LeafIterator > LeafIndexSetImp;
 
       typedef IndexSet< Grid, LevelIndexSetImp > LevelIndexSet;
       typedef IndexSet< Grid, LeafIndexSetImp > LeafIndexSet;
@@ -713,39 +713,6 @@ namespace Dune
                                     entity.level(), true );
     }
 
-  private:
-    //! General definiton for a leaf iterator
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafbegin(int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    leafend(int level) const;
-
-    //! General definiton for a leaf iterator
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafbegin(int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim>
-    typename Traits::template Codim<codim>::LeafIterator
-    leafend(int level) const;
-
-    //! Iterator to first entity of codim 0 on leaf level (All_Partition)
-    LeafIteratorType leafbegin (int level) const;
-
-    //! one past the end on this leaf level (codim 0 and All_Partition)
-    LeafIteratorType leafend (int level) const;
-
-    //! Iterator to first entity of codim 0 on leaf level (All_Partition)
-    LeafIteratorType leafbegin () const;
-
-    //! one past the end on this leaf level (codim 0 and All_Partition)
-    LeafIteratorType leafend () const;
-
   public:
     //! General definiton for a leaf iterator
     template <int codim, PartitionIteratorType pitype>
@@ -766,17 +733,6 @@ namespace Dune
     template <int codim>
     typename Traits::template Codim<codim>::LeafIterator
     leafend() const;
-
-  private:
-    //! General definiton for a leaf iterator
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    createLeafIteratorBegin (int level) const;
-
-    //! General definition for an end iterator on leaf level
-    template <int codim, PartitionIteratorType pitype>
-    typename Traits::template Codim<codim>::template Partition<pitype>::LeafIterator
-    createLeafIteratorEnd(int level) const;
 
   public:
     //! number of grid entities per level and codim
@@ -849,38 +805,16 @@ namespace Dune
     const typename Traits :: LeafIndexSet & leafIndexSet () const;
 
     //! get level index set of the grid
-    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      if( ! levelIndexVec_[ level ] )
-      {
-        levelIndexVec_[ level ] = createLevelIndexSet( level );
-      }
-      return (*levelIndexVec_[ level ]);
-    }
+    const typename Traits :: LevelIndexSet & levelIndexSet (int level) const;
 
     /** \brief return instance of level index set
         \note if index set for this level has not been created then this
         instance will be deleted once the shared_ptr goes out of scope.
     */
-    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const
-    {
-      assert( (level >= 0) && (level < int( levelIndexVec_.size() )) );
-      if( levelIndexVec_[ level ] )
-      {
-        return levelIndexVec_[ level ];
-      }
-      else
-      {
-        return createLevelIndexSet( level );
-      }
-    }
+    std::shared_ptr< LevelIndexSetImp > accessLevelIndexSet ( int level ) const;
 
   protected:
-    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const
-    {
-      return std::shared_ptr< LevelIndexSetImp > (new LevelIndexSetImp( *this, lbegin< 0 >( level ), lend< 0 >( level ), level ) );
-    }
+    std::shared_ptr< LevelIndexSetImp > createLevelIndexSet ( int level ) const;
 
   public:
     template< int cd >

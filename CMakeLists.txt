@@ -9,6 +9,15 @@ set(DUNE_REENABLE_ADD_TEST TRUE)
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
 set(ALUGRID_DISABLE_METIS TRUE)
 
+# set to true to compile more things into library
+set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
+
+# variable to be set in config.h
+if( DUNE_ALUGRID_COMPILE_BINDINGS )
+  set(DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB 1)
+endif()
+
+
 # general stuff
 cmake_minimum_required(VERSION 2.8.12)
 

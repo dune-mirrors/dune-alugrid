@@ -1,10 +1,6 @@
 #ifndef DUNE_ALU3DGRID_FACTORY_CC
 #define DUNE_ALU3DGRID_FACTORY_CC
 
-#if COMPILE_ALUGRID_INLINE == 0
-#include <config.h>
-#endif
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -22,11 +18,7 @@
 
 #include <utils/bisection-compatibility/bisectioncompatibility.hh>
 
-#if COMPILE_ALUGRID_INLINE
-#define alu_inline inline
-#else
-#define alu_inline
-#endif
+#include "dune/alugrid/3d/aluinline.hh"
 
 namespace Dune
 {
@@ -1345,20 +1337,34 @@ namespace Dune
 
   }
 
-#if COMPILE_ALUGRID_LIB
+#if ! COMPILE_ALUGRID_INLINE
+  // Instantiation -3-3
+  template class ALUGrid< 3, 3, cube, nonconforming >;
+  template class ALUGrid< 3, 3, simplex, nonconforming >;
+  template class ALUGrid< 3, 3, simplex, conforming >;
+
   template class ALU3dGridFactory< ALUGrid< 3, 3, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
+
+  // Instantiation -2-3
+  template class ALUGrid< 2, 3, cube, nonconforming >;
+  template class ALUGrid< 2, 3, simplex, nonconforming >;
+  template class ALUGrid< 2, 3, simplex, conforming >;
 
   template class ALU3dGridFactory< ALUGrid< 2, 3, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, conforming > >;
 
+  // Instantiation -2-2
+  template class ALUGrid< 2, 2, cube, nonconforming >;
+  template class ALUGrid< 2, 2, simplex, nonconforming >;
+  template class ALUGrid< 2, 2, simplex, conforming >;
+
   template class ALU3dGridFactory< ALUGrid< 2, 2, cube, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, nonconforming > >;
   template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, conforming > >;
-#endif
+#endif // ! COMPILE_ALUGRID_INLINE
 }
-#undef alu_inline
 
 #endif // end DUNE_ALU3DGRID_FACTORY_CC
