@@ -44,7 +44,7 @@ namespace Dune
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE triangle >
     {
       template <class Storage>
-      static void createGeometries(Storage& storage,
+      static inline void createGeometries(Storage& storage,
                                    const GeometryType& type,
                                    const bool nonConform )
       {
@@ -65,9 +65,9 @@ namespace Dune
     struct CreateGeometries<dummy, 2, dimworld, ALU3DSPACE tetra >
     {
       template <class Storage>
-      static void createGeometries(Storage& storage,
-                                   const GeometryType& type,
-                                   const bool nonConform )
+      static inline void createGeometries(Storage& storage,
+                                          const GeometryType& type,
+                                          const bool nonConform )
       {
         if( nonConform )
         {
@@ -86,9 +86,9 @@ namespace Dune
     struct CreateGeometries<dummy, 3, 3, ALU3DSPACE tetra >
     {
       template <class Storage>
-      static void createGeometries(Storage& storage,
-                                   const GeometryType& type,
-                                   const bool nonConform )
+      static inline void createGeometries(Storage& storage,
+                                          const GeometryType& type,
+                                          const bool nonConform )
       {
         alugrid_assert ( nonConform ) ;
         {
@@ -156,7 +156,7 @@ namespace Dune
 
   public:
     // create empty storage
-    ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
+    inline ALULocalGeometryStorage ( const GeometryType type, const bool nonConform )
     : count_( 0 ), initialized_( false )
     {
       // initialize geometries
@@ -164,13 +164,13 @@ namespace Dune
     }
 
     // create empty storage
-    ALULocalGeometryStorage ()
+    inline ALULocalGeometryStorage ()
     : count_( 0 ), initialized_( false )
     {
     }
 
     // return reference to local geometry
-    const GeometryImpl& operator [] (int child) const
+    inline const GeometryImpl& operator [] (int child) const
     {
       alugrid_assert ( geomCreated(child) );
       // this method is not thread safe yet
@@ -178,7 +178,7 @@ namespace Dune
     }
 
     //! access local geometry storage
-    static const ThisType& storage( const GeometryType type, const bool nonConforming )
+    static inline const ThisType& storage( const GeometryType type, const bool nonConforming )
     {
       if( type.isSimplex() )
       {
@@ -199,10 +199,10 @@ namespace Dune
 
   protected:
     // check if geometry has been created
-    bool geomCreated(int child) const { return geoms_[child].valid(); }
+    inline bool geomCreated(int child) const { return geoms_[child].valid(); }
 
     //! initialize local geometries
-    bool initialize( const GeometryType type, const bool nonConform )
+    inline bool initialize( const GeometryType type, const bool nonConform )
     {
       if( ! initialized_ )
       {
@@ -220,7 +220,7 @@ namespace Dune
     }
 
     template < class Grid >
-    void createGeometries(const GeometryType& type)
+    inline void createGeometries(const GeometryType& type)
     {
       static bool firstCall = true ;
       if( firstCall )
@@ -287,7 +287,7 @@ namespace Dune
 
     // create local geometry
     template< class Geometry >
-    void create ( const Geometry &father,
+    inline void create ( const Geometry &father,
                   const Geometry &son,
                   const int child )
     {

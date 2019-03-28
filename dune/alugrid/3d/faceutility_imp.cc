@@ -280,7 +280,8 @@ namespace Dune
     bndType_( orig.bndType_ ),
     conformanceState_(orig.conformanceState_),
     conformingRefinement_( orig.conformingRefinement_ ),
-    ghostCellsEnabled_( orig.ghostCellsEnabled_ )
+    ghostCellsEnabled_( orig.ghostCellsEnabled_ ),
+    levelIntersection_( orig.levelIntersection_ )
   {}
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >

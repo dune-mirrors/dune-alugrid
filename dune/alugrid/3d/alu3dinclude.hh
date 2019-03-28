@@ -1,24 +1,7 @@
 #ifndef DUNE_ALUGRID_ALU3DINCLUDE_HH
 #define DUNE_ALUGRID_ALU3DINCLUDE_HH
 
-//////////////////////////////////////////////////////////////////////
-// compile imp.cc into lib (1 yes, 0 no)
-// if you change this, you'll get what you deserve
-//////////////////////////////////////////////////////////////////////
-#define COMPILE_ALUGRID_LIB 0
-
-#if COMPILE_ALUGRID_LIB
-  #define COMPILE_ALUGRID_INLINE 0
-#else
-  #define COMPILE_ALUGRID_INLINE 1
-#endif
-
-#if COMPILE_ALUGRID_INLINE
-#define alu_inline inline
-#else
-#define alu_inline
-#endif
-/////////////////////////////////////////////////////////////////////
+#include "aluinline.hh"
 
 // all methods and classes of the ALUGrid are defined in the namespace
 #define ALU3DSPACE ::ALUGrid::

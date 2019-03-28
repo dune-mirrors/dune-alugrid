@@ -5,6 +5,7 @@
 #include "geometry.hh"
 #include "grid.hh"
 
+
 namespace Dune {
 
   /////////////////////////////////////////////////////////////////
@@ -13,6 +14,7 @@ namespace Dune {
   //  --Codim0Entity
   //
   ////////////////////////////////////////////////////////////////
+  /*
   template<int dim, class GridImp>
   inline void ALU3dGridEntity<0,dim,GridImp> ::
   removeElement ()
@@ -201,6 +203,7 @@ namespace Dune {
     alugrid_assert ( item_ );
     return ((*item_).requestrule() == coarse_element_t);
   }
+  */
 
   //*******************************************************************
   //

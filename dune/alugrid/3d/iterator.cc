@@ -1,16 +1,19 @@
 #ifndef DUNE_ALUGRID_ITERATOR_CC
 #define DUNE_ALUGRID_ITERATOR_CC
 
-#if COMPILE_ALUGRID_INLINE == 0
-#include <config.h>
-#endif
+// config.h is included via cmd line argument
 
+#include "aluinline.hh"
 #include "alu3dinclude.hh"
+
+#include "geometry.hh"
+#include "entity.hh"
+#include "grid.hh"
+#include "faceutility.hh"
 #include "iterator.hh"
 
-#ifndef alu_inline
-#define alu_inline inline
-#endif
+#include "alu3diterators_imp.cc"
+#include "iterator_imp.cc"
 
 namespace Dune {
 
@@ -32,7 +35,9 @@ alu_inline ALU3dGridLevelIterator<codim,pitype,GridImp> ::
   , iter_()
   , level_(level)
 {
-  iter_.reset(new IteratorType( grid(), level_, grid().nlinks() ));
+  // the wrapper for the original iterator of the ALU3dGrid
+  typedef typename ALU3DSPACE ALU3dGridLevelIteratorWrapper< (GridImp::dimension == 2 && codim == 2) ? 3 : codim, pitype, Comm > IteratorImplType;
+  iter_.reset(new IteratorImplType( grid(), level_, grid().nlinks() ));
   alugrid_assert( iter_ );
   this->firstItem( grid(), *this, level_);
 }
@@ -85,7 +90,7 @@ assign(const ThisType & org)
   level_ = org.level_;
   if( org.iter_ )
   {
-    iter_.reset( new IteratorType ( *(org.iter_) ) );
+    iter_.reset( org.iter_->clone() );
     alugrid_assert ( iter_ );
     if(!(iter_->done()))
     {
@@ -140,8 +145,9 @@ ALU3dGridLeafIterator(const GridImp& grd, int level ,
   , grid_( &grd )
   , iter_()
 {
+  typedef typename ALU3DSPACE ALU3dGridLeafIteratorWrapper< (GridImp::dimension == 2 && cdim == 2) ? 3 : cdim, pitype, Comm > IteratorImplType ;
   // create interior iterator
-  iter_.reset( new IteratorType ( grid(), level , grid().nlinks() ) );
+  iter_.reset( new IteratorImplType ( grid(), level , grid().nlinks() ) );
   alugrid_assert ( iter_ );
   // -1 to identify as leaf iterator
   this->firstItem( grid(), *this, -1 );
@@ -194,7 +200,7 @@ assign (const ThisType & org)
   if( org.iter_ )
   {
     alugrid_assert ( !org.iter_->done() );
-    iter_.reset( new IteratorType ( *(org.iter_) ) );
+    iter_.reset( org.iter_->clone() );
     alugrid_assert ( iter_ );
 
     if( !(iter_->done() ))
@@ -402,10 +408,8 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   return ;
 }
 
-#if COMPILE_ALUGRID_LIB
+#if ! COMPILE_ALUGRID_INLINE
   // Instantiation 3-3
-  template class ALU3dGrid<3, 3, hexa, ALUGridNoComm >;
-  template class ALU3dGrid<3, 3, tetra, ALUGridNoComm >;
 
   // Instantiation without MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
@@ -512,12 +516,16 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
+
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
 
   // Instantiation
-  template class ALU3dGrid<3, 3, hexa, ALUGridMPIComm >;
-  template class ALU3dGrid<3, 3, tetra, ALUGridMPIComm >;
 
   // Instantiation with MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
@@ -624,12 +632,16 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
+
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
 
-   // Instantiation 2-3
-  template class ALU3dGrid<2, 3, hexa, ALUGridNoComm >;
-  template class ALU3dGrid<2, 3, tetra, ALUGridNoComm >;
+  // Instantiation 2-3
 
   // Instantiation without MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
@@ -671,19 +683,6 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
@@ -723,25 +722,17 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
 
   // Instantiation
-  template class ALU3dGrid<2, 3, hexa, ALUGridMPIComm >;
-  template class ALU3dGrid<2, 3, tetra, ALUGridMPIComm >;
 
   // Instantiation with MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
@@ -783,19 +774,6 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
@@ -835,26 +813,18 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
+
 
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
 
-
-   // Instantiation 2-2
-  template class ALU3dGrid<2, 2, hexa, ALUGridNoComm >;
-  template class ALU3dGrid<2, 2, tetra, ALUGridNoComm >;
+  // Instantiation 2-2
 
   // Instantiation without MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
@@ -896,19 +866,6 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
@@ -948,25 +905,17 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
+
 
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
 
   // Instantiation
-  template class ALU3dGrid<2, 2, hexa, ALUGridMPIComm >;
-  template class ALU3dGrid<2, 2, tetra, ALUGridMPIComm >;
 
   // Instantiation with MPI
   template class ALU3dGridLeafIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
@@ -1008,19 +957,6 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLeafIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLeafIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 0, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 0, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
@@ -1060,23 +996,16 @@ alu_inline void ALU3dGridHierarchicIterator<GridImp> :: increment ()
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
   template class ALU3dGridLevelIterator< 2, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, All_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Interior_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, InteriorBorder_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Overlap_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, OverlapFront_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-  template class ALU3dGridLevelIterator< 3, Ghost_Partition, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
+
+  template class ALU3dGridIntersectionIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
+  template class ALU3dGridLevelIntersectionIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
   template class ALU3dGridHierarchicIterator< const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
 
-#endif // end COMPILE_ALUGRID_LIB
+#endif // ! COMPILE_ALUGRID_INLINE
 
 } // end namespace Dune
 #endif // DUNE_ALUGRID_ITERATOR_IMP_CC

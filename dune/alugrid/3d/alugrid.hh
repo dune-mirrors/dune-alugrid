@@ -202,5 +202,5 @@ namespace Dune
 
 } //end  namespace Dune
 
-#undef alu_inline
+//#undef alu_inline
 #endif // #ifndef DUNE_ALU3DGRID_ALUGRID_HH

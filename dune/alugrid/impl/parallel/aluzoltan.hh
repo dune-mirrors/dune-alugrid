@@ -59,6 +59,10 @@
 
 namespace ALUGridZoltan
 {
+  using ::ALUGrid::MpAccessGlobal;
+  using ::ALUGrid::MpAccessLocal;
+  using ::ALUGrid::MpAccessMPI;
+
 #if HAVE_ZOLTAN
   template < class ldb_vertex_map_t, class ldb_edge_set_t >
   class ObjectCollection
@@ -260,7 +264,7 @@ namespace ALUGridZoltan
   enum method_t {HSFC, PHG, PARMETIS};
   template< class ldb_vertex_map_t, class ldb_edge_set_t, class ldb_connect_set_t >
   bool CALL_Zoltan_LB_Partition( method_t method,
-                                 ALUGrid::MpAccessGlobal &mpa,
+                                 MpAccessGlobal &mpa,
                                  ldb_vertex_map_t& vertexMap,
                                  ldb_edge_set_t& edgeSet,
                                  ldb_connect_set_t& connect,
@@ -268,7 +272,7 @@ namespace ALUGridZoltan
                                  const bool verbose )
   {
 #if HAVE_ZOLTAN && HAVE_MPI
-    ALUGrid::MpAccessMPI* mpaMPI = dynamic_cast<ALUGrid::MpAccessMPI *> (&mpa);
+    MpAccessMPI* mpaMPI = dynamic_cast<MpAccessMPI *> (&mpa);
     if( mpaMPI == 0 )
     {
       std::cerr << "ERROR: wrong mpAccess object, couldn't convert to MpAccessMPI!! in: " << __FILE__ << " line : " << __LINE__ << std::endl;
@@ -392,13 +396,13 @@ namespace ALUGridZoltan
         int& moveTo = i->second;
         // insert and also set partition number new (including own number)
         if ( moveTo == -1 ) moveTo = myrank ;
-        connect.insert( ALUGrid::MpAccessLocal::sendRank( moveTo ) );
+        connect.insert( MpAccessLocal::sendRank( moveTo ) );
       }
 
       // insert also process number that I will receive objects from
       for (int i=0; i < numImport; ++i)
       {
-        connect.insert( ALUGrid::MpAccessLocal::recvRank( importProcs[ i ] ) );
+        connect.insert( MpAccessLocal::recvRank( importProcs[ i ] ) );
       }
     }
     else
