@@ -10,15 +10,12 @@
 #include "alu3diterators_imp.cc"
 #include "aluinline.hh"
 
-// alu_inline might be defined differently
-#define alu_inline_tmp alu_inline
-
 namespace Dune
 {
 
   template< class Comm >
   template< class GridType >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGridVertexList< Comm >::
   setupVxList(const GridType & grid, int level)
   {
@@ -91,7 +88,7 @@ namespace Dune
 
   template< class Comm >
   template< class GridType >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGridLeafVertexList< Comm >::
   setupVxList(const GridType & grid)
   {
@@ -176,7 +173,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void
   ALU3dGrid< dim, dimworld, elType, Comm >::makeGeometries()
   {
@@ -203,7 +200,7 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   const ALU3dGrid< dim, dimworld, elType, Comm > &
   ALU3dGrid< dim, dimworld, elType, Comm >::operator= ( const ALU3dGrid< dim, dimworld, elType, Comm > &other )
   {
@@ -211,29 +208,9 @@ namespace Dune
     return (*this);
   }
 
+
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   alu_inline
-  int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int level, int codim ) const
-  {
-    // if we dont have this level return 0
-    if( (level > maxlevel_) || (level < 0) ) return 0;
-
-    alugrid_assert ( codim >= 0);
-    alugrid_assert ( codim < dimension+1 );
-
-    alugrid_assert ( sizeCache_ );
-    return sizeCache_->size(level,codim);
-  }
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  size_t ALU3dGrid< dim, dimworld, elType, Comm >::numBoundarySegments () const
-  {
-    return macroBoundarySegmentIndexSet().size();
-  }
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
   void ALU3dGrid< dim, dimworld, elType, Comm >::calcMaxLevel ()
   {
     // old fashioned way
@@ -265,7 +242,7 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp bool ALU3dGrid< dim, dimworld, elType, Comm >
+  alu_inline bool ALU3dGrid< dim, dimworld, elType, Comm >
     ::writeMacroGrid ( const std::string path, const std::string name,
                        const ALU3DSPACE MacroFileHeader::Format format ) const
   {
@@ -286,7 +263,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::
   backup( std::ostream& stream, const ALU3DSPACE MacroFileHeader::Format format  ) const
   {
@@ -295,7 +272,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::restore( std::istream& stream )
   {
     // create new grid from stream
@@ -323,7 +300,7 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::checkMacroGridFile ( const std::string filename )
   {
     if(filename == "") return;
@@ -362,7 +339,7 @@ namespace Dune
 
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::checkMacroGrid ()
   {
     typedef typename ALU3dImplTraits< elType, Comm >::HElementType HElementType;
@@ -382,7 +359,7 @@ namespace Dune
   }
 
 
-  alu_inline_tmp
+  alu_inline
   const char* elType2Name( ALU3dGridElementType elType )
   {
     switch( elType )
@@ -395,7 +372,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::finalizeGridCreation()
   {
     // distribute the grid
@@ -413,7 +390,7 @@ namespace Dune
 
   // load balance grid ( lbData might be a pointer to NULL )
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
+  alu_inline bool ALU3dGrid< dim, dimworld, elType, Comm >::loadBalance( GatherScatterType* lbData )
   {
     if( comm().size() <= 1 )
         return false;
@@ -448,7 +425,7 @@ namespace Dune
 
   // post process grid
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::postAdapt ()
   {
     if( lockPostAdapt_ )
@@ -463,7 +440,7 @@ namespace Dune
 
   // post process grid
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
+  alu_inline
   void ALU3dGrid< dim, dimworld, elType, Comm >::clearIsNewMarkers ()
   {
     // old fashioned way
@@ -614,7 +591,6 @@ namespace Dune
 
 #endif // #if COMPILE_ALUGRID_LIB
 
-#undef alu_inline_tmp
 } // end namespace Dune
 
 #endif // end DUNE_ALUGRID_GRID_IMP_CC
