@@ -23,8 +23,7 @@ namespace Dune
   inline ALU3dGrid< dim, dimworld, elType, Comm >
     ::ALU3dGrid ( const std::string &macroTriangFilename,
                   const MPICommunicatorType mpiComm,
-                  const DuneBoundaryProjectionType *bndPrj,
-                  const DuneBoundaryProjectionVector *bndVec,
+                  const ALUGridVertexProjectionPairType& bndPrj,
                   const ALUGridRefinementType refinementType )
     : mygrid_()
     , maxlevel_( 0 )
@@ -37,9 +36,7 @@ namespace Dune
     , levelIndexVec_(1) , leafIndexSet_()
     , sizeCache_ ()
     , lockPostAdapt_( false )
-    , bndPrj_ ( bndPrj )
-    , bndVec_ ( (bndVec) ? (new DuneBoundaryProjectionVector( *bndVec )) : nullptr )
-    , vertexProjection_( (bndPrj || bndVec) ? new ALUGridBoundaryProjectionType( *this ) : nullptr )
+    , vertexProjections_( bndPrj )
     , communications_( new Communications( mpiComm ) )
     , refinementType_( refinementType )
   {
@@ -284,22 +281,6 @@ namespace Dune
       return "ALUCubeGrid";
     else
       return "ALUSimplexGrid";
-  }
-
-
-
-  template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
-  alu_inline_tmp
-  ALU3dGrid< dim, dimworld, elType, Comm >::~ALU3dGrid ()
-  {
-    if( bndVec_ )
-    {
-      const size_t bndSize = bndVec_->size();
-      for(size_t i=0; i<bndSize; ++i)
-      {
-        delete (*bndVec_)[i];
-      }
-    }
   }
 
 

@@ -44,9 +44,6 @@ namespace Dune
 
     typedef typename Grid::MPICommunicatorType MPICommunicatorType;
 
-    //! \brief type of boundary projection class
-    typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
-
     template< int codim >
     struct Codim
     {
@@ -79,7 +76,11 @@ namespace Dune
                     "ALU3dGridFactory supports only grids containing "
                     "tetrahedrons or hexahedrons exclusively." );
 
+    //! \brief type of boundary projection class
+    typedef DuneBoundaryProjection< dimensionworld >  DuneBoundaryProjectionType;
+
     typedef Dune::BoundarySegmentWrapper< dimension, dimensionworld > BoundarySegmentWrapperType;
+    typedef ALUGridBoundaryProjection< Grid > ALUProjectionType;
 
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
@@ -152,9 +153,10 @@ namespace Dune
 
   private:
     // return grid object
-    virtual Grid* createGridObj( BoundaryProjectionVector* bndProjections, const std::string& name ) const
+    virtual Grid* createGridObj( const std::string& name ) const
     {
-      return new Grid( communicator_, globalProjection_, bndProjections , name, realGrid_ );
+      ALU3DSPACE ProjectVertexPtrPair pv = std::make_pair( globalProjection_, surfaceProjection_ );
+      return new Grid( communicator_, pv, name, realGrid_ );
     }
 
   protected:
@@ -264,7 +266,7 @@ namespace Dune
      *
      *  \param[in]  bndProjection instance of an ALUGridBoundaryProjection projecting vertices to a curved
      */
-    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection, const bool projectInside = (dimension != dimensionworld) );
+    virtual void insertBoundaryProjection ( const DuneBoundaryProjectionType& bndProjection, const bool isSurfaceProjection = (dimension != dimensionworld) );
 
     /** \brief add a face transformation (for periodic identification)
      *
@@ -401,8 +403,8 @@ namespace Dune
     ElementVector elements_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
-    bool projectInside_;
-    const DuneBoundaryProjectionType* globalProjection_ ;
+    ALU3DSPACE ProjectVertexPtr globalProjection_ ;
+    ALU3DSPACE ProjectVertexPtr surfaceProjection_ ;
     BoundaryProjectionMap boundaryProjections_;
     FaceTransformationVector faceTransformations_;
     unsigned int numFacesInserted_;
@@ -514,8 +516,8 @@ namespace Dune
     :: ALU3dGridFactory ( const MPICommunicatorType &communicator,
                           bool removeGeneratedFile )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
@@ -523,7 +525,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline
@@ -531,8 +536,8 @@ namespace Dune
     :: ALU3dGridFactory ( const std::string &filename,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( true ),
     allowGridGeneration_( rank_ == 0 ),
@@ -540,7 +545,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline
@@ -548,8 +556,8 @@ namespace Dune
     :: ALU3dGridFactory ( const bool realGrid,
                           const MPICommunicatorType &communicator )
   : rank_( ALU3dGridCommunications< ALUGrid::dimension, ALUGrid::dimensionworld, elementType, MPICommunicatorType >::getRank( communicator ) ),
-    projectInside_(false),
     globalProjection_ ( 0 ),
+    surfaceProjection_ ( 0 ),
     numFacesInserted_ ( 0 ),
     realGrid_( realGrid ),
     allowGridGeneration_( true ),
@@ -557,7 +565,10 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( false )
-  {}
+  {
+    BoundarySegmentWrapperType::registerFactory();
+    ALUProjectionType::registerFactory();
+  }
 
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::

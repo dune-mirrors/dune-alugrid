@@ -802,9 +802,7 @@ namespace ALUGrid
     : A (f0, t0, f1, t1, f2, t2, f3, t3),
       _bbb (0), _up(up)
     , _inner( 0 )
-    , _volume( vol < 0.0 ? quadraturTetra3D< VolumeCalc >(
-                             LinearMapping ( myvertex(0)->Point(), myvertex( 1 )->Point(), myvertex( 2 )->Point(), myvertex( 3 )->Point() ) ).integrate1( 0.0 )
-                         : vol )
+    , _volume( vol < 0.0 ? computeVolume() : vol )
     , _lvl (l)
     , _nChild(nChild)
     , _rule (myrule_t::nosplit)
@@ -823,15 +821,14 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
     // check that _volume has the correct value
-    const double calculatedVolume =
-      std::abs( quadraturTetra3D < VolumeCalc > (
-        LinearMapping ( myvertex(0)->Point(),
-                        myvertex(1)->Point(),
-                        myvertex(2)->Point(),
-                        myvertex(3)->Point())).integrate1 (0.0) );
-    //if( std::abs( calculatedVolume - _volume ) >1e-10 )
-    //  std::cout << "Determinant of Tetra[" << this->getIndex() << "] is wrong" << std::endl;
-    alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    const double calculatedVolume = computeVolume();
+    const double myvol = volume();
+
+    //In the 2d case the 3d volume may be 0, so do not divide by it
+    if(this->is2d())
+      alugrid_assert ( std::abs( calculatedVolume - myvol ) < 1e-10 );
+    else
+      alugrid_assert ( std::abs( calculatedVolume - myvol ) / myvol < 1e-10 );
 #endif
   }
 
@@ -846,9 +843,7 @@ namespace ALUGrid
     : A (f0, t0, f1, t1, f2, t2, f3, t3)
     , _bbb (0), _up(0)
     , _inner( 0 )
-    , _volume( quadraturTetra3D < VolumeCalc >
-      (LinearMapping ( myvertex(0)->Point(), myvertex(1)->Point(),
-                       myvertex(2)->Point(), myvertex(3)->Point())).integrate1 (0.0) )
+    , _volume( computeVolume() )
     , _lvl (l)
     , _nChild(0)  // we are macro ==> nChild 0
     , _rule (myrule_t::nosplit)
@@ -1993,11 +1988,8 @@ namespace ALUGrid
     f0->append(f1) ;
     f1->append(f2) ;
 
-
     // we divide by 4 means we divide the volume by 4
     const double childVolume = calculateChildVolume( 0.25 * _volume );
-
-
 
 #ifdef ALUGRIDDEBUG
   //  for(int  i = 0; i<4 ; ++i )

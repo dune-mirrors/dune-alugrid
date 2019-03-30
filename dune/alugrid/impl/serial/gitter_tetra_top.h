@@ -173,11 +173,14 @@ namespace ALUGrid
       }
 
     private :
-      innerbndseg_t * _bbb, * _dwn , * _up;
+      innerbndseg_t * _bbb, * _dwn , * _up;  // 24 bytes
 
       int _segmentId; // segment index of macro face
-      const bnd_t _bt; // type of boundary
-      unsigned char _lvl;
+      const bnd_t _bt; // type of boundary   // 32 bytes
+
+      using A :: _lvl; // declared in hbndseg3_GEO
+
+      // unsigned char _lvl;                    // 40 bytes
 
       void split_bisection ();
       void split_iso4 ();
@@ -431,6 +434,49 @@ namespace ALUGrid
       int calculateFace2Twist( const int vx, const myhface_t* ) const;
       int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
 
+      // change coordinates of this element (for ghost elements only)
+      void changeVertexCoordinates( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+      {
+        // this should only be called for ghost elements
+        alugrid_assert( this->isGhost() );
+
+#ifdef ALUGRIDDEBUG
+        for (int i = 0; i < 3; ++i)
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myhface(face)->myvertex(i));
+          // this test will (and should) fail for vertex projections
+          {
+            // make sure we got the right face
+            alugrid_assert (std::abs(vx->Point()[0]-newCoords[i][0])<1e-8);
+            alugrid_assert (std::abs(vx->Point()[1]-newCoords[i][1])<1e-8);
+            alugrid_assert (std::abs(vx->Point()[2]-newCoords[i][2])<1e-8);
+          }
+        }
+#endif
+        for( int i=0; i<3; ++i )
+        {
+          //myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex( face, i ));
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myhface(face)->myvertex(i));
+          vx->setCoordinates( newCoords[ i ] );
+        }
+
+        // set vertex opposite to face
+        this->myvertex( face )->setCoordinates( newCoords[ 3 ] );
+
+        _volume = volume;
+      }
+
+      double computeVolume() const
+      {
+        // use std::abs to compute volume because in some of the 2d cases this
+        // could be negative
+        return std::abs( quadraturTetra3D< VolumeCalc >(
+                            LinearMapping ( myvertex(0)->Point(),
+                                            myvertex(1)->Point(),
+                                            myvertex(2)->Point(),
+                                            myvertex(3)->Point() ) ).integrate1( 0.0 ) );
+      }
+
       // the element type is obtained from the level of the element
       // under the assumption that on level 0 all elements have type 0
       unsigned char elementType () const { return ((this->macroSimplexTypeFlag() + _lvl) % 3); }
@@ -444,7 +490,7 @@ namespace ALUGrid
     private :
       innertetra_t * _bbb, * _up; // 16 byte
       inner_t * _inner;           //  8 byte
-      const double _volume;       //  8 byte
+      double _volume;             //  8 byte
 
       const unsigned char _lvl;  // 1 byte
       signed char _nChild;       // 1 byte
@@ -910,9 +956,11 @@ namespace ALUGrid
   Hbnd3Top (int l, myhface_t * f, int i, const bnd_t bt) :
     A (f, i ),
     _bbb (0), _dwn (0), _up (0) ,
-    _bt( bt ),
-    _lvl (l)
+    _bt( bt )
   {
+    // set level (declared in hbdnseg3_GEO to save memory usage)
+    _lvl = l;
+
     // set index of boundary segment
     this->setIndex( indexManager().getIndex() );
 
@@ -925,14 +973,15 @@ namespace ALUGrid
   }
 
   template < class A > inline Hbnd3Top < A > ::
-  Hbnd3Top (int l, myhface_t * f,
-            int i,
+  Hbnd3Top (int l, myhface_t * f, int i,
             innerbndseg_t * up, bnd_t bt,
             Gitter::helement_STI * gh, int gFace ) :
     A (f, i ), _bbb (0), _dwn (0), _up (up) ,
-    _bt (bt),
-    _lvl (l)
+    _bt (bt)
   {
+    // set level (declared in hbdnseg3_GEO to save memory usage)
+    _lvl = l;
+
     alugrid_assert ( this->myGrid()->ghostCellsEnabled() && _bt == A::closure ? gh != 0 : true );
     // store ghost element
     typedef Gitter :: ghostpair_STI ghostpair_STI;
@@ -941,10 +990,18 @@ namespace ALUGrid
     // set index of boundary segment
     this->setIndex( indexManager().getIndex() );
 
-    // get segment index from father if existent
-    _segmentId = (_up) ? _up->_segmentId : this->getIndex();
+    if( _up )
+    {
+      // get segment index from father if existent
+      _segmentId = _up->_segmentId;
+      // set boundary projection from father
+      this->_pvPtr = _up->_pvPtr;
+    }
+    else
+      _segmentId = this->getIndex();
 
     setBoundaryId( _bt );
+
     return;
   }
 
@@ -1050,7 +1107,8 @@ namespace ALUGrid
   {
     // if vertex projection is available on a neighbor
     // volume has to be recalculated
-    return ( this->myGrid()->vertexProjection() ) ? -1.0 : childVolume;
+    //return ( this->myGrid()->vertexProjection() ) ? -1.0 : childVolume;
+    return -1.;
   }
 
   template < class A > inline int TetraTop < A > :: level () const {

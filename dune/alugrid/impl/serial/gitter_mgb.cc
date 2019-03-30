@@ -126,7 +126,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master)
+  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
@@ -146,6 +146,7 @@ namespace ALUGrid
         hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
+        hb3->setBoundaryProjection( pv );
         _hbnd3Map [key] = hb3;
         return true;
       }
@@ -154,7 +155,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master )
+  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
@@ -174,6 +175,7 @@ namespace ALUGrid
         hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
+        hb4->setBoundaryProjection( pv );
         _hbnd4Map [key] = hb4;
         return true;
       }
@@ -387,15 +389,6 @@ namespace ALUGrid
    , _mgb (b)
   {
     if(init) initialize();
-  }
-
-  // deprecated constructor, project vertex has been removed
-  MacroGridBuilder::MacroGridBuilder (BuilderIF & b, ProjectVertex* )
-   : _initialized(false)
-   , _finalized(false)
-   , _mgb (b)
-  {
-    initialize();
   }
 
   void MacroGridBuilder::initialize ()
@@ -908,8 +901,9 @@ namespace ALUGrid
         {
           in >> v[ k ];
         }
+        ProjectVertexPtr pv; // empty projection
         // insert bnd object
-        InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt));
+        InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt), pv);
       }
     }
     else if ( type == TETRA_RAW )
@@ -951,8 +945,9 @@ namespace ALUGrid
         {
           in >> v[ k ];
         }
+        ProjectVertexPtr pv; // empty projection
         // insert bnd object
-        InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt));
+        InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt), pv);
       }
     }
 

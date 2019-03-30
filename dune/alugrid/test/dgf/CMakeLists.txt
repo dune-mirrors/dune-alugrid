@@ -5,6 +5,7 @@ set(DGFS
   cube-testgrid-2-3.dgf
   grid2d_str1d.dgf
   periodic.dgf
+  sphere.dgf
   simplex-testgrid-2-2.dgf
   simplex-testgrid-2-3.dgf
   simplex-testgrid-3-3.dgf

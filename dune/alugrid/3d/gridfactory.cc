@@ -71,7 +71,7 @@ namespace Dune
         if(vertices_.size() == 0)
         {
           // fake vertex that every tetra is connected to
-          vertices_.push_back( std::make_pair( VertexType(1.0), 0 ) );
+          vertices_.push_back( std::make_pair( VertexType{0.0,0.0,1.0}, 0 ) );
         }
 
         //setting the global id to odd is convenience
@@ -195,14 +195,23 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid > ::
-  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool projectInside)
+  insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool isSurfaceProjection )
   {
-     std::cout << "Project Inner Vertices:" << std::boolalpha << projectInside << std::endl << std::endl;
+#ifndef NDEBUG
+    std::cout << "Inserting Surface Projection:" << std::boolalpha << isSurfaceProjection << std::endl << std::endl;
+#endif
+    if( isSurfaceProjection )
+    {
+      if( surfaceProjection_ )
+        DUNE_THROW(InvalidStateException,"You can only insert one Surface Projection");
+      surfaceProjection_.reset(new ALUProjectionType (&bndProjection, ALUProjectionType :: surface) );
+    }
+    else
+    {
       if( globalProjection_ )
-      DUNE_THROW(InvalidStateException,"You can only insert one globalProjection");
-
-    projectInside_ = projectInside;
-    globalProjection_ = &bndProjection;
+        DUNE_THROW(InvalidStateException,"You can only insert one global boundary Projection");
+      globalProjection_.reset(new ALUProjectionType (&bndProjection, ALUProjectionType :: global) );
+    }
   }
 
 
@@ -222,6 +231,7 @@ namespace Dune
 
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
       DUNE_THROW( GridError, "Only one boundary projection can be attached to a face." );
+
     boundaryProjections_[ faceId ] = projection;
   }
 
@@ -436,8 +446,6 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    BoundaryProjectionVector* bndProjections = 0;
-
     correctElementOrientation();
 
     std::vector< unsigned int >& ordering = ordering_;
@@ -475,7 +483,9 @@ namespace Dune
 
       if( bisComp.make6CompatibilityCheck()  )
       {
+#ifndef NDEBUG
         std::cout << rankstr << "Grid is compatible!" << std::endl;
+#endif
       }
       else
       {
@@ -487,25 +497,33 @@ namespace Dune
         {
           markLongestEdge( elementOrientation );
         }
-
+#ifndef NDEBUG
         std::cout << rankstr << "Making compatible" << std::endl;
+#endif
         if( bisComp.type0Algorithm() )
         {
+#ifndef NDEBUG
           std::cout << rankstr << "Grid is compatible!!" << std::endl;
+#endif
           bisComp.stronglyCompatibleFaces();
           // obtain new element sorting, orientations, and types
           bisComp.returnElements( elements_, elementOrientation, simplexTypes );
           markLongestEdge( elementOrientation, false );
         }
+#ifndef NDEBUG
         else
           std::cout << rankstr << "Could not make compatible!" << std::endl;
+#endif
       }
-
+#ifndef NDEBUG
       std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
       std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+#endif
     }
 
     numFacesInserted_ = boundaryIds_.size();
+
+    const bool faceTrafoEmpty = bool(comm().min( int(faceTransformations_.empty()) ));
 
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
@@ -513,7 +531,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTransformations_.empty() || dimension == 2 )
+    if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 )
       recreateBoundaryIds();
 
     // sort boundary ids to insert real boundaries first and then fake
@@ -620,62 +638,15 @@ namespace Dune
       out.close();
     } // if( allowGridGeneration_ && !temporary )
 
-    const size_t boundarySegments = boundaryIds.size();
-
-    const size_t bndProjectionSize = boundaryProjections_.size();
-    if( bndProjectionSize > 0 || (globalProjection_ && dimension == 2) )
-    {
-      // the memory is freed by the grid on destruction
-      bndProjections = new BoundaryProjectionVector( boundarySegments,
-                                                    (DuneBoundaryProjectionType*) 0 );
-      const auto endB = boundaryIds.end();
-      int segmentId = 0;
-      for( auto it = boundaryIds.begin(); it != endB; ++it, ++segmentId )
-      {
-        // generate boundary segment pointer
-        FaceType faceId ( (*it).first);
-        std::sort( faceId.begin(), faceId.end() );
-
-        const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
-
-        // if no projection given we use global projection, otherwise identity
-        if( ! projection
-            && ((it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)) == projectInside_)
-            && globalProjection_ )
-        {
-          typedef BoundaryProjectionWrapper< dimensionworld > ProjectionWrapperType;
-          // we need to wrap the global projection because of
-          // delete in destructor of ALUGrid
-          projection = new ProjectionWrapperType( *globalProjection_ );
-          alugrid_assert ( projection );
-        }
-
-        // copy pointer
-        (*bndProjections)[ segmentId ] = projection;
-      }
-    }
-
-    // free memory
-    boundaryProjections_.clear();
-
-    // if we have a vector reset global projection
-    // because empty positions are filled with global projection anyway
-    if( bndProjections ) globalProjection_ = 0;
-
     // ALUGrid is taking ownership of bndProjections
     // and is going to delete this pointer
-    Grid* grid = createGridObj( bndProjections , name );
+    Grid* grid = createGridObj( name );
     alugrid_assert ( grid );
-
-    // remove pointers
-    globalProjection_ = 0;
-    // is removed by grid instance
-    bndProjections    = 0;
 
     // insert grid using ALUGrid macro grid builder
     if( !vertices_.empty() )
     {
-      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder(), grid->vertexProjection() );
+      ALU3DSPACE MacroGridBuilder mgb ( grid->getBuilder() );
 
       // now start inserting grid
       const int vxSize = vertices_.size();
@@ -728,6 +699,7 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type");
       }
 
+
       const auto endB = boundaryIds.end();
       for( auto it = boundaryIds.begin(); it != endB; ++it )
       {
@@ -738,6 +710,27 @@ namespace Dune
         // only positive boundary id's are allowed
         assert( bndType > 0 );
 
+        // generate boundary segment pointer
+        FaceType faceId ( boundaryId.first);
+        std::sort( faceId.begin(), faceId.end() );
+        const DuneBoundaryProjectionType* projection = boundaryProjections_[ faceId ];
+
+        ALU3DSPACE ProjectVertexPtr pv;
+
+        if( projection )
+        {
+          pv.reset( new ALUProjectionType( projection, ALUProjectionType::segment ) );
+        }
+        else if( (it->second == int(ALU3DSPACE Gitter::hbndseg_STI::closure_2d)
+                 && surfaceProjection_ ) )
+        {
+          pv = surfaceProjection_;
+        }
+        else if ( globalProjection_ )
+        {
+          pv = globalProjection_;
+        }
+
         if( elementType == hexa )
         {
           int bndface[ 4 ];
@@ -745,7 +738,7 @@ namespace Dune
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd4( bndface, bndType );
+          mgb.InsertUniqueHbnd4( bndface, bndType, pv );
         }
         else if( elementType == tetra )
         {
@@ -754,7 +747,7 @@ namespace Dune
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd3( bndface, bndType );
+          mgb.InsertUniqueHbnd3( bndface, bndType, pv );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
@@ -796,6 +789,9 @@ namespace Dune
           DUNE_THROW( GridError, "Invalid element type" );
       }
     }
+
+    // free memory
+    boundaryProjections_.clear();
 
     // clear vertices
     VertexVector().swap( vertices_ );
@@ -846,8 +842,9 @@ namespace Dune
     {
       // A 2d face type, as we want to work in 2d
       typedef std::array<unsigned int, 2>  Face2Type;
+      // this is different from numFaces which could be 2d only
+      const int num3dFaces = (elementType == tetra) ? 3 : 4;
 
-      const int numFaces = (elementType == tetra) ? 3 : 4;
       //the nextIndex denotes the indices of the 2d element
       //inside the 3d element in circular order
       std::vector <unsigned int> nextIndex ({1,2,3});
@@ -872,13 +869,14 @@ namespace Dune
       //The Faces already worked on
       std::set< Face2Type > doneFaces;
 
+
       //get first element
       ElementType &element = elements_[0];
       //choose orientation as given by first inserted element and
       //build oriented faces and add to list of active faces
-      for(int i = 0; i < numFaces ; ++i)
+      for(int i = 0; i < num3dFaces ; ++i)
       {
-        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%numFaces ] ]}};
+        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%num3dFaces ] ]}};
         //this is the twist with respect to the global face orientation
         // we need it once from each side
         int twist = face[0] < face[1] ? 0 : -1;
@@ -919,7 +917,7 @@ namespace Dune
           {
             if (outerElement[nextIndex[i]] == currentFace[0])
             {
-              if( outerElement[ nextIndex[(i+1)%numFaces] ] == currentFace[1]  )
+              if( outerElement[ nextIndex[(i+1)%num3dFaces] ] == currentFace[1]  )
               {
                 if(twist == 0)
                 {
@@ -930,7 +928,7 @@ namespace Dune
                 }
                 found =true;
               }
-              else if(outerElement[nextIndex[(i-1+numFaces)%numFaces]] == currentFace[1] )
+              else if(outerElement[nextIndex[(i-1+num3dFaces)%num3dFaces]] == currentFace[1] )
               {
                 if(twist < 0)
                 {
@@ -945,9 +943,9 @@ namespace Dune
                 break;
 
               //build the faces of outerElement with twists
-              for (int f = 0 ; f< numFaces ; ++f)
+              for (int f = 0 ; f< num3dFaces ; ++f)
               {
-                Face2Type face =  {{ outerElement[ nextIndex[ f%numFaces ] ],outerElement[nextIndex[(f+1)%numFaces]] }} ;
+                Face2Type face =  {{ outerElement[ nextIndex[ f%num3dFaces ] ],outerElement[nextIndex[(f+1)%num3dFaces]] }} ;
                 int twist = face[0] < face[1] ? 0 : -1;
                 std::sort(face.begin(),face.end());
                 if(face == currentFace) continue;
@@ -1111,7 +1109,6 @@ namespace Dune
 
     BndPair bnd0 ( key0, bndId[ 0 ] );
     BndPair bnd1 ( key1, bndId[ 1 ] );
-
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
     return true;
@@ -1121,7 +1118,8 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::searchPeriodicNeighbor ( FaceMap &faceMap, typename FaceMap::iterator &pos,
+    ::searchPeriodicNeighbor ( FaceMap &faceMap,
+                               typename FaceMap::iterator& pos,
                                const int defaultId )
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
@@ -1188,16 +1186,16 @@ namespace Dune
         generateFace( elements_[ n ], face, key );
         std::sort( key.begin(), key.end() );
 
-        const FaceIterator pos = faceMap.find( key );
-        if( pos != faceMap.end() )
+        if( faceMap.find( key ) != faceMap.end() )
+        {
           faceMap.erase( key );
+        }
         else
         {
           faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
         }
       }
     }
-
 
     // swap current boundary ids with an empty vector
     BoundaryIdMap boundaryIds;
@@ -1214,7 +1212,7 @@ namespace Dune
     {
       FaceType key = bndIt->first;
       std::sort( key.begin(), key.end() );
-      const FaceIterator pos = faceMap.find( key );
+      FaceIterator pos = faceMap.find( key );
 
       if( pos == faceMap.end() )
       {
@@ -1230,7 +1228,7 @@ namespace Dune
     //after the recreation of the Ids_, because of correctElementOrientation
     if( !faceTransformations_.empty() )
     {
-      for(auto it = faceMap.begin(); it!=faceMap.end(); ++it)
+      for(auto it = faceMap.begin(); it != faceMap.end(); ++it)
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces

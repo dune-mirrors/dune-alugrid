@@ -99,12 +99,12 @@ namespace ALUGrid
   public:
 
     //! constructor creating grid from std::istream
-    GitterDuneImpl ( const int dim, std::istream &in, ProjectVertex *ppv = 0 )
+    GitterDuneImpl ( const int dim, std::istream &in, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
     : GitterBasisImpl ( dim, in, ppv )
     {}
 
     //! constructor creating grid from macro grid file
-    inline GitterDuneImpl (const int dim, const char *filename, ProjectVertex* ppv = 0 )
+    inline GitterDuneImpl (const int dim, const char *filename, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
       : GitterBasisImpl ( dim, filename, ppv )
     {}
 

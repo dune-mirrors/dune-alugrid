@@ -178,13 +178,21 @@ namespace ALUGrid
 
     for (int i = 0; i < 3; ++i)
     {
-      // make sure we got the right face
-      alugrid_assert (std::abs(myface.myvertex(i)->Point()[0]-
-             face.myvertex(i)->Point()[0])<1e-8);
-      alugrid_assert (std::abs(myface.myvertex(i)->Point()[1]-
-             face.myvertex(i)->Point()[1])<1e-8);
-      alugrid_assert (std::abs(myface.myvertex(i)->Point()[2]-
-             face.myvertex(i)->Point()[2])<1e-8);
+      /*
+#ifdef ALUGRIDDEBUG
+      // this test will (and should) fail for vertex projections
+      if( ! this->myGrid()->vertexProjection() )
+      {
+        // make sure we got the right face
+        alugrid_assert (std::abs(myface.myvertex(i)->Point()[0]-
+               face.myvertex(i)->Point()[0])<1e-8);
+        alugrid_assert (std::abs(myface.myvertex(i)->Point()[1]-
+               face.myvertex(i)->Point()[1])<1e-8);
+        alugrid_assert (std::abs(myface.myvertex(i)->Point()[2]-
+               face.myvertex(i)->Point()[2])<1e-8);
+      }
+#endif
+*/
 
       vertex_GEO * vx = myface.myvertex(i);
       vx->setIndex( vxIm , face.myvertex(i)->getIndex() );
@@ -368,47 +376,55 @@ namespace ALUGrid
   void GitterBasis::Objects::HexaEmpty ::
   setIndicesAndBndId (const hface_STI & f, int face_nr)
   {
-     // set all items to ghost bnd id
-     setGhostBoundaryIds();
+    // set all items to ghost bnd id
+    setGhostBoundaryIds();
 
-     typedef Gitter::Geometric::BuilderIF BuilderIF;
+    typedef Gitter::Geometric::BuilderIF BuilderIF;
 
-     typedef Gitter::Geometric::vertex_GEO vertex_GEO;
-     typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
+    typedef Gitter::Geometric::vertex_GEO vertex_GEO;
+    typedef Gitter::Geometric::hedge1_GEO hedge1_GEO;
 
-     const myhface4_t & face = static_cast<const myhface4_t &> (f);
-     const bndid_t bndid = face.bndId();
+    const myhface4_t & face = static_cast<const myhface4_t &> (f);
+    const bndid_t bndid = face.bndId();
 
-     myhface4_t & myface = *(myhface4(face_nr));
+    myhface4_t & myface = *(myhface4(face_nr));
 
-     IndexManagerStorageType& ims = this->myvertex(0)->indexManagerStorage();
+    IndexManagerStorageType& ims = this->myvertex(0)->indexManagerStorage();
 
-     IndexManagerType & vxIm = ims.get(BuilderIF::IM_Vertices);
-     IndexManagerType & edIm = ims.get(BuilderIF::IM_Edges);
+    IndexManagerType & vxIm = ims.get(BuilderIF::IM_Vertices);
+    IndexManagerType & edIm = ims.get(BuilderIF::IM_Edges);
 
-     // set index of face
-     myface.setIndex( ims.get(BuilderIF::IM_Faces) , face.getIndex ());
-     // set bnd id of face
-     myface.setGhostBndId( bndid );
+    // set index of face
+    myface.setIndex( ims.get(BuilderIF::IM_Faces) , face.getIndex ());
+    // set bnd id of face
+    myface.setGhostBndId( bndid );
 
-     for (int i = 0; i < 4; ++i)
-     {
-       // make sure we got the right face
-       alugrid_assert (fabs(myface.myvertex(i)->Point()[0]-
-              face.myvertex(i)->Point()[0])<1e-8);
-       alugrid_assert (fabs(myface.myvertex(i)->Point()[1]-
-              face.myvertex(i)->Point()[1])<1e-8);
-       alugrid_assert (fabs(myface.myvertex(i)->Point()[2]-
-              face.myvertex(i)->Point()[2])<1e-8);
+    for (int i = 0; i < 4; ++i)
+    {
+      /*
+#ifdef ALUGRIDDEBUG
+      // this test will (and should) fail for vertex projections
+      if( ! this->myGrid()->vertexProjection() )
+      {
+        // make sure we got the right face
+        alugrid_assert (fabs(myface.myvertex(i)->Point()[0]-
+               face.myvertex(i)->Point()[0])<1e-8);
+        alugrid_assert (fabs(myface.myvertex(i)->Point()[1]-
+               face.myvertex(i)->Point()[1])<1e-8);
+        alugrid_assert (fabs(myface.myvertex(i)->Point()[2]-
+               face.myvertex(i)->Point()[2])<1e-8);
+      }
+#endif
+*/
 
-       vertex_GEO * vx = myface.myvertex(i);
-       vx->setIndex(vxIm, face.myvertex(i)->getIndex());
-       vx->setGhostBndId( bndid );
+      vertex_GEO * vx = myface.myvertex(i);
+      vx->setIndex(vxIm, face.myvertex(i)->getIndex());
+      vx->setGhostBndId( bndid );
 
-       hedge1_GEO * edge = myface.myhedge1(i);
-       edge->setIndex(edIm, face.myhedge1(i)->getIndex());
-       edge->setGhostBndId( bndid );
-     }
+      hedge1_GEO * edge = myface.myhedge1(i);
+      edge->setIndex(edIm, face.myhedge1(i)->getIndex());
+      edge->setGhostBndId( bndid );
+    }
   }
 
 
@@ -430,37 +446,36 @@ namespace ALUGrid
   //  --GitterBasisImpl
   //
   //////////////////////////////////////////////////////////////////
-  GitterBasisImpl::GitterBasisImpl ( const int dim ) : _macrogitter (0) , _ppv(0)
+  GitterBasisImpl::GitterBasisImpl ( const int dim ) : _macrogitter (0)
   {
-    _macrogitter = new MacroGitterBasis ( dim, this );
+    ProjectVertexPtrPair ppv; // = std::make_pair( ProjectVertexPtr(), ProjectVertexPtr() );
+    _macrogitter = new MacroGitterBasis ( dim, this, ppv );
     alugrid_assert (_macrogitter);
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisImpl::GitterBasisImpl ( const int dim, std::istream &in, ProjectVertex *ppv )
-  : _macrogitter( 0 ),
-    _ppv( ppv )
+  GitterBasisImpl::GitterBasisImpl ( const int dim, std::istream &in, const ProjectVertexPtrPair& ppv )
+  : _macrogitter( 0 )
   {
-    _macrogitter = new MacroGitterBasis ( dim, this, in );
+    _macrogitter = new MacroGitterBasis ( dim, this, ppv, in );
     alugrid_assert (_macrogitter);
     _macrogitter->dumpInfo();
     notifyMacroGridChanges ();
     return;
   }
 
-  GitterBasisImpl::GitterBasisImpl ( const int dim, const char *file, ProjectVertex *ppv )
-  : _macrogitter( 0 ),
-    _ppv( ppv )
+  GitterBasisImpl::GitterBasisImpl ( const int dim, const char *file, const ProjectVertexPtrPair& ppv )
+  : _macrogitter( 0 )
   {
     std::ifstream in( file );
     if( !in )
     {
       std::cerr << "ERROR (ignored): Cannot open file '" << (file ? file : "") << "' in GitterBasisImpl::GitterBasisImpl( const char * )." << std::endl;
-      _macrogitter = new MacroGitterBasis( dim, this );
+      _macrogitter = new MacroGitterBasis( dim, this, ppv );
     }
     else
-      _macrogitter = new MacroGitterBasis( dim, this, in );
+      _macrogitter = new MacroGitterBasis( dim, this, ppv, in );
 
     _macrogitter->dumpInfo();
     alugrid_assert ( _macrogitter );
@@ -469,15 +484,17 @@ namespace ALUGrid
 
   GitterBasisImpl::~GitterBasisImpl () { delete _macrogitter; }
 
-  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter *mygrid, std::istream &in )
+  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter *mygrid, const ProjectVertexPtrPair& ppv, std::istream &in )
   {
     this->indexManagerStorage().setDimAndGrid( dim, mygrid );
+    this->setProjections( ppv );
     macrogridBuilder( in );
   }
 
-  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter * mygrid )
+  GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter * mygrid, const ProjectVertexPtrPair& ppv )
   {
     this->indexManagerStorage().setDimAndGrid( dim, mygrid );
+    this->setProjections( ppv );
   }
 
   GitterBasis::VertexGeo * GitterBasis::MacroGitterBasis::insert_vertex (double x, double y, double z, int id) {

@@ -483,16 +483,26 @@ void checkGrid( GridType& grid )
 template <class GridType>
 void checkForPeriodicBoundaries( GridType& grid )
 {
+  bool foundPeriodicBnd = false ;
   for (const auto& element : elements(grid.leafGridView()))
   {
     for (const auto& intersection : intersections(grid.leafGridView(), element))
     {
       if (intersection.neighbor() && intersection.boundary())
-        return;
+      {
+        foundPeriodicBnd = true ;
+      }
     }
   }
 
-  DUNE_THROW( Dune::InvalidStateException, "No periodic boundaries found!" );
+  // check if some process has found periodic bnds
+  // due to load balancing issues periodic bnds
+  // might only end up on one core
+  foundPeriodicBnd = grid.comm().max( foundPeriodicBnd );
+  if( ! foundPeriodicBnd )
+  {
+    DUNE_THROW( Dune::InvalidStateException, "No periodic boundaries found!" );
+  }
 }
 
 template <class GridType>
@@ -565,9 +575,11 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
+  std::cout << "  CHECKING: Iterator Assignment" << std::endl;
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
 
+  std::cout << "  CHECKING: Nonconforming Index Sets" << std::endl;
   // check level index sets on nonconforming grids
   checkLevelIndexNonConform(grid);
 
@@ -576,6 +588,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   checkGeometryLifetime( grid.leafGridView() );
 
   // check persistent container
+  std::cout << "  CHECKING: persistent container" << std::endl;
   checkPersistentContainer( grid );
 
   std::cout << std::endl << std::endl;
@@ -621,7 +634,7 @@ int main (int argc , char **argv) {
     }
     else
     {
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube>" << std::endl;
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube|3dperiodic>" << std::endl;
     }
 
     const char *newfilename = 0;
@@ -647,11 +660,13 @@ int main (int argc , char **argv) {
     bool testALU3dSimplex = initialize ;
     bool testALU3dConform = initialize ;
     bool testALU3dCube    = initialize ;
+    bool testALU3dPeriodic    = initialize ;
     if( key == "3d" )
     {
       testALU3dSimplex = true ;
       testALU3dConform = true ;
       testALU3dCube    = true ;
+      testALU3dPeriodic = true ;
     }
     if( key == "3dnonc" )
     {
@@ -661,6 +676,7 @@ int main (int argc , char **argv) {
     if( key == "3dsimp" ) testALU3dSimplex = true ;
     if( key == "3dconf" ) testALU3dConform = true ;
     if( key == "3dcube" ) testALU3dCube    = true ;
+    if( key == "3dperiodic" ) testALU3dPeriodic    = true ;
 #endif // #ifndef NO_3D
 
     // extra-environment to check destruction
@@ -895,20 +911,28 @@ int main (int argc , char **argv) {
             checkALUParallel(grid,0,2);
           }
         }
+      }
 
+      if( testALU3dPeriodic )
+      {
         // check periodic capabilities
-        {
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
           filename = "./dgf/periodic.dgf";
-          Dune::GridPtr< GridType > gridPtr( filename );
-          gridPtr.loadBalance();
-          GridType & grid = *gridPtr;
+        typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
+        // periodic boundaries require certain load balancing methods
+        GridType::setLoadBalanceMethod( 10 );
+        Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
+        GridType & grid = *gridPtr;
 
-          {
-            std::cout << "Check periodic grid" << std::endl;
-            checkALUSerial(grid,
-                           (mysize == 1) ? 1 : 0 );
-            checkForPeriodicBoundaries( grid );
-          }
+        {
+          std::cout << "Check periodic grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+          checkForPeriodicBoundaries( grid );
         }
       }
 

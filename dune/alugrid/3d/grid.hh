@@ -150,17 +150,17 @@ namespace Dune
 
     int nlinks () const { return 0; }
 
-    GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
+    GitterImplType *createALUGrid ( const std::string &macroName, const ALU3DSPACE ProjectVertexPtrPair& projections,
                                     const bool conformingRefinement )
     {
       GitterImplType* grid = ( macroName.empty() ) ?
-        new GitterImplType( dim ) : new GitterImplType ( dim, macroName.c_str(), projection );
+        new GitterImplType( dim ) : new GitterImplType ( dim, macroName.c_str(), projections );
       // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
     }
 
-    GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
+    GitterImplType *createALUGrid ( std::istream& stream, const ALU3DSPACE ProjectVertexPtrPair& projection,
                                     const bool conformingRefinement )
     {
       GitterImplType* grid = new GitterImplType ( dim, stream, projection );
@@ -209,19 +209,19 @@ namespace Dune
 
     int nlinks () const { return mpAccess_.sendLinks(); }
 
-    GitterImplType *createALUGrid ( const std::string &macroName, ALU3DSPACE ProjectVertex *projection,
+    GitterImplType *createALUGrid ( const std::string &macroName, const ALU3DSPACE ProjectVertexPtrPair& projections,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType( dim, macroName.c_str(), mpAccess_, projection );
+      GitterImplType* grid = new GitterImplType( dim, macroName.c_str(), mpAccess_, projections );
       // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid;
     }
 
-    GitterImplType *createALUGrid ( std::istream& stream, ALU3DSPACE ProjectVertex *projection,
+    GitterImplType *createALUGrid ( std::istream& stream, const ALU3DSPACE ProjectVertexPtrPair& projections,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType ( dim, stream, mpAccess_, projection );
+      GitterImplType* grid = new GitterImplType ( dim, stream, mpAccess_, projections );
       // check whether conforming refinement should be enabled
       checkForConformingRefinement( grid, conformingRefinement );
       return grid ;
@@ -578,11 +578,13 @@ namespace Dune
 
     //! \brief boundary projection type
     typedef typename Traits::DuneBoundaryProjectionType DuneBoundaryProjectionType;
-    //! \brief boundary projection type
-    typedef typename Traits::DuneBoundaryProjectionVector DuneBoundaryProjectionVector;
 
-    //! type of ALUGrid Vertex Projection Interface
-    typedef ALU3DSPACE ProjectVertex ALUGridVertexProjectionType;
+    //! type of vertex projection
+    typedef ALU3DSPACE ProjectVertex  ALUGridVertexProjectionType;
+
+    //! type of ALUGrid Vertex Projection Interface (shared_ptr)
+    typedef ALU3DSPACE ProjectVertexPtr       ALUGridVertexProjectionPointerType;
+    typedef ALU3DSPACE ProjectVertexPtrPair   ALUGridVertexProjectionPairType;
 
     //! type of collective communication object
     typedef typename Traits::CollectiveCommunication CollectiveCommunication;
@@ -591,10 +593,6 @@ namespace Dune
     typedef ALULevelCommunication< dim, dimworld, elType, Comm > LevelCommunication;
 
   protected:
-    friend class ALUGridBoundaryProjection< ThisType, alu3d_ctype >;
-    // type of ALUGrid boundary projection wrapper
-    typedef ALUGridBoundaryProjection< ThisType, alu3d_ctype > ALUGridBoundaryProjectionType;
-
     //! Type of the local id set
     typedef typename GridFamily::LocalIdSetImp LocalIdSetImp;
 
@@ -634,7 +632,7 @@ namespace Dune
     typedef ALU3dGridCommunications< dim, dimworld, elType, Comm > Communications;
 
   protected:
-    typedef ALU3dGridVertexList< Comm > VertexListType;
+    typedef ALU3dGridVertexList< Comm >     VertexListType;
     typedef ALU3dGridLeafVertexList< Comm > LeafVertexListType;
 
     typedef DefaultBoundarySegmentIndexSet< ThisType > BoundarySegmentIndexSetType;
@@ -644,12 +642,11 @@ namespace Dune
     //! or given GridFile
     ALU3dGrid ( const std::string &macroTriangFilename,
                 const MPICommunicatorType mpiComm,
-                const DuneBoundaryProjectionType *bndPrj,
-                const DuneBoundaryProjectionVector *bndVec,
+                const ALUGridVertexProjectionPairType& bndPrj,
                 const ALUGridRefinementType refinementType );
 
     //! \brief Desctructor
-    virtual ~ALU3dGrid();
+    virtual ~ALU3dGrid() {}
 
     //! \brief for grid identification
     static inline std::string name ();
@@ -862,6 +859,58 @@ namespace Dune
     bool loadBalance ( GatherScatterType* lbData );
 
   public:
+    /** \brief Set load balancing method and lower and upper bound for decision
+               on whether to load balance or not.
+
+        \note  Possible choices of load balancing methods are:
+          \code
+            // no load balancing
+            NONE = 0
+
+            // collect all to rank 0
+            COLLECT = 1,
+
+            // assuming the elements to be ordered by a
+            // space filling curve approach
+            // here, the edges in the graph are neglected
+            // parallel version
+            ALUGRID_SpaceFillingCurveLinkage = 4,
+            // serial version that requires the whole graph to be avaiable
+            ALUGRID_SpaceFillingCurveSerialLinkage = 5,
+
+            // METIS method for graph partitioning (with linkage storage)
+            //METIS_PartGraphKwayLinkage      = 6,
+            //METIS_PartGraphRecursiveLinkage = 7,
+
+            // ALU sfc without linkage
+            ALUGRID_SpaceFillingCurve       = 9,
+            ALUGRID_SpaceFillingCurveSerial = 10,
+
+            // METIS method for graph partitioning
+            METIS_PartGraphKway = 11,
+            METIS_PartGraphRecursive = 12,
+
+            // ZOLTAN partitioning
+            ZOLTAN_LB_HSFC = 13 ,
+            ZOLTAN_LB_GraphPartitioning = 14 ,
+            ZOLTAN_LB_PARMETIS = 15
+         \endcode
+    */
+    static void setLoadBalanceMethod( const int mthd,
+                                      const double ldbUnder = 0.0,
+                                      const double ldbOver  = 1.2 )
+    {
+      using DataBase = ALU3DSPACE LoadBalancer::DataBase ;
+      if( mthd < int( DataBase::NONE ) && mthd > DataBase::ZOLTAN_LB_PARMETIS )
+      {
+        DUNE_THROW(InvalidStateException,"ALUGrid::setLoadBalanceMethod: wrong method passed, check documentation for correect values");
+      }
+
+      ALU3DSPACE ALUGridExternalParameters::setLoadBalanceParameters( mthd, ldbUnder, ldbOver );
+    }
+
+
+
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method.
                The specific load balancing algorithm is selected from a file alugrid.cfg.
         \return true if grid has changed
@@ -1080,16 +1129,19 @@ namespace Dune
     virtual GitterImplType *createALUGrid ( const std::string &macroName )
     {
       alugrid_assert ( communications_ );
-      return communications_->createALUGrid( macroName, vertexProjection(), conformingRefinement() );
+      return communications_->createALUGrid( macroName, vertexProjections(), conformingRefinement() );
     }
 
     virtual GitterImplType *createALUGrid ( std::istream& stream )
     {
       alugrid_assert ( communications_ );
-      return communications_->createALUGrid( stream, vertexProjection(), conformingRefinement() );
+      return communications_->createALUGrid( stream, vertexProjections(), conformingRefinement() );
     }
 
-    ALUGridVertexProjectionType* vertexProjection() { return (ALUGridVertexProjectionType *) vertexProjection_.operator -> (); }
+    ALUGridVertexProjectionPairType vertexProjections() const
+    {
+      return  vertexProjections_ ;
+    }
 
     // return appropriate ALUGrid builder
     virtual typename ALU3DSPACE Gitter::Geometric::BuilderIF &getBuilder () const
@@ -1211,22 +1263,6 @@ namespace Dune
     //! check whether macro grid has the right element type
     void checkMacroGrid ();
 
-    //! return boudanry projection for given segment Id
-    const DuneBoundaryProjectionType* boundaryProjection(const int segmentId) const
-    {
-      if( bndPrj_ )
-      {
-        return bndPrj_;
-      }
-      else
-      {
-        // pointer can be zero (which is emulates the identity mapping then)
-        alugrid_assert ( bndVec_ );
-        alugrid_assert ( segmentId < (int) bndVec_->size() );
-        return (*bndVec_)[ segmentId ];
-      }
-    }
-
     const Communications &communications () const
     {
       alugrid_assert ( communications_ );
@@ -1316,14 +1352,10 @@ namespace Dune
     // variable to ensure that postAdapt ist called after adapt
     bool lockPostAdapt_;
 
-    // pointer to Dune boundary projection
-    const DuneBoundaryProjectionType* bndPrj_;
-
-    // pointer to Dune boundary projection
-    std::unique_ptr< const DuneBoundaryProjectionVector > bndVec_;
-
     // boundary projection for vertices
-    std::unique_ptr< ALUGridBoundaryProjectionType > vertexProjection_ ;
+    // pair: first is globalProjection_ for boundaries
+    // second is surfaceProjection_ for manifolds
+    ALUGridVertexProjectionPairType vertexProjections_ ;
 
     // pointer to communications object
     std::unique_ptr< Communications > communications_;

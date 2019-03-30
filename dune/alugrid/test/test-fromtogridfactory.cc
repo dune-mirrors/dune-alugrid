@@ -24,7 +24,7 @@ int main (int argc , char **argv)
     Dune::GridPtr< GridType > gridPtr(filename);
 
     Dune::FromToGridFactory< GridType > factory;
-    Dune::GridPtr< GridType > newPtr ( factory.convert( *gridPtr ) );
+    std::shared_ptr< GridType > newPtr = factory.convert( *gridPtr );
 
     Dune::VTKWriter< GridType::LeafGridView > writer( newPtr->leafGridView() );
     writer.write( "dump.vtu" );

@@ -695,7 +695,7 @@ private:
   }
 
   //check face for compatibility
-  bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = true)
+  bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = false)
   {
     EdgeType edge1,edge2;
     int elIndex = face.second[0];
@@ -1078,7 +1078,6 @@ private:
           for(unsigned int i = 0; i < nVertices_; ++i)
           {
             int roll = distribution(generator);  // generates number in the range 1..6
-            std::cout << roll;
             if(roll < 3)
             {
               containedInV0_[ i ] = false;
@@ -1101,7 +1100,9 @@ private:
         ++sizeOfV1;
       }
     }
+#ifndef NDEBUG
     std::cout << "#V0 #V1" << std::endl   << sizeOfV0 << " " << sizeOfV1 << std::endl;
+#endif
   }
 
 }; //class bisectioncompatibility

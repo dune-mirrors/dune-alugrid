@@ -794,10 +794,12 @@ namespace ALUGrid
     }
     else
     {
+      ProjectVertexPtr pv; // internal faces don't have vertex projection
+
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master );
+      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -842,14 +844,37 @@ namespace ALUGrid
     }
     else
     {
+      ProjectVertexPtr pv; // internal faces don't have vertex projection
+
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master );
+      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
     if( ghInfo ) delete ghInfo;
+  }
+
+  ProjectVertexPtr ParallelGridMover::unpackVertexProjection( ObjectStream & os)
+  {
+    ProjectVertexPtr pv;
+    const signed char projectionType = os.get();
+    if( projectionType == ProjectVertex :: global )
+    {
+      pv = myBuilder ().globalProjection();
+    }
+    else if( projectionType == ProjectVertex :: surface )
+    {
+      pv = myBuilder ().surfaceProjection();
+    }
+    else if( projectionType == ProjectVertex :: segment )
+    {
+      // restore vertex projection object
+      pv.reset( ProjectVertex::restore( os ) );
+    }
+
+    return pv;
   }
 
   void ParallelGridMover::unpackHbnd3Ext (ObjectStream & os)
@@ -859,22 +884,29 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
+
+    ProjectVertexPtr pv = unpackVertexProjection( os );
+
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
+    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
-  void ParallelGridMover::unpackHbnd4Ext (ObjectStream & os) {
+  void ParallelGridMover::unpackHbnd4Ext (ObjectStream & os)
+  {
     int b, v [4];
     os.readObject (b);
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
+
+    ProjectVertexPtr pv = unpackVertexProjection( os );
+
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master);
+    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
@@ -985,7 +1017,7 @@ namespace ALUGrid
     void pack( const int link, ObjectStream& os )
     {
       std::cerr << "ERROR: UnpackLBData::pack should not be called!" << std::endl;
-      abort();
+      std::abort();
     }
 
     // work that can be done between send and receive,
@@ -1027,6 +1059,28 @@ namespace ALUGrid
     // in case gatherScatter is given check for overloaded partitioning
     const bool userDefinedPartitioning = gatherScatter && gatherScatter->userDefinedPartitioning();
 
+    bool periodicBoundariesPresent = false ;
+    {
+      // check whether periodic elements are present
+      AccessIterator < hperiodic_STI >::Handle w (containerPll ());
+      // if periodic boundaries are present then only some
+      // partitioning methods do work
+      w.first ();
+      if( ! w.done() )
+      {
+        if( ! db.methodConsitentWithPeriodicBnd( _ldbMethod ) )
+        {
+          std::cerr << "ERROR: Partitioning method " << _ldbMethod << " does not work with periodic boundaries! Select a different method!" << std::endl;
+          std::abort();
+        }
+
+        // remove precomputed graph sizes since that was changed during the
+        // manual set of destinations for periodic elements
+        db.clearGraphSizesVector();
+        periodicBoundariesPresent = true;
+      }
+    }
+
     // default partitioning method
     // for user defined paritioning gatherScatter.partitioning() was called in gitter_pll_sti.cc before
     // calling this method and returned true - that method should thus already have compute the
@@ -1036,7 +1090,7 @@ namespace ALUGrid
       db.repartition (mpa, LoadBalancer::DataBase::method (_ldbMethod), _ldbOver );
 
     // get graph sizes from data base, this is only used for the serial partitioners
-    if( ! userDefinedPartitioning )
+    if( ! userDefinedPartitioning && ! periodicBoundariesPresent )
     {
       _graphSizes = db.graphSizes();
     }

@@ -91,11 +91,11 @@ try
 
   check< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > >();
   check< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > >();
-  check< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > >();
+  //check< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > >();
 
   check< Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > >();
   check< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > >();
-  check< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >();
+  //check< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >();
 
   return 0;
 }

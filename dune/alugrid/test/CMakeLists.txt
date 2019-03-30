@@ -1,22 +1,29 @@
 set(TESTS
+  test-alugrid
+  test-structuredgridfactory
+  test-backup-restore
+)
+
+set(EXTRA_TESTS
   test-adaptivity
   test-fromtogridfactory
   test-iterators
-  test-structuredgridfactory
   test-twists
   test-hierarchic
   test-ball-projection
-  test-backup-restore
   test-gmsh
 )
 
 foreach(TEST ${TESTS})
-  dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
+  dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc MPI_RANKS 1 2 3 4 TIMEOUT 3600 LINK_LIBRARIES dunealugrid)
 endforeach()
 
-#dune_add_test(NAME test-alugrid SOURCES test-alugrid.cc MPI_RANKS 1 2 3 4 TIMEOUT 9999999 LINK_LIBRARIES dunealugrid)
-# parallel tests fails due to missing projections, will be fixed soon
-dune_add_test(NAME test-alugrid SOURCES test-alugrid.cc LINK_LIBRARIES dunealugrid)
+# the extra tests are only enabled in torture mode
+if(ALUGRID_TORTURE_TESTS)
+  foreach(TEST ${EXTRA_TESTS})
+    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
+  endforeach()
+endif()
 
 add_subdirectory(dgf)
 add_subdirectory(gmsh)

@@ -170,6 +170,17 @@ namespace ALUGrid
           void graphCollectBcast ( const MpAccessGlobal &,
                                    std::insert_iterator < ldb_edge_set_t > );
         public :
+          // ALUGRID_SpaceFillingCurveLinkage,
+          // ALUGRID_SpaceFillingCurveSerialLinkage, and
+          // ALUGRID_SpaceFillingCurve do not work when periodic
+          // boundaries are present, one needs to select one of the other
+          // methods, see above
+          bool methodConsitentWithPeriodicBnd( const method mth )
+          {
+            return mth < ALUGRID_SpaceFillingCurveLinkage ||
+                   mth > ALUGRID_SpaceFillingCurve;
+          }
+
           const std::vector< int > &graphSizes () const { return _graphSizes; }
 
           void clearGraphSizesVector ()

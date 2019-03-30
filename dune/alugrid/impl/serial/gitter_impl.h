@@ -64,6 +64,22 @@ namespace ALUGrid
               return p;
             }
 
+            virtual void projectGhostElement( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+            {
+              myhface3_t* f = myhface( 0 );
+              for( int i=0; i<3; ++i )
+              {
+                f->myvertex( i )->setCoordinates( newCoords[ i ] );
+              }
+
+              ghostpair_STI gp = getGhost();
+              // ghost element may not exists (i.e. bisection refined grids)
+              if( gp.first )
+              {
+                gp.first->changeVertexCoordinates( face, newCoords, volume );
+              }
+            }
+
             // default implementation returns 0
             virtual const MacroGhostInfo* buildGhostCell(ObjectStream&, int) { return 0; }
         };
@@ -91,6 +107,21 @@ namespace ALUGrid
               return p;
             }
 
+            virtual void projectGhostElement( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+            {
+              myhface4_t* f = myhface( 0 );
+              for( int i=0; i<4; ++i )
+              {
+                f->myvertex( i )->setCoordinates( newCoords[ i ] );
+              }
+
+              ghostpair_STI gp = getGhost();
+              if( gp.first )
+              {
+                gp.first->changeVertexCoordinates( face, newCoords, volume );
+              }
+            }
+
             // default implementation returns 0
             virtual const MacroGhostInfo * buildGhostCell(ObjectStream&, int) { return 0; }
         };
@@ -102,7 +133,7 @@ namespace ALUGrid
             inline Hedge1Empty (myvertex_t *,myvertex_t *);
             ~Hedge1Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectInnerVertex(const ProjectVertexPair &pv);
+           virtual inline void projectInnerVertex(const ProjectVertex &pv);
         };
 
         typedef Hedge1Top < Hedge1Empty > hedge1_IMPL;
@@ -114,7 +145,7 @@ namespace ALUGrid
             inline Hface3Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int);
            ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertexPair &pv);
+           virtual inline void projectVertex(const ProjectVertex &pv);
         };
         typedef Hface3Top < Hface3Empty > hface3_IMPL;
 
@@ -127,7 +158,7 @@ namespace ALUGrid
            inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int);
            ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
-           virtual inline void projectVertex(const ProjectVertexPair &pv);
+           virtual inline void projectVertex(const ProjectVertex &pv);
         };
         typedef Hface4Top < Hface4Empty > hface4_IMPL;
 
@@ -181,6 +212,19 @@ namespace ALUGrid
         // return MPI rank of master which is always the same as myrank
         int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
 
+        // change coordinates of this element (for ghost elements only)
+        virtual void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >& newCoords )
+        {
+          // this should only be called for ghost elements
+          alugrid_assert( this->isGhost() );
+
+          for( int i=0; i < 4; ++i )
+          {
+            VertexGeo* vx = const_cast< VertexGeo* > (this->myvertex(i));
+            vx->setCoordinates( newCoords[ i ] );
+          }
+        }
+
     private:
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds();
@@ -203,7 +247,8 @@ namespace ALUGrid
         ~Periodic3Empty () {}
         // do nothing here
         virtual void resetGhostIndices() {}
-
+        // return MPI rank of master which is always the same as myrank
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
       public:
     };
     typedef Periodic3Top < Periodic3Empty > periodic3_IMPL;
@@ -278,6 +323,8 @@ namespace ALUGrid
         // so nothing here
         virtual void resetGhostIndices() {}
 
+        // return MPI rank of master which is always the same as myrank
+        int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
       public:
       };
       typedef Periodic4Top < Periodic4Empty > periodic4_IMPL;
@@ -306,10 +353,10 @@ namespace ALUGrid
     public :
       // Gitter is a reference to our grid
       // constructors creating macro grids from streams
-      MacroGitterBasis ( const int, Gitter *, std::istream & );
+      MacroGitterBasis ( const int, Gitter *, const ProjectVertexPtrPair& ptr, std::istream & );
 
       // constructor creating an empty macro grid
-      MacroGitterBasis ( const int, Gitter * );
+      MacroGitterBasis ( const int, Gitter *, const ProjectVertexPtrPair& ptr );
 
       virtual ~MacroGitterBasis () {}
     };
@@ -320,7 +367,6 @@ namespace ALUGrid
   : public GitterBasis
   {
     MacroGitterBasis*  _macrogitter;
-    ProjectVertex*     _ppv;
   public:
     Makrogitter & container ();
     const Makrogitter & container () const;
@@ -331,14 +377,14 @@ namespace ALUGrid
     std::size_t numMacroBndSegments() const;
 
     explicit GitterBasisImpl ( const int );
-    GitterBasisImpl ( const int, std::istream &, ProjectVertex *);
-    GitterBasisImpl ( const int, const char *, ProjectVertex* );
+    GitterBasisImpl ( const int, std::istream &, const ProjectVertexPtrPair& );
+    GitterBasisImpl ( const int, const char *, const ProjectVertexPtrPair& );
     ~GitterBasisImpl ();
 
     virtual void printMemUsage ();
 
     // return pointer to vertex projection
-    virtual ProjectVertex* vertexProjection() const;
+    // virtual ProjectVertex* vertexProjection() const;
   };
 
 
@@ -386,7 +432,7 @@ namespace ALUGrid
     return;
   }
 
-  inline void GitterBasis::Objects::Hedge1Empty::projectInnerVertex(const ProjectVertexPair &pv)
+  inline void GitterBasis::Objects::Hedge1Empty::projectInnerVertex(const ProjectVertex &pv)
   {
     if (innerVertex()) {
       alugrid_assert (!leaf());
@@ -399,7 +445,7 @@ namespace ALUGrid
     return;
   }
 
-  inline void GitterBasis::Objects::Hface3Empty::projectVertex(const ProjectVertexPair &pv)
+  inline void GitterBasis::Objects::Hface3Empty::projectVertex(const ProjectVertex &pv)
   {
     alugrid_assert (!leaf());
     for (int e = 0; e < polygonlength; e++)
@@ -414,7 +460,7 @@ namespace ALUGrid
     return;
   }
 
-  inline void GitterBasis::Objects::Hface4Empty::projectVertex(const ProjectVertexPair &pv) {
+  inline void GitterBasis::Objects::Hface4Empty::projectVertex(const ProjectVertex &pv) {
     for (int e = 0; e < polygonlength; e++)
       myhedge1(e)->projectInnerVertex(pv);
     if (innerVertex())
@@ -535,11 +581,6 @@ namespace ALUGrid
   //  --GitterBasisImpl
   //
   ////////////////////////////////////////////////////////////////
-  inline ProjectVertex*  GitterBasisImpl::vertexProjection() const
-  {
-    return _ppv;
-  }
-
   inline Gitter::Makrogitter & GitterBasisImpl::container () { return *_macrogitter; }
 
   inline const Gitter::Makrogitter & GitterBasisImpl::container () const { return *_macrogitter; }

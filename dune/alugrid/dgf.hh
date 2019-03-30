@@ -473,6 +473,11 @@ namespace Dune
       }
     }
 
+    const unsigned int elemTopoId = (eltype == simplex) ?
+            Dune::Impl::SimplexTopology< dimgrid >::type::id : Dune::Impl::CubeTopology< dimgrid >::type::id ;
+    const unsigned int faceTopoId = (eltype == simplex) ?
+            Dune::Impl::SimplexTopology< dimgrid-1 >::type::id : Dune::Impl::CubeTopology< dimgrid-1 >::type::id ;
+
     GlobalVertexIndexBlock vertexIndex( file );
     const bool globalVertexIndexFound = vertexIndex.isactive();
     if( rank == 0 || globalVertexIndexFound )
@@ -508,10 +513,6 @@ namespace Dune
         }
       }
 
-      const unsigned int elemTopoId = (eltype == simplex) ?
-              Dune::Impl::SimplexTopology< dimgrid >::type::id : Dune::Impl::CubeTopology< dimgrid >::type::id ;
-      const unsigned int faceTopoId = (eltype == simplex) ?
-              Dune::Impl::SimplexTopology< dimgrid-1 >::type::id : Dune::Impl::CubeTopology< dimgrid-1 >::type::id ;
       GeometryType elementType( elemTopoId, dimgrid );
 
       const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
@@ -530,52 +531,50 @@ namespace Dune
         }
       }
 
-      dgf::ProjectionBlock projectionBlock( file, dimworld );
-      const DuneBoundaryProjection< dimworld > *projection
-        = projectionBlock.defaultProjection< dimworld >();
+    } // end rank == 0 || globalVertexIndexBlock
 
-      //True, if we want to project inner vertices
-      const bool projectInside = (dimworld != dimgrid);
-      //True, if we want to project boundary vertices
-      const bool projectBoundary = (projection != 0);
+    dgf::ProjectionBlock projectionBlock( file, dimworld );
+    const DuneBoundaryProjection< dimworld > *projection
+      = projectionBlock.defaultProjection< dimworld >();
 
-      //Currently, we only allow ONE global projection, so
-      //we just insert this projection once
-      //If we want to allow multiple projections,
-      //we need to change the dgf parser first.
-      if( projectBoundary )
-        factory_.insertBoundaryProjection( *projection, projectInside );
+    //There is currently only the possibility to insert one
+    //surface OR a global BOUNDARY projection
+    //This is done via a second argument bool
+    //that defaults to dimgrid != dimworld
+    if( projection )
+      factory_.insertBoundaryProjection( *projection );
 
+    if( rank == 0 || globalVertexIndexFound )
+    {
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
       GeometryType type( faceTopoId, dimgrid-1 );
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
-
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.boundaryProjection< dimworld >( i );
         factory_.insertBoundaryProjection( type, vertices, projection );
       }
-    }
 
-    typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
-    dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
-    const int size = trafoBlock.numTransformations();
-    for( int k = 0; k < size; ++k )
-    {
-      const Transformation &trafo = trafoBlock.transformation( k );
+      typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
+      dgf::PeriodicFaceTransformationBlock trafoBlock( file, dimworld );
+      const int size = trafoBlock.numTransformations();
+      for( int k = 0; k < size; ++k )
+      {
+        const Transformation &trafo = trafoBlock.transformation( k );
 
-      typename GridFactory::WorldMatrix matrix;
-      for( int i = 0; i < dimworld; ++i )
-        for( int j = 0; j < dimworld; ++j )
-          matrix[ i ][ j ] = trafo.matrix( i, j );
+        typename GridFactory::WorldMatrix matrix;
+        for( int i = 0; i < dimworld; ++i )
+          for( int j = 0; j < dimworld; ++j )
+            matrix[ i ][ j ] = trafo.matrix( i, j );
 
-      typename GridFactory::WorldVector shift;
-      for( int i = 0; i < dimworld; ++i )
-        shift[ i ] = trafo.shift[ i ];
+        typename GridFactory::WorldVector shift;
+        for( int i = 0; i < dimworld; ++i )
+          shift[ i ] = trafo.shift[ i ];
 
-      factory_.insertFaceTransformation( matrix, shift );
-    }
+        factory_.insertFaceTransformation( matrix, shift );
+      }
+    } // end rank == 0 || globalVertexIndexBlock
 
     int addMissingBoundariesLocal = (dgf_.nofelements > 0) && dgf_.facemap.empty();
     int addMissingBoundariesGlobal = addMissingBoundariesLocal;

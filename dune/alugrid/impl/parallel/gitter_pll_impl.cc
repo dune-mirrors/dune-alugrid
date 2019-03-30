@@ -811,6 +811,28 @@ namespace ALUGrid
       alugrid_assert ( (!nowLeaf) ? (! myhbnd().isLeafEntity()) : 1);
       alugrid_assert ( ( nowLeaf) ? (  myhbnd().isLeafEntity()) : 1);
 
+      // only transmitted vertices if numVerticesProjected > 0
+      // number is number of all vertices communicated
+      const int numVerticesProjected = os.get();
+
+      if( numVerticesProjected > 0)
+      {
+        const int fce = os.get();
+
+        std::array< std::array<alucoord_t,3>, 8 > projectedVertices;
+        for(int i = 0; i < numVerticesProjected; ++i)
+        {
+          for(int j = 0 ; j < 3 ; ++j)
+          {
+            os.read( projectedVertices[ i ][ j ] );
+          }
+        }
+
+        double vol = 0;
+        os.read( vol );
+
+        myhbnd().projectGhostElement( fce, projectedVertices, vol );
+      }
     }
     catch (ObjectStream::EOFException&)
     {
@@ -917,7 +939,43 @@ namespace ALUGrid
 
     const unsigned char lvl = mytetra().level();
     os.write( lvl );
-    os.put( char( mytetra().leaf() ) );
+    bool leaf = mytetra().leaf();
+    os.put( char( leaf ) );
+
+    // Put numVertices of the element
+    // >0 means, that at least one vertex has been projected
+    const int numVerticesProjected = mytetra().vertexWasProjected() ? 4 : 0;
+    os.put( numVerticesProjected );
+
+    if( numVerticesProjected > 0 )
+    {
+      // store local face number
+      signed char fce = face ;
+      os.put( fce );
+
+      const auto& f = *(mytetra().myhface( face ));
+      // write coordinates of the face
+      for(int vx=0; vx<3; ++vx)
+      {
+        //const alucoord_t (&p)[3] = mytetra().myvertex(face, vx)->Point();
+        const alucoord_t (&p)[3] = f.myvertex(vx)->Point();
+        os.write( p[0] );
+        os.write( p[1] );
+        os.write( p[2] );
+      }
+
+      {
+        // write point opposite to face
+        const alucoord_t (&p)[3] = mytetra().myvertex(face)->Point();
+        os.write( p[0] );
+        os.write( p[1] );
+        os.write( p[2] );
+      }
+
+      // also store volume since the projection of vertices will change this
+      const double vol = mytetra().volume();
+      os.write( vol );
+    }
     return;
   }
 
@@ -1601,7 +1659,45 @@ namespace ALUGrid
     // to determine leafEntity or not
     const unsigned char lvl = myhexa().level();
     os.write( lvl );
-    os.put( char( myhexa().leaf() ) );
+    const bool leaf = myhexa().leaf();
+
+    os.put( char( leaf ) );
+
+    // Put numVertices of the element
+    // >0 means, that at least one vertex has been projected
+    const int numVerticesProjected = myhexa().vertexWasProjected() ? 8 : 0;
+    os.put( numVerticesProjected );
+
+    if( numVerticesProjected > 0 )
+    {
+      signed char fce = face ;
+      os.put( fce );
+
+      const auto& f1 = *(myhexa().myhface( face ));
+      // store inside face
+      for(int vx=0; vx<4; ++vx)
+      {
+        const alucoord_t (&p)[3] = f1.myvertex(vx)->Point();
+        os.writeObject ( p[0] );
+        os.writeObject ( p[1] );
+        os.writeObject ( p[2] );
+      }
+
+      // store opposite face
+      const int oppFace = Gitter::Geometric::Hexa::oppositeFace[face];
+      const auto& f2 = *(myhexa().myhface( oppFace ));
+      for(int vx=0; vx<4; ++vx)
+      {
+        const alucoord_t (&p)[3] = f2.myvertex(vx)->Point();
+        os.writeObject ( p[0] );
+        os.writeObject ( p[1] );
+        os.writeObject ( p[2] );
+      }
+
+      // also store volume since the projection of vertices will change this
+      const double vol = myhexa().volume();
+      os.write( vol );
+    }
   }
 
   template < class A >
@@ -1962,9 +2058,9 @@ namespace ALUGrid
   //  --MacroGitterBasisPll
   ////////////////////////////////////////////////////////////////
   GitterBasisPll::MacroGitterBasisPll::
-  MacroGitterBasisPll ( const int dim, GitterBasisPll * mygrid, std::istream &in )
+  MacroGitterBasisPll ( const int dim, GitterBasisPll * mygrid, const ProjectVertexPtrPair& ppv, std::istream &in )
     : GitterPll::MacroGitterPll (),
-      GitterBasis:: MacroGitterBasis (dim, mygrid),
+      GitterBasis:: MacroGitterBasis (dim, mygrid, ppv),
       _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     macrogridBuilder (in );
@@ -1972,9 +2068,9 @@ namespace ALUGrid
   }
 
   GitterBasisPll::MacroGitterBasisPll::
-  MacroGitterBasisPll (const int dim, GitterBasisPll * mygrid)
+  MacroGitterBasisPll (const int dim, GitterBasisPll * mygrid, const ProjectVertexPtrPair& ppv)
    : GitterPll::MacroGitterPll () ,
-     GitterBasis::MacroGitterBasis (dim, mygrid),
+     GitterBasis::MacroGitterBasis (dim, mygrid, ppv),
      _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
@@ -2184,9 +2280,10 @@ namespace ALUGrid
 
   GitterBasisPll::GitterBasisPll (const int dim, MpAccessLocal & mpa)
     : GitterPll(mpa),
-      _mpaccess(mpa), _macrogitter (0) , _ppv( 0 )
+      _mpaccess(mpa), _macrogitter (0)
   {
-    _macrogitter = new MacroGitterBasisPll (dim, this);
+    ProjectVertexPtrPair ppv;
+    _macrogitter = new MacroGitterBasisPll (dim, this, ppv);
 
     dumpInfo();
 
@@ -2195,11 +2292,10 @@ namespace ALUGrid
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( const int dim, const std::string &filename, MpAccessLocal & mpa, ProjectVertex* ppv )
+  GitterBasisPll::GitterBasisPll ( const int dim, const std::string &filename, MpAccessLocal & mpa, const ProjectVertexPtrPair& ppv )
   : GitterPll( mpa ),
     _mpaccess( mpa ),
-    _macrogitter( 0 ),
-    _ppv( ppv )
+    _macrogitter( 0 )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll (const char * = \"" << filename << "\" ...)" << std::endl, 1) : 1);
 
@@ -2215,7 +2311,7 @@ namespace ALUGrid
 
       std::ifstream in( extendedName.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (dim, this, in);
+        _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
       else
       {
         alugrid_assert (debugOption (5) ?
@@ -2246,11 +2342,11 @@ namespace ALUGrid
     {
       std::ifstream in( filename.c_str() );
       if( in )
-        _macrogitter = new MacroGitterBasisPll (dim, this, in);
+        _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
     }
 
     // create empty macro gitter
-    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this);
+    if(!_macrogitter) _macrogitter = new MacroGitterBasisPll (dim, this, ppv);
 
     dumpInfo();
 
@@ -2259,15 +2355,14 @@ namespace ALUGrid
     return;
   }
 
-  GitterBasisPll::GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &mpa, ProjectVertex *ppv )
+  GitterBasisPll::GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &mpa, const ProjectVertexPtrPair& ppv )
   : GitterPll( mpa ),
     _mpaccess( mpa ),
-    _macrogitter( 0 ),
-    _ppv( ppv )
+    _macrogitter( 0 )
   {
     alugrid_assert (debugOption (20) ? (std::cout << "GitterBasisPll::GitterBasisPll ( istream& = \"" << &in << "\" ...)" << std::endl, 1) : 1);
 
-    _macrogitter = new MacroGitterBasisPll (dim, this, in);
+    _macrogitter = new MacroGitterBasisPll (dim, this, ppv, in);
 
     dumpInfo();
 

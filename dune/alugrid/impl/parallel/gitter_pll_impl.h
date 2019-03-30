@@ -865,15 +865,14 @@ namespace ALUGrid
 
           using GitterBasis::MacroGitterBasis::iterator;
         public :
-          MacroGitterBasisPll (const int, GitterBasisPll *, std::istream & );
-          MacroGitterBasisPll (const int, GitterBasisPll * );
+          MacroGitterBasisPll (const int, GitterBasisPll *, const ProjectVertexPtrPair&, std::istream & );
+          MacroGitterBasisPll (const int, GitterBasisPll *, const ProjectVertexPtrPair& );
          ~MacroGitterBasisPll ();
       }; // end MacroGitterBasisPll
 
     protected :
       MpAccessLocal & _mpaccess;
       MacroGitterPll* _macrogitter;
-      ProjectVertex*  _ppv;
     public :
       virtual inline Makrogitter & container ();
       virtual inline const Makrogitter & container () const;
@@ -887,12 +886,10 @@ namespace ALUGrid
       virtual inline MacroGitterPll & containerPll ();
       virtual inline const MacroGitterPll & containerPll () const;
 
-      GitterBasisPll ( const int dim, const std::string &, MpAccessLocal &, ProjectVertex* );
-      GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &, ProjectVertex* );
+      GitterBasisPll ( const int dim, const std::string &, MpAccessLocal &, const ProjectVertexPtrPair& );
+      GitterBasisPll ( const int dim, std::istream &in, MpAccessLocal &, const ProjectVertexPtrPair& );
 
       virtual ~GitterBasisPll ();
-
-      virtual ProjectVertex* vertexProjection() const { return _ppv; }
 
       virtual void printMemUsage();
   };
@@ -1124,6 +1121,14 @@ namespace ALUGrid
     {
       for (int i = 0; i < myhface_t::polygonlength; ++i)
         os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
+    }
+
+    const typename ProjectVertex::ProjectionType projectionType = myhbnd().projectionType();
+    os.put( projectionType );
+    // only segment projection needs to be backed up
+    if( projectionType == ProjectVertex::segment )
+    {
+      myhbnd ().projection().backup( os );
     }
     return;
   }

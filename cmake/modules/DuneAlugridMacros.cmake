@@ -52,3 +52,6 @@ endif()
 
 # check for phtreads
 include(FindPThreads)
+
+# torture tests for extended testing
+include(AlugridTortureTests)

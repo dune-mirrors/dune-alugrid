@@ -362,10 +362,11 @@ namespace ALUGrid
         return myhface4(0)->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType::IM_Bnd );
       }
     private :
-      innerbndseg_t * _bbb, * _dwn, * _up;
-      const bnd_t _bt; // type of boundary
-      int _segmentId; // index of macro boundary segment
-      const unsigned char _lvl;
+      innerbndseg_t * _bbb, * _dwn, * _up;     // 24 bytes
+      const bnd_t _bt; // type of boundary     //  4 bytes
+      int _segmentId; // index of macro boundary segment (4 bytes)
+
+      using A :: _lvl; // declared in hbndseg4_GEO for memory padding
 
       inline bool coarse ();
       inline void append (innerbndseg_t *);
@@ -494,6 +495,29 @@ namespace ALUGrid
       int calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const ;
       int calculateFace3Twist( const int (&vx)[4], const myhface4_t* subFace, const int thirdVx ) const ;
       bool checkHexa( const innerhexa_t* hexa, const int  ) const;
+
+      // change coordinates of this element (for ghost elements only)
+      void changeVertexCoordinates( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
+      {
+        // this should only be called for ghost elements
+        alugrid_assert( this->isGhost() );
+
+        for( int i=0; i < 4; ++i )
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(face, i));
+          vx->setCoordinates( newCoords[ i ] );
+        }
+
+        const int oppFace = Gitter::Geometric::Hexa::oppositeFace[face];
+        for( int i=0; i < 4; ++i )
+        {
+          myvertex_t* vx = static_cast< myvertex_t* > (this->myvertex(oppFace, i));
+          vx->setCoordinates( newCoords[ i+4 ] );
+        }
+
+        _volume = volume;
+      }
+
     protected:
       // non-virtual methods of down and innerVertex
       innerhexa_t* dwnPtr();
@@ -633,9 +657,10 @@ namespace ALUGrid
     _child( 0 )
   {
     //std::cout << a << b << std::endl;
-    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
     if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
+    //dont assert length > 0 for fake edges
+    else alugrid_assert ( isRealLine() );
     return;
   }
 
@@ -648,9 +673,10 @@ namespace ALUGrid
     _child( nChild )
   {
     alugrid_assert ( _child == 0 || _child == 1 );
-    alugrid_assert ( isRealLine() );
     this->setIndex( indexManager().getIndex() );
     if( ( a->is2d() ) != ( b->is2d() ) ) this->set2dFlag();
+    //dont assert length > 0 for fake edges
+    else alugrid_assert ( isRealLine() );
     return;
   }
 
@@ -1038,9 +1064,11 @@ namespace ALUGrid
   Hbnd4Top (int l, myhface4_t * f, int i,
             innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) :
     A (f, i), _bbb (0), _dwn (0), _up(up) ,
-    _bt(_up->_bt),
-    _lvl (l)
+    _bt(_up->_bt)
   {
+    // set level (declared in hbndseg4_GEO for memory reasons)
+    _lvl = l ;
+
     // store ghost element
     typedef Gitter::ghostpair_STI ghostpair_STI;
     ghostpair_STI p ( gh, gFace );
@@ -1049,8 +1077,18 @@ namespace ALUGrid
     // get index from manager
     this->setIndex( indexManager().getIndex() );
 
-    // store segment index
-    _segmentId = ( _up ) ? ( _up->_segmentId ) : this->getIndex(); // get segment index from father
+    if( _up )
+    {
+      // store segment index
+      _segmentId = _up->_segmentId; // get segment index from father
+      // set boundary projection from father
+      this->_pvPtr = _up->_pvPtr;
+    }
+    else
+    {
+      _segmentId = this->getIndex();
+    }
+
     // store boundary id
     setBoundaryId( _bt );
     return;
@@ -1060,9 +1098,11 @@ namespace ALUGrid
   Hbnd4Top (int l, myhface4_t * f, int i, const bnd_t bt )
     : A (f, i),
       _bbb (0), _dwn (0), _up(0) ,
-      _bt(bt),
-      _lvl (l)
+      _bt(bt)
   {
+    // set level (declared in hbndseg4_GEO for memory reasons)
+    _lvl = l ;
+
     // get index from manager
     this->setIndex( indexManager().getIndex() );
 

@@ -258,7 +258,7 @@ namespace Dune
 
     void print(std::ostream & out) const
     {
-      out << "(" << getKey() << "," << nChild_ << "," << codimLevel_ << ")";
+      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << codimLevel_ << ")";
     }
 
     inline friend std::size_t hash_value(const ALUGridId& arg)

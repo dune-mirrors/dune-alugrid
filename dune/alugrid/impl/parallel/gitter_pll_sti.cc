@@ -1629,41 +1629,54 @@ namespace ALUGrid
       _averageRefineLoops( 0 ),
       _ldbVerticesComputed( false )
   {
-    if( mpa.myrank() == 0 )
+    // check if load balance parameters were set internally
+    auto& ldbParam = ALUGridExternalParameters::loadBalanceParameters();
+    if( ldbParam.second != -1 )
     {
-      // set default values
-      _ldbOver = 1.2;
-      // default partitioning which does not require external packages
-      _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurve;
-
-      std::ifstream in( "alugrid.cfg" );
-      if( in )
+      _ldbUnder  = ldbParam.first.first;
+      _ldbOver   = ldbParam.first.second;
+      _ldbMethod = (LoadBalancer::DataBase::method) ldbParam.second ;
+      // reset parameters for next grid generation
+      ALUGridExternalParameters::resetLoadBalanceParameters();
+    }
+    else
+    {
+      if( mpa.myrank() == 0 )
       {
-        int i;
-        in >> _ldbUnder;
-        in >> _ldbOver;
-        in >> i;
-        _ldbMethod = (LoadBalancer::DataBase::method) i;
-      }
-      else
-      {
-        std::cerr << "WARNING (ignored): Could not open file 'alugrid.cfg', using default values ";
-        std::cerr << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;
-      }
-    } // got values on rank 0
+        // set default values
+        _ldbOver = 1.2;
+        // default partitioning which does not require external packages
+        _ldbMethod = LoadBalancer::DataBase::ALUGRID_SpaceFillingCurve;
 
-    // now communicate them
-    double buff[ 3 ]  = { _ldbOver, _ldbUnder, double(_ldbMethod) };
+        std::ifstream in( "alugrid.cfg" );
+        if( in )
+        {
+          int i;
+          in >> _ldbUnder;
+          in >> _ldbOver;
+          in >> i;
+          _ldbMethod = (LoadBalancer::DataBase::method) i;
+        }
+        else
+        {
+          std::cerr << "WARNING (ignored): Could not open file 'alugrid.cfg', using default values ";
+          std::cerr << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;
+        }
+      } // got values on rank 0
 
-    // broadcast values from rank 0 to all others
-    // (much better then to read file on all procs)
-    const int root = 0;
-    mpa.bcast( &buff[ 0 ], 3, root);
+      // now communicate them
+      double buff[ 3 ]  = { _ldbOver, _ldbUnder, double(_ldbMethod) };
 
-    // store values
-    _ldbOver   = buff[ 0 ];
-    _ldbUnder  = buff[ 1 ];
-    _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
+      // broadcast values from rank 0 to all others
+      // (much better then to read file on all procs)
+      const int root = 0;
+      mpa.bcast( &buff[ 0 ], 3, root);
+
+      // store values
+      _ldbOver   = buff[ 0 ];
+      _ldbUnder  = buff[ 1 ];
+      _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
+    }
 
     // we possibly need to initialize zoltan at some point - we will do it here...
     LoadBalancer::DataBase::initializeZoltan( _ldbMethod );
