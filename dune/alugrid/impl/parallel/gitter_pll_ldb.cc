@@ -73,10 +73,14 @@ namespace ALUGrid
   bool LoadBalancer::DataBase::initializeZoltan( const method mth )
   {
 #if HAVE_ZOLTAN
-    if (mth >= ZOLTAN_LB_HSFC && mth <= ZOLTAN_LB_PARMETIS)
+    // since method can now be set dynamically we have to initialize Zoltan anyway
+    //if (mth >= ZOLTAN_LB_HSFC && mth <= ZOLTAN_LB_PARMETIS)
+    static bool zoltanInitialized = false ;
+    if( ! zoltanInitialized )
     {
       float version;
       Zoltan_Initialize((int)0,(char**)0, &version);
+      zoltanInitialized = true;
       return true; // (rc == ZOLTAN_OK);
     }
 #endif

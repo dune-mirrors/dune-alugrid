@@ -859,6 +859,58 @@ namespace Dune
     bool loadBalance ( GatherScatterType* lbData );
 
   public:
+    /** \brief Set load balancing method and lower and upper bound for decision
+               on whether to load balance or not.
+
+        \note  Possible choices of load balancing methods are:
+          \code
+            // no load balancing
+            NONE = 0
+
+            // collect all to rank 0
+            COLLECT = 1,
+
+            // assuming the elements to be ordered by a
+            // space filling curve approach
+            // here, the edges in the graph are neglected
+            // parallel version
+            ALUGRID_SpaceFillingCurveLinkage = 4,
+            // serial version that requires the whole graph to be avaiable
+            ALUGRID_SpaceFillingCurveSerialLinkage = 5,
+
+            // METIS method for graph partitioning (with linkage storage)
+            //METIS_PartGraphKwayLinkage      = 6,
+            //METIS_PartGraphRecursiveLinkage = 7,
+
+            // ALU sfc without linkage
+            ALUGRID_SpaceFillingCurve       = 9,
+            ALUGRID_SpaceFillingCurveSerial = 10,
+
+            // METIS method for graph partitioning
+            METIS_PartGraphKway = 11,
+            METIS_PartGraphRecursive = 12,
+
+            // ZOLTAN partitioning
+            ZOLTAN_LB_HSFC = 13 ,
+            ZOLTAN_LB_GraphPartitioning = 14 ,
+            ZOLTAN_LB_PARMETIS = 15
+         \endcode
+    */
+    static void setLoadBalanceMethod( const int mthd,
+                                      const double ldbUnder = 0.0,
+                                      const double ldbOver  = 1.2 )
+    {
+      using DataBase = ALU3DSPACE LoadBalancer::DataBase ;
+      if( mthd < int( DataBase::NONE ) && mthd > DataBase::ZOLTAN_LB_PARMETIS )
+      {
+        DUNE_THROW(InvalidStateException,"ALUGrid::setLoadBalanceMethod: wrong method passed, check documentation for correect values");
+      }
+
+      ALU3DSPACE ALUGridExternalParameters::setLoadBalanceParameters( mthd, ldbUnder, ldbOver );
+    }
+
+
+
     /** \brief Calculates load of each process and repartition by using ALUGrid's default partitioning method.
                The specific load balancing algorithm is selected from a file alugrid.cfg.
         \return true if grid has changed

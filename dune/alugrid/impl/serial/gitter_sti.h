@@ -66,6 +66,31 @@ namespace ALUGrid
       alugrid_assert ( allGatherMaxProcs == mpa.gmax( allGatherMaxProcs ) );
       return mpa.psize() <= allGatherMaxProcs;
     }
+
+    typedef std::pair< std::pair< double, double >, int > LoadBalancerParameterType;
+    static LoadBalancerParameterType& loadBalanceParameters()
+    {
+      static LoadBalancerParameterType ldbParam( std::make_pair( 0.0, 1.2 ), -1 );
+      return ldbParam;
+    }
+
+    static void resetLoadBalanceParameters()
+    {
+      LoadBalancerParameterType& ldbParam = loadBalanceParameters();
+      ldbParam.first.first  = 0.0;
+      ldbParam.first.second = 1.2;
+      ldbParam.second       = -1;
+    }
+
+    static void setLoadBalanceParameters( const int method,
+                                          const double ldbUnder,
+                                          const double ldbOver )
+    {
+      LoadBalancerParameterType& ldbParam = loadBalanceParameters();
+      ldbParam.first.first  = ldbUnder;
+      ldbParam.first.second = ldbOver ;
+      ldbParam.second       = method ;
+    }
   };
 
   // linkage pattern map for parallel grid (stored in IndexManagerStorage for convenience)

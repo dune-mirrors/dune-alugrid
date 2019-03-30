@@ -922,6 +922,8 @@ int main (int argc , char **argv) {
         else
           filename = "./dgf/periodic.dgf";
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
+        // periodic boundaries require certain load balancing methods
+        GridType::setLoadBalanceMethod( 10 );
         Dune::GridPtr< GridType > gridPtr( filename );
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
