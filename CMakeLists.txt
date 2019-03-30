@@ -5,6 +5,11 @@ project("dune-alugrid" C CXX)
 set(BUILD_DOCS 1)
 set(DUNE_REENABLE_ADD_TEST TRUE)
 
+# Set the default DUNE_MAX_TEST_CORES that is used in the parallel tests
+if(NOT DUNE_MAX_TEST_CORES)
+  set(DUNE_MAX_TEST_CORES 4)
+endif()
+
 # grid selector in separate file to avoid excessive dependencies
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
 set(ALUGRID_DISABLE_METIS TRUE)
