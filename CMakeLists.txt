@@ -10,7 +10,7 @@ set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
 set(ALUGRID_DISABLE_METIS TRUE)
 
 # set to true to compile more things into library
-set(DUNE_ALUGRID_COMPILE_BINDINGS TRUE)
+set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
 
 # variable to be set in config.h
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
