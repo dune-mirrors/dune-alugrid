@@ -548,10 +548,8 @@ namespace ALUGrid
     typedef typename Gitter::GhostChildrenInfo GhostChildrenInfo;
     GhostChildrenInfo ghostInfo;
     // ghostInfo is filled by splitGhost, see gitter_tetra_top_pll.h
-    if( this->myhface(0)-> myvertex( 0 )->myGrid()->ghostCellsEnabled() )
-    {
-      this->splitGhost( ghostInfo );
-    }
+    this->splitGhost( ghostInfo );
+
     //int gFace = this->getGhost().second ;
 
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), twist (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;

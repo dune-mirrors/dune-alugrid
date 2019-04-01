@@ -86,6 +86,15 @@ namespace ALUGrid
     // read status of grid istream
     virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
   protected:
+    void checkForConformingRefinement( const bool conformingRefinement )
+    {
+      if( conformingRefinement )
+      {
+        this->enableConformingClosure();
+        this->disableGhostCells();
+      }
+    }
+
     void restoreImpl( std::istream &in, const bool restoreBndFaces );
   };
 
@@ -96,22 +105,30 @@ namespace ALUGrid
     virtual IteratorSTI < Gitter::helement_STI > * leafIterator (const IteratorSTI < Gitter::helement_STI > *);
 
     friend class PureElementLeafIterator < Gitter::helement_STI >;
+
+    using GitterDuneBasis :: checkForConformingRefinement;
   public:
 
     //! constructor creating grid from std::istream
-    GitterDuneImpl ( const int dim, std::istream &in, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
+    GitterDuneImpl ( const int dim, const bool conformingRefinement, std::istream &in, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
     : GitterBasisImpl ( dim, in, ppv )
-    {}
+    {
+      checkForConformingRefinement( conformingRefinement );
+    }
 
     //! constructor creating grid from macro grid file
-    inline GitterDuneImpl (const int dim, const char *filename, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
+    inline GitterDuneImpl (const int dim, const bool conformingRefinement, const char *filename, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
       : GitterBasisImpl ( dim, filename, ppv )
-    {}
+    {
+      checkForConformingRefinement( conformingRefinement );
+    }
 
     //! constructor creating empty grid
-    explicit GitterDuneImpl ( const int dim )
+    explicit GitterDuneImpl ( const int dim, const bool conformingRefinement )
       : GitterBasisImpl ( dim )
-    {}
+    {
+      checkForConformingRefinement( conformingRefinement );
+    }
 
     // compress memory of given grid and return new object (holding equivalent information)
     static GitterDuneImpl* compress( GitterDuneImpl* grd )
@@ -127,7 +144,7 @@ namespace ALUGrid
         // free allocated memory (only works if all grids are deleted at this point)
         MyAlloc::clearFreeMemory ();
         // restore saved grid
-        grd = new GitterDuneImpl( grd->dimension(), backup );
+        grd = new GitterDuneImpl( grd->dimension(), grd->conformingClosureNeeded(), backup );
         alugrid_assert ( grd );
         grd->restore( backup );
       }

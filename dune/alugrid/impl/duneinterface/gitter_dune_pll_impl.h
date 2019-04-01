@@ -24,6 +24,8 @@ namespace ALUGrid
       leafIterator (const IteratorSTI < Gitter::helement_STI > *);
 
     friend class PackUnpackInteriorGhostData ;
+
+    using GitterDuneBasis :: checkForConformingRefinement;
   protected:
     bool balanceGrid_;
 
@@ -46,28 +48,34 @@ namespace ALUGrid
     typedef GitterBasisPll::ObjectsPll Objects;
 
     // constructor taking filename containing the macro grid
-    GitterDunePll ( const int dim, const char * filename, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
+    GitterDunePll ( const int dim, const bool conformingRefinement, const char * filename, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
     : GitterBasisPll( dim, filename, mp, ppv ),
       balanceGrid_ ( false )
     {
+      // check and set conforming refinement if true
+      checkForConformingRefinement( conformingRefinement );
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
 
     // constructor taking std::istream containing the macro grid
-    GitterDunePll ( const int dim, std::istream &in, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
+    GitterDunePll ( const int dim, const bool conformingRefinement, std::istream &in, MpAccessLocal &mp, const ProjectVertexPtrPair &ppv = ProjectVertexPtrPair() )
     : GitterBasisPll( dim, in, mp, ppv ),
       balanceGrid_( false )
     {
+      // check and set conforming refinement if true
+      checkForConformingRefinement( conformingRefinement );
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
 
     // constructor creating empty grid
-    GitterDunePll (const int dim, MpAccessLocal &mp)
+    GitterDunePll (const int dim, const bool conformingRefinement, MpAccessLocal &mp)
       : GitterBasisPll (dim, "", mp, ProjectVertexPtrPair() )
       , balanceGrid_ (false)
     {
+      // check and set conforming refinement if true
+      checkForConformingRefinement( conformingRefinement );
       // build ghost cells after the macro grid has been assembled
       rebuildGhostCells();
     }
@@ -151,7 +159,7 @@ namespace ALUGrid
         // free allocated memory (only works if all grids are deleted at this point)
         MyAlloc::clearFreeMemory ();
         // restore saved grid
-        grd = new GitterDunePll( grd->dimension(), backup, mpa );
+        grd = new GitterDunePll( grd->dimension(), grd->conformingClosureNeeded(), backup, mpa );
         alugrid_assert ( grd );
         grd->restore( backup );
 
