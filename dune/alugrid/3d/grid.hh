@@ -113,32 +113,12 @@ namespace Dune
   };
 
 
-
-  // ALU3dGridCommunications
-  // -----------------------
-  struct ALU3dGridCommunicationsBase
-  {
-    template < class GitterImpl >
-    void checkForConformingRefinement( GitterImpl* grid,
-                                       const bool conformingRefinement )
-    {
-      if( grid && conformingRefinement )
-      {
-        grid->enableConformingClosure();
-        grid->disableGhostCells();
-      }
-    }
-  };
-
-
   template< int dim, int dimworld, ALU3dGridElementType elType, class Comm >
   struct ALU3dGridCommunications;
 
   template< int dim, int dimworld, ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridNoComm > : public ALU3dGridCommunicationsBase
+  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridNoComm >
   {
-    using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
-
     typedef ALU3dGridLocalIdSet< dim, dimworld, elType, ALUGridNoComm > GlobalIdSet;
     typedef int GlobalId;
 
@@ -154,19 +134,14 @@ namespace Dune
                                     const bool conformingRefinement )
     {
       GitterImplType* grid = ( macroName.empty() ) ?
-        new GitterImplType( dim ) : new GitterImplType ( dim, macroName.c_str(), projections );
-      // check whether conforming refinement should be enabled
-      checkForConformingRefinement( grid, conformingRefinement );
+        new GitterImplType( dim, conformingRefinement ) : new GitterImplType ( dim, conformingRefinement, macroName.c_str(), projections );
       return grid ;
     }
 
     GitterImplType *createALUGrid ( std::istream& stream, const ALU3DSPACE ProjectVertexPtrPair& projection,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType ( dim, stream, projection );
-      // check whether conforming refinement should be enabled
-      checkForConformingRefinement( grid, conformingRefinement );
-      return grid ;
+      return new GitterImplType ( dim, conformingRefinement, stream, projection );
     }
 
     static ALUGridNoComm defaultComm () { return ALUGridNoComm(); }
@@ -192,10 +167,8 @@ namespace Dune
 
 #if ALU3DGRID_PARALLEL
   template< int dim, int dimworld, ALU3dGridElementType elType >
-  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridMPIComm > : public ALU3dGridCommunicationsBase
+  struct ALU3dGridCommunications< dim, dimworld, elType, ALUGridMPIComm >
   {
-    using ALU3dGridCommunicationsBase :: checkForConformingRefinement ;
-
     typedef ALU3dGridGlobalIdSet< dim, dimworld, elType, ALUGridMPIComm > GlobalIdSet;
     typedef ALUGridId< ALUMacroKey > GlobalId;
 
@@ -212,19 +185,13 @@ namespace Dune
     GitterImplType *createALUGrid ( const std::string &macroName, const ALU3DSPACE ProjectVertexPtrPair& projections,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType( dim, macroName.c_str(), mpAccess_, projections );
-      // check whether conforming refinement should be enabled
-      checkForConformingRefinement( grid, conformingRefinement );
-      return grid;
+      return new GitterImplType( dim, conformingRefinement, macroName.c_str(), mpAccess_, projections );
     }
 
     GitterImplType *createALUGrid ( std::istream& stream, const ALU3DSPACE ProjectVertexPtrPair& projections,
                                     const bool conformingRefinement )
     {
-      GitterImplType* grid = new GitterImplType ( dim, stream, mpAccess_, projections );
-      // check whether conforming refinement should be enabled
-      checkForConformingRefinement( grid, conformingRefinement );
-      return grid ;
+      return new GitterImplType ( dim, conformingRefinement, stream, mpAccess_, projections );
     }
 
     static MPI_Comm defaultComm () { return MPI_COMM_WORLD; }

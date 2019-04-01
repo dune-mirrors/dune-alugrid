@@ -269,20 +269,23 @@ namespace ALUGrid
       const elementMap_t::iterator _periodic3Mapend = _periodic3Map.end ();
       for (elementMap_t::iterator i = _periodic3Map.begin (); i != _periodic3Mapend; ++i)
       {
-        if ( ((periodic3_GEO *)(*i).second)->erasable () )
+        periodic3_GEO * p3 = (periodic3_GEO *)(*i).second;
+        if( p3->erasable () )
         {
-          // false means periodic element
-          removeElement ((*i).first, false );
+          delete p3;
+          i = _periodic3Map.erase( i );
         }
       }
 
       const elementMap_t::iterator _periodic4Mapend = _periodic4Map.end ();
-      for (elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; ++i)
+      size_t pI = 0;
+      for ( elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; ++i, ++pI )
       {
-        if ( ((periodic4_GEO *)(*i).second)->erasable ())
+        periodic4_GEO * p4 = (periodic4_GEO *)(*i).second;
+        if( p4->erasable () )
         {
-          // false means periodic element
-          removeElement ((*i).first, false );
+          delete p4;
+          i = _periodic4Map.erase( i );
         }
       }
     }
@@ -292,8 +295,8 @@ namespace ALUGrid
       const std::vector< elementKey_t >::iterator toDeleteend = toDelete.end ();
       for (std::vector< elementKey_t >::iterator i = toDelete.begin (); i != toDeleteend; ++i )
       {
-        // true means we have a real element
-        removeElement (*i, true);
+        // removes given element from _tetraMap or _hexaMap
+        removeElement ( *i );
       }
     }
 

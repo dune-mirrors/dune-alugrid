@@ -251,16 +251,14 @@ namespace ALUGrid
   }
   // Ende - Neu am 23.5.02 (BS)
 
-  void MacroGridBuilder::removeElement (const elementKey_t & k, const bool realElement )
+  void MacroGridBuilder::removeElement (const elementKey_t & k )
   {
-    // Der Schl"ussel sollte nur in genau einer Map vorliegen.
+    // the key should only exist in exactly one map
 
-    alugrid_assert ((_hexaMap.find (k) == _hexaMap.end () ? 0 : 1)
-          + (_tetraMap.find(k) == _tetraMap.end () ? 0 : 1)
-          + (_periodic3Map.find (k) == _periodic3Map.end () ? 0 : 1)
-          + (_periodic4Map.find (k) == _periodic4Map.end () ? 0 : 1) == 1);
+    alugrid_assert ((_hexaMap.find (k) == _hexaMap.end ()  ? 0 : 1)
+                  + (_tetraMap.find(k) == _tetraMap.end () ? 0 : 1) );
 
-    if( realElement )
+    if( ! _tetraMap.empty() )
     {
       elementMap_t::iterator hit = _tetraMap.find (k);
       if (hit != _tetraMap.end ())
@@ -306,8 +304,11 @@ namespace ALUGrid
 
         return;
       }
+    }
 
-      hit = _hexaMap.find (k);
+    if( ! _hexaMap.empty() )
+    {
+      elementMap_t::iterator hit = _hexaMap.find (k);
       if (hit != _hexaMap.end ())
       {
         hexa_GEO * hx = (hexa_GEO *)(*hit).second;
@@ -353,32 +354,8 @@ namespace ALUGrid
         return;
       }
     }
-    else
-    {
-      elementMap_t::iterator hit = _periodic3Map.find (k);
-      if (hit != _periodic3Map.end ())
-      {
-        periodic3_GEO * p3 = (periodic3_GEO *)(*hit).second;
 
-        delete p3;
-        _periodic3Map.erase (hit);
-
-        return;
-      }
-
-      hit = _periodic4Map.find (k);
-      if (hit != _periodic4Map.end ())
-      {
-        periodic4_GEO * p4 = (periodic4_GEO *)(*hit).second;
-
-        delete p4;
-        _periodic4Map.erase (hit);
-
-        return;
-      }
-    }
-
-    abort ();
+    std::abort ();
     return;
   }
 
