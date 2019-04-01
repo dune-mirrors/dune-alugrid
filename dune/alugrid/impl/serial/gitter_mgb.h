@@ -185,7 +185,7 @@ namespace ALUGrid
 
       inline BuilderIF & myBuilder ();
       inline const BuilderIF & myBuilder () const;
-      void removeElement (const elementKey_t &, const bool );
+      void removeElement (const elementKey_t & );
     public :
       virtual std::pair< VertexGeo *, bool >     InsertUniqueVertex (double, double, double, int);
       virtual std::pair< hedge1_GEO *, bool >    InsertUniqueHedge (int,int);
