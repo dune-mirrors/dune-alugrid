@@ -212,19 +212,6 @@ namespace ALUGrid
         // return MPI rank of master which is always the same as myrank
         int master() const { return myvertex(0)->indexManagerStorage ().myrank(); }
 
-        // change coordinates of this element (for ghost elements only)
-        virtual void changeVertexCoordinates( const std::array< std::array<alucoord_t,3>, 8 >& newCoords )
-        {
-          // this should only be called for ghost elements
-          alugrid_assert( this->isGhost() );
-
-          for( int i=0; i < 4; ++i )
-          {
-            VertexGeo* vx = const_cast< VertexGeo* > (this->myvertex(i));
-            vx->setCoordinates( newCoords[ i ] );
-          }
-        }
-
     private:
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds();
