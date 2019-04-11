@@ -7,6 +7,7 @@
 #include <mutex>
 #include <memory>
 #include <vector>
+#include <array>
 #include <utility>
 
 #include "../macrofileheader.hh"
