@@ -6,6 +6,7 @@ set(alu3dgrid_HEADERS  aluinline.hh alu3dinclude.hh communication.hh
     faceutility.hh faceutility_imp.cc geometry.hh geometry_imp.cc
     gridfactory.hh gridfactory.cc gridview.hh
     indexsets.hh indexsets.cc iterator.hh iterator.cc iterator_imp.cc alu3diterators.hh
+    alu3diterators_imp.cc
     alugrid.hh)
 set(headercheck_IGNORE  ${alu3dgrid_HEADERS})
 # include not needed for CMake
