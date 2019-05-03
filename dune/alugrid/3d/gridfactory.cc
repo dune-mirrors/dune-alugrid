@@ -16,7 +16,7 @@
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 
-#include <utils/bisection-compatibility/bisectioncompatibility.hh>
+#include <dune/alugrid/common/bisectioncompatibility.hh>
 
 #include "dune/alugrid/3d/aluinline.hh"
 
