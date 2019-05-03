@@ -1,6 +1,7 @@
 set(alucommondir  ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/common)
 set(alucommon_HEADERS alugrid_assert.hh
                       backuprestore.hh
+                      bisectioncompatibility.hh
                       bndprojection.hh
                       capabilities.hh
                       declaration.hh
