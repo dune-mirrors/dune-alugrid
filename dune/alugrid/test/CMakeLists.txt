@@ -2,6 +2,7 @@ set(TESTS
   test-alugrid
   test-structuredgridfactory
   test-backup-restore
+  test-dgf
 )
 
 set(EXTRA_TESTS
