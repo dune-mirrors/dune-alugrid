@@ -33,10 +33,11 @@ try
     return 0;
   }
 
-  using ALU3dSimplex = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
-  Dune::GridPtr< ALU3dSimplex > gridPtr( filename );
-
+  using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
+  Dune::GridPtr< GridType > gridPtr( filename );
   gridPtr.loadBalance();
+
+  // grid is ready and load balanced at that point
 
   std::cout << "P[ " << rank << " ] parameters = " << gridPtr.nofParameters( 0 ) << std::endl;
   auto lvlView = gridPtr->levelGridView( 0 );

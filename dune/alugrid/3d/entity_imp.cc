@@ -472,8 +472,9 @@ namespace Dune {
             // get hedge1 corresponding to dune reference element and return number
             return item_->myhedge( ElemTopo::dune2aluEdge(i) )->getIndex();
           }
-          else if (GridImp::dimension == 2)
+          else // if (GridImp::dimension == 2)
           {
+            assert( GridImp::dimension == 2 );
             if (GridImp:: elementType == tetra)
             {
               // We want vertices 1,2,3 in DUNE numbering for tetra and 0,1,2,3 for hexa
