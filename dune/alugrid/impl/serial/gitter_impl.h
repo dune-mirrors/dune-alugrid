@@ -351,7 +351,7 @@ namespace ALUGrid
 
 
   class GitterBasisImpl
-  : public GitterBasis
+  : public virtual GitterBasis
   {
     MacroGitterBasis*  _macrogitter;
   public:

@@ -1126,9 +1126,14 @@ namespace ALUGrid
         }
         alugrid_assert ( j < 4 );
         if ( j == 3 )
+        {
           return myface.subface(3);
-        if ( j < 3 )
+        }
+        else // ( j < 3 )
+        {
+          alugrid_assert ( j < 3 );
           return myface.subface(twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
+        }
       }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**ERROR (FATAL): subface () called on non-refined face. In " << __FILE__ << " " << __LINE__ << std::endl ;
@@ -2547,7 +2552,7 @@ namespace ALUGrid
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::iso4 :
-    // in 2d case do the same as e12
+      // in 2d case do the same as e12
       if(this->is2d()){
         alugrid_assert ( j < 2 );
         if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
@@ -2559,16 +2564,21 @@ namespace ALUGrid
       }
       alugrid_assert ( j < 4 );
       if ( j == 3 )
+      {
         return myhface(i)->subface (3) ;
-      if ( j < 3 )
+      }
+      else // ( j < 3 )
+      {
+        alugrid_assert( j < 3 );
         return myhface (i)->subface (twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
+      }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
-      abort () ;
+      std::abort () ;
       return 0 ;
     default:
       std::cerr << "**FEHLER (FATAL): Falsche Verfeinerungsregel [" << myhface(i)->getrule() << "] in " << __FILE__ << " " << __LINE__ << std::endl ;
-      abort() ;
+      std::abort() ;
     }
     return 0 ;
   }
@@ -2623,17 +2633,23 @@ namespace ALUGrid
           split_iso4 () ;
           break ;
         }
+
+        std::cerr << "**ERROR (FATAL) refinement of Periodic3Top didd not work: " ;
+        std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
+        std::abort () ;
+        break ;
+
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
 
-        abort () ;
+        std::abort () ;
       default :
         std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
         std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
-        abort () ;
+        std::abort () ;
         break ;
     }
     this->postRefinement () ;
