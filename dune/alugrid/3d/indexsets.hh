@@ -181,9 +181,14 @@ namespace Dune
   //
   // The template parameter IntegerType allows to switch between
   // more elements in the grid and a smaller size of the global Ids
-  template <class MacroKeyImp, class IntegerType = int>
+  template <class MacroKeyImp, class IntegerImp = int>
   class ALUGridId
   {
+  public:
+    typedef IntegerImp IntegerType;
+
+  private:
+
     MacroKeyImp key_;
     IntegerType nChild_;
     IntegerType codimLevel_;
@@ -460,7 +465,7 @@ namespace Dune {
       enum { childOffSet = (dim == 2) ? 4 : ((cd == 1) && (elType == hexa)) ? 16 : 8 };
       alugrid_assert ( nChild < childOffSet );
 
-      const IdType::IntegerType newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
+      const typename IdType::IntegerType newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
 
       IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
       alugrid_assert( newId != creatorId );
