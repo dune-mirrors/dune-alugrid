@@ -173,15 +173,23 @@ namespace Dune
     }
   };
 
-  template <class MacroKeyImp>
+  // Class to provide global Ids for all entities in the
+  // grid. Global Ids depend on the macro Element that
+  // the current element descends from, the codimension
+  // and the level - this is usually created by the method
+  // createId
+  //
+  // The template parameter IntegerType allows to switch between
+  // more elements in the grid and a smaller size of the global Ids
+  template <class MacroKeyImp, class IntegerType = int>
   class ALUGridId
   {
     MacroKeyImp key_;
-    int nChild_;
-    int64_t codimLevel_;
+    IntegerType nChild_;
+    IntegerType codimLevel_;
 
     // this means that only up to INT64_MAX/4 entities are allowed
-    static constexpr int64_t codimOffset = INT64_MAX /4 ;
+    static constexpr IntegerType codimOffset = std::numeric_limits<IntegerType>::max() /4 ;
 
   public:
     ALUGridId() : key_()
@@ -189,7 +197,7 @@ namespace Dune
                 , codimLevel_(-1)
     {}
 
-    explicit ALUGridId(const MacroKeyImp & key, const int nChild , const int64_t codim, const int64_t level)
+    explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const IntegerType codim, const IntegerType level)
       : key_(key) , nChild_(nChild)
       , codimLevel_( codim * codimOffset + level )
     {}
@@ -241,9 +249,9 @@ namespace Dune
     }
 
     const MacroKeyImp & getKey() const { return key_; }
-    int nChild() const { return nChild_; }
-    int64_t codim() const  { return codimLevel_ / codimOffset ; }
-    int64_t level() const  { return codimLevel_ % codimOffset ; }
+    IntegerType nChild() const { return nChild_; }
+    IntegerType codim() const  { return codimLevel_ / codimOffset ; }
+    IntegerType level() const  { return codimLevel_ % codimOffset ; }
 
     bool isValid () const
     {
@@ -452,7 +460,7 @@ namespace Dune {
       enum { childOffSet = (dim == 2) ? 4 : ((cd == 1) && (elType == hexa)) ? 16 : 8 };
       alugrid_assert ( nChild < childOffSet );
 
-      const int newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
+      const IdType::IntegerType newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
 
       IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
       alugrid_assert( newId != creatorId );
