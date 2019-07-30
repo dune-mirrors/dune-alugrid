@@ -178,10 +178,10 @@ namespace Dune
   {
     MacroKeyImp key_;
     int nChild_;
-    int codimLevel_;
+    int64_t codimLevel_;
 
-    // this means that only up to 300000000 entities are allowed
-    static constexpr int codimOffset = 300000000 ;
+    // this means that only up to INT64_MAX/4 entities are allowed
+    static constexpr int64_t codimOffset = INT64_MAX /4 ;
 
   public:
     ALUGridId() : key_()
@@ -189,7 +189,7 @@ namespace Dune
                 , codimLevel_(-1)
     {}
 
-    explicit ALUGridId(const MacroKeyImp & key, const int nChild , const int codim, const int level)
+    explicit ALUGridId(const MacroKeyImp & key, const int nChild , const int64_t codim, const int64_t level)
       : key_(key) , nChild_(nChild)
       , codimLevel_( codim * codimOffset + level )
     {}
@@ -242,8 +242,8 @@ namespace Dune
 
     const MacroKeyImp & getKey() const { return key_; }
     int nChild() const { return nChild_; }
-    int codim() const  { return codimLevel_ / codimOffset ; }
-    int level() const  { return codimLevel_ % codimOffset ; }
+    int64_t codim() const  { return codimLevel_ / codimOffset ; }
+    int64_t level() const  { return codimLevel_ % codimOffset ; }
 
     bool isValid () const
     {
