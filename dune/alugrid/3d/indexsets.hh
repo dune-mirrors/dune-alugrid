@@ -191,10 +191,10 @@ namespace Dune
 
     MacroKeyImp key_;
     IntegerType nChild_;
-    IntegerType codimLevel_;
+    int codimLevel_;
 
-    // this means that only up to INT64_MAX/4 entities are allowed
-    static constexpr IntegerType codimOffset = std::numeric_limits<IntegerType>::max() /4 ;
+    // this means that only up to 100 levels are allowed
+    static constexpr int codimOffset = 100 ;
 
   public:
     ALUGridId() : key_()
@@ -202,7 +202,7 @@ namespace Dune
                 , codimLevel_(-1)
     {}
 
-    explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const IntegerType codim, const IntegerType level)
+    explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const int codim, const int level)
       : key_(key) , nChild_(nChild)
       , codimLevel_( codim * codimOffset + level )
     {}
@@ -255,8 +255,8 @@ namespace Dune
 
     const MacroKeyImp & getKey() const { return key_; }
     IntegerType nChild() const { return nChild_; }
-    IntegerType codim() const  { return codimLevel_ / codimOffset ; }
-    IntegerType level() const  { return codimLevel_ % codimOffset ; }
+    int codim() const  { return codimLevel_ / codimOffset ; }
+    int level() const  { return codimLevel_ % codimOffset ; }
 
     bool isValid () const
     {
@@ -456,20 +456,63 @@ namespace Dune {
 
     IdType buildMacroElementId(const HElementType & item );
 
+    // The items of each codimLevel are numbered consecutively
+    // For a level l we have (Note that we are in the interior of a macro element):
+    // nElements = nChild^l elements
+    // nFaces = 3*nElements
+    // nEdges = 3*nElements
+    // nVertices = nElements
+    //
+    // The entries are sorted by creator codim
     template <int cd, class Item>
     IdType createId(const Item& item , const IdType& creatorId , int nChild )
     {
       alugrid_assert ( creatorId.isValid() );
 
-      // we have up to 12 internal hexa faces, therefore need 100 offset
-      enum { childOffSet = (dim == 2) ? 4 : ((cd == 1) && (elType == hexa)) ? 16 : 8 };
-      alugrid_assert ( nChild < childOffSet );
+      typedef typename IdType::IntegerType IntType;
+      typedef typename std::array<int,4> AT;
 
-      const typename IdType::IntegerType newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
+      const int level = creatorId.level();
+      const int creatorNumber = creatorId.nChild();
+      const int creatorCodim = creatorId.codim();
+      if (elType == hexa)
+      {
+        const IntType nElements = std::pow(8,level);
+        const std::array<IntType, 4>  nEntities ({nElements, 3* nElements, 3* nElements, nElements});
 
-      IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
-      alugrid_assert( newId != creatorId );
-      return newId;
+        const std::array<std::array<int, 4>, 3> offset = {AT({8,12,6,1}),AT({-1,4,4,1}),AT({-1,-1,2,1})};
+
+        const int childOffSet = offset[creatorCodim][cd];
+        alugrid_assert ( nChild < childOffSet );
+         typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
+        for(int i=cd ; i > creatorCodim ; i--)
+        {
+          newChild += nEntities[i] * offset[i][cd];
+        }
+
+        IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
+        alugrid_assert( newId != creatorId );
+        return newId;
+      }
+      else if (elType == tetra)
+      {
+        const IntType nElements = std::pow(8,level);
+        const std::array<IntType, 4>  nEntities ({nElements, 2* nElements, (3* nElements)/4, nElements/2});
+
+        const std::array<std::array<int, 4>, 3> offset = {AT({4,12,1,0}),AT({-1,4,3,0}),AT({-1,-1,2,1})};
+
+        const int childOffSet = offset[creatorCodim][cd];
+        alugrid_assert ( nChild < childOffSet );
+         typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
+        for(int i=cd ; i > creatorCodim ; i--)
+        {
+          newChild += nEntities[i] * offset[i][cd];
+        }
+
+      }
+
+      alugrid_assert( false );
+      return creatorId;
     }
 
     // build ids for all children of this element
