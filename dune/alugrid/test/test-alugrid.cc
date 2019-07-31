@@ -102,6 +102,8 @@ void checkCapabilities(const Grid& grid)
 #endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
    std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
    std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
+   std::cout << "  GlobalId = " << sizeof(typename Grid::GlobalIdSet::IdType) << std::endl;
+   std::cout << "  LocalId  = " << sizeof(typename Grid::LocalIdSet::IdType) << std::endl;
    std::cout << std::endl;
 }
 

@@ -230,7 +230,7 @@ buildMacroVertexId(const VertexType & item )
   int vx[4] = { item.ident(), -1, -1, -1};
   enum { codim = 3 };
   MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
-  return MacroIdType(key, 1, codim, startOffSet_ );
+  return MacroIdType(key, 0, codim, startOffSet_ );
 }
 
 template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
@@ -248,7 +248,7 @@ buildMacroEdgeId(const HEdgeType & item )
 
   enum { codim = 2 };
   MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
-  return MacroIdType(key, 1, codim, startOffSet_ );
+  return MacroIdType(key, 0, codim, startOffSet_ );
 }
 
 template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
@@ -266,7 +266,7 @@ buildMacroFaceId(const HFaceType & item )
 
   enum { codim = 1 };
   MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
-  return MacroIdType(key,1, codim, startOffSet_ );
+  return MacroIdType(key,0, codim, startOffSet_ );
 }
 
 template<int dim, int dimworld, ALU3dGridElementType elType, class Comm >
@@ -283,7 +283,7 @@ buildMacroElementId(const HElementType & item )
   }
   enum { codim = 0 };
   MacroKeyType key(vx[0],vx[1],vx[2],vx[3]);
-  return MacroIdType(key,1, codim, startOffSet_ );
+  return MacroIdType(key,0, codim, startOffSet_ );
 }
 
 // build ids for all children of this element
@@ -440,8 +440,8 @@ ALU3dGridGlobalIdSet< dim, dimworld, elType, Comm > ::
 buildVertexIds(const VertexType & vertex, const IdType & fatherId )
 {
   enum { codim = 3 };
-  // inner vertex number is 1
-  ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,1);
+  // inner vertex number is 0
+  ids_[codim][vertex.getIndex()] = createId<codim>(vertex,fatherId,0);
   alugrid_assert ( ids_[codim][vertex.getIndex()].isValid() );
 }
 

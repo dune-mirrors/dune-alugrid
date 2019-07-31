@@ -173,38 +173,53 @@ namespace Dune
     }
   };
 
-  template <class MacroKeyImp>
+  // Class to provide global Ids for all entities in the
+  // grid. Global Ids depend on the macro Element that
+  // the current element descends from, the codimension
+  // and the level - this is usually created by the method
+  // createId
+  //
+  // The template parameter IntegerType allows to switch between
+  // more elements in the grid and a smaller size of the global Ids
+  template <class MacroKeyImp, class IntegerImp = int>
   class ALUGridId
   {
-    MacroKeyImp key_;
-    int nChild_;
-    int64_t codimLevel_;
+  public:
+    typedef IntegerImp IntegerType;
 
-    // this means that only up to INT64_MAX/4 entities are allowed
-    static constexpr int64_t codimOffset = INT64_MAX /4 ;
+  private:
+
+    MacroKeyImp key_;
+    IntegerType nChild_;
+    signed char codim_;
+    signed char level_;
 
   public:
     ALUGridId() : key_()
                 , nChild_(-1)
-                , codimLevel_(-1)
+                , codim_(-1)
+                , level_(-1)
     {}
 
-    explicit ALUGridId(const MacroKeyImp & key, const int nChild , const int64_t codim, const int64_t level)
+    explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const int codim, const int level)
       : key_(key) , nChild_(nChild)
-      , codimLevel_( codim * codimOffset + level )
+      , codim_( codim )
+      , level_( level )
     {}
 
     ALUGridId(const ALUGridId & org )
       : key_(org.key_)
       , nChild_(org.nChild_)
-      , codimLevel_(org.codimLevel_)
+      , codim_(org.codim_)
+      , level_(org.level_)
     {}
 
     ALUGridId & operator = (const ALUGridId & org )
     {
       key_         = org.key_;
       nChild_      = org.nChild_;
-      codimLevel_  = org.codimLevel_;
+      codim_  = org.codim_;
+      level_  = org.level_;
       return *this;
     }
 
@@ -241,31 +256,33 @@ namespace Dune
     }
 
     const MacroKeyImp & getKey() const { return key_; }
-    int nChild() const { return nChild_; }
-    int64_t codim() const  { return codimLevel_ / codimOffset ; }
-    int64_t level() const  { return codimLevel_ % codimOffset ; }
+    IntegerType nChild() const { return nChild_; }
+    int codim() const  { return int(codim_) ; }
+    int level() const  { return int(level_) ; }
 
     bool isValid () const
     {
-      return ( (nChild_ >= 0) && (codimLevel_  >= 0) );
+      return ( (nChild_ >= 0) && (codim_  >= 0) && (level_ >= 0) );
     }
 
     void reset()
     {
       nChild_ = -1;
-      codimLevel_  = -1;
+      codim_  = -1;
+      level_ = -1;
     }
 
     void print(std::ostream & out) const
     {
-      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << codimLevel_ << ")";
+      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << int(codim_) << "," << int(level_) << ")";
     }
 
     inline friend std::size_t hash_value(const ALUGridId& arg)
     {
       std::size_t seed = hash<MacroKeyImp>()(arg.getKey());
       hash_combine(seed,arg.nChild_);
-      hash_combine(seed,arg.codimLevel_);
+      hash_combine(seed,arg.codim_);
+      hash_combine(seed,arg.level_);
       return seed;
     }
 
@@ -279,7 +296,9 @@ namespace Dune
       {
         if(nChild_ == org.nChild_)
         {
-          return codimLevel_ < org.codimLevel_;
+          if( codim_ == org.codim_)
+            return level_ < org.level_;
+          return codim_ < org.codim_;
         }
         else
           return nChild_ < org.nChild_;
@@ -292,7 +311,7 @@ namespace Dune
     bool equals(const ALUGridId & org) const
     {
       return ( (getKey() == org.getKey() ) && (nChild_ == org.nChild_)
-            && (codimLevel_ == org.codimLevel_) );
+            && (codim_ == org.codim_) && (level_ == org.level_) );
     }
   };
 
@@ -373,6 +392,28 @@ namespace Dune {
 
     enum { startOffSet_ = 0 };
 
+    typedef typename std::array<int,4> AT;
+
+    //This offset yields the amount of (or an upper bound for) the lower-dimensional entities that are created
+    // Example first entry (dim 3 - hexa)
+    // A cube creates 8 cubes, 12 inner faces, 6 inner edges, 1 inner vertex
+    //
+    // For the 2d case the first and second entry coincide, because the 3d grid is just an extended 2d grid
+    const std::array<std::array<int, 4>, 4> offset = (dim == 3) ?
+                                                    ( (elType == hexa) ?
+                                                    std::array<AT,4>({AT({8,12,6,1}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
+                                                    std::array<AT,4>({AT({8,8,1,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    ) : (
+                                                    (elType == hexa) ?
+                                                    std::array<AT,4>({AT({4,4,1,0}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
+                                                    std::array<AT,4>({AT({4,3,0,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    );
+    // nChildren is actually 4 for dim = 2
+    // but the other values would have to be computed exactly
+    // so we use an upper bound (5)
+    const int nChildren = ( dim == 3) ? 8 : 5;
+    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT({1, 3 , 3, 1}) : AT({1, 2, 2, 1}) );
+
   public:
 
     //! import default implementation of subId<cc>
@@ -443,18 +484,33 @@ namespace Dune {
 
     IdType buildMacroElementId(const HElementType & item );
 
+    // The items of each codimLevel are numbered consecutively
+    // For a level l we have (Note that we are in the interior of a macro element):
+    //
+    // The entries are sorted by creator codim
     template <int cd, class Item>
     IdType createId(const Item& item , const IdType& creatorId , int nChild )
     {
       alugrid_assert ( creatorId.isValid() );
 
-      // we have up to 12 internal hexa faces, therefore need 100 offset
-      enum { childOffSet = (dim == 2) ? 4 : ((cd == 1) && (elType == hexa)) ? 16 : 8 };
+
+      const int level = creatorId.level();
+      const typename IdType::IntegerType nElements = std::pow(nChildren,level);
+      const int creatorNumber = creatorId.nChild();
+      const int creatorCodim = creatorId.codim();
+      const int childOffSet = offset[creatorCodim][cd];
+
       alugrid_assert ( nChild < childOffSet );
+      alugrid_assert ( creatorNumber < nEntitiesFactor[creatorCodim] * nElements );
 
-      const int newChild   = ((creatorId.codim()+1) * creatorId.nChild() * childOffSet ) + nChild;
+      typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
+      for(int i=cd ; i > creatorCodim ; i--)
+      {
+        newChild += nEntitiesFactor[i] * nElements  * offset[i][cd];
+      }
 
-      IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
+      IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
+      alugrid_assert( newId.isValid() );
       alugrid_assert( newId != creatorId );
       return newId;
     }
