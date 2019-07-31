@@ -392,6 +392,28 @@ namespace Dune {
 
     enum { startOffSet_ = 0 };
 
+    typedef typename std::array<int,4> AT;
+
+    //This offset yields the amount of (or an upper bound for) the lower-dimensional entities that are created
+    // Example first entry (dim 3 - hexa)
+    // A cube creates 8 cubes, 12 inner faces, 6 inner edges, 1 inner vertex
+    //
+    // For the 2d case the first and second entry coincide, because the 3d grid is just an extended 2d grid
+    const std::array<std::array<int, 4>, 4> offset = (dim == 3) ?
+                                                    ( (elType == hexa) ?
+                                                    std::array<AT,4>({AT({8,12,6,1}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
+                                                    std::array<AT,4>({AT({8,8,1,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    ) : (
+                                                    (elType == hexa) ?
+                                                    std::array<AT,4>({AT({4,4,1,0}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
+                                                    std::array<AT,4>({AT({4,3,0,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    );
+    // nChildren is actually 4 for dim = 2
+    // but the other values would have to be computed exactly
+    // so we use an upper bound (5)
+    const int nChildren = ( dim == 3) ? 8 : 5;
+    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT({1, 3 , 3, 1}) : AT({1, 2, 1, 1}) );
+
   public:
 
     //! import default implementation of subId<cc>
@@ -464,10 +486,6 @@ namespace Dune {
 
     // The items of each codimLevel are numbered consecutively
     // For a level l we have (Note that we are in the interior of a macro element):
-    // nElements = nChild^l elements
-    // nFaces = 3*nElements
-    // nEdges = 3*nElements
-    // nVertices = nElements
     //
     // The entries are sorted by creator codim
     template <int cd, class Item>
@@ -475,58 +493,26 @@ namespace Dune {
     {
       alugrid_assert ( creatorId.isValid() );
 
-      typedef typename IdType::IntegerType IntType;
-      typedef typename std::array<int,4> AT;
 
       const int level = creatorId.level();
+      const typename IdType::IntegerType nElements = std::pow(nChildren,level);
       const int creatorNumber = creatorId.nChild();
       const int creatorCodim = creatorId.codim();
-      if (elType == hexa)
+      const int childOffSet = offset[creatorCodim][cd];
+
+      alugrid_assert ( nChild < childOffSet );
+      alugrid_assert ( creatorNumber < nEntitiesFactor[creatorCodim] * nElements );
+
+      typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
+      for(int i=cd ; i > creatorCodim ; i--)
       {
-        const IntType nElements = std::pow(8,level);
-        const std::array<IntType, 4>  nEntities ({nElements, 3* nElements, 3* nElements, nElements});
-
-        const std::array<std::array<int, 4>, 4> offset = {AT({8,12,6,1}),AT({-1,4,4,1}),AT({-1,-1,2,1}),AT({-1,-1,-1,1})};
-
-        const int childOffSet = offset[creatorCodim][cd];
-        alugrid_assert ( nChild < childOffSet );
-        alugrid_assert ( childOffSet > 0);
-        alugrid_assert ( creatorNumber < nEntities[creatorCodim] );
-        typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
-        for(int i=cd ; i > creatorCodim ; i--)
-        {
-          alugrid_assert(offset[i][cd] > 0);
-          newChild += nEntities[i] * offset[i][cd];
-        }
-
-        IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
-        alugrid_assert( newId.isValid() );
-        alugrid_assert( newId != creatorId );
-        return newId;
-      }
-      else if (elType == tetra)
-      {
-        const IntType nElements = std::pow(8,level);
-        const std::array<IntType, 4>  nEntities ({nElements, 2* nElements, (3* nElements)/4, nElements/2});
-
-        const std::array<std::array<int, 4>, 4> offset = {AT({8,8,1,0}),AT({-1,4,3,0}),AT({-1,-1,2,1}),AT({-1,-1,-1,1})};
-
-        const int childOffSet = offset[creatorCodim][cd];
-        alugrid_assert ( nChild < childOffSet );
-         typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
-        for(int i=cd ; i > creatorCodim ; i--)
-        {
-          newChild += nEntities[i] * offset[i][cd];
-        }
-        IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
-        alugrid_assert( newId.isValid() );
-        alugrid_assert( newId != creatorId );
-        return newId;
-
+        newChild += nEntitiesFactor[i] * nElements  * offset[i][cd];
       }
 
-      alugrid_assert( false );
-      return creatorId;
+      IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
+      alugrid_assert( newId.isValid() );
+      alugrid_assert( newId != creatorId );
+      return newId;
     }
 
     // build ids for all children of this element
