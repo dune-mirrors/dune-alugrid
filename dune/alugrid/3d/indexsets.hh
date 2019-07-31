@@ -191,33 +191,35 @@ namespace Dune
 
     MacroKeyImp key_;
     IntegerType nChild_;
-    int codimLevel_;
-
-    // this means that only up to 100 levels are allowed
-    static constexpr int codimOffset = 100 ;
+    signed char codim_;
+    signed char level_;
 
   public:
     ALUGridId() : key_()
                 , nChild_(-1)
-                , codimLevel_(-1)
+                , codim_(-1)
+                , level_(-1)
     {}
 
     explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const int codim, const int level)
       : key_(key) , nChild_(nChild)
-      , codimLevel_( codim * codimOffset + level )
+      , codim_( codim )
+      , level_( level )
     {}
 
     ALUGridId(const ALUGridId & org )
       : key_(org.key_)
       , nChild_(org.nChild_)
-      , codimLevel_(org.codimLevel_)
+      , codim_(org.codim_)
+      , level_(org.level_)
     {}
 
     ALUGridId & operator = (const ALUGridId & org )
     {
       key_         = org.key_;
       nChild_      = org.nChild_;
-      codimLevel_  = org.codimLevel_;
+      codim_  = org.codim_;
+      level_  = org.level_;
       return *this;
     }
 
@@ -255,30 +257,32 @@ namespace Dune
 
     const MacroKeyImp & getKey() const { return key_; }
     IntegerType nChild() const { return nChild_; }
-    int codim() const  { return codimLevel_ / codimOffset ; }
-    int level() const  { return codimLevel_ % codimOffset ; }
+    int codim() const  { return int(codim_) ; }
+    int level() const  { return int(level_) ; }
 
     bool isValid () const
     {
-      return ( (nChild_ >= 0) && (codimLevel_  >= 0) );
+      return ( (nChild_ >= 0) && (codim_  >= 0) && (level_ >= 0) );
     }
 
     void reset()
     {
       nChild_ = -1;
-      codimLevel_  = -1;
+      codim_  = -1;
+      level_ = -1;
     }
 
     void print(std::ostream & out) const
     {
-      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << codimLevel_ << ")";
+      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << int(codim_) << "," << int(level_) << ")";
     }
 
     inline friend std::size_t hash_value(const ALUGridId& arg)
     {
       std::size_t seed = hash<MacroKeyImp>()(arg.getKey());
       hash_combine(seed,arg.nChild_);
-      hash_combine(seed,arg.codimLevel_);
+      hash_combine(seed,arg.codim_);
+      hash_combine(seed,arg.level_);
       return seed;
     }
 
@@ -292,7 +296,9 @@ namespace Dune
       {
         if(nChild_ == org.nChild_)
         {
-          return codimLevel_ < org.codimLevel_;
+          if( codim_ == org.codim_)
+            return level_ < org.level_;
+          return codim_ < org.codim_;
         }
         else
           return nChild_ < org.nChild_;
@@ -305,7 +311,7 @@ namespace Dune
     bool equals(const ALUGridId & org) const
     {
       return ( (getKey() == org.getKey() ) && (nChild_ == org.nChild_)
-            && (codimLevel_ == org.codimLevel_) );
+            && (codim_ == org.codim_) && (level_ == org.level_) );
     }
   };
 
@@ -480,17 +486,21 @@ namespace Dune {
         const IntType nElements = std::pow(8,level);
         const std::array<IntType, 4>  nEntities ({nElements, 3* nElements, 3* nElements, nElements});
 
-        const std::array<std::array<int, 4>, 3> offset = {AT({8,12,6,1}),AT({-1,4,4,1}),AT({-1,-1,2,1})};
+        const std::array<std::array<int, 4>, 4> offset = {AT({8,12,6,1}),AT({-1,4,4,1}),AT({-1,-1,2,1}),AT({-1,-1,-1,1})};
 
         const int childOffSet = offset[creatorCodim][cd];
         alugrid_assert ( nChild < childOffSet );
-         typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
+        alugrid_assert ( childOffSet > 0);
+        alugrid_assert ( creatorNumber < nEntities[creatorCodim] );
+        typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
         for(int i=cd ; i > creatorCodim ; i--)
         {
+          alugrid_assert(offset[i][cd] > 0);
           newChild += nEntities[i] * offset[i][cd];
         }
 
-        IdType newId( creatorId.getKey() , newChild , cd, creatorId.level() + 1  );
+        IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
+        alugrid_assert( newId.isValid() );
         alugrid_assert( newId != creatorId );
         return newId;
       }
@@ -499,7 +509,7 @@ namespace Dune {
         const IntType nElements = std::pow(8,level);
         const std::array<IntType, 4>  nEntities ({nElements, 2* nElements, (3* nElements)/4, nElements/2});
 
-        const std::array<std::array<int, 4>, 3> offset = {AT({4,12,1,0}),AT({-1,4,3,0}),AT({-1,-1,2,1})};
+        const std::array<std::array<int, 4>, 4> offset = {AT({8,8,1,0}),AT({-1,4,3,0}),AT({-1,-1,2,1}),AT({-1,-1,-1,1})};
 
         const int childOffSet = offset[creatorCodim][cd];
         alugrid_assert ( nChild < childOffSet );
@@ -508,6 +518,10 @@ namespace Dune {
         {
           newChild += nEntities[i] * offset[i][cd];
         }
+        IdType newId( creatorId.getKey() , newChild , cd, level + 1  );
+        alugrid_assert( newId.isValid() );
+        alugrid_assert( newId != creatorId );
+        return newId;
 
       }
 
