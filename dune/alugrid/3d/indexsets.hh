@@ -412,7 +412,7 @@ namespace Dune {
     // but the other values would have to be computed exactly
     // so we use an upper bound (5)
     const int nChildren = ( dim == 3) ? 8 : 5;
-    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT({1, 3 , 3, 1}) : AT({1, 2, 1, 1}) );
+    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT({1, 3 , 3, 1}) : AT({1, 2, 2, 1}) );
 
   public:
 
