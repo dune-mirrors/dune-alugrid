@@ -36,15 +36,27 @@ try
   }
 
 #if 0
-  using GridType = Dune::ALUGrid<2, 3, Dune::simplex, Dune::conforming>;
+  using GridType = Dune::ALUGrid<2, 3, Dune::simplex, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
   GridType& grid = *gridPtr;
-  grid.globalRefine( 3 );
+  grid.loadBalance();
+
+  if( rank == 0 )
+  {
+    for(const auto& elem : Dune::elements( grid.leafGridView() ) )
+    {
+      grid.mark( 1, elem );
+    }
+  }
+
+  grid.preAdapt();
+  grid.adapt();
+  grid.postAdapt();
+  // grid.globalRefine( 5 );
 
   Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid.leafGridView());
   vtkWriter.write( "sphere-out" );
-#endif
-
+#else
   {
     using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
     Dune::GridPtr< GridType > gridPtr( filename );
@@ -67,6 +79,7 @@ try
       std::cout << std::endl;
     }
   }
+#endif
 
   return 0;
 }

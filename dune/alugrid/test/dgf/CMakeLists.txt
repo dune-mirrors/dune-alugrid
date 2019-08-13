@@ -8,6 +8,7 @@ set(DGFS
   sphere.dgf
   simplex-testgrid-2-2.dgf
   simplex-testgrid-2-3.dgf
+  simplex-testgrid-2-3-noproj.dgf
   simplex-testgrid-3-3.dgf
 )
 
