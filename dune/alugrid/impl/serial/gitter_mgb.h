@@ -29,28 +29,12 @@ namespace ALUGrid
     }
   }
 
+  //This method is not needed anymore...
   // cyclic re-ordering of v and computing of twist
   inline int cyclicReorder( int *begin, int *end )
   {
-    int* middle = std::min_element( begin, end );
-
-    int twst = 0;
-    if( middle != begin )
-    {
-      rotateVec( begin, middle, end );
-      twst = end - middle;
-    }
-
-    if( *(begin + 1) < *(end - 1) )
-    {
-      return twst;
-    }
-    else
-    {
-      std::reverse( begin, end );
-      rotateVec( begin, end - 1, end );
-      return -twst - 1;
-    }
+    //DO nothing here
+    return 0
   }
 
   // sorts v in ascending order and returns twist

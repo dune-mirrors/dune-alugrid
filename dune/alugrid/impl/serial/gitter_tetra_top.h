@@ -20,7 +20,7 @@ namespace ALUGrid
     bool found = true;
     for( int i=0; i<3; ++i )
     {
-      const int twst = face->twist( i );
+      const bool isFront = face->isFront( i );
       // check vertices of the face
       for( int j=0; j<2; ++j )
       {
@@ -63,7 +63,7 @@ namespace ALUGrid
   template < class A > class Hface3Top : public A
   {
     public :
-      using A :: twist;
+      using A :: isFront;
       using A :: myhedge;
       using A :: myvertex;
 
@@ -153,7 +153,7 @@ namespace ALUGrid
 
   template < class A > class Hbnd3Top : public A {
     public:
-      using A :: twist;
+      using A :: isFront;
       using A :: subface;
       using A :: myhface;
 
@@ -220,7 +220,7 @@ namespace ALUGrid
   template < class A > class TetraTop : public A
   {
     public :
-      using A :: twist;
+      using A :: isFront;
       using A :: myhface;
       using A :: myvertex;
       using A :: myGrid;
@@ -320,10 +320,10 @@ namespace ALUGrid
 
           for(int j=0; j<3; ++j )
           {
-            for( int twist=0; twist<2; ++twist )
+            for( int i=0; i<2; ++i )
             {
-              if( face->myhedge( j )->myvertex( twist ) == vx0  &&
-                  face->myhedge( j )->myvertex( 1-twist ) == vx1  )
+              if( face->myhedge( j )->myvertex( i ) == vx0  &&
+                  face->myhedge( j )->myvertex( 1-i ) == vx1  )
               {
                 return rules[ j ];
               }
@@ -348,7 +348,7 @@ namespace ALUGrid
            // std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
-            if (! face->refine( faceRule, tetra->twist( info._faces[ i ] ) ) ) return false;
+            if (! face->refine( faceRule, tetra->isFront( info._faces[ i ] ) ) ) return false;
           }
           return true;
         }
@@ -430,9 +430,6 @@ namespace ALUGrid
       inline void append (innertetra_t * h);
 
       bool checkTetra( const innertetra_t* tetra, const int  ) const;
-      int vertexTwist( const int, const int ) const;
-      int calculateFace2Twist( const int vx, const myhface_t* ) const;
-      int calculateFace3Twist( const int (&vx)[2], const myhface_t*, const int ) const;
 
       // change coordinates of this element (for ghost elements only)
       void changeVertexCoordinates( const int face, const std::array< std::array<alucoord_t,3>, 8 >& newCoords, const double volume )
@@ -665,7 +662,7 @@ namespace ALUGrid
 
   template < class A > class Periodic3Top : public A {
     public:
-      using A :: twist;
+      using A :: isFront;
       using A :: myhface;
 
     protected :
@@ -841,12 +838,12 @@ namespace ALUGrid
 
   template < class A > inline typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) {
     alugrid_assert (j == 0 || j == 1);
-    return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i));
+    return myhedge (i)->subedge (j);
   }
 
   template < class A > inline const typename Hface3Top < A > :: myhedge_t * Hface3Top < A > :: subedge (int i,int j) const {
     alugrid_assert (j == 0 || j == 1);
-    return myhedge (i)->subedge (j ? 1 - twist(i) : twist(i));
+    return myhedge (i)->subedge (j);
   }
 
   template < class A > inline typename Hface3Top < A > :: inneredge_t * Hface3Top < A > :: subedge (int n) {

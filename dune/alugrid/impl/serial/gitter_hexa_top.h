@@ -255,7 +255,7 @@ namespace ALUGrid
   template < class A > class Hface4Top : public A
   {
     public :
-      using A::twist;
+      using A::isFront;
       using A::myvertex;
       using A::myhedge;
 
@@ -340,7 +340,7 @@ namespace ALUGrid
   template < class A > class Hbnd4Top : public A
   {
     public:
-      using A::twist;
+      using A::isFront;
       using A::myhface4;
       using A::subface;
 
@@ -400,7 +400,7 @@ namespace ALUGrid
 
   template < class A > class HexaTop : public A {
     public :
-      using A::twist;
+      using A::isFront;
       using A::myvertex;
       using A::myhedge;
       using A::myhface4;
@@ -491,9 +491,6 @@ namespace ALUGrid
       int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
 
-      int  vertexTwist ( const int twst, const int vx ) const  ;
-      int calculateFace2Twist( const int vxIndex, const myhface4_t* subFace ) const ;
-      int calculateFace3Twist( const int (&vx)[4], const myhface4_t* subFace, const int thirdVx ) const ;
       bool checkHexa( const innerhexa_t* hexa, const int  ) const;
 
       // change coordinates of this element (for ghost elements only)
@@ -539,7 +536,7 @@ namespace ALUGrid
 
   template < class A > class Periodic4Top : public A {
     public:
-      using A::twist;
+      using A::isFront;
       using A::myhface4;
 
     protected :
@@ -868,13 +865,13 @@ namespace ALUGrid
   template < class A > typename Hface4Top < A >::myhedge_t *
   Hface4Top < A >::subedge (int i,int j) {
     alugrid_assert (j == 0 || j == 1);
-    return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i));
+    return this->myhedge (i)->subedge (j);
   }
 
   template < class A > const typename Hface4Top < A >::myhedge_t *
   Hface4Top < A >::subedge (int i,int j) const {
     alugrid_assert (j == 0 || j == 1);
-    return this->myhedge (i)->subedge (j ? 1 - this->twist(i) : this->twist(i));
+    return this->myhedge (i)->subedge (j);
   }
 
   template < class A > inline typename Hface4Top < A >::innervertex_t *

@@ -286,7 +286,7 @@ namespace ALUGrid
           if( hbndit == end )
           {
             Hbnd3IntStorage* hbnd =
-              new Hbnd3IntStorage (face, tr->twist (i), ldbVertexIndex, master, tr , i );
+              new Hbnd3IntStorage (face, tr->isFront (i), ldbVertexIndex, master, tr , i );
             _hbnd3Int.insert( std::make_pair( key, hbnd ) );
           }
           // if the face already exists this means we can delete it,
@@ -334,7 +334,7 @@ namespace ALUGrid
           if( hbndit == end )
           {
             Hbnd4IntStorage* hbnd =
-              new Hbnd4IntStorage ( face, hx->twist (i), ldbVertexIndex, master, hx, i );
+              new Hbnd4IntStorage ( face, hx->isFront (i), ldbVertexIndex, master, hx, i );
 
             _hbnd4Int.insert( std::make_pair( key, hbnd ) );
           }
@@ -428,7 +428,7 @@ namespace ALUGrid
       {
         faceKey_t key ((*i)->myhface4 (0)->myvertex (0)->ident (), (*i)->myhface4 (0)->myvertex (1)->ident (), (*i)->myhface4 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure) {
-          _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
+          _hbnd4Int [key] = new Hbnd4IntStorage ((*i)->myhface4 (0),(*i)->isFront (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
         }
         else
@@ -449,7 +449,7 @@ namespace ALUGrid
         faceKey_t key ((*i)->myhface3 (0)->myvertex (0)->ident (), (*i)->myhface3 (0)->myvertex (1)->ident (), (*i)->myhface3 (0)->myvertex (2)->ident ());
         if ((*i)->bndtype () == Gitter::hbndseg_STI::closure)
         {
-          _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->twist (0),(*i)->ldbVertexIndex(),(*i)->master());
+          _hbnd3Int [key] = new Hbnd3IntStorage ((*i)->myhface3 (0), (*i)->isFront (0),(*i)->ldbVertexIndex(),(*i)->master());
           delete (*i);
         }
         else

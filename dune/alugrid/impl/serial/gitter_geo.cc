@@ -38,31 +38,6 @@ namespace ALUGrid
                                                               {0, 0},
                                                               {0, 1}};
 
-  // calculation Fomula is
-  // edgeTwist = twist(face) < 0 ?
-  //          (6 - vertex + twist(face)) % 3 :
-  //          (vertex + twist(face)) % 3);
-  const int Gitter::Geometric::Tetra::edgeTwist[6][3] = {
-                                                                {0, 2, 1}, // twist -3
-                                                                {1, 0, 2}, // twist -2
-                                                                {2, 1, 0}, // twist -1
-                                                                {0, 1, 2}, // twist 0
-                                                                {1, 2, 0}, // twist 1
-                                                                {2, 0, 1}, // twist 2
-                                                                      };
-
-  // calculation Fomula is
-  // vertexTwist = (twist(face) < 0 ?
-  //                 (7 - vertex + twist(face)) % 3 :
-  //                 (vertex + twist(face)) % 3);
-  const int Gitter::Geometric::Tetra::vertexTwist[6][3] = {
-                                                                {1, 0, 2}, // twist -3
-                                                                {2, 1, 0}, // twist -2
-                                                                {0, 2, 1}, // twist -1
-                                                                {0, 1, 2}, // twist 0
-                                                                {1, 2, 0}, // twist 1
-                                                                {2, 0, 1}, // twist 2
-                                                                      };
 
   const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_verticesNotOnFace( Gitter::Geometric::Tetra::initVerticesNotOnFace() );
   const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_edgesNotOnFace( Gitter::Geometric::Tetra::initEdgesNotOnFace() );
@@ -330,37 +305,6 @@ namespace ALUGrid
                                                               {1, 1},
                                                               {1, 2}};
 
-  // calculation Fomula is
-  // vertexTwist = twist(face) < 0 ?
-  //                   (9 - vertex + twist(face)) % 4 :
-  //                   (vertex + twist(face)) % 4)
-  const int Gitter::Geometric::Hexa::
-  vertexTwist[8][4] = {
-    {1,0,3,2}, // twist = -4
-    {2,1,0,3}, // twist = -3
-    {3,2,1,0}, // twist = -2
-    {0,3,2,1}, // twist = -1
-    {0,1,2,3}, // twist = 0
-    {1,2,3,0}, // twist = 1
-    {2,3,0,1}, // twist = 2
-    {3,0,1,2}  // twist = 3
-  };
-
-  // calculation Fomula is
-  // edgeTwist = twist(face) < 0 ?
-  //          (6 - vertex + twist(face)) % 3 :
-  //          (vertex + twist(face)) % 3);
-  const int Gitter::Geometric::Hexa::
-  edgeTwist[8][4] = {
-    {0,3,2,1}, // twist = -4
-    {1,0,3,2}, // twist = -3
-    {2,1,0,3}, // twist = -2
-    {3,2,1,0}, // twist = -1
-    {0,1,2,3}, // twist = 0
-    {1,2,3,0}, // twist = 1
-    {2,3,0,1}, // twist = 2
-    {3,0,1,2}  // twist = 3
-   };
 
   const int Gitter::Geometric::Hexa::
   vertex2Face [8][2] = {
@@ -390,8 +334,8 @@ namespace ALUGrid
         {
           std::cerr << "ERROR: On level " << level () << " ";
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
-          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0);
-          std::cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1) << " " << twist (i1);
+          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0)
+          std::cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1)
           std::cerr << std::endl;
           nfaults ++;
         }
@@ -399,8 +343,8 @@ namespace ALUGrid
         {
           std::cerr << "ERROR: On level " << level () << " ";
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")";
-          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0) << " " << twist (i0);
-          std::cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2) << " " << twist (i1);
+          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0)
+          std::cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2)
           std::cerr << std::endl;
           nfaults ++;
         }
@@ -568,14 +512,12 @@ namespace ALUGrid
   {
     std::cerr << "**WARNING (ignored): Periodic3::test () not implemented." << std::endl;
   //  const int digits = 3;
-  //  cout << "Fl\"ache: 0, Twist: " << twist (0) << "\t";
   //  const VertexGeo * vx = myvertex (0,0);
   //  cout << "(" << setw (digits) << vx->Point ()[0] << "," << setw (digits) << vx->Point ()[1] << "," << setw (digits) << vx->Point ()[2] << ") ";
   //  vx = myvertex (0,1);
   //  cout << "(" << setw (digits) << vx->Point ()[0] << "," << setw (digits) << vx->Point ()[1] << "," << setw (digits) << vx->Point ()[2] << ") ";
   //  vx = myvertex (0,2);
   //  cout << "(" << setw (digits) << vx->Point ()[0] << "," << setw (digits) << vx->Point ()[1] << "," << setw (digits) << vx->Point ()[2] << ") \n";
-  //  cout << "Fl\"ache: 1, Twist: " << twist (1) << "\t";
   //  vx = myvertex (1,0);
   //  cout << "(" << setw (digits) << vx->Point ()[0] << "," << setw (digits) << vx->Point ()[1] << "," << setw (digits) << vx->Point ()[2] << ") ";
   //  vx = myvertex (1,2);

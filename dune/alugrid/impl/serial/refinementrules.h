@@ -14,6 +14,8 @@ namespace ALUGrid
     // bzw Vierecksfl"ache sind aber auch Methoden n"otig, die eine Regel
     // mit dem Twist der Fl"ache mitdrehen, damit der "Ubergang der
     // Verfeinerung stimmt.
+    //
+    // Das ist bei Twist-freien gittern nicht mehr notwendig
 
     struct Hedge1Rule
     {
@@ -252,21 +254,18 @@ namespace ALUGrid
       break ;
     case e01 :
       {
-        //cout << "e01: my twist is " << t << endl;
         static const rule_t retRule [ 6 ] = { e01, e12, e20, e01, e20, e12 }; // double checked
         newr = retRule[ t + 3 ];
         break ;
       }
     case e12 :
       {
-        //cout << "e12: my twist is " << t << endl;
         static const rule_t retRule [ 6 ] = { e20, e01, e12, e12, e01, e20 }; // double checked
         newr = retRule[ t + 3 ];
         break ;
       }
     case e20 :
       {
-        //cout << "e20: my twist is " << t << endl;
         static const rule_t retRule [ 6 ] = { e12, e20, e01, e20, e12, e01 }; // double checked
         newr = retRule[ t + 3 ];
         break ;
