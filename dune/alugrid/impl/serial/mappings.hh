@@ -257,8 +257,8 @@ namespace ALUGrid {
 #ifdef ALUGRIDDEBUG
       {
         BilinearSurfaceMapping map(p0,p1,p2,p3);
-        alucoord_t p[3];
-        map.map2world(.0, .0, p);
+        coord3_t p;
+        map.map2world(coord2_t(0), p);
         for(int j=0; j<3; ++j)
         {
           alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
@@ -402,10 +402,11 @@ namespace ALUGrid {
       barycenter[0] = 0.25 * (p0[0] + p1[0] + p2[0] + p3[0]);
       barycenter[1] = 0.25 * (p0[1] + p1[1] + p2[1] + p3[1]);
       barycenter[2] = 0.25 * (p0[2] + p1[2] + p2[2] + p3[2]);
-#ifdef ALUGRIDDEBUG
-      LinearMapping<3,3> map(p0,p1,p2,p3);
-      alucoord_t p[3] ;
-      map.map2world(.25, .25, .25, .25, p) ;
+      // TODO: Make this a unit test
+#if 0
+      LinearMapping<3,3> map(world_t(p0),world_t(p1),world_t(p2),world_t(p3));
+      world_t p ;
+      map.map2world(map_t(.25), p) ;
       for(int j=0; j<3; ++j)
       {
         alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );

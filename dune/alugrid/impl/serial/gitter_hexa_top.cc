@@ -587,7 +587,7 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
       // make sure determinant is ok
-      alucoord_t point[3] = { 0.0, 0.0, 0.0 };
+      Dune::FieldVector<double, 3> point = { 0.0, 0.0, 0.0 };
       alugrid_assert ( trMap.det( point ) > 0 );
 #endif
 
@@ -632,7 +632,7 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
       // make sure determinant is ok
-      alucoord_t point[3] = { 0.0, 0.0, 0.0 };
+      Dune::FieldVector<double,3> point = { 0.0, 0.0, 0.0 };
       alugrid_assert ( triMap.det( point ) > 0 );
 #endif
 
