@@ -4341,12 +4341,16 @@ namespace ALUGrid
   inline int Gitter::Geometric::hbndseg3::postRefinement ()
   {
     // don't project vertices on internal borders
-    if( this->bndtype() >= closure_2d ) return 0;
+    // except for 2d fake boundaries on surface grids
+    if( this->bndtype() > closure_2d ) return 0;
 
     if ( hasVertexProjection() )
     {
+      alugrid_assert( this->bndtype() == closure_2d ?
+                        this->projectionType() == ProjectVertex :: surface : true );
       myhface(0)->projectVertex( projection() );
     }
+
     return 0;
   }
 
@@ -4435,10 +4439,13 @@ namespace ALUGrid
   inline int Gitter::Geometric::hbndseg4::postRefinement ()
   {
     // don't project vertices on internal borders
-    if( this->isBorder() ) return 0;
+    // except for 2d fake boundaries on surface grids
+    if( this->bndtype() > closure_2d ) return 0;
 
     if( hasVertexProjection() )
     {
+      alugrid_assert( this->bndtype() == closure_2d ?
+                        this->projectionType() == ProjectVertex :: surface : true );
       myhface(0)->projectVertex( projection() );
     }
     return 0;

@@ -826,8 +826,10 @@ int main (int argc , char **argv) {
         //checkALUSerial(grid,2);
 
         typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming > SurfaceGridType;
-        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
+        std::string surfaceFilename( "./dgf/simplex-testgrid-2-3-noproj.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
+
+        std::cerr << "WARNING: surface projection disabled for ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming >" << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
         surfaceGrid.loadBalance();
