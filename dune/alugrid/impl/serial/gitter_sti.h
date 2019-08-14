@@ -1689,7 +1689,6 @@ namespace ALUGrid
           myconnect_t *_faceRear;
           signed char _numFront;
           signed char _numRear;
-          signed char s [ polygonlength ];  // 12 bytes (moved here to use padding)
 
           // count number of attchElement calls (front and rear)
           unsigned char _attachedFront; // 1 byte
@@ -1732,7 +1731,7 @@ namespace ALUGrid
 
         typedef myhedge_t   myhedge1_t;
       protected :
-        hface3 (myhedge_t *,int, myhedge_t *, int, myhedge_t *, int);
+        hface3 (myhedge_t *, myhedge_t *, myhedge_t *);
         int postRefinement ();
         int preCoarsening ();
       public :
@@ -1742,9 +1741,9 @@ namespace ALUGrid
         void detachElement (int, const std::pair< hasFace3 *, int > &);
 
         // return true if more than one attachment was made to rear/front
-        bool moreAttachments( const int twst ) const
+        bool moreAttachments( const bool isFront ) const
         {
-          return twst < 0 ? nb._attachedRear > 1 : nb._attachedFront > 1;
+          return isFront ? nb._attachedRear > 1 : nb._attachedFront > 1;
         }
       public :
         myvertex_t * myvertex (int);
@@ -1832,7 +1831,7 @@ namespace ALUGrid
 
         typedef myhedge_t   myhedge1_t;
       protected :
-        hface4 (myhedge_t *, int, myhedge_t *, int, myhedge_t *, int, myhedge_t *, int);
+        hface4 (myhedge_t *, myhedge_t *, myhedge_t *, myhedge_t *);
         int postRefinement ();
         int preCoarsening ();
       public :
@@ -1909,8 +1908,8 @@ namespace ALUGrid
         typedef std::pair< hasFace3 *, int > myneighbour_t;
 
       protected :
-        Tetra (myhface_t *, int, myhface_t *, int,
-               myhface_t *, int, myhface_t *, int);
+        Tetra (myhface_t *, bool, myhface_t *, bool,
+               myhface_t *, bool, myhface_t *, bool);
         int postRefinement ();
         int preCoarsening ();
       public :
@@ -1920,7 +1919,6 @@ namespace ALUGrid
 
         // returns 3 which is the lenght of the edges not on face number
         static const std::vector< std::vector< int > > _verticesNotOnFace;
-        static const std::vector< std::vector< int > > _edgesNotOnFace;
         static const std::vector< std::vector< int > > _facesNotOnFace;
 
         static std::vector< std::vector< int > > initVerticesNotOnFace ();
@@ -1957,6 +1955,7 @@ namespace ALUGrid
 
         virtual int nFaces() const { return 4; }
         virtual int nEdges() const { return 6; }
+        bool isFront(int) const;
         int test () const;
         // returns level of this object
         virtual int nbLevel() const {return level();}
@@ -2005,7 +2004,7 @@ namespace ALUGrid
 
       protected:
         myhface_t * f [4];
-        signed char s [4];
+        bool s [4];
 
         // counter for bisection refinement if more than once
         signed char _count;
@@ -2031,7 +2030,7 @@ namespace ALUGrid
         typedef std::pair< hasFace3 *, int > myneighbour_t;
         typedef std::pair< const hasFace3 *, int > const_myneighbour_t;
       protected:
-        Periodic3 (myhface_t *, int, myhface_t *, int);
+        Periodic3 (myhface_t *, bool, myhface_t *, bool);
         int postRefinement ();
         int preCoarsening ();
 
@@ -2062,6 +2061,8 @@ namespace ALUGrid
           abort();
           return 6;
         }
+
+        bool isFront(int) const;
 
         int test () const;
 
@@ -2122,9 +2123,9 @@ namespace ALUGrid
         typedef std::pair< hasFace4 *, int > myneighbour_t;
 
       protected :
-        Hexa (myhface_t *, int, myhface_t *, int,
-              myhface_t *, int, myhface_t *, int,
-              myhface_t *, int, myhface_t *, int);
+        Hexa (myhface_t *, bool , myhface_t *, bool,
+              myhface_t *, bool, myhface_t *, bool,
+              myhface_t *, bool, myhface_t *, bool);
         int postRefinement ();
         int preCoarsening ();
 
@@ -2176,6 +2177,7 @@ namespace ALUGrid
         virtual int nFaces() const { return 6; }
         virtual int nEdges() const { return 12; }
 
+        bool isFront(int) const;
         int test () const;
         // just returns level
         virtual int nbLevel() const {return level();}
@@ -2245,7 +2247,7 @@ namespace ALUGrid
         typedef std::pair< hasFace4 *, int > myneighbour_t;
         typedef std::pair< const hasFace4 *, int > const_myneighbour_t;
       protected:
-        Periodic4 (myhface_t *, int, myhface_t *, int);
+        Periodic4 (myhface_t *, bool, myhface_t *, bool);
         int postRefinement ();
         int preCoarsening ();
 
@@ -2274,6 +2276,7 @@ namespace ALUGrid
           return 8;
         }
 
+        bool isFront(int) const;
         int test () const;
 
         virtual bool isboundary() const { return true; }
@@ -2406,7 +2409,7 @@ namespace ALUGrid
 
         typedef hbndseg_STI::bnd_t bnd_t;
       protected :
-        hbndseg4 (myhface_t *,int);
+        hbndseg4 (myhface_t *,bool);
         int postRefinement ();
         int preCoarsening ();
         bool lockedAgainstCoarsening () const { return false; }
@@ -2422,6 +2425,7 @@ namespace ALUGrid
         virtual bool markForConformingClosure () { return false; }
         virtual void markEdgeCoarsening () { }
 
+        bool isFront(int) const;
         virtual bool isboundary() const { return true; }
         virtual bool isperiodic() const { return false; }
         virtual int nChild () const;
@@ -3485,15 +3489,15 @@ namespace ALUGrid
   }
 
   inline Gitter::Geometric::hface3::
-  hface3 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
+  hface3 (myhedge_t * e0, myhedge_t * e1, myhedge_t * e2)
   {
     alugrid_assert ( nb.emptyFront() );
     alugrid_assert ( nb.emptyRear() );
     nb._parRule = (Hface3Rule::undefined);
     alugrid_assert (e0 && e1 && e2);
-    (e [0] = e0)->ref ++; nb.s [0] = s0;
-    (e [1] = e1)->ref ++; nb.s [1] = s1;
-    (e [2] = e2)->ref ++; nb.s [2] = s2;
+    (e [0] = e0)->ref ++;
+    (e [1] = e1)->ref ++;
+    (e [2] = e2)->ref ++;
     return;
   }
 
@@ -3567,10 +3571,6 @@ namespace ALUGrid
     return 0;
   }
 
-  inline bool Gitter::Geometric::hface3::isFront (int i) const {
-    alugrid_assert (i < 3);
-    return nb.s [i];
-  }
 
   inline Gitter::Geometric::hface3::myhedge_t * Gitter::Geometric::hface3::myhedge (int i) {
     alugrid_assert (i < 3);
@@ -3584,12 +3584,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) {
     alugrid_assert (0<=i && i < 3);
-    return myhedge (i)->myvertex ( nb.s[i] );
+    return myhedge (i)->myvertex ( i );
   }
 
   inline const Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) const {
     alugrid_assert (0<=i && i < 3);
-    return myhedge (i)->myvertex (nb.s[i]);
+    return myhedge (i)->myvertex (i);
   }
 
   inline Gitter::Geometric::hface3::myrule_t
@@ -3699,13 +3699,13 @@ namespace ALUGrid
   }
 
   inline Gitter::Geometric::hface4::
-  hface4 (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2, myhedge_t * e3, int s3)
+  hface4 (myhedge_t * e0, myhedge_t * e1, myhedge_t * e2, myhedge_t * e3)
   {
     alugrid_assert (e0 && e1 && e2 && e3);
-    (e [0] = e0)->ref ++; nb.s [0] = s0;
-    (e [1] = e1)->ref ++; nb.s [1] = s1;
-    (e [2] = e2)->ref ++; nb.s [2] = s2;
-    (e [3] = e3)->ref ++; nb.s [3] = s3;
+    (e [0] = e0)->ref ++;
+    (e [1] = e1)->ref ++;
+    (e [2] = e2)->ref ++;
+    (e [3] = e3)->ref ++;
     nb._parRule = (Hface4Rule::undefined);
   }
 
@@ -3746,11 +3746,6 @@ namespace ALUGrid
     return 0;
   }
 
-  inline bool Gitter::Geometric::hface4::isFront (int i) const {
-    alugrid_assert (i < 4);
-    return nb.s [i];
-  }
-
   inline Gitter::Geometric::hface4::myhedge_t * Gitter::Geometric::hface4::myhedge (int i) {
     alugrid_assert (i < 4);
     return e [i];
@@ -3763,12 +3758,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) {
     alugrid_assert (0<=i && i < 4);
-    return myhedge (i)->myvertex (nb.s[i]);
+    return myhedge (i)->myvertex (i);
   }
 
   inline const Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) const {
     alugrid_assert (0<=i && i < 4);
-    return myhedge (i)->myvertex (nb.s[i]);
+    return myhedge (i)->myvertex (i);
   }
 
   inline Gitter::Geometric::hface4::myrule_t
@@ -3907,16 +3902,16 @@ namespace ALUGrid
       : std::pair< const hasFace3 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second);
   }
 
-  inline std::pair< Gitter::Geometric::hface3_GEO *, int > Gitter::Geometric::Tetra::myintersection (int i)
+  inline std::pair< Gitter::Geometric::hface3_GEO *, bool > Gitter::Geometric::Tetra::myintersection (int i)
   {
     // return pair, first = pointer to face, second = isFront of face
-    return std::pair< Gitter::Geometric::hface3_GEO *,int> (myhface( i ) ,isFront (i));
+    return std::pair< Gitter::Geometric::hface3_GEO *, bool> (myhface( i ) ,isFront (i));
   }
 
-  inline std::pair< const Gitter::Geometric::hface3_GEO *, int > Gitter::Geometric::Tetra::myintersection (int i) const
+  inline std::pair< const Gitter::Geometric::hface3_GEO *, bool > Gitter::Geometric::Tetra::myintersection (int i) const
   {
     // return pair, first = pointer to face, second = isFront of face
-    return  std::pair< const Gitter::Geometric::hface3_GEO * , int > (myhface( i ) , isFront (i) );
+    return  std::pair< const Gitter::Geometric::hface3_GEO * , bool > (myhface( i ) , isFront (i) );
   }
 
   inline int Gitter::Geometric::Tetra::postRefinement () {
@@ -3938,8 +3933,8 @@ namespace ALUGrid
   inline Gitter::Geometric::Periodic3::
   Periodic3 (myhface_t * f0, bool t0, myhface_t * f1, bool t1)
   {
-    (f [0] = f0)->attachElement (std::pair< hasFace3 *, int > (InternalHasFace3 ()(this), 0),(s [0] = t0));
-    (f [1] = f1)->attachElement (std::pair< hasFace3 *, int > (InternalHasFace3 ()(this), 1),(s [1] = t1));
+    (f [0] = f0)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 0),(s [0] = t0));
+    (f [1] = f1)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 1),(s [1] = t1));
     return;
   }
 
@@ -3966,11 +3961,11 @@ namespace ALUGrid
 
   inline Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i, int j) {
     alugrid_assert (0 <= i && i < 2);
-    return isFront(i) ? myhface( i )->myvertex(j) : myhface( i )->myvertex(j);
+    return myhface( i )->myvertex(j);
   }
 
   inline const Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i, int j) const {
-    return isFront(i) ? myhface( i )->myvertex(j) : myhface( i )->myvertex(j);
+    return myhface( i )->myvertex(j);
   }
 
   inline Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i) {
@@ -4184,13 +4179,13 @@ namespace ALUGrid
       : std::pair< const hasFace4 *, int > (myhface( i )->nb.rear ().first, myhface( i )->nb.rear ().second);
   }
 
-  inline std::pair< Gitter::Geometric::hface4_GEO *, int >
+  inline std::pair< Gitter::Geometric::hface4_GEO *, bool >
   Gitter::Geometric::Hexa::myintersection ( int i )
   {
     return std::make_pair( myhface( i ), isFront( i ) );
   }
 
-  inline std::pair< const Gitter::Geometric::hface4_GEO *, int >
+  inline std::pair< const Gitter::Geometric::hface4_GEO *, bool >
   Gitter::Geometric::Hexa::myintersection ( int i ) const
   {
     return std::make_pair( myhface( i ), isFront( i ) );
@@ -4272,18 +4267,13 @@ namespace ALUGrid
     return 0;
   }
 
-  inline bool Gitter::Geometric::hbndseg3::isFront (int i) const {
-    alugrid_assert (i == 0);
-    return _isFront;
-  }
-
   inline Gitter::Geometric::hbndseg3::myhface_t * Gitter::Geometric::hbndseg3::myhface (int i) const {
     alugrid_assert (i == 0);
     return _face;
   }
 
   inline Gitter::Geometric::hbndseg3::myvertex_t * Gitter::Geometric::hbndseg3::myvertex (int,int j) const {
-    return isFront(0) ? myhface(0)->myvertex (j) : myhface(0)->myvertex (j);
+    return  myhface(0)->myvertex (j);
   }
 
   inline Gitter::Geometric::hbndseg3::myhface_t * Gitter::Geometric::hbndseg3::subface (int,int i) const {
@@ -4312,7 +4302,7 @@ namespace ALUGrid
     : _face( a ),
       _isFront (isFront)
   {
-    _face->attachElement (std::pair< hasFace4 *, int > (InternalHasFace4 ()(this),0), _isFront);
+    _face->attachElement (std::pair< hasFace4 *, bool > (InternalHasFace4 ()(this),0), _isFront);
     return;
   }
 
