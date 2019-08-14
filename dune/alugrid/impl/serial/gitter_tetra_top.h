@@ -42,10 +42,7 @@ namespace ALUGrid
         }
       }
 
-      if( ! ( face->myvertex( i ) == face->myhedge( i )->myvertex( twst ) &&
-              face->myvertex( (i+1)%3 ) == face->myhedge( i )->myvertex( 1-twst ) ) )
-        found = false;
-
+//TODO write a check here
       for( int j=1; j<3; ++j )
       {
         int f = (i+j)%3;

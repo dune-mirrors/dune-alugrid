@@ -34,7 +34,7 @@ namespace ALUGrid
   inline int cyclicReorder( int *begin, int *end )
   {
     //DO nothing here
-    return 0
+    return 0;
   }
 
   // sorts v in ascending order and returns twist

@@ -425,8 +425,8 @@ namespace ALUGrid
     }
   }
 
-  inline GitterBasis::Objects::Hface3Empty::Hface3Empty (myhedge1_t *e0, int s0,
-    myhedge1_t *e1, int s1, myhedge1_t *e2, int s2) : Gitter::Geometric::hface3_GEO (e0, s0, e1, s1, e2, s2) {
+  inline GitterBasis::Objects::Hface3Empty::Hface3Empty (myhedge1_t *e0,
+    myhedge1_t *e1, myhedge1_t *e2) : Gitter::Geometric::hface3_GEO (e0, e1, e2) {
     return;
   }
 

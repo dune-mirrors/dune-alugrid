@@ -334,8 +334,8 @@ namespace ALUGrid
         {
           std::cerr << "ERROR: On level " << level () << " ";
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i1 << "," << j1 << ")";
-          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0)
-          std::cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1)
+          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0);
+          std::cerr << "\t(" << i1 << "," << j1 << ") =" << myvertex(i1,j1);
           std::cerr << std::endl;
           nfaults ++;
         }
@@ -343,8 +343,8 @@ namespace ALUGrid
         {
           std::cerr << "ERROR: On level " << level () << " ";
           std::cerr << "vertex (" << i0 << "," << j0 << ") != vertex (" << i2 << "," << j2 << ")";
-          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0)
-          std::cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2)
+          std::cerr << "\t(" << i0 << "," << j0 << ") =" << myvertex(i0,j0);
+          std::cerr << "\t(" << i2 << "," << j2 << ") =" << myvertex(i2,j2);
           std::cerr << std::endl;
           nfaults ++;
         }

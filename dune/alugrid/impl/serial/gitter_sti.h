@@ -1919,6 +1919,7 @@ namespace ALUGrid
 
         // returns 3 which is the lenght of the edges not on face number
         static const std::vector< std::vector< int > > _verticesNotOnFace;
+        static const std::vector< std::vector< int > > _edgesNotOnFace;
         static const std::vector< std::vector< int > > _facesNotOnFace;
 
         static std::vector< std::vector< int > > initVerticesNotOnFace ();
