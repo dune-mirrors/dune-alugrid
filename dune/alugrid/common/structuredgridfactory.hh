@@ -446,6 +446,10 @@ namespace Dune
         }
       }
 
+      // for structured grids, do not mark longest edge
+      // not necessary
+      factory.setLongestEdgeFlag(false);
+
       // create shared grid pointer
       return SharedPtrType( factory.createGrid( true, true, name ) );
     }
