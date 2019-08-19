@@ -1359,7 +1359,7 @@ namespace ALUGrid
       virtual int nChild () const = 0;
        int leaf () const;
 
-       bool isFront() const;
+       bool isFront(int) const;
       // for dune
       virtual int ghostLevel () const = 0;
       virtual bool ghostLeaf () const = 0;

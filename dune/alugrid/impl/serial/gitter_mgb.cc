@@ -48,11 +48,10 @@ namespace ALUGrid
     if( result.second )
     {
       hedge1_GEO * edge [3];
-      int dire [3] = { 0, 0, 1 };
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
       edge [1] = InsertUniqueHedge (v[1],v[2]).first;
       edge [2] = InsertUniqueHedge (v[2],v[0]).first;
-      result.first->second = myBuilder ().insert_hface3 (edge,dire);
+      result.first->second = myBuilder ().insert_hface3 (edge);
     }
     return std::make_pair( static_cast< hface3_GEO * >( result.first->second ), result.second );
   }
@@ -64,16 +63,11 @@ namespace ALUGrid
     if( result.second )
     {
       hedge1_GEO * edge [4];
-      int dire [4];
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
       edge [1] = InsertUniqueHedge (v[1],v[2]).first;
       edge [2] = InsertUniqueHedge (v[2],v[3]).first;
       edge [3] = InsertUniqueHedge (v[3],v[0]).first;
-      dire [0] = v[0] < v[1] ? 0 : 1;
-      dire [1] = v[1] < v[2] ? 0 : 1;
-      dire [2] = v[2] < v[3] ? 0 : 1;
-      dire [3] = v[3] < v[0] ? 0 : 1;
-      result.first->second = myBuilder ().insert_hface4 (edge,dire);
+      result.first->second = myBuilder ().insert_hface4 (edge);
     }
     return std::make_pair( static_cast< hface4_GEO * >( result.first->second ), result.second );
   }
