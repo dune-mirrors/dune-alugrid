@@ -365,17 +365,17 @@ namespace ALUGrid
 
   // constructor for hface3
   template <> FacePllBaseXMacro<GitterBasisPll::ObjectsPll::hface3_IMPL>::
-  FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                    myhedge_t * e2, int s2)
-   : GitterBasisPll::ObjectsPll::hface3_IMPL(l, e0, s0, e1, s1, e2, s2), _moveTo( 0 )
+  FacePllBaseXMacro(int l, myhedge_t * e0, myhedge_t * e1,
+                    myhedge_t * e2)
+   : GitterBasisPll::ObjectsPll::hface3_IMPL(l, e0, e1, e2), _moveTo( 0 )
   {
   }
 
   // constructor for hface4
   template <> FacePllBaseXMacro<GitterBasisPll::ObjectsPll::hface4_IMPL>::
-  FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                    myhedge_t * e2, int s2, myhedge_t * e3, int s3)
-   : GitterBasisPll::ObjectsPll::hface4_IMPL(l, e0, s0, e1, s1, e2, s2, e3, s3), _moveTo( 0 )
+  FacePllBaseXMacro(int l, myhedge_t * e0, myhedge_t * e1,
+                    myhedge_t * e2, myhedge_t * e3)
+   : GitterBasisPll::ObjectsPll::hface4_IMPL(l, e0, e1, e2, e3), _moveTo( 0 )
   {
   }
 
@@ -2041,15 +2041,15 @@ namespace ALUGrid
   }
 
   GitterBasisPll::ObjectsPll::Hface3EmptyPllMacro::
-  Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2)
-    : Base_t(0, e0, s0, e1, s1, e2, s2) // 0 == level 0
+  Hface3EmptyPllMacro (myhedge_t * e0, myhedge_t *e1, myhedge_t *e2)
+    : Base_t(0, e0, e1, e2) // 0 == level 0
   {
   }
 
   GitterBasisPll::ObjectsPll::Hface4EmptyPllMacro::
-  Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
-                       myhedge_t *e2, int s2, myhedge_t *e3, int s3)
-    : Base_t(0, e0, s0, e1, s1, e2, s2, e3, s3) // 0 == level 0
+  Hface4EmptyPllMacro (myhedge_t *e0, myhedge_t *e1,
+                       myhedge_t *e2, myhedge_t *e3)
+    : Base_t(0, e0, e1, e2, e3) // 0 == level 0
   {
   }
 
@@ -2155,15 +2155,15 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::hface4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4])
+  insert_hface4 (hedge1_GEO *(&e)[4])
   {
-    return new ObjectsPll::Hface4EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2], e [3], s [3]);
+    return new ObjectsPll::Hface4EmptyPllMacro (e [0], e [1], e [2], e [3]);
   }
 
   Gitter::Geometric::hface3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3])
+  insert_hface3 (hedge1_GEO *(&e)[3])
   {
-    return new ObjectsPll::Hface3EmptyPllMacro (e [0], s [0], e [1], s [1], e [2], s [2] );
+    return new ObjectsPll::Hface3EmptyPllMacro (e [0], e [1], e [2] );
   }
 
   Gitter::Geometric::hexa_GEO * GitterBasisPll::MacroGitterBasisPll::

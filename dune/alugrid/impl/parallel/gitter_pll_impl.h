@@ -158,11 +158,11 @@ namespace ALUGrid
       typedef typename A::moveto_t   moveto_t;
 
       // constructor for hface3
-      inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                                      myhedge_t * e2, int s2);
+      inline FacePllBaseXMacro(int l, myhedge_t * e0, myhedge_t * e1,
+                                      myhedge_t * e2);
       // constructor for hface4
-      inline FacePllBaseXMacro(int l, myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                                      myhedge_t * e2, int s2, myhedge_t * e3, int s3);
+      inline FacePllBaseXMacro(int l, myhedge_t * e0, myhedge_t * e1,
+                                      myhedge_t * e2, myhedge_t * e3);
       // destructor only checking move-to
       inline ~FacePllBaseXMacro ();
 
@@ -855,8 +855,8 @@ namespace ALUGrid
           // version that created internal boundary on ghost elements
           virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
           hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int );
-          virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]);
-          virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]);
+          virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]);
+          virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]);
           virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
           virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag);
 

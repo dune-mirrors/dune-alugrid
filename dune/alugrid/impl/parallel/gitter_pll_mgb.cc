@@ -135,13 +135,13 @@ namespace ALUGrid
           hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
           if( gh )
           {
-            _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->twist (0),
+            _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->isFront (0),
                                                    (*i)->ldbVertexIndex(),
                                                    (*i)->master(),
                                                    gh, gpair.second );
           }
           else
-            _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->twist (0),
+            _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->isFront (0),
                                                    (*i)->ldbVertexIndex(), (*i)->master() );
 
           toDeleteHbnd.push_back( (*i ) );
@@ -180,13 +180,13 @@ namespace ALUGrid
           if( gh )
           {
             // insert new internal storage
-            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0),
+            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isFront (0),
                                                     (*i)->ldbVertexIndex(), (*i)->master(),
                                                     gh , gpair.second );
           }
           // until here
           else
-            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->twist (0),
+            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isFront (0),
                                                     (*i)->ldbVertexIndex(), (*i)->master() );
 
           toDeleteHbnd.push_back( (*i) );
