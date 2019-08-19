@@ -150,6 +150,7 @@ namespace Dune
     }
 
     void markLongestEdge( std::vector< bool >& elementOrientation, const bool resortElements = true  ) ;
+    void markLongestEdge();
 
   private:
     // return grid object
@@ -333,7 +334,7 @@ namespace Dune
 
 
     //! set longest edge marking for biscetion grids (default is off)
-    void setLongestEdgeFlag () { markLongestEdge_ = true ; }
+    void setLongestEdgeFlag (bool flag = true) { markLongestEdge_ = flag ; }
 
     /** \brief Return the Communication used by the grid factory
      *
@@ -524,7 +525,7 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( false )
+    markLongestEdge_( ALUGrid::dimension == 2 )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -544,7 +545,7 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( false )
+    markLongestEdge_( ALUGrid::dimension == 2 )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -564,7 +565,7 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( false )
+    markLongestEdge_( ALUGrid::dimension == 2 )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();

@@ -336,6 +336,51 @@ namespace Dune
     }
   }
 
+  //mark longest edge for 2d bisection refinement
+  //called after correctElementOrientation, if markLongestEdge_ is set
+  //uses rotation of vertices 1,2,3 to keep element orientation intact
+  //while setting the refinement edge
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >::markLongestEdge ()
+  {
+    alugrid_assert( elementType == tetra );
+    alugrid_assert( dimension == 2 );
+    const typename ElementVector::iterator elementEnd = elements_.end();
+    for( typename ElementVector::iterator elementIt = elements_.begin();
+        elementIt != elementEnd; ++elementIt )
+    {
+      ElementType &element = *elementIt;
+
+      const VertexType p1 = position( element[ 1 ] );
+      const VertexType p2 = position( element[ 2 ] );
+      const VertexType p3 = position( element[ 3 ] );
+
+      double edge12 = (p1 - p2).two_norm();
+      double edge13 = (p1 - p3).two_norm();
+      double edge23 = (p2 - p3).two_norm();
+
+      //refinement edge is always between 1,3
+      if( edge12 > edge23 )
+      {
+        if( edge12 > edge13 )
+        {
+          //positive rotation
+          std::swap( element[1], element[2] );
+          std::swap( element[2], element[3] );
+        }
+      }
+      else if( edge23 > edge13 )
+      {
+        //negative rotation
+        std::swap( element[2], element[3] );
+        std::swap( element[1], element[2] );
+      }
+    }
+  }
+
+  //mark longest edge for 3d bisection refinement
+  //called alongside bisection compatibility algorithm
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation, const bool resortElements )
@@ -447,6 +492,14 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
     correctElementOrientation();
+
+    if( dimension == 2 && ALUGrid::refinementType == conforming )
+    {
+      if( markLongestEdge_ )
+      {
+        markLongestEdge();
+      }
+    }
 
     std::vector< unsigned int >& ordering = ordering_;
     // sort element given a hilbert space filling curve (if Zoltan is available)
