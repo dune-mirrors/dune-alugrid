@@ -135,8 +135,8 @@ namespace ALUGrid
       typedef typename A::myhedge_t myhedge_t;
 
     public :
-      inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int);
-      inline FacePllBaseX(myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t*,int);
+      inline FacePllBaseX(myhedge_t *,myhedge_t *,myhedge_t *);
+      inline FacePllBaseX(myhedge_t *,myhedge_t *,myhedge_t *,myhedge_t*);
       inline ~FacePllBaseX () {}
 
       inline myhface_t & myhface () { return *this; }
@@ -671,8 +671,8 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
 
         // constructor
-        inline Hface3EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1, myhedge_t *e2, int s2)
-          : FacePllBaseX< Hface3Empty >( e0, s0, e1, s1, e2, s2 ) {}
+        inline Hface3EmptyPll (myhedge_t *e0, myhedge_t *e1, myhedge_t *e2)
+          : FacePllBaseX< Hface3Empty >( e0, e1, e2 ) {}
       };
       typedef Hface3Top < Hface3EmptyPll > hface3_IMPL;
 
@@ -680,7 +680,7 @@ namespace ALUGrid
       {
         typedef FacePllBaseXMacro< hface3_IMPL > Base_t;
       public :
-        Hface3EmptyPllMacro (myhedge_t * e0, int s0, myhedge_t *e1,int s1, myhedge_t *e2, int s2);
+        Hface3EmptyPllMacro (myhedge_t * e0, myhedge_t *e1, myhedge_t *e2);
       };
 
       class Hface4EmptyPll : public FacePllBaseX< Hface4Empty >
@@ -690,9 +690,9 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
 
         // constructor
-        inline Hface4EmptyPll (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
-                               myhedge_t *e2, int s2, myhedge_t *e3, int s3)
-          : FacePllBaseX< Hface4Empty >(e0,s0, e1,s1, e2,s2, e3,s3) {}
+        inline Hface4EmptyPll (myhedge_t *e0, myhedge_t *e1,
+                               myhedge_t *e2, myhedge_t *e3)
+          : FacePllBaseX< Hface4Empty >(e0, e1, e2, e3) {}
       };
       typedef Hface4Top < Hface4EmptyPll > hface4_IMPL;
 
@@ -700,8 +700,8 @@ namespace ALUGrid
       {
         typedef  FacePllBaseXMacro< hface4_IMPL > Base_t;
       public :
-        Hface4EmptyPllMacro (myhedge_t *e0, int s0, myhedge_t *e1, int s1,
-                             myhedge_t *e2, int s2, myhedge_t *e3, int s3);
+        Hface4EmptyPllMacro (myhedge_t *e0, myhedge_t *e1,
+                             myhedge_t *e2, myhedge_t *e3);
       };
 
   public :
@@ -1003,16 +1003,16 @@ namespace ALUGrid
   //  --FacePllBaseX
   //////////////////////////////////////////////////////////
   template < class A > inline FacePllBaseX < A >::FacePllBaseX
-      (myhedge_t * e0, int s0, myhedge_t * e1, int s1, myhedge_t * e2, int s2)
-    : A( e0, s0, e1, s1, e2, s2 )
+      (myhedge_t * e0, myhedge_t * e1, myhedge_t * e2)
+    : A( e0, e1, e2 )
   {
     return;
   }
 
   template < class A > inline FacePllBaseX < A >::
-  FacePllBaseX (myhedge_t * e0, int s0, myhedge_t * e1, int s1,
-                myhedge_t * e2, int s2, myhedge_t * e3, int s3 )
-    : A( e0, s0, e1, s1, e2, s2, e3, s3 )
+  FacePllBaseX (myhedge_t * e0, myhedge_t * e1,
+                myhedge_t * e2, myhedge_t * e3 )
+    : A( e0, e1, e2, e3 )
   {
     return;
   }
