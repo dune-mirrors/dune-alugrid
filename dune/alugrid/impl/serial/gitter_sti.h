@@ -1359,6 +1359,7 @@ namespace ALUGrid
       virtual int nChild () const = 0;
        int leaf () const;
 
+       bool isFront() const;
       // for dune
       virtual int ghostLevel () const = 0;
       virtual bool ghostLeaf () const = 0;
@@ -2536,8 +2537,8 @@ namespace ALUGrid
         virtual VertexGeo     * insert_vertex (double, double, double, int) = 0;
         virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0;
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0;
-        virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3], int (&)[3]) = 0;
-        virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4], int (&)[4]) = 0;
+        virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]) = 0;
+        virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]) = 0;
         virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag) = 0;
 
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;

@@ -20,7 +20,6 @@ namespace ALUGrid
     bool found = true;
     for( int i=0; i<3; ++i )
     {
-      const bool isFront = face->isFront( i );
       // check vertices of the face
       for( int j=0; j<2; ++j )
       {
@@ -60,7 +59,6 @@ namespace ALUGrid
   template < class A > class Hface3Top : public A
   {
     public :
-      using A :: isFront;
       using A :: myhedge;
       using A :: myvertex;
 
@@ -97,9 +95,9 @@ namespace ALUGrid
 
     public :
       // constructor for macro elements
-      inline Hface3Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int );
+      inline Hface3Top (int,myhedge_t *,myhedge_t *,myhedge_t * );
       // constructor for refined elements
-      inline Hface3Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int, int nChild );
+      inline Hface3Top (int,myhedge_t *,myhedge_t *,myhedge_t *, int nChild );
       virtual inline ~Hface3Top ();
       innervertex_t * subvertex (int);
       const innervertex_t * subvertex (int) const;
@@ -884,9 +882,9 @@ namespace ALUGrid
   // constructor called during refinement
   template < class A > inline Hface3Top < A > ::
   Hface3Top (int l, myhedge_t * e0,
-    int t0, myhedge_t * e1, int t1, myhedge_t * e2, int t2,
+    myhedge_t * e1, myhedge_t * e2,
     int nChild ) :
-    A (e0, t0, e1, t1, e2, t2),
+    A (e0, e1, e2),
     _bbb (0), _inner(0) ,
     _lvl (l),
     _nChild (nChild),
@@ -914,8 +912,8 @@ namespace ALUGrid
   // constructor called while creating macro face
   template < class A > inline Hface3Top < A > ::
   Hface3Top (int l, myhedge_t * e0,
-    int t0, myhedge_t * e1, int t1, myhedge_t * e2, int t2) :
-    A (e0, t0, e1, t1, e2, t2),
+    myhedge_t * e1, myhedge_t * e2) :
+    A (e0, e1, e2),
     _bbb (0), _inner (0),
     _lvl (l),
     _nChild (0),

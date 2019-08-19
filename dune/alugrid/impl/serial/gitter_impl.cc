@@ -510,12 +510,12 @@ namespace ALUGrid
     return new Objects::hedge1_IMPL (0, a, b );
   }
 
-  GitterBasis::hface3_GEO * GitterBasis::MacroGitterBasis::insert_hface3 (hedge1_GEO *(&e)[3], int (&s)[3]) {
-    return new Objects::hface3_IMPL (0,e[0],s[0],e[1],s[1],e[2],s[2]);
+  GitterBasis::hface3_GEO * GitterBasis::MacroGitterBasis::insert_hface3 (hedge1_GEO *(&e)[3]) {
+    return new Objects::hface3_IMPL (0,e[0],e[1],e[2]);
   }
 
-  GitterBasis::hface4_GEO * GitterBasis::MacroGitterBasis::insert_hface4 (hedge1_GEO *(&e)[4], int (&s)[4]) {
-    return new Objects::hface4_IMPL (0, e[0],s[0],e[1],s[1],e[2],s[2],e[3],s[3]);
+  GitterBasis::hface4_GEO * GitterBasis::MacroGitterBasis::insert_hface4 (hedge1_GEO *(&e)[4]) {
+    return new Objects::hface4_IMPL (0, e[0],e[1],e[2],e[3]);
   }
 
   GitterBasis::tetra_GEO * GitterBasis::MacroGitterBasis::
