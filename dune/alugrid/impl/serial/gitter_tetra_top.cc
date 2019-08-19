@@ -125,15 +125,15 @@ namespace ALUGrid
     inneredge_t * e0 = new inneredge_t (newLevel, ev0, vx2 ) ;
     alugrid_assert ( e0 ) ;
     innerface_t * f0 = new innerface_t (newLevel,
-                                        subEdge.first, isFront(0),
-                                        e0, 0,
-                                        myhedge(2), isFront(2),
+                                        subEdge.first,
+                                        e0,
+                                        myhedge(2),
                                         0) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel,
-                                        subEdge.second, isFront(0),
-                                        myhedge(1), isFront(1),
-                                        e0, 1,
+                                        subEdge.second,
+                                        myhedge(1),
+                                        e0,
                                         1) ; // child number
 
     //std::cout << "split_e01 " << ev0 << std::endl;
@@ -194,15 +194,15 @@ namespace ALUGrid
     //std::cout << "new inner edge " << e0 << std::endl;
 
     innerface_t * f0 = new innerface_t (newLevel, // level
-                                        myhedge(0), isFront(0),         // edge 0, isFront
-                                        subEdge.first, isFront(1), // edge 0, isFront
-                                        e0, 0,                         // edge 1, isFront
+                                        myhedge(0),         // edge 0
+                                        subEdge.first, // edge 0
+                                        e0,                         // edge 1
                                         0 ) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel, // level
-                                        e0, 1,                         // edge 1, isFront
-                                        subEdge.second, isFront(1), // edge 2, isFront
-                                        myhedge(2), isFront(2),         // edge 0, isFront
+                                        e0,                         // edge 1
+                                        subEdge.second, // edge 2
+                                        myhedge(2),         // edge 0
                                         1 ) ; // child number
     alugrid_assert (f0 && f1 ) ;
     f0->append(f1) ;
@@ -261,15 +261,15 @@ namespace ALUGrid
     alugrid_assert ( e0 ) ;
 
     innerface_t * f0 = new innerface_t (newLevel, // level
-                                        e0, 0,                         // edge 0, isFront
-                                        myhedge(1), isFront(1),         // edge 1, isFront
-                                        subEdge.second, isFront(2), // edge 2, isFront
+                                        e0,                         // edge 0
+                                        myhedge(1),         // edge 1
+                                        subEdge.second, // edge 2
                                         0 ) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel, // level
-                                        myhedge(0), isFront(0),         // edge 0, isFront
-                                        e0, 1,                         // edge 1, isFront
-                                        subEdge.first, isFront(2), // edge 2, isFront
+                                        myhedge(0),         // edge 0
+                                        e0,                         // edge 1
+                                        subEdge.first, // edge 2
                                         1 ) ; // child number
 
     alugrid_assert (f0 && f1 ) ;
@@ -300,10 +300,10 @@ namespace ALUGrid
     alugrid_assert ( e0 && e1 && e2 ) ;
     e0->append(e1) ;
     e1->append(e2) ;
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), isFront(0), e2, 1, this->subedge(2,1), isFront(2), 0) ;
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), isFront(0), this->subedge(1,0), isFront(1), e0, 1, 1) ;
-    innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge(1,1), isFront(1), this->subedge(2,0), isFront(2), 2) ;
-    innerface_t * f3 = new innerface_t (l, e0, 0, e1, 0, e2, 0, 3 ) ;
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), e2, this->subedge(2,1), 0) ;
+    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), this->subedge(1,0), e0, 1) ;
+    innerface_t * f2 = new innerface_t (l, e1, this->subedge(1,1), this->subedge(2,0), 2) ;
+    innerface_t * f3 = new innerface_t (l, e0, e1, e2, 3 ) ;
     alugrid_assert (f0 && f1 && f2 && f3) ;
     f0->append(f1) ;
     f1->append(f2) ;
@@ -799,9 +799,9 @@ namespace ALUGrid
   //    #     ######     #    #    #  #    #    #      ####   #
 
   template< class A > TetraTop < A >
-  :: TetraTop (int l, myhface_t * f0, int t0,
-               myhface_t * f1, int t1, myhface_t * f2, int t2,
-               myhface_t * f3, int t3, innertetra_t *up, int nChild, double vol)
+  :: TetraTop (int l, myhface_t * f0, bool  t0,
+               myhface_t * f1, bool t1, myhface_t * f2, bool t2,
+               myhface_t * f3, bool t3, innertetra_t *up, bool nChild, double vol)
     : A (f0, t0, f1, t1, f2, t2, f3, t3),
       _bbb (0), _up(up)
     , _inner( 0 )
@@ -1132,9 +1132,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge,  0, // from face 2 get subedge 0
-                       orgEdge,  edgeTwst,
-                       subEdge2, 1 // from face 1 get subedge 0
+                       subEdge, // from face 2 get subedge 0
+                       orgEdge,
+                       subEdge2 // from face 1 get subedge 0
                       ) ;
     alugrid_assert ( newFace );
 
@@ -1219,9 +1219,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge,  1, // from face 1 get subedge 0
-                       subEdge2, 0, // from face 2 get subedge 0
-                       orgEdge, edgeTwst
+                       subEdge, // from face 1 get subedge 0
+                       subEdge2, // from face 2 get subedge 0
+                       orgEdge
                       ) ;
     alugrid_assert ( newFace );
 
@@ -1304,9 +1304,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       orgEdge, edgeTwst,
-                       subEdge2, 1, // from face 2 get subedge 0
-                       subEdge,  0 // from face 1 get subedge 0
+                       orgEdge,
+                       subEdge2, // from face 2 get subedge 0
+                       subEdge // from face 1 get subedge 0
                       ) ;
     alugrid_assert ( newFace );
 
@@ -1389,9 +1389,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge2, 1, // from face 2 get subedge 0
-                       subEdge,  0, // from face 1 get subedge 0
-                       orgEdge, edgeTwst
+                       subEdge2, // from face 2 get subedge 0
+                       subEdge, // from face 1 get subedge 0
+                       orgEdge
                       ) ;
     alugrid_assert ( newFace );
 
@@ -1492,9 +1492,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge2, 1, // from face 2 get subedge 0
-                       subEdge,  0, // from face 1 get subedge 0
-                       orgEdge, edgeTwst
+                       subEdge2, // from face 2 get subedge 0
+                       subEdge, // from face 1 get subedge 0
+                       orgEdge
                       ) ;
 
     alugrid_assert ( newFace ) ;
@@ -1558,9 +1558,9 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       orgEdge, edgeTwst,
-                       subEdge, 1,  // from face 1 get subedge 0
-                       subEdge2, 0  // from face 2 get subedge 0
+                       orgEdge,
+                       subEdge,  // from face 1 get subedge 0
+                       subEdge2  // from face 2 get subedge 0
                       ) ;
 
     alugrid_assert ( newFace ) ;
@@ -1824,14 +1824,14 @@ namespace ALUGrid
     alugrid_assert (e31 && e20);
     inneredge_t * e0 = new inneredge_t (l, e31, e20) ;
     alugrid_assert (e0) ;
-    innerface_t * f0 = new innerface_t (l, subedge (3, 2), ((isFront(3))?1:0), subedge (1, 2), ((isFront(1))?1:0), subedge (2, 2), ((isFront(2))?1:0)) ;
-    innerface_t * f1 = new innerface_t (l, subedge (3, 0), ((isFront(3))?1:0), subedge (2, 1), ((isFront(2))?1:0), subedge (0, 2), ((isFront(0))?1:0)) ;
-    innerface_t * f2 = new innerface_t (l, subedge (3, 1), ((isFront(3))?1:0), subedge (0, 1), ((isFront(0))?1:0), subedge (1, 0), ((isFront(1))?1:0)) ;
-    innerface_t * f3 = new innerface_t (l, subedge (2, 0), ((isFront(2))?0:1), subedge (0, 0), ((isFront(0))?0:1), subedge (1, 1), ((isFront(1))?0:1)) ;
-    innerface_t * f4 = new innerface_t (l, e0, 0, subedge (3, 2), ((isFront(3))?0:1), subedge (2, 1), ((isFront(2))?1:0)) ;
-    innerface_t * f5 = new innerface_t (l, e0, 0, subedge (3, 1), ((isFront(3))?1:0), subedge (0, 2), ((isFront(0))?0:1)) ;
-    innerface_t * f6 = new innerface_t (l, e0, 0, subedge (1, 0), ((isFront(1))?0:1), subedge (0, 0), ((isFront(0))?1:0)) ;
-    innerface_t * f7 = new innerface_t (l, e0, 0, subedge (1, 2), ((isFront(1))?1:0), subedge (2, 0), ((isFront(2))?0:1)) ;
+    innerface_t * f0 = new innerface_t (l, subedge (3, 2), subedge (1, 2), subedge (2, 2)) ;
+    innerface_t * f1 = new innerface_t (l, subedge (3, 0), subedge (2, 1), subedge (0, 2)) ;
+    innerface_t * f2 = new innerface_t (l, subedge (3, 1), subedge (0, 1), subedge (1, 0)) ;
+    innerface_t * f3 = new innerface_t (l, subedge (2, 0), subedge (0, 0), subedge (1, 1)) ;
+    innerface_t * f4 = new innerface_t (l, e0, subedge (3, 2), subedge (2, 1)) ;
+    innerface_t * f5 = new innerface_t (l, e0, subedge (3, 1), subedge (0, 2)) ;
+    innerface_t * f6 = new innerface_t (l, e0, subedge (1, 0), subedge (0, 0)) ;
+    innerface_t * f7 = new innerface_t (l, e0, subedge (1, 2), subedge (2, 0)) ;
     alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7) ;
     f0->append(f1) ;
     f1->append(f2) ;
@@ -1845,14 +1845,14 @@ namespace ALUGrid
     const double childVolume = calculateChildVolume( 0.125 * _volume );
 
     // pointer `this' is the pointer to the father element
-    innertetra_t * h0 = new innertetra_t (l, f0, -1, subface(1, 0), isFront(1), subface(2, 0), isFront(2), subface(3, 0), isFront(3), this, 0 , childVolume) ;
-    innertetra_t * h1 = new innertetra_t (l, subface(0, 0), isFront(0), f1, -3, subface(2, 2), isFront(2), subface(3, 1), isFront(3), this, 1 , childVolume) ;
-    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isFront(0), subface(1, 1), isFront(1), f2, -1, subface(3, 2), isFront(3), this, 2 , childVolume) ;
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 1), isFront(0), subface(1, 2), isFront(1), subface(2, 1), isFront(2), f3, 0,  this, 3 , childVolume) ;
-    innertetra_t * h4 = new innertetra_t (l, f7, -3, subface(2, 3), isFront(2) , f4, 2, f0, 0, this, 4 , childVolume) ;
-    innertetra_t * h5 = new innertetra_t (l, f4, -3, f1, 0, f5, 2, subface(3, 3), (isFront(3), this, 5 , childVolume) ;
-    innertetra_t * h6 = new innertetra_t (l, f3, -1, f6, -3, subface(1, 3), (isFront(1), f7, 1, this, 6 , childVolume) ;
-    innertetra_t * h7 = new innertetra_t (l, subface(0, 3), (isFront(0), f5, -3, f2, 0, f6, 1, this, 7 , childVolume) ;
+    innertetra_t * h0 = new innertetra_t (l, f0, false, subface(1, 0), isFront(1), subface(2, 0), isFront(2), subface(3, 0), isFront(3), this, 0 , childVolume) ;
+    innertetra_t * h1 = new innertetra_t (l, subface(0, 0), isFront(0), f1, false, subface(2, 2), isFront(2), subface(3, 1), isFront(3), this, 1 , childVolume) ;
+    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isFront(0), subface(1, 1), isFront(1), f2, false, subface(3, 2), isFront(3), this, 2 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, subface(0, 1), isFront(0), subface(1, 2), isFront(1), subface(2, 1), isFront(2), f3, true,  this, 3 , childVolume) ;
+    innertetra_t * h4 = new innertetra_t (l, f7, false, subface(2, 3), isFront(2) , f4, true, f0, true, this, 4 , childVolume) ;
+    innertetra_t * h5 = new innertetra_t (l, f4, false, f1, true, f5, true, subface(3, 3), isFront(3), this, 5 , childVolume) ;
+    innertetra_t * h6 = new innertetra_t (l, f3, false, f6, false, subface(1, 3), isFront(1), f7, true, this, 6 , childVolume) ;
+    innertetra_t * h7 = new innertetra_t (l, subface(0, 3), isFront(0), f5, false, f2, true, f6, true, this, 7 , childVolume) ;
     alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
     h0->append(h1) ;
     h1->append(h2) ;
@@ -1892,9 +1892,9 @@ namespace ALUGrid
   //   std::cout << "( " << i << ", 0) " << subedge(i,0);
 #endif
 
-    innerface_t * f0 = new innerface_t (l, subedge (2, 0), 1, subedge (0, 2), isFront(0), subedge (3, 0), 0) ;
-    innerface_t * f1 = new innerface_t (l, subedge (1, 0), 1, subedge (0, 0), isFront(0), subedge (2, 0), 0) ;
-    innerface_t * f2 = new innerface_t (l, subedge (3, 0), 1, subedge (0, 1), isFront(0), subedge (1, 0), 0) ;
+    innerface_t * f0 = new innerface_t (l, subedge (2, 0), subedge (0, 2), subedge (3, 0)) ;
+    innerface_t * f1 = new innerface_t (l, subedge (1, 0), subedge (0, 0), subedge (2, 0)) ;
+    innerface_t * f2 = new innerface_t (l, subedge (3, 0), subedge (0, 1), subedge (1, 0)) ;
   //  std::cout << "f1: " << f1 ;
   //  std::cout << "f0: "<< f0 ;
    // std::cout << "f2: " <<f2 ;

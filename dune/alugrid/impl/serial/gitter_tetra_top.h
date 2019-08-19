@@ -118,7 +118,7 @@ namespace ALUGrid
       void append (innerface_t * f);
     public:
       virtual myrule_t getrule () const;
-      virtual bool refine (myrule_t,int);
+      virtual bool refine (myrule_t,bool);
       virtual void refineImmediate (myrule_t);
       virtual bool coarse ();
     public :
@@ -589,11 +589,11 @@ namespace ALUGrid
       const myhface_t * subface (int i, int j) const;
     public:
       // constructor for refined elements
-      TetraTop (int,myhface_t *,int,myhface_t *,int,myhface_t *,int,
-                    myhface_t *,int,innertetra_t *up, int nChild, double vol);
+      TetraTop (int,myhface_t *,bool,myhface_t *,bool,myhface_t *,bool,
+                    myhface_t *,bool,innertetra_t *up, bool nChild, double vol);
       // constructor for macro elements
-      TetraTop (int,myhface_t *,int,myhface_t *,int,
-                    myhface_t *,int,myhface_t *,int, SimplexTypeFlag );
+      TetraTop (int,myhface_t *,bool,myhface_t *,bool,
+                    myhface_t *,bool,myhface_t *,bool, SimplexTypeFlag );
       virtual ~TetraTop ();
       inline innertetra_t * up ();
       inline const innertetra_t * up () const;
