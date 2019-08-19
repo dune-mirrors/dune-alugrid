@@ -255,7 +255,6 @@ namespace ALUGrid
   template < class A > class Hface4Top : public A
   {
     public :
-      using A::isFront;
       using A::myvertex;
       using A::myhedge;
 
@@ -288,9 +287,9 @@ namespace ALUGrid
         return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType::IM_Faces ); }
 
       // constructor for macro faces
-      inline Hface4Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int);
+      inline Hface4Top (int,myhedge_t *,myhedge_t *,myhedge_t *,myhedge_t *);
       // constructor for refined faces
-      inline Hface4Top (int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int,myhedge_t *,int, int nChild );
+      inline Hface4Top (int,myhedge_t *,myhedge_t *,myhedge_t *,myhedge_t *, int nChild );
       virtual ~Hface4Top ();
       innervertex_t * subvertex (int);
       const innervertex_t * subvertex (int) const;
@@ -313,7 +312,7 @@ namespace ALUGrid
 
     public :
       virtual myrule_t getrule () const;
-      virtual bool refine (myrule_t,int);
+      virtual bool refine (myrule_t,bool);
       virtual void refineImmediate (myrule_t);
       virtual bool coarse ();
     public :
@@ -919,9 +918,9 @@ namespace ALUGrid
   }
 
   template < class A > inline Hface4Top < A >::
-  Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1,
-    myhedge_t * e2, int t2, myhedge_t * e3, int t3 )
-    : A (e0, t0, e1, t1, e2, t2, e3, t3),
+  Hface4Top (int l, myhedge_t * e0, myhedge_t * e1,
+    myhedge_t * e2, myhedge_t * e3 )
+    : A (e0, e1, e2, e3),
     _bbb (0), _inner (0),
     _rule (myrule_t::nosplit),
     _lvl (l),
@@ -931,9 +930,9 @@ namespace ALUGrid
     if( !( e0->is2d() ) ) this->reset2dFlag();
   }
 
-  template < class A > inline Hface4Top < A >::Hface4Top (int l, myhedge_t * e0, int t0, myhedge_t * e1, int t1,
-    myhedge_t * e2, int t2, myhedge_t * e3, int t3,int nChild )
-    : A (e0, t0, e1, t1, e2, t2, e3, t3),
+  template < class A > inline Hface4Top < A >::Hface4Top (int l, myhedge_t * e0, myhedge_t * e1,
+    myhedge_t * e2, myhedge_t * e3,int nChild )
+    : A (e0, e1, e2, e3),
     _bbb (0), _inner (0),
     _rule (myrule_t::nosplit),
     _lvl (l),

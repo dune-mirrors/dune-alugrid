@@ -140,7 +140,7 @@ namespace ALUGrid
           protected :
             typedef VertexEmpty   innervertex_t;
             typedef hedge1_IMPL   inneredge_t;
-            inline Hface3Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int);
+            inline Hface3Empty (myhedge1_t *, myhedge1_t *, myhedge1_t *);
            ~Hface3Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertex &pv);
@@ -153,7 +153,7 @@ namespace ALUGrid
          protected :
            typedef VertexEmpty innervertex_t;
            typedef hedge1_IMPL     inneredge_t;
-           inline Hface4Empty (myhedge1_t *,int, myhedge1_t *,int, myhedge1_t *,int,myhedge1_t *,int);
+           inline Hface4Empty (myhedge1_t *, myhedge1_t *, myhedge1_t *,myhedge1_t *);
            ~Hface4Empty () {}
            // Methode um einen Vertex zu verschieben; f"ur die Randanpassung
            virtual inline void projectVertex(const ProjectVertex &pv);
@@ -439,9 +439,9 @@ namespace ALUGrid
       innerVertex()->project(pv);
   }
 
-  inline GitterBasis::Objects::Hface4Empty::Hface4Empty (myhedge1_t *e0, int s0,
-    myhedge1_t *e1, int s1, myhedge1_t *e2, int s2, myhedge1_t *e3, int s3)
-    : Gitter::Geometric::hface4_GEO (e0, s0, e1, s1, e2, s2, e3, s3) {
+  inline GitterBasis::Objects::Hface4Empty::Hface4Empty (myhedge1_t *e0,
+    myhedge1_t *e1, myhedge1_t *e2, myhedge1_t *e3)
+    : Gitter::Geometric::hface4_GEO (e0, e1, e2, e3) {
     return;
   }
 

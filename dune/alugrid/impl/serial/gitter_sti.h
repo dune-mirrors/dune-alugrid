@@ -1863,7 +1863,7 @@ namespace ALUGrid
 
       public :
         virtual myrule_t getrule () const = 0;
-        virtual bool refine (myrule_t,int) = 0;
+        virtual bool refine (myrule_t,bool) = 0;
         virtual void refineImmediate (myrule_t) = 0;
       public :
         myrule_t parentRule() const;

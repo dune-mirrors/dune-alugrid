@@ -146,10 +146,10 @@ namespace ALUGrid
     e1->append(e2);
     e2->append(e3);
 
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), isFront(0), e0, 0, e3, 1, this->subedge(3,1), isFront(3), 0);
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), isFront(0), this->subedge(1,0), isFront(1), e1, 0, e0, 1, 1);
-    innerface_t * f2 = new innerface_t (l, e1, 1, this->subedge(1,1), isFront(1), this->subedge(2,0), isFront(2), e2, 0, 2);
-    innerface_t * f3 = new innerface_t (l, e3, 0, e2, 1, this->subedge(2,1), isFront(2), this->subedge(3,0), isFront(3), 3);
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), e0, e3, this->subedge(3,1), 0);
+    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), this->subedge(1,0), e1, e0, 1);
+    innerface_t * f2 = new innerface_t (l, e1, this->subedge(1,1), this->subedge(2,0), e2, 2);
+    innerface_t * f3 = new innerface_t (l, e3, e2, this->subedge(2,1), this->subedge(3,0), 3);
 
     alugrid_assert (f0 && f1 && f2 && f3);
     f0->append(f1);
@@ -189,9 +189,9 @@ namespace ALUGrid
     _inner = new inner_t( 0 , e0);
     alugrid_assert(_inner);
 
-    // level, edge,isFrton x 4, nChild
-    innerface_t * f0 = new innerface_t (l, this->myhedge(0), isFront(0), this->subedge(1,0), isFront(0), e0, 1, this->subedge(3,1), isFront(3), 0);
-    innerface_t * f1 = new innerface_t (l, e0, 0, this->subedge(1,1), isFront(1), this->myhedge(2), isFront(2), this->subedge(3,0), isFront(3), 1);
+    // level, edge x 4, nChild
+    innerface_t * f0 = new innerface_t (l, this->myhedge(0), this->subedge(1,0), e0, this->subedge(3,1), 0);
+    innerface_t * f1 = new innerface_t (l, e0, this->subedge(1,1), this->myhedge(2), this->subedge(3,0), 1);
 
     //std::cout << this << f0 << f1 << std::endl ;
 
@@ -260,7 +260,7 @@ namespace ALUGrid
       {
         case myrule_t::iso4:
         {
-          const bool a = isFront;
+          const bool a = isFront
                   ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                   : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
           if( a )
@@ -664,11 +664,11 @@ namespace ALUGrid
 
   //for regular 2d we use the subedge routine for the faces 0,1
   template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) {
-    return myhface(i) -> myhedge(j);
+    return myhface4(i) -> myhedge(j);
   }
 
   template< class A >  const typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) const {
-    return myhface(i) -> myhedge(j);
+    return myhface4(i) -> myhedge(j);
   }
 
   // subface routine for regular 2d
@@ -678,7 +678,7 @@ namespace ALUGrid
     myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
-              ( face->subface(j) )
+              ( face->subface(j) ) :
               (abort (), (myhface4_t *)0);
   }
 
@@ -688,7 +688,7 @@ namespace ALUGrid
     const myhface4_t * face = myhface4(i);
     const facerule_t facerule = face->getrule();
     return ( facerule == facerule_t::iso4 ) ?
-              ( face->subface(j) )
+              ( face->subface(j) ) :
               (abort (), (myhface4_t *)0);
   }
 
@@ -733,18 +733,18 @@ namespace ALUGrid
     e3->append(e4);
     e4->append(e5);
 
-    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), 0, e2, 0, e5, 1, this->subedge (5, 4), 1);
-    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), 1, this->subedge (3, 7), 0, e3, 0, e2, 1);
-    innerface_t * f2 = new innerface_t (l, e3, 1, this->subedge (3, 5), 1, this->subedge (4, 7), 0, e4, 0 );
-    innerface_t * f3 = new innerface_t (l, e5, 0, e4, 1, this->subedge (4, 5), 1, this->subedge (5, 6), 0 );
-    innerface_t * f4 = new innerface_t (l, this->subedge (0, 7), 0, e0, 0, e2, 1, this->subedge (2, 4), 1 );
-    innerface_t * f5 = new innerface_t (l, this->subedge (0, 5), 1, this->subedge (4, 4), 0, e4, 0, e0, 1 );
-    innerface_t * f6 = new innerface_t (l, e4, 1, this->subedge (4, 6), 1, this->subedge (1, 6), 0, e1, 0 );
-    innerface_t * f7 = new innerface_t (l, e2, 0, e1, 1, this->subedge (1, 4), 1, this->subedge (2, 6), 0 );
-    innerface_t * f8 = new innerface_t (l, this->subedge (0, 4), 0, e0, 0, e5, 1, this->subedge (5, 7), 1 );
-    innerface_t * f9 = new innerface_t (l, this->subedge (0, 6), 1, this->subedge (3, 4), 0, e3, 0, e0, 1 );
-    innerface_t * f10 = new innerface_t (l, e3, 1, this->subedge (3, 6), 1, this->subedge (1, 5), 0, e1, 0 );
-    innerface_t * f11 = new innerface_t (l, e5, 0, e1, 1, this->subedge (1, 7), 1, this->subedge (5, 5), 0 );
+    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), e2, e5, this->subedge (5, 4));
+    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), this->subedge (3, 7), e3, e2);
+    innerface_t * f2 = new innerface_t (l, e3, this->subedge (3, 5), this->subedge (4, 7), e4 );
+    innerface_t * f3 = new innerface_t (l, e5, e4, this->subedge (4, 5), this->subedge (5, 6) );
+    innerface_t * f4 = new innerface_t (l, this->subedge (0, 7), e0, e2, this->subedge (2, 4) );
+    innerface_t * f5 = new innerface_t (l, this->subedge (0, 5), this->subedge (4, 4), e4, e0 );
+    innerface_t * f6 = new innerface_t (l, e4, this->subedge (4, 6), this->subedge (1, 6), e1 );
+    innerface_t * f7 = new innerface_t (l, e2, e1, this->subedge (1, 4), this->subedge (2, 6) );
+    innerface_t * f8 = new innerface_t (l, this->subedge (0, 4), e0, e5, this->subedge (5, 7) );
+    innerface_t * f9 = new innerface_t (l, this->subedge (0, 6), this->subedge (3, 4), e3, e0 );
+    innerface_t * f10 = new innerface_t (l, e3, this->subedge (3, 6), this->subedge (1, 5), e1 );
+    innerface_t * f11 = new innerface_t (l, e5, e1, this->subedge (1, 7), this->subedge (5, 5) );
 
     alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11);
     f0->append(f1);
@@ -832,13 +832,13 @@ namespace ALUGrid
     // always the inner edge + the subedge of top and bottom  + one subedge of a side face
     // the top face is rotated in the other direction as the bottom face, so we need the subedges in the descending order.
     // inner face 0 at face 2
-    innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), 0, this->subedge(1,4), 0, e0, 0, this->subedge(0,7), 1);
+    innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), this->subedge(1,4), e0, this->subedge(0,7));
     // inner face 1 at face 3
-    innerface_t * f1 = new innerface_t (l, this->myhface4(3)->subedge(0), 0, this->subedge(1,5), 0, e0, 0, this->subedge(0,6), 1);
+    innerface_t * f1 = new innerface_t (l, this->myhface4(3)->subedge(0), this->subedge(1,5), e0, this->subedge(0,6));
     //inner face 2 at face 4
-    innerface_t * f2 = new innerface_t (l, this->myhface4(4)->subedge(0), 0, this->subedge(1,6), 0, e0, 0, this->subedge(0,5), 1);
+    innerface_t * f2 = new innerface_t (l, this->myhface4(4)->subedge(0), this->subedge(1,6), e0, this->subedge(0,5));
     // inner face 3 at face 5
-    innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), 0, this->subedge(1,7), 0, e0, 0, this->subedge(0,4), 1);
+    innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), this->subedge(1,7), e0, this->subedge(0,4));
 
     alugrid_assert (f0 && f1 && f2 && f3 );
     f0->append(f1);
@@ -1210,7 +1210,7 @@ namespace ALUGrid
     // make sure we have only 8 different vertices
     alugrid_assert ( verticesFound.size() == 8 );
 
-    return facesOK;
+    return facesOk;
   }
 
 
@@ -1280,7 +1280,7 @@ namespace ALUGrid
 
   template< class A > typename Periodic4Top < A >::myhedge_t * Periodic4Top < A >::subedge (int i, int j) {
     alugrid_assert (getrule () == myrule_t::iso4);
-    return myhface(i)->myhedge(j);
+    return myhface4(i)->myhedge(j);
   }
 
   template< class A > const typename Periodic4Top < A >::myhedge_t * Periodic4Top < A >::subedge (int i, int j) const {
