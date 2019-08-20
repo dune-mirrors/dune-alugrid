@@ -211,11 +211,11 @@ namespace Dune
     int applyEdge ( int i ) const { return ((positive() ? i : 2*corners - i) + aluTwist_) % corners; }
 
 
-    static int aluEdge2duneEdge ( int i ) { return ((corners == 3) ? (3 - i) % 3 : (6 - swap23( i )) % 4); }
-    static int duneEdge2aluEdge ( int i ) { return ((corners == 3) ? (3 - i) % 3 : swap23( (6 - i) % 4 )); }
+    static int aluEdge2duneEdge ( int i ) { return i; }
+    static int duneEdge2aluEdge ( int i ) { return i; }
 
-    static int aluVertex2duneVertex ( int i ) { return ((corners == 3) ? i : swap23( i )); }
-    static int duneVertex2aluVertex ( int i ) { return ((corners == 3) ? i : swap23( i )); }
+    static int aluVertex2duneVertex ( int i ) { return i; }
+    static int duneVertex2aluVertex ( int i ) { return i; }
 
     static int alu2dune ( int i, int codim ) { return (codim == 0 ? i : (codim == 1 ? aluEdge2duneEdge( i ) : aluVertex2duneVertex( i ))); }
     static int dune2alu ( int i, int codim ) { return (codim == 0 ? i : (codim == 1 ? duneEdge2aluEdge( i ) : aluVertex2duneVertex( i ))); }
@@ -424,8 +424,8 @@ namespace Dune
     /** \} */
 
   private:
-    static int aluVertex2duneVertex ( int i ) { return ((corners == 3) ? i : swap23( i )); }
-    static int duneVertex2aluVertex ( int i ) { return ((corners == 3) ? i : swap23( i )); }
+    static int aluVertex2duneVertex ( int i ) { return i; }
+    static int duneVertex2aluVertex ( int i ) { return i; }
 
     static int swap23 ( int i ) { return i ^ (i >> 1); }
   };

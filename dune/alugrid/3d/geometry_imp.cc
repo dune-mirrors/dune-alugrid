@@ -227,19 +227,19 @@ buildGeom(const IMPLElementType& item)
 template <int mydim, int cdim, class GridImp>
 alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HFaceType & item, int t)
+buildGeom(const HFaceType & item)
 {
   // get geo face
   const GEOFaceType& face = static_cast<const GEOFaceType&> (item);
 
   const int numVertices = ElementTopo::numVerticesPerFace;
   typedef ALUTwist< numVertices, 2 > Twist;
-  const Twist twist( t );
+  const Twist twist( 0 );
 
   // for all vertices of this face get rotatedIndex
   int rotatedALUIndex[ 4 ];
   for( int i = 0; i < numVertices; ++i )
-    rotatedALUIndex[ i ] = (elementType == tetra ? twist( i ) : twist( i ) ^ (twist( i ) >> 1));
+    rotatedALUIndex[ i ] = i;
 
   if( elementType == hexa )
   {
@@ -255,8 +255,8 @@ buildGeom(const HFaceType & item, int t)
     {
       //update geometry implementation
       //we cannot use the rotatedALUIndex here, because for the codimiterator we get the wrong twist
-      geoImpl().update( face.myvertex(t < 0 ? 0 : 3)->Point(),
-                        face.myvertex(t < 0 ? 3 : 0)->Point() );
+      geoImpl().update( face.myvertex( 0 )->Point(),
+                        face.myvertex( 3 )->Point() );
     }
   }
   else if ( elementType == tetra )
@@ -350,15 +350,15 @@ buildGeom(const FaceCoordinatesType& coords)
 template <int mydim, int cdim, class GridImp> // for edges
 alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const HEdgeType & item, int twist)
+buildGeom(const HEdgeType & item)
 {
   const GEOEdgeType & edge = static_cast<const GEOEdgeType &> (item);
 
   if (mydim == 1) // edge
   {
      // update geometry implementation
-    geoImpl().update( edge.myvertex((twist)  %2)->Point(),
-                      edge.myvertex((1+twist)%2)->Point() );
+    geoImpl().update( edge.myvertex(0)->Point(),
+                      edge.myvertex(1)->Point() );
   }
   else if ( mydim == 0) // point
   {
@@ -379,7 +379,7 @@ buildGeom(const HEdgeType & item, int twist)
 template <int mydim, int cdim, class GridImp> // for Vertices ,i.e. Points
 alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
-buildGeom(const VertexType & item, int twist)
+buildGeom(const VertexType & item)
 {
   // update geometry implementation
   geoImpl().update( static_cast<const GEOVertexType &> (item).Point() );

@@ -2346,6 +2346,7 @@ namespace ALUGrid
         myhface_t * myhface (int) const;
         hface3_GEO * subface (int,int) const;
 
+        bool isFront(int) const;
         virtual bool isboundary() const { return true; }
         virtual bool isperiodic() const { return false; }
 
@@ -4269,6 +4270,11 @@ namespace ALUGrid
     return 0;
   }
 
+  inline bool Gitter::Geometric::hbndseg3::isFront (int i) const
+  {
+    alugrid_assert (i == 0);
+    return _isFront;
+  }
   inline Gitter::Geometric::hbndseg3::myhface_t * Gitter::Geometric::hbndseg3::myhface (int i) const {
     alugrid_assert (i == 0);
     return _face;

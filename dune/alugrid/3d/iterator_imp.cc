@@ -156,7 +156,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     innerLevel_ = org.innerLevel_;
     index_      = org.index_;
     connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
-                              item_->twist(index_));
+                              item_->isFront(index_));
     geoProvider_.resetFaceGeom();
   }
   else {
@@ -304,14 +304,14 @@ template< class GridImp >
 alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInInside () const
 {
-  return Twist( connector_.duneTwist( indexInInside(), connector_.innerTwist() ) );
+  return Twist( connector_.duneTwist( indexInInside(), 0 ) );
 }
 
 template< class GridImp >
 alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInOutside () const
 {
-  return Twist( connector_.duneTwist( indexInOutside(), connector_.outerTwist() ) );
+  return Twist( connector_.duneTwist( indexInOutside(), 0 ) );
 }
 
 template< class GridImp >
@@ -466,7 +466,7 @@ setNewFace(const GEOFaceType& newFace)
   alugrid_assert ( ! ghost_ );
   alugrid_assert ( innerLevel_ == item_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_,
-              item_->twist(index_) );
+              item_->isFront(index_) );
   geoProvider_.resetFaceGeom();
 }
 
@@ -476,7 +476,7 @@ setGhostFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ghost_ );
   alugrid_assert ( innerLevel_ == ghost_->level() );
-  connector_.updateFaceInfo(newFace,innerLevel_, ghost_->twist(0) );
+  connector_.updateFaceInfo(newFace,innerLevel_, ghost_->isFront(0) );
   geoProvider_.resetFaceGeom();
 }
 
@@ -629,8 +629,8 @@ setNewFace(const GEOFaceType& newFace)
   levelNeighbor_ = (newFace.level() == innerLevel_);
   connector_.updateFaceInfo(newFace, innerLevel_,
               ( ImplTraits::isGhost( ghost_ ) ) ?
-                 ghost_->twist(0) :
-                 item_->twist( index_ )
+                 ghost_->isFront(0) :
+                 item_->isFront( index_ )
               );
   geoProvider_.resetFaceGeom();
 

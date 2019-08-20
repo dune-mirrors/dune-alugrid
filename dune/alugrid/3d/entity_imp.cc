@@ -302,7 +302,7 @@ namespace Dune {
   ALU3dGridEntity< cd, dim, GridImp >::geometry () const
   {
     if( ! geo_.valid() )
-      geo_.buildGeom( getItem(), seed_.twist() );
+      geo_.buildGeom( getItem() );
     return Geometry( geo_ );
   }
 
@@ -573,12 +573,12 @@ namespace Dune {
       typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOEdgeType Edge;
       typedef typename ALU3dImplTraits< GridImp::elementType, typename GridImp::MPICommunicatorType>::GEOFaceType Face;
 
-      ALUTwist< Topo::numVerticesPerFace, 2 > faceTwist( item.twist( Topo::duneEdgeMap( i ).first ) );
+      ALUTwist< Topo::numVerticesPerFace, 2 > faceTwist( 0 );
       const Face &face = *item.myhface( Topo::duneEdgeMap( i ).first );
       const int j = faceTwist.apply( Topo::duneEdgeMap( i ).second, 1 );
 
       const Edge &edge = *face.myhedge( j );
-      const int twist = (int( !faceTwist.positive() )^face.twist( j ));
+      const int twist = 0;
 
       return EntityImp( EntitySeed( edge, level, twist ) );
     }
@@ -774,7 +774,7 @@ namespace Dune {
       // the above is a bad test, as it does not take into account
       // the situation of conforming refinement
       // it is better to directly test the face twist
-      if( item_->twist( i ) > -1 )
+      if( item_->isFront(i) )
       {
         outerElement = face.nb.rear().first;
       }
