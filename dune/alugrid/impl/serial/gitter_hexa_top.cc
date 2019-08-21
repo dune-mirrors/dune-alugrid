@@ -578,8 +578,8 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point());
-    //TODO calculate volume
-    _volume = -1.;
+    //calculate volume
+    _volume = trMap.volume();
 
     // check whether mapping is affine
     if( ! trMap.affine() )
@@ -637,7 +637,7 @@ namespace ALUGrid
 #endif
 
       // calculate volume
-      _volume = -1.;
+      _volume = triMap.volume();
       // make as non-affine geometry
       this->setNonAffineGeometry();
     }

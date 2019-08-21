@@ -190,6 +190,25 @@ namespace ALUGrid
     }
   }
 
+
+  alu_inline alucoord_t TrilinearMapping :: volume()
+  {
+    //Gaussquadrature points on [-1,1] for order 3
+    //points are +/- gauss_point
+    const alucoord_t gauss_point =   .5773502691896258 ;
+    //rescale to [0,1]
+    const alucoord_t quad_point1 = 0.5 *( gauss_point + 1.0);
+    const alucoord_t quad_point2 = 0.5 *( -1.0 * gauss_point + 1.0);
+    const alucoord_t weight = 0.125;
+    alucoord_t volume = 0;
+    for(int i = 0; i<8 ; ++i)
+    {
+      coord_t qp{ (i>3 ? quad_point1 : quad_point2), (i/4 > 1 ? quad_point1 : quad_point2), (i%2 ? quad_point1 : quad_point2) };
+      volume += det(qp);
+    }
+    return weight * volume;
+  }
+
   alu_inline alucoord_t TrilinearMapping :: det(const coord_t& point)
   {
     // use cached value of determinant

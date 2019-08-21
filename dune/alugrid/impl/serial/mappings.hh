@@ -62,6 +62,7 @@ namespace ALUGrid {
     TrilinearMapping (const TrilinearMapping &) ;
 
     ~TrilinearMapping () {}
+    alucoord_t volume ();
     alucoord_t det (const coord_t&) ;
     const mat_t& jacobianInverseTransposed(const coord_t&);
     const mat_t& jacobianTransposed(const coord_t&);

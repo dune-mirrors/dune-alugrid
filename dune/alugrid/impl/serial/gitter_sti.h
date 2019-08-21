@@ -3761,12 +3761,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) {
     alugrid_assert (0<=i && i < 4);
-    return myhedge (i)->myvertex (i);
+    return  myhedge (i % 2)->myvertex (i/2);
   }
 
   inline const Gitter::Geometric::hface4::myvertex_t * Gitter::Geometric::hface4::myvertex (int i) const {
     alugrid_assert (0<=i && i < 4);
-    return myhedge (i)->myvertex (i);
+    return  myhedge (i % 2)->myvertex (i/2);
   }
 
   inline Gitter::Geometric::hface4::myrule_t

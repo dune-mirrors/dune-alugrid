@@ -179,20 +179,20 @@ buildGeom(const IMPLElementType& item)
       // update geo impl
       geoImpl().update( item.myvertex(0)->Point(),
                         item.myvertex(1)->Point(),
-                        item.myvertex(3)->Point(),
                         item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point(),
                         item.myvertex(4)->Point(),
                         item.myvertex(5)->Point(),
-                        item.myvertex(7)->Point(),
-                        item.myvertex(6)->Point() );
+                        item.myvertex(6)->Point(),
+                        item.myvertex(7)->Point() );
     }
     else if ( mydim == 2 ) // quadrilateral
     {
       // update geo impl (drop vertex 4,5,6,7)
       geoImpl().update( item.myvertex(0)->Point(),
                         item.myvertex(1)->Point(),
-                        item.myvertex(3)->Point(),
-                        item.myvertex(2)->Point() );
+                        item.myvertex(2)->Point(),
+                        item.myvertex(3)->Point() );
     }
   }
   else if( elementType == tetra )
