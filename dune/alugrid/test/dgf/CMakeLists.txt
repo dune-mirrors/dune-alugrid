@@ -10,6 +10,10 @@ set(DGFS
   simplex-testgrid-2-3.dgf
   simplex-testgrid-2-3-noproj.dgf
   simplex-testgrid-3-3.dgf
+  reference-cube-2-2.dgf
+  reference-cube-3-3.dgf
+  reference-simplex-2-2.dgf
+  reference-simplex-3-3.dgf
 )
 
 foreach(dgf ${DGFS})

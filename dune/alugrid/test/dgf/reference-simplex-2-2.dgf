@@ -1,0 +1,11 @@
+DGF
+
+VERTEX
+0 0
+1 0
+0 1
+#
+
+SIMPLEX
+0 1 2
+#

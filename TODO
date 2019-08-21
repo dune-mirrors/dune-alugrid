@@ -1,7 +1,7 @@
 
 2. Alle twists auf 0 setzen. Dafür muss man zusätzlich eine isFront
 variable einführen, weil derzeit nach dem twist entschieden wird, ob ein
-element rear oder front ist.
+element rear oder front ist. - done
 
 3. die Gitter konstruktion anpassen (gridfactory + macrogridbuilder), so
 dass konsistente gitter eingelesen werden. Hier ist dann der erste
