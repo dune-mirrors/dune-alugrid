@@ -491,7 +491,7 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    correctElementOrientation();
+    //correctElementOrientation();
 
     if( dimension == 2 && ALUGrid::refinementType == conforming )
     {
@@ -505,7 +505,7 @@ namespace Dune
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
-
+/* For now disabled
     bool make6 = true;
     std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
@@ -573,7 +573,7 @@ namespace Dune
       std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
 #endif
     }
-
+*/
     numFacesInserted_ = boundaryIds_.size();
 
     const bool faceTrafoEmpty = bool(comm().min( int(faceTransformations_.empty()) ));
@@ -734,6 +734,7 @@ namespace Dune
           // bisection element type: orientation and type (default 0)
           int type = 0;
           int orientation = (dimension == 3 ? (elemIndex % 2) : 0);
+#if 0
           if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
           {
             assert( !elementOrientation.empty() );
@@ -742,6 +743,7 @@ namespace Dune
             assert( !simplexTypes.empty() );
             type = simplexTypes[ elemIndex ];
           }
+#endif
           ALU3DSPACE SimplexTypeFlag simplexTypeFlag( orientation, type );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
@@ -865,12 +867,10 @@ namespace Dune
     ::generateFace ( const ElementType &element, const int f, FaceType &face )
   {
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
-    const int falu = ElementTopologyMappingType :: generic2aluFace( f );
     for( unsigned int i = 0; i < numFaceCorners; ++i )
     {
-      const int j = ElementTopologyMappingType :: faceVertex( falu, i );
-      const int k = ElementTopologyMappingType :: alu2genericVertex( j );
-      face[ i ] = element[ k ];
+      const int j = ElementTopologyMappingType :: faceVertex( f, i );
+      face[ i ] = element[ j ];
     }
   }
 

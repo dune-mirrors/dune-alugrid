@@ -16,7 +16,7 @@ namespace ALUGrid
   inline bool checkFace ( const A* fce, const int child )
   {
     A* face = const_cast< A* > (fce);
-    const int vxs[ 3 ][ 2 ] = { { 0, 1 }, { 1, 2 }, { 2, 0 } };
+    const int vxs[ 3 ][ 2 ] = { { 0, 1 }, { 0, 2 }, { 1,2 } };
     bool found = true;
     for( int i=0; i<3; ++i )
     {

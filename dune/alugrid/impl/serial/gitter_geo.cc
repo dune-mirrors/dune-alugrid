@@ -28,15 +28,15 @@ namespace ALUGrid
         & (Gitter::Geometric::hasFaceEmpty::instance() ), -1);
 
   // prototype of Tetra type ( the faces of a tetrahedron )
-  const int Gitter::Geometric::Tetra::prototype [4][3] = {{1,3,2},{0,2,3},{0,3,1},{0,1,2}};
+  const int Gitter::Geometric::Tetra::prototype [4][3] = {{0,1,2},{0,1,3},{0,2,3},{1,2,3}};
 
   // edge which tell from which face with which edge number we get edge 0 to 5
-  const int Gitter::Geometric::Tetra::edgeMap [6][2] = {{3, 0},
-                                                              {3, 2},
-                                                              {1, 2},
+  const int Gitter::Geometric::Tetra::edgeMap [6][2] = {{0, 0},
+                                                              {0, 1},
                                                               {0, 2},
-                                                              {0, 0},
-                                                              {0, 1}};
+                                                              {1, 1},
+                                                              {1, 2},
+                                                              {2, 2}};
 
 
   const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_verticesNotOnFace( Gitter::Geometric::Tetra::initVerticesNotOnFace() );
@@ -187,9 +187,9 @@ namespace ALUGrid
 
   // defines from which vertices one face is created
   const int Gitter::Geometric::Hexa::prototype [6][4] =
-          {{0,3,2,1},{4,5,6,7},{0,1,5,4},{1,2,6,5},{2,3,7,6},{0,4,7,3}};
+          {{0,2,4,6},{1,3,5,7},{0,1,4,5},{2,3,6,7},{0,1,2,3},{4,5,6,7}};
 
-  const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 4 , 5 , 2 , 3  }; // opposite face of given face
+  const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 3, 2 , 5, 4 }; // opposite face of given face
 
   const std::vector< std::vector< int > > Gitter::Geometric::Hexa::_verticesNotOnFace( Gitter::Geometric::Hexa::initVerticesNotOnFace() );
   const std::vector< std::vector< int > > Gitter::Geometric::Hexa::_edgesNotOnFace( Gitter::Geometric::Hexa::initEdgesNotOnFace() );
@@ -231,8 +231,8 @@ namespace ALUGrid
 
       // vertices of the edges of an Hexa
       const int protoEdges [12][2] =
-          { {0,1} , {0,3} , {0,4} , {1,2} , {1,5} , {2,3} ,
-            {2,6} , {3,7} , {4,5} , {4,7} , {5,6} , {6,7} };
+          { {0,4} , {1,5} , {2,6} , {3,7} , {0,2} , {1,3} ,
+            {0,1} , {2,3} , {4,6} , {5,7} , {4,5} , {6,7} };
 
       const int (&edges)[12][2] = protoEdges;
       const int (&vertices)[4]  = prototype [ f ];
@@ -292,29 +292,29 @@ namespace ALUGrid
 
   // defines how we get an edge from an hexa , first is face , second is edge
   // for example the 0th edge is defined by the 3th edge of the 0th face
-  const int Gitter::Geometric::Hexa::edgeMap [12][2] = {{0, 3},
-                                                              {0, 0},
-                                                              {2, 3},
-                                                              {0, 2},
-                                                              {2, 1},
-                                                              {0, 1},
-                                                              {4, 3},
-                                                              {4, 1},
+  const int Gitter::Geometric::Hexa::edgeMap [12][2] = {{0, 0},
                                                               {1, 0},
-                                                              {1, 3},
+                                                              {0, 1},
                                                               {1, 1},
-                                                              {1, 2}};
+                                                              {4, 0},
+                                                              {4, 1},
+                                                              {4, 2},
+                                                              {4, 3},
+                                                              {5, 0},
+                                                              {5, 1},
+                                                              {5, 2},
+                                                              {5, 3}};
 
 
   const int Gitter::Geometric::Hexa::
   vertex2Face [8][2] = {
     {0,0},// vx = 0
-    {0,3},// vx = 1
-    {0,2},// vx = 2
-    {0,1},// vx = 3
-    {1,0},// vx = 4
-    {1,1},// vx = 5
-    {1,2},// vx = 6
+    {1,0},// vx = 1
+    {0,1},// vx = 2
+    {1,1},// vx = 3
+    {0,2},// vx = 4
+    {1,2},// vx = 5
+    {0,3},// vx = 6
     {1,3} // vx = 7
   };
 

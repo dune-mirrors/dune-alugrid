@@ -1920,7 +1920,7 @@ namespace ALUGrid
     innertetra_t * h0 = new innertetra_t (l, subface(0, 0), isFront(0), f0, -1, subface(2, 1), isFront(2), subface(3, 0), isFront(3), this, 0 , childVolume) ;
     innertetra_t * h1 = new innertetra_t (l, subface(0, 1), isFront(0), subface(1, 1), isFront(1), subface(2, 0), isFront(2), f1, -1, this, 1 , childVolume) ;
     innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isFront(0), subface(1, 0), isFront(1), f2, -1, subface(3, 1), isFront(3), this, 2 , childVolume) ;
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), isFront(0) < 0 ? isFront(0)%3-1 : isFront(0), f2, 0, f1, 0, f0, 0, this, 3 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), isFront(0), f2, 0, f1, 0, f0, 0, this, 3 , childVolume) ;
 
 #ifdef ALUGRIDDEBUG
     //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet

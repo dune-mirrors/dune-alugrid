@@ -325,16 +325,16 @@ namespace ALUGrid
       virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
       virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]);
       virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]);
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t)      ;
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t)      ;
       // version with point , returns insert_hbnd3 here
-      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
-      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
-      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag );
+      virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t);
+      virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
+      virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool(&)[4], SimplexTypeFlag );
       virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);
 
       virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter:: hbndseg_STI::bnd_t (&)[2]);
-      virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
+      virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]);
     public :
       // Gitter is a reference to our grid
       // constructors creating macro grids from streams

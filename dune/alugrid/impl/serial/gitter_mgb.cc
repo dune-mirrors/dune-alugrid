@@ -23,10 +23,8 @@ namespace ALUGrid
 
   std::pair< Gitter::Geometric::hedge1_GEO *, bool > MacroGridBuilder::
   InsertUniqueHedge (int l, int r) {
-    if (l > r) {
-      int i = l; l = r; r = i;
-    }
     edgeKey_t key (l,r);
+//    std::cout << "Edge insert: " << l << ", " << r << std::endl;
     std::pair< edgeMap_t::iterator, bool > result = _edgeMap.insert( std::make_pair( key, static_cast< hedge1_GEO * >( 0 ) ) );
     if( result.second )
     {
@@ -42,31 +40,30 @@ namespace ALUGrid
 
   std::pair< Gitter::Geometric::hface3_GEO *, bool > MacroGridBuilder::
   InsertUniqueHface (int (&v)[3]) {
-    cyclicReorder (v);
     faceKey_t key (v[0],v[1],v[2]);
     std::pair< faceMap_t::iterator, bool > result = _face3Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
     {
       hedge1_GEO * edge [3];
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
-      edge [1] = InsertUniqueHedge (v[1],v[2]).first;
-      edge [2] = InsertUniqueHedge (v[2],v[0]).first;
+      edge [1] = InsertUniqueHedge (v[0],v[2]).first;
+      edge [2] = InsertUniqueHedge (v[1],v[2]).first;
+      std::cout << "Insert Face: (" << v[0] << "," << v[1] << "," << v[2] << ")";
       result.first->second = myBuilder ().insert_hface3 (edge);
     }
     return std::make_pair( static_cast< hface3_GEO * >( result.first->second ), result.second );
   }
 
   std::pair< Gitter::Geometric::hface4_GEO *, bool > MacroGridBuilder::InsertUniqueHface (int (&v)[4]) {
-    cyclicReorder (v);
     faceKey_t key (v[0],v[1],v[2]);
     std::pair< faceMap_t::iterator, bool > result = _face4Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
     {
       hedge1_GEO * edge [4];
-      edge [0] = InsertUniqueHedge (v[0],v[1]).first;
-      edge [1] = InsertUniqueHedge (v[1],v[2]).first;
-      edge [2] = InsertUniqueHedge (v[2],v[3]).first;
-      edge [3] = InsertUniqueHedge (v[3],v[0]).first;
+      edge [0] = InsertUniqueHedge (v[0],v[2]).first;
+      edge [1] = InsertUniqueHedge (v[1],v[3]).first;
+      edge [2] = InsertUniqueHedge (v[0],v[1]).first;
+      edge [3] = InsertUniqueHedge (v[2],v[3]).first;
       result.first->second = myBuilder ().insert_hface4 (edge);
     }
     return std::make_pair( static_cast< hface4_GEO * >( result.first->second ), result.second );
@@ -80,17 +77,20 @@ namespace ALUGrid
     if( result.second )
     {
       hface3_GEO * face [4];
-      int twst [4];
+      bool isFront [4];
       for (int fce = 0; fce < 4; ++fce )
       {
         int x [3];
         x [0] = v [Tetra::prototype [fce][0]];
         x [1] = v [Tetra::prototype [fce][1]];
         x [2] = v [Tetra::prototype [fce][2]];
-        twst [fce] = cyclicReorder (x);
-        face [fce] =  InsertUniqueHface (x).first;
+        // returns false if already inserted (hence we call this rear)
+        auto faceFrontPair =  InsertUniqueHface (x);
+        face [fce] = faceFrontPair.first;
+        isFront[fce] = faceFrontPair.second;
+        if(isFront[fce]) std::cout << "true" << std::endl;
       }
-      result.first->second = myBuilder ().insert_tetra (face,twst, elementType);
+      result.first->second = myBuilder ().insert_tetra (face,isFront, elementType);
       alugrid_assert( result.first->second );
     }
     return std::make_pair( static_cast< tetra_GEO * >( result.first->second ), result.second );
@@ -103,7 +103,7 @@ namespace ALUGrid
     if( result.second )
     {
       hface4_GEO * face [6];
-      int twst [6];
+      bool isFront [6];
       for (int fce = 0; fce < 6; ++fce)
       {
         int x [4];
@@ -111,10 +111,11 @@ namespace ALUGrid
         x [1] = v [Hexa::prototype [fce][1]];
         x [2] = v [Hexa::prototype [fce][2]];
         x [3] = v [Hexa::prototype [fce][3]];
-        twst [fce] = cyclicReorder (x);
-        face [fce] =  InsertUniqueHface (x).first;
+        auto faceFrontPair = InsertUniqueHface (x);
+        face [fce] =  faceFrontPair.first;
+        isFront[fce] = faceFrontPair.second;
       }
-      result.first->second = myBuilder ().insert_hexa (face,twst);
+      result.first->second = myBuilder ().insert_hexa (face,isFront);
     }
     return std::make_pair( static_cast< hexa_GEO * >( result.first->second ), result.second );
   }
@@ -122,13 +123,16 @@ namespace ALUGrid
   bool MacroGridBuilder::
   InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
-    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
+    std::cout << "Insert Boundary: " << v[0] << "," << v[1] << "," << v[2] << ")";
     if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
-        hface3_GEO * face =  InsertUniqueHface (v).first;
-        _hbnd3Int [key] = new Hbnd3IntStorage (face, twst, ldbVertexIndex, master);
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface3_GEO * face =  faceFrontPair.first;
+        bool isFront = faceFrontPair.second;
+        std::cout << isFront << std::endl;
+        _hbnd3Int [key] = new Hbnd3IntStorage (face, isFront, ldbVertexIndex, master);
         return true;
       }
     }
@@ -136,8 +140,11 @@ namespace ALUGrid
     {
       if (_hbnd3Map.find (key) == _hbnd3Map.end ())
       {
-        hface3_GEO * face  = InsertUniqueHface (v).first;
-        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt);
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface3_GEO * face  = faceFrontPair.first;
+        bool isFront = faceFrontPair.second;
+        std::cout << isFront << std::endl;
+        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,isFront,bt);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
         hb3->setBoundaryProjection( pv );
@@ -151,13 +158,14 @@ namespace ALUGrid
   bool MacroGridBuilder::
   InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
-    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
-        hface4_GEO * face =  InsertUniqueHface (v).first;
-        _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master );
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface4_GEO * face =  faceFrontPair.first;
+        bool isFront = faceFrontPair.second;
+        _hbnd4Int [key] = new Hbnd4IntStorage (face, isFront, ldbVertexIndex, master );
         return true;
       }
     }
@@ -165,8 +173,10 @@ namespace ALUGrid
     {
       if (_hbnd4Map.find (key) == _hbnd4Map.end ())
       {
-        hface4_GEO * face =  InsertUniqueHface (v).first;
-        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt);
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface4_GEO * face =  faceFrontPair.first;
+        bool isFront = faceFrontPair.second;
+        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,isFront,bt);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
         hb4->setBoundaryProjection( pv );

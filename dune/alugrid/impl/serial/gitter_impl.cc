@@ -519,7 +519,7 @@ namespace ALUGrid
   }
 
   GitterBasis::tetra_GEO * GitterBasis::MacroGitterBasis::
-  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], SimplexTypeFlag simplexType )
+  insert_tetra (hface3_GEO *(&f)[4], bool (&t)[4], SimplexTypeFlag simplexType )
   {
     return new Objects::tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], simplexType );
   }
@@ -540,13 +540,13 @@ namespace ALUGrid
   }
 
   GitterBasis::hexa_GEO * GitterBasis::MacroGitterBasis::
-  insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
+  insert_hexa (hface4_GEO *(&f)[6], bool (&t)[6])
   {
     return new Objects::hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5]);
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd3 (hface3_GEO * f, int i,
+  insert_hbnd3 (hface3_GEO * f, bool i,
                 Gitter::hbndseg_STI::bnd_t b)
   {
     // the NULL pointer is the pointer to the father which does not exists
@@ -554,20 +554,20 @@ namespace ALUGrid
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd3 (hface3_GEO * f, int i,
+  insert_hbnd3 (hface3_GEO * f, bool i,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoTetra* )
   {
     return insert_hbnd3(f,i,b);
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, int i, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, bool i, Gitter::hbndseg_STI::bnd_t b)
   {
     return new Objects::hbndseg4_IMPL ( 0, f, i, b );
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, int i,
+  insert_hbnd4 (hface4_GEO * f, bool i,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoHexa* )
   {
     return insert_hbnd4 (f,i,b);

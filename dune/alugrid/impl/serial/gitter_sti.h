@@ -1737,9 +1737,9 @@ namespace ALUGrid
         int preCoarsening ();
       public :
         virtual ~hface3 ();
-        void attachElement (const std::pair< hasFace3 *, int > &,int);
-        void detachElement (int);
-        void detachElement (int, const std::pair< hasFace3 *, int > &);
+        void attachElement (const std::pair< hasFace3 *, int > &,bool);
+        void detachElement (bool);
+        void detachElement (bool, const std::pair< hasFace3 *, int > &);
 
         // return true if more than one attachment was made to rear/front
         bool moreAttachments( const bool isFront ) const
@@ -1837,8 +1837,8 @@ namespace ALUGrid
         int preCoarsening ();
       public :
         virtual ~hface4 ();
-        void attachElement (const std::pair< hasFace4 *, int > &,int);
-        void detachElement (int);
+        void attachElement (const std::pair< hasFace4 *, int > &,bool);
+        void detachElement (bool);
       public :
         myvertex_t * myvertex (int);
         const myvertex_t * myvertex (int) const;
@@ -2540,23 +2540,23 @@ namespace ALUGrid
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0;
         virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]) = 0;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]) = 0;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag) = 0;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool (&)[4], SimplexTypeFlag) = 0;
 
         virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
         virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
 
-        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0;
+        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]) = 0;
 
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, hbndseg_STI::bnd_t) = 0;
 
         // insert ghost element
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t,
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, hbndseg_STI:: bnd_t,
                                               MacroGhostInfoTetra* ) = 0;
 
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, hbndseg_STI::bnd_t) = 0;
 
         // method to insert internal boundary with ghost
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t,
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, hbndseg_STI::bnd_t,
                                               MacroGhostInfoHexa* ) = 0;
 
         IteratorSTI < vertex_STI >    *iterator (const vertex_STI *) const;
@@ -3516,10 +3516,10 @@ namespace ALUGrid
   }
 
   inline void Gitter::Geometric::hface3::
-  attachElement (const std::pair< myconnect_t *, int > & p, int t)
+  attachElement (const std::pair< myconnect_t *, int > & p, bool isFront)
   {
     alugrid_assert ( ref == 0 ? (nb._attachedRear + nb._attachedFront) == 0 : true );
-    if ( t < 0 )
+    if ( isFront )
     {
       // if nothing was attached to rear then increase ref
       if( nb.emptyRear() ) ref ++;
@@ -3539,16 +3539,16 @@ namespace ALUGrid
   }
 
   // detachElement and set connector to null
-  inline void Gitter::Geometric::hface3::detachElement (int t)
+  inline void Gitter::Geometric::hface3::detachElement (bool isFront)
   {
     // set null element
-    detachElement( t, nb.null );
+    detachElement( isFront, nb.null );
   }
 
   // detachElement with a given new pair of connectors
-  inline void Gitter::Geometric::hface3::detachElement (int t, const std::pair< myconnect_t *, int > & p)
+  inline void Gitter::Geometric::hface3::detachElement (bool isFront, const std::pair< myconnect_t *, int > & p)
   {
-    if ( t < 0 )
+    if ( isFront )
     {
       // set replacement
       nb.setPrevRear( p );
@@ -3587,12 +3587,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) {
     alugrid_assert (0<=i && i < 3);
-    return myhedge (i)->myvertex ( i );
+    return i < 2 ? myhedge (0)->myvertex ( i ) : myhedge(1)->myvertex(1);
   }
 
   inline const Gitter::Geometric::hface3::myvertex_t * Gitter::Geometric::hface3::myvertex (int i) const {
     alugrid_assert (0<=i && i < 3);
-    return myhedge (i)->myvertex (i);
+    return i < 2 ? myhedge (0)->myvertex ( i ) : myhedge(1)->myvertex(1);
   }
 
   inline Gitter::Geometric::hface3::myrule_t
@@ -3721,9 +3721,9 @@ namespace ALUGrid
     return;
   }
 
-  inline void Gitter::Geometric::hface4::attachElement (const std::pair< myconnect_t *, int > & p, int t)
+  inline void Gitter::Geometric::hface4::attachElement (const std::pair< myconnect_t *, int > & p, bool isFront)
   {
-    if( t < 0 )
+    if( isFront )
       nb.setRear( p );
     else
       nb.setFront( p );
@@ -3731,9 +3731,9 @@ namespace ALUGrid
     return;
   }
 
-  inline void Gitter::Geometric::hface4::detachElement (int t)
+  inline void Gitter::Geometric::hface4::detachElement (bool isFront)
   {
-    if( t < 0 )
+    if( isFront )
       nb.setRear( nb.null );
     else
       nb.setFront( nb.null );
@@ -3858,9 +3858,8 @@ namespace ALUGrid
 
     typedef Gitter::Geometric::Tetra ThisType;
 
-    //TODO Return correct edge
     return myhface(ThisType::edgeMap[edge][0])->
-      myhedge(-1);
+      myhedge(ThisType::edgeMap[edge][1]);
   }
 
   inline const Gitter::Geometric::Tetra::myhedge_t * Gitter::Geometric::Tetra::myhedge (int edge) const
@@ -3870,7 +3869,7 @@ namespace ALUGrid
     typedef Gitter::Geometric::Tetra ThisType;
 
     return myhface(ThisType::edgeMap[edge][0])->
-      myhedge(-1);
+      myhedge(ThisType::edgeMap[edge][1]);
 
   }
 
@@ -3885,14 +3884,12 @@ namespace ALUGrid
   //- --tetramyvertex
   inline Gitter::Geometric::Tetra::myvertex_t * Gitter::Geometric::Tetra::myvertex (int i) {
     alugrid_assert (0 <= i && i < 4);
-    //TODO correct vertex choice
-    return (i < 3) ? myvertex (3,i) : myvertex (2,1);
+    return (i < 3) ? myvertex (0,i) : myvertex (1,2);
   }
 
   inline const Gitter::Geometric::Tetra::myvertex_t * Gitter::Geometric::Tetra::myvertex (int i) const {
     alugrid_assert (0 <= i && i < 4);
-    //TODO correct vertex choice
-    return (i < 3) ? myvertex (3,i) : myvertex (2,1);
+    return (i < 3) ? myvertex (0,i) : myvertex (1,2);
   }
 
   inline std::pair< Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::Tetra::myneighbour (int i)
@@ -4162,7 +4159,7 @@ namespace ALUGrid
 
     typedef Gitter::Geometric::Hexa MyType;
     return myhface(MyType::edgeMap[i][0])->
-      myhedge(-1);
+      myhedge(MyType::edgeMap[i][1]);
   }
 
   inline const Gitter::Geometric::Hexa::myhedge_t * Gitter::Geometric::Hexa::myhedge(int i) const {
@@ -4170,7 +4167,7 @@ namespace ALUGrid
 
     typedef Gitter::Geometric::Hexa MyType;
     return myhface(MyType::edgeMap[i][0])->
-      myhedge(-1);
+      myhedge(MyType::edgeMap[i][1]);
   }
 
   inline std::pair< Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::Hexa::myneighbour (int i) {
