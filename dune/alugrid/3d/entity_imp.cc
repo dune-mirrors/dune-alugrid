@@ -575,9 +575,8 @@ namespace Dune {
 
       ALUTwist< Topo::numVerticesPerFace, 2 > faceTwist( 0 );
       const Face &face = *item.myhface( Topo::duneEdgeMap( i ).first );
-      const int j = faceTwist.apply( Topo::duneEdgeMap( i ).second, 1 );
 
-      const Edge &edge = *face.myhedge( j );
+      const Edge &edge = *face.myhedge( Topo::duneEdgeMap( i ).second );
       const int twist = 0;
 
       return EntityImp( EntitySeed( edge, level, twist ) );
@@ -769,14 +768,11 @@ namespace Dune {
       if( face.isBorder() ) continue ;
 
       // check both
-      const HasFaceType * outerElement = face.nb.front().first;
+      const HasFaceType * outerElement = face.nb.rear().first;
       // if we got our own element, get other side
-      // the above is a bad test, as it does not take into account
-      // the situation of conforming refinement
-      // it is better to directly test the face twist
       if( item_->isRear(i) )
       {
-        outerElement = face.nb.rear().first;
+        outerElement = face.nb.front().first;
       }
 
       alugrid_assert ( outerElement );

@@ -462,8 +462,9 @@ namespace ALUGrid
       {
         // use std::abs to compute volume because in some of the 2d cases this
         // could be negative
-        //TODO compute actual volume !!
-        return 1;
+        LinearMapping<3,3> map;
+        map.buildMapping(myvertex(0)->Point(),myvertex(1)->Point(),myvertex(2)->Point(),myvertex(3)->Point());
+        return std::abs(1./6. * map.det(LinearMapping<3,3>::map_t(0)));
       }
 
       // the element type is obtained from the level of the element

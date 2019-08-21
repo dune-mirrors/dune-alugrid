@@ -81,7 +81,7 @@ namespace Dune
 
   template<>
   const int ElementTopologyMapping< tetra >::duneEdgeMap_[ numEdges ][ 2 ]
-    = { { 3, 0 }, { 1, 0 }, { 3, 1 }, { 2, 0 }, { 0, 0 }, { 1, 1 } };
+    = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 1 }, { 1, 2 }, { 2, 2 } };
 
 
   //********************************************************************
@@ -179,8 +179,8 @@ namespace Dune
 
   template<>
   const int ElementTopologyMapping< hexa >::duneEdgeMap_[ numEdges ][ 2 ]
-    = { { 5, 0 }, { 2, 1 }, { 4, 1 }, { 3, 1 }, { 0, 0 }, { 3, 0 },
-        { 2, 0 }, { 0, 1 }, { 5, 1 }, { 1, 1 }, { 1, 0 }, { 4, 2 } };
+    = { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 }, { 4, 0 }, { 4, 1 },
+        { 4, 2 }, { 4, 3 }, { 5, 0 }, { 5, 1 }, { 5, 2 }, { 5, 3 } };
 
   template<>
   const int ElementTopologyMapping< tetra >::faceVertex_[ numFaces ][ numVerticesPerFace ]

@@ -198,111 +198,7 @@ void checkIteratorAssignment(GridType & grid)
 }
 
 
-template <class EntityType, class LocalGeometryType>
-int aluTwistCheck(const EntityType& en, const LocalGeometryType& localGeom,
-                  const int face, const bool neighbor, const bool output )
-{
-  enum { dim = EntityType :: dimension };
-  typedef typename EntityType :: Geometry :: ctype ctype;
 
-  typedef Dune::FaceTopologyMapping< Dune::tetra > SimplexFaceMapping;
-  typedef Dune::FaceTopologyMapping< Dune::hexa > CubeFaceMapping;
-
-  // get reference element
-  const auto& refElem = Dune::ReferenceElements< ctype, dim >::general( en.type() );
-
-  const int vxSize = refElem.size( face, 1, dim );
-  typedef Dune::FieldVector< ctype, dim > CoordinateVectorType;
-
-  // now calculate twist by trial and error for all possible twists
-  // the calculated twist is with respect to the ALUGrid
-  // reference face, see twistprovider.cc
-  int twistFound = -66;
-  for(int twist = -vxSize; twist<vxSize; ++twist)
-  {
-    bool twistOk = true;
-    // now check mapping with twist
-    for(int i=0; i<vxSize; ++i)
-    {
-      // get face vertices of number in self face
-      int vxIdx = refElem.subEntity( face, 1 , i , dim);
-
-      // get position in reference element of vertex i
-      CoordinateVectorType refPos = refElem.position( vxIdx, dim );
-
-      // check coordinates again
-      CoordinateVectorType localPos = localGeom.corner( i );
-      if( (refPos - localPos).infinity_norm() > 1e-8 )
-      {
-        twistOk = false;
-        break;
-      }
-    }
-
-    if( twistOk )
-    {
-      twistFound = twist;
-      break ;
-    }
-  }
-
-  // if no twist found, then something is wrong
-  if( twistFound == -66 )
-  {
-    assert (false);
-    DUNE_THROW( Dune::GridError, "Not matching twist found" );
-  }
-
-  if( output )
-  {
-    std::string twistIn( (neighbor) ? "twistInOutside()" : "twistInInside()" );
-    std::string numberIn( (neighbor) ? "indexInOutside()" : "indexInInside()" );
-    std::cout << "ERROR: Face "<< face << " : twist = "<< twistFound << std::endl;
-    std::cout << "\nPut twist = "<< twistFound << " In TwistUtility::"<< twistIn << " for " << numberIn << " = " << face << " ! \n";
-    std::cout << "******************************************\n";
-  }
-
-  return twistFound;
-}
-
-template <class GridView>
-void checkALUTwists( const GridView& gridView, const bool verbose = false )
-{
-
-  typedef typename GridView :: template Codim< 0 > :: Iterator Iterator ;
-  typedef typename Iterator :: Entity Entity ;
-  typedef typename GridView :: IntersectionIterator IntersectionIterator ;
-
-  const Iterator endit = gridView.template end< 0 >();
-  for( Iterator it = gridView.template begin< 0 >(); it != endit ; ++it )
-  {
-    const Entity& entity = *it ;
-    const IntersectionIterator endnit = gridView.iend( entity );
-    for( IntersectionIterator nit = gridView.ibegin( entity ); nit != endnit; ++nit )
-    {
-      typedef typename IntersectionIterator :: Intersection  Intersection;
-      const Intersection& intersection = * nit ;
-
-      // check twist of inside geometry
-      const int twistInside = aluTwistCheck( entity, intersection.geometryInInside(),
-                                             intersection.indexInInside(), false, verbose );
-      const int twistIn = gridView.grid().getRealIntersection( intersection ).twistInInside();
-
-      if( twistInside != twistIn )
-        std::cerr << "Error: inside twists " << twistInside << " (found)  and  " << twistIn << " (given) differ" << std::endl;
-
-      if( intersection.neighbor() )
-      {
-        // check twist of inside geometry
-        const int twistOutside = aluTwistCheck( intersection.outside(), intersection.geometryInOutside(),
-                                                intersection.indexInOutside(), true, verbose );
-        const int twistOut = gridView.grid().getRealIntersection( intersection ).twistInOutside();
-        if( twistOutside != twistOut )
-          std::cerr << "Error: outside twists " << twistOutside << " (found)  and  " << twistOut << " (given) differ" << std::endl;
-      }
-    }
-  }
-}
 
 template <int codim, class GridView>
 void checkIteratorCodim(const GridView & gridView)
@@ -516,12 +412,6 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
-  if( GridType :: dimension == 3 )
-  {
-    // this only works for ALUGrid 3d
-    std::cout << "  CHECKING: 3d Twists " << std::endl;
-    checkALUTwists( grid.leafGridView() );
-  }
 
   // only check twists for simplex grids
   // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();

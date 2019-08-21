@@ -177,7 +177,7 @@ namespace Dune
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
         else
-          isInnerRear_ != outerEntity().isRear( outerFaceNumber_ );
+          isInnerRear_ = !(outerEntity().isRear( outerFaceNumber_ ));
       }
       if ( bnd ) // the boundary case
       {
@@ -200,7 +200,7 @@ namespace Dune
           bndType_ = outerGhostBoundary ;
 
           if(conformingRefinement_)
-            isInnerRear_ != boundaryFace().isRear(outerALUFaceIndex());
+            isInnerRear_ = !(boundaryFace().isRear(outerALUFaceIndex()));
 
           // access ghost only when ghost cells are enabled
           if( ghostCellsEnabled_ )
@@ -211,13 +211,13 @@ namespace Dune
 
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
             alugrid_assert ( ghost );
-            isInnerRear_ != ghost->isRear(outerFaceNumber_);
+            isInnerRear_ = !(ghost->isRear(outerFaceNumber_));
           }
         }
         else // the normal boundary case
         {
           // get outer isRear
-          isInnerRear_ != boundaryFace().isRear(outerALUFaceIndex());
+          isInnerRear_ = !(boundaryFace().isRear(outerALUFaceIndex()));
           // compute segment index when needed
           segmentId_ = boundaryFace().segmentId();
           bndId_ = boundaryFace().bndtype();
@@ -227,7 +227,7 @@ namespace Dune
     else
     {
       // get outer isRear
-      isInnerRear_ != outerEntity().isRear(outerALUFaceIndex());
+      isInnerRear_ = !(outerEntity().isRear(outerALUFaceIndex()));
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
@@ -549,15 +549,21 @@ namespace Dune
       const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
       const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
 
+
+      // cross product of two vectors
+      outerNormal_[0] =  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
+      outerNormal_[1] =  ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
+      outerNormal_[2] =  ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
+
       // change sign if face normal points into inner element
-      // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerRear()) ? 1.0 : -1.0;
-
-      // see mapp_tetra_3d.h for this piece of code
-      outerNormal_[0] = factor * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2]));
-      outerNormal_[1] = factor * ((_p1[2]-_p0[2]) *(_p2[0]-_p1[0]) - (_p2[2]-_p1[2]) *(_p1[0]-_p0[0]));
-      outerNormal_[2] = factor * ((_p1[0]-_p0[0]) *(_p2[1]-_p1[1]) - (_p2[0]-_p1[0]) *(_p1[1]-_p0[1]));
-
+      const alu3d_ctype (&_oppInnerVtx)[3] = this->connector_.innerEntity().myvertex(3-this->connector_.innerALUFaceIndex())->Point();
+      const alu3d_ctype scalarProduct = outerNormal_[0] *(_oppInnerVtx[0] - _p0[0]) + outerNormal_[1] *(_oppInnerVtx[1] - _p0[1]) +outerNormal_[2] *(_oppInnerVtx[2] - _p0[2]);
+      if(scalarProduct > 0 )
+      {
+        outerNormal_[0] *= -1.0;
+        outerNormal_[1] *= -1.0;
+        outerNormal_[2] *= -1.0;
+      }
       normalUp2Date_ = true;
     } // end if mapp ...
 
@@ -944,7 +950,6 @@ namespace Dune
   globalVertexIndex(const int duneFaceIndex,
                     const int duneFaceVertexIndex) const
   {
-    //TODO: get this right!
     //we want vertices 1,2 of the real 3d DUNE face for tetras and 0,1 for hexas
 
    /* std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
