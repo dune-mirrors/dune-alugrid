@@ -108,29 +108,29 @@ namespace Dune
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
         alugrid_assert (ghost);
 
-        isInnerFront_ = ghost->isFront(innerFaceNumber_);
+        isInnerFront_ = ghost->isRear(innerFaceNumber_);
       }
       else
       {
-        isInnerFront_ = innerFace().isFront(innerALUFaceIndex());
+        isInnerFront_ = innerFace().isRear(innerALUFaceIndex());
       }
     }
     else
     {
-      // set inner isFront
-      alugrid_assert (isInnerFront == innerEntity().isFront(innerFaceNumber_));
+      // set inner isRear
+      alugrid_assert (isInnerFront == innerEntity().isRear(innerFaceNumber_));
       isInnerFront_ = isInnerFront;
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
     //we assume the macro grid view. So we go up to level 0
-    //after that we have to get new isFront and facenumbers
+    //after that we have to get new isRear and facenumbers
     if(levelIntersection_ && conformingRefinement_ && ! (innerElement_->isboundary() ) )
     {
       const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
       while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
       innerElement_ = static_cast<const HasFaceType *> (inner);
-      isInnerFront_ = innerEntity().isFront(innerFaceNumber_);
+      isInnerFront_ = innerEntity().isRear(innerFaceNumber_);
     }
 
     if( outerElement_->isboundary() )
@@ -178,7 +178,7 @@ namespace Dune
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
         else
-          isOuterFront_ = outerEntity().isFront( outerFaceNumber_ );
+          isOuterFront_ = outerEntity().isRear( outerFaceNumber_ );
       }
       if ( bnd ) // the boundary case
       {
@@ -201,7 +201,7 @@ namespace Dune
           bndType_ = outerGhostBoundary ;
 
           if(conformingRefinement_)
-            isOuterFront_ = boundaryFace().isFront(outerALUFaceIndex());
+            isOuterFront_ = boundaryFace().isRear(outerALUFaceIndex());
 
           // access ghost only when ghost cells are enabled
           if( ghostCellsEnabled_ )
@@ -212,13 +212,13 @@ namespace Dune
 
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
             alugrid_assert ( ghost );
-            isOuterFront_ = ghost->isFront(outerFaceNumber_);
+            isOuterFront_ = ghost->isRear(outerFaceNumber_);
           }
         }
         else // the normal boundary case
         {
-          // get outer isFront
-          isOuterFront_ = boundaryFace().isFront(outerALUFaceIndex());
+          // get outer isRear
+          isOuterFront_ = boundaryFace().isRear(outerALUFaceIndex());
           // compute segment index when needed
           segmentId_ = boundaryFace().segmentId();
           bndId_ = boundaryFace().bndtype();
@@ -227,25 +227,25 @@ namespace Dune
     } // if outerElement_->isboundary
     else
     {
-      // get outer isFront
-      isOuterFront_ = outerEntity().isFront(outerALUFaceIndex());
+      // get outer isRear
+      isOuterFront_ = outerEntity().isRear(outerALUFaceIndex());
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
     //we assume the macro grid view. So we go up to level 0
-    //after that we have to get new isFront and facenumbers
+    //after that we have to get new isRear and facenumbers
     if(levelIntersection_ && conformingRefinement_ && !  (outerElement_->isboundary() ) )
     {
       const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
       while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
       outerElement_ = static_cast<const HasFaceType *> (outer);
-      isOuterFront_ = outerEntity().isFront(outerFaceNumber_);
+      isOuterFront_ = outerEntity().isRear(outerFaceNumber_);
     }
 
     // make sure we got boundary id correctly
     alugrid_assert ( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
 
-    //make sure isFronts are set
+    //make sure isRears are set
     alugrid_assert( isInnerFront_ != -665);
     alugrid_assert( isOuterFront_ != -665);
 
@@ -382,7 +382,7 @@ namespace Dune
   {
     // don't check ghost boundaries here
     alugrid_assert ( ( ! innerBoundary() ) ?
-        innerEntity().isFront(innerALUFaceIndex()) == isInnerFront_ : true );
+        innerEntity().isRear(innerALUFaceIndex()) == isInnerFront_ : true );
     return isInnerFront_;
   }
 
@@ -397,9 +397,9 @@ namespace Dune
   {
     // don't check ghost boundaries here
     //alugrid_assert ( (outerBoundary_) ?
-    //          (isOuterFront_ == boundaryFace().isFront(0)) :
+    //          (isOuterFront_ == boundaryFace().isRear(0)) :
     //          (! ghostBoundary_) ?
-    //          (isOuterFront_ == outerEntity().isFront(outerALUFaceIndex())) : true
+    //          (isOuterFront_ == outerEntity().isRear(outerALUFaceIndex())) : true
     //      );
     return isOuterFront_;
   }
@@ -787,7 +787,7 @@ namespace Dune
   ALU3dGridGeometricFaceInfoTetra< 2, dimworld, Comm >::
   buildGlobalGeom(GeometryImp& geo) const
   {
-        //could be wrong in isFront sense
+        //could be wrong in isRear sense
     if (! this->generatedGlobal_)
     {
       // calculate the normal
@@ -862,7 +862,7 @@ namespace Dune
   ALU3dGridGeometricFaceInfoHexa< 2, dimworld, Comm >::
   buildGlobalGeom(GeometryImp& geo) const
   {
-    //could be wrong in isFront sense
+    //could be wrong in isRear sense
     if (! this->generatedGlobal_)
     {
       // calculate the normal
@@ -952,7 +952,7 @@ namespace Dune
     //we want vertices 1,2 of the real 3d DUNE face for tetras and 0,1 for hexas
 
    /* std::cout << "duneFaceIndex: " << duneFaceIndex << std::endl;
-    std::cout << "aluFaceisFront: " << aluFaceTwist << std::endl;
+    std::cout << "aluFaceisRear: " << aluFaceTwist << std::endl;
     std::cout << "duneFaceVertexIndex: " << duneFaceVertexIndex << std::endl;
     std::cout << "localALUIndex: " << localALUIndex << std::endl;
     std::cout << "localDuneIndex: " << localDuneIndex << std::endl;

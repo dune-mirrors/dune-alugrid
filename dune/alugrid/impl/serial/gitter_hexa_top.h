@@ -339,7 +339,7 @@ namespace ALUGrid
   template < class A > class Hbnd4Top : public A
   {
     public:
-      using A::isFront;
+      using A::isRear;
       using A::myhface4;
       using A::subface;
 
@@ -399,7 +399,7 @@ namespace ALUGrid
 
   template < class A > class HexaTop : public A {
     public :
-      using A::isFront;
+      using A::isRear;
       using A::myvertex;
       using A::myhedge;
       using A::myhface4;
@@ -535,7 +535,7 @@ namespace ALUGrid
 
   template < class A > class Periodic4Top : public A {
     public:
-      using A::isFront;
+      using A::isRear;
       using A::myhface4;
 
     protected :

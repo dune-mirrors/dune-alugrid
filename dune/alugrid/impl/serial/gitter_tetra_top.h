@@ -148,7 +148,7 @@ namespace ALUGrid
 
   template < class A > class Hbnd3Top : public A {
     public:
-      using A :: isFront;
+      using A :: isRear;
       using A :: subface;
       using A :: myhface;
 
@@ -215,7 +215,7 @@ namespace ALUGrid
   template < class A > class TetraTop : public A
   {
     public :
-      using A :: isFront;
+      using A :: isRear;
       using A :: myhface;
       using A :: myvertex;
       using A :: myGrid;
@@ -343,7 +343,7 @@ namespace ALUGrid
            // std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
-            if (! face->refine( faceRule, tetra->isFront( info._faces[ i ] ) ) ) return false;
+            if (! face->refine( faceRule, tetra->isRear( info._faces[ i ] ) ) ) return false;
           }
           return true;
         }
@@ -657,7 +657,7 @@ namespace ALUGrid
 
   template < class A > class Periodic3Top : public A {
     public:
-      using A :: isFront;
+      using A :: isRear;
       using A :: myhface;
 
     protected :

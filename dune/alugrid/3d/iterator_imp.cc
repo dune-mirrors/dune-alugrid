@@ -156,7 +156,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     innerLevel_ = org.innerLevel_;
     index_      = org.index_;
     connector_.updateFaceInfo(org.connector_.face(),innerLevel_,
-                              item_->isFront(index_));
+                              item_->isRear(index_));
     geoProvider_.resetFaceGeom();
   }
   else {
@@ -466,7 +466,7 @@ setNewFace(const GEOFaceType& newFace)
   alugrid_assert ( ! ghost_ );
   alugrid_assert ( innerLevel_ == item_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_,
-              item_->isFront(index_) );
+              item_->isRear(index_) );
   geoProvider_.resetFaceGeom();
 }
 
@@ -476,7 +476,7 @@ setGhostFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ghost_ );
   alugrid_assert ( innerLevel_ == ghost_->level() );
-  connector_.updateFaceInfo(newFace,innerLevel_, ghost_->isFront(0) );
+  connector_.updateFaceInfo(newFace,innerLevel_, ghost_->isRear(0) );
   geoProvider_.resetFaceGeom();
 }
 
@@ -629,8 +629,8 @@ setNewFace(const GEOFaceType& newFace)
   levelNeighbor_ = (newFace.level() == innerLevel_);
   connector_.updateFaceInfo(newFace, innerLevel_,
               ( ImplTraits::isGhost( ghost_ ) ) ?
-                 ghost_->isFront(0) :
-                 item_->isFront( index_ )
+                 ghost_->isRear(0) :
+                 item_->isRear( index_ )
               );
   geoProvider_.resetFaceGeom();
 

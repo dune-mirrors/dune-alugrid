@@ -246,7 +246,7 @@ namespace ALUGrid
   }
 
   template< class A >
-  bool Hface4Top< A >::refine ( myrule_t r, bool isFront )
+  bool Hface4Top< A >::refine ( myrule_t r, bool isRear )
   {
     if( r != getrule() )
     {
@@ -260,7 +260,7 @@ namespace ALUGrid
       {
         case myrule_t::iso4:
         {
-          const bool a = isFront
+          const bool a = isRear
                   ? this->nb.front ().first->refineBalance (r,this->nb.front ().second)
                   : this->nb.rear  ().first->refineBalance (r,this->nb.rear  ().second);
           if( a )
@@ -363,10 +363,10 @@ namespace ALUGrid
     // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h
     this->splitGhost( ghostInfo );
 
-    innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isFront (0), this, ghostInfo.child(0), ghostInfo.face(0));
-    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isFront (0), this, ghostInfo.child(1), ghostInfo.face(1));
-    innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), isFront (0), this, ghostInfo.child(2), ghostInfo.face(2));
-    innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), isFront (0), this, ghostInfo.child(3), ghostInfo.face(3));
+    innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this, ghostInfo.child(0), ghostInfo.face(0));
+    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this, ghostInfo.child(1), ghostInfo.face(1));
+    innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), isRear (0), this, ghostInfo.child(2), ghostInfo.face(2));
+    innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), isRear (0), this, ghostInfo.child(3), ghostInfo.face(3));
 
 
     alugrid_assert (b0 && b1 && b2 && b3);
@@ -391,8 +391,8 @@ namespace ALUGrid
     this->splitGhost( ghostInfo );
 
     //TODO: subface is maybe wrong....
-    innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isFront (0), this, ghostInfo.child(0), ghostInfo.face(0));
-    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isFront (0), this, ghostInfo.child(1), ghostInfo.face(1));
+    innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this, ghostInfo.child(0), ghostInfo.face(0));
+    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this, ghostInfo.child(1), ghostInfo.face(1));
 
     alugrid_assert (b0 && b1 );
     b0->append(b1);
@@ -496,7 +496,7 @@ namespace ALUGrid
         case balrule_t::iso4 :
           {
             myhface4_t &face (*(myhface4 (0)));
-            if (! face.refine(balrule_t (balrule_t::iso4),  isFront (0))) return false;
+            if (! face.refine(balrule_t (balrule_t::iso4),  isRear (0))) return false;
 
             // call refinement method
             if( face.is2d())
@@ -778,14 +778,14 @@ namespace ALUGrid
       }
     }
 
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isFront (0), f0, 0, subface (2, 0), isFront (2), f4, 0, f8, -4, subface (5, 0), isFront (5) , this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isFront (0), f1, 0, subface (2, 1), isFront (2), subface (3, 0), isFront (3), f9, -4, f4, -1, this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isFront (0), f2, 0,f9, 0, subface (3, 1), isFront (3), subface (4, 0), isFront (4), f5, -1        , this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isFront (0), f3, 0, f8, 0, f5, 0, subface(4, 1), isFront (4), subface(5, 3), isFront (5)    , this, 3, childVolume);
-    innerhexa_t * h4 = new innerhexa_t (l, f0, -1, subface(1, 0), isFront (1), subface(2, 3), isFront (2), f7, 0, f11, -4, subface(5, 1), isFront (5)  , this, 4, childVolume);
-    innerhexa_t * h5 = new innerhexa_t (l, f1, -1, subface(1, 1), isFront (1), subface(2, 2), isFront (2), subface(3, 3), isFront (3), f10, -4, f7, -1 , this, 5, childVolume);
-    innerhexa_t * h6 = new innerhexa_t (l, f2, -1, subface(1, 2), isFront (1), f10, 0, subface(3, 2), isFront (3), subface(4, 3), isFront (4), f6, -1  , this, 6, childVolume);
-    innerhexa_t * h7 = new innerhexa_t (l, f3, -1, subface(1, 3), isFront (1), f11, 0, f6, 0, subface(4, 2), isFront (4), subface(5, 2), isFront (5)   , this, 7, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isRear (0), f0, 0, subface (2, 0), isRear (2), f4, 0, f8, -4, subface (5, 0), isRear (5) , this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isRear (0), f1, 0, subface (2, 1), isRear (2), subface (3, 0), isRear (3), f9, -4, f4, -1, this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isRear (0), f2, 0,f9, 0, subface (3, 1), isRear (3), subface (4, 0), isRear (4), f5, -1        , this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isRear (0), f3, 0, f8, 0, f5, 0, subface(4, 1), isRear (4), subface(5, 3), isRear (5)    , this, 3, childVolume);
+    innerhexa_t * h4 = new innerhexa_t (l, f0, -1, subface(1, 0), isRear (1), subface(2, 3), isRear (2), f7, 0, f11, -4, subface(5, 1), isRear (5)  , this, 4, childVolume);
+    innerhexa_t * h5 = new innerhexa_t (l, f1, -1, subface(1, 1), isRear (1), subface(2, 2), isRear (2), subface(3, 3), isRear (3), f10, -4, f7, -1 , this, 5, childVolume);
+    innerhexa_t * h6 = new innerhexa_t (l, f2, -1, subface(1, 2), isRear (1), f10, 0, subface(3, 2), isRear (3), subface(4, 3), isRear (4), f6, -1  , this, 6, childVolume);
+    innerhexa_t * h7 = new innerhexa_t (l, f3, -1, subface(1, 3), isRear (1), f11, 0, f6, 0, subface(4, 2), isRear (4), subface(5, 2), isRear (5)   , this, 7, childVolume);
 
     alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7);
     h0->append(h1);
@@ -867,10 +867,10 @@ namespace ALUGrid
 
     //4 inner hexas
 
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isFront(0), subface(1,0), isFront(1), subface (2, 1), isFront(2), f0, -1, f3, 3,  subface (5, 0), isFront(5),  this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isFront(0), subface(1,1), isFront(1), subface (2, 0), isFront(2), subface (3, 1), isFront(3),  f1, -1, f0, 0, this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isFront (0), subface(1,2), isFront(1), f1, 3, subface (3, 0), isFront (3), subface (4, 1), isFront (4), f2, -2 , this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isFront (0), subface(1,3), isFront(1), f3, -1, f2, 3, subface (4, 0), isFront(4), subface(5,1), isFront(5),   this, 3, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isRear(0), subface(1,0), isRear(1), subface (2, 1), isRear(2), f0, -1, f3, 3,  subface (5, 0), isRear(5),  this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isRear(0), subface(1,1), isRear(1), subface (2, 0), isRear(2), subface (3, 1), isRear(3),  f1, -1, f0, 0, this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isRear (0), subface(1,2), isRear(1), f1, 3, subface (3, 0), isRear (3), subface (4, 1), isRear (4), f2, -2 , this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isRear (0), subface(1,3), isRear(1), f3, -1, f2, 3, subface (4, 0), isRear(4), subface(5,1), isRear(5),   this, 3, childVolume);
 
     alugrid_assert (h0 && h1 && h2 && h3 );
 
@@ -938,7 +938,7 @@ namespace ALUGrid
 
          typedef typename myhface4_t::myrule_t myhface4rule_t;
          for( int i = 0; i < 6; ++i )
-           if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso4 ), isFront( i ) ) )
+           if( !myhface4( i )->refine( myhface4rule_t( myhface4_t::myrule_t::iso4 ), isRear( i ) ) )
              return false;
          refineImmediate( r );
          return true;
@@ -965,7 +965,7 @@ namespace ALUGrid
           for (int i = 0; i < 6; ++i)
           {
             if (i != fce)
-              if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4), isFront (i)))
+              if (!myhface4 (i)->refine (balrule_t (balrule_t::iso4), isRear (i)))
                 return false;
           }
           _req = myrule_t::nosplit;
@@ -1305,10 +1305,10 @@ namespace ALUGrid
     alugrid_assert (_dwn == 0);
 
     const int l = 1 + this->level ();
-    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isFront (0), subface (1,0), isFront (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isFront (0), subface (1,3), isFront (1), this, 1);
-    innerperiodic4_t * p2 = new innerperiodic4_t (l, subface (0,2), isFront (0), subface (1,2), isFront (1), this, 2);
-    innerperiodic4_t * p3 = new innerperiodic4_t (l, subface (0,3), isFront (0), subface (1,1), isFront (1), this, 3);
+    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isRear (0), subface (1,0), isRear (1), this, 0);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isRear (0), subface (1,3), isRear (1), this, 1);
+    innerperiodic4_t * p2 = new innerperiodic4_t (l, subface (0,2), isRear (0), subface (1,2), isRear (1), this, 2);
+    innerperiodic4_t * p3 = new innerperiodic4_t (l, subface (0,3), isRear (0), subface (1,1), isRear (1), this, 3);
     alugrid_assert (p0 && p1 && p2 && p3);
     p0->append(p1);
     p1->append(p2);
@@ -1326,8 +1326,8 @@ namespace ALUGrid
     //TODO: get the right faces here
 
     const int l = 1 + this->level ();
-    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isFront (0), subface (1,0), isFront (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isFront (0), subface (1,1), isFront (1), this, 1);
+    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isRear (0), subface (1,0), isRear (1), this, 0);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isRear (0), subface (1,1), isRear (1), this, 1);
 
     alugrid_assert (p0 && p1 );
     p0->append(p1);
@@ -1393,7 +1393,7 @@ namespace ALUGrid
 
       typedef typename myhface4_t::myrule_t myhface4rule_t;
       int opp = fce == 0 ? 1 : 0;
-      if (myhface4 (opp)->refine (myhface4rule_t (r), isFront (opp)))
+      if (myhface4 (opp)->refine (myhface4rule_t (r), isRear (opp)))
       {
         refineImmediate( r );
         return true;

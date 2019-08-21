@@ -774,7 +774,7 @@ namespace Dune {
       // the above is a bad test, as it does not take into account
       // the situation of conforming refinement
       // it is better to directly test the face twist
-      if( item_->isFront(i) )
+      if( item_->isRear(i) )
       {
         outerElement = face.nb.rear().first;
       }
