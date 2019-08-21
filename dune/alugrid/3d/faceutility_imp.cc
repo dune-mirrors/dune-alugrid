@@ -549,21 +549,14 @@ namespace Dune
       const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
       const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
 
+      // isRear determines whether normal points outward or not
+      const double factor = this->connector_.isInnerRear() ? -1.0 : 1.0;
 
       // cross product of two vectors
-      outerNormal_[0] =  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
-      outerNormal_[1] =  ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
-      outerNormal_[2] =  ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
+      outerNormal_[0] = factor *  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
+      outerNormal_[1] = factor * ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
+      outerNormal_[2] = factor * ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
 
-      // change sign if face normal points into inner element
-      const alu3d_ctype (&_oppInnerVtx)[3] = this->connector_.innerEntity().myvertex(3-this->connector_.innerALUFaceIndex())->Point();
-      const alu3d_ctype scalarProduct = outerNormal_[0] *(_oppInnerVtx[0] - _p0[0]) + outerNormal_[1] *(_oppInnerVtx[1] - _p0[1]) +outerNormal_[2] *(_oppInnerVtx[2] - _p0[2]);
-      if(scalarProduct > 0 )
-      {
-        outerNormal_[0] *= -1.0;
-        outerNormal_[1] *= -1.0;
-        outerNormal_[2] *= -1.0;
-      }
       normalUp2Date_ = true;
     } // end if mapp ...
 

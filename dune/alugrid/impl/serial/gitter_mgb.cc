@@ -24,7 +24,6 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::hedge1_GEO *, bool > MacroGridBuilder::
   InsertUniqueHedge (int l, int r) {
     edgeKey_t key (l,r);
-//    std::cout << "Edge insert: " << l << ", " << r << std::endl;
     std::pair< edgeMap_t::iterator, bool > result = _edgeMap.insert( std::make_pair( key, static_cast< hedge1_GEO * >( 0 ) ) );
     if( result.second )
     {
@@ -48,7 +47,6 @@ namespace ALUGrid
       edge [0] = InsertUniqueHedge (v[0],v[1]).first;
       edge [1] = InsertUniqueHedge (v[0],v[2]).first;
       edge [2] = InsertUniqueHedge (v[1],v[2]).first;
-      std::cout << "Insert Face: (" << v[0] << "," << v[1] << "," << v[2] << ")";
       result.first->second = myBuilder ().insert_hface3 (edge);
     }
     return std::make_pair( static_cast< hface3_GEO * >( result.first->second ), result.second );
@@ -84,11 +82,25 @@ namespace ALUGrid
         x [0] = v [Tetra::prototype [fce][0]];
         x [1] = v [Tetra::prototype [fce][1]];
         x [2] = v [Tetra::prototype [fce][2]];
-        // returns false if already inserted (hence we call this rear)
-        auto faceFrontPair =  InsertUniqueHface (x);
-        face [fce] = faceFrontPair.first;
-        isRear[fce] = faceFrontPair.second;
-        if(isRear[fce]) std::cout << "true" << std::endl;
+        auto faceFrontPair = InsertUniqueHface (x);
+        face [fce] =  faceFrontPair.first;
+        isRear[fce] = !(bool(fce % 2 ));
+      }
+      //if det of the element < 0 then the orientation of isRear switches
+      auto p0 = face[0]->myvertex(0)->Point();
+      auto p1 = face[0]->myvertex(1)->Point();
+      auto p2 = face[0]->myvertex(2)->Point();
+      auto p3 = face[1]->myvertex(2)->Point();
+      // (p1 - p0) x (p2 - p0) * (p3 - p0)
+      double det = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p1[2] - p0[2]) * (p2[1] - p0[1])) * (p3[0] - p0[0])
+                 + ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p1[0] - p0[0]) * (p2[2] - p0[2])) * (p3[1] - p0[1])
+                 + ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])) * (p3[2] - p0[2]);
+      if (det < 0)
+      {
+        isRear[0] = !(isRear[0]);
+        isRear[1] = !(isRear[1]);
+        isRear[2] = !(isRear[2]);
+        isRear[3] = !(isRear[3]);
       }
       result.first->second = myBuilder ().insert_tetra (face,isRear, elementType);
       alugrid_assert( result.first->second );
@@ -113,7 +125,9 @@ namespace ALUGrid
         x [3] = v [Hexa::prototype [fce][3]];
         auto faceFrontPair = InsertUniqueHface (x);
         face [fce] =  faceFrontPair.first;
-        isRear[fce] = faceFrontPair.second;
+        // calculate normal direction
+        // in contrast to tets we expect all hexas to have positive det
+        isRear[fce] = !(bool(fce %2));
       }
       result.first->second = myBuilder ().insert_hexa (face,isRear);
     }
@@ -124,14 +138,13 @@ namespace ALUGrid
   InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     faceKey_t key (v [0], v [1], v [2]);
-    std::cout << "Insert Boundary: " << v[0] << "," << v[1] << "," << v[2] << ")";
     if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
         auto faceFrontPair = InsertUniqueHface (v);
-        hface3_GEO * face =  faceFrontPair.first;
-        bool isRear = faceFrontPair.second;
-        std::cout << isRear << std::endl;
+        hface3_GEO * face  = faceFrontPair.first;
+        alugrid_assert( !faceFrontPair.second );
+        bool isRear = face->nb.emptyRear();
         _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master);
         return true;
       }
@@ -142,8 +155,8 @@ namespace ALUGrid
       {
         auto faceFrontPair = InsertUniqueHface (v);
         hface3_GEO * face  = faceFrontPair.first;
-        bool isRear = faceFrontPair.second;
-        std::cout << isRear << std::endl;
+        alugrid_assert( !faceFrontPair.second );
+        bool isRear = face->nb.emptyRear();
         hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,isRear,bt);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
@@ -164,7 +177,8 @@ namespace ALUGrid
       if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
         auto faceFrontPair = InsertUniqueHface (v);
         hface4_GEO * face =  faceFrontPair.first;
-        bool isRear = faceFrontPair.second;
+        alugrid_assert( !faceFrontPair.second);
+        bool isRear = (face->nb.rear() == face->nb.null);
         _hbnd4Int [key] = new Hbnd4IntStorage (face, isRear, ldbVertexIndex, master );
         return true;
       }
@@ -175,7 +189,8 @@ namespace ALUGrid
       {
         auto faceFrontPair = InsertUniqueHface (v);
         hface4_GEO * face =  faceFrontPair.first;
-        bool isRear = faceFrontPair.second;
+        alugrid_assert( !faceFrontPair.second );
+        bool isRear = (face->nb.rear() == face->nb.null);
         hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,isRear,bt);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
