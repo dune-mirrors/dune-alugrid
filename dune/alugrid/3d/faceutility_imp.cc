@@ -13,8 +13,7 @@ namespace Dune
     outerElement_(0),
     innerFaceNumber_(-1),
     outerFaceNumber_(-1),
-    isInnerFront_(-665),
-    isOuterFront_(-665),
+    isInnerRear_(false),
     segmentId_( -1 ),
     bndId_( -1 ),
     bndType_( noBoundary ),
@@ -42,7 +41,7 @@ namespace Dune
   ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
   updateFaceInfo(const GEOFaceType& face,
                  int innerLevel,
-                 int isInnerFront)
+                 bool isInnerRear)
   {
     face_ = &face;
 
@@ -55,7 +54,7 @@ namespace Dune
     bndId_ = 0; // inner face
 
     // points face from inner element away?
-    if (isInnerFront < 0)
+    if (isInnerRear)
     {
       innerElement_    = face.nb.rear().first;
       innerFaceNumber_ = face.nb.rear().second;
@@ -108,18 +107,18 @@ namespace Dune
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
         alugrid_assert (ghost);
 
-        isInnerFront_ = ghost->isRear(innerFaceNumber_);
+        isInnerRear_ = ghost->isRear(innerFaceNumber_);
       }
       else
       {
-        isInnerFront_ = innerFace().isRear(innerALUFaceIndex());
+        isInnerRear_ = innerFace().isRear(innerALUFaceIndex());
       }
     }
     else
     {
       // set inner isRear
-      alugrid_assert (isInnerFront == innerEntity().isRear(innerFaceNumber_));
-      isInnerFront_ = isInnerFront;
+      alugrid_assert (isInnerRear == innerEntity().isRear(innerFaceNumber_));
+      isInnerRear_ = isInnerRear;
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
@@ -130,7 +129,7 @@ namespace Dune
       const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
       while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
       innerElement_ = static_cast<const HasFaceType *> (inner);
-      isInnerFront_ = innerEntity().isRear(innerFaceNumber_);
+      isInnerRear_ = innerEntity().isRear(innerFaceNumber_);
     }
 
     if( outerElement_->isboundary() )
@@ -178,7 +177,7 @@ namespace Dune
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
         else
-          isOuterFront_ = outerEntity().isRear( outerFaceNumber_ );
+          isInnerRear_ != outerEntity().isRear( outerFaceNumber_ );
       }
       if ( bnd ) // the boundary case
       {
@@ -201,7 +200,7 @@ namespace Dune
           bndType_ = outerGhostBoundary ;
 
           if(conformingRefinement_)
-            isOuterFront_ = boundaryFace().isRear(outerALUFaceIndex());
+            isInnerRear_ != boundaryFace().isRear(outerALUFaceIndex());
 
           // access ghost only when ghost cells are enabled
           if( ghostCellsEnabled_ )
@@ -212,13 +211,13 @@ namespace Dune
 
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
             alugrid_assert ( ghost );
-            isOuterFront_ = ghost->isRear(outerFaceNumber_);
+            isInnerRear_ != ghost->isRear(outerFaceNumber_);
           }
         }
         else // the normal boundary case
         {
           // get outer isRear
-          isOuterFront_ = boundaryFace().isRear(outerALUFaceIndex());
+          isInnerRear_ != boundaryFace().isRear(outerALUFaceIndex());
           // compute segment index when needed
           segmentId_ = boundaryFace().segmentId();
           bndId_ = boundaryFace().bndtype();
@@ -228,26 +227,24 @@ namespace Dune
     else
     {
       // get outer isRear
-      isOuterFront_ = outerEntity().isRear(outerALUFaceIndex());
+      isInnerRear_ != outerEntity().isRear(outerALUFaceIndex());
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
     //we assume the macro grid view. So we go up to level 0
-    //after that we have to get new isRear and facenumbers
+    //after that we have to get new facenumbers
     if(levelIntersection_ && conformingRefinement_ && !  (outerElement_->isboundary() ) )
     {
       const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
       while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
       outerElement_ = static_cast<const HasFaceType *> (outer);
-      isOuterFront_ = outerEntity().isRear(outerFaceNumber_);
     }
 
     // make sure we got boundary id correctly
     alugrid_assert ( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
 
-    //make sure isRears are set
-    alugrid_assert( isInnerFront_ != -665);
-    alugrid_assert( isOuterFront_ != -665);
+    //make sure isRears are set - not possible anymore with bool
+    //alugrid_assert( isInnerFront_ != -665);
 
     // set conformance information
     conformanceState_ = getConformanceState(innerLevel);
@@ -257,9 +254,9 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
   ALU3dGridFaceInfo(const GEOFaceType& face,
-                    int isInnerFront)
+                    bool isInnerRear)
   {
-    updateFaceInfo(face,isInnerFront);
+    updateFaceInfo(face,isInnerRear);
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
@@ -273,8 +270,7 @@ namespace Dune
     outerElement_(orig.outerElement_),
     innerFaceNumber_(orig.innerFaceNumber_),
     outerFaceNumber_(orig.outerFaceNumber_),
-    isInnerFront_(orig.isInnerFront_),
-    isOuterFront_(orig.isOuterFront_),
+    isInnerRear_(orig.isInnerRear_),
     segmentId_( orig.segmentId_ ),
     bndId_( orig.bndId_ ),
     bndType_( orig.bndType_ ),
@@ -378,12 +374,12 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::isInnerFront() const
+  inline bool ALU3dGridFaceInfo< dim, dimworld, type, Comm >::isInnerRear() const
   {
     // don't check ghost boundaries here
     alugrid_assert ( ( ! innerBoundary() ) ?
-        innerEntity().isRear(innerALUFaceIndex()) == isInnerFront_ : true );
-    return isInnerFront_;
+        innerEntity().isRear(innerALUFaceIndex()) == isInnerRear_ : true );
+    return isInnerRear_;
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
@@ -393,7 +389,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::isOuterFront() const
+  inline bool ALU3dGridFaceInfo< dim, dimworld, type, Comm >::isOuterRear() const
   {
     // don't check ghost boundaries here
     //alugrid_assert ( (outerBoundary_) ?
@@ -401,7 +397,7 @@ namespace Dune
     //          (! ghostBoundary_) ?
     //          (isOuterFront_ == outerEntity().isRear(outerALUFaceIndex())) : true
     //      );
-    return isOuterFront_;
+    return !(isInnerRear_);
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
@@ -555,7 +551,7 @@ namespace Dune
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerFront() < 0) ? 1.0 : -1.0;
+      const double factor = (this->connector_.isInnerRear()) ? 1.0 : -1.0;
 
       // see mapp_tetra_3d.h for this piece of code
       outerNormal_[0] = factor * ((_p1[1]-_p0[1]) *(_p2[2]-_p1[2]) - (_p2[1]-_p1[1]) *(_p1[2]-_p0[2]));
@@ -638,7 +634,7 @@ namespace Dune
     // calculate the normal
     // has to be calculated every time normal called, because
     // depends on local
-    if (connector_.isInnerFront() < 0)
+    if (connector_.isInnerRear())
       mappingGlobal_.negativeNormal(local,outerNormal_);
     else
       mappingGlobal_.normal(local,outerNormal_);
@@ -815,7 +811,7 @@ namespace Dune
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerFront() < 0) ? 1.0 : -1.0;
+      const double factor = (this->connector_.isInnerRear()) ? 1.0 : -1.0;
 
 
       if(dimworld == 2)
@@ -889,7 +885,7 @@ namespace Dune
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerFront() < 0) ? -1.0 : 1.0;
+      const double factor = (this->connector_.isInnerRear()) ? -1.0 : 1.0;
 
       if(dimworld == 2)
       {

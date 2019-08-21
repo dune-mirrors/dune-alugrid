@@ -59,7 +59,7 @@ namespace Dune
   public:
     //! constructor creating empty face info
     ALU3dGridFaceInfo( const bool levelIntersection = false );
-    void updateFaceInfo(const GEOFaceType& face, int innerLevel, int isInnerFront);
+    void updateFaceInfo(const GEOFaceType& face, int innerLevel, bool isInnerRear);
 
     //- constructors and destructors
     //! Construct a connector from a face and the twist seen from the inner
@@ -67,7 +67,7 @@ namespace Dune
     //! \note: The user is responsible for the consistency of the input data
     //! as well as for choosing the appropriate (i.e. most refined) face
     //! Copy constructor
-    ALU3dGridFaceInfo(const GEOFaceType& face, int isInnerFront);
+    ALU3dGridFaceInfo(const GEOFaceType& face, bool isInnerRear);
     ALU3dGridFaceInfo(const ALU3dGridFaceInfo &orig);
     //! Destructor
     ~ALU3dGridFaceInfo();
@@ -109,10 +109,10 @@ namespace Dune
     //! \note This function is only meaningful at a boundary
     const BNDFaceType& boundaryFace() const;
 
-    //! Twist of the face seen from the inner element
-    int isInnerFront() const;
-    //! Twist of the face seen from the outer element
-    int isOuterFront() const;
+    //! Information which of the faces is rear seen from the inner element
+    bool isInnerRear() const;
+    //! Information which of the faces is rear seen from the outer element
+    bool isOuterRear() const;
 
     //! Twist of the face seen from the inner element
     int duneTwist(const int faceIdx, const int aluTwist) const;
@@ -163,8 +163,7 @@ namespace Dune
     int  innerFaceNumber_;
     int  outerFaceNumber_;
 
-    int  isInnerFront_;
-    int  isOuterFront_;
+    bool  isInnerRear_;
 
     mutable int segmentId_;
     int bndId_;
