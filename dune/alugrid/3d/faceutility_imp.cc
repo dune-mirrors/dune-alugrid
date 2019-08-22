@@ -810,7 +810,7 @@ namespace Dune
 
       // change sign if face normal points into inner element
       // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerRear()) ? 1.0 : -1.0;
+      const double factor = (this->connector_.isInnerRear()) ? -1.0 : 1.0;
 
 
       if(dimworld == 2)
