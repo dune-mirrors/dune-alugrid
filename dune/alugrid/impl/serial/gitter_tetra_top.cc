@@ -65,9 +65,8 @@ namespace ALUGrid
     myhedge_t* splitEdge = myhedge(0);
 
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
-    myvertex_t * vx2 = vertexNotOnSplitEdge( 0 );
 
-    //myvertex_t * vx2 = myvertex( 2 );
+    myvertex_t * vx2 = myvertex( 2 );
     alugrid_assert (ev0) ;
     inneredge_t * e0 = new inneredge_t (newLevel, ev0, vx2 ) ;
     alugrid_assert ( e0 ) ;
@@ -128,8 +127,7 @@ namespace ALUGrid
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
     alugrid_assert (ev0) ;
 
-    myvertex_t * vxOld = vertexNotOnSplitEdge( 1 );
-    //myvertex_t * vxOld = myvertex(0);
+    myvertex_t * vxOld = myvertex(0);
 
     // create new inner edge
     inneredge_t * e0 = new inneredge_t (newLevel, vxOld, ev0 ) ;
@@ -197,9 +195,8 @@ namespace ALUGrid
 
     // get vertices of new edge
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
-    myvertex_t * vxOld = vertexNotOnSplitEdge( 2 );
 
-    //myvertex_t * vxOld = myvertex( 1 );
+    myvertex_t * vxOld = myvertex( 1 );
 
     alugrid_assert (ev0) ;
     inneredge_t * e0 = new inneredge_t (newLevel, vxOld, ev0 ) ;
@@ -275,17 +272,17 @@ namespace ALUGrid
           split_e01 () ;
           break ;
         case myrule_t::e12 :
-          myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
+          myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
           split_e12 () ;
           break ;
         case myrule_t::e20 :
-          myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
+          myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
           split_e20 () ;
           break ;
         case myrule_t::iso4 :
           //iso4 on a 2d face is just e12 bisection + setting the rule to iso4
           if(this->is2d()) {
-            myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
+            myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
             split_e12 () ;
             _rule = myrule_t::iso4 ;
             break ;
@@ -1735,8 +1732,6 @@ namespace ALUGrid
       case myrule_t::e01 :
         _faces[ 0 ] = 0 ;
         _faces[ 1 ] = 1 ;
-        _vertices[ 0 ] = 0 ;
-        _vertices[ 1 ] = 1 ;
         _faceRules[ 0 ] = face3rule_t::e01;
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e01 > ();
@@ -1744,8 +1739,6 @@ namespace ALUGrid
       case myrule_t::e12 :
         _faces[ 0 ] = 0 ;
         _faces[ 1 ] = 3 ;
-        _vertices[ 0 ] = 1 ;
-        _vertices[ 1 ] = 2 ;
         _faceRules[ 0 ] = face3rule_t::e12;
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e12 > ();
@@ -1753,8 +1746,6 @@ namespace ALUGrid
       case myrule_t::e20 :
         _faces[ 0 ] = 0 ;
         _faces[ 1 ] = 2 ;
-        _vertices[ 0 ] = 0 ;
-        _vertices[ 1 ] = 2 ;
         _faceRules[ 0 ] = face3rule_t::e20;
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e20 > ();
@@ -1762,8 +1753,6 @@ namespace ALUGrid
       case myrule_t::e23 :
         _faces[ 0 ] = 2 ;
         _faces[ 1 ] = 3 ;
-        _vertices[ 0 ] = 2 ;
-        _vertices[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e12;
         _faceRules[ 1 ] = face3rule_t::e12;
         _caller = new CallSplitImpl< myrule_t::e23 > ();
@@ -1771,8 +1760,6 @@ namespace ALUGrid
       case myrule_t::e30 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 2 ;
-        _vertices[ 0 ] = 0 ;
-        _vertices[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e20;
         _faceRules[ 1 ] = face3rule_t::e20;
         _caller = new CallSplitImpl< myrule_t::e30 > ();
@@ -1780,8 +1767,6 @@ namespace ALUGrid
       case myrule_t::e31 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 3 ;
-        _vertices[ 0 ] = 1 ;
-        _vertices[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e12;
         _faceRules[ 1 ] = face3rule_t::e20;
         _caller = new CallSplitImpl< myrule_t::e31 > ();

@@ -274,7 +274,6 @@ namespace ALUGrid
 
         const CallSplitIF* _caller;
         unsigned char _faces[ 2 ];
-        unsigned char _vertices[ 2 ];
         face3rule_t _faceRules[ 2 ];
 
       private:
@@ -305,30 +304,6 @@ namespace ALUGrid
           return bisectionInfo[ int(rule) - 2 ];
         }
 
-        static face3rule_t calculateRule( const myhface_t* face,
-                                          const myvertex_t* vx0,
-                                          const myvertex_t* vx1 )
-        {
-          static const face3rule_t rules[ 3 ] = { face3rule_t :: e01, face3rule_t :: e12, face3rule_t :: e20 };
-
-          alugrid_assert ( checkFace( face, face->nChild() ) );
-
-          for(int j=0; j<3; ++j )
-          {
-            for( int i=0; i<2; ++i )
-            {
-              if( face->myhedge( j )->myvertex( i ) == vx0  &&
-                  face->myhedge( j )->myvertex( 1-i ) == vx1  )
-              {
-                return rules[ j ];
-              }
-            }
-          }
-
-          alugrid_assert ( false );
-          abort();
-          return rules[ 0 ];
-        }
 
         static bool refineFaces( innertetra_t* tetra, const myrule_t& rule )
         {
@@ -337,10 +312,9 @@ namespace ALUGrid
           {
             myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-            const face3rule_t faceRule = calculateRule( face,
-                tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
+            const face3rule_t faceRule = info._faceRules[i];
 
-           // std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
+            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
             if (! face->refine( faceRule, tetra->isRear( info._faces[ i ] ) ) ) return false;
@@ -356,9 +330,8 @@ namespace ALUGrid
           {
             myhface_t* face = tetra->myhface( info._faces[ i ] );
 
-            const face3rule_t faceRule = calculateRule( face,
-                tetra->myvertex( info._vertices[ 0 ] ), tetra->myvertex( info._vertices[ 1 ] ) );
-
+            const face3rule_t faceRule = info._faceRules[i];
+            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
             face->refineImmediate ( faceRule );
           }
 
