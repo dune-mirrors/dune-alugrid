@@ -77,6 +77,7 @@ namespace Dune
       {
         // it is here important, that the fake vertices
         // are of globalId +1 to the real ones
+        // odd indices are the 2d vertices
         vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
         VertexType pos1 (pos);
         pos1[2] += 1.0 ;
