@@ -34,58 +34,6 @@ namespace ALUGrid
     return vx ;
   }
 
-  template< class A > typename Hface3Top < A >::edgepair_t
-  Hface3Top < A >::subEdges( myhedge_t* edge, const myvertex_t* vx0, const myvertex_t* vx1 )
-  {
-    alugrid_assert ( vx0 );
-    alugrid_assert ( vx1 );
-
-    // get sub faces
-    myhedge_t* subEdge[ 2 ] = { edge->subedge( 0 ), edge->subedge( 1 ) };
-
-    // check face order with vertex0
-    int sub0 = 1 ;
-    for( int i=0; i<2; ++i )
-    {
-      if( subEdge[ 0 ]->myvertex( i ) == vx0 )
-      {
-        sub0 = 0;
-        break;
-      }
-    }
-
-#ifdef ALUGRIDDEBUG
-    // make sure the vertex is on the other face
-    bool found0 = false ;
-    bool found1 = false ;
-    // check face order with vertex0
-    for( int i=0; i<2; ++i )
-    {
-      if( subEdge[ sub0 ]->myvertex( i ) == vx0 )
-      {
-        found0 = true ;
-      }
-      if( subEdge[ ! sub0 ]->myvertex( i ) == vx1 )
-      {
-        found1 = true ;
-      }
-    }
-
-    if( ! found0 || ! found1 )
-    {
-      std::cout << "Problem: " << edge << std::endl;
-      std::cout << " vx0 " << vx0 << std::endl;
-      std::cout << " vx1 " << vx1 << std::endl;
-      std::cout << "sub0 " << subEdge[ sub0 ] << std::endl;
-      std::cout << "sub1 " << subEdge[ ! sub0 ] << std::endl;
-    }
-
-    alugrid_assert ( found0 );
-    alugrid_assert ( found1 );
-
-#endif
-    return edgepair_t( subEdge[ sub0 ], subEdge[ ! sub0 ] );
-  }
 
 
   template< class A > void Hface3Top < A >::split_e01 ()
@@ -101,8 +49,8 @@ namespace ALUGrid
                    /  *  \
                   /       \
                  /    *    \
-             2  /           \ 1
-               /2    1*2    1\
+             1  /           \ 2
+               /1    2*1    2\
               /               \
              /        *        \
             /                   \
@@ -119,21 +67,20 @@ namespace ALUGrid
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
     myvertex_t * vx2 = vertexNotOnSplitEdge( 0 );
 
-    edgepair_t subEdge = subEdges( splitEdge, myvertex(0), myvertex(1) );
     //myvertex_t * vx2 = myvertex( 2 );
     alugrid_assert (ev0) ;
     inneredge_t * e0 = new inneredge_t (newLevel, ev0, vx2 ) ;
     alugrid_assert ( e0 ) ;
     innerface_t * f0 = new innerface_t (newLevel,
-                                        subEdge.first,
+                                        splitEdge->subedge(0),
+                                        myhedge(1),
                                         e0,
-                                        myhedge(2),
                                         0) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel,
-                                        subEdge.second,
-                                        myhedge(1),
+                                        splitEdge->subedge(1),
                                         e0,
+                                        myhedge(2),
                                         1) ; // child number
 
     //std::cout << "split_e01 " << ev0 << std::endl;
@@ -160,15 +107,15 @@ namespace ALUGrid
                        / \
                       / 2 \
                      /     \
-                    /     1 \
+                    /     2 \
                    /         \
                   /           \
-               2 / 2         1 \  1
+               1 / 1         1 \ 2
                 /             * \
                /           *   2 \
               /      0  *         \
-             /       *           1 \
-            /     *   2             \
+             /       *           2 \
+            /     *   1             \
            /0  *                     \
           / *0                      1 \
           -----------------------------
@@ -176,7 +123,7 @@ namespace ALUGrid
       */
     alugrid_assert ( _inner == 0 );
     const int newLevel= 1 + level () ;
-    myhedge_t* splitEdge = myhedge(1);
+    myhedge_t* splitEdge = myhedge(2);
 
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
     alugrid_assert (ev0) ;
@@ -184,10 +131,8 @@ namespace ALUGrid
     myvertex_t * vxOld = vertexNotOnSplitEdge( 1 );
     //myvertex_t * vxOld = myvertex(0);
 
-    edgepair_t subEdge = subEdges( splitEdge, myvertex(1), myvertex(2) );
-
     // create new inner edge
-    inneredge_t * e0 = new inneredge_t (newLevel, ev0, vxOld ) ;
+    inneredge_t * e0 = new inneredge_t (newLevel, vxOld, ev0 ) ;
     alugrid_assert ( e0 ) ;
 
     //std::cout << "split_e12 " << ev0 << std::endl;
@@ -195,14 +140,14 @@ namespace ALUGrid
 
     innerface_t * f0 = new innerface_t (newLevel, // level
                                         myhedge(0),         // edge 0
-                                        subEdge.first, // edge 0
                                         e0,                         // edge 1
+                                        splitEdge->subedge(0),
                                         0 ) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel, // level
-                                        e0,                         // edge 1
-                                        subEdge.second, // edge 2
-                                        myhedge(2),         // edge 0
+                                        e0,                         // edge 0
+                                        myhedge(1),  // edge 1
+                                        splitEdge->subedge(1),       // edge 2
                                         1 ) ; // child number
     alugrid_assert (f0 && f1 ) ;
     f0->append(f1) ;
@@ -223,6 +168,7 @@ namespace ALUGrid
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
     // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
+    //
 
     /*                  2
 
@@ -232,13 +178,13 @@ namespace ALUGrid
                     /2      \
                    /         \
                   /           \
-               2 /0            \  1
+               1 /1            \  2
                 / *            1\
                / 2   *           \
               /         * 0       \
-             /2          1 *       \
+             /1          2 *       \
             /                 *     \
-           /                     * 1 \
+           /                     * 0 \
           / 0          0          1 * \
           -----------------------------
         0              0                 1
@@ -247,29 +193,28 @@ namespace ALUGrid
     alugrid_assert ( _inner == 0 );
     const int newLevel= 1 + level () ;
 
-    myhedge_t* splitEdge = myhedge( 2 );
+    myhedge_t* splitEdge = myhedge( 1 );
 
     // get vertices of new edge
     myvertex_t * ev0 = splitEdge->subvertex (0) ;
     myvertex_t * vxOld = vertexNotOnSplitEdge( 2 );
 
-    edgepair_t subEdge = subEdges( splitEdge, myvertex(0), myvertex(2) );
     //myvertex_t * vxOld = myvertex( 1 );
 
     alugrid_assert (ev0) ;
-    inneredge_t * e0 = new inneredge_t (newLevel, ev0, vxOld ) ;
+    inneredge_t * e0 = new inneredge_t (newLevel, vxOld, ev0 ) ;
     alugrid_assert ( e0 ) ;
 
     innerface_t * f0 = new innerface_t (newLevel, // level
-                                        e0,                         // edge 0
-                                        myhedge(1),         // edge 1
-                                        subEdge.second, // edge 2
+                                        myhedge(0),         // edge 0
+                                        splitEdge->subedge(0),         // edge 1
+                                        e0, // edge 2
                                         0 ) ; // child number
 
     innerface_t * f1 = new innerface_t (newLevel, // level
-                                        myhedge(0),         // edge 0
-                                        e0,                         // edge 1
-                                        subEdge.first, // edge 2
+                                        e0,         // edge 0
+                                        myhedge(2),                         // edge 1
+                                        splitEdge->subedge(1), // edge 2
                                         1 ) ; // child number
 
     alugrid_assert (f0 && f1 ) ;
@@ -933,11 +878,7 @@ namespace ALUGrid
     switch ( myhface( face )->getrule() )
     {
     case myhface_t::myrule_t::e01 :
-      alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
-      return myhface ( face )->subedge ( edge ) ;
     case myhface_t::myrule_t::e12 :
-      alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
-      return myhface ( face )->subedge ( edge ) ;
     case myhface_t::myrule_t::e20 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
@@ -950,7 +891,7 @@ namespace ALUGrid
           return myface.subedge ( edge ) ;
         }
         alugrid_assert ( edge < 3 );
-        return (isRear(face) ? myface.subedge ( edge) : myface.subedge (edge )) ;
+        return  myface.subedge ( edge);
       }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**ERROR (FATAL): subedge () called on non-refined face. In " << __FILE__ << " " << __LINE__ << std::endl ;
@@ -965,99 +906,6 @@ namespace ALUGrid
   }
 
 
-  // --subFaces
-  template< class A >
-  typename TetraTop < A >::facepair_t
-  TetraTop < A >::subFaces ( const int i )
-  {
-    // get face that we want sub faces from
-    myhface_t* face = myhface( i );
-
-    typedef typename myhface_t::myrule_t  myrule_t;
-    // get split rule of face
-    const myrule_t rule = face->getrule() ;
-    alugrid_assert ( rule == myrule_t::e01 ||
-            rule == myrule_t::e12 ||
-            rule == myrule_t::e20 );
-
-#ifdef ALUGRIDDEBUG
-    if( rule == myrule_t::iso4 )
-    {
-      std::cerr << "**ERROR (FATAL): subFaces () not implemented for iso4 " << i << ". In " << __FILE__ << " " << __LINE__ << std::endl ;
-      abort () ;
-    }
-    else if ( rule == myrule_t::nosplit )
-    {
-      std::cerr << "**ERROR (FATAL): subFaces () called on non-refined face " << i << ". In " << __FILE__ << " " << __LINE__ << std::endl ;
-      abort () ;
-    }
-#endif
-
-    // obtain rule id
-    const unsigned int ruleId = int(rule) - 2;
-    alugrid_assert ( ruleId <= 2 );
-
-    // return sub face 0 and 1 of face i
-    return facepair_t ( face->subface( 0 ), face->subface( 1 ) );
-  }
-
-  // --subFaces
-  template< class A >
-  typename TetraTop < A >::facepair_t
-  TetraTop < A >::subFaces ( const int i,
-                               const myvertex_t* vx0,
-                               const myvertex_t* vx1 )
-  {
-    alugrid_assert ( vx0 );
-    alugrid_assert ( vx1 );
-
-    // get face that we want sub faces from
-    myhface_t* face = myhface( i );
-
-    // get sub faces
-    myhface_t* subFce[ 2 ] = { face->subface( 0 ), face->subface( 1 ) };
-
-    // check face order with vertex0
-    int sub0 = 1 ;
-    for( int i=0; i<3; ++i )
-    {
-      if( subFce[ 0 ]->myvertex( i ) == vx0 )
-      {
-        sub0 = 0;
-        break;
-      }
-    }
-
-#ifdef ALUGRIDDEBUG
-    // make sure the vertex is on the other face
-    bool found0 = false ;
-    bool found1 = false ;
-    // check face order with vertex0
-    for( int i=0; i<3; ++i )
-    {
-      if( subFce[ sub0 ]->myvertex( i ) == vx0 )
-      {
-        found0 = true ;
-      }
-      if( subFce[ ! sub0 ]->myvertex( i ) == vx1 )
-      {
-        found1 = true ;
-      }
-    }
-    if( ! found0 || ! found1 )
-    {
-      std::cout << "Problem: " << face << std::endl;
-      std::cout << " vx0 " << vx0 << std::endl;
-      std::cout << " vx1 " << vx1 << std::endl;
-      std::cout << "sub0 " << subFce[ sub0 ] << std::endl;
-      std::cout << "sub1 " << subFce[ ! sub0 ] << std::endl;
-    }
-    alugrid_assert ( found0 );
-    alugrid_assert ( found1 );
-
-#endif
-    return facepair_t( subFce[ sub0 ], subFce[ ! sub0 ] );
-  }
 
   // --subface
   template< class A >  typename TetraTop < A >:: myhface_t * TetraTop < A >::subface (int i, int j)
@@ -1065,21 +913,10 @@ namespace ALUGrid
     switch ( myhface( i )->getrule() )
     {
     case myhface_t::myrule_t::e01 :
-      alugrid_assert ( j < 2 );
-      return myhface(i)->subface( j ) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      alugrid_assert ( false );
-      return 0;
     case myhface_t::myrule_t::e12 :
-      alugrid_assert ( j < 2 );
-        return myhface(i)->subface(j) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      return 0;
     case myhface_t::myrule_t::e20 :
       alugrid_assert ( j < 2 );
       return myhface(i)->subface(j) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      return 0;
     case myhface_t::myrule_t::iso4 :
       {
         myhface_t& myface (*(myhface(i)));
@@ -1087,19 +924,9 @@ namespace ALUGrid
         if(myface.is2d()){
            alugrid_assert ( j < 2 );
             return myface.subface(j) ;
-            std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-            return 0;
         }
         alugrid_assert ( j < 4 );
-        if ( j == 3 )
-        {
-          return myface.subface(3);
-        }
-        else // ( j < 3 )
-        {
-          alugrid_assert ( j < 3 );
-          return myface.subface(j) ;
-        }
+        return myface.subface(j) ;
       }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**ERROR (FATAL): subface () called on non-refined face. In " << __FILE__ << " " << __LINE__ << std::endl ;
@@ -1123,23 +950,15 @@ namespace ALUGrid
 
     splitInfo( myrule_t::e01 );
 
-    myhedge_t* subEdge = this->subedge (2, 0);
-    myhedge_t* subEdge2 = this->subedge (3, 0);
-    myhedge_t* orgEdge = this->myhedge( 5 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge, // from face 2 get subedge 0
-                       orgEdge,
-                       subEdge2 // from face 1 get subedge 0
+                       this->subedge (0, 0), // from face 0 get subedge 0
+                       this->subedge (1, 0), // from face 1 get subedge 0
+                       this->myhedge( 5 )
                       ) ;
     alugrid_assert ( newFace );
 
-    facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 2
-    facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 1 ) ); // get sub face 0 and 1 of face 3
 
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1165,17 +984,17 @@ namespace ALUGrid
     */
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          newFace, 0,
-                                          myhface( 1 ),   isRear( 1 ),
-                                          subFace2.first, isRear( 2 ),
-                                          subFace3.first, isRear( 3 ),
+                                          subface(0,0), isRear(0),
+                                          subface(1,0), isRear(1),
+                                          myhface(2), isRear(2),
+                                          newFace, isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          myhface( 0 ),   isRear( 0 ),
-                                          newFace, -1,
-                                          subFace2.second,isRear( 2 ),
-                                          subFace3.second,isRear( 3 ),
+                                          subface(0,1), isRear(0),
+                                          subface(1,0), isRear(1),
+                                          newFace, isRear(2),
+                                          myhface(3), isRear(3),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1210,23 +1029,15 @@ namespace ALUGrid
 
     splitInfo( myrule_t::e12 );
 
-    myhedge_t* subEdge = this->subedge (3, 0);
-    myhedge_t* subEdge2 = this->subedge (0, 0);
-    myhedge_t* orgEdge = this->myhedge( 2 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 1 : 0;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge, // from face 1 get subedge 0
-                       subEdge2, // from face 2 get subedge 0
-                       orgEdge
+                       this->subedge(0,0), // from face 1 get subedge 0
+                       myhedge(3), // from face 2 get subedge 0
+                       this->subedge(3,0)
                       ) ;
     alugrid_assert ( newFace );
 
-    facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
-    facepair_t subFace3 = subFaces( 3, myvertex( 1 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 3
 
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1252,17 +1063,17 @@ namespace ALUGrid
     */
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          subFace0.first, isRear( 0 ),
-                                          newFace, 0,
-                                          myhface( 2 ),  isRear( 2 ),
-                                          subFace3.first, isRear( 3 ),
+                                          subface(0,0), isRear(0),
+                                          myhface(1), isRear(1),
+                                          newFace, isRear(2),
+                                          subface(3,0), isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          subFace0.second, isRear( 0 ),
-                                          myhface( 1 ), isRear( 1 ),
-                                          newFace, -1,
-                                          subFace3.second, isRear( 3 ),
+                                          subface(0,1), isRear(0),
+                                          newFace, isRear(1),
+                                          myhface(2), isRear(2),
+                                          subface(3,0), isRear(3),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1295,23 +1106,15 @@ namespace ALUGrid
 
     splitInfo( myrule_t::e20 );
 
-    myhedge_t* subEdge2 = this->subedge (1, 0);
-    myhedge_t* subEdge = this->subedge (3, 0);
-    myhedge_t* orgEdge = this->myhedge( 4 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       orgEdge,
-                       subEdge2, // from face 2 get subedge 0
-                       subEdge // from face 1 get subedge 0
+                       this->subedge(0,0),
+                       this->subedge(2,0), // from face 2 get subedge 0
+                       myhedge(4) // from face 1 get subedge 0
                       ) ;
     alugrid_assert ( newFace );
 
-    facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 0
-    facepair_t subFace3 = subFaces( 3, myvertex( 0 ), myvertex( 2 ) ); // get sub face 0 and 1 of face 1
 
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1337,17 +1140,17 @@ namespace ALUGrid
     */
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          newFace, 0,
-                                          subFace1.first, isRear( 1 ),
-                                          myhface( 2 ),  isRear( 2 ),
-                                          subFace3.first, isRear( 3 ),
+                                          subface(0,0), isRear(0),
+                                          myhface(1), isRear(1),
+                                          subface(2,0), isRear(2),
+                                          newFace, isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          myhface( 0 ), isRear( 0 ),
-                                          subFace1.second, isRear( 1 ),
-                                          newFace, -2,
-                                          subFace3.second, isRear( 3 ),
+                                          subface(0,1), !(isRear(0)),
+                                          newFace, !(isRear(1)),
+                                          myhface(3), isRear(3),
+                                          subface(2,1), isRear(2),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1380,23 +1183,15 @@ namespace ALUGrid
 
     splitInfo( myrule_t::e23 );
 
-    myhedge_t* subEdge2 = this->subedge (1, 0);
-    myhedge_t* subEdge = this->subedge (0, 0);
-    myhedge_t* orgEdge = this->myhedge( 0 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge2, // from face 2 get subedge 0
-                       subEdge, // from face 1 get subedge 0
-                       orgEdge
+                       myhedge(0), // from face 2 get subedge 0
+                       this->subedge(2,0), // from face 1 get subedge 0
+                       this->subedge(3,0)
                       ) ;
     alugrid_assert ( newFace );
 
-    facepair_t subFace0 = subFaces( 0, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
-    facepair_t subFace1 = subFaces( 1, myvertex( 2 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
 
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
@@ -1422,17 +1217,17 @@ namespace ALUGrid
     */
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          subFace0.first, isRear( 0 ),
-                                          subFace1.first, isRear( 1 ),
-                                          newFace, 0,
-                                          myhface( 3 ),  isRear( 3 ),
+                                          myhface(0), isRear(0),
+                                          newFace, isRear(1),
+                                          subface(2,0), isRear(2),
+                                          subface(3,0), isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          subFace0.second, isRear( 0 ),
-                                          subFace1.second, isRear( 1 ),
-                                          myhface( 2 ),  isRear( 2 ),
-                                          newFace, -1,
+                                          newFace, isRear(0),
+                                          myhface(1), isRear(1),
+                                          subface(2,1), isRear(2),
+                                          subface(3,1), isRear(3),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1483,40 +1278,32 @@ namespace ALUGrid
 
     */
 
-    myhedge_t* subEdge2 = this->subedge (2, 0);
-    myhedge_t* subEdge = this->subedge (1, 0);
-    myhedge_t* orgEdge = this->myhedge( 3 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 0 : 1;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       subEdge2, // from face 2 get subedge 0
-                       subEdge, // from face 1 get subedge 0
-                       orgEdge
+                       myhedge(2), // from face 2 get subedge 0
+                       this->subedge(0,0), // from face 1 get subedge 0
+                       this->subedge(2,0)
                       ) ;
 
     alugrid_assert ( newFace ) ;
 
-    facepair_t subFace1 = subFaces( 1, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
-    facepair_t subFace2 = subFaces( 2, myvertex( 0 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 2
 
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          newFace, 0,
-                                          subFace1.first, isRear (1),
-                                          subFace2.first, isRear (2),
-                                          myhface(3), isRear (3),
+                                          myhface(0), isRear(0),
+                                          subface(1,0), isRear(1),
+                                          subface(2,0), isRear(2),
+                                          newFace, isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          myhface( 0 ), isRear( 0 ),
-                                          subFace1.second, isRear (1),
-                                          subFace2.second, isRear (2),
-                                          newFace, -3,
+                                          newFace, isRear(0),
+                                          myhface(3), isRear(3),
+                                          subface(1,1), !(isRear(1)),
+                                          subface(2,1), !(isRear(2)),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1549,18 +1336,12 @@ namespace ALUGrid
 
     splitInfo( myrule_t::e31 );
 
-    myhedge_t* subEdge2 = this->subedge (2, 0);
-    myhedge_t* subEdge = this->subedge (0, 0);
-    myhedge_t* orgEdge = this->myhedge( 1 ) ;
-
-    const int edgeTwst = (orgEdge->myvertex( 0 ) == subEdge->myvertex( 1 )) ? 1 : 0;
-
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       orgEdge,
-                       subEdge,  // from face 1 get subedge 0
-                       subEdge2  // from face 2 get subedge 0
+                       myhedge(1),
+                       this->subedge(0,0),  // from face 1 get subedge 0
+                       this->subedge(2,0)  // from face 2 get subedge 0
                       ) ;
 
     alugrid_assert ( newFace ) ;
@@ -1587,22 +1368,20 @@ namespace ALUGrid
     // we divide by 2 means we divide the volume by 2
     const double childVolume = calculateChildVolume( 0.5 * _volume );
 
-    facepair_t subFace0 = subFaces( 0, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 0
-    facepair_t subFace2 = subFaces( 2, myvertex( 1 ), myvertex( 3 ) ); // get sub face 0 and 1 of face 1
 
 
     innertetra_t * h0 = new innertetra_t (newLevel,
-                                          subFace0.first, isRear( 0 ),
-                                          newFace, 0,
-                                          subFace2.first, isRear ( 2 ),
-                                          myhface( 3 ), isRear ( 3 ),
+                                          myhface(0), isRear(0),
+                                          subface(1,0), isRear(1),
+                                          newFace, isRear(2),
+                                          subface(3,0), isRear(3),
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          subFace0.second, isRear( 0 ),
-                                          myhface( 1 ), isRear( 1 ),
-                                          subFace2.second, isRear( 2 ),
-                                          newFace, -1,
+                                          newFace, !(isRear(0)),
+                                          myhface(2), isRear(2),
+                                          subface(1,1), isRear(1),
+                                          subface(3,1), !(isRear(3)),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1954,11 +1733,11 @@ namespace ALUGrid
     switch(r)
     {
       case myrule_t::e01 :
-        _faces[ 0 ] = 2 ;
-        _faces[ 1 ] = 3 ;
+        _faces[ 0 ] = 0 ;
+        _faces[ 1 ] = 1 ;
         _vertices[ 0 ] = 0 ;
         _vertices[ 1 ] = 1 ;
-        _faceRules[ 0 ] = face3rule_t::e20;
+        _faceRules[ 0 ] = face3rule_t::e01;
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e01 > ();
         break ;
@@ -1967,22 +1746,22 @@ namespace ALUGrid
         _faces[ 1 ] = 3 ;
         _vertices[ 0 ] = 1 ;
         _vertices[ 1 ] = 2 ;
-        _faceRules[ 0 ] = face3rule_t::e20;
-        _faceRules[ 1 ] = face3rule_t::e12;
+        _faceRules[ 0 ] = face3rule_t::e12;
+        _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e12 > ();
         break ;
       case myrule_t::e20 :
-        _faces[ 0 ] = 1 ;
-        _faces[ 1 ] = 3 ;
-        _vertices[ 0 ] = 2 ;
-        _vertices[ 1 ] = 0 ;
-        _faceRules[ 0 ] = face3rule_t::e01;
-        _faceRules[ 1 ] = face3rule_t::e20;
+        _faces[ 0 ] = 0 ;
+        _faces[ 1 ] = 2 ;
+        _vertices[ 0 ] = 0 ;
+        _vertices[ 1 ] = 2 ;
+        _faceRules[ 0 ] = face3rule_t::e20;
+        _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e20 > ();
         break ;
       case myrule_t::e23 :
-        _faces[ 0 ] = 0 ;
-        _faces[ 1 ] = 1 ;
+        _faces[ 0 ] = 2 ;
+        _faces[ 1 ] = 3 ;
         _vertices[ 0 ] = 2 ;
         _vertices[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e12;
@@ -1992,19 +1771,19 @@ namespace ALUGrid
       case myrule_t::e30 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 2 ;
-        _vertices[ 0 ] = 3 ;
-        _vertices[ 1 ] = 0 ;
+        _vertices[ 0 ] = 0 ;
+        _vertices[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e20;
-        _faceRules[ 1 ] = face3rule_t::e01;
+        _faceRules[ 1 ] = face3rule_t::e20;
         _caller = new CallSplitImpl< myrule_t::e30 > ();
         break ;
       case myrule_t::e31 :
-        _faces[ 0 ] = 0 ;
-        _faces[ 1 ] = 2 ;
-        _vertices[ 0 ] = 3 ;
-        _vertices[ 1 ] = 1 ;
-        _faceRules[ 0 ] = face3rule_t::e01;
-        _faceRules[ 1 ] = face3rule_t::e12;
+        _faces[ 0 ] = 1 ;
+        _faces[ 1 ] = 3 ;
+        _vertices[ 0 ] = 1 ;
+        _vertices[ 1 ] = 3 ;
+        _faceRules[ 0 ] = face3rule_t::e12;
+        _faceRules[ 1 ] = face3rule_t::e20;
         _caller = new CallSplitImpl< myrule_t::e31 > ();
         break ;
       default :
