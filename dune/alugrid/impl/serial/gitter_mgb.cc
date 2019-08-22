@@ -127,7 +127,8 @@ namespace ALUGrid
         face [fce] =  faceFrontPair.first;
         // calculate normal direction
         // in contrast to tets we expect all hexas to have positive det
-        isRear[fce] = !(bool(fce %2));
+        // faces 1,2,5 point outwards and faces 0,3,4 inwards
+        isRear[fce] = (fce == 1 || fce == 2 || fce == 5);
       }
       result.first->second = myBuilder ().insert_hexa (face,isRear);
     }

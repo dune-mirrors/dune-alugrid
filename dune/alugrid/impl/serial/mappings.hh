@@ -85,7 +85,8 @@ namespace ALUGrid {
       {
         TrilinearMapping map(p0,p1,p2,p3,p4,p5,p6,p7);
         alucoord_t p[3];
-        map.map2world(.0, .0, .0, p);
+        //Reference element is [0,1]^3 - use (0.5,0.5,0.5)
+        map.map2world(0.5, 0.5, 0.5, p);
         for(int j=0; j<3; ++j)
         {
           alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
@@ -259,7 +260,8 @@ namespace ALUGrid {
       {
         BilinearSurfaceMapping map(p0,p1,p2,p3);
         coord3_t p;
-        map.map2world(coord2_t(0), p);
+        // reference element is [0,1]^2 with center (0.5,0.5)
+        map.map2world(coord2_t(0.5), p);
         for(int j=0; j<3; ++j)
         {
           alugrid_assert ( fabs(barycenter[j] - p[j]) < 1e-8 );
