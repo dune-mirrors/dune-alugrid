@@ -434,19 +434,19 @@ namespace ALUGrid
       IndexManagerType & indexManager() {
         return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType::IM_Elements ); }
 
-      myhedge_t * subedge (int,int);
-      const myhedge_t * subedge (int,int) const;
+      myhedge_t * subedge (int,int,int);
+      const myhedge_t * subedge (int,int,int) const;
       myhface4_t * subface (int,int);
       const myhface4_t * subface (int,int) const;
 
     public:
       // Constructor for macro elements
-      HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-               myhface4_t *,int,myhface4_t *,int,myhface4_t *,int);
+      HexaTop (int,myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,
+               myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool);
 
       // constructor for refinement
-      HexaTop (int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
-               myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,
+      HexaTop (int,myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,
+               myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,
                innerhexa_t * up, int nChild , double vol );
 
       virtual ~HexaTop ();

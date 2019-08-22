@@ -485,14 +485,14 @@ namespace Dune
       if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
-      if( eltype == simplex )
+/*      if( eltype == simplex )
       {
         if(dimgrid == 3)
           dgf_.setOrientation( 2, 3 );
         else
           dgf_.setRefinement( 0, 1);
       }
-
+*/
       if( parallelFileExists && !globalVertexIndexFound )
         DUNE_THROW( DGFException, "Parallel DGF file requires GLOBALVERTEXINDEX block." );
 

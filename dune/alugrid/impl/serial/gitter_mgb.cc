@@ -70,6 +70,7 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
   InsertUniqueTetra (int (&v)[4], SimplexTypeFlag elementType)
   {
+    std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] << std::endl;
     elementKey_t key (v [0], v [1], v [2], v [3]);
     std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )

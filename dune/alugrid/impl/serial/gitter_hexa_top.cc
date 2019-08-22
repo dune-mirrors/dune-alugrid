@@ -137,19 +137,19 @@ namespace ALUGrid
     alugrid_assert (ev0 && ev1 && ev2 && ev3);
 
     inneredge_t * e0 = new inneredge_t (l, ev0, inVx());
-    inneredge_t * e1 = new inneredge_t (l, ev1, inVx());
+    inneredge_t * e1 = new inneredge_t (l, inVx(), ev1);
     inneredge_t * e2 = new inneredge_t (l, ev2, inVx());
-    inneredge_t * e3 = new inneredge_t (l, ev3, inVx());
+    inneredge_t * e3 = new inneredge_t (l, inVx(), ev3);
 
     alugrid_assert ( e0 && e1 && e2 && e3);
     e0->append(e1);
     e1->append(e2);
     e2->append(e3);
 
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), e0, e3, this->subedge(3,1), 0);
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), this->subedge(1,0), e1, e0, 1);
-    innerface_t * f2 = new innerface_t (l, e1, this->subedge(1,1), this->subedge(2,0), e2, 2);
-    innerface_t * f3 = new innerface_t (l, e3, e2, this->subedge(2,1), this->subedge(3,0), 3);
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), e0, this->subedge(2,0), e2, 0);
+    innerface_t * f1 = new innerface_t (l, e2, this->subedge(1,0), this->subedge(2,1), e1, 1);
+    innerface_t * f2 = new innerface_t (l, this->subedge(0,1), e3, e0, this->subedge(3,0), 2);
+    innerface_t * f3 = new innerface_t (l, e3, this->subedge(1,1), e1, this->subedge(3,1), 3);
 
     alugrid_assert (f0 && f1 && f2 && f3);
     f0->append(f1);
@@ -163,14 +163,14 @@ namespace ALUGrid
     return;
   }
 
-  //splitISO2 splits edges 03 and 12
-  //            1
-  //   1|-------|-------|2
-  //    |       |       |
-  //   0|   0   |   1   |2
-  //    |       |       |
-  //   0|_______|_______|3
+  //splitISO2 splits edges 01 and 23
   //            3
+  //   2|-------|-------|3
+  //    |       |       |
+  //   0|   0   |   1   |1
+  //    |       |       |
+  //   0|_______|_______|1
+  //            2
   // so we just need to add two inner faces - one inner edges - no inner vertices
 
   template< class A >  void Hface4Top < A >::splitISO2 () {
@@ -178,11 +178,11 @@ namespace ALUGrid
     alugrid_assert ( _inner == 0 );
 
 
-    myvertex_t * ev1 = myhedge(1)->subvertex (0);
+    myvertex_t * ev2 = myhedge(2)->subvertex (0);
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
-    alugrid_assert (ev1 && ev3 );
+    alugrid_assert (ev2 && ev3 );
 
-    inneredge_t * e0 = new inneredge_t (l, ev3, ev1);
+    inneredge_t * e0 = new inneredge_t (l, ev2, ev3);
     alugrid_assert ( e0 );
 
     //create new InnerStorage with 0 pointer as down pointer
@@ -190,8 +190,8 @@ namespace ALUGrid
     alugrid_assert(_inner);
 
     // level, edge x 4, nChild
-    innerface_t * f0 = new innerface_t (l, this->myhedge(0), this->subedge(1,0), e0, this->subedge(3,1), 0);
-    innerface_t * f1 = new innerface_t (l, e0, this->subedge(1,1), this->myhedge(2), this->subedge(3,0), 1);
+    innerface_t * f0 = new innerface_t (l, this->myhedge(0), e0, this->subedge(2,0), this->subedge(3,0), 0);
+    innerface_t * f1 = new innerface_t (l, e0, this->myhedge(1), this->subedge(2,1), this->subedge(3,1), 1);
 
     //std::cout << this << f0 << f1 << std::endl ;
 
@@ -387,10 +387,8 @@ namespace ALUGrid
     GhostChildrenInfo ghostInfo;
     // ghostInfo is filled by splitGhost, see gitter_hexa_top_pll.h
     // ghostInfo should do the right thing if invoked with ISO4 of hexaTop
-    // TODO: Check that
     this->splitGhost( ghostInfo );
 
-    //TODO: subface is maybe wrong....
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this, ghostInfo.child(0), ghostInfo.face(0));
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this, ghostInfo.child(1), ghostInfo.face(1));
 
@@ -563,9 +561,9 @@ namespace ALUGrid
 
   // constructor for macro elements
   template< class A > HexaTop < A >
-  :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-              myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4,
-              int t4, myhface4_t * f5, int t5)
+  :: HexaTop (int l, myhface4_t * f0, bool t0, myhface4_t * f1, bool t1,
+              myhface4_t * f2, bool t2, myhface4_t * f3, bool t3, myhface4_t * f4,
+              bool t4, myhface4_t * f5, bool t5)
     : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5 )
     , _bbb (0), _up(0)
     , _inner( 0 )
@@ -600,9 +598,9 @@ namespace ALUGrid
 
   // constructor for refinement
   template< class A > HexaTop < A >
-  :: HexaTop (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-              myhface4_t * f2, int t2, myhface4_t * f3, int t3, myhface4_t * f4,
-              int t4, myhface4_t * f5, int t5, innerhexa_t * up , int nChild , double vol )
+  :: HexaTop (int l, myhface4_t * f0, bool t0, myhface4_t * f1, bool t1,
+              myhface4_t * f2, bool t2, myhface4_t * f3, bool t3, myhface4_t * f4,
+              bool t4, myhface4_t * f5, bool t5, innerhexa_t * up , int nChild , double vol )
     : A (f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5 )
     , _bbb (0), _up(up)
     , _inner( 0 )
@@ -644,7 +642,18 @@ namespace ALUGrid
 
     // make sure that given volume is the same as calulated
 #ifdef ALUGRIDDEBUG
-    const double calculatedVolume = -1.;
+      TrilinearMapping triMap (myvertex(0)->Point(),
+                               myvertex(1)->Point(),
+                               myvertex(2)->Point(),
+                               myvertex(3)->Point(),
+                               myvertex(4)->Point(),
+                               myvertex(5)->Point(),
+                               myvertex(6)->Point(),
+                               myvertex(7)->Point() );
+
+
+      // calculate volume
+      const double calculatedVolume = triMap.volume();
      alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
 #endif
 
@@ -662,13 +671,14 @@ namespace ALUGrid
     return;
   }
 
-  //for regular 2d we use the subedge routine for the faces 0,1
-  template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) {
-    return myhface4(i) -> myhedge(j);
+  //subedge gets three ints - face -> subface -> edge
+  template< class A >  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j, int k) {
+    return myhface4(i) ->subface(j) -> myhedge(k);
   }
 
-  template< class A >  const typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j) const {
-    return myhface4(i) -> myhedge(j);
+  //subedge gets three ints - face -> subface -> edge
+  template< class A > const  typename HexaTop < A >::myhedge_t * HexaTop < A >::subedge (int i, int j, int k) const {
+    return myhface4(i) ->subface(j) -> myhedge(k);
   }
 
   // subface routine for regular 2d
@@ -682,7 +692,7 @@ namespace ALUGrid
               (abort (), (myhface4_t *)0);
   }
 
-  //check subface routine  for regular 2d
+  //subface routine  for regular 2d
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
     typedef typename myhface4_t::myrule_t  facerule_t ;
     const myhface4_t * face = myhface4(i);
@@ -720,11 +730,11 @@ namespace ALUGrid
     alugrid_assert (fv0 && fv1 && fv2 && fv3 && fv4 && fv5);
 
     inneredge_t * e0 = new inneredge_t (l, fv0, inVx());
-    inneredge_t * e1 = new inneredge_t (l, fv1, inVx());
+    inneredge_t * e1 = new inneredge_t (l, inVx(), fv1);
     inneredge_t * e2 = new inneredge_t (l, fv2, inVx());
-    inneredge_t * e3 = new inneredge_t (l, fv3, inVx());
+    inneredge_t * e3 = new inneredge_t (l, inVx(), fv3);
     inneredge_t * e4 = new inneredge_t (l, fv4, inVx());
-    inneredge_t * e5 = new inneredge_t (l, fv5, inVx());
+    inneredge_t * e5 = new inneredge_t (l, inVx(), fv5);
 
     alugrid_assert (e0 && e1 && e2 && e3 && e4 && e5);
     e0->append(e1);
@@ -733,18 +743,19 @@ namespace ALUGrid
     e3->append(e4);
     e4->append(e5);
 
-    innerface_t * f0 = new innerface_t (l, this->subedge (2, 7), e2, e5, this->subedge (5, 4));
-    innerface_t * f1 = new innerface_t (l, this->subedge(2, 5), this->subedge (3, 7), e3, e2);
-    innerface_t * f2 = new innerface_t (l, e3, this->subedge (3, 5), this->subedge (4, 7), e4 );
-    innerface_t * f3 = new innerface_t (l, e5, e4, this->subedge (4, 5), this->subedge (5, 6) );
-    innerface_t * f4 = new innerface_t (l, this->subedge (0, 7), e0, e2, this->subedge (2, 4) );
-    innerface_t * f5 = new innerface_t (l, this->subedge (0, 5), this->subedge (4, 4), e4, e0 );
-    innerface_t * f6 = new innerface_t (l, e4, this->subedge (4, 6), this->subedge (1, 6), e1 );
-    innerface_t * f7 = new innerface_t (l, e2, e1, this->subedge (1, 4), this->subedge (2, 6) );
-    innerface_t * f8 = new innerface_t (l, this->subedge (0, 4), e0, e5, this->subedge (5, 7) );
-    innerface_t * f9 = new innerface_t (l, this->subedge (0, 6), this->subedge (3, 4), e3, e0 );
-    innerface_t * f10 = new innerface_t (l, e3, this->subedge (3, 6), this->subedge (1, 5), e1 );
-    innerface_t * f11 = new innerface_t (l, e5, e1, this->subedge (1, 7), this->subedge (5, 5) );
+    //inner faces are numbered by the macro edge they originate from
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0,3), e2, this->subedge(2,0,3), e0);
+    innerface_t * f1 = new innerface_t (l, e2, this->subedge(1,0,3), this->subedge(2,1,3), e1);
+    innerface_t * f2 = new innerface_t (l, this->subedge(0,1,3), e3, e0, this->subedge(3,0,3));
+    innerface_t * f3 = new innerface_t (l, e3, this->subedge(1,1,3), e1, this->subedge(3,1,3));
+    innerface_t * f4 = new innerface_t (l, this->subedge(0,0,1), e4, this->subedge(4,0,3), e0);
+    innerface_t * f5 = new innerface_t (l, e4, this->subedge(1,0,1), this->subedge(4,1,3), e1);
+    innerface_t * f6 = new innerface_t (l, this->subedge(2,0,1), e4, this->subedge(4,0,1), e2);
+    innerface_t * f7 = new innerface_t (l, e4, this->subedge(3,0,1), this->subedge(4,2,1), e3);
+    innerface_t * f8 = new innerface_t (l, this->subedge(0,2,1), e5, e0, this->subedge(5,0,3));
+    innerface_t * f9 = new innerface_t (l, e5, this->subedge(1,2,1), e1, this->subedge(5,1,3));
+    innerface_t * f10 = new innerface_t (l,this->subedge(2,2,1), e5, e2, this->subedge(5,0,1));
+    innerface_t * f11 = new innerface_t (l,e5, this->subedge(3,2,1), e3, this->subedge(5,2,1));
 
     alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7 && f8 && f9 && f10 && f11);
     f0->append(f1);
@@ -778,14 +789,15 @@ namespace ALUGrid
       }
     }
 
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isRear (0), f0, 0, subface (2, 0), isRear (2), f4, 0, f8, -4, subface (5, 0), isRear (5) , this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isRear (0), f1, 0, subface (2, 1), isRear (2), subface (3, 0), isRear (3), f9, -4, f4, -1, this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isRear (0), f2, 0,f9, 0, subface (3, 1), isRear (3), subface (4, 0), isRear (4), f5, -1        , this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isRear (0), f3, 0, f8, 0, f5, 0, subface(4, 1), isRear (4), subface(5, 3), isRear (5)    , this, 3, childVolume);
-    innerhexa_t * h4 = new innerhexa_t (l, f0, -1, subface(1, 0), isRear (1), subface(2, 3), isRear (2), f7, 0, f11, -4, subface(5, 1), isRear (5)  , this, 4, childVolume);
-    innerhexa_t * h5 = new innerhexa_t (l, f1, -1, subface(1, 1), isRear (1), subface(2, 2), isRear (2), subface(3, 3), isRear (3), f10, -4, f7, -1 , this, 5, childVolume);
-    innerhexa_t * h6 = new innerhexa_t (l, f2, -1, subface(1, 2), isRear (1), f10, 0, subface(3, 2), isRear (3), subface(4, 3), isRear (4), f6, -1  , this, 6, childVolume);
-    innerhexa_t * h7 = new innerhexa_t (l, f3, -1, subface(1, 3), isRear (1), f11, 0, f6, 0, subface(4, 2), isRear (4), subface(5, 2), isRear (5)   , this, 7, childVolume);
+    //hexas are numbered by vertex they are attached to
+    innerhexa_t * h0 = new innerhexa_t (l, subface(0,0), isRear(0), f6, !(isRear(0)), subface(2,0), isRear(2), f4, !(isRear(2)), subface(4,0), isRear(4), f0, !(isRear(4)), this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, f6, !(isRear(1)), subface(1,0), isRear(1), subface(2,1), isRear(2), f5, !(isRear(2)), subface(4,1), isRear(4), f1, !(isRear(4)), this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface(0,1), isRear(0), f7, !(isRear(0)), f4, !(isRear(3)), subface(3,0), isRear(3), subface(4,2), isRear(4), f2, !(isRear(4)), this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, f7, !(isRear(1)), subface(1,1), isRear(1), f5, !(isRear(3)), subface(3,1), isRear(3), subface(4,3), isRear(4), f3, !(isRear(4)), this, 3, childVolume);
+    innerhexa_t * h4 = new innerhexa_t (l, subface(0,3), isRear(0), f10, !(isRear(0)), subface(2,2), isRear(2), f8, !(isRear(2)), f0, !(isRear(5)), subface(5,0), isRear(5), this, 4, childVolume);
+    innerhexa_t * h5 = new innerhexa_t (l, f10, !(isRear(1)), subface(1,2), isRear(1), subface(2,3), isRear(2), f9, !(isRear(2)), f1, !(isRear(5)), subface(5,1), isRear(5), this, 5, childVolume);
+    innerhexa_t * h6 = new innerhexa_t (l, subface(0,3), isRear(0), f11, !(isRear(0)), f8, !(isRear(3)), subface(3,2), isRear(3), f2, !(isRear(5)), subface(5,2), isRear(5), this, 6, childVolume);
+    innerhexa_t * h7 = new innerhexa_t (l, f11, !(isRear(1)), subface(1,3), isRear(1), f9, !(isRear(3)), subface(3,3), isRear(3), f3, !(isRear(5)), subface(5,3), isRear(5), this, 7, childVolume);
 
     alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7);
     h0->append(h1);
@@ -796,7 +808,14 @@ namespace ALUGrid
     h5->append(h6);
     h6->append(h7);
 
-
+    alugrid_assert( checkHexa( h0, 0 ) );
+    alugrid_assert( checkHexa( h1, 1 ) );
+    alugrid_assert( checkHexa( h2, 2 ) );
+    alugrid_assert( checkHexa( h3, 3 ) );
+    alugrid_assert( checkHexa( h4, 4 ) );
+    alugrid_assert( checkHexa( h5, 5 ) );
+    alugrid_assert( checkHexa( h6, 6 ) );
+    alugrid_assert( checkHexa( h7, 7 ) );
     // inner edge
     _inner->store( e0 );
     // inne face
@@ -816,11 +835,11 @@ namespace ALUGrid
     alugrid_assert (_inner == 0 );
 
     //the only subvertices we need are from the top and bottom face
-    myvertex_t * fv4 = myhface4 (0)->subvertex (0);
-    myvertex_t * fv5 = myhface4 (1)->subvertex (0);
+    myvertex_t * fv4 = myhface4 (4)->subvertex (0);
+    myvertex_t * fv5 = myhface4 (5)->subvertex (0);
     alugrid_assert ( fv4 && fv5);
 
-    inneredge_t * e0 = new inneredge_t (l, fv5, fv4);
+    inneredge_t * e0 = new inneredge_t (l, fv4, fv5);
 
     alugrid_assert ( e0 );
 
@@ -830,15 +849,14 @@ namespace ALUGrid
 
     // we just need four inner Faces
     // always the inner edge + the subedge of top and bottom  + one subedge of a side face
-    // the top face is rotated in the other direction as the bottom face, so we need the subedges in the descending order.
-    // inner face 0 at face 2
-    innerface_t * f0 = new innerface_t (l, this->myhface4(2)->subedge(0), this->subedge(1,4), e0, this->subedge(0,7));
-    // inner face 1 at face 3
-    innerface_t * f1 = new innerface_t (l, this->myhface4(3)->subedge(0), this->subedge(1,5), e0, this->subedge(0,6));
-    //inner face 2 at face 4
-    innerface_t * f2 = new innerface_t (l, this->myhface4(4)->subedge(0), this->subedge(1,6), e0, this->subedge(0,5));
-    // inner face 3 at face 5
-    innerface_t * f3 = new innerface_t (l, this->myhface4(5)->subedge(0), this->subedge(1,7), e0, this->subedge(0,4));
+    // inner face 0 at face 0
+    innerface_t * f0 = new innerface_t (l, this->myhface4(0)->subedge(0), e0, this->subedge(4,0,3), this->subedge(5,0,3));
+    // inner face 1 at face 1
+    innerface_t * f1 = new innerface_t (l, e0, this->myhface4(1)->subedge(0), this->subedge(4,1,3), this->subedge(5,1,3));
+    //inner face 2 at face 2
+    innerface_t * f2 = new innerface_t (l, this->myhface4(2)->subedge(0), e0, this->subedge(4,0,1), this->subedge(5,2,1));
+    // inner face 3 at face 3
+    innerface_t * f3 = new innerface_t (l, e0, this->myhface4(3)->subedge(0), this->subedge(4,2,1), this->subedge(5,2,1));
 
     alugrid_assert (f0 && f1 && f2 && f3 );
     f0->append(f1);
@@ -867,10 +885,10 @@ namespace ALUGrid
 
     //4 inner hexas
 
-    innerhexa_t * h0 = new innerhexa_t (l, subface (0, 0), isRear(0), subface(1,0), isRear(1), subface (2, 1), isRear(2), f0, -1, f3, 3,  subface (5, 0), isRear(5),  this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, subface (0, 3), isRear(0), subface(1,1), isRear(1), subface (2, 0), isRear(2), subface (3, 1), isRear(3),  f1, -1, f0, 0, this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface (0, 2), isRear (0), subface(1,2), isRear(1), f1, 3, subface (3, 0), isRear (3), subface (4, 1), isRear (4), f2, -2 , this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, subface (0, 1), isRear (0), subface(1,3), isRear(1), f3, -1, f2, 3, subface (4, 0), isRear(4), subface(5,1), isRear(5),   this, 3, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface(0,0), isRear(0), f2, !(isRear(0)), subface(2,0), isRear(2), f0, !(isRear(2)), subface(4,0), isRear(4), subface(5,0), isRear(5), this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, f2, !(isRear(1)), subface(1,0), isRear(1), subface(2,1), isRear(2), f1, !(isRear(2)), subface(4,1), isRear(4), subface(5,1), isRear(5), this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface(0,1), isRear(0), f3, !(isRear(0)), f0, !(isRear(3)), subface(3,0), isRear(3), subface(4,2), isRear(4), subface(5,2), isRear(5), this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, f3, !(isRear(1)), subface(1,1), isRear(1), f1, !(isRear(3)), subface(3,1), isRear(3), subface(4,3), isRear(4), subface(5,3), isRear(5), this, 3, childVolume);
 
     alugrid_assert (h0 && h1 && h2 && h3 );
 
@@ -1168,11 +1186,6 @@ namespace ALUGrid
     const bool isGhost = hexa->isGhost();
     for(int fce=0; fce<6; ++fce )
     {
-      for(int i=0; i<4; ++i )
-      {
-        verticesFound.insert( hexa->myvertex( fce, i )->getIndex() );
-      }
-
       for(int i=0; i<4; ++i )
       {
         verticesFound.insert( hexa->myvertex( fce, i )->getIndex() );

@@ -525,6 +525,11 @@ namespace Dune
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
+    if(ALUGrid::dimension == 2 && elementType == tetra)
+    {
+      // fake vertex that every tetra is connected to
+      vertices_.push_back( std::make_pair( VertexType{0.0,0.0,1.0}, 0 ) );
+    }
   }
 
   template< class ALUGrid >
@@ -545,6 +550,11 @@ namespace Dune
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
+    if(ALUGrid::dimension == 2 && elementType == tetra)
+    {
+      // fake vertex that every tetra is connected to
+      vertices_.push_back( std::make_pair( VertexType{0.0,0.0,1.0}, 0 ) );
+    }
   }
 
   template< class ALUGrid >
@@ -565,6 +575,11 @@ namespace Dune
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
+    if(ALUGrid::dimension == 2 && elementType == tetra)
+    {
+      // fake vertex that every tetra is connected to
+      vertices_.push_back( std::make_pair( VertexType{0.0,0.0,1.0}, 0 ) );
+    }
   }
 
   template< class ALUGrid >
