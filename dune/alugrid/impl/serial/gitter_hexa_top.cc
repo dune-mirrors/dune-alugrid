@@ -219,7 +219,7 @@ namespace ALUGrid
            // refine such that global indices of new vertices are sequential
           myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2));
           myhedge (3)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2));
-          //  Assert that global index of new vertices are sequential -
+          //  Assert that global index of new vertices are sequential - is done in splitiso2
           splitISO2 ();
           break;
         }
@@ -833,7 +833,7 @@ namespace ALUGrid
     myvertex_t * fv4 = myhface4 (4)->subvertex (0);
     myvertex_t * fv5 = myhface4 (5)->subvertex (0);
     alugrid_assert ( fv4 && fv5);
-
+    alugrid_assert ( (fv4)->is2d() && !(fv5->is2d()));
     inneredge_t * e0 = new inneredge_t (l, fv4, fv5);
 
     alugrid_assert ( e0 );
@@ -849,9 +849,10 @@ namespace ALUGrid
     // inner face 1 at face 1
     innerface_t * f1 = new innerface_t (l, e0, this->myhface4(1)->subedge(0), this->subedge(4,1,3), this->subedge(5,1,3));
     //inner face 2 at face 2
-    innerface_t * f2 = new innerface_t (l, this->myhface4(2)->subedge(0), e0, this->subedge(4,0,1), this->subedge(5,2,1));
+    innerface_t * f2 = new innerface_t (l, this->myhface4(2)->subedge(0), e0, this->subedge(4,0,1), this->subedge(5,0,1));
     // inner face 3 at face 3
     innerface_t * f3 = new innerface_t (l, e0, this->myhface4(3)->subedge(0), this->subedge(4,2,1), this->subedge(5,2,1));
+
 
     alugrid_assert (f0 && f1 && f2 && f3 );
     f0->append(f1);
@@ -888,10 +889,10 @@ namespace ALUGrid
     alugrid_assert (h0 && h1 && h2 && h3 );
 
     //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
-    //alugrid_assert( checkHexa( h0, 0 ) );
-    //alugrid_assert( checkHexa( h1, 1 ) );
-    //alugrid_assert( checkHexa( h2, 2 ) );
-    //alugrid_assert( checkHexa( h3, 3 ) );
+    alugrid_assert( checkHexa( h0, 0 ) );
+    alugrid_assert( checkHexa( h1, 1 ) );
+    alugrid_assert( checkHexa( h2, 2 ) );
+    alugrid_assert( checkHexa( h3, 3 ) );
 
     h0->append(h1);
     h1->append(h2);
