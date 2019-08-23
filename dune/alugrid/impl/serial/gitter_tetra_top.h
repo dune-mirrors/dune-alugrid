@@ -90,7 +90,7 @@ namespace ALUGrid
       inline const myhedge_t * subedge (int,int) const;
       void split_e01 ();
       void split_e12 ();
-      void split_e20 ();
+      void split_e02 ();
       void split_iso4 ();
 
     public :
@@ -256,14 +256,14 @@ namespace ALUGrid
               tetra->split_e01();
             else if ( rule == myrule_t :: e12 )
               tetra->split_e12();
-            else if ( rule == myrule_t :: e20 )
-              tetra->split_e20();
+            else if ( rule == myrule_t :: e02 )
+              tetra->split_e02();
             else if ( rule == myrule_t :: e23 )
               tetra->split_e23();
-            else if ( rule == myrule_t :: e30 )
-              tetra->split_e30();
-            else if ( rule == myrule_t :: e31 )
-              tetra->split_e31();
+            else if ( rule == myrule_t :: e03 )
+              tetra->split_e03();
+            else if ( rule == myrule_t :: e13 )
+              tetra->split_e13();
             else
             {
               std::cerr << "ERROR (FATAL): Wrong refinement rule." << std::endl;
@@ -289,18 +289,18 @@ namespace ALUGrid
         {
           alugrid_assert ( rule == myrule_t :: e01 ||
                   rule == myrule_t :: e12 ||
-                  rule == myrule_t :: e20 ||
+                  rule == myrule_t :: e02 ||
                   rule == myrule_t :: e23 ||
-                  rule == myrule_t :: e30 ||
-                  rule == myrule_t :: e31  );
+                  rule == myrule_t :: e03 ||
+                  rule == myrule_t :: e13  );
 
           static const BisectionInfo bisectionInfo[ 6 ] = {
               BisectionInfo( myrule_t :: e01 ),
+              BisectionInfo( myrule_t :: e02 ),
+              BisectionInfo( myrule_t :: e03 ),
               BisectionInfo( myrule_t :: e12 ),
-              BisectionInfo( myrule_t :: e20 ),
-              BisectionInfo( myrule_t :: e23 ),
-              BisectionInfo( myrule_t :: e30 ),
-              BisectionInfo( myrule_t :: e31 ) };
+              BisectionInfo( myrule_t :: e13 ),
+              BisectionInfo( myrule_t :: e23 ) };
           return bisectionInfo[ int(rule) - 2 ];
         }
 
@@ -314,7 +314,7 @@ namespace ALUGrid
 
             const face3rule_t faceRule = info._faceRules[i];
 
-            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
+       //     std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
             if (! face->refine( faceRule, tetra->isRear( info._faces[ i ] ) ) ) return false;
@@ -331,7 +331,7 @@ namespace ALUGrid
             myhface_t* face = tetra->myhface( info._faces[ i ] );
 
             const face3rule_t faceRule = info._faceRules[i];
-            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
+         //   std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
             face->refineImmediate ( faceRule );
           }
 
@@ -444,8 +444,8 @@ namespace ALUGrid
       // under the assumption that on level 0 all elements have type 0
       unsigned char elementType () const { return ((this->macroSimplexTypeFlag() + _lvl) % 3); }
 
-      // sets the new _vxMap for this tetra
-      void setNewMapping( innertetra_t*, innertetra_t*, innerface_t*, const int, const int );
+      // sets the new edges for this tetra
+      void setNewMapping( innertetra_t*, innertetra_t*, innerface_t* );
 
     protected:
       void setIndexAndFlag();
@@ -457,31 +457,29 @@ namespace ALUGrid
 
       const unsigned char _lvl;  // 1 byte
       signed char _nChild;       // 1 byte
-      unsigned char _vxMap[ 4 ]; // 4 byte
       myrule_t _req, _rule;      // 2 byte   = 8 byte
-
-      // true if bisection after Stevenson is used, otherwise ALBERTA refinement
-      enum { stevensonRefinement_ = false };
 
     private :
       bool checkRule( const myrule_t rule ) const
       {
-        // this does not work, when children are fliped, see setNewMapping
+        // note that children are flipped
+        // only edges opposite of the recent vertex introduced are possible
+        // the edge of the newface that is in the father is not possible
         static const myrule_t possibleRules0[ 6 ][ 2 ] = {
-            { myrule_t :: e20, myrule_t :: e30 }, // possible rules for e01 in child 0
-            { myrule_t :: e01, myrule_t :: e31 }, // possible rules for e12 in child 0
-            { myrule_t :: e30, myrule_t :: e01 }, // possible rules for e20 in child 0
-            { myrule_t :: e30, myrule_t :: e31 }, // possible rules for e23 in child 0
-            { myrule_t :: e20, myrule_t :: e01 }, // possible rules for e30 in child 0
-            { myrule_t :: e01, myrule_t :: e12 }  // possible rules for e31 in child 0
+            { myrule_t :: e02, myrule_t :: e03 }, // possible rules for e01 in child 0
+            { myrule_t :: e01, myrule_t :: e13 }, // possible rules for e12 in child 0
+            { myrule_t :: e03, myrule_t :: e01 }, // possible rules for e02 in child 0
+            { myrule_t :: e02, myrule_t :: e12 }, // possible rules for e23 in child 0
+            { myrule_t :: e02, myrule_t :: e01 }, // possible rules for e03 in child 0
+            { myrule_t :: e01, myrule_t :: e12 }  // possible rules for e13 in child 0
           };
         static const myrule_t possibleRules1[ 6 ][ 2 ] = {
-            { myrule_t :: e31, myrule_t :: e12 }, // possible rules for e01 in child 1
-            { myrule_t :: e23, myrule_t :: e20 }, // possible rules for e12 in child 1
-            { myrule_t :: e12, myrule_t :: e23 }, // possible rules for e12 in child 1
-            { myrule_t :: e12, myrule_t :: e20 }, // possible rules for e23 in child 1
-            { myrule_t :: e31, myrule_t :: e23 }, // possible rules for e30 in child 1
-            { myrule_t :: e23, myrule_t :: e30 }  // possible rules for e31 in child 0
+            { myrule_t :: e13, myrule_t :: e12 }, // possible rules for e01 in child 1
+            { myrule_t :: e23, myrule_t :: e02 }, // possible rules for e12 in child 1
+            { myrule_t :: e02, myrule_t :: e23 }, // possible rules for e12 in child 1
+            { myrule_t :: e13, myrule_t :: e03 }, // possible rules for e23 in child 1
+            { myrule_t :: e13, myrule_t :: e03 }, // possible rules for e03 in child 1
+            { myrule_t :: e13, myrule_t :: e03 }  // possible rules for e13 in child 0
           };
 
         if( _up )
@@ -503,42 +501,98 @@ namespace ALUGrid
 
       void splitInfo( const myrule_t rule ) const
       {
-  #if 0
-        cout << endl << "Split tetra " << this<< endl;
-        cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
+        std::cout << std::endl << "Split tetra " << this<< std::endl;
+        std::cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
         if( _up )
-          cout << "father (" << _up->getIndex() << ", ch" << int( _up->_nChild) << ") rule = " << _up->_rule << endl;
-        cout << endl;
+          std::cout << "father (" << _up->getIndex() << ", ch" << int( _up->_nChild) << ") rule = " << _up->_rule << std::endl;
+        std::cout << std::endl;
         const bool chRule = checkRule( rule );
         if( ! chRule )
         {
-          cout << "Map = ( ";
-          for(int i=0; i<4; ++i )
-            cout << int(_vxMap[ i ]) << " ";
-          cout << " ) " << endl;
+          std::cout << "Map = ( ";
+          std::cout << " ) " << std::endl;
 
-          cout << rule << " not valid " << endl;
+          std::cout << rule << " not valid " << std::endl;
           //alugrid_assert ( false );
         }
-  #endif
       }
 
-      myrule_t suggestRule ()  const
+      myrule_t suggestRule ( bool longest = false )  const
       {
-        // Stevenson refinement: edge 0--3
-        // ALBERTA refinement:   edge 0--1
-        // 2d refinement: edge 1--2
-        int  vxFirst = this->is2d() ? 1 : 0 ;
-        int  vxSecond = stevensonRefinement_ ? 3 : (this->is2d() ? 2 : 1) ;
-        static const myrule_t rules [ 4 ][ 4 ] = {
-          { myrule_t :: crs , myrule_t :: e01, myrule_t :: e20, myrule_t :: e30 },
-          { myrule_t :: e01 , myrule_t :: crs, myrule_t :: e12, myrule_t :: e31 },
-          { myrule_t :: e20 , myrule_t :: e12, myrule_t :: crs, myrule_t :: e23 },
-          { myrule_t :: e30 , myrule_t :: e31, myrule_t :: e23, myrule_t :: crs }
-        };
-        alugrid_assert ( int(_vxMap[ vxFirst ]) != int(_vxMap[ vxSecond ]) );
-        return rules[ int(_vxMap[ vxFirst ]) ][ int(_vxMap[ vxSecond ]) ];
+        // implementation of longest edge refinement
+        if(longest)
+        {
+          double max =0;
+          myrule_t rule = myrule_t :: e01;
+          int i = this->is2d() ? 1 : 0;
+          int rulenumber = this->is2d() ? 5 : 2 ;
+
+          for(; i<4; ++i)
+          {
+            double sum = 0;
+            const alucoord_t (&p0)[ 3 ] = myvertex(0)->Point();
+            for(int j=i+1; j < 4; ++j)
+            {
+              rulenumber++;
+              const alucoord_t (&p1)[ 3 ] = myvertex(1)->Point();
+
+              for(int k=0; k<3; ++k)
+              {
+                double diff = p0[k] - p1[k];
+                sum += (diff * diff );
+              }
+              sum = std::sqrt( sum );
+              if (sum > max)
+              {
+                max = sum;
+                rule = static_cast<myrule_t>(rulenumber);
+              }
+            }
+          }
+          return rule;
+        }
+        //implementation of bisection refinement
+        else
+        {
+          //specialization for the 2d case
+          if( this->is2d() )
+          {
+            if( _up )
+            {
+              switch( _up->getrule() ){
+                case (myrule_t :: e12):
+                  if(this->nChild() == 0)
+                    return myrule_t :: e13;
+                  if(this->nChild() == 1)
+                    return myrule_t :: e23;
+                  break;
+                case (myrule_t :: e13):
+                  if(this->nChild() == 0)
+                    return myrule_t :: e12;
+                  if(this->nChild() == 1)
+                    return myrule_t :: e13;
+                  break;
+                case (myrule_t :: e23):
+                  if(this->nChild() == 0)
+                    return myrule_t :: e12;
+                  if(this->nChild() == 1)
+                    return myrule_t :: e13;
+                  break;
+                default:
+                  alugrid_assert(this->nChild() == 0 || this->nChild() == 1);
+                  std::cerr << __FILE__ << __LINE__ << "Refinement Edge must not contain Vertex 0" << std::endl;
+                  alugrid_assert(false);
+
+              }
+            }
+            else
+            {
+              return suggestRule(true);
+            }
+          }
+        }
       }
+
 
       inline IndexManagerType & indexManager() {
         return this->myvertex(0)->indexManagerStorage().get( IndexManagerStorageType :: IM_Elements ); }
@@ -547,10 +601,10 @@ namespace ALUGrid
 
       void split_e01 ();
       void split_e12 ();
-      void split_e20 ();
+      void split_e02 ();
       void split_e23 ();
-      void split_e30 ();
-      void split_e31 ();
+      void split_e03 ();
+      void split_e13 ();
 
       void splitISO8 ();
       void splitIso4_2d();
@@ -586,7 +640,7 @@ namespace ALUGrid
       inline int nChild () const;
       inline double volume () const;
 
-      SimplexTypeFlag simplexTypeFlag () const { return SimplexTypeFlag( int((_vxMap[ 2 ] == 3 ) ? 0 : 1), this->macroSimplexTypeFlag()); }
+      SimplexTypeFlag simplexTypeFlag () const { return SimplexTypeFlag(0, this->macroSimplexTypeFlag()); }
     public :
       myrule_t getrule () const;
       myrule_t requestrule () const;
@@ -661,7 +715,7 @@ namespace ALUGrid
     private :
       void split_e01 ();
       void split_e12 ();
-      void split_e20 ();
+      void split_e02 ();
       void split_iso4 ();
     protected :
       myhedge_t * subedge (int,int);

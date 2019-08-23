@@ -60,6 +60,7 @@ namespace ALUGrid
         0            0               1
       */
 
+    alugrid_assert ( !(this->is2d()) );
     alugrid_assert ( _inner == 0 );
     const int newLevel = 1 + level () ;
     myhedge_t* splitEdge = myhedge(0);
@@ -161,7 +162,7 @@ namespace ALUGrid
     return ;
   }
 
-  template< class A >  void Hface3Top < A >::split_e20 ()
+  template< class A >  void Hface3Top < A >::split_e02 ()
   {
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
@@ -188,6 +189,7 @@ namespace ALUGrid
         0              0                 1
       */
 
+    alugrid_assert( !(this->is2d()) );
     alugrid_assert ( _inner == 0 );
     const int newLevel= 1 + level () ;
 
@@ -216,14 +218,14 @@ namespace ALUGrid
 
     alugrid_assert (f0 && f1 ) ;
 
-    //std::cout << "split_e20 " << ev0 << std::endl;
+    //std::cout << "split_e02 " << ev0 << std::endl;
     //std::cout << "Split face " << this << " into " << std::endl;
     //std::cout << "New subface 0" << f0 << std::endl;
     //std::cout << "New subface 1" << f1 << std::endl;
 
     f0->append(f1) ;
     _inner = new inner_t( f0 , e0 );
-    _rule = myrule_t::e20 ;
+    _rule = myrule_t::e02 ;
 
     return ;
   }
@@ -275,9 +277,9 @@ namespace ALUGrid
           myhedge (2)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
           split_e12 () ;
           break ;
-        case myrule_t::e20 :
+        case myrule_t::e02 :
           myhedge (1)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
-          split_e20 () ;
+          split_e02 () ;
           break ;
         case myrule_t::iso4 :
           //iso4 on a 2d face is just e12 bisection + setting the rule to iso4
@@ -321,7 +323,7 @@ namespace ALUGrid
       {
         case myrule_t::e01 :
         case myrule_t::e12 :
-        case myrule_t::e20 :
+        case myrule_t::e02 :
         case myrule_t::iso4 :
         {
           typedef typename A::face3Neighbour::neighbour_t neighbour_t ;
@@ -494,8 +496,17 @@ namespace ALUGrid
 
     //int gFace = this->getGhost().second ;
 
+    // In the case of facerule == e02 the second child flips
+    // rear and front are exchanged
+    bool secondFace = isRear(0);
+    if( this->myhface3(0)->getrule() == myhface_t::myrule_t::e02)
+    {
+      secondFace = !secondFace;
+    }
+
+
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
-    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
+    innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), secondFace, this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
     //innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this , _bt, 0, gFace ) ;
     //innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this , _bt, 0, gFace ) ;
 
@@ -666,7 +677,7 @@ namespace ALUGrid
         switch (r) {
         case balrule_t::e01 :
         case balrule_t::e12 :
-        case balrule_t::e20 :
+        case balrule_t::e02 :
           //std::cout << "refLikeEl: e01 " << std::endl;
           // if (!myhface (0)->refine (balrule_t (balrule_t::e01), isRear(0))) return false ;
           if (! face.refine (r, isRear (0))) return false ;
@@ -711,7 +722,7 @@ namespace ALUGrid
       switch (r) {
         case myrule_t::e01 :
         case myrule_t::e12 :
-        case myrule_t::e20 :
+        case myrule_t::e02 :
           split_bisection();
           break ;
         case myrule_t::iso4 :
@@ -752,8 +763,6 @@ namespace ALUGrid
     , _nChild(nChild)
     , _rule (myrule_t::nosplit)
   {
-    // vxMap is set by the setNewMapping routine
-    _vxMap[ 0 ] = _vxMap[ 1 ] = _vxMap[ 2 ] = _vxMap[ 3 ] = -1;
 
     // set level
     alugrid_assert ( this->level() == l );
@@ -802,15 +811,6 @@ namespace ALUGrid
       this->setSimplexTypeFlagOne() ;
     if( simplexType.type() % 2 )
       this->setSimplexTypeFlagZero() ;
-
-    // initial mapping is has to be adjusted according
-    // to the make-6 algorithm
-    // NOTE: the _vxMap numbers only affect the bisection refinement
-    const int mod = 1 - simplexType.orientation() ;
-    _vxMap[ 0 ] = 0;
-    _vxMap[ 1 ] = 1;
-    _vxMap[ 2 ] = 2 + mod ;
-    _vxMap[ 3 ] = 3 - mod ;
   }
 
   template< class A > TetraTop < A >::~TetraTop ()
@@ -876,7 +876,7 @@ namespace ALUGrid
     {
     case myhface_t::myrule_t::e01 :
     case myhface_t::myrule_t::e12 :
-    case myhface_t::myrule_t::e20 :
+    case myhface_t::myrule_t::e02 :
       alugrid_assert ( edge == 0 );  // for bisection we only get one subEdge of a face
       return myhface ( face )->subedge ( edge ) ;
     case myhface_t::myrule_t::iso4 :
@@ -911,7 +911,7 @@ namespace ALUGrid
     {
     case myhface_t::myrule_t::e01 :
     case myhface_t::myrule_t::e12 :
-    case myhface_t::myrule_t::e20 :
+    case myhface_t::myrule_t::e02 :
       alugrid_assert ( j < 2 );
       return myhface(i)->subface(j) ;
     case myhface_t::myrule_t::iso4 :
@@ -989,7 +989,7 @@ namespace ALUGrid
 
     innertetra_t * h1 = new innertetra_t (newLevel,
                                           subface(0,1), isRear(0),
-                                          subface(1,0), isRear(1),
+                                          subface(1,1), isRear(1),
                                           newFace, isRear(2),
                                           myhface(3), isRear(3),
                                           this, 1, childVolume) ;
@@ -1007,11 +1007,11 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e30 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 0 is new in child 1
     alugrid_assert ( h0->myvertex( 1 ) == h1->myvertex( 0 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 1, 0);
+    setNewMapping( h0, h1, newFace );
 
     // store refinement rule that was used to split this tetra
     _rule = myrule_t::e01;
@@ -1070,7 +1070,7 @@ namespace ALUGrid
                                           subface(0,1), isRear(0),
                                           newFace, isRear(1),
                                           myhface(2), isRear(2),
-                                          subface(3,0), isRear(3),
+                                          subface(3,1), isRear(3),
                                           this, 1, childVolume) ;
 
     alugrid_assert (h0 && h1) ;
@@ -1086,22 +1086,22 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e30 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 0 is new in child 1
     alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 1 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 1, 2 );
+    setNewMapping( h0, h1, newFace );
 
     // set refinement rule that was used to refine this tetra
     _rule = myrule_t::e12 ;
   }
 
-  template< class A >  void TetraTop < A >::split_e20 ()
+  template< class A >  void TetraTop < A >::split_e02 ()
   {
     alugrid_assert ( _inner == 0 );
     const int newLevel = 1 + this->level();
 
-    splitInfo( myrule_t::e20 );
+    splitInfo( myrule_t::e02 );
 
     // new inner face
     innerface_t * newFace =
@@ -1163,14 +1163,14 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e30 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 0 is new in child 1
     alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 0 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 2, 0 );
+    setNewMapping( h0, h1, newFace );
 
     // set refinement rule that was used to refine this tetra
-    _rule = myrule_t::e20;
+    _rule = myrule_t::e02;
   }
 
   template< class A >  void TetraTop < A >::split_e23 ()
@@ -1243,18 +1243,18 @@ namespace ALUGrid
     alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 2, 3 );
+    setNewMapping( h0, h1, newFace );
 
     // set refinement rule that was used to refine this tetra
     _rule = myrule_t::e23 ;
   }
 
-  template< class A >  void TetraTop < A >::split_e30 ()
+  template< class A >  void TetraTop < A >::split_e03 ()
   {
     alugrid_assert ( _inner == 0 );
     const int newLevel = 1 + this->level();
 
-    splitInfo( myrule_t::e30 );
+    splitInfo( myrule_t::e03 );
     /*
 
       3               2
@@ -1316,29 +1316,29 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e30 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 0 is new in child 1
     alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 0 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 3, 0 );
+    setNewMapping( h0, h1, newFace );
 
     // set refinement rule that was used to refine this tetra
-    _rule = myrule_t::e30;
+    _rule = myrule_t::e03;
   }
 
-  template< class A >  void TetraTop < A >::split_e31 ()
+  template< class A >  void TetraTop < A >::split_e13 ()
   {
     alugrid_assert ( _inner == 0 );
     const int newLevel = 1 + this->level () ;
 
-    splitInfo( myrule_t::e31 );
+    splitInfo( myrule_t::e13 );
 
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
                        myhedge(1),
-                       this->subedge(0,0),  // from face 1 get subedge 0
-                       this->subedge(2,0)  // from face 2 get subedge 0
+                       this->subedge(1,0),  // from face 1 get subedge 0
+                       this->subedge(3,0)  // from face 2 get subedge 0
                       ) ;
 
     alugrid_assert ( newFace ) ;
@@ -1389,137 +1389,27 @@ namespace ALUGrid
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 2 ) == myvertex( 2 ) );
 
+    //the internal numbering changes
     alugrid_assert ( h1->myvertex( 0 ) == myvertex( 0 ) );
-    alugrid_assert ( h1->myvertex( 2 ) == myvertex( 2 ) );
+    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 2 ) );
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e30 then 3 is new in child 0 and 0 is new in child 1
-    alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 1 ) );
+    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
-    setNewMapping( h0, h1, newFace, 3, 1 );
+    setNewMapping( h0, h1, newFace );
 
     // set refinement rule that was used to refine this tetra
-    _rule = myrule_t::e31;
+    _rule = myrule_t::e13;
   }
 
   // --setNewMapping
   template< class A >  void
   TetraTop < A >::setNewMapping( innertetra_t* h0, innertetra_t* h1,
-                                 innerface_t* newFace,
-                                 const int newVx0, const int newVx1 )
+                                 innerface_t* newFace)
   {
-    // vertex 0 is always containd in child 0, and not in child 1
-    myvertex_t* vx0 = this->myvertex( _vxMap[ 0 ] );
-    //for 2dbisection vx0 stays vx0 (and thus 0) in all children
-    // we use the ALBERTA 2d algorithm with the map ALU (or vxMap) 1,2,3 to ALBERTA 0,1,2
-    if(this->is2d())
-    {
-      // vertex 1 is always containd in child 0, and not in child 1
-      vx0 = this->myvertex( _vxMap[ 1 ] );
-    }
-
-    bool found = false ;
-    for( int i=0; i<4; ++i )
-    {
-      if( h0->myvertex( i ) == vx0 )
-      {
-        found = true ;
-        break ;
-      }
-    }
-
-    // if vx0 was not found in child 0 we have to swap the children
-    innertetra_t* t0 = ( found ) ? h0 : h1;
-    innertetra_t* t1 = ( found ) ? h1 : h0;
-
-    // the vxMap for the 2d refinement
-    if ( this->is2d() )
-    {
-      ///////////////////////////////////////////////////
-      //  Bisection 2d refinement, always refine edge 1--2
-      ///////////////////////////////////////////////////
-
-      // set vertex mapping (child 0)
-      t0->_vxMap[ 0 ] = _vxMap[ 0 ];
-      t0->_vxMap[ 1 ] = _vxMap[ 3 ];
-      t0->_vxMap[ 2 ] = _vxMap[ 1 ];
-      t0->_vxMap[ 3 ] = _vxMap[ 2 ];
-
-      // set vertex mapping (child 1)
-      t1->_vxMap[ 0 ] = _vxMap[ 0 ];
-      t1->_vxMap[ 1 ] = _vxMap[ 2 ];
-      t1->_vxMap[ 2 ] = _vxMap[ 3 ];
-      t1->_vxMap[ 3 ] = _vxMap[ 1 ];
-    }
-    else if( stevensonRefinement_ )
-    {
-      ///////////////////////////////////////////////////
-      //  Stevenson refinement, always refine edge 0--3
-      ///////////////////////////////////////////////////
-
-      // set vertex mapping (child 0)
-      t0->_vxMap[ 0 ] = _vxMap[ 0 ];
-      t0->_vxMap[ 1 ] = _vxMap[ 3 ];
-      t0->_vxMap[ 2 ] = _vxMap[ 1 ];
-      t0->_vxMap[ 3 ] = _vxMap[ 2 ];
-
-      // set vertex mapping (child 1)
-      t1->_vxMap[ 0 ] = _vxMap[ 3 ];
-      t1->_vxMap[ 1 ] = _vxMap[ 0 ];
-      const char fce3 = ( elementType () == 0 ) ? 1 : 0;
-      t1->_vxMap[ 2 ] = _vxMap[ 1 + fce3 ]; // for type 0   2 else 1
-      t1->_vxMap[ 3 ] = _vxMap[ 2 - fce3 ]; // for type 0   1 else 2
-    }
-    else
-    {
-      ///////////////////////////////////////////////////
-      //  ALBERTA refinement, always refine edge 0--1
-      ///////////////////////////////////////////////////
-
-      // set vertex mapping (child 0)
-      t0->_vxMap[ 0 ] = _vxMap[ 0 ];
-      t0->_vxMap[ 1 ] = _vxMap[ 2 ];
-      t0->_vxMap[ 2 ] = _vxMap[ 3 ];
-      t0->_vxMap[ 3 ] = _vxMap[ 1 ];
-
-      // set vertex mapping (child 1)
-      t1->_vxMap[ 0 ] = _vxMap[ 1 ];
-      t1->_vxMap[ 3 ] = _vxMap[ 0 ];
-      const char fce3 = ( elementType () == 0 ) ? 1 : 0;
-      t1->_vxMap[ 1 ] = _vxMap[ 2 + fce3 ]; // for type 0   2 else 1
-      t1->_vxMap[ 2 ] = _vxMap[ 3 - fce3 ]; // for type 0   1 else 2
-    }
-
-#ifdef ALUGRIDDEBUG
-    /*
-    std::cout << "Map0 = ( " ;
-    for( int i=0; i<4 ; ++ i )
-    {
-      std::cout << int(h0->_vxMap[i]) << " " ;
-    }
-    std::cout << " ) " << std::endl;
-    std::cout << "Map1 = ( " ;
-    for( int i=0; i<4 ; ++ i )
-    {
-      std::cout << int(h1->_vxMap[i]) << " " ;
-    }
-    std::cout << " ) " << std::endl;
-    */
-
-    for(int i=0; i<4; ++i )
-    {
-      for(int j=i+1; j<4; ++ j)
-      {
-        if( i != j )
-        {
-          alugrid_assert ( h0->_vxMap[ i ] != h0->_vxMap[ j ] );
-          alugrid_assert ( h1->_vxMap[ i ] != h1->_vxMap[ j ] );
-        }
-      }
-    }
-#endif
     // append h1 to h0
     h0->append( h1 );
 
@@ -1595,10 +1485,10 @@ namespace ALUGrid
     typedef typename A::inneredge_t inneredge_t;
     const int l = 1 + this->level () ;
 
-    myvertex_t * e31 = myhface (0)->myhedge (0)->subvertex (0) ;
-    myvertex_t * e20 = myhface (1)->myhedge (1)->subvertex (0) ;
-    alugrid_assert (e31 && e20);
-    inneredge_t * e0 = new inneredge_t (l, e31, e20) ;
+    myvertex_t * e13 = myhface (0)->myhedge (0)->subvertex (0) ;
+    myvertex_t * e02 = myhface (1)->myhedge (1)->subvertex (0) ;
+    alugrid_assert (e13 && e02);
+    inneredge_t * e0 = new inneredge_t (l, e13, e02) ;
     alugrid_assert (e0) ;
     innerface_t * f0 = new innerface_t (l, subedge (3, 2), subedge (1, 2), subedge (2, 2)) ;
     innerface_t * f1 = new innerface_t (l, subedge (3, 0), subedge (2, 1), subedge (0, 2)) ;
@@ -1743,12 +1633,12 @@ namespace ALUGrid
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e12 > ();
         break ;
-      case myrule_t::e20 :
+      case myrule_t::e02 :
         _faces[ 0 ] = 0 ;
         _faces[ 1 ] = 2 ;
-        _faceRules[ 0 ] = face3rule_t::e20;
+        _faceRules[ 0 ] = face3rule_t::e02;
         _faceRules[ 1 ] = face3rule_t::e01;
-        _caller = new CallSplitImpl< myrule_t::e20 > ();
+        _caller = new CallSplitImpl< myrule_t::e02 > ();
         break ;
       case myrule_t::e23 :
         _faces[ 0 ] = 2 ;
@@ -1757,19 +1647,19 @@ namespace ALUGrid
         _faceRules[ 1 ] = face3rule_t::e12;
         _caller = new CallSplitImpl< myrule_t::e23 > ();
         break ;
-      case myrule_t::e30 :
+      case myrule_t::e03 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 2 ;
-        _faceRules[ 0 ] = face3rule_t::e20;
-        _faceRules[ 1 ] = face3rule_t::e20;
-        _caller = new CallSplitImpl< myrule_t::e30 > ();
+        _faceRules[ 0 ] = face3rule_t::e02;
+        _faceRules[ 1 ] = face3rule_t::e02;
+        _caller = new CallSplitImpl< myrule_t::e03 > ();
         break ;
-      case myrule_t::e31 :
+      case myrule_t::e13 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e12;
-        _faceRules[ 1 ] = face3rule_t::e20;
-        _caller = new CallSplitImpl< myrule_t::e31 > ();
+        _faceRules[ 1 ] = face3rule_t::e02;
+        _caller = new CallSplitImpl< myrule_t::e13 > ();
         break ;
       default :
         std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
@@ -1853,10 +1743,10 @@ namespace ALUGrid
             break ;
           case myrule_t::e01 :
           case myrule_t::e12 :
-          case myrule_t::e20 :
+          case myrule_t::e02 :
           case myrule_t::e23 :
-          case myrule_t::e30 :
-          case myrule_t::e31 :
+          case myrule_t::e03 :
+          case myrule_t::e13 :
             if( ! BisectionInfo::refineFaces( this, r ) ) return false ;
             break ;
           default :
@@ -2119,7 +2009,7 @@ namespace ALUGrid
         {
           alugrid_assert( face.getrule() == balrule_t::e01 ||
                           face.getrule() == balrule_t::e12 ||
-                          face.getrule() == balrule_t::e20 ||
+                          face.getrule() == balrule_t::e02 ||
                           face.getrule() == balrule_t::iso4 );
           const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
           for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
@@ -2174,7 +2064,7 @@ namespace ALUGrid
     switch (myhface(i)->getrule()) {
       case myhface_t::myrule_t::e01 :
       case myhface_t::myrule_t::e12 :
-      case myhface_t::myrule_t::e20 :
+      case myhface_t::myrule_t::e02 :
         alugrid_assert ( j == 0 );
         return myhface (i)->subedge (0) ;
       case myhface_t::myrule_t::iso4 :
@@ -2208,7 +2098,7 @@ namespace ALUGrid
         return myhface(i)->subface(j) ;
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
-    case myhface_t::myrule_t::e20 :
+    case myhface_t::myrule_t::e02 :
       alugrid_assert ( j < 2 );
         return myhface(i)->subface(j) ;
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
@@ -2296,7 +2186,7 @@ namespace ALUGrid
 
       case myrule_t::e01 :
       case myrule_t::e12 :
-      case myrule_t::e20 :
+      case myrule_t::e02 :
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
 

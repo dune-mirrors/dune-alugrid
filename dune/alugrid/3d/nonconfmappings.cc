@@ -22,7 +22,7 @@ namespace Dune
     else if (rule_ == RefinementRuleType::e12) {
       child2parentE12(childCoordinates, parentCoordinates);
     }
-    else if (rule_ == RefinementRuleType::e20) {
+    else if (rule_ == RefinementRuleType::e02) {
       child2parentE20(childCoordinates, parentCoordinates);
     }
     else if (rule_ == RefinementRuleType::iso4) {
