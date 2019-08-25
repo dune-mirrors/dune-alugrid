@@ -53,7 +53,7 @@ namespace Dune
     segmentId_ = -1;
     bndId_ = 0; // inner face
 
-    // points face from inner element away?
+    // points face from inner element away
     if (isInnerRear)
     {
       innerElement_    = face.nb.rear().first;
@@ -127,9 +127,32 @@ namespace Dune
     if(levelIntersection_ && conformingRefinement_ && ! (innerElement_->isboundary() ) )
     {
       const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
-      while( inner -> up () ) inner = static_cast<const GEOElementType *> ( inner ->up() );
+      //we come from a macro element, which may have an intersection with an element
+      //of level one. So we have at most to go up one level
+      if( inner -> up ())
+      {
+        bool faceNumberChange = false;
+        if( inner->nChild() == 1)
+        {
+          faceNumberChange = true;
+        }
+        inner = static_cast<const GEOElementType *> ( inner ->up() );
+        //if the rule is one of e02, e13, e03 a face number changes
+        if( faceNumberChange )
+        {
+          if( inner->getrule() == ALU3DSPACE RefinementRules::TetraRule::e03 || inner->getrule() == ALU3DSPACE RefinementRules::TetraRule::e02 )
+          {
+            innerFaceNumber_ = 3;
+          }
+          if( inner->getrule() == ALU3DSPACE RefinementRules::TetraRule::e13 )
+          {
+            innerFaceNumber_ = 2;
+          }
+        }
+      }
+      alugrid_assert( inner->level() == 0 );
       innerElement_ = static_cast<const HasFaceType *> (inner);
-      isInnerRear_ = innerEntity().isRear(innerFaceNumber_);
+      alugrid_assert( isInnerRear_ == innerEntity().isRear(innerFaceNumber_) );
     }
 
     if( outerElement_->isboundary() )
@@ -236,15 +259,36 @@ namespace Dune
     if(levelIntersection_ && conformingRefinement_ && !  (outerElement_->isboundary() ) )
     {
       const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
-      while( outer -> up () ) outer = static_cast<const GEOElementType *> ( outer ->up() );
+      //we come from a macro element, which may have an intersection with an element
+      //of level one. So we have at most to go up one level
+      if( outer -> up ())
+      {
+        bool faceNumberChange = false;
+        if( outer->nChild() == 1)
+        {
+          faceNumberChange = true;
+        }
+        outer = static_cast<const GEOElementType *> ( outer ->up() );
+        //if the rule is one of e02, e13, e03 a face number changes
+        if( faceNumberChange )
+        {
+          if( outer->getrule() == ALU3DSPACE RefinementRules::TetraRule::e03 || outer->getrule() == ALU3DSPACE RefinementRules::TetraRule::e02 )
+          {
+            outerFaceNumber_ = 3;
+          }
+          if( outer->getrule() == ALU3DSPACE RefinementRules::TetraRule::e13 )
+          {
+            outerFaceNumber_ = 2;
+          }
+        }
+      }
+      alugrid_assert( outer->level() == 0 );
       outerElement_ = static_cast<const HasFaceType *> (outer);
+      alugrid_assert( isInnerRear_ == !(outerEntity().isRear(outerFaceNumber_)) );
     }
 
     // make sure we got boundary id correctly
     alugrid_assert ( bndType_ == periodicBoundary || bndType_ == domainBoundary ? bndId_ > 0 : bndId_ == 0 );
-
-    //make sure isRears are set - not possible anymore with bool
-    //alugrid_assert( isInnerFront_ != -665);
 
     // set conformance information
     conformanceState_ = getConformanceState(innerLevel);
