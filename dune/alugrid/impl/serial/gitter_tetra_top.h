@@ -602,6 +602,40 @@ namespace ALUGrid
               myrule_t fatherRule = _up->getrule();
               int fatherChild = _up->nChild();
               int thisChild = this->nChild();
+              // vertices of the refinement edge - e.g. e03 -> 0 in child 0 and 3 in child 1
+              const int refEdgeVertices [ 6 ][ 2 ] = { { 0, 1}, {0, 2}, {0,3}, {1,2}, {1,3}, {2,3} };
+              // local index of new vertex - e.g. e03 -> 3 in child 0 and 2 in child 1
+              // for child 0 it is always the other vertex of the refinement edge
+              const int newVertices [ 6 ] [ 2 ] = { {1,0}, {2,1}, {3,2}, {2,1}, {3,2}, {3,2} };
+              // choose rule based on vertices that are present
+              const myrule_t ruleChoicePres  [ 4 ] [ 4 ] = { { -1, myrule_t :: e01, myrule_t :: e02, myrule_t :: e03},
+                                                         { myrule_t :: e01, -1, myrule_t :: e12, myrule_t :: e13},
+                                                         { myrule_t :: e02, myrule_t :: e12, -1, myrule_t :: e23},
+                                                         { myrule_t :: e03, myrule_t :: e13, myrule_t :: e23, -1} };
+              // choose rule based on vertices that are not present
+              const myrule_t ruleChoice  [ 4 ] [ 4 ] = { { -1, myrule_t :: e23, myrule_t :: e13, myrule_t :: e12},
+                                                         { myrule_t :: e23, -1, myrule_t :: e03, myrule_t :: e02},
+                                                         { myrule_t :: e13, myrule_t :: e03, -1, myrule_t :: e01},
+                                                         { myrule_t :: e12, myrule_t :: e02, myrule_t :: e01, -1} };
+              // If elementType == 0 or 2 then the grandfather was of type  0 or 11
+              // this is the easier case. Always refine the edge that is still present from the grandfather.
+              if( elementType() == 2 || elementType() == 0 )
+              {
+                int newFromGrandFather = newVertices[int(grandFatherRule) - 2][fatherChild];
+                int newFromFather = newVertices[int(fatherRule) - 2][thisChild];
+                //We may have to adjust the grandFathervertex, if the child 1 has rotated
+                if( thisChild == 1)
+                {
+                  //e02 maps 1->0
+                  if(fatherRule == myrule_t::e02 && newFromGrandFather == 1) newFromGrandFather = 0;
+                  //e03 maps 1->0 and 2->1
+                  else if (fatherRule == myrule_t::e03 && newFromGrandFather <=2 ) newFromGrandFather -= 1;
+                  //e13 maps 2->1
+                  else if (fatherRule == myrule_t::e13 && newFromGrandFather ==2 ) newFromGrandFather -= 1;
+                }
+                //Now we just take the edge, that does not include any of these two vertices
+                return ruleChoice[newFromGrandFather][newFromFather];
+              }
             }
             //if we are macro
             //for macro elements we refine edge 0 -- 3
