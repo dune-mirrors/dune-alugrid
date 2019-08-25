@@ -467,19 +467,19 @@ namespace ALUGrid
         // the edge of the newface that is in the father is not possible
         static const myrule_t possibleRules0[ 6 ][ 2 ] = {
             { myrule_t :: e02, myrule_t :: e03 }, // possible rules for e01 in child 0
-            { myrule_t :: e01, myrule_t :: e13 }, // possible rules for e12 in child 0
             { myrule_t :: e03, myrule_t :: e01 }, // possible rules for e02 in child 0
-            { myrule_t :: e02, myrule_t :: e12 }, // possible rules for e23 in child 0
             { myrule_t :: e02, myrule_t :: e01 }, // possible rules for e03 in child 0
-            { myrule_t :: e01, myrule_t :: e12 }  // possible rules for e13 in child 0
+            { myrule_t :: e01, myrule_t :: e13 }, // possible rules for e12 in child 0
+            { myrule_t :: e01, myrule_t :: e12 }, // possible rules for e13 in child 0
+            { myrule_t :: e02, myrule_t :: e12 }  // possible rules for e23 in child 0
           };
         static const myrule_t possibleRules1[ 6 ][ 2 ] = {
             { myrule_t :: e13, myrule_t :: e12 }, // possible rules for e01 in child 1
-            { myrule_t :: e23, myrule_t :: e02 }, // possible rules for e12 in child 1
-            { myrule_t :: e02, myrule_t :: e23 }, // possible rules for e12 in child 1
-            { myrule_t :: e13, myrule_t :: e03 }, // possible rules for e23 in child 1
+            { myrule_t :: e02, myrule_t :: e23 }, // possible rules for e02 in child 1
             { myrule_t :: e13, myrule_t :: e03 }, // possible rules for e03 in child 1
-            { myrule_t :: e13, myrule_t :: e03 }  // possible rules for e13 in child 0
+            { myrule_t :: e23, myrule_t :: e02 }, // possible rules for e12 in child 1
+            { myrule_t :: e13, myrule_t :: e03 }, // possible rules for e13 in child 1
+            { myrule_t :: e13, myrule_t :: e03 }  // possible rules for e23 in child 1
           };
 
         if( _up )
@@ -499,6 +499,7 @@ namespace ALUGrid
           return true;
       }
 
+      // Only checks 3d!
       void splitInfo( const myrule_t rule ) const
       {
         std::cout << std::endl << "Split tetra " << this<< std::endl;
@@ -509,9 +510,6 @@ namespace ALUGrid
         const bool chRule = checkRule( rule );
         if( ! chRule )
         {
-          std::cout << "Map = ( ";
-          std::cout << " ) " << std::endl;
-
           std::cout << rule << " not valid " << std::endl;
           //alugrid_assert ( false );
         }
@@ -551,10 +549,11 @@ namespace ALUGrid
           }
           return rule;
         }
-        //implementation of bisection refinement
+        //implementation of NVB bisection refinement
         else
         {
           //specialization for the 2d case
+          //always thae the edge that is opposite to the most recent introduced vertex
           if( this->is2d() )
           {
             if( _up )
@@ -580,7 +579,7 @@ namespace ALUGrid
                   break;
                 default:
                   alugrid_assert(this->nChild() == 0 || this->nChild() == 1);
-                  std::cerr << __FILE__ << __LINE__ << "Refinement Edge must not contain Vertex 0" << std::endl;
+                  std::cerr << __FILE__ << __LINE__ << ":  Refinement Edge must not contain Vertex 0" << std::endl;
                   alugrid_assert(false);
 
               }
@@ -590,6 +589,42 @@ namespace ALUGrid
               return suggestRule(true);
             }
           }
+          //3d NVB specialization
+          // This is based on the following property of NVB
+          // Once a vertex is part of a refinement edge it is always part of the refinement edge in all descendants that contain it
+          // Now we inspect the refinement edge of both father element and grandfather and choose the refinement edge accordingly
+          else
+          {
+            // if  we have a grandfather
+            if( _lvl > 1 )
+            {
+              myrule_t grandFatherRule = _up->_up->getrule();
+              myrule_t fatherRule = _up->getrule();
+              int fatherChild = _up->nChild();
+              int thisChild = this->nChild();
+            }
+            //if we are macro
+            //for macro elements we refine edge 0 -- 3
+            else if( _lvl == 0 )
+            {
+              return myrule_t :: e03;
+            }
+            // if we do not have a grandfather, we know that the father rule is e03
+            else
+            {
+              alugrid_assert( _lvl == 1 );
+              if (this->nChild() == 0)
+                return myrule_t :: e02;
+              else
+              {
+                alugrid_assert (this->nChild() == 1);
+                return myrule_t :: e03;
+              }
+            }
+          }
+          //We should not get here
+          std::cerr << __FILE__ << __LINE__ << ":  suggestRule does not suggest a refinement rule" << std::endl;
+          alugrid_assert(false);
         }
       }
 

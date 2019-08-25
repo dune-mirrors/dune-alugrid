@@ -1107,8 +1107,8 @@ namespace ALUGrid
     innerface_t * newFace =
       new innerface_t (newLevel,
                        this->subedge(0,0),
-                       this->subedge(2,0), // from face 2 get subedge 0
-                       myhedge(4) // from face 1 get subedge 0
+                       myhedge(4), // from face 1 get subedge 0
+                       this->subedge(2,0) // from face 2 get subedge 0
                       ) ;
     alugrid_assert ( newFace );
 
@@ -1158,13 +1158,13 @@ namespace ALUGrid
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 3 ) == myvertex( 3 ) );
 
-    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 1 ) );
+    alugrid_assert ( h1->myvertex( 0 ) == myvertex( 1 ) );
     alugrid_assert ( h1->myvertex( 2 ) == myvertex( 2 ) );
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
     // split e03 then 3 is new in child 0 and 0 is new in child 1
-    alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 0 ) );
+    alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 1 ) );
 
     // remap vertices of children
     setNewMapping( h0, h1, newFace );
@@ -1279,7 +1279,7 @@ namespace ALUGrid
     innerface_t * newFace =
       new innerface_t (newLevel,
                        myhedge(2), // from face 2 get subedge 0
-                       this->subedge(0,0), // from face 1 get subedge 0
+                       this->subedge(1,0), // from face 1 get subedge 0
                        this->subedge(2,0)
                       ) ;
 
@@ -1311,13 +1311,13 @@ namespace ALUGrid
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 2 ) == myvertex( 2 ) );
 
-    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 1 ) );
-    alugrid_assert ( h1->myvertex( 2 ) == myvertex( 2 ) );
+    alugrid_assert ( h1->myvertex( 0 ) == myvertex( 1 ) );
+    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 2 ) );
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
     // split e03 then 3 is new in child 0 and 0 is new in child 1
-    alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 0 ) );
+    alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
     setNewMapping( h0, h1, newFace );
