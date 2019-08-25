@@ -619,7 +619,7 @@ namespace ALUGrid
                                                          { myrule_t :: e12, myrule_t :: e02, myrule_t :: e01, -1} };
               // If elementType == 0 or 2 then the grandfather was of type  0 or 11
               // this is the easier case. Always refine the edge that is still present from the grandfather.
-              if( elementType() == 2 || elementType() == 0 )
+              if( elementType() == 2 || elementType() == 0 || thisChild == 0 )
               {
                 int newFromGrandFather = newVertices[int(grandFatherRule) - 2][fatherChild];
                 int newFromFather = newVertices[int(fatherRule) - 2][thisChild];
@@ -635,6 +635,25 @@ namespace ALUGrid
                 }
                 //Now we just take the edge, that does not include any of these two vertices
                 return ruleChoice[newFromGrandFather][newFromFather];
+              }
+              //case elementType == 1 (grandfather =2 ) behaves differently if thisChild == 1
+              //the refinement edge contains the vertex created in the grandfather and
+              //the vertex of the father refinement edge, that is contained in the child
+              else
+              {
+                int newFromGrandFather = newVertices[int(grandFatherRule) - 2][fatherChild];
+                int refEdgeFromFather = refEdgeVertices[int(fatherRule) - 2][thisChild];
+                //We may have to adjust the grandFathervertex, if the child 1 has rotated
+                if( thisChild == 1)
+                {
+                  //e02 maps 1->0
+                  if(fatherRule == myrule_t::e02 && newFromGrandFather == 1) newFromGrandFather = 0;
+                  //e03 maps 1->0 and 2->1
+                  else if (fatherRule == myrule_t::e03 && newFromGrandFather <=2 ) newFromGrandFather -= 1;
+                  //e13 maps 2->1
+                  else if (fatherRule == myrule_t::e13 && newFromGrandFather ==2 ) newFromGrandFather -= 1;
+                }
+                return ruleChoicePres[newFromGrandFather][refEdgeFromFather];
               }
             }
             //if we are macro
