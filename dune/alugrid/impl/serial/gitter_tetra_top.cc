@@ -1485,19 +1485,27 @@ namespace ALUGrid
     typedef typename A::inneredge_t inneredge_t;
     const int l = 1 + this->level () ;
 
-    myvertex_t * e13 = myhface (0)->myhedge (0)->subvertex (0) ;
-    myvertex_t * e02 = myhface (1)->myhedge (1)->subvertex (0) ;
+    //Choice of diagonal is important for shape regularity
+    //This algorithm is described in Bey,2000 : Simplicial Grid Refinement ...
+    myvertex_t * e13 = myhface (1)->myhedge (2)->subvertex (0) ;
+    myvertex_t * e02 = myhface (0)->myhedge (1)->subvertex (0) ;
     alugrid_assert (e13 && e02);
-    inneredge_t * e0 = new inneredge_t (l, e13, e02) ;
+    inneredge_t * e0 = new inneredge_t (l, e02, e13) ;
     alugrid_assert (e0) ;
-    innerface_t * f0 = new innerface_t (l, subedge (3, 2), subedge (1, 2), subedge (2, 2)) ;
-    innerface_t * f1 = new innerface_t (l, subedge (3, 0), subedge (2, 1), subedge (0, 2)) ;
-    innerface_t * f2 = new innerface_t (l, subedge (3, 1), subedge (0, 1), subedge (1, 0)) ;
-    innerface_t * f3 = new innerface_t (l, subedge (2, 0), subedge (0, 0), subedge (1, 1)) ;
-    innerface_t * f4 = new innerface_t (l, e0, subedge (3, 2), subedge (2, 1)) ;
-    innerface_t * f5 = new innerface_t (l, e0, subedge (3, 1), subedge (0, 2)) ;
-    innerface_t * f6 = new innerface_t (l, e0, subedge (1, 0), subedge (0, 0)) ;
-    innerface_t * f7 = new innerface_t (l, e0, subedge (1, 2), subedge (2, 0)) ;
+    //first the 4 inner faces of tetrahedra at each corner of the father
+    //In DUNE numbering
+    // 0,1,3 : 0,2,4 : 1,2,5 : 3,4,5
+    //then the four faces containing the diagonal
+    //In DUNE numbering of the edges they are
+    // 0,1,4 : 1,2,4 :  1,3,4 : 1,4,5
+    innerface_t * f0 = new innerface_t (l, subedge (0, 0), subedge (1, 0), subedge (2, 0)) ;
+    innerface_t * f1 = new innerface_t (l, subedge (0, 1), subedge (1, 1), subedge (3, 0)) ;
+    innerface_t * f2 = new innerface_t (l, subedge (0, 2), subedge (2, 1), subedge (3, 1)) ;
+    innerface_t * f3 = new innerface_t (l, subedge (1, 2), subedge (2, 2), subedge (3, 2)) ;
+    innerface_t * f4 = new innerface_t (l, subedge (0, 0), subedge (1, 1), e0) ;
+    innerface_t * f5 = new innerface_t (l, subedge (0, 2), e0, subedge (3, 0)) ;
+    innerface_t * f6 = new innerface_t (l, subedge (2, 0), e0, subedge (1, 2)) ;
+    innerface_t * f7 = new innerface_t (l, e0, subedge (2, 1), subedge (3, 2)) ;
     alugrid_assert (f0 && f1 && f2 && f3 && f4 && f5 && f6 && f7) ;
     f0->append(f1) ;
     f1->append(f2) ;
@@ -1511,14 +1519,32 @@ namespace ALUGrid
     const double childVolume = calculateChildVolume( 0.125 * _volume );
 
     // pointer `this' is the pointer to the father element
-    innertetra_t * h0 = new innertetra_t (l, f0, false, subface(1, 0), isRear(1), subface(2, 0), isRear(2), subface(3, 0), isRear(3), this, 0 , childVolume) ;
-    innertetra_t * h1 = new innertetra_t (l, subface(0, 0), isRear(0), f1, false, subface(2, 2), isRear(2), subface(3, 1), isRear(3), this, 1 , childVolume) ;
-    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isRear(0), subface(1, 1), isRear(1), f2, false, subface(3, 2), isRear(3), this, 2 , childVolume) ;
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 1), isRear(0), subface(1, 2), isRear(1), subface(2, 1), isRear(2), f3, true,  this, 3 , childVolume) ;
-    innertetra_t * h4 = new innertetra_t (l, f7, false, subface(2, 3), isRear(2) , f4, true, f0, true, this, 4 , childVolume) ;
-    innertetra_t * h5 = new innertetra_t (l, f4, false, f1, true, f5, true, subface(3, 3), isRear(3), this, 5 , childVolume) ;
-    innertetra_t * h6 = new innertetra_t (l, f3, false, f6, false, subface(1, 3), isRear(1), f7, true, this, 6 , childVolume) ;
-    innertetra_t * h7 = new innertetra_t (l, subface(0, 3), isRear(0), f5, false, f2, true, f6, true, this, 7 , childVolume) ;
+    // First the tetrahedra at the corners - numbered by corner number
+    innertetra_t * h0 = new innertetra_t (l, subface(0, 0), isRear(0), subface(1, 0), isRear(1), subface(2, 0), isRear(2), f0, isRear(3), this, 0 , childVolume) ;
+    innertetra_t * h1 = new innertetra_t (l, subface(0, 1), isRear(0), subface(1, 1), isRear(1), f1, isRear(2), subface(3, 0), isRear(3), this, 1 , childVolume) ;
+    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isRear(0), f2, isRear(1), subface(2, 1), isRear(2), subface(3, 1), isRear(3), this, 2 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, f3, isRear(0), subface(1, 2), isRear(1), subface(2, 2), isRear(2), subface(3, 2), isRear(3), this, 3 , childVolume) ;
+    innertetra_t * h4 = new innertetra_t (l, f0, !(isRear(3)), f4, isRear(3), subface(1, 3), !(isRear(1)), f6, isRear(1), this, 4 , childVolume) ;
+    innertetra_t * h5 = new innertetra_t (l, subface(0, 3), !(isRear(0)), f4, isRear(0), f1, !(isRear(2)), f5, isRear(2), this, 5 , childVolume) ;
+    innertetra_t * h6 = new innertetra_t (l, f6, isRear(2), subface(2, 3), !(isRear(2)), f7, isRear(0), f3, !(isRear(0)), this, 6 , childVolume) ;
+    innertetra_t * h7 = new innertetra_t (l, f5, isRear(1), f2, !(isRear(1)), f7, isRear(3), subface(3, 3), !(isRear(3)), this, 7 , childVolume) ;
+
+  std::cout << h0 ;
+  checkTetra(h0,0);
+  std::cout << h1 ;
+  checkTetra(h1,1);
+  std::cout << h2;
+  checkTetra(h2,2);
+  std::cout << h3 ;
+  checkTetra(h3,3);
+  std::cout << h4 ;
+  checkTetra(h4,4);
+  std::cout << h5;
+  checkTetra(h5,5);
+  std::cout << h6 ;
+  checkTetra(h6,6);
+  std::cout << h7;
+  checkTetra(h7,7);
     alugrid_assert (h0 && h1 && h2 && h3 && h4 && h5 && h6 && h7) ;
     h0->append(h1) ;
     h1->append(h2) ;
@@ -1590,14 +1616,14 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
     //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
-   std::cout << h0 ;
-   checkTetra(h0,0);
-   std::cout << h1 ;
-   checkTetra(h1,1);
-   std::cout << h2;
-   checkTetra(h2,2);
-   std::cout << h3;
-   alugrid_assert(checkTetra(h3,3));
+  // std::cout << h0 ;
+  // checkTetra(h0,0);
+  // std::cout << h1 ;
+  // checkTetra(h1,1);
+  // std::cout << h2;
+  // checkTetra(h2,2);
+  // std::cout << h3;
+  // alugrid_assert(checkTetra(h3,3));
 #endif
 
 
