@@ -239,14 +239,14 @@ namespace ALUGrid
     myvertex_t * ev2 = myhedge(2)->subvertex (0) ;
     alugrid_assert (ev0 && ev1 && ev2 ) ;
     inneredge_t * e0 = new inneredge_t (l, ev0, ev1) ;
-    inneredge_t * e1 = new inneredge_t (l, ev1, ev2) ;
-    inneredge_t * e2 = new inneredge_t (l, ev2, ev0) ;
+    inneredge_t * e1 = new inneredge_t (l, ev0, ev2) ;
+    inneredge_t * e2 = new inneredge_t (l, ev1, ev2) ;
     alugrid_assert ( e0 && e1 && e2 ) ;
     e0->append(e1) ;
     e1->append(e2) ;
-    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), e2, this->subedge(2,1), 0) ;
-    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), this->subedge(1,0), e0, 1) ;
-    innerface_t * f2 = new innerface_t (l, e1, this->subedge(1,1), this->subedge(2,0), 2) ;
+    innerface_t * f0 = new innerface_t (l, this->subedge(0,0), this->subedge(1,0), e0, 0) ;
+    innerface_t * f1 = new innerface_t (l, this->subedge(0,1), e1, this->subedge(2,0), 1) ;
+    innerface_t * f2 = new innerface_t (l, e2, this->subedge(1,1), this->subedge(2,1), 2) ;
     innerface_t * f3 = new innerface_t (l, e0, e1, e2, 3 ) ;
     alugrid_assert (f0 && f1 && f2 && f3) ;
     f0->append(f1) ;
@@ -528,7 +528,7 @@ namespace ALUGrid
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0)) ;
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1)) ;
     innerbndseg_t * b2 = new innerbndseg_t (l, subface (0,2), isRear (0), this , _bt, ghostInfo.child(2), ghostInfo.face(2)) ;
-    innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), isRear (0), this , _bt, ghostInfo.child(3), ghostInfo.face(3)) ;
+    innerbndseg_t * b3 = new innerbndseg_t (l, subface (0,3), !(isRear (0)), this , _bt, ghostInfo.child(3), ghostInfo.face(3)) ;
     alugrid_assert (b0 && b1 && b2 && b3) ;
     b0->append(b1) ;
     b1->append(b2) ;
@@ -754,7 +754,7 @@ namespace ALUGrid
   template< class A > TetraTop < A >
   :: TetraTop (int l, myhface_t * f0, bool  t0,
                myhface_t * f1, bool t1, myhface_t * f2, bool t2,
-               myhface_t * f3, bool t3, innertetra_t *up, bool nChild, double vol)
+               myhface_t * f3, bool t3, innertetra_t *up, int nChild, double vol)
     : A (f0, t0, f1, t1, f2, t2, f3, t3),
       _bbb (0), _up(up)
     , _inner( 0 )
@@ -1558,9 +1558,9 @@ namespace ALUGrid
   //   std::cout << "( " << i << ", 0) " << subedge(i,0);
 #endif
 
-    innerface_t * f0 = new innerface_t (l, subedge (2, 0), subedge (0, 2), subedge (3, 0)) ;
-    innerface_t * f1 = new innerface_t (l, subedge (1, 0), subedge (0, 0), subedge (2, 0)) ;
-    innerface_t * f2 = new innerface_t (l, subedge (3, 0), subedge (0, 1), subedge (1, 0)) ;
+    innerface_t * f0 = new innerface_t (l, subedge (0, 0), subedge (1, 0), subedge (3, 0) );
+    innerface_t * f1 = new innerface_t (l, subedge (0, 0), subedge (2, 0), subedge (3, 1) );
+    innerface_t * f2 = new innerface_t (l, subedge (1, 0), subedge (2, 0), subedge (3, 2) );
   //  std::cout << "f1: " << f1 ;
   //  std::cout << "f0: "<< f0 ;
    // std::cout << "f2: " <<f2 ;
@@ -1583,21 +1583,21 @@ namespace ALUGrid
     // because it is "upside down" in the old face and cannot just be oriented as before
 
     // pointer `this' is the pointer to the father element
-    innertetra_t * h0 = new innertetra_t (l, subface(0, 0), isRear(0), f0, -1, subface(2, 1), isRear(2), subface(3, 0), isRear(3), this, 0 , childVolume) ;
-    innertetra_t * h1 = new innertetra_t (l, subface(0, 1), isRear(0), subface(1, 1), isRear(1), subface(2, 0), isRear(2), f1, -1, this, 1 , childVolume) ;
-    innertetra_t * h2 = new innertetra_t (l, subface(0, 2), isRear(0), subface(1, 0), isRear(1), f2, -1, subface(3, 1), isRear(3), this, 2 , childVolume) ;
-    innertetra_t * h3 = new innertetra_t (l, subface(0, 3), isRear(0), f2, 0, f1, 0, f0, 0, this, 3 , childVolume) ;
+    innertetra_t * h0 = new innertetra_t (l, subface(0,0), isRear(0), subface(1,0), isRear(1), f0, isRear(2), subface(3,0), isRear(3), this, 0 , childVolume) ;
+    innertetra_t * h1 = new innertetra_t (l, subface(0,1), isRear(0), f1, isRear(1), subface(2,0), isRear(2), subface(3,1), isRear(3), this, 1 , childVolume) ;
+    innertetra_t * h2 = new innertetra_t (l, f2, isRear(0), subface(1,1), isRear(1), subface(2,1), isRear(2), subface(3,2), isRear(3), this, 2 , childVolume) ;
+    innertetra_t * h3 = new innertetra_t (l, f0, !(isRear(2)), f1, !(isRear(1)), f2, !(isRear(0)), subface(3,3), !(isRear(3)), this, 3 , childVolume) ;
 
 #ifdef ALUGRIDDEBUG
     //this check produces output, when loadbalancing and refining the transported elements, because the ghost neighbours do not exist yet
-   // std::cout << h0 ;
-    //checkTetra(h0,0);
-   // std::cout << h1 ;
-    //checkTetra(h1,1);
-   // std::cout << h2;
-    //checkTetra(h2,2);
-   // std::cout << h3;
-    //alugrid_assert(checkTetra(h3,3));
+   std::cout << h0 ;
+   checkTetra(h0,0);
+   std::cout << h1 ;
+   checkTetra(h1,1);
+   std::cout << h2;
+   checkTetra(h2,2);
+   std::cout << h3;
+   alugrid_assert(checkTetra(h3,3));
 #endif
 
 
@@ -2112,15 +2112,7 @@ namespace ALUGrid
         return 0;
       }
       alugrid_assert ( j < 4 );
-      if ( j == 3 )
-      {
-        return myhface(i)->subface (3) ;
-      }
-      else // ( j < 3 )
-      {
-        alugrid_assert( j < 3 );
-        return myhface (i)->subface (j) ;
-      }
+      return myhface(i)->subface (j) ;
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
       std::abort () ;

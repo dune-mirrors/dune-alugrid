@@ -671,7 +671,10 @@ namespace ALUGrid
               else
               {
                 alugrid_assert (this->nChild() == 1);
-                return myrule_t :: e03;
+                if( this->elementType() == 1)
+                  return myrule_t :: e03;
+                else
+                  return myrule_t :: e13;
               }
             }
           }
@@ -706,7 +709,7 @@ namespace ALUGrid
     public:
       // constructor for refined elements
       TetraTop (int,myhface_t *,bool,myhface_t *,bool,myhface_t *,bool,
-                    myhface_t *,bool,innertetra_t *up, bool nChild, double vol);
+                    myhface_t *,bool,innertetra_t *up, int nChild, double vol);
       // constructor for macro elements
       TetraTop (int,myhface_t *,bool,myhface_t *,bool,
                     myhface_t *,bool,myhface_t *,bool, SimplexTypeFlag );
