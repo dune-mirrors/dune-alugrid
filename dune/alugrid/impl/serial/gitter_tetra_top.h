@@ -637,12 +637,16 @@ namespace ALUGrid
                 //Now we just take the edge, that does not include any of these two vertices
                 return ruleChoice[newFromGrandFather][newFromFather];
               }
-              //case elementType == 1 (grandfather =2 ) behaves differently if thisChild == 1
+              //case elementType == 1 (grandfather =2 ) behaves differently if the child is bisectionwise child 1
               //the refinement edge contains the vertex created in the grandfather and
               //the vertex of the father refinement edge, that is contained in the child
               else
               {
+                //First we need to find out, whether we have vertices of the refinement edge of the grandfather
+                int refEdgeGrandFatherIndex0 = _up->_up->myvertex(refEdgeVertices[int(grandFatherRule) - 2][0])->getIndex();
+                int refEdgeGrandFatherIndex1 = _up->_up->myvertex(refEdgeVertices[int(grandFatherRule) - 2][1])->getIndex();
                 int newFromGrandFather = newVertices[int(grandFatherRule) - 2][fatherChild];
+                int newFromFather = newVertices[int(fatherRule) - 2][thisChild];
                 int refEdgeFromFather = refEdgeVertices[int(fatherRule) - 2][thisChild];
                 //We may have to adjust the grandFathervertex, if the child 1 has rotated
                 if( thisChild == 1)
@@ -654,7 +658,19 @@ namespace ALUGrid
                   //e13 maps 2->1
                   else if (fatherRule == myrule_t::e13 && newFromGrandFather ==2 ) newFromGrandFather -= 1;
                 }
-                return ruleChoicePres[newFromGrandFather][refEdgeFromFather];
+                bool child1 = true;
+                for(int i=0; i < 4 ; ++i)
+                {
+                  if( i == newFromFather || i == newFromGrandFather )
+                    continue;
+                  if( this->myvertex(i)->getIndex() == refEdgeGrandFatherIndex0 || this->myvertex(i)->getIndex() == refEdgeGrandFatherIndex1 )
+                  {
+                    child1 = false;
+                    break;
+                  }
+                }
+
+                return child1 ? ruleChoicePres[newFromGrandFather][refEdgeFromFather] : ruleChoice[newFromGrandFather][newFromFather];
               }
             }
             //if we are macro
