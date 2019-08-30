@@ -314,7 +314,7 @@ namespace ALUGrid
 
             const face3rule_t faceRule = info._faceRules[i];
 
-       //     std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
+            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
             if (! face->refine( faceRule, tetra->isRear( info._faces[ i ] ) ) ) return false;
@@ -502,6 +502,7 @@ namespace ALUGrid
       // Only checks 3d!
       void splitInfo( const myrule_t rule ) const
       {
+        /*
         std::cout << std::endl << "Split tetra " << this<< std::endl;
         std::cout << " ( " << this->getIndex() << ", ch" << int( _nChild) << ") with rule " << rule << "  ";
         if( _up )
@@ -512,7 +513,7 @@ namespace ALUGrid
         {
           std::cout << rule << " not valid " << std::endl;
           //alugrid_assert ( false );
-        }
+        }*/
       }
 
       myrule_t suggestRule ( bool longest = false )  const
@@ -619,7 +620,7 @@ namespace ALUGrid
                                                          { myrule_t :: e12, myrule_t :: e02, myrule_t :: e01, -1} };
               // If elementType == 0 or 2 then the grandfather was of type  0 or 11
               // this is the easier case. Always refine the edge that is still present from the grandfather.
-              if( elementType() == 2 || elementType() == 0 || thisChild == 0 )
+              if( elementType() == 2 || elementType() == 0 )
               {
                 int newFromGrandFather = newVertices[int(grandFatherRule) - 2][fatherChild];
                 int newFromFather = newVertices[int(fatherRule) - 2][thisChild];

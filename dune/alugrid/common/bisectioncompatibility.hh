@@ -217,21 +217,24 @@ public:
     for(int counter = 0; counter < numberOfElements ; ++counter)
     {
       FaceElementType faceElement = std::make_pair( FaceType{l1,l1,l1}, EdgeType{l1,l1} );
-      if(counter == 0 && constructOrder)
+      if(counter == 0 )
       {
-        FaceType face;
-        const ElementType& el0 = elements_[0];
-        getFace(el0, type0faces_[0], face);
-        faceElement = FaceElementType(std::make_pair( face , EdgeType{0,0} ) );
-
-        //orientate E_0 - add vertices to vertexOrder
-        for(unsigned int i=0 ; i < 4 ; ++i)
+        if( constructOrder )
         {
-          int vtx = el0[ i ];
-          vertexWeights[ vtx ] = i+1;
-          // previous vertex index or -1
-          vertexOrder[ vtx ].first  = i > 0 ? el0[ i-1 ] : -1;
-          vertexOrder[ vtx ].second = i < 3 ? el0[ i+1 ] : -2;
+          FaceType face;
+          const ElementType& el0 = elements_[0];
+          getFace(el0, type0faces_[0], face);
+          faceElement = FaceElementType(std::make_pair( face , EdgeType{0,0} ) );
+
+          //orientate E_0 - add vertices to vertexOrder
+          for(unsigned int i=0 ; i < 4 ; ++i)
+          {
+            int vtx = el0[ i ];
+            vertexWeights[ vtx ] = i+1;
+            // previous vertex index or -1
+            vertexOrder[ vtx ].first  = i > 0 ? el0[ i-1 ] : -1;
+            vertexOrder[ vtx ].second = i < 3 ? el0[ i+1 ] : -2;
+          }
         }
       }
       else
@@ -307,7 +310,7 @@ public:
             vxIndex = el[ nodeInNeigh ];
           }
 
-          double vxWeight = vertexWeights[ el[ nodeInNeigh] ];
+          double vxWeight = vertexWeights[ vxIndex ];
           auto& vxPair = vertexOrder[ vxIndex ];
           assert( vxWeight >= 0 );
 
@@ -315,13 +318,13 @@ public:
           const int prevIdx = vxPair.first ;
           double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexWeights[ prevIdx ];
           double newOrder = 0.5 * (vxWeight + prevOrder);
+          assert( vxWeight > newOrder );
 
           vertexWeights[ neigh [ nodeInNeigh ] ] =  newOrder ;
           vertexOrder[ neigh [ nodeInNeigh ] ] =  std::make_pair( prevIdx, vxIndex ) ;
           if( prevIdx >= 0 )
             vertexOrder[ prevIdx ].second = neigh [ nodeInNeigh ];
           vxPair.first = neigh [ nodeInNeigh ];
-          assert( vxWeight > newOrder );
 
           if( (vxWeight - newOrder) < eps )
           {

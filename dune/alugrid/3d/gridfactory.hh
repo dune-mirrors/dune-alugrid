@@ -145,7 +145,7 @@ namespace Dune
       return bndPair;
     }
 
-    void markLongestEdge();
+    void markLongestEdge( const bool resortElements = true  ) ;
 
   private:
     // return grid object

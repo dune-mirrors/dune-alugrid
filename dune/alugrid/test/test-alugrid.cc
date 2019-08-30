@@ -419,7 +419,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   //if( checkTwist )
   //  checkTwists( grid.leafGridView(), NoMapTwist() );
 
-  for(int i=0; i<mxl; i++)
+  for(int i=0; i<6; i++)
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
     std::cout << "  CHECKING: Refined" << std::endl;
@@ -630,8 +630,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/cube-testgrid-2-2.dgf";
-          filename = "./dgf/reference-cube-2-2.dgf";
+          filename = "./dgf/cube-testgrid-2-2.dgf";
+          //filename = "./dgf/reference-cube-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         gridPtr.loadBalance();
@@ -677,8 +677,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/simplex-testgrid-2-2.dgf";
-          filename = "./dgf/reference-simplex-2-2.dgf";
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
+          //filename = "./dgf/reference-simplex-2-2.dgf";
         std::cout << "READING from " << filename << std::endl;
         Dune::GridPtr< GridType > gridPtr( filename );
         gridPtr.loadBalance();
@@ -725,8 +725,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/simplex-testgrid-2-2.dgf";
-          filename = "./dgf/reference-simplex-2-2.dgf";
+          filename = "./dgf/simplex-testgrid-2-2.dgf";
+          //filename = "./dgf/reference-simplex-2-2.dgf";
         Dune::GridPtr<GridType> gridPtr( filename );
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
@@ -771,8 +771,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/simplex-testgrid-3-3.dgf";
-          filename = "./dgf/reference-cube-3-3.dgf";
+          filename = "./dgf/simplex-testgrid-3-3.dgf";
+          //filename = "./dgf/reference-cube-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         {
@@ -828,8 +828,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/simplex-testgrid-3-3.dgf";
-          filename = "./dgf/reference-simplex-3-3.dgf";
+          filename = "./dgf/simplex-testgrid-3-3.dgf";
+          //filename = "./dgf/reference-simplex-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );

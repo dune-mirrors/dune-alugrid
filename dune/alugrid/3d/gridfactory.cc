@@ -330,20 +330,19 @@ namespace Dune
       }
     }
   }
-#if 0
+
+  // This method moves the longest edge to edge 0--3 of the local numbering,
+  // so if it is a possibly announced edge, it is taken by the compatibility algorithm
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( );// std::vector< bool >& elementOrientation, const bool resortElements )
+  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( const bool resortElements )
   {
     std::cerr << "Marking longest edge for initial refinement..." << std::endl;
 
     // DUNE reference element edge numbering
+    // The vertices on edge i
+    // (Vertices that are not on edge i are on edge 5-i)
     static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {1,2}, {0,3}, {1,3}, {2,3} };
-
-    static const int swapSuccessor[ 6 ] = { -1, 1, -1, -1, 3, -1 };
-
-    // DUNE reference element
-    static const int shift[ 6 ] = { 0, 0, 1, 3, 0, 2 };
 
     const int numVertices = 4;
 
@@ -376,23 +375,12 @@ namespace Dune
 
       if( resortElements )
       {
-        // rotate element
-        if( shift[ edge ] > 0 )
-        {
-          assert( element.size() == 4 );
-          const auto old( element );
-          const int s = shift[ edge ];
-          for( int j = 0; j < numVertices; ++j )
-          {
-            element[ j ] = old[ (j+s) % numVertices ];
-          }
-        }
-
-        if( swapSuccessor[ edge ] > 0 )
-        {
-          std::swap( element[  swapSuccessor[ edge ] ],
-                     element[ (swapSuccessor[ edge ] + 1) % numVertices ] );
-        }
+        assert( element.size() == 4 );
+        const auto old( element );
+        element[0] = old[edges[edge][0]];
+        element[1] = old[edges[5-edge][0]];
+        element[2] = old[edges[5-edge][1]];
+        element[3] = old[edges[edge][1]];
       }
 
 
@@ -419,7 +407,6 @@ namespace Dune
 
     }
   }
-#endif
 
   template< class ALUGrid >
   alu_inline
@@ -457,9 +444,11 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
 
-    bool isCompatible = false;
+    bool madeCompatible = false;
     std::vector<int> simplexTypes(elements_.size(),0);
-    std::vector<double> vertexWeights(vertices_.size(),-1);
+    //pass empty vertexWeights to construct them on the fly in
+    //the reordering algorithm
+    std::vector<double> vertexWeights;
     const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
 
     // BisectionCompatibility only works in serial because of the sorting
@@ -486,7 +475,6 @@ namespace Dune
 
       if( bisComp.compatibilityCheck()  )
       {
-        isCompatible = true;
 #ifndef NDEBUG
         std::cout << rankstr << "Grid is compatible!" << std::endl;
 #endif
@@ -502,8 +490,9 @@ namespace Dune
 #ifndef NDEBUG
         std::cout << rankstr << "Making compatible" << std::endl;
 #endif
-        if( bisComp.type0Algorithm( vertexWeights ) )
+        if(  bisComp.type0Algorithm( vertexWeights ) )
         {
+          madeCompatible = true;
 #ifndef NDEBUG
           std::cout << rankstr << "Grid is compatible!!" << std::endl;
           bisComp.stronglyCompatibleFaces();
@@ -532,7 +521,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 )
+    if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 || madeCompatible )
       recreateBoundaryIds();
 
     // sort boundary ids to insert real boundaries first and then fake
@@ -681,7 +670,7 @@ namespace Dune
 
           // bisection element type: orientation and type (default 0)
           int type = 0;
-          if(dimension == 3 && ALUGrid::refinementType == conforming && !(isCompatible) )
+          if(dimension == 3 && ALUGrid::refinementType == conforming && madeCompatible )
           {
             type = simplexTypes[ elemIndex ];
           }
