@@ -145,7 +145,6 @@ namespace Dune
       return bndPair;
     }
 
-    void markLongestEdge( std::vector< bool >& elementOrientation, const bool resortElements = true  ) ;
     void markLongestEdge();
 
   private:

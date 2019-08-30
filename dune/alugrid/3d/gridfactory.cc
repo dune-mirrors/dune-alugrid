@@ -330,55 +330,10 @@ namespace Dune
       }
     }
   }
-
-  //mark longest edge for 2d bisection refinement
-  //called after correctElementOrientation, if markLongestEdge_ is set
-  //uses rotation of vertices 1,2,3 to keep element orientation intact
-  //while setting the refinement edge
+#if 0
   template< class ALUGrid >
   alu_inline
-  void ALU3dGridFactory< ALUGrid >::markLongestEdge ()
-  {
-    alugrid_assert( elementType == tetra );
-    alugrid_assert( dimension == 2 );
-    const typename ElementVector::iterator elementEnd = elements_.end();
-    for( typename ElementVector::iterator elementIt = elements_.begin();
-        elementIt != elementEnd; ++elementIt )
-    {
-      ElementType &element = *elementIt;
-
-      const VertexType p1 = position( element[ 1 ] );
-      const VertexType p2 = position( element[ 2 ] );
-      const VertexType p3 = position( element[ 3 ] );
-
-      double edge12 = (p1 - p2).two_norm();
-      double edge13 = (p1 - p3).two_norm();
-      double edge23 = (p2 - p3).two_norm();
-
-      //refinement edge is always between 1,3
-      if( edge12 > edge23 )
-      {
-        if( edge12 > edge13 )
-        {
-          //positive rotation
-          std::swap( element[1], element[2] );
-          std::swap( element[2], element[3] );
-        }
-      }
-      else if( edge23 > edge13 )
-      {
-        //negative rotation
-        std::swap( element[2], element[3] );
-        std::swap( element[1], element[2] );
-      }
-    }
-  }
-
-  //mark longest edge for 3d bisection refinement
-  //called alongside bisection compatibility algorithm
-  template< class ALUGrid >
-  alu_inline
-  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation, const bool resortElements )
+  void ALU3dGridFactory< ALUGrid >::markLongestEdge ( );// std::vector< bool >& elementOrientation, const bool resortElements )
   {
     std::cerr << "Marking longest edge for initial refinement..." << std::endl;
 
@@ -464,6 +419,7 @@ namespace Dune
 
     }
   }
+#endif
 
   template< class ALUGrid >
   alu_inline
@@ -500,11 +456,10 @@ namespace Dune
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
-/* For now disabled
-    bool make6 = true;
-    std::vector< bool > elementOrientation;
-    std::vector< int  > simplexTypes;
 
+    bool isCompatible = false;
+    std::vector<int> simplexTypes(elements_.size(),0);
+    std::vector<double> vertexWeights(vertices_.size(),-1);
     const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
 
     // BisectionCompatibility only works in serial because of the sorting
@@ -520,7 +475,7 @@ namespace Dune
 
       Dune::Timer timer;
 
-      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
+      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_);
 
       std::string rankstr ;
       {
@@ -529,34 +484,32 @@ namespace Dune
         rankstr = str.str();
       }
 
-      if( bisComp.make6CompatibilityCheck()  )
+      if( bisComp.compatibilityCheck()  )
       {
+        isCompatible = true;
 #ifndef NDEBUG
         std::cout << rankstr << "Grid is compatible!" << std::endl;
 #endif
       }
       else
       {
-        make6 = false;
-
         // mark longest edge for initial refinement
         // successive refinement is done via Newest Vertex Bisection
-        if( markLongestEdge_ )
-        {
-          markLongestEdge( elementOrientation );
-        }
+ //       if( markLongestEdge_ )
+   //     {
+     //     markLongestEdge( );
+     //   }
 #ifndef NDEBUG
         std::cout << rankstr << "Making compatible" << std::endl;
 #endif
-        if( bisComp.type0Algorithm() )
+        if( bisComp.type0Algorithm( vertexWeights ) )
         {
 #ifndef NDEBUG
           std::cout << rankstr << "Grid is compatible!!" << std::endl;
-#endif
           bisComp.stronglyCompatibleFaces();
+#endif
           // obtain new element sorting, orientations, and types
-          bisComp.returnElements( elements_, elementOrientation, simplexTypes );
-          markLongestEdge( elementOrientation, false );
+          bisComp.returnElements( elements_, simplexTypes );
         }
 #ifndef NDEBUG
         else
@@ -568,7 +521,7 @@ namespace Dune
       std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
 #endif
     }
-*/
+
     numFacesInserted_ = boundaryIds_.size();
 
     const bool faceTrafoEmpty = bool(comm().min( int(faceTransformations_.empty()) ));
@@ -728,18 +681,11 @@ namespace Dune
 
           // bisection element type: orientation and type (default 0)
           int type = 0;
-          int orientation = (dimension == 3 ? (elemIndex % 2) : 0);
-#if 0
-          if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
+          if(dimension == 3 && ALUGrid::refinementType == conforming && !(isCompatible) )
           {
-            assert( !elementOrientation.empty() );
-            orientation = elementOrientation[ elemIndex ];
-
-            assert( !simplexTypes.empty() );
             type = simplexTypes[ elemIndex ];
           }
-#endif
-          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( orientation, type );
+          ALU3DSPACE SimplexTypeFlag simplexTypeFlag( 0, type );
           mgb.InsertUniqueTetra( element, simplexTypeFlag );
         }
         else

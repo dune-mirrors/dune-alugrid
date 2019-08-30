@@ -55,7 +55,6 @@ protected:
 
   //the elements to be renumbered
   std::vector<ElementType> elements_;
-  std::vector<bool> elementOrientation_;
   //the neighbouring structure
   FaceMapType neighbours_;
   // the number of vertices
@@ -65,9 +64,6 @@ protected:
   std::vector<bool> containedInV0_;
   //the element types
   std::vector<int> types_;
-  //true if stevenson notation is used
-  //false for ALBERTA
-  bool stevensonRefinement_;
 
   //the 2 nodes of the refinement edge
   EdgeType type0nodes_;  // = stevensonRefinement_ ? 0,3 : 0,1 ;
@@ -90,19 +86,16 @@ public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
   BisectionCompatibility( const VertexVectorType& vertices,
-                          const std::vector<ElementType>& elements,
-                          const bool stevenson)
+                          const std::vector<ElementType>& elements)
     : vertices_( vertices ),
       elements_( elements ),
-      elementOrientation_(elements_.size(), true),
       nVertices_( vertices_.size() ),
       containedInV0_(nVertices_,true),
       types_(elements_.size(), 0),
-      stevensonRefinement_(stevenson),
-      type0nodes_( stevensonRefinement_ ? EdgeType{0,3} : EdgeType{0,1} ),
-      type0faces_( stevensonRefinement_ ? EdgeType{3,0} : EdgeType{3,2} ),
-      type1node_( stevensonRefinement_ ? 1 : 2 ),
-      type1face_( 3 - type1node_ )
+      type0nodes_( EdgeType{0,3} ),
+      type0faces_( EdgeType{3,0} ),
+      type1node_( 1 ),
+      type1face_( 22 )
   {
     //build the information about neighbours
     Dune::Timer timer;
@@ -148,16 +141,6 @@ public:
     return true;
   }
 
-  bool make6CompatibilityCheck()
-  {
-    //set types to 0, and switch vertices 2,3 for elemIndex % 2
-    applyStandardOrientation();
-    bool result = compatibilityCheck();
-    //set types to 0, and switch vertices 2,3 for elemIndex % 2
-    applyStandardOrientation();
-    return result;
-  }
-
   //print the neighbouring structure
   void printNB()
   {
@@ -192,10 +175,22 @@ public:
   //an algorithm using only elements of type 0
   //it works by sorting the vertices in a global ordering
   //and tries to make as many reflected neighbors as possible.
-  bool type0Algorithm( )
+  //
+  // \param vector containing a double, by which vertices will be sorted
+  //      if it is empty, weights will be created on the fly
+  //
+  bool type0Algorithm( std::vector<double> vertexWeights  )
   {
-    // convert ordering of refinement edge to stevenson
-    alberta2Stevenson();
+    bool constructOrder = false;
+    if( vertexWeights.empty() )
+    {
+      constructOrder = true;
+      vertexWeights.resize( nVertices_, -1.0 );
+    }
+    else
+    {
+      assert(vertexWeights.size() == nVertices_);
+    }
 
     //calculate the sets V0 and V1
     calculateV0( variant_, threshold_ );
@@ -207,32 +202,36 @@ public:
     std::list<std::pair<FaceType, EdgeType> > activeFaceList; // use std::find to find
     std::vector<bool> doneElements(elements_.size(), false);
 
-    std::vector< std::pair< double, std::pair< int,int > > > vertexOrder( nVertices_ , std::make_pair(-1.0, std::make_pair(-1,-2) ) );
+    // vector containing a double, by which vertices will be sorted, an index to the previous
+    // and the the following vertex
+    // -1 and -2 are the two ends (-1 before beginning, -2 after the end)
+    std::vector< std::pair< int,int > > vertexOrder( nVertices_ , std::make_pair(-1,-2) );
+    //if the difference of two doubles drops below eps, a rescale is done
     const double eps = std::numeric_limits< double >::epsilon() * double(nVertices_) * 10.0;
 
 
+    // Now we walk over the elements`
     const unsigned int l1 = -1;
-    //create the vertex priority List
     const int numberOfElements = elements_.size();
     Dune::Timer timer;
     for(int counter = 0; counter < numberOfElements ; ++counter)
     {
       FaceElementType faceElement = std::make_pair( FaceType{l1,l1,l1}, EdgeType{l1,l1} );
-      if(counter == 0)
+      if(counter == 0 && constructOrder)
       {
         FaceType face;
         const ElementType& el0 = elements_[0];
         getFace(el0, type0faces_[0], face);
         faceElement = FaceElementType(std::make_pair( face , EdgeType{0,0} ) );
 
-        //orientate E_0 (add vertices to vertexPriorityList)
+        //orientate E_0 - add vertices to vertexOrder
         for(unsigned int i=0 ; i < 4 ; ++i)
         {
           int vtx = el0[ i ];
-          vertexOrder[ vtx ].first = i+1;
+          vertexWeights[ vtx ] = i+1;
           // previous vertex index or -1
-          vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
-          vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
+          vertexOrder[ vtx ].first  = i > 0 ? el0[ i-1 ] : -1;
+          vertexOrder[ vtx ].second = i < 3 ? el0[ i+1 ] : -2;
         }
       }
       else
@@ -246,26 +245,6 @@ public:
         while( doneElements[ el1 ] && doneElements[ el2 ] )
         {
           activeFaceList.erase( it++ );
-          /*
-          if( it == activeFaceList.end() )
-          {
-            FaceType face;
-            const ElementType& el0 = elements_[0];
-            getFace(el0, type0faces_[0], face);
-            faceElement = FaceElementType(std::make_pair( face , EdgeType( {0,0} ) ) );
-
-            //orientate E_0 (add vertices to vertexPriorityList)
-            for(unsigned int i=0 ; i < 4 ; ++i)
-            {
-              int vtx = el0[ i ];
-              vertexOrder[ vtx ].first = i+1;
-              // previous vertex index or -1
-              vertexOrder[ vtx ].second.first  = i > 0 ? el0[ i-1 ] : -1;
-              vertexOrder[ vtx ].second.second = i < 3 ? el0[ i+1 ] : -2;
-            }
-          }
-          */
-
           assert( it != activeFaceList.end() );
           el1 = it->second[ 0 ];
           el2 = it->second[ 1 ];
@@ -299,7 +278,8 @@ public:
       ElementType newNeigh(el);
 
       //insertion of new vertex before nodeInEl
-      if( vertexOrder[ neigh [ nodeInNeigh ] ].first < 0 )
+      //i.e. < 0 means the vertex has not been worked on
+      if( constructOrder &&  vertexWeights[ neigh [ nodeInNeigh ] ] < 0 )
       {
         int vxIndex = el[ nodeInEl ];
 
@@ -307,13 +287,15 @@ public:
         //if nodeInNeigh = 3 && nodeInEl = 0 insert after el[3]
         if( useAnnounced && (nodeInEl == type0nodes_[0] && nodeInNeigh == type0nodes_[1] ) )
         {
+          double vxWeight = vertexWeights[ el[ nodeInNeigh] ];
           auto& vxPair = vertexOrder[ el[ nodeInNeigh ] ];
           // got to next vertex
-          vxIndex = vxPair.second.second;
+          vxIndex = vxPair.second;
           if( vxIndex == -2 )
           {
-            vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( vxPair.first+1.0, std::make_pair( el[ nodeInNeigh ], -2 ) );
-            vxPair.second.second = neigh [ nodeInNeigh ];
+            vertexWeights[ neigh [ nodeInNeigh ] ] = vxWeight + 1.0;
+            vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( el[ nodeInNeigh ], -2 );
+            vxPair.second = neigh [ nodeInNeigh ];
           }
         }
 
@@ -325,33 +307,36 @@ public:
             vxIndex = el[ nodeInNeigh ];
           }
 
+          double vxWeight = vertexWeights[ el[ nodeInNeigh] ];
           auto& vxPair = vertexOrder[ vxIndex ];
-          assert( vxPair.first >= 0 );
+          assert( vxWeight >= 0 );
 
           // new vertex weight is average between previous and this one
-          const int prevIdx = vxPair.second.first ;
-          double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexOrder[ prevIdx ].first;
-          double newOrder = 0.5 * (vxPair.first + prevOrder);
+          const int prevIdx = vxPair.first ;
+          double prevOrder = ( prevIdx == -1 ) ? 0.0 : vertexWeights[ prevIdx ];
+          double newOrder = 0.5 * (vxWeight + prevOrder);
 
-          vertexOrder[ neigh [ nodeInNeigh ] ] = std::make_pair( newOrder, std::make_pair( prevIdx, vxIndex ) );
+          vertexWeights[ neigh [ nodeInNeigh ] ] =  newOrder ;
+          vertexOrder[ neigh [ nodeInNeigh ] ] =  std::make_pair( prevIdx, vxIndex ) ;
           if( prevIdx >= 0 )
-            vertexOrder[ prevIdx ].second.second = neigh [ nodeInNeigh ];
-          vxPair.second.first = neigh [ nodeInNeigh ];
-          assert( vxPair.first > newOrder );
+            vertexOrder[ prevIdx ].second = neigh [ nodeInNeigh ];
+          vxPair.first = neigh [ nodeInNeigh ];
+          assert( vxWeight > newOrder );
 
-          if( (vxPair.first - newOrder) < eps )
+          if( (vxWeight - newOrder) < eps )
           {
 #ifndef NDEBUG
             Dune::Timer restimer;
             std::cout << "Rescale vertex order weights." << std::endl;
 #endif
+            // We use a map to sort
             std::map< double, int > newVertexOrder;
             const int size = vertexOrder.size();
             for( int j=0; j<size; ++j )
             {
-              if( vertexOrder[ j ].first > 0.0 )
+              if( vertexWeights[ j ] > 0.0 )
               {
-                newVertexOrder.insert( std::make_pair( vertexOrder[ j ].first, j ) );
+                newVertexOrder.insert( std::make_pair( vertexWeights[ j ], j ) );
               }
             }
 
@@ -359,14 +344,14 @@ public:
             for( const auto& vx: newVertexOrder )
             {
               assert( vx.second >=0 && vx.second < size );
-              vertexOrder[ vx.second ].first = count++ ;
+              vertexWeights[ vx.second ] = count++ ;
             }
 
             for( int j=0; j<size; ++j )
             {
-              if( vertexOrder[ j ].first > 0.0 && vertexOrder[ j ].second.first >= 0 )
+              if( vertexWeights[ j ] > 0.0 && vertexOrder[ j ].first >= 0 )
               {
-                if( vertexOrder[ j ].first <= vertexOrder[ vertexOrder[ j ].second.first ].first )
+                if( vertexWeights[ j ] <= vertexWeights[ vertexOrder[ j ].first ] )
                   std::abort();
               }
             }
@@ -379,11 +364,12 @@ public:
 
       {
         // sort vertices in ascending order
+        // again use map for sorting purposes
         std::map< double, int > vx;
         for( int j=0; j<4; ++j )
         {
-          assert( vertexOrder[ neigh[ j ] ].first > 0 );
-          vx.insert( std::make_pair( vertexOrder[ neigh[ j ] ].first, j ) );
+          assert( vertexWeights[ neigh[ j ] ] > 0 );
+          vx.insert( std::make_pair( vertexWeights[ neigh[ j ] ], j ) );
         }
 
         int count = 0;
@@ -439,17 +425,14 @@ public:
 
       //reorientate neigh using the helper element newNeigh
       //we use swaps to be able to track the elementOrientation_
-      bool neighOrientation = elementOrientation_[neighIndex];
       for(unsigned int i =0 ; i < 3; ++i)
       {
         if( newNeigh[i] != neigh[i] )
         {
           auto neighIt = std::find(neigh.begin() + i,neigh.end(),newNeigh[i]);
           std::swap(*neighIt,neigh[i]);
-          neighOrientation = ! neighOrientation;
         }
       }
-      elementOrientation_[neighIndex] = neighOrientation;
       //add and remove faces from activeFaceList
       for(unsigned int i = 0; i < 4 ; ++i)
       {
@@ -479,220 +462,16 @@ public:
   }
 
 
-  //An algorithm using only elements of type 1
-  bool type1Algorithm()
-  {
-    // convert to stevenson ordering
-    alberta2Stevenson();
-
-    //set all types to 1
-    std::fill( types_.begin(), types_.end(), 1 );
-
-    //the currently active Faces.
-    //and the free faces that can still be adjusted at the end.
-    FaceMapType activeFaces, freeFaces;
-    //the finished elements. The number indicates the fixed node
-    //if it is -1, the element has not been touched yet.
-    std::vector<int> nodePriority;
-    nodePriority.resize(nVertices_ , -1);
-    int currNodePriority =nVertices_;
-
-    const unsigned int numberOfElements = elements_.size();
-    //walk over all elements
-    for(unsigned int elIndex =0 ; elIndex < numberOfElements; ++elIndex)
-    {
-      //if no node is constrained and no face is active, fix one (e.g. smallest index)
-      ElementType & el = elements_[elIndex];
-      int priorityNode = -1;
-      FaceType face;
-      int freeNode = -1;
-      for(int i = 0; i < 4; ++i)
-      {
-        int tmpPrio = nodePriority[el[i]];
-        //if a node has positive priority
-        if( tmpPrio > -1 )
-        {
-          if( priorityNode < 0 || tmpPrio > nodePriority[el[priorityNode]] )
-            priorityNode = i;
-        }
-        getFace(el,3 - i,face );
-        //if we have a free face, the opposite node is good to be fixed
-        if(freeFaces.find(face) != freeFaces.end())
-          freeNode = i;
-      }
-      if(priorityNode > -1)
-      {
-        fixNode(el, priorityNode);
-      }
-      else if(freeNode > -1)
-      {
-        nodePriority[el[freeNode]] = currNodePriority;
-        fixNode(el, freeNode);
-        --currNodePriority;
-      }
-      else //fix a random node
-      {
-        nodePriority[el[type1node_]] = currNodePriority;
-        fixNode(el, type1node_);
-        --currNodePriority;
-      }
-
-      FaceElementType faceElement;
-      //walk over all faces
-      //add face 2 to freeFaces - if already free -great, match and keep, if active and not free, match and erase
-      getFace(el,type1face_, faceElement);
-      getFace(el,type1face_, face);
-
-      const auto freeFacesEnd = freeFaces.end();
-      const auto freeFaceIt = freeFaces.find(face);
-      if( freeFaceIt != freeFacesEnd)
-      {
-        while(!checkFaceCompatibility(faceElement))
-        {
-          rotate(el);
-        }
-        freeFaceIt->second[1] = elIndex;
-      }
-      else if(activeFaces.find(face) != activeFaces.end())
-      {
-        while(!checkFaceCompatibility(faceElement))
-        {
-          rotate(el);
-        }
-        activeFaces.erase(face);
-      }
-      else
-      {
-        freeFaces.insert({{face,{elIndex,elIndex}}});
-      }
-      //add others to activeFaces - if already there, delete, if already free, match and erase
-      //for(int i=0; i<4; ++i ) //auto&& i : {0,1,2,3})
-      for(auto&& i : {0,1,2,3})
-      {
-        if (i == type1face_) continue;
-
-        getFace(el,i,face);
-        getFace(el,i,faceElement);
-
-        unsigned int neighborIndex = faceElement.second[0] == elIndex ? faceElement.second[1] : faceElement.second[0];
-        if(freeFaces.find(face) != freeFacesEnd)
-        {
-          while(!checkFaceCompatibility(faceElement))
-          {
-            rotate(elements_[neighborIndex]);
-          }
-        }
-        else if(activeFaces.find(face) != activeFaces.end())
-        {
-          if(!checkFaceCompatibility(faceElement))
-          {
-            checkFaceCompatibility(faceElement,true) ;
-            return false;
-          }
-          activeFaces.erase(face);
-        }
-        else
-        {
-          activeFaces.insert({{face,{elIndex,elIndex}}});
-        }
-      }
-    }
-
-    //now postprocessing of freeFaces. possibly - not really necessary, has to be thought about
-    //useful for parallelization .
-    /*
-    for(auto&& face : freeFaces)
-    {
-      unsigned int elementIndex = face.second[0];
-      unsigned int neighborIndex = face.second[1];
-      //give refinement edge positive priority
-      //and non-refinement edge negative priority less than -1 and counting
-    }
-    */
-    return true;
-  }
 
   void returnElements(std::vector<ElementType> & elements,
-                      std::vector<bool>& elementOrientation,
-                      std::vector<int>& types,
-                      const bool stevenson = false )
+                      std::vector<int>& types )
   {
-    if( stevenson )
-    {
-      alberta2Stevenson();
-    }
-    else
-    {
-      stevenson2Alberta();
-    }
-
-    //This needs to happen, before the boundaryIds are
-    //recreated in the GridFactory
-    const int nElements = elements_.size();
-    for( int el = 0; el<nElements; ++el )
-    {
-      // in ALU only elements with negative orientation can be inserted
-      if( ! elementOrientation_[ el  ] )
-      {
-        // the refinement edge is 0 -- 1, so we can swap 2 and 3
-        std::swap( elements_[ el ][ 2 ], elements_[ el ][ 3 ] );
-      }
-    }
-
     elements = elements_;
-    elementOrientation = elementOrientation_;
     types = types_;
   }
 
-  void stevenson2Alberta()
-  {
-    if( stevensonRefinement_ )
-    {
-      swapRefinementType();
-    }
-  }
-
-  void alberta2Stevenson()
-  {
-    if( ! stevensonRefinement_ )
-    {
-      swapRefinementType();
-    }
-  }
 
 private:
-  void swapRefinementType()
-  {
-    const int nElements = elements_.size();
-    for( int el = 0; el<nElements; ++el )
-    {
-      elementOrientation_[ el ] = !elementOrientation_[ el ];
-      std::swap(elements_[ el ][ 1 ], elements_[ el ][ 3 ]);
-    }
-
-    // swap refinement flags
-    stevensonRefinement_ = ! stevensonRefinement_;
-    type0nodes_ = stevensonRefinement_ ? EdgeType{0,3} : EdgeType{0,1} ;
-    type0faces_ = stevensonRefinement_ ? EdgeType{3,0} : EdgeType{3,2} ;
-    type1node_ = stevensonRefinement_ ? 1 : 2 ;
-    type1face_ = ( 3 -  type1node_ );
-  }
-
-  //switch vertices 2,3 for all elements with elemIndex % 2
-  void applyStandardOrientation ()
-  {
-    int i = 0;
-    for(auto & element : elements_ )
-    {
-      if ( i % 2 == 0 )
-      {
-        std::swap(element[2],element[3]);
-        elementOrientation_[i] = ! elementOrientation_[i];
-      }
-      ++i;
-    }
-    types_.resize(elements_.size(), 0);
-  }
 
   //check face for compatibility
   bool checkFaceCompatibility(std::pair<FaceType, EdgeType> face, bool verbose = false)
@@ -853,10 +632,8 @@ private:
   {
     if(type == 0)
     {
-      if(stevensonRefinement_)
+      switch(faceIndex)
       {
-        switch(faceIndex)
-        {
         case 0 :
           edge = {el[0],el[2]};
           break;
@@ -872,36 +649,12 @@ private:
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
           std::abort();
-        }
-      }
-      else //ALBERTA Refinement
-      {
-        switch(faceIndex)
-        {
-        case 0 :
-          edge = {el[0],el[1]};
-          break;
-        case 1 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
-          edge =  {el[0],el[2]};
-          break;
-        case 3 :
-          edge =  {el[1],el[3]};
-          break;
-        default :
-          std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          std::abort();
-        }
       }
     }
     else if(type == 1 || type == 2)
     {
-      if(stevensonRefinement_)
+      switch(faceIndex)
       {
-        switch(faceIndex)
-        {
         case 0 :
           edge = {el[0],el[2]};
           break;
@@ -917,28 +670,6 @@ private:
         default :
           std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
           std::abort();
-        }
-      }
-      else //ALBERTA Refinement
-      {
-        switch(faceIndex)
-        {
-        case 0 :
-          edge = {el[0],el[1]};
-          break;
-        case 1 :
-          edge = {el[0],el[1]};
-          break;
-        case 2 :
-          edge = {el[0],el[3]};
-          break;
-        case 3 :
-          edge = {el[1],el[3]};
-          break;
-        default :
-          std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR TETRAHEDRONS" << std::endl;
-          std::abort();
-        }
       }
     }
     else
