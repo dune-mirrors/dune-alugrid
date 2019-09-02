@@ -50,7 +50,7 @@ namespace ALUGrid
       for (BuilderIF::hedge1list_t::iterator i = _hedge1List.begin (); i != _hedge1Listend; ++i )
       {
         int k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
-        _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
+        _edgeMap [edgeKey_t (k,l)] = (*i);
       }
       // clear list
       clear( _hedge1List );
@@ -61,7 +61,7 @@ namespace ALUGrid
       // copy list entries to map
       for (BuilderIF::hface3list_t::iterator i = _hface3List.begin (); i != _hface3Listend; ++i )
       {
-        _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
+       _face3Map [faceKey_t ((*i)->myvertex (0)->ident (),(*i)->myvertex (1)->ident (), (*i)->myvertex (2)->ident ())] = (*i);
       }
       // clear list
       clear( _hface3List );
@@ -105,6 +105,33 @@ namespace ALUGrid
       clear( _periodic4List );
     }
 
+
+    // all elements
+    {
+      BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
+      const BuilderIF::tetralist_t::iterator _tetraListend = _tetraList.end ();
+      // copy list entries to map
+      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); i != _tetraListend; ++i )
+      {
+        _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
+             (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
+      }
+      // clear list
+      clear( _tetraList );
+    }
+
+    {
+      BuilderIF::hexalist_t& _hexaList = myBuilder()._hexaList;
+      const BuilderIF::hexalist_t::iterator _hexaListend = _hexaList.end ();
+      // copy list entries to map
+      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); i != _hexaListend; ++i )
+      {
+        _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
+                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
+      }
+      // clear list
+      clear( _hexaList );
+    }
 
     // all boundary segments
     typedef std::vector< Gitter::hbndseg_STI * > hbndvector_t;
@@ -198,33 +225,6 @@ namespace ALUGrid
       }
       // clear list
       clear( _hbndseg3List );
-    }
-
-    // all elements
-    {
-      BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
-      const BuilderIF::tetralist_t::iterator _tetraListend = _tetraList.end ();
-      // copy list entries to map
-      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); i != _tetraListend; ++i )
-      {
-        _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
-             (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
-      }
-      // clear list
-      clear( _tetraList );
-    }
-
-    {
-      BuilderIF::hexalist_t& _hexaList = myBuilder()._hexaList;
-      const BuilderIF::hexalist_t::iterator _hexaListend = _hexaList.end ();
-      // copy list entries to map
-      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); i != _hexaListend; ++i )
-      {
-        _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
-                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
-      }
-      // clear list
-      clear( _hexaList );
     }
 
     /////////////////////////////////////////
@@ -724,9 +724,9 @@ namespace ALUGrid
                                Gitter::hbndseg_STI ::bnd_t bt,
                                int ldbVertexIndex,
                                int master,
-                               MacroGhostInfoTetra * ghInfo)
+                               MacroGhostInfoTetra * ghInfo,
+                               bool isRear)
   {
-    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
     if (_hbnd3Int.find (key) == _hbnd3Int.end ())
@@ -734,7 +734,7 @@ namespace ALUGrid
       alugrid_assert ( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first;
       // here the point is stored
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,twst, ldbVertexIndex, master, ghInfo);
+      _hbnd3Int [key] = new Hbnd3IntStorage (face,isRear, ldbVertexIndex, master, ghInfo);
       return true;
     }
     return false;
@@ -746,16 +746,16 @@ namespace ALUGrid
                                Gitter::hbndseg_STI ::bnd_t bt,
                                int ldbVertexIndex,
                                int master,
-                               MacroGhostInfoHexa* ghInfo)
+                               MacroGhostInfoHexa* ghInfo,
+                               bool isRear)
   {
-    int twst = cyclicReorder (v);
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
     if (_hbnd4Int.find (key) == _hbnd4Int.end ())
     {
       alugrid_assert ( ghInfo );
       hface4_GEO * face =  InsertUniqueHface4 (v).first;
-      _hbnd4Int [key] = new Hbnd4IntStorage (face, twst, ldbVertexIndex, master, ghInfo);
+      _hbnd4Int [key] = new Hbnd4IntStorage (face, isRear, ldbVertexIndex, master, ghInfo);
       return true;
     }
     return false;
@@ -776,6 +776,7 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
+    char isRear = os.get();
 
     const signed char readPoint = os.get();
 
@@ -790,7 +791,7 @@ namespace ALUGrid
     if( b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo );
+      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo, bool(isRear) );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = 0;
@@ -802,7 +803,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master, pv );
+      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master, pv, bool(isRear) );
     }
 
     // delete to avoid memory leak
@@ -827,6 +828,7 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
+    char isRear = os.get();
     const signed char readPoint = os.get();
 
     MacroGhostInfoHexa* ghInfo = 0;
@@ -840,7 +842,7 @@ namespace ALUGrid
     if(b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo );
+      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo, bool(isRear) );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = 0;
@@ -852,7 +854,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master, pv );
+      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master, pv, bool(isRear) );
     }
 
     // delete to avoid memory leak
@@ -887,12 +889,13 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
+    char isRear = os.get ();
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
+    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv, bool(isRear) );
     return;
   }
 
@@ -904,12 +907,13 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
+    char isRear = os.get ();
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
+    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv, bool(isRear) );
     return;
   }
 

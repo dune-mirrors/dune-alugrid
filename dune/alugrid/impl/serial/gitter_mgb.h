@@ -29,21 +29,6 @@ namespace ALUGrid
     }
   }
 
-  //This method is not needed anymore...
-  // cyclic re-ordering of v and computing of twist
-  inline int cyclicReorder( int *begin, int *end )
-  {
-    //DO nothing here
-    return 0;
-  }
-
-  // sorts v in ascending order and returns twist
-  template <int dim>
-  inline int cyclicReorder( int (&v)[ dim ] )
-  {
-    return cyclicReorder( v, v+dim );
-  }
-
   class MacroGridBuilder
   : protected Gitter::Geometric
   {
@@ -207,7 +192,9 @@ namespace ALUGrid
       }
 
       virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
+      virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv, bool isRear);
       virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
+      virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv, bool isRear);
 
       virtual bool InsertUniqueHbnd3 (int (&v)[3], Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
       {

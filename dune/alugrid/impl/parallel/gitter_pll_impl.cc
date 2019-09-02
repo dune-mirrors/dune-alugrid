@@ -633,8 +633,8 @@ namespace ALUGrid
       // als Randelemente dorthin schreiben sollen - das tun sie
       // aber selbst.
 
-      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled );
-      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled );
+      this->myhface ().nb.front ().first->accessPllX ().packAsBnd (this->myhface ().nb.front ().second, link, os, ghostCellsEnabled);
+      this->myhface ().nb.rear  ().first->accessPllX ().packAsBnd (this->myhface ().nb.rear  ().second, link, os, ghostCellsEnabled);
     }
     catch( Parallel::AccessPllException& )
     {
@@ -887,6 +887,8 @@ namespace ALUGrid
       for (int i = 0; i < myhface_t::polygonlength; ++i)
         os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ());
     }
+
+    os.put(char(this->myhbnd().isRear(fce)));
 
     if(_ghInfo) // is stored ghost point exists
     {
@@ -1190,6 +1192,7 @@ namespace ALUGrid
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
 
+    os.put ( char(mytetra ().isRear(fce)));
     // see method unpackHbnd3Int
     if( packGhost )
     {
@@ -1920,6 +1923,7 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (fce,2)->ident ());
     os.writeObject (myhexa ().myvertex (fce,3)->ident ());
 
+    os.put (char(myhexa().isRear(fce)));
     // see method unpackHbnd4Int
     if( packGhost )
     {

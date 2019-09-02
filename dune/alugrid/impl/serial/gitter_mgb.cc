@@ -40,7 +40,7 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::hface3_GEO *, bool > MacroGridBuilder::
   InsertUniqueHface (int (&v)[3]) {
     faceKey_t key (v[0],v[1],v[2]);
-   // std::cout << "Inserting Face " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+  //  std::cout << "Inserting Face " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
     std::pair< faceMap_t::iterator, bool > result = _face3Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
     {
@@ -138,6 +138,37 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
+  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv, bool isRear )
+  {
+    faceKey_t key (v [0], v [1], v [2]);
+    //std::cout << "Inserting Hbnd3 " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+    if (bt == Gitter::hbndseg_STI::closure)
+    {
+      if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface3_GEO * face  = faceFrontPair.first;
+        _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master);
+        return true;
+      }
+    }
+    else
+    {
+      if (_hbnd3Map.find (key) == _hbnd3Map.end ())
+      {
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface3_GEO * face  = faceFrontPair.first;
+        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,isRear,bt);
+        hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
+        hb3->setMaster( master );
+        hb3->setBoundaryProjection( pv );
+        _hbnd3Map [key] = hb3;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool MacroGridBuilder::
   InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     faceKey_t key (v [0], v [1], v [2]);
@@ -148,6 +179,7 @@ namespace ALUGrid
         hface3_GEO * face  = faceFrontPair.first;
         alugrid_assert( !faceFrontPair.second );
         bool isRear = face->nb.emptyRear();
+        alugrid_assert( face->ref == 1);
         _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master);
         return true;
       }
@@ -160,6 +192,7 @@ namespace ALUGrid
         hface3_GEO * face  = faceFrontPair.first;
         alugrid_assert( !faceFrontPair.second );
         bool isRear = face->nb.emptyRear();
+        alugrid_assert( face->ref == 1);
         hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,isRear,bt);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
@@ -171,6 +204,35 @@ namespace ALUGrid
     return false;
   }
 
+  bool MacroGridBuilder::
+  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv, bool isRear )
+  {
+    faceKey_t key (v [0], v [1], v [2]);
+    if (bt == Gitter::hbndseg_STI::closure)
+    {
+      if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface4_GEO * face =  faceFrontPair.first;
+        _hbnd4Int [key] = new Hbnd4IntStorage (face, isRear, ldbVertexIndex, master );
+        return true;
+      }
+    }
+    else
+    {
+      if (_hbnd4Map.find (key) == _hbnd4Map.end ())
+      {
+        auto faceFrontPair = InsertUniqueHface (v);
+        hface4_GEO * face =  faceFrontPair.first;
+        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,isRear,bt);
+        hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
+        hb4->setMaster( master );
+        hb4->setBoundaryProjection( pv );
+        _hbnd4Map [key] = hb4;
+        return true;
+      }
+    }
+    return false;
+  }
   bool MacroGridBuilder::
   InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
@@ -218,17 +280,16 @@ namespace ALUGrid
     elementMap_t::const_iterator hit = _periodic3Map.find (key);
     if (hit == _periodic3Map.end ()) {
       hface3_GEO * face [2];
-      int twst [2];
+      bool isRear [2];
       for (int fce = 0; fce < 2; ++fce )
       {
         int x [3];
         x [0] = v [Periodic3::prototype [fce][0]];
         x [1] = v [Periodic3::prototype [fce][1]];
         x [2] = v [Periodic3::prototype [fce][2]];
-        twst [fce] = cyclicReorder (x);
         face [fce] = InsertUniqueHface (x).first;
       }
-      periodic3_GEO * t = myBuilder ().insert_periodic3 (face,twst,bt);
+      periodic3_GEO * t = myBuilder ().insert_periodic3 (face,isRear,bt);
       alugrid_assert (t);
       _periodic3Map [key] = t;
       return std::pair< periodic3_GEO *, bool > (t,true);
@@ -250,7 +311,7 @@ namespace ALUGrid
     elementMap_t::const_iterator hit = _periodic4Map.find (key);
     if (hit == _periodic4Map.end ()) {
       hface4_GEO * face [2];
-      int twst [2];
+      bool isRear [2];
       for (int fce = 0; fce < 2; ++fce )
       {
         int x [4];
@@ -258,10 +319,9 @@ namespace ALUGrid
         x [1] = v [Periodic4::prototype [fce][1]];
         x [2] = v [Periodic4::prototype [fce][2]];
         x [3] = v [Periodic4::prototype [fce][3]];
-        twst [fce] = cyclicReorder (x);
         face [fce] = InsertUniqueHface (x).first;
       }
-      periodic4_GEO * t = myBuilder ().insert_periodic4 (face,twst,bt);
+      periodic4_GEO * t = myBuilder ().insert_periodic4 (face,isRear,bt);
       alugrid_assert (t);
       _periodic4Map [key] = t;
       return std::pair< periodic4_GEO *, bool > (t,true);
@@ -411,7 +471,7 @@ namespace ALUGrid
       for ( iterator i = _hedge1List.begin (); i != hedge1ListEnd; ++i )
       {
         long k = (*i)->myvertex (0)->ident (), l = (*i)->myvertex (1)->ident ();
-        _edgeMap [edgeKey_t (k < l ? k : l, k < l ? l : k)] = (*i);
+        _edgeMap [edgeKey_t (k,l )] = (*i);
       }
       // clear list
       clear( _hedge1List );
@@ -748,6 +808,11 @@ namespace ALUGrid
         }
         else
         {
+          if(((hface3_GEO *)(*i).second)->ref != 2)
+          {
+            auto face = (hface3_GEO *)(*i).second;
+            std::cout << face << std::endl;
+          }
           alugrid_assert (((hface3_GEO *)(*i).second)->ref == 2);
           myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second );
         }
@@ -850,9 +915,8 @@ namespace ALUGrid
         {
           in >> v[ j ] ;
         }
-        int orientation = i%2;
         int elementType = 0;
-        InsertUniqueTetra (v, SimplexTypeFlag(orientation, elementType) );
+        InsertUniqueTetra (v, SimplexTypeFlag(0, elementType) );
       }
     }
 
