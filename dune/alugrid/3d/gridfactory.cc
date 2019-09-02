@@ -483,10 +483,10 @@ namespace Dune
       {
         // mark longest edge for initial refinement
         // successive refinement is done via Newest Vertex Bisection
- //       if( markLongestEdge_ )
-   //     {
-     //     markLongestEdge( );
-     //   }
+        if( markLongestEdge_ )
+        {
+          markLongestEdge( );
+        }
 #ifndef NDEBUG
         std::cout << rankstr << "Making compatible" << std::endl;
 #endif
@@ -513,7 +513,11 @@ namespace Dune
 
     numFacesInserted_ = boundaryIds_.size();
 
-    const bool faceTrafoEmpty = bool(comm().min( int(faceTransformations_.empty()) ));
+    // We need to communicate executing recreateboundaryids
+    // because there is communication inside
+    // recreateBoundaryIds needs to be called, when
+    // the grid numbering has changed, i.e. almost always
+    const bool recreateBndIds = (dimension ==2) || addMissingBoundaries || bool(comm().max( int(!faceTransformations_.empty() || madeCompatible) ));
 
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
@@ -521,7 +525,7 @@ namespace Dune
     //
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
-    if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 || madeCompatible )
+    if( recreateBndIds )
       recreateBoundaryIds();
 
     // sort boundary ids to insert real boundaries first and then fake

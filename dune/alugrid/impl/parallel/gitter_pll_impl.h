@@ -190,8 +190,8 @@ namespace ALUGrid
       typedef A mytetra_t;
       typedef typename A::myhface3_t myhface3_t;
     protected:
-      inline TetraPllXBase(myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                           myhface3_t *f2, int s2, myhface3_t *f3, int s3)
+      inline TetraPllXBase(myhface3_t *f0, bool s0, myhface3_t *f1, bool s1,
+                           myhface3_t *f2, bool s2, myhface3_t *f3, bool s3)
           : A(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
 
       inline mytetra_t& mytetra() { return *this; }
@@ -231,8 +231,8 @@ namespace ALUGrid
       typedef typename A::myneighbour_t myneighbour_t;
       typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
-      TetraPllXBaseMacro(int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                         myhface3_t *f2, int s2, myhface3_t *f3, int s3, SimplexTypeFlag elementType);
+      TetraPllXBaseMacro(int l, myhface3_t *f0, bool s0, myhface3_t *f1, bool s1,
+                         myhface3_t *f2, bool s2, myhface3_t *f3, bool s3, SimplexTypeFlag elementType);
     public :
       virtual int ldbVertexIndex () const;
       virtual void writeStaticState (ObjectStream &, int) const ;
@@ -445,9 +445,9 @@ namespace ALUGrid
       inline myhexa_t & myhexa () { return *this; }
       inline const myhexa_t & myhexa () const { return *this; }
 
-      inline HexaPllBaseX(myhface4_t *f0, int s0, myhface4_t *f1, int s1,
-                          myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                          myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+      inline HexaPllBaseX(myhface4_t *f0, bool s0, myhface4_t *f1, bool s1,
+                          myhface4_t *f2, bool s2, myhface4_t *f3, bool s3,
+                          myhface4_t *f4, bool s4, myhface4_t *f5, bool s5)
           : A(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
     public :
       void writeDynamicState (ObjectStream &, int) const;
@@ -478,9 +478,9 @@ namespace ALUGrid
       typedef typename A::myneighbour_t  myneighbour_t;
       typedef typename A::vertexelementlinkage_t vertexelementlinkage_t ;
 
-      HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
-                               myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                               myhface4_t *f4, int s4, myhface4_t *f5, int s5);
+      HexaPllBaseXMacro(int l, myhface4_t *f0, bool s0, myhface4_t *f1, bool s1,
+                               myhface4_t *f2, bool s2, myhface4_t *f3, bool s3,
+                               myhface4_t *f4, bool s4, myhface4_t *f5, bool s5);
     public :
      ~HexaPllBaseXMacro ();
       virtual int ldbVertexIndex () const;
@@ -715,8 +715,8 @@ namespace ALUGrid
         typedef hface3_IMPL innerface_t;
         typedef TetraEmpty::balrule_t balrule_t;
       public :
-        inline TetraEmptyPll (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                              myhface3_t *f2, int s2, myhface3_t *f3, int s3)
+        inline TetraEmptyPll (myhface3_t *f0, bool s0, myhface3_t *f1, bool s1,
+                              myhface3_t *f2, bool s2, myhface3_t *f3, bool s3)
           : TetraPllXBase< TetraEmpty >(f0, s0, f1, s1, f2, s2, f3, s3 ) {}
         virtual ElementPllXIF & accessPllX () { return *this; }
         virtual const ElementPllXIF & accessPllX () const { return *this; }
@@ -726,8 +726,8 @@ namespace ALUGrid
       class TetraEmptyPllMacro : public TetraPllXBaseMacro< tetra_IMPL >
       {
       public :
-        inline TetraEmptyPllMacro (myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                                   myhface3_t *f2, int s2, myhface3_t *f3, int s3, SimplexTypeFlag elementType)
+        inline TetraEmptyPllMacro (myhface3_t *f0, bool s0, myhface3_t *f1, bool s1,
+                                   myhface3_t *f2, bool s2, myhface3_t *f3, bool s3, SimplexTypeFlag elementType)
           : TetraPllXBaseMacro< tetra_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, elementType) {} // 0 == level 0
         virtual ElementPllXIF & accessPllX () { return *this; }
         virtual const ElementPllXIF & accessPllX () const { return *this; }
@@ -802,9 +802,9 @@ namespace ALUGrid
         typedef hface4_IMPL innerface_t;
         typedef HexaEmpty::balrule_t balrule_t;
       public :
-        inline HexaEmptyPll (myhface4_t *f0, int s0, myhface4_t *f1, int s1,
-                             myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                             myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+        inline HexaEmptyPll (myhface4_t *f0, bool s0, myhface4_t *f1, bool s1,
+                             myhface4_t *f2, bool s2, myhface4_t *f3, bool s3,
+                             myhface4_t *f4, bool s4, myhface4_t *f5, bool s5)
           : HexaPllBaseX< HexaEmpty >(f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
         virtual ElementPllXIF & accessPllX () { return *this; }
         virtual const ElementPllXIF & accessPllX () const { return *this; }
@@ -814,9 +814,9 @@ namespace ALUGrid
       class HexaEmptyPllMacro : public HexaPllBaseXMacro< hexa_IMPL >
       {
       public :
-        inline HexaEmptyPllMacro(myhface4_t *f0, int s0, myhface4_t *f1, int s1,
-                                 myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                                 myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+        inline HexaEmptyPllMacro(myhface4_t *f0, bool s0, myhface4_t *f1, bool s1,
+                                 myhface4_t *f2, bool s2, myhface4_t *f3, bool s3,
+                                 myhface4_t *f4, bool s4, myhface4_t *f5, bool s5)
           : HexaPllBaseXMacro< hexa_IMPL >(0, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5) {}
         virtual ElementPllXIF & accessPllX () { return *this; }
         virtual const ElementPllXIF & accessPllX () const { return *this; }
@@ -844,21 +844,20 @@ namespace ALUGrid
           virtual VertexGeo     * insert_ghostvx (double,double,double,int);
 
           // insert hbnd_int without ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t);
           // insert hbnd_int with ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
 
           // normal insert hbnd3 version
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t);
           // version that get point and create ghost macro
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
           // version that created internal boundary on ghost elements
           virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
-          hedge1_GEO    * insert_hedge1_twist (VertexGeo *,int , VertexGeo * , int );
           virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]);
           virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]);
-          virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]);
-          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], int (&)[4], SimplexTypeFlag);
+          virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]);
+          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool (&)[4], SimplexTypeFlag);
 
           virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
           virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );

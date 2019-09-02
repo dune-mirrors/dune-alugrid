@@ -314,7 +314,7 @@ namespace ALUGrid
 
             const face3rule_t faceRule = info._faceRules[i];
 
-            std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
+            //std::cout << "Calculated Face  Rule: "<< faceRule << " with TetraRule: " << rule <<  " for " << tetra << " and " << face << std::endl;
 
             // check refinement of faces
             if (! face->refine( faceRule, tetra->isRear( info._faces[ i ] ) ) ) return false;

@@ -980,8 +980,8 @@ namespace ALUGrid
 
   template < class A >
   TetraPllXBaseMacro< A >::
-  TetraPllXBaseMacro (int l, myhface3_t *f0, int s0, myhface3_t *f1, int s1,
-                             myhface3_t *f2, int s2, myhface3_t *f3, int s3,
+  TetraPllXBaseMacro (int l, myhface3_t *f0, bool s0, myhface3_t *f1, bool s1,
+                             myhface3_t *f2, bool s2, myhface3_t *f3, bool s3,
                       SimplexTypeFlag elementType )
     : A(l, f0, s0, f1, s1, f2, s2, f3, s3, elementType )
     , _moveTo ( -1 )
@@ -1701,9 +1701,9 @@ namespace ALUGrid
 
   template < class A >
   HexaPllBaseXMacro< A >::
-  HexaPllBaseXMacro(int l, myhface4_t *f0, int s0, myhface4_t *f1, int s1,
-                           myhface4_t *f2, int s2, myhface4_t *f3, int s3,
-                           myhface4_t *f4, int s4, myhface4_t *f5, int s5)
+  HexaPllBaseXMacro(int l, myhface4_t *f0, bool s0, myhface4_t *f1, bool s1,
+                           myhface4_t *f2, bool s2, myhface4_t *f3, bool s3,
+                           myhface4_t *f4, bool s4, myhface4_t *f5, bool s5)
   : A(l, f0, s0, f1, s1, f2, s2, f3, s3, f4, s4, f5, s5)
   , _moveTo ( -1 )
   , _ldbVertexIndex (-1)
@@ -2145,15 +2145,6 @@ namespace ALUGrid
     return new ObjectsPll::Hedge1EmptyPllMacro (a,b);
   }
 
-  Gitter::Geometric::hedge1_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hedge1_twist (VertexGeo *a, int aid,  VertexGeo *b , int bid )
-  {
-    if(aid < bid)
-      return GitterBasis::MacroGitterBasis::insert_hedge1 (a,b);
-    else
-      return GitterBasis::MacroGitterBasis::insert_hedge1 (b,a);
-  }
-
   Gitter::Geometric::hface4_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hface4 (hedge1_GEO *(&e)[4])
   {
@@ -2167,13 +2158,13 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::hexa_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hexa (hface4_GEO *(&f)[6], int (&t)[6])
+  insert_hexa (hface4_GEO *(&f)[6], bool (&t)[6])
   {
     return new ObjectsPll::HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5]);
   }
 
   Gitter::Geometric::tetra_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_tetra (hface3_GEO *(&f)[4], int (&t)[4], SimplexTypeFlag simplexType )
+  insert_tetra (hface3_GEO *(&f)[4], bool (&t)[4], SimplexTypeFlag simplexType )
   {
     return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], simplexType );
   }
@@ -2193,7 +2184,7 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, int t, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, bool t, Gitter::hbndseg_STI::bnd_t b)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
     if (b == Gitter::hbndseg_STI::closure)
@@ -2210,7 +2201,7 @@ namespace ALUGrid
 
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, int t,
+  insert_hbnd4 (hface4_GEO * f, bool t,
                 Gitter::hbndseg_STI::bnd_t b,
                 MacroGhostInfoHexa* ghInfo)
   {
@@ -2235,7 +2226,7 @@ namespace ALUGrid
 
   // version with point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd3 (hface3_GEO * f, int t,
+  insert_hbnd3 (hface3_GEO * f, bool t,
                 Gitter::hbndseg_STI::bnd_t b,
                 MacroGhostInfoTetra * ghInfo)
   {
@@ -2260,7 +2251,7 @@ namespace ALUGrid
 
   // version without point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd3 (hface3_GEO * f, int t,
+  insert_hbnd3 (hface3_GEO * f, bool t,
                 Gitter::hbndseg_STI::bnd_t b )
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
