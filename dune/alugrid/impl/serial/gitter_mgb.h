@@ -164,9 +164,9 @@ namespace ALUGrid
       virtual std::pair< hface3_GEO *, bool >    InsertUniqueHface (int (&)[3]);
       virtual std::pair< hface4_GEO *, bool >    InsertUniqueHface (int (&)[4]);
 
-      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4] ) { return InsertUniqueTetra( v, SimplexTypeFlag(0,0) ); }
-      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], SimplexTypeFlag );
-      virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8]);
+      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4], bool (&isRear)[4] ) { return InsertUniqueTetra( v, isRear, SimplexTypeFlag(0,0) ); }
+      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], bool (&isRear)[4], SimplexTypeFlag );
+      virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8], bool (&isRear)[6]);
 
       virtual std::pair< periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], const Gitter::hbndseg::bnd_t (&)[2]);
       virtual std::pair< periodic4_GEO *, bool > InsertUniquePeriodic (int (&)[8], const Gitter::hbndseg::bnd_t (&)[2]);
@@ -191,20 +191,18 @@ namespace ALUGrid
         return InsertUniquePeriodic( v, bnd );
       }
 
-      virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
-      virtual bool InsertUniqueHbnd3 (int (&)[3], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv, bool isRear);
-      virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
-      virtual bool InsertUniqueHbnd4 (int (&)[4], Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv, bool isRear);
+      virtual bool InsertUniqueHbnd3 (int (&)[3], bool isRear, Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
+      virtual bool InsertUniqueHbnd4 (int (&)[4], bool isRear, Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);
 
-      virtual bool InsertUniqueHbnd3 (int (&v)[3], Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
+      virtual bool InsertUniqueHbnd3 (int (&v)[3], bool isRear, Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
       {
         // ldbVertexIndex = -1
-        return InsertUniqueHbnd3( v, bt, int(-1), int(-1), pv );
+        return InsertUniqueHbnd3( v, isRear, bt, int(-1), int(-1), pv );
       }
-      virtual bool InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
+      virtual bool InsertUniqueHbnd4 (int (&v)[4], bool isRear, Gitter::hbndseg::bnd_t bt, const ProjectVertexPtr& pv )
       {
         // ldbVertexIndex = -1
-        return InsertUniqueHbnd4( v, bt, int(-1), int(-1), pv );
+        return InsertUniqueHbnd4( v, isRear, bt, int(-1), int(-1), pv );
       }
 
     public :

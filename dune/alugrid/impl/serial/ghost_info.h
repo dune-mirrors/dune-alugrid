@@ -34,6 +34,8 @@ namespace ALUGrid
     enum { noVx     = (points == 4) ? 8 : 4 };
     // number of all non-internal points
     enum { noFaceVx = (points == 4) ? 4 : 1 };
+    // number of faces
+    enum { noFace   = (points == 4) ? 6 : 4 };
 
     static const signed char invalidFace = -111;
 
@@ -46,6 +48,9 @@ namespace ALUGrid
 
     // vertex idents of all not internal vertices
     int _vxface[noFaceVx]; // 4 or 16 bytes
+
+    // vertex idents of all not internal vertices
+    bool _isRear[noFace]; // 4 or 16 bytes
 
     // face number of internal face
     signed char _fce; // 1 byte
@@ -73,6 +78,12 @@ namespace ALUGrid
     {
       alugrid_assert ( _fce != invalidFace );
       return _vx;
+    }
+
+    // return idents of ghost element
+    bool (& isRear () )[noFace]
+    {
+      return _isRear;
     }
 
     // return reference to vector with non-internal vertex idents

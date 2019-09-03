@@ -452,78 +452,9 @@ namespace Dune
 
 
     std::vector<int> simplexTypes(elements_.size(),0);
-    //pass empty vertexWeights to construct them on the fly in
-    //the reordering algorithm
-    std::vector<double> vertexWeights;
-    const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
 
-    // BisectionCompatibility only works in serial because of the sorting
-    // algorithm, therefore it needs to be run as a preprocessing step in case a
-    // parallel bisection compatible grid should be read
-    if( dimension == 3 && ALUGrid::refinementType == conforming && numNonEmptyPartitions > 1 )
-    {
-      std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
-    }
-    if( dimension == 3 && ALUGrid::elementType == tetra && ! elements_.empty() )
-    {
-      assert( numNonEmptyPartitions == 1 );
+    madeCompatible = bisectionCompatibility(simplexTypes);
 
-      if( ! ALUGrid::refinementType == conforming )
-      {
-        for(std::size_t i = 1; i<vertices_.size()+1; ++i)
-        {
-          vertexWeights.push_back(i);
-        }
-      }
-
-      Dune::Timer timer;
-
-      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_);
-
-      std::string rankstr ;
-      {
-        std::stringstream str;
-        str << "P[ " << rank_ << " ]: ";
-        rankstr = str.str();
-      }
-
-      if( bisComp.compatibilityCheck()  )
-      {
-#ifndef NDEBUG
-        std::cout << rankstr << "Grid is compatible!" << std::endl;
-#endif
-      }
-      else
-      {
-        // mark longest edge for initial refinement
-        // successive refinement is done via Newest Vertex Bisection
-        if( markLongestEdge_ )
-        {
-          markLongestEdge( );
-        }
-#ifndef NDEBUG
-        std::cout << rankstr << "Making compatible" << std::endl;
-#endif
-        if(  bisComp.type0Algorithm( vertexWeights ) )
-        {
-          madeCompatible = true;
-#ifndef NDEBUG
-          std::cout << rankstr << "Grid is compatible!!" << std::endl;
-          bisComp.stronglyCompatibleFaces();
-#endif
-          // obtain new element sorting, orientations, and types
-          bisComp.returnElements( elements_, simplexTypes );
-        }
-#ifndef NDEBUG
-        else
-          std::cout << rankstr << "Could not make compatible!" << std::endl;
-#endif
-      }
-#ifndef NDEBUG
-      std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
-      std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
-#endif
-    }
 
     numFacesInserted_ = boundaryIds_.size();
 
@@ -563,6 +494,12 @@ namespace Dune
         boundaryIds.push_back( bndId );
       }
     }
+
+    // We now create the isRear variables for all boundaries
+    // and elements
+    std::vector<std::vector<bool> > isRearElements(elements_.size());
+    std::vector< bool > isRearBoundaries(boundaryIds_.size());
+    calculateIsRear( isRearElements, isRearBoundaries );
 
     assert( boundaryIds.size() == boundaryIds_.size() );
     boundaryIds_.clear();
@@ -672,18 +609,25 @@ namespace Dune
         if( elementType == hexa )
         {
           int element[ 8 ];
+          bool isRear[ 6 ];
           for( unsigned int i = 0; i < 8; ++i )
           {
             element[ i ] = globalId( elements_[ elemIndex ][ i ] );
           }
-          mgb.InsertUniqueHexa( element );
+          for( unsigned int i = 0; i < 6; ++i )
+          {
+            isRear[ i ] = isRearElements[el][i];
+          }
+          mgb.InsertUniqueHexa( element, isRear );
         }
         else if( elementType == tetra )
         {
           int element[ 4 ];
+          bool isRear[ 4 ];
           for( unsigned int i = 0; i < 4; ++i )
           {
             element[ i ] = globalId( elements_[ elemIndex ][ i ] );
+            isRear[ i ] = isRearElements[el][i];
           }
 
           // bisection element type: orientation and type (default 0)
@@ -693,7 +637,7 @@ namespace Dune
             type = simplexTypes[ elemIndex ];
           }
           ALU3DSPACE SimplexTypeFlag simplexTypeFlag( 0, type );
-          mgb.InsertUniqueTetra( element, simplexTypeFlag );
+          mgb.InsertUniqueTetra( element, isRear, simplexTypeFlag );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
@@ -701,7 +645,8 @@ namespace Dune
 
 
       const auto endB = boundaryIds.end();
-      for( auto it = boundaryIds.begin(); it != endB; ++it )
+      int count = 0;
+      for( auto it = boundaryIds.begin(); it != endB; ++it, ++count )
       {
         const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
@@ -734,20 +679,22 @@ namespace Dune
         if( elementType == hexa )
         {
           int bndface[ 4 ];
+          bool isRear = isRearBoundaries[count];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd4( bndface, bndType, pv );
+          mgb.InsertUniqueHbnd4( bndface, isRear, bndType, pv );
         }
         else if( elementType == tetra )
         {
           int bndface[ 3 ];
+          bool isRear = isRearBoundaries[count];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
           }
-          mgb.InsertUniqueHbnd3( bndface, bndType, pv );
+          mgb.InsertUniqueHbnd3( bndface, isRear, bndType, pv );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
@@ -828,7 +775,152 @@ namespace Dune
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
+    //apply mesh-consistency algorithm to hexas
+    if( elementType == hexa )
+    {
+    }
+  }
 
+  template< class ALUGrid >
+  alu_inline
+  void
+  ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::vector< bool > & isRearBoundaries)
+  {
+    //In dimension == dimensionworld, we calculate the normal direction of the face and use this for isRear
+    if(dimension == dimensionworld)
+    {
+      if(elementType == tetra)
+      {
+        std::vector<bool> isRear = {false, true, false, true};
+        std::map< FaceType, bool> facesVisited;
+        //walk over all elements
+        for( std::size_t el =0 ; el < elements_.size(); ++el)
+        {
+          //calculate det to know whether we have to switch
+          auto element = elements_[el];
+          auto p0 = position(element[0]);
+          auto p1 = position(element[1]);
+          auto p2 = position(element[2]);
+          auto p3 = position(element[3]);
+          // (p1 - p0) x (p2-p0) * (p3-p0)
+          double det = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p1[2] - p0[2]) * (p2[1] - p0[1])) * (p3[0] - p0[0])
+                     + ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p1[0] - p0[0]) * (p2[2] - p0[2])) * (p3[1] - p0[1])
+                     + ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])) * (p3[2] - p0[2]);
+          for( int face = 0 ; face < 4; ++face)
+          {
+            //set isRear on all faces correctly
+            bool rear = (det < 0) ? isRear[face] : !isRear[face];
+            isRearElements[el][face] = rear;
+            //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
+            FaceType faceId = makeFace( { (face == 3) ? element[1] : element[0],
+                                          (face <  2) ? element[1] : element[2],
+                                          (face == 0) ? element[2] : element[3] } );
+            facesVisited.insert(std::make_pair(faceId, !rear ));
+          }
+        }
+        //walk over all boundaries and collect the correct isRear from map
+        for( std::size_t bnd = 0; bnd < boundaryIds_.size(); ++bnd )
+        {
+        }
+      }
+      else // elementType == hexa
+      {
+        //walk over all elements
+        //set isRear on all faces correctly
+        //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
+        //walk over all boundaries and collect the correct isRear from map
+      }
+    }
+    else // dimension == 2 and dimensionWorld == 3
+    {
+      //Walk over all elements
+      //walk over all faces
+      //check if face has been addressed
+      //if yes -> isRear = true, else false
+      //Walk over boundaries -> set isRear = true
+    }
+    assert( isRearElements.size() == elements_.size() && isRearBoundaries.size() == boundaryIds_.size() );
+  }
+
+  template< class ALUGrid >
+  alu_inline
+  bool
+  ALU3dGridFactory< ALUGrid >::bisectionCompatibility ( std::vector<int> & simplexTypes)
+  {
+    bool madeCompatible = false;
+    //pass empty vertexWeights to construct them on the fly in
+    //the reordering algorithm
+    std::vector<double> vertexWeights;
+    const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
+    // BisectionCompatibility only works in serial because of the sorting
+    // algorithm, therefore it needs to be run as a preprocessing step in case a
+    // parallel bisection compatible grid should be read
+    if( dimension == 3 && ALUGrid::refinementType == conforming && numNonEmptyPartitions > 1 )
+    {
+      std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
+      return false;
+    }
+    if( dimension == 3 && ALUGrid::elementType == tetra && ! elements_.empty() )
+    {
+      assert( numNonEmptyPartitions == 1 );
+
+      if( ! ALUGrid::refinementType == conforming )
+      {
+        for(std::size_t i = 1; i<vertices_.size()+1; ++i)
+        {
+          vertexWeights.push_back(i);
+        }
+      }
+
+      Dune::Timer timer;
+
+      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_);
+
+      std::string rankstr ;
+      {
+        std::stringstream str;
+        str << "P[ " << rank_ << " ]: ";
+        rankstr = str.str();
+      }
+
+      if( bisComp.compatibilityCheck()  )
+      {
+#ifndef NDEBUG
+        std::cout << rankstr << "Grid is compatible!" << std::endl;
+#endif
+      }
+      else
+      {
+        // mark longest edge for initial refinement
+        // successive refinement is done via Newest Vertex Bisection
+        if( markLongestEdge_ )
+        {
+          markLongestEdge( );
+        }
+#ifndef NDEBUG
+        std::cout << rankstr << "Making compatible" << std::endl;
+#endif
+        if(  bisComp.type0Algorithm( vertexWeights ) )
+        {
+          madeCompatible = true;
+#ifndef NDEBUG
+          std::cout << rankstr << "Grid is compatible!!" << std::endl;
+          bisComp.stronglyCompatibleFaces();
+#endif
+          // obtain new element sorting, orientations, and types
+          bisComp.returnElements( elements_, simplexTypes );
+        }
+#ifndef NDEBUG
+        else
+          std::cout << rankstr << "Could not make compatible!" << std::endl;
+#endif
+      }
+#ifndef NDEBUG
+      std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
+      std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+#endif
+    }
+    return madeCompatible;
   }
 
   template< class ALUGrid >

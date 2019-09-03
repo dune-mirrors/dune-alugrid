@@ -116,7 +116,7 @@ namespace ALUGrid
     alugrid_assert ( wasNewlyInserted );
 
     // InsertUniqueHexa gets the global vertex numbers
-    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), allp->simplexTypeFlag() ).first;
+    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), ghInfo.isRear(), allp->simplexTypeFlag() ).first;
 
     // set ghost and number
     _ghostPair.first = ghost;
@@ -153,7 +153,7 @@ namespace ALUGrid
                                 orig->myvertex(i)->ident()   );
     }
 
-    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), orig->simplexTypeFlag() ).first;
+    GhostTetra_t * ghost = mgb.InsertUniqueTetra ( ghInfo.vertices(), ghInfo.isRear(), orig->simplexTypeFlag() ).first;
     _ghostPair.first = ghost;
     alugrid_assert ( _ghostPair.first );
     _ghostPair.second = ghInfo.internalFace();
@@ -251,7 +251,7 @@ namespace ALUGrid
     }
 
     // InsertUniqueHexa gets the global vertex numbers
-    hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices() ).first;
+    hexa_GEO * ghost = mgb.InsertUniqueHexa ( ghInfo.vertices(), ghInfo.isRear() ).first;
     alugrid_assert ( ghost );
 
     // set ghost values

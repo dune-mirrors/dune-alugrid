@@ -69,7 +69,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
-  InsertUniqueTetra (int (&v)[4], SimplexTypeFlag elementType)
+  InsertUniqueTetra (int (&v)[4], bool (&isRear)[4], SimplexTypeFlag elementType)
   {
     //std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] << std::endl;
     elementKey_t key (v [0], v [1], v [2], v [3]);
@@ -77,7 +77,6 @@ namespace ALUGrid
     if( result.second )
     {
       hface3_GEO * face [4];
-      bool isRear [4];
       for (int fce = 0; fce < 4; ++fce )
       {
         int x [3];
@@ -86,23 +85,6 @@ namespace ALUGrid
         x [2] = v [Tetra::prototype [fce][2]];
         auto faceFrontPair = InsertUniqueHface (x);
         face [fce] =  faceFrontPair.first;
-        isRear[fce] = !(bool(fce % 2 ));
-      }
-      //if det of the element < 0 then the orientation of isRear switches
-      auto p0 = face[0]->myvertex(0)->Point();
-      auto p1 = face[0]->myvertex(1)->Point();
-      auto p2 = face[0]->myvertex(2)->Point();
-      auto p3 = face[1]->myvertex(2)->Point();
-      // (p1 - p0) x (p2 - p0) * (p3 - p0)
-      double det = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p1[2] - p0[2]) * (p2[1] - p0[1])) * (p3[0] - p0[0])
-                 + ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p1[0] - p0[0]) * (p2[2] - p0[2])) * (p3[1] - p0[1])
-                 + ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])) * (p3[2] - p0[2]);
-      if (det < 0)
-      {
-        isRear[0] = !(isRear[0]);
-        isRear[1] = !(isRear[1]);
-        isRear[2] = !(isRear[2]);
-        isRear[3] = !(isRear[3]);
       }
       result.first->second = myBuilder ().insert_tetra (face,isRear, elementType);
       alugrid_assert( result.first->second );
@@ -110,14 +92,13 @@ namespace ALUGrid
     return std::make_pair( static_cast< tetra_GEO * >( result.first->second ), result.second );
   }
 
-  std::pair< Gitter::Geometric::hexa_GEO *, bool > MacroGridBuilder::InsertUniqueHexa (int (&v)[8])
+  std::pair< Gitter::Geometric::hexa_GEO *, bool > MacroGridBuilder::InsertUniqueHexa (int (&v)[8], bool (&isRear)[6])
   {
     elementKey_t key (v [0], v [1], v [3], v[4]);
     std::pair< elementMap_t::iterator, bool > result = _hexaMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
     {
       hface4_GEO * face [6];
-      bool isRear [6];
       for (int fce = 0; fce < 6; ++fce)
       {
         int x [4];
@@ -127,10 +108,6 @@ namespace ALUGrid
         x [3] = v [Hexa::prototype [fce][3]];
         auto faceFrontPair = InsertUniqueHface (x);
         face [fce] =  faceFrontPair.first;
-        // calculate normal direction
-        // in contrast to tets we expect all hexas to have positive det
-        // faces 1,2,5 point outwards and faces 0,3,4 inwards
-        isRear[fce] = (fce == 1 || fce == 2 || fce == 5);
       }
       result.first->second = myBuilder ().insert_hexa (face,isRear);
     }
@@ -138,7 +115,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv, bool isRear )
+  InsertUniqueHbnd3 (int (&v)[3], bool isRear ,Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     faceKey_t key (v [0], v [1], v [2]);
     //std::cout << "Inserting Hbnd3 " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
@@ -169,43 +146,7 @@ namespace ALUGrid
   }
 
   bool MacroGridBuilder::
-  InsertUniqueHbnd3 (int (&v)[3],Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
-  {
-    faceKey_t key (v [0], v [1], v [2]);
-    if (bt == Gitter::hbndseg_STI::closure)
-    {
-      if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
-        auto faceFrontPair = InsertUniqueHface (v);
-        hface3_GEO * face  = faceFrontPair.first;
-        alugrid_assert( !faceFrontPair.second );
-        bool isRear = face->nb.emptyRear();
-        alugrid_assert( face->ref == 1);
-        _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master);
-        return true;
-      }
-    }
-    else
-    {
-      if (_hbnd3Map.find (key) == _hbnd3Map.end ())
-      {
-        auto faceFrontPair = InsertUniqueHface (v);
-        hface3_GEO * face  = faceFrontPair.first;
-        alugrid_assert( !faceFrontPair.second );
-        bool isRear = face->nb.emptyRear();
-        alugrid_assert( face->ref == 1);
-        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,isRear,bt);
-        hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
-        hb3->setMaster( master );
-        hb3->setBoundaryProjection( pv );
-        _hbnd3Map [key] = hb3;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool MacroGridBuilder::
-  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv, bool isRear )
+  InsertUniqueHbnd4 (int (&v)[4], bool isRear , Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv)
   {
     faceKey_t key (v [0], v [1], v [2]);
     if (bt == Gitter::hbndseg_STI::closure)
@@ -223,39 +164,6 @@ namespace ALUGrid
       {
         auto faceFrontPair = InsertUniqueHface (v);
         hface4_GEO * face =  faceFrontPair.first;
-        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,isRear,bt);
-        hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
-        hb4->setMaster( master );
-        hb4->setBoundaryProjection( pv );
-        _hbnd4Map [key] = hb4;
-        return true;
-      }
-    }
-    return false;
-  }
-  bool MacroGridBuilder::
-  InsertUniqueHbnd4 (int (&v)[4], Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
-  {
-    faceKey_t key (v [0], v [1], v [2]);
-    if (bt == Gitter::hbndseg_STI::closure)
-    {
-      if (_hbnd4Int.find (key) == _hbnd4Int.end ()) {
-        auto faceFrontPair = InsertUniqueHface (v);
-        hface4_GEO * face =  faceFrontPair.first;
-        alugrid_assert( !faceFrontPair.second);
-        bool isRear = (face->nb.rear() == face->nb.null);
-        _hbnd4Int [key] = new Hbnd4IntStorage (face, isRear, ldbVertexIndex, master );
-        return true;
-      }
-    }
-    else
-    {
-      if (_hbnd4Map.find (key) == _hbnd4Map.end ())
-      {
-        auto faceFrontPair = InsertUniqueHface (v);
-        hface4_GEO * face =  faceFrontPair.first;
-        alugrid_assert( !faceFrontPair.second );
-        bool isRear = (face->nb.rear() == face->nb.null);
         hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,isRear,bt);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
@@ -897,18 +805,22 @@ namespace ALUGrid
     if( type == HEXA_RAW )
     {
       int v [8];
+      //TODO get From stream
+      bool isRear[6] = {true,false,false,true,true,false};
       for (int i = 0; i<ne; ++i )
       {
         for( int k=0; k<8; ++k )
         {
           in >> v[ k ] ;
         }
-        InsertUniqueHexa (v);
+        InsertUniqueHexa (v, isRear);
       }
     }
     else if( type == TETRA_RAW )
     {
       int v [4];
+      //TODO get From stream
+      bool isRear[4] = {true,false,true,false};
       for (int i = 0; i < ne; ++i )
       {
         for( int j=0; j<4; ++j )
@@ -916,7 +828,7 @@ namespace ALUGrid
           in >> v[ j ] ;
         }
         int elementType = 0;
-        InsertUniqueTetra (v, SimplexTypeFlag(0, elementType) );
+        InsertUniqueTetra (v, isRear, SimplexTypeFlag(0, elementType) );
       }
     }
 
@@ -939,7 +851,9 @@ namespace ALUGrid
       }
 
       int bt ;
+      //TODO get From stream
       int v[ 4 ];
+      bool isRear = false;
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
@@ -966,7 +880,7 @@ namespace ALUGrid
         }
         ProjectVertexPtr pv; // empty projection
         // insert bnd object
-        InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t(bt), pv);
+        InsertUniqueHbnd4 (v, isRear, Gitter::hbndseg::bnd_t(bt), pv);
       }
     }
     else if ( type == TETRA_RAW )
@@ -983,6 +897,8 @@ namespace ALUGrid
 
       int bt ;
       int v[ 3 ];
+      //TODO get From stream
+      bool isRear = false;
       for( int i=0; i<nb ; ++i )
       {
         in >> bt ;
@@ -1010,7 +926,7 @@ namespace ALUGrid
         }
         ProjectVertexPtr pv; // empty projection
         // insert bnd object
-        InsertUniqueHbnd3 (v,Gitter::hbndseg::bnd_t(bt), pv);
+        InsertUniqueHbnd3 (v, isRear, Gitter::hbndseg::bnd_t(bt), pv);
       }
     }
 

@@ -639,10 +639,16 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
+    bool isRear[4];
+    os.read (isRear[0]);
+    os.read (isRear[1]);
+    os.read (isRear[2]);
+    os.read (isRear[3]);
+
     SimplexTypeFlag elementType;
     elementType.read( os );
 
-    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, elementType);
+    std::pair< tetra_GEO *, bool > p = InsertUniqueTetra (v, isRear, elementType);
     // set unique element number
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs);
@@ -711,7 +717,15 @@ namespace ALUGrid
     os.readObject (v[5]);
     os.readObject (v[6]);
     os.readObject (v[7]);
-    std::pair< hexa_GEO *, bool > p = InsertUniqueHexa (v);
+
+    bool isRear [6];
+    os.read (isRear[0]);
+    os.read (isRear[1]);
+    os.read (isRear[2]);
+    os.read (isRear[3]);
+    os.read (isRear[4]);
+    os.read (isRear[5]);
+    std::pair< hexa_GEO *, bool > p = InsertUniqueHexa (v, isRear);
     // set unique element number
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs );
@@ -803,7 +817,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd3 (v, b, ldbVertexIndex, master, pv, bool(isRear) );
+      InsertUniqueHbnd3 (v, bool(isRear), b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -854,7 +868,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd4 (v, b, ldbVertexIndex, master, pv, bool(isRear) );
+      InsertUniqueHbnd4 (v, bool(isRear), b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -895,7 +909,7 @@ namespace ALUGrid
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd3 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv, bool(isRear) );
+    InsertUniqueHbnd3 (v, bool(isRear), Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
@@ -913,7 +927,7 @@ namespace ALUGrid
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd4 (v, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv, bool(isRear) );
+    InsertUniqueHbnd4 (v, bool(isRear), Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
