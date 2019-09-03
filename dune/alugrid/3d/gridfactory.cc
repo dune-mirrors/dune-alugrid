@@ -497,9 +497,9 @@ namespace Dune
 
     // We now create the isRear variables for all boundaries
     // and elements
-    std::vector<std::vector<bool> > isRearElements(elements_.size());
-    std::vector< bool > isRearBoundaries(boundaryIds_.size());
-    calculateIsRear( isRearElements, isRearBoundaries );
+    std::vector<std::vector<bool> > isRearElements(elements_.size(), elementType == tetra ? std::vector<bool>({false, true, false, true}) : std::vector<bool>({false, true, true, false, false ,true}));
+    std::map< FaceType, bool > isRearBoundaries;
+    calculateIsRear( isRearElements, isRearBoundaries);
 
     assert( boundaryIds.size() == boundaryIds_.size() );
     boundaryIds_.clear();
@@ -616,7 +616,7 @@ namespace Dune
           }
           for( unsigned int i = 0; i < 6; ++i )
           {
-            isRear[ i ] = isRearElements[el][i];
+            isRear[ i ] = isRearElements[elemIndex][i];
           }
           mgb.InsertUniqueHexa( element, isRear );
         }
@@ -627,7 +627,7 @@ namespace Dune
           for( unsigned int i = 0; i < 4; ++i )
           {
             element[ i ] = globalId( elements_[ elemIndex ][ i ] );
-            isRear[ i ] = isRearElements[el][i];
+            isRear[ i ] = isRearElements[elemIndex][i];
           }
 
           // bisection element type: orientation and type (default 0)
@@ -645,8 +645,7 @@ namespace Dune
 
 
       const auto endB = boundaryIds.end();
-      int count = 0;
-      for( auto it = boundaryIds.begin(); it != endB; ++it, ++count )
+      for( auto it = boundaryIds.begin(); it != endB; ++it )
       {
         const BndPair &boundaryId = *it;
         ALU3DSPACE Gitter::hbndseg::bnd_t bndType = (ALU3DSPACE Gitter::hbndseg::bnd_t ) boundaryId.second;
@@ -679,7 +678,7 @@ namespace Dune
         if( elementType == hexa )
         {
           int bndface[ 4 ];
-          bool isRear = isRearBoundaries[count];
+          bool isRear = isRearBoundaries[faceId];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
@@ -689,7 +688,7 @@ namespace Dune
         else if( elementType == tetra )
         {
           int bndface[ 3 ];
-          bool isRear = isRearBoundaries[count];
+          bool isRear = isRearBoundaries[faceId];
           for( unsigned int i = 0; i < numFaceCorners; ++i )
           {
             bndface[ i ] = globalId( boundaryId.first[ i ] );
@@ -784,7 +783,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void
-  ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::vector< bool > & isRearBoundaries)
+  ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool > & isRearBoundaries)
   {
     //In dimension == dimensionworld, we calculate the normal direction of the face and use this for isRear
     if(dimension == dimensionworld)
@@ -792,7 +791,6 @@ namespace Dune
       if(elementType == tetra)
       {
         std::vector<bool> isRear = {false, true, false, true};
-        std::map< FaceType, bool> facesVisited;
         //walk over all elements
         for( std::size_t el =0 ; el < elements_.size(); ++el)
         {
@@ -812,23 +810,32 @@ namespace Dune
             bool rear = (det < 0) ? isRear[face] : !isRear[face];
             isRearElements[el][face] = rear;
             //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
-            FaceType faceId = makeFace( { (face == 3) ? element[1] : element[0],
-                                          (face <  2) ? element[1] : element[2],
-                                          (face == 0) ? element[2] : element[3] } );
-            facesVisited.insert(std::make_pair(faceId, !rear ));
+            FaceType faceId;
+            generateFace( element, face, faceId);
+            std::sort(faceId.begin(), faceId.end());
+            isRearBoundaries.insert(std::make_pair(faceId, !rear));
           }
-        }
-        //walk over all boundaries and collect the correct isRear from map
-        for( std::size_t bnd = 0; bnd < boundaryIds_.size(); ++bnd )
-        {
         }
       }
       else // elementType == hexa
       {
+        std::vector<bool> isRear = {false, true, true, false, false, true};
         //walk over all elements
-        //set isRear on all faces correctly
-        //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
-        //walk over all boundaries and collect the correct isRear from map
+        for( std::size_t el =0 ; el < elements_.size(); ++el)
+        {
+          //calculate det to know whether we have to switch
+          auto element = elements_[el];
+          for( int face = 0 ; face < 6; ++face)
+          {
+            //set isRear on all faces correctly
+            isRearElements[el][face] = isRear[face];
+            //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
+            FaceType faceId;
+            generateFace( element, face, faceId);
+            std::sort(faceId.begin(), faceId.end());
+            isRearBoundaries.insert(std::make_pair(faceId, !isRear[face]));
+          }
+        }
       }
     }
     else // dimension == 2 and dimensionWorld == 3
@@ -839,7 +846,7 @@ namespace Dune
       //if yes -> isRear = true, else false
       //Walk over boundaries -> set isRear = true
     }
-    assert( isRearElements.size() == elements_.size() && isRearBoundaries.size() == boundaryIds_.size() );
+    assert( isRearElements.size() == elements_.size() );
   }
 
   template< class ALUGrid >
@@ -860,11 +867,11 @@ namespace Dune
       std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
       return false;
     }
-    if( dimension == 3 && ALUGrid::elementType == tetra && ! elements_.empty() )
+    if( ALUGrid::elementType == tetra && ! elements_.empty() )
     {
       assert( numNonEmptyPartitions == 1 );
 
-      if( ! ALUGrid::refinementType == conforming )
+      if( ! ALUGrid::refinementType == conforming || dimension == 2 )
       {
         for(std::size_t i = 1; i<vertices_.size()+1; ++i)
         {

@@ -71,7 +71,8 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
   InsertUniqueTetra (int (&v)[4], bool (&isRear)[4], SimplexTypeFlag elementType)
   {
-    //std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] << std::endl;
+    //std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] <<
+    //"| Rear:" << isRear [0] << "," << isRear [1] <<"," << isRear [2] << "," << isRear [3] << std::endl;
     elementKey_t key (v [0], v [1], v [2], v [3]);
     std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
@@ -118,7 +119,7 @@ namespace ALUGrid
   InsertUniqueHbnd3 (int (&v)[3], bool isRear ,Gitter::hbndseg_STI ::bnd_t bt, int ldbVertexIndex, int master, const ProjectVertexPtr& pv )
   {
     faceKey_t key (v [0], v [1], v [2]);
-    //std::cout << "Inserting Hbnd3 " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+    //std::cout << "Inserting Hbnd3 " << v[0] << ", " << v[1] << ", " << v[2] << "| Rear:" << isRear <<  std::endl;
     if (bt == Gitter::hbndseg_STI::closure)
     {
       if (_hbnd3Int.find (key) == _hbnd3Int.end ()) {
