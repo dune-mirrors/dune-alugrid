@@ -20,6 +20,8 @@
 
 #include "dune/alugrid/3d/aluinline.hh"
 
+#include "utils/mesh-consistency/include/mesh-consistency.hh"
+
 namespace Dune
 {
 
@@ -429,7 +431,12 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    //correctElementOrientation();
+    if( ALUGrid::elementType == hexa )
+    {
+      //use Marcel Kochs consistency algorithm
+      correctElementOrientation();
+    }
+    bool madeCompatible = false;
 
     if( dimension == 2 && ALUGrid::refinementType == conforming )
     {
@@ -444,7 +451,6 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
 
-    bool madeCompatible = false;
     std::vector<int> simplexTypes(elements_.size(),0);
     //pass empty vertexWeights to construct them on the fly in
     //the reordering algorithm
@@ -458,9 +464,17 @@ namespace Dune
     {
       std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
     }
-    else if( dimension == 3 && ALUGrid::refinementType == conforming && ! elements_.empty() )
+    if( dimension == 3 && ALUGrid::elementType == tetra && ! elements_.empty() )
     {
       assert( numNonEmptyPartitions == 1 );
+
+      if( ! ALUGrid::refinementType == conforming )
+      {
+        for(std::size_t i = 1; i<vertices_.size()+1; ++i)
+        {
+          vertexWeights.push_back(i);
+        }
+      }
 
       Dune::Timer timer;
 
@@ -814,209 +828,8 @@ namespace Dune
   void
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
-    //if there are no elements, do not correct Orientation
-    if(elements_.begin() == elements_.end()) return;
 
-    //for 2,3 we orient the surface -
-    // we choose the orientation on one element
-    // and then set the orientation on the neighbour to be the same
-    // and iterate that over the whole grid, in hope that we have an
-    // orientable surface.
-    if(dimension ==2 && dimensionworld == 3 )
-    {
-      // A 2d face type, as we want to work in 2d
-      typedef std::array<unsigned int, 2>  Face2Type;
-      // this is different from numFaces which could be 2d only
-      const int num3dFaces = (elementType == tetra) ? 3 : 4;
-
-      //the nextIndex denotes the indices of the 2d element
-      //inside the 3d element in circular order
-      std::vector <unsigned int> nextIndex ({1,2,3});
-      if(elementType == hexa)
-      {
-        nextIndex.resize(4,0);
-        nextIndex[0]=0;
-        nextIndex[1]=1;
-        nextIndex[2]=3;
-        nextIndex[3] =2;
-      }
-
-      //The sorted faces that are pending to be worked on with
-      //the corresponding twist
-      typedef std::map< Face2Type, int > FaceMap ;
-      typedef FaceMap::iterator FaceIterator;
-      FaceMap activeFaces;
-
-      //returns true if element is done
-      std::vector<bool> doneElements(elements_.size(), false);
-
-      //The Faces already worked on
-      std::set< Face2Type > doneFaces;
-
-
-      //get first element
-      ElementType &element = elements_[0];
-      //choose orientation as given by first inserted element and
-      //build oriented faces and add to list of active faces
-      for(int i = 0; i < num3dFaces ; ++i)
-      {
-        Face2Type face = {{element[ nextIndex[i] ], element[ nextIndex[ (i+1)%num3dFaces ] ]}};
-        //this is the twist with respect to the global face orientation
-        // we need it once from each side
-        int twist = face[0] < face[1] ? 0 : -1;
-        std::sort(face.begin(),face.end());
-        activeFaces.insert( std::make_pair ( face, twist ) );
-      }
-      doneElements[0] =true;
-
-      while(!(activeFaces.empty()))
-      {
-        //get iterator
-        FaceIterator faceBegin = activeFaces.begin();
-
-        const Face2Type &currentFace = faceBegin->first;
-
-        //if face is in doneFaces, just remove the face from the active face list
-        //this should actually never happen, but just to be sure
-        if(doneFaces.find(currentFace) != doneFaces.end())
-        {
-          activeFaces.erase(currentFace);
-          //while loop continue
-          continue;
-        }
-
-        //get twist
-        int twist = faceBegin->second;
-        bool found = false;
-        int cnt = 0;
-        //find face in element list
-        const typename ElementVector::iterator elementEnd = elements_.end();
-        for( typename ElementVector::iterator elementIt = elements_.begin();
-          elementIt != elementEnd; ++elementIt, ++cnt )
-        {
-          ElementType &outerElement  = *elementIt;
-          //we already treated this element if doneElements is true
-          if ( doneElements[cnt] ) continue;
-          for(int i=0; i<3 ;++i)
-          {
-            if (outerElement[nextIndex[i]] == currentFace[0])
-            {
-              if( outerElement[ nextIndex[(i+1)%num3dFaces] ] == currentFace[1]  )
-              {
-                if(twist == 0)
-                {
-                  //correct element orientation
-                  std::swap(outerElement[1], outerElement[2]);
-                  if(elementType == hexa )
-                    std::swap(outerElement[5], outerElement[6]);
-                }
-                found =true;
-              }
-              else if(outerElement[nextIndex[(i-1+num3dFaces)%num3dFaces]] == currentFace[1] )
-              {
-                if(twist < 0)
-                {
-                  //correct element orientation
-                  std::swap(outerElement[1], outerElement[2]);
-                  if(elementType == hexa )
-                    std::swap(outerElement[5], outerElement[6]);
-                }
-                found = true;
-              }
-              else //this is not the element you are looking for - break innermost for
-                break;
-
-              //build the faces of outerElement with twists
-              for (int f = 0 ; f< num3dFaces ; ++f)
-              {
-                Face2Type face =  {{ outerElement[ nextIndex[ f%num3dFaces ] ],outerElement[nextIndex[(f+1)%num3dFaces]] }} ;
-                int twist = face[0] < face[1] ? 0 : -1;
-                std::sort(face.begin(),face.end());
-                if(face == currentFace) continue;
-
-                //check that it is not in doneFaces
-                if(doneFaces.find(face) == doneFaces.end())
-                {
-                //check that it is not in activeFaces
-                  if(activeFaces.find(face) == activeFaces.end())
-                     activeFaces.insert(std::make_pair( face , twist ) );
-                  //here we can make the orientability check - see assert
-                  else
-                  {
-                    // alugrid_assert(std::abs(activeFaces.find(face)->second - twist) == 1);
-                    activeFaces.erase(face);
-                  }
-                }
-              }
-              //break inner for loop, as we do not need it anymore
-              break;
-            }
-          }
-
-          //break element for loop if we found the element
-          //and set doneElements true
-          if(found)
-          {
-            doneElements[cnt] = true;
-            break;
-          }
-        }
-        // add the sorted face to doneFaces with innerElement and outerElement
-        doneFaces.insert( currentFace );
-        //remove face from activeFaces (if not found it is a boundary)
-        activeFaces.erase(currentFace);
-      } //end while
-      return;
-    }
-
-    //for all other cases we orient the elements by having a positive 3d volume
-
-      const typename ElementVector::iterator elementEnd = elements_.end();
-      for( typename ElementVector::iterator elementIt = elements_.begin();
-           elementIt != elementEnd; ++elementIt )
-      {
-        ElementType &element = *elementIt;
-
-        const VertexType &p0 = position( element[ 0 ] );
-        VertexType p1, p2, p3;
-
-        if( elementType == tetra )
-        {
-          p1 = position( element[ 1 ] );
-          p2 = position( element[ 2 ] );
-          p3 = position( element[ 3 ] );
-        }
-        else
-        {
-          p1 = position( element[ 1 ] );
-          p2 = position( element[ 2 ] );
-          p3 = position( element[ 4 ] );
-        }
-        p1 -= p0; p2 -= p0; p3 -= p0;
-
-        VertexType n;
-        n[ 0 ] = p1[ 1 ] * p2[ 2 ] - p2[ 1 ] * p1[ 2 ];
-        n[ 1 ] = p1[ 2 ] * p2[ 0 ] - p2[ 2 ] * p1[ 0 ];
-        n[ 2 ] = p1[ 0 ] * p2[ 1 ] - p2[ 0 ] * p1[ 1 ];
-
-        if( n * p3 > 0 )
-          continue;
-
-
-
-        if( elementType == hexa )
-        {
-        //we changed this,because for the 2d case it is important, that the valid vertices 0,1,2,3 remain the vertices 0,1,2,3
-        //  for( int i = 0; i < 4; ++i )
-        //    std::swap( element[ i ], element[ i+4 ] );
-          std::swap( element[ 5 ], element[ 6 ] );
-          std::swap( element[ 1 ], element[ 2 ] );
-        }
-        else
-          std::swap( element[ 2 ], element[ 3 ] );
-      } // end of loop over all elements
   }
-
 
   template< class ALUGrid >
   alu_inline

@@ -219,13 +219,13 @@ public:
       FaceElementType faceElement = std::make_pair( FaceType{l1,l1,l1}, EdgeType{l1,l1} );
       if(counter == 0 )
       {
-        if( constructOrder )
-        {
           FaceType face;
           const ElementType& el0 = elements_[0];
           getFace(el0, type0faces_[0], face);
           faceElement = FaceElementType(std::make_pair( face , EdgeType{0,0} ) );
 
+        if( constructOrder )
+        {
           //orientate E_0 - add vertices to vertexOrder
           for(unsigned int i=0 ; i < 4 ; ++i)
           {

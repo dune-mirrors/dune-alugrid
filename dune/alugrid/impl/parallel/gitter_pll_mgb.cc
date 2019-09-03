@@ -105,34 +105,6 @@ namespace ALUGrid
       clear( _periodic4List );
     }
 
-
-    // all elements
-    {
-      BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
-      const BuilderIF::tetralist_t::iterator _tetraListend = _tetraList.end ();
-      // copy list entries to map
-      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); i != _tetraListend; ++i )
-      {
-        _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
-             (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
-      }
-      // clear list
-      clear( _tetraList );
-    }
-
-    {
-      BuilderIF::hexalist_t& _hexaList = myBuilder()._hexaList;
-      const BuilderIF::hexalist_t::iterator _hexaListend = _hexaList.end ();
-      // copy list entries to map
-      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); i != _hexaListend; ++i )
-      {
-        _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
-                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
-      }
-      // clear list
-      clear( _hexaList );
-    }
-
     // all boundary segments
     typedef std::vector< Gitter::hbndseg_STI * > hbndvector_t;
     hbndvector_t  toDeleteHbnd;
@@ -225,6 +197,34 @@ namespace ALUGrid
       }
       // clear list
       clear( _hbndseg3List );
+    }
+
+
+    // all elements
+    {
+      BuilderIF::tetralist_t& _tetraList = myBuilder ()._tetraList;
+      const BuilderIF::tetralist_t::iterator _tetraListend = _tetraList.end ();
+      // copy list entries to map
+      for (BuilderIF::tetralist_t::iterator i = _tetraList.begin (); i != _tetraListend; ++i )
+      {
+        _tetraMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
+             (*i)->myvertex (2)->ident (), (*i)->myvertex (3)->ident ())] = (*i);
+      }
+      // clear list
+      clear( _tetraList );
+    }
+
+    {
+      BuilderIF::hexalist_t& _hexaList = myBuilder()._hexaList;
+      const BuilderIF::hexalist_t::iterator _hexaListend = _hexaList.end ();
+      // copy list entries to map
+      for (BuilderIF::hexalist_t::iterator i = _hexaList.begin (); i != _hexaListend; ++i )
+      {
+        _hexaMap [elementKey_t ((*i)->myvertex (0)->ident (), (*i)->myvertex (1)->ident (),
+                  (*i)->myvertex (3)->ident (), (*i)->myvertex (4)->ident ())] = (*i);
+      }
+      // clear list
+      clear( _hexaList );
     }
 
     /////////////////////////////////////////
