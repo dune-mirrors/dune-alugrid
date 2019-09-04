@@ -107,12 +107,12 @@ namespace Dune
 
 
     //for some reason the behavior for tetra and hexa is opposite
-    if(connector_.face().nChild() == ( type == tetra) ? 1 : 0){
+    if(connector_.face().nChild() ==  0){
       result[0] = cornerCoords[0];
       result[1] =  ( cornerCoords[1] + cornerCoords[0] );
       result[1] *=0.5;
     }
-    else if(connector_.face().nChild() == ( type == tetra ) ? 0 : 1)
+    else if(connector_.face().nChild() ==  1)
     {
       result[0] = ( cornerCoords[1] + cornerCoords[0] );
       result[0] *= 0.5;
