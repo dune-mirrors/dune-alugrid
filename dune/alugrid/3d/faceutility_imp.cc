@@ -595,14 +595,21 @@ namespace Dune
       const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
       const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
 
-      // isRear determines whether normal points outward or not
-      const double factor = this->connector_.isInnerRear() ? -1.0 : 1.0;
+      const alu3d_ctype (&_p3)[3] = connector_.innerEntity().myvertex(3 - connector_.innerALUFaceIndex())->Point();
 
       // cross product of two vectors
-      outerNormal_[0] = factor *  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
-      outerNormal_[1] = factor * ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
-      outerNormal_[2] = factor * ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
+      outerNormal_[0] =  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
+      outerNormal_[1] =  ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
+      outerNormal_[2] =  ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
 
+      double det = outerNormal_[0] * (_p3[0] - _p0[0]) +outerNormal_[1] * (_p3[1] - _p0[1]) + outerNormal_[2] * (_p3[2] - _p0[2]);
+
+      if(det > 0)
+      {
+        outerNormal_[0] *=-1;
+        outerNormal_[1] *=-1;
+        outerNormal_[2] *=-1;
+      }
       normalUp2Date_ = true;
     } // end if mapp ...
 
@@ -854,19 +861,23 @@ namespace Dune
       const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
       const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
 
-      // change sign if face normal points into inner element
-      // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerRear()) ? -1.0 : 1.0;
+      const alu3d_ctype (&_p3)[3] = this->connector_.innerEntity().myvertex(3 - this->connector_.innerALUFaceIndex())->Point();
 
-
-      if(dimworld == 2)
-      {
-        // we want the outer normal orhtogonal to the intersection and  with length of the intersection
-        outerNormal_[0] = factor * (_p2[1]-_p1[1]);
-        outerNormal_[1] = factor * (_p1[0]-_p2[0]);
-      }
+      alugrid_assert(dimworld == 2);
       //implemented in iterator_imp.cc
       //else if(dimworld == 3)
+
+      // we want the outer normal orhtogonal to the intersection and  with length of the intersection
+      outerNormal_[0] =  (_p2[1]-_p1[1]);
+      outerNormal_[1] =  (_p1[0]-_p2[0]);
+
+      double det = outerNormal_[0] * (_p3[0] - _p1[0]) + outerNormal_[1] * (_p3[1] - _p1[1]);
+
+      if(det > 0)
+      {
+        outerNormal_[0] *= -1;
+        outerNormal_[1] *= -1;
+      }
 
       normalUp2Date_ = true;
     } // end if mapp ...

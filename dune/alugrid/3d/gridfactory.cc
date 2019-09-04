@@ -786,6 +786,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool > & isRearBoundaries)
   {
     //In dimension == dimensionworld, we calculate the normal direction of the face and use this for isRear
+    //The benefit is, that we do not need communication, as this works for consistently oriented grids
     if(dimension == dimensionworld)
     {
       std::vector<bool> isRear = (elementType == tetra) ? std::vector<bool>({false, true, false, true}) : std::vector<bool>( {false, true, true, false, false, true});

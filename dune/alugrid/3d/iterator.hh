@@ -234,11 +234,11 @@ protected:
   void first(const EntityImp& en, int wLevel, const GridImp& grid );
 
   // set new face
-  void setNewFace(const GEOFaceType& newFace, bool isRearFlip = false);
+  void setNewFace(const GEOFaceType& newFace);
 
 private:
   // set new face (only LeafIntersectionIterator)
-  void setGhostFace(const GEOFaceType& newFace, bool isRearFlip = false);
+  void setGhostFace(const GEOFaceType& newFace);
 
 protected:
   // generate local geometries

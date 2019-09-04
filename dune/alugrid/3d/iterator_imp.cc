@@ -189,21 +189,22 @@ alu_inline void ALU3dGridIntersectionIterator<GridImp> :: increment ()
   if (connector_.conformanceState() == FaceInfoType::REFINED_OUTER)
   {
     nextFace = connector_.face().next();
+
     // There was a next child face...
     if (nextFace)
     {
-      //For the last childface in simplies isRear value flips
       if( ImplTraits :: isGhost( ghost_ ) )
       {
-        setGhostFace( *nextFace, (GridImp::elementType == tetra && GridImp::dimension == 3 && nextFace->nChild() == 3) ? true : false );
+        setGhostFace( *nextFace );
       }
       else
       {
-        setNewFace(*nextFace, (GridImp::elementType == tetra && GridImp::dimension == 3 && nextFace->nChild() == 3) ?  true : false);
+        setNewFace(*nextFace);
       }
       return; // we found what we were looking for...
     }
   } // end if
+
   // Next face number of starting element
   ++index_;
 
@@ -460,22 +461,22 @@ getFace(const GEOHexaElementType& elem, int index) const
 
 template <class GridImp>
 alu_inline void ALU3dGridIntersectionIterator<GridImp>::
-setNewFace(const GEOFaceType& newFace, bool isRearFlip)
+setNewFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ! ghost_ );
   alugrid_assert ( innerLevel_ == item_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_,
-              isRearFlip ? !(item_->isRear(index_)) :  item_->isRear(index_));
+              item_->isRear(index_) );
   geoProvider_.resetFaceGeom();
 }
 
 template <class GridImp>
 alu_inline void ALU3dGridIntersectionIterator<GridImp>::
-setGhostFace(const GEOFaceType& newFace, bool isRearFlip)
+setGhostFace(const GEOFaceType& newFace)
 {
   alugrid_assert ( ghost_ );
   alugrid_assert ( innerLevel_ == ghost_->level() );
-  connector_.updateFaceInfo(newFace,innerLevel_, isRearFlip ? !(ghost_->isRear(0)) : ghost_->isRear(0) );
+  connector_.updateFaceInfo(newFace,innerLevel_, ghost_->isRear(0) );
   geoProvider_.resetFaceGeom();
 }
 
