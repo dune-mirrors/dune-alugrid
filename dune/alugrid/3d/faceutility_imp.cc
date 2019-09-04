@@ -53,6 +53,7 @@ namespace Dune
     segmentId_ = -1;
     bndId_ = 0; // inner face
 
+    isInnerRear_ = isInnerRear;
     // points face from inner element away
     if (isInnerRear)
     {
@@ -107,18 +108,18 @@ namespace Dune
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
         alugrid_assert (ghost);
 
-        isInnerRear_ = ghost->isRear(innerFaceNumber_);
+        alugrid_assert(isInnerRear_ == ghost->isRear(innerFaceNumber_));
       }
       else
       {
-        isInnerRear_ = innerFace().isRear(innerALUFaceIndex());
+        alugrid_assert(isInnerRear_ == innerFace().isRear(innerALUFaceIndex()));
       }
     }
     else
     {
-      // set inner isRear
-      alugrid_assert (isInnerRear == innerEntity().isRear(innerFaceNumber_));
-      isInnerRear_ = isInnerRear;
+      // in REFINED_OUTER status, subface 3 of the outside may have rear
+      // pointing in different direction
+      alugrid_assert (isInnerRear_ == innerEntity().isRear(innerFaceNumber_) || innerLevel < outerEntity().level());
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
@@ -200,7 +201,7 @@ namespace Dune
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
         else
-          isInnerRear_ = !(outerEntity().isRear( outerFaceNumber_ ));
+          alugrid_assert(isInnerRear_ == !(outerEntity().isRear( outerFaceNumber_ )));
       }
       if ( bnd ) // the boundary case
       {
@@ -223,7 +224,7 @@ namespace Dune
           bndType_ = outerGhostBoundary ;
 
           if(conformingRefinement_)
-            isInnerRear_ = !(boundaryFace().isRear(outerALUFaceIndex()));
+            alugrid_assert(isInnerRear_ == !(boundaryFace().isRear(outerALUFaceIndex())));
 
           // access ghost only when ghost cells are enabled
           if( ghostCellsEnabled_ )
@@ -234,13 +235,13 @@ namespace Dune
 
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
             alugrid_assert ( ghost );
-            isInnerRear_ = !(ghost->isRear(outerFaceNumber_));
+            alugrid_assert(isInnerRear_ == !(ghost->isRear(outerFaceNumber_)));
           }
         }
         else // the normal boundary case
         {
           // get outer isRear
-          isInnerRear_ = !(boundaryFace().isRear(outerALUFaceIndex()));
+          alugrid_assert(isInnerRear_ == !(boundaryFace().isRear(outerALUFaceIndex())));
           // compute segment index when needed
           segmentId_ = boundaryFace().segmentId();
           bndId_ = boundaryFace().bndtype();
@@ -249,8 +250,8 @@ namespace Dune
     } // if outerElement_->isboundary
     else
     {
-      // get outer isRear
-      isInnerRear_ = !(outerEntity().isRear(outerALUFaceIndex()));
+      // in REFINED_INNER conformance status, rear may point in different directions
+      alugrid_assert(isInnerRear_ == !(outerEntity().isRear(outerALUFaceIndex())) || innerLevel > outerEntity().level() );
     }
 
     //in the case of a levelIntersectionIterator and conforming elements
@@ -421,7 +422,7 @@ namespace Dune
   inline bool ALU3dGridFaceInfo< dim, dimworld, type, Comm >::isInnerRear() const
   {
     // don't check ghost boundaries here
-    alugrid_assert ( ( ! innerBoundary() ) ?
+    alugrid_assert ( ( ! innerBoundary()  && !(conformanceState() == REFINED_OUTER)) ?
         innerEntity().isRear(innerALUFaceIndex()) == isInnerRear_ : true );
     return isInnerRear_;
   }
@@ -479,6 +480,7 @@ namespace Dune
       else
         levelDifference = innerLevel - boundaryFace().level();
 
+      alugrid_assert(std::abs(levelDifference) <= 1);
       if (levelDifference < 0) {
         result = REFINED_OUTER;
       }

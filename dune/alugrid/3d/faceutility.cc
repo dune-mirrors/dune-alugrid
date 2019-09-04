@@ -99,8 +99,6 @@ namespace Dune
   void ALU3dGridGeometricFaceInfoBase< 2, dimworld, type, Comm >
     ::referenceElementCoordinatesUnrefined ( SideIdentifier side, LocalCoordinateType &result ) const
   {
-    //TODO use connector.face.nChild and (maybe twist)    referenceElementCoordinatesRefined ( side, cornerCoords )
-
     // get the parent's face coordinates on the reference element (Dune reference element)
     LocalCoordinateType cornerCoords;
     referenceElementCoordinatesRefined ( side, cornerCoords );

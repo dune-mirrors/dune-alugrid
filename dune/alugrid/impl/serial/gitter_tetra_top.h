@@ -598,7 +598,6 @@ namespace ALUGrid
           // Now we inspect the refinement edge of both father element and grandfather and choose the refinement edge accordingly
           else
           {
-            std::cout << "Tetra is 3d!! " << std::endl;
             // if  we have a grandfather
             if( _lvl > 1 )
             {

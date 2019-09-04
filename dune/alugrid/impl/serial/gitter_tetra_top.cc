@@ -342,7 +342,7 @@ namespace ALUGrid
                 for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
                 {
                   // assign neighbor info to child faces for initialization
-                  f->nb.assign( this->nb ) ;
+                  f->nb.assign( this->nb, f->nChild() == 3 ) ;
                 }
               }
               //for bisection we want no hanging nodes
@@ -407,7 +407,7 @@ namespace ALUGrid
       // auf das n"achste Level "uber.
       if (f->ref)
       {
-        if (f->ref == 1) f->nb.complete (this->nb) ;
+        if (f->ref == 1) f->nb.complete (this->nb, f->nChild() == 3) ;
         f->coarse () ;
         x = false ;
       }
@@ -2036,7 +2036,7 @@ namespace ALUGrid
                           face.getrule() == balrule_t::e02 ||
                           face.getrule() == balrule_t::iso4 );
           const int subFaces = ( face.getrule() == balrule_t::iso4 && ( ! this->is2d() ) ) ? 4 : 2;
-          for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb) ;
+          for (int j = 0 ; j < subFaces ; ++j ) face.subface (j)->nb.complete (face.nb, j == 3) ;
         }
       }
     }
@@ -2349,7 +2349,7 @@ namespace ALUGrid
         if (!f.leaf ()) {
           switch (f.getrule ()) {
       case balrule_t::iso4 :
-              {for (int j = 0 ; j < 4 ; j ++) f.subface (j)->nb.complete (f.nb) ;}
+              {for (int j = 0 ; j < 4 ; j ++) f.subface (j)->nb.complete (f.nb, j == 3) ;}
         break ;
       default :
         std::cerr << "**FEHLER (FATAL) beim restore mit unbekannter Balancierungsregel: "

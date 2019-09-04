@@ -1712,8 +1712,8 @@ namespace ALUGrid
         public:
           static const std::pair< myconnect_t *, int > null;
           face3Neighbour ();
-          void assign (const face3Neighbour &);
-          int complete (const face3Neighbour &);
+          void assign (const face3Neighbour &, bool isRearFlip = false);
+          int complete (const face3Neighbour &, bool isRearFlip = false);
           neighbour_t front ();
           const_neighbour_t front () const;
           neighbour_t rear ();
@@ -3436,31 +3436,47 @@ namespace ALUGrid
     -- _attachedRear;
   }
 
-  inline void Gitter::Geometric::hface3::face3Neighbour::assign (const face3Neighbour & n)
+  inline void Gitter::Geometric::hface3::face3Neighbour::assign (const face3Neighbour & n, bool isRearFlip)
   {
-    _faceFront     = n._faceFront;
-    _faceRear      = n._faceRear;
-    _numFront      = n._numFront;
-    _numRear       = n._numRear;
+    if(isRearFlip)
+    {
+      _faceFront     = n._faceRear;
+      _faceRear      = n._faceFront;
+      _numFront      = n._numRear;
+      _numRear       = n._numFront;
+    }
+    else
+    {
+      _faceFront     = n._faceFront;
+      _faceRear      = n._faceRear;
+      _numFront      = n._numFront;
+      _numRear       = n._numRear;
+    }
     // this is needed due to the copy of this structure in
     // gitter_tetra_top.cc:381
     _attachedFront = 0;
     _attachedRear  = 0;
   }
 
-  inline int Gitter::Geometric::hface3::face3Neighbour::complete (const face3Neighbour & n)
+  inline int Gitter::Geometric::hface3::face3Neighbour::complete (const face3Neighbour & n, bool isRearFlip)
   {
     int ret = 0;
 
     if( front() == null )
     {
-      setFront( std::pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
+      if( isRearFlip )
+        setFront( std::pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
+      else
+        setFront( std::pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
       ++ret;
     }
 
     if( rear() == null )
     {
-      setRear( std::pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
+      if( isRearFlip )
+        setRear( std::pair< hasFace3 *, int >( n._faceFront, n._numFront ) );
+      else
+        setRear( std::pair< hasFace3 *, int >( n._faceRear, n._numRear ) );
       ++ret;
     }
 

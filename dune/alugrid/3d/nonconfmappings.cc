@@ -107,7 +107,7 @@ namespace Dune
     //                   |    \    starting with the lower left vertex
     //                   |     \   (i.e. child 0 consits of  { P_0, (P_0+P_1)/2 , (P_0+P_2)/2 }  )
     //                   |      \
-    //                   |   1   \
+    //                   |   2   \
     //                   |        \
     //                   |         \
     //      (0.5,0,0.5)  |----------\  (0,0.5,0.5) = (P_1 + P_2)/2
@@ -118,17 +118,13 @@ namespace Dune
     //                   |    \     |    \
     //                   |     \    |     \
     //                   |      \   |      \
-    //                   |  0    \  |   2   \
+    //                   |  0    \  |   1   \
     //                   |        \ |        \
     //                   |         \|         \
     //                   -----------------------
     //         (1,0,0) = P_0   (0.5,0.5,0)    P_1 = (0,1,0)
     //                         = (P_0 + P_1)/
     //
-    //  NOTE: the strange numbering of the childs is due to the swap
-    //  of the vertex number form ALUGrid to Dune reference triangles faces
-    //  This means that in ALUGrid child 1 and 2 are swaped compared to
-    //  this example here.
     */
 
     // this mapping map from the points (P_0,P_1,P_2) to the
@@ -138,7 +134,7 @@ namespace Dune
     switch(nChild_) {
     case 0:
       // (1,0,0) --> (1,0,0)
-      // (0,1,0) --> (0.5,0,5,0)
+      // (0,1,0) --> (0.5,0.5,0)
       // (0,0,1) --> (0.5,0,0.5)
       parentCoordinates[0] =
         1.0 - 0.5*childCoordinates[1] - 0.5*childCoordinates[2];
@@ -149,16 +145,7 @@ namespace Dune
       parentCoordinates[1] = 0.5*childCoordinates[1];
       parentCoordinates[2] = 0.5*childCoordinates[2];
       break;
-    case 1: // swaped case 1 and case 2
-      // (1,0,0) --> (0.5,0,0.5)
-      // (0,1,0) --> (0,0,5,0)
-      // (0,0,1) --> (0,0,1)
-      parentCoordinates[0] = 0.5*childCoordinates[0];
-      parentCoordinates[1] = 0.5*childCoordinates[1];
-      parentCoordinates[2] =
-        1.0 - 0.5*childCoordinates[0] - 0.5*childCoordinates[1];
-      break;
-    case 2:
+    case 1:
       // (1,0,0) --> (0.5,0,5,0)
       // (0,1,0) --> (0,1,0)
       // (0,0,1) --> (0.5,0.5,0)
@@ -167,14 +154,22 @@ namespace Dune
         1.0 - 0.5*childCoordinates[0] - 0.5*childCoordinates[2];
       parentCoordinates[2] = 0.5*childCoordinates[2];
       break;
-    case 3:
+    case 2:
       // (1,0,0) --> (0.5,0,0.5)
-      // (0,1,0) --> (0.5,0.5,0)
+      // (0,1,0) --> (0,0,5,0)
+      // (0,0,1) --> (0,0,1)
+      parentCoordinates[0] = 0.5*childCoordinates[0];
+      parentCoordinates[1] = 0.5*childCoordinates[1];
+      parentCoordinates[2] =
+        1.0 - 0.5*childCoordinates[0] - 0.5*childCoordinates[1];
+      break;
+    case 3:
+      // (1,0,0) --> (0.5,0.5,0)
+      // (0,1,0) --> (0.5,0,0.5)
       // (0,0,1) --> (0,0.5,0.5)
-      // here swaped all to the next position
-      parentCoordinates[1] = 0.5 - 0.5*childCoordinates[0];
-      parentCoordinates[2] = 0.5 - 0.5*childCoordinates[1];
       parentCoordinates[0] = 0.5 - 0.5*childCoordinates[2];
+      parentCoordinates[1] = 0.5 - 0.5*childCoordinates[1];
+      parentCoordinates[2] = 0.5 - 0.5*childCoordinates[0];
       break;
     default:
       DUNE_THROW(RangeError, "Only 4 children on a tetrahedron face (val = "

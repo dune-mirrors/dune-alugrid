@@ -432,6 +432,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
 
   writeFile( grid.leafGridView(), 1 );
 
+  std::cout << " Making Non-Conform " << std::endl;
   // check also non-conform grids
   makeNonConfGrid(grid,0,1);
 
@@ -828,8 +829,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          filename = "./dgf/simplex-testgrid-3-3.dgf";
-          //filename = "./dgf/reference-simplex-3-3.dgf";
+          //filename = "./dgf/simplex-testgrid-3-3.dgf";
+          filename = "./dgf/reference-simplex-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
