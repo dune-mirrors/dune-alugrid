@@ -404,6 +404,9 @@ namespace Dune
 
     // false if surface mapping needs a update
     mutable bool mappingGlobalUp2Date_;
+
+    // false if outerNormal_ has to be multiplied by -1
+    mutable bool negativeNormal_ = true;
   };
 
   // ALU3dGridGeometricFaceInfoBase

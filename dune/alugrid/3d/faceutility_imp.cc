@@ -681,12 +681,27 @@ namespace Dune
         face.myvertex( 3 )->Point()
         );
       mappingGlobalUp2Date_ = true;
+      mappingGlobal_.normal(local, outerNormal_);
+      int innerFaceIndex = this->connector_.innerALUFaceIndex();
+      const alu3d_ctype (&_p)[3] = this->connector_.innerEntity().myhface((innerFaceIndex % 2 == 0) ? innerFaceIndex + 1 : innerFaceIndex -1)->myvertex(0)->Point();
+      const alu3d_ctype (&_p0)[3] = face.myvertex( 0 )->Point();
+      double det = outerNormal_[0] * (_p[0] - _p0[0]) +outerNormal_[1] * (_p[1] - _p0[1]) + outerNormal_[2] * (_p[2] - _p0[2]);
+      if(det > 0)
+      {
+        outerNormal_[0] *=-1;
+        outerNormal_[1] *=-1;
+        outerNormal_[2] *=-1;
+        negativeNormal_ = true;
+      }
+      else
+        negativeNormal_ = false;
+      return outerNormal_;
     }
 
     // calculate the normal
     // has to be calculated every time normal called, because
     // depends on local
-    if (connector_.isInnerRear())
+    if (negativeNormal_)
       mappingGlobal_.negativeNormal(local,outerNormal_);
     else
       mappingGlobal_.normal(local,outerNormal_);
@@ -937,21 +952,25 @@ namespace Dune
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
       const alu3d_ctype (&_p0)[3] = face.myvertex(0)->Point();
-      const alu3d_ctype (&_p3)[3] = face.myvertex(3)->Point();
+      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
 
-      // change sign if face normal points into inner element
-      // factor is 1.0 to get integration outer normal and not volume outer normal
-      const double factor = (this->connector_.isInnerRear()) ? -1.0 : 1.0;
-
-      if(dimworld == 2)
-      {
-        // we want the length of the intersection and orthogonal to it
-        outerNormal_[0] = factor * (_p0[1] - _p3[1]);
-        outerNormal_[1] = factor * (_p3[0] - _p0[0]);
-      }
+      int innerFaceIndex = this->connector_.innerALUFaceIndex();
+      const alu3d_ctype (&_p3)[3] = this->connector_.innerEntity().myhface((innerFaceIndex % 2 == 0) ? innerFaceIndex + 1 : innerFaceIndex -1)->myvertex(0)->Point();
+      alugrid_assert(dimworld == 2);
       //implemented in iterator_imp.cc
       //else if(dimworld == 3)
 
+      // we want the length of the intersection and orthogonal to it
+      outerNormal_[0] =  (_p0[1] - _p1[1]);
+      outerNormal_[1] =  (_p1[0] - _p0[0]);
+
+      double det = outerNormal_[0] * (_p3[0] - _p1[0]) + outerNormal_[1] * (_p3[1] - _p1[1]);
+
+      if(det > 0)
+      {
+        outerNormal_[0] *= -1;
+        outerNormal_[1] *= -1;
+      }
       normalUp2Date_ = true;
     } // end if mapp ...
 
