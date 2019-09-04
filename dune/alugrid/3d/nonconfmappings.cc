@@ -230,13 +230,13 @@ namespace Dune
     //    -------------------------
     //    |           |           |     childs within the reference
     //    |           |           |     quadrilateral of Dune
-    //    |    1      |     2     |
+    //    |    2      |     3     |
     //    |           |           |
     //    |           |           |
     //    |-----------|-----------|
     //    |           |           |
     //    |           |           |
-    //    |    0      |     3     |
+    //    |    0      |     1     |
     //    |           |           |
     //    |           |           |
     //    -------------------------
@@ -249,16 +249,16 @@ namespace Dune
       parentCoordinates[1] = 0.5*childCoordinates[1];
       break;
     case 1:
-      parentCoordinates[0] = 0.5*childCoordinates[0];
-      parentCoordinates[1] = 0.5*childCoordinates[1] + 0.5;
+      parentCoordinates[0] = 0.5*childCoordinates[0] + 0.5;
+      parentCoordinates[1] = 0.5*childCoordinates[1];
       break;
     case 2:
-      parentCoordinates[0] = 0.5*childCoordinates[0] + 0.5;
+      parentCoordinates[0] = 0.5*childCoordinates[0];
       parentCoordinates[1] = 0.5*childCoordinates[1] + 0.5;
       break;
     case 3:
       parentCoordinates[0] = 0.5*childCoordinates[0] + 0.5;
-      parentCoordinates[1] = 0.5*childCoordinates[1];
+      parentCoordinates[1] = 0.5*childCoordinates[1] + 0.5;
       break;
     default:
       DUNE_THROW(RangeError, "Only 4 children on a hexahedron face (val = "
