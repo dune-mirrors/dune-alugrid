@@ -233,6 +233,7 @@ namespace ALUGrid
   template< class A >  void Hface3Top < A >::split_iso4 ()
   {
     alugrid_assert ( _inner == 0 );
+    alugrid_assert ( !(this->is2d()) );
     int l = 1 + level () ;
     myvertex_t * ev0 = myhedge(0)->subvertex (0) ;
     myvertex_t * ev1 = myhedge(1)->subvertex (0) ;
@@ -265,9 +266,6 @@ namespace ALUGrid
       switch(r)
       {
         typedef typename myhedge_t::myrule_t myhedgerule_t;
-
-        // rotate of hedge rule does nothing,
-        // so its actually useless
 
         case myrule_t::e01 :
           myhedge (0)->refineImmediate (myhedgerule_t (myhedge_t::myrule_t::iso2)) ;
@@ -990,7 +988,7 @@ namespace ALUGrid
     innertetra_t * h1 = new innertetra_t (newLevel,
                                           subface(0,1), isRear(0),
                                           subface(1,1), isRear(1),
-                                          newFace, isRear(2),
+                                          newFace, !isRear(3),
                                           myhface(3), isRear(3),
                                           this, 1, childVolume) ;
 
@@ -1068,7 +1066,7 @@ namespace ALUGrid
 
     innertetra_t * h1 = new innertetra_t (newLevel,
                                           subface(0,1), isRear(0),
-                                          newFace, isRear(1),
+                                          newFace, !isRear(2),
                                           myhface(2), isRear(2),
                                           subface(3,1), isRear(3),
                                           this, 1, childVolume) ;
@@ -1145,7 +1143,7 @@ namespace ALUGrid
 
     innertetra_t * h1 = new innertetra_t (newLevel,
                                           subface(0,1), !(isRear(0)),
-                                          newFace, !(isRear(1)),
+                                          newFace, !(isRear(3)),
                                           myhface(3), isRear(3),
                                           subface(2,1), isRear(2),
                                           this, 1, childVolume) ;
@@ -1221,7 +1219,7 @@ namespace ALUGrid
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          newFace, isRear(0),
+                                          newFace, !isRear(1),
                                           myhface(1), isRear(1),
                                           subface(2,1), isRear(2),
                                           subface(3,1), isRear(3),
@@ -1297,7 +1295,7 @@ namespace ALUGrid
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          newFace, isRear(0),
+                                          newFace, !isRear(3),
                                           myhface(3), isRear(3),
                                           subface(1,1), !(isRear(1)),
                                           subface(2,1), !(isRear(2)),
@@ -1375,7 +1373,7 @@ namespace ALUGrid
                                           this, 0, childVolume) ;
 
     innertetra_t * h1 = new innertetra_t (newLevel,
-                                          newFace, !(isRear(0)),
+                                          newFace, !(isRear(2)),
                                           myhface(2), isRear(2),
                                           subface(1,1), isRear(1),
                                           subface(3,1), !(isRear(3)),

@@ -523,31 +523,33 @@ namespace ALUGrid
         {
           double max =0;
           myrule_t rule = myrule_t :: e01;
-          int i = this->is2d() ? 1 : 0;
-          int rulenumber = this->is2d() ? 5 : 2 ;
+          int i = (this->is2d()) ? 1 : 0;
+          int rulenumber = (this->is2d()) ? 5 : 2 ;
 
           for(; i<4; ++i)
           {
-            double sum = 0;
-            const alucoord_t (&p0)[ 3 ] = myvertex(0)->Point();
+            const alucoord_t (&p0)[ 3 ] = myvertex(i)->Point();
             for(int j=i+1; j < 4; ++j)
             {
-              rulenumber++;
-              const alucoord_t (&p1)[ 3 ] = myvertex(1)->Point();
+              //std::cout << i << j << rulenumber << " "  ;
+              const alucoord_t (&p1)[ 3 ] = myvertex(j)->Point();
+              double sum = 0;
 
               for(int k=0; k<3; ++k)
               {
                 double diff = p0[k] - p1[k];
                 sum += (diff * diff );
               }
-              sum = std::sqrt( sum );
               if (sum > max)
               {
                 max = sum;
                 rule = static_cast<myrule_t>(rulenumber);
               }
+              rulenumber++;
             }
           }
+          //std::cout << rule <<std::endl;
+          alugrid_assert( rule.bisection() );
           return rule;
         }
         //implementation of NVB bisection refinement
@@ -596,6 +598,7 @@ namespace ALUGrid
           // Now we inspect the refinement edge of both father element and grandfather and choose the refinement edge accordingly
           else
           {
+            std::cout << "Tetra is 3d!! " << std::endl;
             // if  we have a grandfather
             if( _lvl > 1 )
             {

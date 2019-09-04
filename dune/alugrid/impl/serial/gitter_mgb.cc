@@ -18,6 +18,7 @@ namespace ALUGrid
     std::pair< vertexMap_t::iterator, bool > result = _vertexMap.insert( std::make_pair( i, static_cast< VertexGeo * >( 0 ) ) );
     if( result.second )
       result.first->second = myBuilder().insert_vertex( x, y, z, i );
+    //std::cout << "Insert Vertex: " << i << " is2d: " << result.first->second->is2d() << std::endl;
     return std::make_pair( result.first->second, result.second );
   }
 
@@ -49,6 +50,7 @@ namespace ALUGrid
       edge [1] = InsertUniqueHedge (v[0],v[2]).first;
       edge [2] = InsertUniqueHedge (v[1],v[2]).first;
       result.first->second = myBuilder ().insert_hface3 (edge);
+      //std::cout << "Inserting Face " << v[0] << ", " << v[1] << ", " << v[2] << " is2d: " << static_cast< hface3_GEO * >( result.first->second )->is2d() << std::endl;
     }
     return std::make_pair( static_cast< hface3_GEO * >( result.first->second ), result.second );
   }
@@ -71,7 +73,7 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::tetra_GEO *, bool > MacroGridBuilder::
   InsertUniqueTetra (int (&v)[4], bool (&isRear)[4], SimplexTypeFlag elementType)
   {
-    //std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] <<
+    //std::cout << "Insert Tetra: " << v [0] << "," << v [1] <<"," << v [2] << "," << v [3] << std::endl;
     //"| Rear:" << isRear [0] << "," << isRear [1] <<"," << isRear [2] << "," << isRear [3] << std::endl;
     elementKey_t key (v [0], v [1], v [2], v [3]);
     std::pair< elementMap_t::iterator, bool > result = _tetraMap.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );

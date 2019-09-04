@@ -788,63 +788,59 @@ namespace Dune
     //In dimension == dimensionworld, we calculate the normal direction of the face and use this for isRear
     if(dimension == dimensionworld)
     {
-      if(elementType == tetra)
+      std::vector<bool> isRear = (elementType == tetra) ? std::vector<bool>({false, true, false, true}) : std::vector<bool>( {false, true, true, false, false, true});
+      //walk over all elements
+      for( std::size_t el =0 ; el < elements_.size(); ++el)
       {
-        std::vector<bool> isRear = {false, true, false, true};
-        //walk over all elements
-        for( std::size_t el =0 ; el < elements_.size(); ++el)
+        //calculate det to know whether we have to switch
+        auto element = elements_[el];
+        auto p0 = position(element[0]);
+        auto p1 = position(element[1]);
+        auto p2 = position(element[2]);
+        auto p3 = position(element[(elementType == tetra) ? 3 : 4]);
+        // (p1 - p0) x (p2-p0) * (p3-p0)
+        double det = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p1[2] - p0[2]) * (p2[1] - p0[1])) * (p3[0] - p0[0])
+                   + ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p1[0] - p0[0]) * (p2[2] - p0[2])) * (p3[1] - p0[1])
+                   + ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])) * (p3[2] - p0[2]);
+        for( std::size_t face = 0 ; face < numFaces; ++face)
         {
-          //calculate det to know whether we have to switch
-          auto element = elements_[el];
-          auto p0 = position(element[0]);
-          auto p1 = position(element[1]);
-          auto p2 = position(element[2]);
-          auto p3 = position(element[3]);
-          // (p1 - p0) x (p2-p0) * (p3-p0)
-          double det = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p1[2] - p0[2]) * (p2[1] - p0[1])) * (p3[0] - p0[0])
-                     + ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p1[0] - p0[0]) * (p2[2] - p0[2])) * (p3[1] - p0[1])
-                     + ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0])) * (p3[2] - p0[2]);
-          for( int face = 0 ; face < 4; ++face)
-          {
-            //set isRear on all faces correctly
-            bool rear = (det < 0) ? isRear[face] : !isRear[face];
-            isRearElements[el][face] = rear;
-            //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
-            FaceType faceId;
-            generateFace( element, face, faceId);
-            std::sort(faceId.begin(), faceId.end());
-            isRearBoundaries.insert(std::make_pair(faceId, !rear));
-          }
-        }
-      }
-      else // elementType == hexa
-      {
-        std::vector<bool> isRear = {false, true, true, false, false, true};
-        //walk over all elements
-        for( std::size_t el =0 ; el < elements_.size(); ++el)
-        {
-          //calculate det to know whether we have to switch
-          auto element = elements_[el];
-          for( int face = 0 ; face < 6; ++face)
-          {
-            //set isRear on all faces correctly
-            isRearElements[el][face] = isRear[face];
-            //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
-            FaceType faceId;
-            generateFace( element, face, faceId);
-            std::sort(faceId.begin(), faceId.end());
-            isRearBoundaries.insert(std::make_pair(faceId, !isRear[face]));
-          }
+          //set isRear on all faces correctly
+          bool rear = (det < 0) ? isRear[face] : !isRear[face];
+          isRearElements[el][face] = rear;
+          //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
+          FaceType faceId;
+          generateFace( element, face, faceId);
+          std::sort(faceId.begin(), faceId.end());
+          isRearBoundaries.insert(std::make_pair(faceId, !rear));
         }
       }
     }
     else // dimension == 2 and dimensionWorld == 3
     {
       //Walk over all elements
-      //walk over all faces
-      //check if face has been addressed
-      //if yes -> isRear = true, else false
-      //Walk over boundaries -> set isRear = true
+      for( std::size_t el =0 ; el < elements_.size(); ++el)
+      {
+        auto element = elements_[el];
+        //walk over all faces
+        for( unsigned face = 0 ; face < numFaces; ++face)
+        {
+          FaceType faceId;
+          generateFace( element, face, faceId);
+          std::sort(faceId.begin(), faceId.end());
+          //check if face has been addressed
+          auto faceIt = isRearBoundaries.find(faceId);
+          if( faceIt == isRearBoundaries.end() )
+          {
+            isRearElements[el][face] =false;
+            isRearBoundaries.insert(std::make_pair(faceId, true ));
+          }
+          else
+          {
+            isRearElements[el][face] = true;
+            isRearBoundaries.erase( faceIt );
+          }
+        }
+      }
     }
     assert( isRearElements.size() == elements_.size() );
   }
