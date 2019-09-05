@@ -676,24 +676,55 @@ namespace ALUGrid
               }
             }
             //if we are macro
-            //for macro elements we refine edge 0 -- 3
+            //The vertices are ordered in two disjoint sets V0,V1
+            //and V1 comes after V0
+            //the type is the size of V1 and the refinement edge is
+            //the first and last vertex of V0
+            //Example: Element: [0,1,2,3]
+            //type = 0 -> V1 = [] -> V0 = [0,1,2,3] -> refedge = 0--3
+            //type = 2 -> V1 = [2,3] -> V0 = [0,1] -> refedge = 0--1
             else if( _lvl == 0 )
             {
-              return myrule_t :: e03;
+              if(this->elementType() == 0)
+                return myrule_t :: e03;
+              if(this->elementType() == 1)
+                return myrule_t :: e02;
+              if(this->elementType() == 2)
+                return myrule_t :: e01;
             }
-            // if we do not have a grandfather, we know that the father rule is e03
+            // if we do not have a grandfather, we know the father rule depending on the type
             else
             {
               alugrid_assert( _lvl == 1 );
-              if (this->nChild() == 0)
-                return myrule_t :: e02;
-              else
+              if(this->elementType() == 1)
               {
-                alugrid_assert (this->nChild() == 1);
-                if( this->elementType() == 1)
+                if (this->nChild() == 0)
+                  return myrule_t :: e02;
+                else
+                {
+                  alugrid_assert (this->nChild() == 1);
+                  return myrule_t :: e03;
+                }
+              }
+              if(this->elementType() == 2)
+              {
+                if (this->nChild() == 0)
+                  return myrule_t :: e01;
+                else
+                {
+                  alugrid_assert (this->nChild() == 1);
+                  return myrule_t :: e02;
+                }
+              }
+              if(this->elementType() == 0)
+              {
+                if (this->nChild() == 0)
                   return myrule_t :: e03;
                 else
+                {
+                  alugrid_assert (this->nChild() == 1);
                   return myrule_t :: e13;
+                }
               }
             }
           }

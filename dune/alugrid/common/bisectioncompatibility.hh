@@ -398,31 +398,23 @@ public:
       }
       else
       {
-        ElementType V0Part(newNeigh);
-        ElementType V1Part(newNeigh);
+        //We append the vertices in V1 after the ones in V0
+        //to have a globally consistent ordering
+        auto it = newNeigh.begin();
         for(unsigned int i = 0 ; i < 4; ++i)
         {
-          if( contained[ i ] )
+          if( ! contained[ i ] )
           {
-            auto it = std::find(V1Part.begin(),V1Part.end(),newNeigh[i]);
-            V1Part.erase( it );
+            newNeigh.push_back(newNeigh[i]);
+            ++type;
+            it = newNeigh.erase(it);
           }
           else
           {
-            auto it = std::find(V0Part.begin(),V0Part.end(),newNeigh[i]);
-            V0Part.erase( it );
-            ++type;
+            ++it;
           }
         }
-        for(unsigned int i = 0; i < 4; ++i)
-        {
-          if(i == 0)
-            newNeigh[ i ] = V0Part[ i ];
-          else if( i <= type )
-            newNeigh[ i ] = V1Part[ i - 1 ] ;
-          else if( i > type)
-            newNeigh[ i ] = V0Part[ i - type];
-        }
+        alugrid_assert( newNeigh.size() == 4 );
       }
       types_[neighIndex] = type % 3;
 
