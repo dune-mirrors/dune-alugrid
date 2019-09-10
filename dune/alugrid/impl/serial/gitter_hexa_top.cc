@@ -586,8 +586,8 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
       // make sure determinant is ok
-      Dune::FieldVector<double, 3> point = { 0.0, 0.0, 0.0 };
-      alugrid_assert ( trMap.det( point ) > 0 );
+      //Dune::FieldVector<double, 3> point = { 0.0, 0.0, 0.0 };
+      //alugrid_assert ( trMap.det( point ) > 0 );
 #endif
 
     alugrid_assert ( this->level() == l );
@@ -631,8 +631,8 @@ namespace ALUGrid
 
 #ifdef ALUGRIDDEBUG
       // make sure determinant is ok
-      Dune::FieldVector<double,3> point = { 0.0, 0.0, 0.0 };
-      alugrid_assert ( triMap.det( point ) > 0 );
+      //Dune::FieldVector<double,3> point = { 0.0, 0.0, 0.0 };
+      //alugrid_assert ( triMap.det( point ) > 0 );
 #endif
 
       // calculate volume

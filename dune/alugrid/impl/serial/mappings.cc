@@ -206,7 +206,7 @@ namespace ALUGrid
       coord_t qp{ (i>3 ? quad_point1 : quad_point2), (i/4 > 1 ? quad_point1 : quad_point2), (i%2 ? quad_point1 : quad_point2) };
       volume += det(qp);
     }
-    return weight * volume;
+    return weight * std::abs(volume);
   }
 
   alu_inline alucoord_t TrilinearMapping :: det(const coord_t& point)
@@ -229,7 +229,7 @@ namespace ALUGrid
     DetDf = (t4*Df[2][2]-t6*Df[2][1]-t8*Df[2][2]+
             t10*Df[2][1]+t12*Df[1][2]-t14*Df[1][1]);
 
-    alugrid_assert ( DetDf > 0 );
+    //alugrid_assert ( DetDf > 0 );
     //: ( std::cout << "DetDf wrong: " << DetDf << std::endl,false ) );
 
     // set calced det to affine (true if affine false otherwise)

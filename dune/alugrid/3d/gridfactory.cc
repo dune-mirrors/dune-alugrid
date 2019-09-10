@@ -777,6 +777,15 @@ namespace Dune
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
+      if(dimension == 3)
+      {
+        std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
+        for(unsigned i = 0 ; i < vertices_.size(); ++i)
+        {
+          vertices[i] = vertices_[i].first;
+        }
+        MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
+      }
     }
   }
 
