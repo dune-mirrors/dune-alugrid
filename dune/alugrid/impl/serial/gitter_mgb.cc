@@ -700,6 +700,8 @@ namespace ALUGrid
       }
       else
       {
+        if(((hface4_GEO *)(*i).second)->ref != 2)
+          std::cout << (hface4_GEO *)(*i).second  ;
         alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
         myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
       }

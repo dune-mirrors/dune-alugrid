@@ -384,7 +384,7 @@ namespace Dune
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
-    void correctElementOrientation ();
+    bool correctElementOrientation ();
     void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool> & isRearBoundaries );
     bool bisectionCompatibility ( std::vector<int> & simplexTypes );
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );

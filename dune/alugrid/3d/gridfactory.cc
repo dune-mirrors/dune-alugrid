@@ -431,12 +431,12 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
+    bool madeCompatible = false;
     if( ALUGrid::elementType == hexa )
     {
       //use Marcel Kochs consistency algorithm
-      correctElementOrientation();
+      madeCompatible = correctElementOrientation();
     }
-    bool madeCompatible = false;
 
     if( dimension == 2 && ALUGrid::refinementType == conforming )
     {
@@ -453,7 +453,7 @@ namespace Dune
 
     std::vector<int> simplexTypes(elements_.size(),0);
 
-    madeCompatible = bisectionCompatibility(simplexTypes);
+    madeCompatible = madeCompatible ||  bisectionCompatibility(simplexTypes);
 
 
     numFacesInserted_ = boundaryIds_.size();
@@ -771,22 +771,36 @@ namespace Dune
 
   template< class ALUGrid >
   alu_inline
-  void
+  bool
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
   {
+    bool result = false;
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
       if(dimension == 3)
       {
+        for( auto elem : elements_ )
+        {
+          for(int i =0 ; i < 8 ; ++i )
+            std::cout << elem[i] << ", " ;
+          std::cout << std::endl;
+        }
         std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
         for(unsigned i = 0 ; i < vertices_.size(); ++i)
         {
           vertices[i] = vertices_[i].first;
         }
-        MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
+        result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
+        for( auto elem : elements_ )
+        {
+          for(int i =0 ; i < 8 ; ++i )
+            std::cout << elem[i] << ", " ;
+          std::cout << std::endl;
+        }
       }
     }
+    return result;
   }
 
   template< class ALUGrid >
