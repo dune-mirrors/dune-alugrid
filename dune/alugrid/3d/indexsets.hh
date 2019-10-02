@@ -401,18 +401,18 @@ namespace Dune {
     // For the 2d case the first and second entry coincide, because the 3d grid is just an extended 2d grid
     const std::array<std::array<int, 4>, 4> offset = (dim == 3) ?
                                                     ( (elType == hexa) ?
-                                                    std::array<AT,4>({AT({8,12,6,1}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
-                                                    std::array<AT,4>({AT({8,8,1,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    std::array<AT,4>{{AT{{8,12,6,1}},AT{{-1,4,4,1}}, AT{{-1,-1,2,1}}, AT{{-1,-1,-1,1}}}}:
+                                                    std::array<AT,4>{{AT{{8,8,1,0}}, AT{{-1,4,3,0}}, AT{{-1,-1,2,1}}, AT{{-1,-1,-1,1}}}}
                                                     ) : (
                                                     (elType == hexa) ?
-                                                    std::array<AT,4>({AT({4,4,1,0}),AT({-1,4,4,1}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})}):
-                                                    std::array<AT,4>({AT({4,3,0,0}), AT({-1,4,3,0}), AT({-1,-1,2,1}), AT({-1,-1,-1,1})})
+                                                    std::array<AT,4>{{AT{{4,4,1,0}},AT{{-1,4,4,1}}, AT{{-1,-1,2,1}}, AT{{-1,-1,-1,1}}}}:
+                                                    std::array<AT,4>{{AT{{4,3,0,0}}, AT{{-1,4,3,0}}, AT{{-1,-1,2,1}}, AT{{-1,-1,-1,1}}}}
                                                     );
     // nChildren is actually 4 for dim = 2
     // but the other values would have to be computed exactly
     // so we use an upper bound (5)
     const int nChildren = ( dim == 3) ? 8 : 5;
-    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT({1, 3 , 3, 1}) : AT({1, 2, 2, 1}) );
+    const std::array<int, 4>  nEntitiesFactor =  ( (elType == hexa) ? AT{{1, 3 , 3, 1}} : AT{{1, 2, 2, 1}} );
 
   public:
 
