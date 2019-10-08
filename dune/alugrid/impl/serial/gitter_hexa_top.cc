@@ -881,10 +881,10 @@ namespace ALUGrid
 
     //4 inner hexas
 
-    innerhexa_t * h0 = new innerhexa_t (l, subface(0,0), isRear(0), f2, !(isRear(0)), subface(2,0), isRear(2), f0, !(isRear(2)), subface(4,0), isRear(4), subface(5,0), isRear(5), this, 0, childVolume);
-    innerhexa_t * h1 = new innerhexa_t (l, f2, !(isRear(1)), subface(1,0), isRear(1), subface(2,1), isRear(2), f1, !(isRear(2)), subface(4,1), isRear(4), subface(5,1), isRear(5), this, 1, childVolume);
-    innerhexa_t * h2 = new innerhexa_t (l, subface(0,1), isRear(0), f3, !(isRear(0)), f0, !(isRear(3)), subface(3,0), isRear(3), subface(4,2), isRear(4), subface(5,2), isRear(5), this, 2, childVolume);
-    innerhexa_t * h3 = new innerhexa_t (l, f3, !(isRear(1)), subface(1,1), isRear(1), f1, !(isRear(3)), subface(3,1), isRear(3), subface(4,3), isRear(4), subface(5,3), isRear(5), this, 3, childVolume);
+    innerhexa_t * h0 = new innerhexa_t (l, subface(0,0), isRear(0), f2, false, subface(2,0), isRear(2), f0, true, subface(4,0), isRear(4), subface(5,0), isRear(5), this, 0, childVolume);
+    innerhexa_t * h1 = new innerhexa_t (l, f2, true, subface(1,0), isRear(1), subface(2,1), isRear(2), f1, false, subface(4,1), isRear(4), subface(5,1), isRear(5), this, 1, childVolume);
+    innerhexa_t * h2 = new innerhexa_t (l, subface(0,1), isRear(0), f3, true, f0, false, subface(3,0), isRear(3), subface(4,2), isRear(4), subface(5,2), isRear(5), this, 2, childVolume);
+    innerhexa_t * h3 = new innerhexa_t (l, f3, false, subface(1,1), isRear(1), f1, true, subface(3,1), isRear(3), subface(4,3), isRear(4), subface(5,3), isRear(5), this, 3, childVolume);
 
     alugrid_assert (h0 && h1 && h2 && h3 );
 

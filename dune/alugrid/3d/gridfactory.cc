@@ -794,14 +794,6 @@ namespace Dune
       {
         //get quad grid
         std::vector<std::vector<unsigned int> > quadElements(elements_);
-        for(auto& el : elements_)
-        {
-          for(int i = 0; i < 8; ++i )
-          {
-            std::cout << el[i] << "," ;
-          }
-          std::cout << std::endl;
-        }
         for( auto&& quad : quadElements )
           quad.resize(4);
         //consistently orient quads
@@ -816,14 +808,6 @@ namespace Dune
               elements_[i][j+4] = quadElements[i][j]+1;
             }
           }
-        }
-        for(auto& el : elements_)
-        {
-          for(int i = 0; i < 8; ++i )
-          {
-            std::cout << el[i] << "," ;
-          }
-          std::cout << std::endl;
         }
       }
     }
