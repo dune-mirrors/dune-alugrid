@@ -17,6 +17,8 @@
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 
 #include <dune/alugrid/common/bisectioncompatibility.hh>
+#include <dune/alugrid/common/faceconsistency.hh>
+
 
 #include "dune/alugrid/3d/aluinline.hh"
 
@@ -431,12 +433,6 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
   {
-    bool madeCompatible = false;
-    if( ALUGrid::elementType == hexa )
-    {
-      //use Marcel Kochs consistency algorithm
-      madeCompatible = correctElementOrientation();
-    }
 
     if( dimension == 2 && ALUGrid::refinementType == conforming )
     {
@@ -451,10 +447,11 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
 
-    std::vector<int> simplexTypes(elements_.size(),0);
+    std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
 
-    madeCompatible = madeCompatible ||  bisectionCompatibility(simplexTypes);
 
+    //use Marcel Kochs consistency algorithm
+    bool madeCompatible = correctElementOrientation(simplexTypes);
 
     numFacesInserted_ = boundaryIds_.size();
 
@@ -772,33 +769,67 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   bool
-  ALU3dGridFactory< ALUGrid >::correctElementOrientation ()
+  ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int> & simplexTypes)
   {
     bool result = false;
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
+      std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
+      for(unsigned i = 0 ; i < vertices_.size(); ++i)
+      {
+        vertices[i] = vertices_[i].first;
+      }
       if(dimension == 3)
       {
-        for( auto elem : elements_ )
+        result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
+        FaceConsistency faceConsistency(elements_);
+        if(!faceConsistency.consistencyCheck(true))
         {
-          for(int i =0 ; i < 8 ; ++i )
-            std::cout << elem[i] << ", " ;
+          faceConsistency.makeFaceConsistent();
+          faceConsistency.returnElements(elements_);
+        }
+      }
+      else //if dimension == 2
+      {
+        //get quad grid
+        std::vector<std::vector<unsigned int> > quadElements(elements_);
+        for(auto& el : elements_)
+        {
+          for(int i = 0; i < 8; ++i )
+          {
+            std::cout << el[i] << "," ;
+          }
           std::cout << std::endl;
         }
-        std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
-        for(unsigned i = 0 ; i < vertices_.size(); ++i)
+        for( auto&& quad : quadElements )
+          quad.resize(4);
+        //consistently orient quads
+        result = MeshConsistency::orient_consistently(vertices, quadElements, MeshConsistency::quadrilateralType);
+        if( result )
         {
-          vertices[i] = vertices_[i].first;
+          for(unsigned int i = 0 ; i < elements_.size() ; ++i)
+          {
+            for(int j = 0 ; j < 4 ; ++j)
+            {
+              elements_[i][j] = quadElements[i][j];
+              elements_[i][j+4] = quadElements[i][j]+1;
+            }
+          }
         }
-        result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
-        for( auto elem : elements_ )
+        for(auto& el : elements_)
         {
-          for(int i =0 ; i < 8 ; ++i )
-            std::cout << elem[i] << ", " ;
+          for(int i = 0; i < 8; ++i )
+          {
+            std::cout << el[i] << "," ;
+          }
           std::cout << std::endl;
         }
       }
+    }
+    else if(elementType == tetra)
+    {
+      result = bisectionCompatibility(simplexTypes);
     }
     return result;
   }
