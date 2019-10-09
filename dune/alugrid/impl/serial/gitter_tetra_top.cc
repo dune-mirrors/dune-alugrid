@@ -2105,15 +2105,7 @@ namespace ALUGrid
   template< class A > typename Periodic3Top < A >:: myhface_t * Periodic3Top < A >::subface (int i, int j) {
     switch (myhface (i)->getrule ()) {
     case myhface_t::myrule_t::e01 :
-      alugrid_assert ( j < 2 );
-        return myhface(i)->subface(j) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      return 0;
     case myhface_t::myrule_t::e12 :
-      alugrid_assert ( j < 2 );
-        return myhface(i)->subface(j) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      return 0;
     case myhface_t::myrule_t::e02 :
       alugrid_assert ( j < 2 );
         return myhface(i)->subface(j) ;
@@ -2147,11 +2139,12 @@ namespace ALUGrid
   template< class A > void Periodic3Top < A >::split_iso4 ()
   {
     const int l = 1 + this->level () ;
+    //TODO: This may be wrong unless we can guarantee twist-free periodic faces
+    //which we should...
     innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,0), isRear (0), subface (1,0), isRear (1), this , 0) ;
-    innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,1), isRear (0), subface (1,2), isRear (1), this , 1) ;
-    innerperiodic3_t * p2 = new innerperiodic3_t (l, subface (0,2), isRear (0), subface (1,1), isRear (1), this , 2) ;
-
-    innerperiodic3_t * p3 = new innerperiodic3_t (l, subface (0,3), isRear (0), subface (1,3), isRear(1) , this , 3) ;
+    innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,1), isRear (0), subface (1,1), isRear (1), this , 1) ;
+    innerperiodic3_t * p2 = new innerperiodic3_t (l, subface (0,2), isRear (0), subface (1,2), isRear (1), this , 2) ;
+    innerperiodic3_t * p3 = new innerperiodic3_t (l, subface (0,3), isRear (0), subface (1,3), isRear (1), this , 3) ;
     alugrid_assert (p0 && p1 && p2 && p3) ;
     p0->append(p1) ;
     p1->append(p2) ;

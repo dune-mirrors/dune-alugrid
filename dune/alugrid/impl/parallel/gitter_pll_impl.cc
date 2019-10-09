@@ -1301,7 +1301,7 @@ namespace ALUGrid
 
   template < class A >
   Periodic3PllXBaseMacro< A >::
-  Periodic3PllXBaseMacro ( int level, myhface3_t* f0,int s0, myhface3_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
+  Periodic3PllXBaseMacro ( int level, myhface3_t* f0, bool s0, myhface3_t *f1, bool s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   : A(level, f0, s0, f1, s1, bt )
   , _moveTo ( -1 )
   {
@@ -1412,6 +1412,9 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (4)->ident ());
     os.writeObject (myperiodic ().myvertex (5)->ident ());
 
+    os.put (char(myperiodic ().isRear(0)));
+    os.put (char(myperiodic ().isRear(1)));
+
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
@@ -1474,7 +1477,7 @@ namespace ALUGrid
 
   template < class A >
   Periodic4PllXBaseMacro< A >::
-  Periodic4PllXBaseMacro ( int level, myhface4_t* f0,int s0, myhface4_t *f1,int s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
+  Periodic4PllXBaseMacro ( int level, myhface4_t* f0, bool s0, myhface4_t *f1, bool s1, const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
     : A(level, f0, s0, f1, s1, bt )
     , _moveTo ( -1 )
   {
@@ -1589,6 +1592,8 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (6)->ident ());
     os.writeObject (myperiodic ().myvertex (7)->ident ());
 
+    os.put (char(myperiodic ().isRear(0)));
+    os.put (char(myperiodic ().isRear(1)));
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
@@ -2174,14 +2179,14 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::periodic3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic3 (hface3_GEO *(&f)[2], int (&t)[2],
+  insert_periodic3 (hface3_GEO *(&f)[2], bool (&t)[2],
                     const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
     return new ObjectsPll::Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1], bt);
   }
 
   Gitter::Geometric::periodic4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic4 (hface4_GEO *(&f)[2], int (&t)[2],
+  insert_periodic4 (hface4_GEO *(&f)[2], bool (&t)[2],
                     const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
     return new ObjectsPll::Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1], bt );

@@ -577,8 +577,8 @@ namespace ALUGrid
 
     public:
 
-      Periodic4Top (int,myhface4_t *,int,myhface4_t *,int, const bnd_t (&bt)[ 2 ] );
-      Periodic4Top (int,myhface4_t *,int,myhface4_t *,int,
+      Periodic4Top (int,myhface4_t *,bool,myhface4_t *,bool, const bnd_t (&bt)[ 2 ] );
+      Periodic4Top (int,myhface4_t *,bool,myhface4_t *,bool,
                     innerperiodic4_t * up, int nChild );
       virtual ~Periodic4Top ();
 

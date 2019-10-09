@@ -450,7 +450,7 @@ namespace Dune
     std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
 
 
-    //use Marcel Kochs consistency algorithm
+    //use consistency algorithm or bisection compatibility
     bool madeCompatible = correctElementOrientation(simplexTypes);
 
     numFacesInserted_ = boundaryIds_.size();
@@ -709,10 +709,14 @@ namespace Dune
             perel[ i+4 ] = globalId( facePair.second.first[ i ] );
           }
 
+          bool isRear[ 2 ];
+          isRear[0] = isRearBoundaries[ facePair.second.first ];
+          isRear[1] = isRearBoundaries[ facePair.second.first ];
+
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic4( perel, bndId );
+          mgb.InsertUniquePeriodic4( perel, isRear, bndId );
 
         }
         else if( elementType == tetra )
@@ -723,10 +727,13 @@ namespace Dune
             perel[ i+0 ] = globalId( facePair.first.first[ (3 - i) % 3 ] );
             perel[ i+3 ] = globalId( facePair.second.first[ (3 - i) % 3 ] );
           }
+          bool isRear[ 2 ];
+          isRear[0] = isRearBoundaries[ facePair.second.first ];
+          isRear[1] = isRearBoundaries[ facePair.second.first ];
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic3( perel, bndId );
+          mgb.InsertUniquePeriodic3( perel, isRear, bndId );
         }
         else
           DUNE_THROW( GridError, "Invalid element type" );

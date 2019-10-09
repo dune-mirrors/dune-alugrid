@@ -870,9 +870,9 @@ namespace ALUGrid
       }
     public:
       // constructor for macro elements
-      inline Periodic3Top (int,myhface_t *,int,myhface_t *,int, const bnd_t (&bnd)[2] );
+      inline Periodic3Top (int,myhface_t *,bool,myhface_t *,bool, const bnd_t (&bnd)[2] );
       // construtor for refined elements
-      inline Periodic3Top (int,myhface_t *,int,myhface_t *,int, innerperiodic3_t * up, int nChild );
+      inline Periodic3Top (int,myhface_t *,bool,myhface_t *,bool, innerperiodic3_t * up, int nChild );
       virtual inline ~Periodic3Top ();
       inline innerperiodic3_t * up ();
       inline const innerperiodic3_t * up () const;
@@ -1380,8 +1380,8 @@ namespace ALUGrid
   // #        ######  #    #     #     ####   #####      #     ####   #####    #      ####   #
 
   template < class A > inline Periodic3Top < A > ::
-  Periodic3Top (int l, myhface_t * f0, int t0,
-    myhface_t * f1, int t1, const bnd_t (&bt)[2] )
+  Periodic3Top (int l, myhface_t * f0, bool t0,
+    myhface_t * f1, bool t1, const bnd_t (&bt)[2] )
    : A (f0, t0, f1, t1)
    , _dwn (0), _bbb (0), _up(0)
    , _lvl (l)
@@ -1402,7 +1402,7 @@ namespace ALUGrid
   }
 
   template < class A > inline Periodic3Top < A > ::
-  Periodic3Top (int l, myhface_t * f0, int t0, myhface_t * f1, int t1, innerperiodic3_t * up, int nChild )
+  Periodic3Top (int l, myhface_t * f0, bool t0, myhface_t * f1, bool t1, innerperiodic3_t * up, int nChild )
     : A (f0, t0, f1, t1)
     , _dwn (0), _bbb (0), _up(up)
     , _lvl (l)

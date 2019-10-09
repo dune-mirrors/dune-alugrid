@@ -179,7 +179,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::periodic3_GEO *, bool > MacroGridBuilder::
-  InsertUniquePeriodic (int (&v)[6], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
+  InsertUniquePeriodic (int (&v)[6], bool (&isRear)[2], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
   {
 
     // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -191,7 +191,6 @@ namespace ALUGrid
     elementMap_t::const_iterator hit = _periodic3Map.find (key);
     if (hit == _periodic3Map.end ()) {
       hface3_GEO * face [2];
-      bool isRear [2];
       for (int fce = 0; fce < 2; ++fce )
       {
         int x [3];
@@ -210,7 +209,7 @@ namespace ALUGrid
   }
 
   std::pair< Gitter::Geometric::periodic4_GEO *, bool > MacroGridBuilder::
-  InsertUniquePeriodic (int (&v)[8], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
+  InsertUniquePeriodic (int (&v)[8], bool (&isRear)[2], const Gitter::hbndseg_STI ::bnd_t (&bt)[2] )
   {
 
     // Vorsicht: Der Schl"ussel f"ur das periodische Randelement wird
@@ -222,7 +221,6 @@ namespace ALUGrid
     elementMap_t::const_iterator hit = _periodic4Map.find (key);
     if (hit == _periodic4Map.end ()) {
       hface4_GEO * face [2];
-      bool isRear [2];
       for (int fce = 0; fce < 2; ++fce )
       {
         int x [4];
@@ -848,11 +846,13 @@ namespace ALUGrid
       int vp[ 8 ];
       for( int i=0; i<nper; ++i )
       {
+        //TODO get from stream
+        bool isRear[2] = {true,true};
         for( int j=0; j<8; ++j )
           in >> vp[ j ] ;
 
         Gitter::hbndseg::bnd_t bndId[ 2 ] = { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
-        InsertUniquePeriodic (vp, bndId );
+        InsertUniquePeriodic (vp, isRear, bndId );
       }
 
       int bt ;
@@ -893,11 +893,13 @@ namespace ALUGrid
       int vp[ 6 ];
       for( int i=0; i<nper; ++i )
       {
+        //TODO get from stream
+        bool isRear[2] = {true,true};
         for( int j=0; j<6; ++j )
           in >> vp[ j ] ;
 
         Gitter::hbndseg::bnd_t bndId[ 2 ] = { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
-        InsertUniquePeriodic (vp, bndId );
+        InsertUniquePeriodic (vp, isRear, bndId );
       }
 
       int bt ;

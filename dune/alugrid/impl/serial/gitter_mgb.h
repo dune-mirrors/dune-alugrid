@@ -168,27 +168,27 @@ namespace ALUGrid
       virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], bool (&isRear)[4], SimplexTypeFlag );
       virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8], bool (&isRear)[6]);
 
-      virtual std::pair< periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], const Gitter::hbndseg::bnd_t (&)[2]);
-      virtual std::pair< periodic4_GEO *, bool > InsertUniquePeriodic (int (&)[8], const Gitter::hbndseg::bnd_t (&)[2]);
+      virtual std::pair< periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], bool (&)[2], const Gitter::hbndseg::bnd_t (&)[2]);
+      virtual std::pair< periodic4_GEO *, bool > InsertUniquePeriodic (int (&)[8], bool (&)[2], const Gitter::hbndseg::bnd_t (&)[2]);
       virtual std::pair< periodic3_GEO *, bool >
-      InsertUniquePeriodic3 (int (&v)[6], const Gitter::hbndseg::bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, bnd ); }
+      InsertUniquePeriodic3 (int (&v)[6], bool (&isRear)[2], const Gitter::hbndseg::bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, isRear, bnd ); }
       virtual std::pair< periodic4_GEO *, bool >
-      InsertUniquePeriodic4 (int (&v)[8], const Gitter::hbndseg::bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, bnd ); }
+      InsertUniquePeriodic4 (int (&v)[8], bool (&isRear)[2], const Gitter::hbndseg::bnd_t (&bnd)[2]) { return InsertUniquePeriodic( v, isRear, bnd ); }
 
       // old version setting default boundary ids
-      std::pair< periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&v)[6] )
+      std::pair< periodic3_GEO *, bool > InsertUniquePeriodic3 (int (&v)[6], bool (&isRear)[2] )
       {
         Gitter::hbndseg::bnd_t bnd[ 2 ] =
           { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
-        return InsertUniquePeriodic( v, bnd );
+        return InsertUniquePeriodic( v, isRear, bnd );
       }
 
       // old version setting default boundary ids
-      std::pair< periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&v)[8] )
+      std::pair< periodic4_GEO *, bool > InsertUniquePeriodic4 (int (&v)[8], bool (&isRear)[2] )
       {
         Gitter::hbndseg::bnd_t bnd[ 2 ] =
           { Gitter::hbndseg::periodic, Gitter::hbndseg::periodic };
-        return InsertUniquePeriodic( v, bnd );
+        return InsertUniquePeriodic( v, isRear, bnd );
       }
 
       virtual bool InsertUniqueHbnd3 (int (&)[3], bool isRear, Gitter::hbndseg::bnd_t, int,int, const ProjectVertexPtr& pv);

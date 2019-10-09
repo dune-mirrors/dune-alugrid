@@ -286,7 +286,7 @@ namespace ALUGrid
       using A::PERIODIC3;
       using A::HBND3INT;
 
-      Periodic3PllXBase( myhface3_t* f0,int s0, myhface3_t *f1,int s1)
+      Periodic3PllXBase( myhface3_t* f0, bool s0, myhface3_t *f1, bool s1)
         : A( f0, s0, f1, s1 ) {}
 
       inline myperiodic_t & myperiodic () { return *this; }
@@ -323,7 +323,7 @@ namespace ALUGrid
       using A::unset;
       using A::set;
 
-      Periodic3PllXBaseMacro (int, myhface3_t* f0,int s0, myhface3_t *f1,int s1,
+      Periodic3PllXBaseMacro (int, myhface3_t* f0,bool s0, myhface3_t *f1,bool s1,
                               const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
      ~Periodic3PllXBaseMacro ();
 
@@ -367,7 +367,7 @@ namespace ALUGrid
       using A::PERIODIC4;
       using A::HBND4INT;
 
-      Periodic4PllXBase( myhface4_t* f0, int s0, myhface4_t *f1, int s1)
+      Periodic4PllXBase( myhface4_t* f0, bool s0, myhface4_t *f1, bool s1)
         : A( f0, s0, f1, s1 ) {}
 
     protected:
@@ -395,7 +395,7 @@ namespace ALUGrid
       typedef A myperiodic_t;
       typedef Gitter::hface_STI hface_STI;
 
-      Periodic4PllXBaseMacro (int, myhface4_t* f0,int s0, myhface4_t *f1,int s1,
+      Periodic4PllXBaseMacro (int, myhface4_t* f0, bool s0, myhface4_t *f1, bool s1,
                               const Gitter::hbndseg_STI::bnd_t (&bt)[2] );
       ~Periodic4PllXBaseMacro ();
 
@@ -742,7 +742,7 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
         typedef hface3_IMPL innerface_t;
       public :
-        inline Periodic3EmptyPll (myhface3_t * f0, int s0, myhface3_t *f1, int s1 )
+        inline Periodic3EmptyPll (myhface3_t * f0, bool s0, myhface3_t *f1, bool s1 )
           : Periodic3PllXBase< Periodic3Empty >( f0, s0, f1, s1 ) {}
         virtual ElementPllXIF & accessPllX () { return *this; }
         virtual const ElementPllXIF & accessPllX () const { return *this; }
@@ -752,7 +752,7 @@ namespace ALUGrid
       class Periodic3EmptyPllMacro : public Periodic3PllXBaseMacro< periodic3_IMPL >
       {
       public :
-        Periodic3EmptyPllMacro (myhface3_t* f0, int s0, myhface3_t* f1, int s1,
+        Periodic3EmptyPllMacro (myhface3_t* f0, bool s0, myhface3_t* f1, bool s1,
                                 const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic3PllXBaseMacro< periodic3_IMPL >( 0, f0, s0, f1, s1, bt ) {}
         virtual ElementPllXIF & accessPllX () { return *this; }
@@ -773,7 +773,7 @@ namespace ALUGrid
         typedef hedge1_IMPL inneredge_t;
         typedef hface4_IMPL innerface_t;
       public :
-        inline Periodic4EmptyPll (myhface4_t* f0, int s0, myhface4_t* f1, int s1)
+        inline Periodic4EmptyPll (myhface4_t* f0, bool s0, myhface4_t* f1, bool s1)
           : Periodic4PllXBase< Periodic4Empty >( f0, s0, f1, s1 ) {}
 
         virtual ElementPllXIF & accessPllX () { return *this; }
@@ -784,7 +784,7 @@ namespace ALUGrid
       class Periodic4EmptyPllMacro : public Periodic4PllXBaseMacro< periodic4_IMPL >
       {
       public :
-        Periodic4EmptyPllMacro (myhface4_t* f0, int s0, myhface4_t* f1, int s1,
+        Periodic4EmptyPllMacro (myhface4_t* f0, bool s0, myhface4_t* f1, bool s1,
                                 const Gitter:: hbndseg_STI::bnd_t (&bt)[2] )
           : Periodic4PllXBaseMacro< periodic4_IMPL >( 0, f0, s0, f1, s1, bt ) {}
 
@@ -859,8 +859,8 @@ namespace ALUGrid
           virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]);
           virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool (&)[4], SimplexTypeFlag);
 
-          virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
-          virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], int (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
+          virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], bool (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
+          virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], bool (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
 
           using GitterBasis::MacroGitterBasis::iterator;
         public :

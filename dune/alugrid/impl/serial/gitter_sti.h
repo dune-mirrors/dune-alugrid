@@ -3975,14 +3975,14 @@ namespace ALUGrid
     //      1-> (0,1)
     //      2-> (0,2)
     //      3-> (1,0)
-    //      4-> (1,2)
-    //      5-> (1,1)
-    return (i < 3) ? myvertex (0,i) : myvertex (1,(6-i)%3);
+    //      4-> (1,1)
+    //      5-> (1,2)
+    return (i < 3) ? myvertex (0,i) : myvertex (1,i%3);
   }
 
   inline const Gitter::Geometric::Periodic3::myvertex_t * Gitter::Geometric::Periodic3::myvertex (int i) const {
     alugrid_assert (0 <= i && i < 6);
-    return (i < 3) ? myvertex (0,i) : myvertex (1,(6-i)%3);
+    return (i < 3) ? myvertex (0,i) : myvertex (1,i%3);
   }
 
   inline std::pair< Gitter::Geometric::hasFace3 *, int > Gitter::Geometric::Periodic3::myneighbour (int i) {
@@ -4054,12 +4054,12 @@ namespace ALUGrid
 
   inline Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i) { // ok
     alugrid_assert (0 <= i && i < 8);
-    return (i < 4) ? myvertex (0, (4 - i) % 4) : myvertex (1, i - 4);
+    return (i < 4) ? myvertex (0, i) : myvertex (1, i - 4);
   }
 
   inline const Gitter::Geometric::Periodic4::myvertex_t * Gitter::Geometric::Periodic4::myvertex (int i) const { // ok
     alugrid_assert (0 <= i && i < 8);
-    return (i < 4) ? myvertex (0,i) : myvertex (1,(8-i)%4);
+    return (i < 4) ? myvertex (0,i) : myvertex (1, i - 4);
   }
 
   inline std::pair< Gitter::Geometric::hasFace4 *, int > Gitter::Geometric::Periodic4::myneighbour (int i) {

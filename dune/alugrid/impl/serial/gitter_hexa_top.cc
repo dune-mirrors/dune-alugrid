@@ -1233,7 +1233,7 @@ namespace ALUGrid
 
 
   template< class A >  Periodic4Top < A >::
-  Periodic4Top (int l, myhface4_t * f0, int t0, myhface4_t * f1, int t1, const bnd_t (&bt)[2] )
+  Periodic4Top (int l, myhface4_t * f0, bool t0, myhface4_t * f1, bool t1, const bnd_t (&bt)[2] )
     : A (f0, t0, f1, t1)
     , _dwn (0), _bbb (0), _up(0)
     , _lvl (l)
@@ -1255,7 +1255,7 @@ namespace ALUGrid
   }
 
   template< class A >  Periodic4Top < A >::Periodic4Top (int l, myhface4_t * f0,
-      int t0, myhface4_t * f1, int t1, innerperiodic4_t * up, int nChild )
+      bool t0, myhface4_t * f1, bool t1, innerperiodic4_t * up, int nChild )
   : A (f0, t0, f1, t1)
     , _dwn (0), _bbb (0), _up(up)
     , _lvl (l)
@@ -1315,9 +1315,9 @@ namespace ALUGrid
 
     const int l = 1 + this->level ();
     innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isRear (0), subface (1,0), isRear (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isRear (0), subface (1,3), isRear (1), this, 1);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), isRear (0), subface (1,1), isRear (1), this, 1);
     innerperiodic4_t * p2 = new innerperiodic4_t (l, subface (0,2), isRear (0), subface (1,2), isRear (1), this, 2);
-    innerperiodic4_t * p3 = new innerperiodic4_t (l, subface (0,3), isRear (0), subface (1,1), isRear (1), this, 3);
+    innerperiodic4_t * p3 = new innerperiodic4_t (l, subface (0,3), isRear (0), subface (1,3), isRear (1), this, 3);
     alugrid_assert (p0 && p1 && p2 && p3);
     p0->append(p1);
     p1->append(p2);
@@ -1331,8 +1331,6 @@ namespace ALUGrid
   template< class A > void Periodic4Top < A >::splitISO2 ()
   {
     alugrid_assert (_dwn == 0);
-
-    //TODO: get the right faces here
 
     const int l = 1 + this->level ();
     innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), isRear (0), subface (1,0), isRear (1), this, 0);

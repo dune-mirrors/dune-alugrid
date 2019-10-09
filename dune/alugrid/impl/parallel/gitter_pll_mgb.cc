@@ -674,7 +674,11 @@ namespace ALUGrid
     os.readObject (v[4]);
     os.readObject (v[5]);
 
-    std::pair< periodic3_GEO *, bool > p = InsertUniquePeriodic (v, b);
+    char isRear0 = os.get();
+    char isRear1 = os.get();
+    bool isRear[2] = {bool(isRear0),bool(isRear1)};
+
+    std::pair< periodic3_GEO *, bool > p = InsertUniquePeriodic (v, isRear, b);
     p.first->accessPllX ().unpackSelf (os,p.second);
     return;
   }
@@ -699,7 +703,12 @@ namespace ALUGrid
     os.readObject (v[5]);
     os.readObject (v[6]);
     os.readObject (v[7]);
-    std::pair< periodic4_GEO *, bool > p = InsertUniquePeriodic (v, b);
+
+    char isRear0 = os.get();
+    char isRear1 = os.get();
+    bool isRear[2] = {bool(isRear0),bool(isRear1)};
+
+    std::pair< periodic4_GEO *, bool > p = InsertUniquePeriodic (v, isRear, b);
     p.first->accessPllX ().unpackSelf (os,p.second);
     return;
   }

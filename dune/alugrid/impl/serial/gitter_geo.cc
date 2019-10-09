@@ -136,7 +136,7 @@ namespace ALUGrid
   }
 
   // prototype of periodic 3 type
-  const int Gitter::Geometric::Periodic3::prototype [2][3] = {{0,1,2},{3,5,4}};
+  const int Gitter::Geometric::Periodic3::prototype [2][3] = {{0,1,2},{3,4,5}};
 
   // prototype of periodic 4 type
   const int Gitter::Geometric::Periodic4::prototype [2][4] = {{0,1,2,3},{4,5,6,7}};

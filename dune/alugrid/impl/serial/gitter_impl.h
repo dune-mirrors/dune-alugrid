@@ -228,7 +228,7 @@ namespace ALUGrid
         typedef tetra_IMPL GhostElement_t;
         typedef periodic3_GEO::myneighbour_t myneighbour_t;
 
-        inline Periodic3Empty (myhface3_t *,int,myhface3_t *,int);
+        inline Periodic3Empty (myhface3_t *,bool,myhface3_t *,bool);
         ~Periodic3Empty () {}
         // do nothing here
         virtual void resetGhostIndices() {}
@@ -302,7 +302,7 @@ namespace ALUGrid
         typedef VertexEmpty innervertex_t;
         typedef hexa_IMPL GhostElement_t;
 
-        inline Periodic4Empty (myhface4_t *,int,myhface4_t *,int);
+        inline Periodic4Empty (myhface4_t *,bool,myhface4_t *,bool);
         ~Periodic4Empty () {}
 
         // so nothing here
@@ -519,12 +519,12 @@ namespace ALUGrid
     return ((this->isGhost()) ? 0 : myGrid()->postRefinement(*this));
   }
 
-  inline GitterBasis::Objects::Periodic3Empty::Periodic3Empty (myhface3_t * f0, int t0, myhface3_t * f1, int t1)
+  inline GitterBasis::Objects::Periodic3Empty::Periodic3Empty (myhface3_t * f0, bool t0, myhface3_t * f1, bool t1)
     : Gitter::Geometric::Periodic3 (f0, t0, f1, t1) {
     return;
   }
 
-  inline GitterBasis::Objects::Periodic4Empty::Periodic4Empty (myhface4_t * f0, int t0, myhface4_t * f1, int t1)
+  inline GitterBasis::Objects::Periodic4Empty::Periodic4Empty (myhface4_t * f0, bool t0, myhface4_t * f1, bool t1)
     : Gitter::Geometric::Periodic4 (f0, t0, f1, t1) {
     return;
   }
