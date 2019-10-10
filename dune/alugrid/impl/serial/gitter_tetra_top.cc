@@ -2609,6 +2609,20 @@ namespace ALUGrid
     return ;
   }
 
+  template< class A > void Periodic3Top < A >::split_bisection ()
+  {
+    const int l = 1 + this->level () ;
+    innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this , 0) ;
+    innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,1), twist (0), subface (1,1), twist (1), this , 1) ;
+
+    alugrid_assert (p0 && p1) ;
+    p0->append(p1) ;
+    _dwn = p0 ;
+    _rule = myrule_t::iso4 ;
+    p0->_up = p1->_up = this; //us
+    return ;
+  }
+
   template< class A > void Periodic3Top < A >::refineImmediate (myrule_t r) {
 
     // Die Methode wird nur vom restore () und vom refineBalance () auf-
@@ -2619,28 +2633,32 @@ namespace ALUGrid
     switch(r)
     {
       case myrule_t::iso4 :
-        if(!this->is2d())
-        {
-          // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
-          // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
-          // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
-          // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
-          // erzwingen m"ussen und d"urfen.
+        // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
+        // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
+        // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
+        // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
+        // erzwingen m"ussen und d"urfen.
 
-          typedef typename myhface_t::myrule_t face3rule_t;
-          myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
-          myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
-          split_iso4 () ;
-          break ;
-        }
+        typedef typename myhface_t::myrule_t face3rule_t;
+        myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
+        myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
+        split_iso4 () ;
+        break ;
 
         std::cerr << "**ERROR (FATAL) refinement of Periodic3Top didd not work: " ;
         std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
         std::abort () ;
         break ;
 
-      case myrule_t::e01 :
       case myrule_t::e12 :
+        alugrid_assert( myhface(0)->is2d() );
+        typedef typename myhface_t::myrule_t face3rule_t;
+        myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
+        myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
+        split_bisection () ;
+        break ;
+
+      case myrule_t::e01 :
       case myrule_t::e20 :
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
@@ -2667,7 +2685,7 @@ namespace ALUGrid
 
   template< class A > bool Periodic3Top < A >::refineBalance (balrule_t r, int fce)
   {
-    if (r != balrule_t::iso4)
+    if (!(myhface(0)->is2d()) && r != balrule_t::iso4)
     {
       std::cerr << "**WARNING (IGNORED) in Periodic3Top < A >::refineBalance (..) , file "
          << __FILE__ << " line " << __LINE__ << " periodic refinement is only implemented for isometric refinement!" << std::endl ;

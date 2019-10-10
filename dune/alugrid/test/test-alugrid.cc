@@ -636,7 +636,7 @@ int main (int argc , char **argv) {
     }
     else
     {
-      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|3d|3dsimp|3dconf|3dcube|3dperiodic>" << std::endl;
+      std::cout << "usage:" << argv[0] << " <2d|2dsimp|2dcube|2dconf|2dperiodic|3d|3dsimp|3dconf|3dcube|3dperiodic>" << std::endl;
     }
 
     const char *newfilename = 0;
@@ -647,15 +647,18 @@ int main (int argc , char **argv) {
     bool testALU2dSimplex = initialize ;
     bool testALU2dConform = initialize ;
     bool testALU2dCube    = initialize ;
+    bool testALU2dPeriodic    = initialize ;
     if( key == "2d" )
     {
       testALU2dSimplex = true ;
       testALU2dConform = true ;
       testALU2dCube   = true ;
+      testALU2dPeriodic = true;
     }
     if( key == "2dsimp" ) testALU2dSimplex = true ;
     if( key == "2dconf" ) testALU2dConform = true ;
     if( key == "2dcube" ) testALU2dCube    = true ;
+    if( key == "2dperiodic" ) testALU2dPeriodic    = true ;
 #endif // #ifndef NO_2D
 
 #ifndef NO_3D
@@ -881,6 +884,29 @@ int main (int argc , char **argv) {
         checkCapabilities< true >( surfaceGrid );
         checkALUSerial( surfaceGrid, 1 );
       }
+
+      if( testALU2dPeriodic )
+      {
+        // check periodic capabilities
+        std::string filename;
+        if( newfilename )
+          filename = newfilename;
+        else
+          filename = "./dgf/periodic-2d.dgf";
+        typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
+        // periodic boundaries require certain load balancing methods
+        GridType::setLoadBalanceMethod( 10 );
+        Dune::GridPtr< GridType > gridPtr( filename );
+        gridPtr.loadBalance();
+        GridType & grid = *gridPtr;
+
+        {
+          std::cout << "Check periodic grid" << std::endl;
+          checkALUSerial(grid,
+                         (mysize == 1) ? 1 : 0 );
+          checkForPeriodicBoundaries( grid );
+        }
+      }
 #endif // #ifndef NO_2D
 
 #ifndef NO_3D
@@ -924,7 +950,7 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          filename = "./dgf/periodic.dgf";
+          filename = "./dgf/periodic-3d.dgf";
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         // periodic boundaries require certain load balancing methods
         GridType::setLoadBalanceMethod( 10 );
