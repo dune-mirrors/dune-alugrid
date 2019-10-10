@@ -2618,7 +2618,7 @@ namespace ALUGrid
     alugrid_assert (p0 && p1) ;
     p0->append(p1) ;
     _dwn = p0 ;
-    _rule = myrule_t::iso4 ;
+    _rule = myrule_t::e12 ;
     p0->_up = p1->_up = this; //us
     return ;
   }
