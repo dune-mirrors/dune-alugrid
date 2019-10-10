@@ -138,8 +138,40 @@ namespace Dune
         insertBoundary(elements_.size()-1,3,boundaryId2d);
       }
     }
+    for( unsigned int i = 0 ; i < numFaces ; ++i)
+    {
+      doInsertFace(elements_.size()-1, i);
+    }
   }
 
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+    :: doInsertFace ( const unsigned elIndex, int faceNumber )
+  {
+    FaceType face;
+    generateFace( elements_[ elIndex ], faceNumber, face);
+    doInsertFace( face, elIndex );
+  }
+
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >
+    :: doInsertFace ( FaceType face, const unsigned int elIndex )
+  {
+    std::sort(face.begin(), face.end());
+    auto it = boundaryFaces_.find( face ) ;
+    if(it != boundaryFaces_.end() )
+    {
+      unsigned neighIndex = it->second;
+      interiorFaces_.insert( std::make_pair( face, std::make_pair(neighIndex, elIndex ) ) );
+      boundaryFaces_.erase( it );
+    }
+    else
+    {
+      boundaryFaces_.insert( std::make_pair( face, elIndex ) );
+    }
+  }
 
   template< class ALUGrid >
   alu_inline

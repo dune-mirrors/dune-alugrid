@@ -22,6 +22,29 @@
 
 #include <dune/alugrid/common/hsfc.hh>
 
+// custom specialization of std::hash can be injected in namespace std
+namespace std
+{
+  template<> struct hash<std::array< unsigned, 4> >
+  {
+    typedef std::array< unsigned, 4> argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const& face) const noexcept
+    {
+      return result_type((face[0] << 24) ^ (face[1] << 16) ^ (face[2] << 8) ^ face[3]);
+    }
+  };
+
+  template<> struct hash<std::array< unsigned, 3> >
+  {
+    typedef std::array< unsigned, 3> argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const& face) const noexcept
+    {
+      return result_type((face[0] << 24) ^ (face[1] << 12) ^ face[3]);
+    }
+  };
+}
 namespace Dune
 {
   /** \brief Factory class for ALUGrids */
@@ -105,6 +128,10 @@ namespace Dune
     typedef std::vector< std::pair< BndPair, BndPair > > PeriodicBoundaryVector;
     typedef std::pair< unsigned int, int > SubEntity;
     typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
+
+    typedef std::unordered_map < FaceType, std::pair< unsigned int, unsigned int> > InteriorFaceMap;
+    typedef std::unordered_map < FaceType, unsigned int > BoundaryFaceMap;
+
 
     typedef std::map< FaceType, const DuneBoundaryProjectionType* > BoundaryProjectionMap;
     typedef std::vector< const DuneBoundaryProjectionType* > BoundaryProjectionVector;
@@ -358,6 +385,8 @@ namespace Dune
 
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
     void doInsertBoundary ( int element, int face, int boundaryId );
+    void doInsertFace ( const unsigned elIndex, const int faceNumber );
+    void doInsertFace ( const FaceType face, const unsigned elIndex );
 
     GlobalIdType globalId ( const VertexId &id ) const
     {
@@ -399,6 +428,8 @@ namespace Dune
 
     VertexVector vertices_;
     ElementVector elements_;
+    InteriorFaceMap interiorFaces_;
+    BoundaryFaceMap boundaryFaces_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
     PeriodicBoundaryVector periodicBoundaries_;
     ALU3DSPACE ProjectVertexPtr globalProjection_ ;
