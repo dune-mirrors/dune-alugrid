@@ -15,26 +15,30 @@
 
 //Class to correct the element orientation to make twist free 3d cubes work
 //we expect an edge-consistent grid
+template< class InteriorFaceMap, class BoundaryFaceMap>
 class FaceConsistency
 {
 public:
 
   typedef std::array<unsigned int, 2> NeighbourType;
-  typedef std::array<unsigned int, 4> FaceType;
+  typedef typename InteriorFaceMap::key_type FaceType;
   typedef std::vector<unsigned int> ElementType;
-  typedef std::map< FaceType, NeighbourType > FaceNeighbourMapType;
-  typedef std::pair< FaceType, NeighbourType > FaceNeighbourType;
+  typedef std::pair<FaceType, std::pair<unsigned int, unsigned int> > FaceNeighbourType;
 
 protected:
   //the elements to be renumbered
   std::vector<ElementType> elements_;
   //the neighbouring structure
-  FaceNeighbourMapType neighbours_;
+  InteriorFaceMap neighbours_;
+  //
+  BoundaryFaceMap boundaryFaces_;
+  //
+  unsigned int numNonPerEl_;
 
 public:
   //constructor taking elements
-  FaceConsistency( const std::vector<ElementType>& elements)
-    : elements_( elements )
+  FaceConsistency( const std::vector<ElementType>& elements, const InteriorFaceMap & interiorFaces, const BoundaryFaceMap & boundaryFaces, const unsigned numNonPeriodicElem)
+    : elements_( elements ), neighbours_(interiorFaces), boundaryFaces_(boundaryFaces), numNonPerEl_(numNonPeriodicElem)
   {
     //build the information about neighbours
     Dune::Timer timer;
@@ -75,13 +79,13 @@ public:
   //For an edge consistent grid, face consistency is always possible
   void makeFaceConsistent()
   {
-    FaceNeighbourMapType untreatedFaces(neighbours_);
+    InteriorFaceMap untreatedFaces(neighbours_);
 
     //Repeat until all faces have been treated
     while(!untreatedFaces.empty())
     {
       auto startFace = untreatedFaces.begin();
-      unsigned int startElIndex = startFace->second[0];
+      unsigned int startElIndex = startFace->second.first;
       ElementType el = elements_[startElIndex];
       int startFaceIndexInEl = getFaceIndex(el, startFace->first);
       int oppIndex = (startFaceIndexInEl % 2) ? startFaceIndexInEl + 1 : startFaceIndexInEl - 1;
@@ -105,7 +109,7 @@ public:
   // - remove face from untreated
   // - get opposite unsorted face
   // - move on
-  void walkIntoDirection(FaceType unsortedFace, unsigned int previousElIndex, FaceNeighbourMapType & untreatedFaces)
+  void walkIntoDirection(FaceType unsortedFace, unsigned int previousElIndex, InteriorFaceMap & untreatedFaces)
   {
     FaceType currentFaceKey = unsortedFace;
     std::sort(currentFaceKey.begin(), currentFaceKey.end() );
@@ -113,12 +117,7 @@ public:
     auto currentFace = untreatedFaces.find( currentFaceKey );
     if( currentFace == untreatedFaces.end() )
       return;
-    unsigned int  currentElIndex = (previousElIndex == currentFace->second[0]) ? currentFace->second[1] : currentFace->second[0];
-    if( currentElIndex == previousElIndex )
-    {
-      untreatedFaces.erase( currentFaceKey );
-      return;
-    }
+    unsigned int  currentElIndex = (previousElIndex == currentFace->second.first) ? currentFace->second.second : currentFace->second.first;
 
     ElementType el = elements_[currentElIndex];
     int indexInEl = getFaceIndex( el, unsortedFace );
@@ -147,6 +146,16 @@ public:
 
 private:
 
+  FaceType convert( std::vector<unsigned> face)
+  {
+    FaceType newFace;
+    for(unsigned i = 0; i< std::tuple_size<FaceType>::value; ++i)
+    {
+      newFace[i] = face[i];
+    }
+    return newFace;
+  }
+
   ElementType swapElementOrientation(const unsigned int elIndex, const unsigned int localFaceIndex )
   {
     ElementType & el = elements_[elIndex];
@@ -174,10 +183,9 @@ private:
   //check face for compatibility
   bool checkFaceConsistency(FaceNeighbourType faceNeighbour, bool verbose = false)
   {
-    if( faceNeighbour.second[1] == faceNeighbour.second[0]) return true;
     FaceType face = faceNeighbour.first;
-    ElementType el0 = elements_[faceNeighbour.second[0]];
-    ElementType el1 = elements_[faceNeighbour.second[1]];
+    ElementType el0 = elements_[faceNeighbour.second.first];
+    ElementType el1 = elements_[faceNeighbour.second.second];
 
     int indexInEl0 = getFaceIndex(el0, face);
     int indexInEl1 = getFaceIndex(el1, face);
@@ -190,8 +198,8 @@ private:
         if( verbose )
         {
           std::cout << "Face Orientation does not match for elements: " ;
-          printElement(faceNeighbour.second[0]);
-          printElement(faceNeighbour.second[1]);
+          printElement(faceNeighbour.second.first);
+          printElement(faceNeighbour.second.second);
         }
         return false;
       }
@@ -204,7 +212,7 @@ private:
   //the index coincides with the missing vertex
   FaceType getFace(ElementType el, int faceIndex)
   {
-    FaceType face;
+    ElementType face;
     switch(faceIndex)
     {
     case 0 :
@@ -229,14 +237,7 @@ private:
       std::cerr << "index " << faceIndex << " NOT IMPLEMENTED FOR HEXAHEDRONS" << std::endl;
       std::abort();
     }
-    return face;
-  }
-
-  void getFaceNeighbour(const ElementType & el, int faceIndex, FaceNeighbourType & faceNeighbour)
-  {
-    FaceType face = getFace(el, faceIndex);
-    std::sort(face.begin(),face.end());
-    faceNeighbour = *neighbours_.find(face);
+    return convert(face);
   }
 
   //get FaceIndex for a (sorted) face
@@ -262,43 +263,23 @@ private:
     return -1;
   }
 
-
-
-
-  //build the structure containing the neighbors
-  //consists of a face and the two indices belonging to
-  //the elements that share said face
-  //boundary faces have two times the same index
-  //this is executed in the constructor
+  //add periodicneighbours to the interiorface structure passed from the grid
   void buildNeighbors()
   {
-    // clear existing structures
-    neighbours_.clear();
-
-    FaceType face;
-    NeighbourType indexPair;
-
-    unsigned int index = 0;
-    const auto nend = neighbours_.end();
-    for(auto&& el : elements_)
+    //start at first periodic element
+    for(unsigned int i = numNonPerEl_ ; i < elements_.size(); ++i)
     {
-      for(int i = 0; i< 6; ++i)
-      {
-        face = getFace(el, i);
-        std::sort(face.begin(),face.end());
-        auto faceInList = neighbours_.find(face);
-        if(faceInList == nend)
-        {
-          indexPair = {index, index};
-          neighbours_.insert(std::make_pair (face, indexPair ) );
-        }
-        else
-        {
-          assert(faceInList != neighbours_.end());
-          faceInList->second[1] = index;
-        }
-      }
-      ++index;
+      ElementType el = elements_[i];
+      ElementType vecFace = {el[0],el[1],el[2],el[3]};
+      FaceType face0 = convert(vecFace);
+      std::sort(face0.begin(), face0.end());
+      auto it = boundaryFaces_.find(face0);
+      neighbours_.insert(std::make_pair(face0, std::make_pair(i, it->second)));
+
+      FaceType face1 = convert(ElementType{{el[4],el[5],el[6],el[7]}});
+      std::sort(face1.begin(), face1.end());
+      it = boundaryFaces_.find(face1);
+      neighbours_.insert(std::make_pair(face1, std::make_pair(i, it->second)));
     }
   }
 

@@ -861,7 +861,7 @@ namespace Dune
       if(dimension == 3)
       {
         result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
-        FaceConsistency faceConsistency(elements_);
+        FaceConsistency faceConsistency(elements_, interiorFaces_, boundaryFaces_, elementSize);
         if(!faceConsistency.consistencyCheck(true))
         {
           faceConsistency.makeFaceConsistent();
