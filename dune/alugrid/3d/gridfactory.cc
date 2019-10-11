@@ -479,8 +479,7 @@ namespace Dune
     sortElements( vertices_, elements_, ordering );
 
     //the search for the periodic neighbour also deletes the
-    //found faces from the boundaryIds_ - thus it has to be done
-    //after the recreation of the Ids_, because of correctElementOrientation
+    //found faces from the boundaryIds_
     if( !faceTransformations_.empty() )
     {
       BoundaryFaceMap faceMap(boundaryFaces_);
@@ -503,6 +502,13 @@ namespace Dune
     std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
     //use consistency algorithm or bisection compatibility
     bool madeCompatible = correctElementOrientation(simplexTypes);
+    if( elementType == hexa )
+    {
+      const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
+      if( madeCompatible && numNonEmptyPartitions > 1)
+          DUNE_THROW( GridError, "Cannot consistently orient a parallel hexahedral grid." );
+    }
+
 
     numFacesInserted_ = boundaryIds_.size();
 
@@ -515,9 +521,6 @@ namespace Dune
     //We need dimension == 2 here, because it is correcting the face orientation
     //as the 2d faces are not necessarily orientated the right way, we cannot
     //guerantee beforehand to have the right 3d face orientation
-    //
-    //Another way would be to store faces as element number + local face index and
-    // create them AFTER correctelementorientation was called!!
     if( recreateBndIds )
       recreateBoundaryIds();
 
@@ -838,6 +841,23 @@ namespace Dune
       {
         vertices[i] = vertices_[i].first;
       }
+      std::size_t elementSize = elements_.size();
+      if(!faceTransformations_.empty())
+      {
+        //Add periodic elements to elements_ vector
+        for( auto perElem : periodicBoundaries_ )
+        {
+          FaceType perFace0 = perElem.first.first;
+          FaceType perFace1 = perElem.second.first;
+          ElementType elem;
+          for( int i = 0 ; i < 4 ; ++i)
+          {
+            elem[i] = perFace0[i];
+            elem[i+4] = perFace1[i];
+          }
+          elements_.push_back(elem);
+        }
+      }
       if(dimension == 3)
       {
         result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
@@ -867,6 +887,11 @@ namespace Dune
             }
           }
         }
+      }
+      if(!faceTransformations_.empty())
+      {
+        //periodic elements are regenerated in recreateboundaryids
+        elements_.resize(elementSize);
       }
     }
     else if(elementType == tetra)
@@ -952,23 +977,13 @@ namespace Dune
     //the reordering algorithm
     std::vector<double> vertexWeights;
     const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
-    // BisectionCompatibility only works in serial because of the sorting
-    // algorithm, therefore it needs to be run as a preprocessing step in case a
-    // parallel bisection compatible grid should be read
-    if( dimension == 3 && ALUGrid::refinementType == conforming && numNonEmptyPartitions > 1 )
-    {
-      std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
-      return false;
-    }
     if( ALUGrid::elementType == tetra && ! elements_.empty() )
     {
-      assert( numNonEmptyPartitions == 1 );
-
-      if( ! ALUGrid::refinementType == conforming || dimension == 2 )
+      if( ! ALUGrid::refinementType == conforming || dimension == 2 || numNonEmptyPartitions > 1 )
       {
-        for(std::size_t i = 1; i<vertices_.size()+1; ++i)
+        for(std::size_t i = 0; i<vertices_.size(); ++i)
         {
-          vertexWeights.push_back(i);
+          vertexWeights.push_back(globalId(i) +1 );
         }
       }
 
@@ -1184,16 +1199,6 @@ namespace Dune
 
       if( pos == boundaryFaces_.end() )
       {
-        std::cout << key[0] << "," << key[1] << "," << key[2] << std::endl;
-        for(auto face : boundaryFaces_ )
-        {
-          std::cout << "Boundary: " << face.first[0];
-          for(unsigned int i =1; i < numFaceCorners; i++)
-            std::cout << "," << face.first[i] ;
-          std ::cout << " | Element: " << face.second << std::endl;
-        }
-        for(auto face : boundaryIds )
-          std::cout << "Boundary: " << face.first[0] << "," << face.first[1] << "," << face.first[2] << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
@@ -1201,16 +1206,32 @@ namespace Dune
       toBeDeletedFaces.insert( key );
     }
 
-    // add periodic boundaries to deleted faces
-    for( auto periodicPair : periodicBoundaries_ )
+    if(!faceTransformations_.empty() )
     {
-      FaceType key0 = periodicPair.first.first;
-      std::sort(key0.begin(), key0.end());
-      toBeDeletedFaces.insert( key0 );
+      //restore periodic boundaries and
+      //add periodic boundaries to deleted faces
+      for( auto periodicPair : periodicBoundaries_ )
+      {
+        FaceType key0 = periodicPair.first.first;
+        std::sort(key0.begin(), key0.end());
+        FaceIterator pos = boundaryFaces_.find( key0 );
+        if( pos == boundaryFaces_.end() )
+        {
+          DUNE_THROW( GridError, "Inserted periodic boundary segment is not part of the boundary." );
+        }
+        generateFace( elements_[pos->second], getFaceIndex(pos->second, pos->first), periodicPair.first.first);
+        toBeDeletedFaces.insert( key0 );
 
-      FaceType key1 = periodicPair.second.first;
-      std::sort(key1.begin(), key1.end());
-      toBeDeletedFaces.insert( key1 );
+        FaceType key1 = periodicPair.second.first;
+        std::sort(key1.begin(), key1.end());
+        pos = boundaryFaces_.find( key1 );
+        if( pos == boundaryFaces_.end() )
+        {
+          DUNE_THROW( GridError, "Inserted periodic boundary segment is not part of the boundary." );
+        }
+        generateFace( elements_[pos->second], getFaceIndex(pos->second, pos->first), periodicPair.second.first);
+        toBeDeletedFaces.insert( key1 );
+      }
     }
 
     // erase faces that are boundries

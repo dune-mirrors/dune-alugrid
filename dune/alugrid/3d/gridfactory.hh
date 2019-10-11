@@ -128,7 +128,6 @@ namespace Dune
     typedef std::map < FaceType, int > BoundaryIdMap;
     typedef std::vector< std::pair< BndPair, BndPair > > PeriodicBoundaryVector;
     typedef std::pair< unsigned int, int > SubEntity;
-    typedef std::map< FaceType, SubEntity, FaceLess > FaceMap;
 
     typedef std::unordered_map < FaceType, std::pair< unsigned int, unsigned int> > InteriorFaceMap;
     typedef std::unordered_map < FaceType, unsigned int > BoundaryFaceMap;
