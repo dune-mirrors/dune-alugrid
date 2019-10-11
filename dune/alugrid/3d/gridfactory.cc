@@ -478,10 +478,29 @@ namespace Dune
     // sort element given a hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
+    //the search for the periodic neighbour also deletes the
+    //found faces from the boundaryIds_ - thus it has to be done
+    //after the recreation of the Ids_, because of correctElementOrientation
+    if( !faceTransformations_.empty() )
+    {
+      BoundaryFaceMap faceMap(boundaryFaces_);
+      for(auto it = faceMap.begin(); it != faceMap.end(); ++it)
+      {
+        //for dimension == 2 we do not want to search
+        // the artificially introduced faces
+        if(dimension == 2)
+        {
+          int localFaceIndex = getFaceIndex( it->second, it->first );
+          if(elementType == hexa  && localFaceIndex > 3)
+              continue;
+          if(elementType == tetra && localFaceIndex > 2)
+              continue;
+        }
+        searchPeriodicNeighbor( faceMap, it, 1 );
+      }
+    }
 
     std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
-
-
     //use consistency algorithm or bisection compatibility
     bool madeCompatible = correctElementOrientation(simplexTypes);
 
@@ -1088,31 +1107,30 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::searchPeriodicNeighbor ( FaceMap &faceMap,
-                               typename FaceMap::iterator& pos,
+    ::searchPeriodicNeighbor ( BoundaryFaceMap &boundaryFaceMap,
+                               typename BoundaryFaceMap::iterator& pos,
                                const int defaultId )
   {
     typedef typename FaceTransformationVector::const_iterator TrafoIterator;
-    typedef typename FaceMap::iterator FaceMapIterator;
+    typedef typename BoundaryFaceMap::iterator BoundaryFaceMapIterator;
 
     if( !faceTransformations_.empty() )
     {
-      FaceType key1;
-      generateFace( pos->second, key1 );
+      FaceType key1 = pos->first;
 
-      for( FaceMapIterator fit = faceMap.begin(); fit != faceMap.end(); ++fit )
+      for( BoundaryFaceMapIterator fit = boundaryFaceMap.begin(); fit != boundaryFaceMap.end(); ++fit )
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          if(elementType == hexa  && fit->second.second > 3)
+          int localFaceIndex = getFaceIndex( fit->second, fit->first );
+          if(elementType == hexa  && localFaceIndex > 3)
               continue;
-          if(elementType == tetra && fit->second.second > 2)
+          if(elementType == tetra && localFaceIndex > 2)
               continue;
         }
-        FaceType key2;
-        generateFace( fit->second, key2 );
+        FaceType key2 = fit->first;
 
         const TrafoIterator trend = faceTransformations_.end();
         for( TrafoIterator trit = faceTransformations_.begin(); trit != trend; ++trit )
@@ -1120,8 +1138,8 @@ namespace Dune
           if( identifyFaces( *trit, key1, key2, defaultId) ||
               identifyFaces( *trit, key2, key1, defaultId) )
           {
-            fit = faceMap.erase( fit );
-            pos = faceMap.erase( pos );
+            fit = boundaryFaceMap.erase( fit );
+            pos = boundaryFaceMap.erase( pos );
             return;
           }
         }
@@ -1133,39 +1151,19 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id )
+    ::reinsertBoundary ( const typename BoundaryFaceMap::const_iterator &pos, const int id )
   {
-    doInsertBoundary( pos->second.first, pos->second.second, id );
+    doInsertBoundary( pos->second, getFaceIndex(pos->second, pos->first), id );
   }
 
-
+  //clears the boundaryFaces_ to recreate all boundaries
+  //also finds process boundaries
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
     ::recreateBoundaryIds ( const int defaultId )
   {
-    typedef typename FaceMap::iterator FaceIterator;
-    FaceMap faceMap;
-
-    const unsigned int numElements = elements_.size();
-    for( unsigned int n = 0; n < numElements; ++n )
-    {
-      for( unsigned int face = 0; face < numFaces; ++face )
-      {
-        FaceType key;
-        generateFace( elements_[ n ], face, key );
-        std::sort( key.begin(), key.end() );
-
-        if( faceMap.find( key ) != faceMap.end() )
-        {
-          faceMap.erase( key );
-        }
-        else
-        {
-          faceMap.insert( std::make_pair( key, SubEntity( n, face ) ) );
-        }
-      }
-    }
+    typedef typename BoundaryFaceMap::iterator FaceIterator;
 
     // swap current boundary ids with an empty vector
     BoundaryIdMap boundaryIds;
@@ -1182,55 +1180,57 @@ namespace Dune
     {
       FaceType key = bndIt->first;
       std::sort( key.begin(), key.end() );
-      FaceIterator pos = faceMap.find( key );
+      FaceIterator pos = boundaryFaces_.find( key );
 
-      if( pos == faceMap.end() )
+      if( pos == boundaryFaces_.end() )
       {
+        std::cout << key[0] << "," << key[1] << "," << key[2] << std::endl;
+        for(auto face : boundaryFaces_ )
+        {
+          std::cout << "Boundary: " << face.first[0];
+          for(unsigned int i =1; i < numFaceCorners; i++)
+            std::cout << "," << face.first[i] ;
+          std ::cout << " | Element: " << face.second << std::endl;
+        }
+        for(auto face : boundaryIds )
+          std::cout << "Boundary: " << face.first[0] << "," << face.first[1] << "," << face.first[2] << std::endl;
         DUNE_THROW( GridError, "Inserted boundary segment is not part of the boundary." );
       }
 
-      reinsertBoundary( faceMap, pos, bndIt->second );
+      reinsertBoundary( pos, bndIt->second );
       toBeDeletedFaces.insert( key );
     }
 
-    //the search for the periodic neighbour also deletes the
-    //found faces from the boundaryIds_ - thus it has to be done
-    //after the recreation of the Ids_, because of correctElementOrientation
-    if( !faceTransformations_.empty() )
+    // add periodic boundaries to deleted faces
+    for( auto periodicPair : periodicBoundaries_ )
     {
-      for(auto it = faceMap.begin(); it != faceMap.end(); ++it)
-      {
-        //for dimension == 2 we do not want to search
-        // the artificially introduced faces
-        if(dimension == 2)
-        {
-          if(elementType == hexa  && it->second.second > 3)
-              continue;
-          if(elementType == tetra && it->second.second > 2)
-              continue;
-        }
-        searchPeriodicNeighbor( faceMap, it, defaultId );
-      }
+      FaceType key0 = periodicPair.first.first;
+      std::sort(key0.begin(), key0.end());
+      toBeDeletedFaces.insert( key0 );
+
+      FaceType key1 = periodicPair.second.first;
+      std::sort(key1.begin(), key1.end());
+      toBeDeletedFaces.insert( key1 );
     }
 
     // erase faces that are boundries
     for( const auto& key : toBeDeletedFaces )
     {
-      faceMap.erase( key );
+      boundaryFaces_.erase( key );
     }
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
     typename ALUGrid::CollectiveCommunication comm( communicator_ );
 
-    int numBoundariesMine = faceMap.size();
+    int numBoundariesMine = boundaryFaces_.size();
     std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
     typedef std::map< FaceType, FaceType, FaceLess > GlobalToLocalFaceMap;
     GlobalToLocalFaceMap globalFaceMap;
     {
-      const FaceIterator faceEnd = faceMap.end();
+      const FaceIterator faceEnd = boundaryFaces_.end();
       int idx = 0;
-      for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
+      for( FaceIterator faceIt = boundaryFaces_.begin(); faceIt != faceEnd; ++faceIt )
       {
         FaceType key;
         for( unsigned int i = 0; i < numFaceCorners; ++i )
@@ -1283,11 +1283,11 @@ namespace Dune
           const typename GlobalToLocalFaceMap :: const_iterator pos_gl = globalFaceMap.find( key );
           if( pos_gl != globalFaceMap.end() )
           {
-            FaceIterator pos = faceMap.find( pos_gl->second );
-            if ( pos != faceMap.end() )
+            FaceIterator pos = boundaryFaces_.find( pos_gl->second );
+            if ( pos != boundaryFaces_.end() )
             {
-              reinsertBoundary( faceMap, pos, ALU3DSPACE ProcessorBoundary_t );
-              pos = faceMap.erase( pos );
+              reinsertBoundary(  pos, ALU3DSPACE ProcessorBoundary_t );
+              pos = boundaryFaces_.erase( pos );
             }
             else
             {
@@ -1301,9 +1301,9 @@ namespace Dune
     } // end for all p
 
     // add all new boundaries (with defaultId)
-    const FaceIterator faceEnd = faceMap.end();
-    for( FaceIterator faceIt = faceMap.begin(); faceIt != faceEnd; ++faceIt )
-      reinsertBoundary( faceMap, faceIt, defaultId );
+    const FaceIterator faceEnd = boundaryFaces_.end();
+    for( FaceIterator faceIt = boundaryFaces_.begin(); faceIt != faceEnd; ++faceIt )
+      reinsertBoundary( faceIt, defaultId );
 
   }
 

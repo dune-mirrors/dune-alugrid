@@ -23,6 +23,7 @@
 #include <dune/alugrid/common/hsfc.hh>
 
 // custom specialization of std::hash can be injected in namespace std
+// TODO: Maybe use 2^13-1 or 2^17-1 as primes instead of just shifting
 namespace std
 {
   template<> struct hash<std::array< unsigned, 4> >
@@ -41,7 +42,7 @@ namespace std
     typedef std::size_t result_type;
     result_type operator()(argument_type const& face) const noexcept
     {
-      return result_type((face[0] << 24) ^ (face[1] << 12) ^ face[3]);
+      return result_type((face[0] << 24) ^ (face[1] << 12) ^ face[2]);
     }
   };
 }
@@ -413,12 +414,14 @@ namespace Dune
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
+    static int getFaceIndex ( const ElementType &element, const FaceType &face );
+    int getFaceIndex ( const unsigned int elIndex, const FaceType &face ) const;
     bool correctElementOrientation ( std::vector<int> & simplexTypes );
     void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool> & isRearBoundaries );
     bool bisectionCompatibility ( std::vector<int> & simplexTypes );
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
-    void searchPeriodicNeighbor ( FaceMap &faceMap, typename FaceMap::iterator &pos, const int defaultId  );
-    void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
+    void searchPeriodicNeighbor ( BoundaryFaceMap &boundaryFaceMap, typename BoundaryFaceMap::iterator &pos, const int defaultId  );
+    void reinsertBoundary ( const typename BoundaryFaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
 
     // sort elements according to hilbert space filling curve (if Zoltan is available)
@@ -700,6 +703,38 @@ namespace Dune
     ::generateFace ( const SubEntity &subEntity, FaceType &face ) const
   {
     generateFace( elements_[ subEntity.first ], subEntity.second, face );
+  }
+
+  //get FaceIndex for a (sorted) face
+  template< class ALUGrid >
+  inline int ALU3dGridFactory< ALUGrid >
+    :: getFaceIndex(const unsigned int elIndex, const FaceType & face) const
+  {
+    return getFaceIndex(elements_[ elIndex ], face);
+  }
+
+  //get FaceIndex for a (sorted) face
+  template< class ALUGrid >
+  inline int ALU3dGridFactory< ALUGrid >
+    :: getFaceIndex(const ElementType & el, const FaceType & face)
+  {
+    FaceType sortedFace = face;
+    std::sort(sortedFace.begin(),sortedFace.end());
+
+    FaceType compareFace;
+    for(int i = 0; i < 6; ++i)
+    {
+      generateFace(el, i, compareFace);
+      std::sort(compareFace.begin(), compareFace.end());
+      if(compareFace[0] != sortedFace[0])
+        continue;
+      if(compareFace[1] != sortedFace[1])
+        continue;
+      if(compareFace[2] != sortedFace[2])
+        continue;
+      return i;
+    }
+    return -1;
   }
 
 } // end namespace Dune
