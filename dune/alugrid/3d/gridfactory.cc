@@ -979,7 +979,7 @@ namespace Dune
     const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
     if( ALUGrid::elementType == tetra && ! elements_.empty() )
     {
-      if( ! ALUGrid::refinementType == conforming || dimension == 2 || numNonEmptyPartitions > 1 )
+      if( ! ALUGrid::refinementType == conforming || dimension == 2 || numNonEmptyPartitions > 1 || !(faceTransformations_.empty()) )
       {
         for(std::size_t i = 0; i<vertices_.size(); ++i)
         {
@@ -989,7 +989,7 @@ namespace Dune
 
       Dune::Timer timer;
 
-      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_);
+      BisectionCompatibility< VertexVector, PeriodicBoundaryVector > bisComp( vertices_, elements_, periodicBoundaries_);
 
       std::string rankstr ;
       {

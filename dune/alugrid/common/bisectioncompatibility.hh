@@ -36,10 +36,10 @@ struct BisectionCompatibilityParameters
 //Class to correct the element orientation to make bisection work in 3d
 // It provides different algorithms to orientate a grid.
 // Also implements checks for compatibility.
-template <class VertexVector>
+template <class VertexVector, class PeriodicBoundaryVector>
 class BisectionCompatibility
 {
-  typedef BisectionCompatibility< VertexVector > ThisType;
+  typedef BisectionCompatibility< VertexVector, PeriodicBoundaryVector > ThisType;
 public:
   // type of vertex coordinates stored inside the factory
   typedef VertexVector  VertexVectorType;
@@ -47,7 +47,7 @@ public:
   typedef std::array<unsigned int, 3> FaceType;
   typedef std::vector< unsigned int > ElementType;
   typedef std::array<unsigned int, 2> EdgeType;
-  typedef std::map< FaceType, EdgeType > FaceMapType;
+  typedef std::unordered_map< FaceType, EdgeType > FaceMapType;
   typedef std::pair< FaceType, EdgeType > FaceElementType;
 
 protected:
@@ -64,6 +64,8 @@ protected:
   std::vector<bool> containedInV0_;
   //the element types
   std::vector<int> types_;
+  //possible periodic vertex identifications
+  std::unordered_map<unsigned int, std::set<unsigned int> > periodicVertices_;
 
   //the 2 nodes of the refinement edge
   EdgeType type0nodes_;  // = stevensonRefinement_ ? 0,3 : 0,1 ;
@@ -71,8 +73,6 @@ protected:
   EdgeType type0faces_;
   //The interior node of a type 1 element
   unsigned int type1node_;  // = stevensonRefinement_ ? 1 : 2;
-  //the face opposite of the interior node
-  unsigned int type1face_;  // = 3 - type1node_ ;
 
   // 0 = put all vertices in V0,
   // 1 = longest edge,
@@ -86,7 +86,8 @@ public:
   //constructor taking elements
   //assumes standard orientation elemIndex % 2
   BisectionCompatibility( const VertexVectorType& vertices,
-                          const std::vector<ElementType>& elements)
+                          const std::vector<ElementType>& elements,
+                          const PeriodicBoundaryVector & perBoundaries)
     : vertices_( vertices ),
       elements_( elements ),
       nVertices_( vertices_.size() ),
@@ -94,13 +95,13 @@ public:
       types_(elements_.size(), 0),
       type0nodes_( EdgeType{0,3} ),
       type0faces_( EdgeType{3,0} ),
-      type1node_( 1 ),
-      type1face_( 22 )
+      type1node_( 1 )
   {
     //build the information about neighbours
     Dune::Timer timer;
     buildNeighbors();
     std::cout << "Build neighbors took " << timer.elapsed() << " sec." << std::endl;
+    buildPeriodicVertices(perBoundaries);
   }
 
   //check for strong compatibility
@@ -181,6 +182,8 @@ public:
   //
   bool type0Algorithm( std::vector<double> vertexWeights  )
   {
+    //calculate the sets V0 and V1
+    calculateV0( variant_, threshold_ );
     bool constructOrder = false;
     if( vertexWeights.empty() )
     {
@@ -189,11 +192,21 @@ public:
     }
     else
     {
+      //guarantee the same weight and inv0 for periodically identified vertices
+      // may not work in some rare cases
+      for( auto vtx : periodicVertices_ )
+      {
+        double weight = vertexWeights[vtx.first];
+        bool inV0 = containedInV0_[vtx.first];
+        for( unsigned identvtx : vtx.second )
+        {
+          vertexWeights[identvtx] = weight;
+          containedInV0_[identvtx] = inV0;
+        }
+      }
       assert(vertexWeights.size() == nVertices_);
     }
 
-    //calculate the sets V0 and V1
-    calculateV0( variant_, threshold_ );
     const bool useAnnounced = useAnnouncedEdge_;
 
     // all elements are type 0
@@ -730,6 +743,40 @@ private:
       ++index;
     }
   }
+
+  void buildPeriodicVertices( const PeriodicBoundaryVector perBoundaries )
+  {
+    for( auto perBnd : perBoundaries )
+    {
+      ElementType face0(perBnd.first.first.begin(),perBnd.first.first.end());
+      ElementType face1(perBnd.second.first.begin(), perBnd.second.first.end());
+      for(unsigned i = 0 ; i < face0.size(); i++ )
+      {
+        unsigned vtx0 = face0[i];
+        unsigned vtx1 = face1[i];
+        auto it = periodicVertices_.find(vtx0);
+        if( it != periodicVertices_.end())
+        {
+          it->second.insert(vtx1);
+        }
+        else
+        {
+          periodicVertices_.insert(std::make_pair( vtx0, std::set<unsigned>({vtx1}) ));
+        }
+        it = periodicVertices_.find(vtx1);
+        if( it != periodicVertices_.end())
+        {
+          it->second.insert(vtx0);
+        }
+        else
+        {
+          periodicVertices_.insert(std::make_pair( vtx1, std::set<unsigned>({vtx0}) ));
+        }
+      }
+    }
+  }
+
+
 
   /*!
      \brief This method is supposed to calculate V0 and V1
