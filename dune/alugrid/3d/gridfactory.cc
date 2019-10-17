@@ -22,7 +22,10 @@
 
 #include "dune/alugrid/3d/aluinline.hh"
 
+// provided by consistent-edge-orientation module
+#if HAVE_CONSISTENT_EDGE_ORIENTATION
 #include "utils/mesh-consistency/include/mesh-consistency.hh"
+#endif
 
 namespace Dune
 {
@@ -858,6 +861,8 @@ namespace Dune
           elements_.push_back(elem);
         }
       }
+
+#if HAVE_CONSISTENT_EDGE_ORIENTATION
       if(dimension == 3)
       {
         result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
@@ -888,6 +893,8 @@ namespace Dune
           }
         }
       }
+#endif
+
       if(!faceTransformations_.empty())
       {
         //periodic elements are regenerated in recreateboundaryids
