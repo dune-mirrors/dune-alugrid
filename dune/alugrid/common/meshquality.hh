@@ -69,6 +69,12 @@ namespace Dune {
       const double vol = element.geometry().volume();
       const Dune::GeometryType geomType = element.type();
 
+      if( ! geomType.isSimplex() )
+      {
+        std::cout << "MeshQuality check only works for simplex grids, skipping check!" << std::endl;
+        return ;
+      }
+
       const double factorEdge     = geomType.isCube() ? 1.0 : factorEdgeTet;
       const double factorFaceEdge = geomType.isCube() ? 1.0 : factorFaceEdgeTet;
       const double factorFace     = geomType.isCube() ? 1.0 : factorFaceTet;
@@ -101,7 +107,7 @@ namespace Dune {
       {
         const auto& face = element.template subEntity<dim-2>( f );
         const auto& geo  = face.geometry();
-        assert( geo.corners() == 3 );
+        //assert( geo.corners() == 3 );
         //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
         double faceSize = geo.volume();
         faceVols.push_back( faceSize );
