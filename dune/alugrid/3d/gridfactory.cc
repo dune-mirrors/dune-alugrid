@@ -486,19 +486,22 @@ namespace Dune
     if( !faceTransformations_.empty() )
     {
       BoundaryFaceMap faceMap(boundaryFaces_);
-      for(auto it = faceMap.begin(); it != faceMap.end(); ++it)
+      for(auto it = boundaryFaces_.begin(); it != boundaryFaces_.end(); ++it)
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          int localFaceIndex = getFaceIndex( it->second, it->first );
-          if(elementType == hexa  && localFaceIndex > 3)
-              continue;
-          if(elementType == tetra && localFaceIndex > 2)
-              continue;
+          //if the first vertex is not the artificial vertex
+          if(elementType == tetra && it->first[0] != 0)
+            continue;
+          //if the first and third vertex do not differ by 1
+          if(elementType == hexa && (it->first[0] != it->first[2] -1) )
+            continue;
         }
-        searchPeriodicNeighbor( faceMap, it, 1 );
+        auto pos = faceMap.find( it->first );
+        if( pos != faceMap.end() )
+          searchPeriodicNeighbor( faceMap, pos, 1 );
       }
     }
 
@@ -552,7 +555,7 @@ namespace Dune
     // We now create the isRear variables for all boundaries
     // and elements
     std::vector<std::vector<bool> > isRearElements(elements_.size(), elementType == tetra ? std::vector<bool>({false, true, false, true}) : std::vector<bool>({false, true, true, false, false ,true}));
-    std::map< FaceType, bool > isRearBoundaries;
+    std::unordered_map<FaceType, bool> isRearBoundaries;
     calculateIsRear( isRearElements, isRearBoundaries);
 
     assert( boundaryIds.size() == boundaryIds_.size() );
@@ -767,8 +770,16 @@ namespace Dune
           }
 
           bool isRear[ 2 ];
-          isRear[0] = isRearBoundaries[ facePair.second.first ];
-          isRear[1] = isRearBoundaries[ facePair.second.first ];
+          {
+            FaceType faceId = facePair.first.first;
+            std::sort(faceId.begin(),faceId.end());
+            isRear[0]  = isRearBoundaries[faceId];
+          }
+          {
+            FaceType faceId = facePair.second.first;
+            std::sort(faceId.begin(),faceId.end());
+            isRear[1]  = isRearBoundaries[faceId];
+          }
 
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
@@ -781,12 +792,20 @@ namespace Dune
           int perel[ 6 ];
           for( unsigned int i = 0; i < 3; ++i )
           {
-            perel[ i+0 ] = globalId( facePair.first.first[ (3 - i) % 3 ] );
-            perel[ i+3 ] = globalId( facePair.second.first[ (3 - i) % 3 ] );
+            perel[ i+0 ] = globalId( facePair.first.first[ i  ] );
+            perel[ i+3 ] = globalId( facePair.second.first[ i ] );
           }
           bool isRear[ 2 ];
-          isRear[0] = isRearBoundaries[ facePair.second.first ];
-          isRear[1] = isRearBoundaries[ facePair.second.first ];
+          {
+            FaceType faceId = facePair.first.first;
+            std::sort(faceId.begin(),faceId.end());
+            isRear[0]  = isRearBoundaries[faceId];
+          }
+          {
+            FaceType faceId = facePair.second.first;
+            std::sort(faceId.begin(),faceId.end());
+            isRear[1]  = isRearBoundaries[faceId];
+          }
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
@@ -911,7 +930,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void
-  ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool > & isRearBoundaries)
+  ALU3dGridFactory< ALUGrid >::calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::unordered_map<FaceType, bool> & isRearBoundaries)
   {
     //In dimension == dimensionworld, we calculate the normal direction of the face and use this for isRear
     //The benefit is, that we do not need communication, as this works for consistently oriented grids
@@ -936,10 +955,9 @@ namespace Dune
           //set isRear on all faces correctly
           bool rear = (det < 0) ? isRear[face] : !isRear[face];
           isRearElements[el][face] = rear;
-          //create faces in a (unordered) map with a variable whether isRear is set and to which value (maybe twice)
           FaceType faceId;
-          generateFace( element, face, faceId);
-          std::sort(faceId.begin(), faceId.end());
+          generateFace(element, face, faceId);
+          std::sort(faceId.begin(),faceId.end());
           isRearBoundaries.insert(std::make_pair(faceId, !rear));
         }
       }
@@ -1045,6 +1063,10 @@ namespace Dune
     return madeCompatible;
   }
 
+  //Get two sorted face keys,
+  //If the faces match by world transformation,
+  //key1 and resorted key2 are added into periodicBoundaryVector
+  //Also checks boundaryIds_ and erases face there
   template< class ALUGrid >
   alu_inline
   bool ALU3dGridFactory< ALUGrid >
@@ -1053,11 +1075,28 @@ namespace Dune
                       const int defaultId )
   {
     FaceType key0;
-    if(dimension == 3 || elementType ==hexa)
+    //set of indices to match
+    std::vector<unsigned int> indices;
+    if(elementType == tetra)
     {
-      WorldVector w = transformation.evaluate( inputPosition( key1[ 0 ] ) );
+      if(dimension == 2)
+        indices = {{1,2}};
+      else
+        indices = {{0,1,2}};
+    }
+    else
+    {
+      if(dimension == 2)
+        indices = {{0,1}};
+      else
+        indices = {{0,1,2,3}};
+    }
+
+    for( unsigned int j  : indices)
+    {
+      WorldVector w = transformation.evaluate( inputPosition( key1[ j ] ) );
       int org = -1;
-      for( unsigned int i = 0; i < numFaceCorners; ++i )
+      for( unsigned int i  : indices )
       {
         if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
         {
@@ -1068,39 +1107,15 @@ namespace Dune
       if( org < 0 )
         return false;
 
-      key0[ 0 ] = key2[ org ];
-      for( unsigned int i = 1; i < numFaceCorners; ++i )
+      key0[ j ] = key2[ org ];
+      if(elementType == hexa && dimension == 2)
       {
-        w = transformation.evaluate( inputPosition( key1[ i ] ) );
-        const int j = ((org+numFaceCorners)-i) % numFaceCorners;
-        if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
-          return false;
-        key0[ i ] = key2[ j ];
+        key0[ j + 2 ] = key2[ org + 2];
       }
     }
-    else //if dimension == 2 && elementType == tetra
+    if(dimension == 2 && elementType == tetra)
     {
-      if(key1[0] != 0 || key2[0] != 0) return false;
-      WorldVector w = transformation.evaluate( inputPosition( key1[ 1 ] ) );
-      int org = -1;
-      for( unsigned int i = 1; i < numFaceCorners; ++i )
-      {
-        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
-        {
-          org = i;
-          break;
-        }
-      }
-      if( org < 0 )
-        return false;
-
-      key0[ 0 ] = 0;
-      key0[ 1 ] = key2[ org ];
-      w = transformation.evaluate( inputPosition( key1[ 2 ] ) );
-      const int j = (org == 1) ? 2 : 1;
-      if( (w - inputPosition( key2[ j ] )).two_norm() >= 1e-6 )
-        return false;
-      key0[ 2 ] = key2[ j ];
+        key0[ 0 ] = key1[ 0 ]; // = 0
     }
 
     int bndId[ 2 ] = { 20, 20 };
@@ -1108,8 +1123,12 @@ namespace Dune
 
     for( int i=0; i<2; ++i )
     {
-      typedef typename BoundaryIdMap :: iterator iterator ;
-      iterator pos = boundaryIds_.find( keys[ i ] );
+      auto it = boundaryFaces_.find( keys[ i ] );
+      int localFaceIndex = getFaceIndex( it->second, it->first );
+      FaceType key;
+      generateFace( elements_[it->second], localFaceIndex, key );
+
+      auto pos = boundaryIds_.find( key );
 
       if( pos != boundaryIds_.end() )
       {
@@ -1142,15 +1161,17 @@ namespace Dune
 
       for( BoundaryFaceMapIterator fit = boundaryFaceMap.begin(); fit != boundaryFaceMap.end(); ++fit )
       {
+        if( fit == pos ) continue;
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
         if(dimension == 2)
         {
-          int localFaceIndex = getFaceIndex( fit->second, fit->first );
-          if(elementType == hexa  && localFaceIndex > 3)
-              continue;
-          if(elementType == tetra && localFaceIndex > 2)
-              continue;
+          //if the first vertex is not the artificial vertex
+          if(elementType == tetra && fit->first[0] != 0)
+            continue;
+          //if the first and third vertex do not differ by 1
+          if(elementType == hexa && (fit->first[0] != fit->first[2] -1) )
+            continue;
         }
         FaceType key2 = fit->first;
 
@@ -1217,7 +1238,7 @@ namespace Dune
     {
       //restore periodic boundaries and
       //add periodic boundaries to deleted faces
-      for( auto periodicPair : periodicBoundaries_ )
+      for( auto & periodicPair : periodicBoundaries_ )
       {
         FaceType key0 = periodicPair.first.first;
         std::sort(key0.begin(), key0.end());

@@ -41,7 +41,7 @@ namespace ALUGrid
   std::pair< Gitter::Geometric::hface3_GEO *, bool > MacroGridBuilder::
   InsertUniqueHface (int (&v)[3]) {
     faceKey_t key (v[0],v[1],v[2]);
-  //  std::cout << "Inserting Face " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+    //std::cout << "Inserting Face " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
     std::pair< faceMap_t::iterator, bool > result = _face3Map.insert( std::make_pair( key, static_cast< void * >( 0 ) ) );
     if( result.second )
     {

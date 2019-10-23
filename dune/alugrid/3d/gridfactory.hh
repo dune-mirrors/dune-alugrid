@@ -416,7 +416,7 @@ namespace Dune
     static int getFaceIndex ( const ElementType &element, const FaceType &face );
     int getFaceIndex ( const unsigned int elIndex, const FaceType &face ) const;
     bool correctElementOrientation ( std::vector<int> & simplexTypes );
-    void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::map< FaceType, bool> & isRearBoundaries );
+    void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::unordered_map<FaceType, bool> & isRearBoundaries );
     bool bisectionCompatibility ( std::vector<int> & simplexTypes );
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
     void searchPeriodicNeighbor ( BoundaryFaceMap &boundaryFaceMap, typename BoundaryFaceMap::iterator &pos, const int defaultId  );
@@ -430,6 +430,7 @@ namespace Dune
 
     VertexVector vertices_;
     ElementVector elements_;
+    //boundaryIds_ contains unsorted face keys, all other face maps have sorted keys
     InteriorFaceMap interiorFaces_;
     BoundaryFaceMap boundaryFaces_;
     BoundaryIdMap boundaryIds_,insertionOrder_;
