@@ -855,6 +855,7 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int> & simplexTypes)
   {
     bool result = false;
+#if HAVE_CONSISTENT_EDGE_ORIENTATION
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
@@ -871,7 +872,7 @@ namespace Dune
         {
           FaceType perFace0 = perElem.first.first;
           FaceType perFace1 = perElem.second.first;
-          ElementType elem;
+          ElementType elem(8);
           for( int i = 0 ; i < 4 ; ++i)
           {
             elem[i] = perFace0[i];
@@ -881,7 +882,6 @@ namespace Dune
         }
       }
 
-#if HAVE_CONSISTENT_EDGE_ORIENTATION
       if(dimension == 3)
       {
         result = MeshConsistency::orient_consistently(vertices, elements_, MeshConsistency::hexahedronType);
@@ -912,7 +912,6 @@ namespace Dune
           }
         }
       }
-#endif
 
       if(!faceTransformations_.empty())
       {
@@ -920,7 +919,8 @@ namespace Dune
         elements_.resize(elementSize);
       }
     }
-    else if(elementType == tetra)
+#endif
+    if(elementType == tetra)
     {
       result = bisectionCompatibility(simplexTypes);
     }
