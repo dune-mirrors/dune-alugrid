@@ -1,7 +1,6 @@
 #ifndef DUNE_ALUGRID_MAPPINGS_CC
 #define DUNE_ALUGRID_MAPPINGS_CC
 
-#include "config.h"
 #include "mappings.hh"
 
 namespace ALUGrid
