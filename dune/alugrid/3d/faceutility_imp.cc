@@ -130,7 +130,8 @@ namespace Dune
       const GEOElementType * inner = static_cast<const GEOElementType *> (innerElement_);
       //we come from a macro element, which may have an intersection with an element
       //of level one. So we have at most to go up one level
-      if( inner -> up ())
+      //TODO: THis is not true in Longest Edge bisection
+      while( inner -> up ())
       {
         bool faceNumberChange = false;
         if( inner->nChild() == 1)
@@ -262,7 +263,8 @@ namespace Dune
       const GEOElementType * outer = static_cast<const GEOElementType *> (outerElement_);
       //we come from a macro element, which may have an intersection with an element
       //of level one. So we have at most to go up one level
-      if( outer -> up ())
+      //TODO: THis is not true in Longest Edge Bisection
+      while( outer -> up ())
       {
         bool faceNumberChange = false;
         if( outer->nChild() == 1)
