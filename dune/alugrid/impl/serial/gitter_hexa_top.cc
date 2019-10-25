@@ -685,16 +685,12 @@ namespace ALUGrid
   // subface routine for regular 2d
   template< class A >  typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j)
   {
-    typedef typename myhface4_t::myrule_t  facerule_t ;
-    myhface4_t * face = myhface4(i);
-    return   face->subface(j);
+    return myhface4(i)->subface(j);
   }
 
   //subface routine  for regular 2d
   template< class A >  const typename HexaTop < A >::myhface4_t * HexaTop < A >::subface (int i, int j) const {
-    typedef typename myhface4_t::myrule_t  facerule_t ;
-    const myhface4_t * face = myhface4(i);
-    return   face->subface(j);
+    return myhface4(i)->subface(j);
   }
 
   template< class A > void HexaTop < A >::splitISO8 ()
@@ -1189,17 +1185,6 @@ namespace ALUGrid
         if( hexa->myvertex( Gitter::Geometric::Hexa::prototype[ fce ][ i ] )
               != hexa->myvertex( fce, i ) )
         {
-          const int vx0 = Gitter::Geometric::Hexa::prototype[ fce ][ 0 ] ;
-          const int vx1 = Gitter::Geometric::Hexa::prototype[ fce ][ 1 ] ;
-          const int vx2 = Gitter::Geometric::Hexa::prototype[ fce ][ 2 ] ;
-          const int vx3 = Gitter::Geometric::Hexa::prototype[ fce ][ 3 ] ;
-
-          const int vx[4] = { hexa->myvertex( vx0 )->getIndex(),
-                              hexa->myvertex( vx1 )->getIndex(),
-                              hexa->myvertex( vx2 )->getIndex(),
-                              hexa->myvertex( vx3 )->getIndex()
-                            };
-
           std::cout << "Face" << fce <<" is wrong" << std::endl;
           facesOk = false ;
           continue ;
