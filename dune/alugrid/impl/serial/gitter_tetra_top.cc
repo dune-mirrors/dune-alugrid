@@ -1642,26 +1642,12 @@ namespace ALUGrid
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e01 > ();
         break ;
-      case myrule_t::e12 :
-        _faces[ 0 ] = 0 ;
-        _faces[ 1 ] = 3 ;
-        _faceRules[ 0 ] = face3rule_t::e12;
-        _faceRules[ 1 ] = face3rule_t::e01;
-        _caller = new CallSplitImpl< myrule_t::e12 > ();
-        break ;
       case myrule_t::e02 :
         _faces[ 0 ] = 0 ;
         _faces[ 1 ] = 2 ;
         _faceRules[ 0 ] = face3rule_t::e02;
         _faceRules[ 1 ] = face3rule_t::e01;
         _caller = new CallSplitImpl< myrule_t::e02 > ();
-        break ;
-      case myrule_t::e23 :
-        _faces[ 0 ] = 2 ;
-        _faces[ 1 ] = 3 ;
-        _faceRules[ 0 ] = face3rule_t::e12;
-        _faceRules[ 1 ] = face3rule_t::e12;
-        _caller = new CallSplitImpl< myrule_t::e23 > ();
         break ;
       case myrule_t::e03 :
         _faces[ 0 ] = 1 ;
@@ -1670,12 +1656,26 @@ namespace ALUGrid
         _faceRules[ 1 ] = face3rule_t::e02;
         _caller = new CallSplitImpl< myrule_t::e03 > ();
         break ;
+      case myrule_t::e12 :
+        _faces[ 0 ] = 0 ;
+        _faces[ 1 ] = 3 ;
+        _faceRules[ 0 ] = face3rule_t::e12;
+        _faceRules[ 1 ] = face3rule_t::e01;
+        _caller = new CallSplitImpl< myrule_t::e12 > ();
+        break ;
       case myrule_t::e13 :
         _faces[ 0 ] = 1 ;
         _faces[ 1 ] = 3 ;
         _faceRules[ 0 ] = face3rule_t::e12;
         _faceRules[ 1 ] = face3rule_t::e02;
         _caller = new CallSplitImpl< myrule_t::e13 > ();
+        break ;
+      case myrule_t::e23 :
+        _faces[ 0 ] = 2 ;
+        _faces[ 1 ] = 3 ;
+        _faceRules[ 0 ] = face3rule_t::e12;
+        _faceRules[ 1 ] = face3rule_t::e12;
+        _caller = new CallSplitImpl< myrule_t::e23 > ();
         break ;
       default :
         std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;

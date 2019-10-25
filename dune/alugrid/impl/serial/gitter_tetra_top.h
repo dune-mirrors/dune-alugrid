@@ -521,8 +521,8 @@ namespace ALUGrid
         // implementation of longest edge refinement
         if(longest)
         {
-          double max =0;
-          myrule_t rule = myrule_t :: e01;
+          myrule_t rule = myrule_t::e01;
+          std::multimap<double, myrule_t> rules;
           int i = (this->is2d()) ? 1 : 0;
           int rulenumber = (this->is2d()) ? 5 : 2 ;
 
@@ -540,14 +540,22 @@ namespace ALUGrid
                 double diff = p0[k] - p1[k];
                 sum += (diff * diff );
               }
-              if (sum > max)
-              {
-                max = sum;
-                rule = static_cast<myrule_t>(rulenumber);
-              }
+              rules.insert(std::make_pair(sum, static_cast<myrule_t>(rulenumber)));
               rulenumber++;
             }
           }
+          // if there are multiple edges of largest size, take the one with bigger rule number
+          auto rIt = rules.rbegin();
+          double maxLength = rIt->first;
+          rule = (rules.rbegin())->second;
+          rIt++;
+          while( std::abs( rIt->first - maxLength ) < 1e-8 )
+          {
+            if(rIt->second < rule )
+              rule = rIt->second;
+            rIt++;
+          }
+
           //std::cout << rule <<std::endl;
           alugrid_assert( rule.bisection() );
           return rule;
