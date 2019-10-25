@@ -37,7 +37,7 @@ namespace Dune
   typename ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::SurfaceMappingType *
   ALU3dGridSurfaceMappingFactory< dim, dimworld, hexa, Comm >::buildSurfaceMapping ( const GEOFaceType &face ) const
   {
-    typedef FaceTopologyMapping< hexa > FaceTopo;
+    //typedef FaceTopologyMapping< hexa > FaceTopo;
     // this is the new implementation using FieldVector
     // see mappings.hh
     // we have to swap the vertices, because

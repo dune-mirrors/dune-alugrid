@@ -1441,13 +1441,6 @@ namespace ALUGrid
         if( tetra->myvertex( Gitter::Geometric::Tetra::prototype[ fce ][ i ] )
               != tetra->myvertex( fce, i ) )
         {
-          const int vx0 = Gitter::Geometric::Tetra::prototype[ fce ][ 0 ] ;
-          const int vx1 = Gitter::Geometric::Tetra::prototype[ fce ][ 1 ] ;
-
-          const int vx[2] = { tetra->myvertex( vx0 )->getIndex(),
-                              tetra->myvertex( vx1 )->getIndex()
-                            };
-
           std::cout << "face " << fce << " is wrong" << std::endl;
           facesOk = false ;
           continue ;

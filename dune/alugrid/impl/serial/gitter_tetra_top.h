@@ -590,9 +590,10 @@ namespace ALUGrid
                   break;
                 default:
                   alugrid_assert(this->nChild() == 0 || this->nChild() == 1);
-                  std::cerr << __FILE__ << __LINE__ << ":  Refinement Edge must not contain Vertex 0" << std::endl;
+                  std::cerr << "ERROR: "<< __FILE__ << __LINE__ << ":  Refinement Edge must not contain Vertex 0" << std::endl;
                   alugrid_assert(false);
-
+                  std::abort();
+                  return myrule_t();
               }
             }
             else
@@ -737,8 +738,10 @@ namespace ALUGrid
             }
           }
           //We should not get here
-          std::cerr << __FILE__ << __LINE__ << ":  suggestRule does not suggest a refinement rule" << std::endl;
+          std::cerr << "ERRORO: "<< __FILE__ << __LINE__ << ":  suggestRule does not suggest a refinement rule" << std::endl;
           alugrid_assert(false);
+          std::abort();
+          return myrule_t();
         }
       }
 
