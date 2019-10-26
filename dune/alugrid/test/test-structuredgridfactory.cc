@@ -18,19 +18,38 @@ int main (int argc , char **argv)
   Dune::MPIHelper::instance( argc, argv );
 
   try {
-    static const int dim = 3;
-    typedef Dune::ALUGrid< dim, dim, Dune::cube, Dune::nonconforming > GridType;
-    typedef double ctype;
-    Dune::FieldVector< ctype, dim > lower ( 0 );
-    Dune::FieldVector< ctype, dim > upper ( 1 );
-    std::array<unsigned int, dim> elements = {{ 8, 8, 8 }} ;
+    {
+      static const int dim = 3;
+      typedef Dune::ALUGrid< dim, dim, Dune::cube, Dune::nonconforming > GridType;
+      typedef double ctype;
+      Dune::FieldVector< ctype, dim > lower ( 0 );
+      Dune::FieldVector< ctype, dim > upper ( 1 );
+      std::array<unsigned int, dim> elements = {{ 8, 8, 8 }} ;
 
-    auto gridPtr = Dune::StructuredGridFactory< GridType > :: createCubeGrid( lower, upper, elements );
+      auto gridPtr = Dune::StructuredGridFactory< GridType > :: createCubeGrid( lower, upper, elements );
 
-    Dune::VTKWriter< typename GridType::LeafGridView > writer( gridPtr->leafGridView() );
-    if( gridPtr->comm().rank() == 0 )
-      std::cout <<"Writing VTK output! " << std::endl;
-    writer.write( "dump" );
+      Dune::VTKWriter< typename GridType::LeafGridView > writer( gridPtr->leafGridView() );
+      if( gridPtr->comm().rank() == 0 )
+        std::cout <<"Writing VTK output! " << std::endl;
+      writer.write( "dump" );
+    }
+    {
+      static const int dim = 2;
+      static const int dimworld = 3;
+      typedef Dune::ALUGrid< dim, dimworld, Dune::cube, Dune::nonconforming > GridType;
+      typedef double ctype;
+      Dune::FieldVector< ctype, dimworld > lower ( 0 );
+      Dune::FieldVector< ctype, dimworld > upper ( 1 );
+      //upper[ 2 ] = 0;
+      std::array<unsigned int, dim> elements = {{ 8, 8 }} ;
+
+      auto gridPtr = Dune::StructuredGridFactory< GridType > :: createCubeGrid( lower, upper, elements );
+
+      Dune::VTKWriter< typename GridType::LeafGridView > writer( gridPtr->leafGridView() );
+      if( gridPtr->comm().rank() == 0 )
+        std::cout <<"Writing VTK output! " << std::endl;
+      writer.write( "dump" );
+    }
 
   }
   catch( Dune::Exception &e )

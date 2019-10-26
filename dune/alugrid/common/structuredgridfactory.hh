@@ -311,6 +311,52 @@ namespace Dune
                         const std::array< int_t, dim>& elements,
                         MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
+      return createStructuredGrid( lowerLeft, upperRight, elements, mpiComm );
+    }
+
+    template < class int_t >
+    static SharedPtrType
+    createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
+                     const FieldVector<ctype,dimworld>& upperRight,
+                     const std::array< int_t, dim>& elements,
+                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
+    {
+      return createCubeGrid( lowerLeft, upperRight, elements, mpiComm,
+          std::integral_constant< bool, dim == dimworld > () );
+    }
+
+  protected:
+    template < class int_t >
+    static SharedPtrType
+    createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
+                     const FieldVector<ctype,dimworld>& upperRight,
+                     const std::array< int_t, dim>& elements,
+                     MPICommunicatorType mpiComm,
+                     std::integral_constant< bool, true> )
+    {
+      CollectiveCommunication comm( mpiComm );
+      std::string name( "Cartesian ALUGrid via YaspGrid" );
+      return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
+    }
+
+    template < class int_t >
+    static SharedPtrType
+    createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
+                     const FieldVector<ctype,dimworld>& upperRight,
+                     const std::array< int_t, dim>& elements,
+                     MPICommunicatorType mpiComm,
+                     std::integral_constant< bool, false> )
+    {
+      return createStructuredGrid( lowerLeft, upperRight, elements, mpiComm );
+    }
+
+    template < class int_t >
+    static SharedPtrType
+    createStructuredGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
+                           const FieldVector<ctype,dimworld>& upperRight,
+                           const std::array< int_t, dim>& elements,
+                           MPICommunicatorType mpiComm )
+    {
       // create DGF interval block and use DGF parser to create simplex grid
       std::stringstream dgfstream;
       dgfstream << "DGF" << std::endl;
@@ -326,25 +372,12 @@ namespace Dune
       dgfstream << "Simplex" << std::endl;
       dgfstream << "#" << std::endl;
 
-      std::cout << dgfstream.str() << std::endl;
+      //std::cout << "Grid< " << dim << " , " << dimworld << ">" << std::endl;
+      //std::cout << dgfstream.str() << std::endl;
 
       Dune::GridPtr< Grid > grid( dgfstream, mpiComm );
       return SharedPtrType( grid.release() );
     }
-
-    template < class int_t >
-    static SharedPtrType
-    createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
-                     const FieldVector<ctype,dimworld>& upperRight,
-                     const std::array< int_t, dim>& elements,
-                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
-    {
-      CollectiveCommunication comm( mpiComm );
-      std::string name( "Cartesian ALUGrid via YaspGrid" );
-      return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
-    }
-
-  protected:
     template <int codim, class Entity>
     int subEntities ( const Entity& entity ) const
     {
@@ -380,7 +413,7 @@ namespace Dune
       GridView gridView = sgrid.leafGridView();
       const IndexSet &indexSet = gridView.indexSet();
 
-      // get decompostition of the marco grid
+      // get decomposition of the marco grid
       SimplePartitioner< GridView, InteriorBorder_Partition > partitioner( gridView, comm, lowerLeft, upperRight );
 
       // create ALUGrid GridFactory
@@ -430,8 +463,6 @@ namespace Dune
         factory.insertElement( entity.type(), vertices );
         const int elementIndex = nextElementIndex++;
 
-        //const auto iend = gridView.iend( entity );
-        //for( auto iit = gridView.ibegin( entity ); iit != iend; ++iit )
         const IntersectionIterator iend = gridView.iend( entity );
         for( IntersectionIterator iit = gridView.ibegin( entity ); iit != iend; ++iit )
         {
