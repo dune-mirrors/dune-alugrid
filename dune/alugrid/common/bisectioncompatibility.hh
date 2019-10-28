@@ -384,7 +384,8 @@ public:
         std::map< double, int > vx;
         for( int j=0; j<4; ++j )
         {
-          assert( vertexWeights[ neigh[ j ] ] > 0 );
+          if(constructOrder)
+            assert( vertexWeights[ neigh[ j ] ] > 0 );
           vx.insert( std::make_pair( vertexWeights[ neigh[ j ] ], j ) );
         }
 

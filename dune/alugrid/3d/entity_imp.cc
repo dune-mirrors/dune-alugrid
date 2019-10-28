@@ -456,8 +456,6 @@ namespace Dune {
   template<int dim, class GridImp>
   alu_inline int ALU3dGridEntity<0,dim,GridImp> :: subIndex (int i, unsigned int codim ) const
   {
-    typedef ElementTopologyMapping<GridImp::elementType> ElemTopo;
-
     alugrid_assert (item_ != 0);
     switch (codim)
     {

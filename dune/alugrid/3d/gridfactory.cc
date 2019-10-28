@@ -23,6 +23,7 @@
 #include "dune/alugrid/3d/aluinline.hh"
 
 // provided by consistent-edge-orientation module
+#define HAVE_CONSISTENT_EDGE_ORIENTATION true
 #if HAVE_CONSISTENT_EDGE_ORIENTATION
 #include "utils/mesh-consistency/include/mesh-consistency.hh"
 #endif
@@ -1001,14 +1002,22 @@ namespace Dune
     //pass empty vertexWeights to construct them on the fly in
     //the reordering algorithm
     std::vector<double> vertexWeights;
-    const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
     if( ALUGrid::elementType == tetra && ! elements_.empty() )
     {
-      if( ! ALUGrid::refinementType == conforming || dimension == 2 || numNonEmptyPartitions > 1 || !(faceTransformations_.empty()) )
+      for(std::size_t i = 0; i<vertices_.size(); ++i)
       {
-        for(std::size_t i = 0; i<vertices_.size(); ++i)
-        {
+        //Dim = 2 is only needed for consistency,
+        //initial refinement edge is always the longest
+        if(dimension == 2)
           vertexWeights.push_back(globalId(i) +1 );
+        //For dim = 2 the ordering presets the refinement edge
+        //for structured (and axis-aligned) grids the following results in
+        //criss-cross reffinement
+        else
+        {
+          auto pos = inputPosition(i);
+          double weight = 256 * pos[0] + 16 * pos[1] + pos[2];
+          vertexWeights.push_back(weight);
         }
       }
 
