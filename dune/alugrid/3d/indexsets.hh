@@ -181,7 +181,7 @@ namespace Dune
   //
   // The template parameter IntegerType allows to switch between
   // more elements in the grid and a smaller size of the global Ids
-  template <class MacroKeyImp, class IntegerImp = int>
+  template <class MacroKeyImp, class IntegerImp = unsigned int>
   class ALUGridId
   {
   public:
@@ -196,7 +196,7 @@ namespace Dune
 
   public:
     ALUGridId() : key_()
-                , nChild_(-1)
+                , nChild_(0)
                 , codim_(-1)
                 , level_(-1)
     {}
@@ -256,25 +256,25 @@ namespace Dune
     }
 
     const MacroKeyImp & getKey() const { return key_; }
-    IntegerType nChild() const { return nChild_; }
+    IntegerType nChild() const { return nChild_-1; }
     int codim() const  { return int(codim_) ; }
     int level() const  { return int(level_) ; }
 
     bool isValid () const
     {
-      return ( (nChild_ >= 0) && (codim_  >= 0) && (level_ >= 0) );
+      return ( (nChild() >= 0) && (codim_  >= 0) && (level_ >= 0) );
     }
 
     void reset()
     {
-      nChild_ = -1;
+      nChild_ = 0;
       codim_  = -1;
       level_ = -1;
     }
 
     void print(std::ostream & out) const
     {
-      out << "AluGridID: (" << getKey() << "," << nChild_ << "," << int(codim_) << "," << int(level_) << ")";
+      out << "AluGridID: (" << getKey() << "," << nChild() << "," << int(codim_) << "," << int(level_) << ")";
     }
 
     inline friend std::size_t hash_value(const ALUGridId& arg)
