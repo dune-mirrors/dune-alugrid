@@ -36,11 +36,12 @@
 // use overloaded test because intersection test fails for manifold
 // intersections, there is some discussion needed.
 #include <dune/alugrid/test/checkintersectionit.hh>
-//#include "checktwists.cc"
 
 #include <dune/grid/test/checkgridfactory.hh>
-#include <doc/grids/gridfactory/testgrids.hh>
 
+#if HAVE_DUNE_GRID_TESTGRIDS
+#include "testgrids.cc"
+#endif
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI
 #define USE_PARALLEL_TEST 1
@@ -713,10 +714,10 @@ int main (int argc , char **argv) {
 
       // check grid factory (test only available for dune-grid 3.0 or later)
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
       if( myrank == 0 )
         std::cout << "Checking grid factory..." << std::endl;
 
+#if HAVE_DUNE_GRID_TESTGRIDS
 #ifndef NO_2D
       if( testALU2dCube )
         Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > >( Dune::TestGrids::unitSquare );
@@ -738,8 +739,7 @@ int main (int argc , char **argv) {
       if( testALU3dConform )
         Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
 #endif // #ifndef NO_3D
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-
+#endif // HAVE_DUNE_GRID_TESTGRIDS
 
 #ifndef NO_2D
       // check non-conform ALUGrid for 2d

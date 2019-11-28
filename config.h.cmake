@@ -60,6 +60,9 @@
 /* Define if we have pthreads */
 #cmakedefine HAVE_PTHREAD 1
 
+/* Define if we have testgrids.hh from dune-grid */
+#cmakedefine HAVE_DUNE_GRID_TESTGRIDS 1
+
 /* Grid type magic for DGF parser */
 @ALUGRID_CONFIG_H_BOTTOM@
 /* end dune-alugrid */
