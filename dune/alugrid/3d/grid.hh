@@ -341,11 +341,6 @@ namespace Dune
         // minimal information to generate entities
         typedef ALU3dGridEntitySeed< cd , const Grid> EntitySeed ;
 
-#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-        typedef EntityImp EntityPointerImpl;
-        typedef Entity    EntityPointer;
-#endif
-
         template< PartitionIteratorType pitype >
         struct Partition
         {
@@ -498,10 +493,6 @@ namespace Dune
       typedef typename Traits::template Codim< codim >::EntityImp   EntityImp;
       typedef typename Traits::template Codim< codim >::Twists      Twists;
       typedef typename Twists::Twist                                Twist;
-
-#if ! DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-      typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-#endif
     };
 
   protected:
@@ -1344,14 +1335,6 @@ namespace Dune
     {
       static const bool v = true;
     };
-
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-    template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
-    struct isParallel< ALU3dGrid< dim, dimworld, elType, Comm > >
-    {
-      static const bool v = true;
-    };
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
     template< int dim, int dimworld,  ALU3dGridElementType elType, class Comm >
     struct isLevelwiseConforming< ALU3dGrid< dim, dimworld, elType, Comm > >

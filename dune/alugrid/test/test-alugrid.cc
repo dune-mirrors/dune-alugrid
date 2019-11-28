@@ -38,10 +38,8 @@
 #include <dune/alugrid/test/checkintersectionit.hh>
 //#include "checktwists.cc"
 
-#if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 #include <dune/grid/test/checkgridfactory.hh>
 #include <doc/grids/gridfactory/testgrids.hh>
-#endif // #if DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI

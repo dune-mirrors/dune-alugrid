@@ -48,9 +48,6 @@ namespace Dune
     struct Codim
     {
       typedef typename Grid::template Codim< codim >::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-      typedef typename Grid::template Codim< codim >::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
     };
 
     typedef unsigned int VertexId;
