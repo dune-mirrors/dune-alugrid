@@ -94,10 +94,6 @@ public:
   typedef typename GridImp::template Codim<cd>::Entity Entity;
   typedef typename GridImp::template Codim<cd>::Geometry Geometry;
 
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-
   //! typedef of my type
   typedef typename GridImp::template Codim<cd>::EntitySeed EntitySeed;
 
@@ -248,18 +244,12 @@ public:
   typedef LevelIntersectionIteratorWrapper<GridImp>  ALU3dGridLevelIntersectionIteratorType;
 
   typedef typename GridImp::template Codim<0>::Entity        Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-  typedef typename GridImp::template Codim<0>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
   template <int cd>
   struct Codim
   {
     typedef typename GridImp::Traits::template Codim< cd >::Twists::Twist Twist;
     typedef typename GridImp::template Codim< cd >::Entity Entity;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-    typedef typename GridImp::template Codim<cd>::EntityPointer EntityPointer;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
   };
 
   //! typedef of my type

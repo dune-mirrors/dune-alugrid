@@ -2,14 +2,9 @@
 #define DUNE_ALUGRID_CAPABILITIES_HH
 
 #include <dune/common/version.hh>
+#include <dune/geometry/type.hh>
 #include <dune/grid/common/capabilities.hh>
 #include <dune/alugrid/common/declaration.hh>
-
-#if DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,5)
-#include <dune/geometry/type.hh>
-#else
-#include <dune/geometry/genericgeometry/topologytypes.hh>
-#endif
 
 /** @file
  *  @author Robert Kloefkorn
@@ -18,14 +13,6 @@
 
 namespace Dune
 {
-
-#if ! DUNE_VERSION_NEWER(DUNE_GEOMETRY,2,5)
-  namespace Impl
-  {
-    using Dune :: GenericGeometry :: SimplexTopology ;
-    using Dune :: GenericGeometry :: CubeTopology ;
-  }
-#endif
 
   namespace Capabilities
   {
@@ -53,26 +40,6 @@ namespace Dune
     {
       static const bool v = true;
     };
-
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
-    \ingroup ALUGrid
-    */
-    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype, ALUGridNoComm > >
-    {
-      static const bool v = false;
-    };
-
-    /** \brief ALUGrid is parallel when Comm == ALUGridMPIComm
-    \ingroup ALUGrid
-    */
-    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype >
-    struct isParallel< ALUGrid< dim, dimworld, eltype, refinementtype,  ALUGridMPIComm > >
-    {
-      static const bool v = true;
-    };
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
     /** \brief ALUGrid can communicate when Comm == ALUGridMPIComm
     \ingroup ALUGrid
