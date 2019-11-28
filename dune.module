@@ -2,6 +2,6 @@ Module: dune-alugrid
 Version: 2.7
 Maintainer: gitlab.dune-project.org/extensions/dune-alugrid
 Whitespace-Hook: Yes
-Depends: dune-grid (>= 2.6)
+Depends: dune-grid (>= 2.7)
 Suggests: dune-python
 Python-Modules: dune.alugrid
