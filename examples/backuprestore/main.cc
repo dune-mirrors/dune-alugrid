@@ -161,11 +161,6 @@ try
     return 0;
   }
 
-#if HAVE_ALUGRID
-  if( mpi.rank() == 0 )
-    std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
-#endif
-
   /* create problem */
   const char* gridFileName = (argc > 1) ? argv[ 1 ] : "./dgf/unitcube3d.dgf";
 
@@ -183,20 +178,11 @@ catch( const std::exception &e )
   std::cout << "STL ERROR: " << e.what() << std::endl;
   return 1;
 }
-#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,5)
-catch( const Dune::Exception &e )
-{
-  std::cout << "DUNE ERROR: " << e << std::endl;
-  return 1;
-}
-#endif
-#if ! HAVE_ALUGRID
 catch( const ALUGrid::ALUGridException& e )
 {
   std::cout << "ALUGrid ERROR: " << e.what() << std::endl;
   return 1;
 }
-#endif
 catch( ... )
 {
   std::cout << "Unknown ERROR" << std::endl;
