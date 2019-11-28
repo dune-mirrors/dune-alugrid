@@ -182,11 +182,6 @@ try
 
   std::string dgffile( argv[1] );
 
-#if HAVE_ALUGRID
-  if( mpi.rank() == 0 )
-    std::cout << "WARNING: Using old ALUGrid version from dune-grid." << std::endl;
-#endif
-
   BisectionCompatibilityParameters::variant() = variant;
   BisectionCompatibilityParameters::threshold() = threshold;
   BisectionCompatibilityParameters::useAnnouncedEdge() = useAnnouncedEdge;
@@ -219,20 +214,11 @@ catch( const std::exception &e )
   std::cout << "STL ERROR: " << e.what() << std::endl;
   return 1;
 }
-#if ! DUNE_VERSION_NEWER(DUNE_COMMON,2,5)
-catch( const Dune::Exception &e )
-{
-  std::cout << "DUNE ERROR: " << e << std::endl;
-  return 1;
-}
-#endif
-#if ! HAVE_ALUGRID
 catch( const ALUGrid::ALUGridException& e )
 {
   std::cout << "ALUGrid ERROR: " << e.what() << std::endl;
   return 1;
 }
-#endif
 catch( ... )
 {
   std::cout << "Unknown ERROR" << std::endl;

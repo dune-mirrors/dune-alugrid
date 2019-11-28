@@ -3,10 +3,8 @@
 
 #include <dune/alugrid/common/structuredgridfactory.hh>
 
-#if ! HAVE_ALUGRID
 #include <dune/alugrid/dgf.hh>
 #include <dune/alugrid/common/structuredgridfactory.hh>
-#endif
 
 namespace Dune
 {
@@ -20,7 +18,6 @@ namespace Dune
     }
   };
 
-#if ! HAVE_ALUGRID
   template < int dim, int dimworld, ALUGridRefinementType refineType, class Comm >
   class CreateParallelGrid< ALUGrid< dim, dimworld, Dune::cube, refineType, Comm > >
   {
@@ -33,7 +30,6 @@ namespace Dune
       return GridPtr< Grid >( SGF :: createCubeGrid( filename ).release() ) ;
     }
   };
-#endif // if ! HAVE_ALUGRID
 }
 
 #endif
