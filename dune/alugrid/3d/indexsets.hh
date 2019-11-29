@@ -181,7 +181,7 @@ namespace Dune
   //
   // The template parameter IntegerType allows to switch between
   // more elements in the grid and a smaller size of the global Ids
-  template <class MacroKeyImp, class IntegerImp = unsigned int>
+  template <class MacroKeyImp, class IntegerImp = long int>
   class ALUGridId
   {
   public:
@@ -202,7 +202,7 @@ namespace Dune
     {}
 
     explicit ALUGridId(const MacroKeyImp & key, const IntegerType nChild , const int codim, const int level)
-      : key_(key) , nChild_(nChild)
+      : key_(key) , nChild_(nChild+1)
       , codim_( codim )
       , level_( level )
     {}
@@ -256,7 +256,7 @@ namespace Dune
     }
 
     const MacroKeyImp & getKey() const { return key_; }
-    IntegerType nChild() const { return nChild_-1; }
+    long int nChild() const { return nChild_-1; }
     int codim() const  { return int(codim_) ; }
     int level() const  { return int(level_) ; }
 
@@ -496,12 +496,12 @@ namespace Dune {
 
       const int level = creatorId.level();
       const typename IdType::IntegerType nElements = std::pow(nChildren,level);
-      const int creatorNumber = creatorId.nChild();
+      const long int creatorNumber = creatorId.nChild();
       const int creatorCodim = creatorId.codim();
       const int childOffSet = offset[creatorCodim][cd];
 
       alugrid_assert ( nChild < childOffSet );
-      alugrid_assert ( creatorNumber < nEntitiesFactor[creatorCodim] * nElements );
+      alugrid_assert ( creatorNumber < (long long int)(nEntitiesFactor[creatorCodim] * nElements) );
 
       typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
       for(int i=cd ; i > creatorCodim ; i--)
