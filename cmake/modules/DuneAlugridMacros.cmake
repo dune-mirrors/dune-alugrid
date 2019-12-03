@@ -50,7 +50,7 @@ if( METIS_FOUND AND ALUGRID_DISABLE_METIS )
   unset( HAVE_METIS )
 endif()
 
-try_compile(HAVE_DUNE_GRID_TESTGRIDS ${CMAKE_BINARY_DIR}/dune/alugrid/test/ ${CMAKE_SOURCE_DIR}/dune/alugrid/test/testgrids.cc)
+# try_compile(HAVE_DUNE_GRID_TESTGRIDS ${CMAKE_BINARY_DIR}/dune/alugrid/test/ ${CMAKE_SOURCE_DIR}/dune/alugrid/test/testgrids.cc)
 
 # check for phtreads
 include(FindPThreads)
