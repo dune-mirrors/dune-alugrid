@@ -40,7 +40,7 @@
 #include <dune/grid/test/checkgridfactory.hh>
 
 #if HAVE_DUNE_GRID_TESTGRIDS
-#include "testgrids.cc"
+#include <doc/grids/gridfactory/testgrids.hh>
 #endif
 
 #if ALU3DGRID_PARALLEL && HAVE_MPI

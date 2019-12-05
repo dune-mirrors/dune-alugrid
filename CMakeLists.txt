@@ -68,5 +68,15 @@ elseif(dune-corepy_FOUND)
   dune_python_install_package(PATH "python")
 endif()
 
+#look for testgrids.hh header in dune-grid doc sub directory
+find_path(DUNE_TESTGRIDS_INCLUDE_DIR testgrids.hh
+  PATHS ${dune-grid_INCLUDE_DIRS}/doc/grids/gridfactory
+  NO_DEFAULT_PATH
+)
+
+if(DUNE_TESTGRIDS_INCLUDE_DIR)
+  set(HAVE_DUNE_GRID_TESTGRIDS 1)
+endif()
+
 # finalize the dune project, e.g., generate config.h etc.
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)

@@ -60,7 +60,7 @@
 /* Define if we have pthreads */
 #cmakedefine HAVE_PTHREAD 1
 
-/* Define if we have testgrids.hh from dune-grid */
+/* Define if testgrids.hh from dune-grid have been found in docs/grids/gridfactory */
 #cmakedefine HAVE_DUNE_GRID_TESTGRIDS 1
 
 /* Grid type magic for DGF parser */
