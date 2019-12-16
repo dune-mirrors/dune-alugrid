@@ -1,64 +1,89 @@
 // -*- tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*-
 // vi: set et ts=4 sw=2 sts=2:
-/** \file
- *  \author Matrin Nolte
- *  \brief a small program converting a gmsh file into a DGF file
- *
- *  gmsh2dgf is a small example program for the DGFWriter. It reads a gmsh file
- *  into any grid (selected by gridtype.hh) and writes it back as a DGF file.
- *
- *  The program's usage is as follows:
-    \code
-    ./gmsh2dgf <gmshfile>
-    \endcode
- */
 
-#include <config.h>
+#include "config.h"
 
 #include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <dune/common/parallel/mpihelper.hh>
 
-#include <dune/grid/io/file/gmshreader.hh>
+#include <dune/alugrid/grid.hh>
+#include <dune/alugrid/dgf.hh>
+
+#include <dune/grid/io/file/vtk/vtkwriter.hh>
+#include <dune/grid/io/file/gmshwriter.hh>
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
 using namespace Dune;
 
-int main ( int argc, char *argv[] )
+int main( int argc, char** argv )
 try
 {
-  Dune::MPIHelper::instance( argc, argv );
-  typedef Dune::GridSelector::GridType Grid;
+  auto& mpiHelper = MPIHelper::instance( argc, argv );
+  const int rank = mpiHelper.rank();
 
-  if( argc < 2 )
+  std::string filename;
+  if( argc > 1 )
   {
-    std::cerr << "Usage: " << argv[ 0 ] << " <gmshfile>" << std::endl;
-    return 1;
+    filename = std::string(argv[1]);
+  }
+  else
+  {
+    std::cerr << "usage: " << argv[0] << " <filename>" << std::endl;
+    return 0;
   }
 
-  const std::string gmshFileName( argv[ 1 ] );
-  std::string dgfFileName( gmshFileName );
-  dgfFileName.resize( dgfFileName.find_last_of( "." ) );
-  dgfFileName += ".dgf";
+  typedef typename GridSelector::GridType GridType;
+  std::unique_ptr< GridType > gridPtr;
+  typedef typename GridSelector::GridType GridType;
+  gridPtr.reset( Dune::GridPtr< GridType >( filename ).release() );
 
-  Grid *grid = GmshReader< Grid  >::read( gmshFileName );
+  GridType& grid = *gridPtr;
+  typedef typename GridType::LeafGridView  LeafGridView;
+  const LeafGridView& gridView = grid.leafGridView();
 
-  typedef Grid::LeafGridView GridView;
-  GridView gridView = grid->leafGridView();
+  // Write MSH
+  {
+    Dune::GmshWriter< LeafGridView > writer( leafGridView );
+    writer.setPrecision(10);
 
-  DGFWriter< GridView > dgfWriter( gridView );
-  dgfWriter.write( dgfFileName );
+    const std::string outputName(filename+".msh");
+    writer.write(outputName);
+  }
 
-  const GridView::IndexSet &indexSet = gridView.indexSet();
-  std::cerr << "Grid successfully written: "
-            << indexSet.size( Grid::dimension ) << " vertices, "
-            << indexSet.size( 0 ) << " elements."
-            << std::endl;
+  // Write DGF
+  {
+    Dune::DGFWriter< LeafGridView > writer( leafGridView );
+
+    const std::string outputName(filename+".msh");
+    writer.write(outputName);
+  }
+
+  // Write VTK
+  {
+    std::ostringstream vtkName;
+    vtkName << gridName << ".vtk";
+    VTKWriter< LeafGridView > vtkWriter( leafGridView );
+    vtkWriter.write( vtkName.str() );
+  }
 
   return 0;
 }
-catch( const Exception &exception )
+catch ( const Dune::Exception &e )
 {
-  std::cerr << exception << std::endl;
+  std::cerr << e << std::endl;
   return 1;
+}
+catch (const std::exception &e) {
+  std::cerr << e.what() << std::endl;
+  return 1;
+}
+catch ( ... )
+{
+  std::cerr << "Generic exception!" << std::endl;
+  return 2;
 }
