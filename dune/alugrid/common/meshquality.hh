@@ -1,6 +1,7 @@
 #ifndef DUNE_ALU3DGRID_MESHQUALITY_HH
 #define DUNE_ALU3DGRID_MESHQUALITY_HH
 
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -71,7 +72,10 @@ namespace Dune {
 
       if( ! geomType.isSimplex() )
       {
-        std::cout << "MeshQuality check only works for simplex grids, skipping check!" << std::endl;
+        if( gridView.comm().rank() == 0 )
+        {
+          std::cout << "MeshQuality check only works for simplex grids, skipping check!" << std::endl;
+        }
         return ;
       }
 
