@@ -23,8 +23,7 @@ using namespace Dune;
 int main( int argc, char** argv )
 try
 {
-  auto& mpiHelper = MPIHelper::instance( argc, argv );
-  const int rank = mpiHelper.rank();
+  MPIHelper::instance( argc, argv );
 
   std::string filename;
   if( argc > 1 )
@@ -44,7 +43,7 @@ try
 
   GridType& grid = *gridPtr;
   typedef typename GridType::LeafGridView  LeafGridView;
-  const LeafGridView& gridView = grid.leafGridView();
+  const LeafGridView& leafGridView = grid.leafGridView();
 
   // Write MSH
   {
@@ -59,14 +58,14 @@ try
   {
     Dune::DGFWriter< LeafGridView > writer( leafGridView );
 
-    const std::string outputName(filename+".msh");
+    const std::string outputName(filename+".dgf");
     writer.write(outputName);
   }
 
   // Write VTK
   {
     std::ostringstream vtkName;
-    vtkName << gridName << ".vtk";
+    vtkName << filename << ".vtk";
     VTKWriter< LeafGridView > vtkWriter( leafGridView );
     vtkWriter.write( vtkName.str() );
   }
