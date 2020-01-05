@@ -40,9 +40,9 @@
 #include <dune/common/parallel/mpihelper.hh>
 
 #if ALU3DGRID_PARALLEL
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 #else
-#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/communication.hh>
 #endif
 
 namespace Dune
