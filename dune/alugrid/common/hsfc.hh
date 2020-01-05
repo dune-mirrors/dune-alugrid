@@ -9,8 +9,8 @@
 #include <dune/common/exceptions.hh>
 
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/parallel/collectivecommunication.hh>
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/communication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 #if HAVE_ZOLTAN

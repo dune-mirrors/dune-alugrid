@@ -11,7 +11,7 @@
 #include <fstream>
 #include <list>
 
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
