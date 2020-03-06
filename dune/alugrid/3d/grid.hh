@@ -1067,15 +1067,6 @@ namespace Dune
       return Communications::defaultComm();
     }
 
-    template< class IntersectionType >
-    static const typename BaseType
-      :: template ReturnImplementationType< IntersectionType >
-      :: ImplementationType &
-    getRealIntersection ( const IntersectionType &intersection )
-    {
-      return intersection.impl();
-    }
-
     //! deliver all geometry types used in this grid
     const std::vector<GeometryType>& geomTypes (int codim) const { return geomTypes_[codim]; }
 

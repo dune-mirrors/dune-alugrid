@@ -296,7 +296,7 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
       // check twist of inside geometry
       const int twistInside = aluTwistCheck( entity, intersection.geometryInInside(),
                                              intersection.indexInInside(), false, verbose );
-      const int twistIn = gridView.grid().getRealIntersection( intersection ).twistInInside();
+      const int twistIn = intersection.impl().twistInInside();
 
       if( twistInside != twistIn )
         std::cerr << "Error: inside twists " << twistInside << " (found)  and  " << twistIn << " (given) differ" << std::endl;
@@ -306,7 +306,7 @@ void checkALUTwists( const GridView& gridView, const bool verbose = false )
         // check twist of inside geometry
         const int twistOutside = aluTwistCheck( intersection.outside(), intersection.geometryInOutside(),
                                                 intersection.indexInOutside(), true, verbose );
-        const int twistOut = gridView.grid().getRealIntersection( intersection ).twistInOutside();
+        const int twistOut = intersection.impl().twistInOutside();
         if( twistOutside != twistOut )
           std::cerr << "Error: outside twists " << twistOutside << " (found)  and  " << twistOut << " (given) differ" << std::endl;
       }
