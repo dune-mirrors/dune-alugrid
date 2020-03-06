@@ -18,9 +18,9 @@ debian:9--clang:
   script: duneci-standard-test
   variables: {DUNECI_OPTS: /duneci/opts.clang}
 
-ubuntu:16.04--gcc:
-  image: duneci/ubuntu:16.04
-  script: duneci-standard-test
+#ubuntu:16.04--gcc:
+#  image: duneci/ubuntu:16.04
+#  script: duneci-standard-test
 
 #ubuntu:16.04--clang:
   #image: duneci/ubuntu:16.04
