@@ -1804,7 +1804,7 @@ namespace ALUGrid
           signed char _numFront;
           signed char _numRear;
           // put here to save memory because of padding
-          signed char s [polygonlength];
+          // signed char s [polygonlength];
         public:
           // put here to save memory because of padding
           myrule_t _parRule;
