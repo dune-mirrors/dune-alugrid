@@ -105,8 +105,12 @@ void checkRefinements( GitterType& grid )
 
   typedef ALUGrid::Gitter ::Geometric :: TetraRule  TetraRule ;
   const ALUGrid::Gitter ::Geometric :: TetraRule rules[ 6 ] =
-  { TetraRule :: e01, TetraRule :: e12, TetraRule :: e20,
-    TetraRule :: e23, TetraRule :: e30, TetraRule :: e31 };
+  { TetraRule::rule_enum::e01,
+    TetraRule::rule_enum::e02,
+    TetraRule::rule_enum::e03,
+    TetraRule::rule_enum::e12,
+    TetraRule::rule_enum::e13,
+    TetraRule::rule_enum::e23 };
 
   for (int i=0; i<6; ++i )
   {
