@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/alugrid/impl/serial/mappings.hh>
+
 #if HAVE_DLMALLOC
 #if _OPENMP
 #error DLMALLOC cannot be used with DLMALLOC
@@ -64,7 +66,7 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
       typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
       // mark element for refinement
       tetra_IMPL& tetra = ((tetra_IMPL &) elem);
-      ALUGrid::LinearMapping::
+      ALUGrid::LinearMapping<3,3>::
         barycenter(
           tetra.myvertex (0)->Point (),
           tetra.myvertex (1)->Point (),
@@ -273,7 +275,7 @@ int main (int argc, char ** argv)
 #endif
   {
     std::ifstream infile( macroname.c_str());
-    ALUGrid::GitterDuneImpl grid1(3, infile );
+    ALUGrid::GitterDuneImpl grid1(3, false, infile );
   }
   return 0;
 }
