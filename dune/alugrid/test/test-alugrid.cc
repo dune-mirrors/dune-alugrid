@@ -198,8 +198,6 @@ void checkIteratorAssignment(GridType & grid)
 }
 
 
-
-
 template <int codim, class GridView>
 void checkIteratorCodim(const GridView & gridView)
 {
