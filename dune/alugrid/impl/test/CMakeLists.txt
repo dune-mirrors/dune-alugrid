@@ -8,11 +8,8 @@ set(TESTS
 # copy data to build source to make tests work
 file(COPY alugrid.cfg grids DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-#dune_add_test(NAME sizes SOURCES sizes.cc LINK_LIBRARIES dunealugrid)
-# dune 2.5 and higher
-#if(NOT (("${DUNE_COMMON_VERSION_MAJOR}" STREQUAL "2")
-#           AND ("${DUNE_COMMON_VERSION_MINOR}" STREQUAL "4")))
-#  foreach(TEST ${TESTS})
-#    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
-#  endforeach()
+#if(ALUGRID_TORTURE_TESTS)
+  foreach(TEST ${TESTS})
+    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc MPI_RANKS 1 2 3 4 TIMEOUT 3600 LINK_LIBRARIES dunealugrid)
+  endforeach()
 #endif()

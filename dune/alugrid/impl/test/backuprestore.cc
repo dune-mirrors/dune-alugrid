@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <dune/alugrid/impl/serial/mappings.hh>
+
 #define ENABLE_ALUGRID_VTK_OUTPUT
 
 // include serial part of ALUGrid
@@ -58,7 +60,7 @@ struct ExchangeBaryCenter : public ALUGrid::GatherScatter
       typedef typename GitterType :: Objects :: tetra_IMPL tetra_IMPL ;
       // mark element for refinement
       tetra_IMPL& tetra = ((tetra_IMPL &) elem);
-      ALUGrid::LinearMapping::
+      ALUGrid::LinearMapping<3,3>::
         barycenter(
           tetra.myvertex (0)->Point (),
           tetra.myvertex (1)->Point (),
@@ -157,6 +159,8 @@ void checkElement( GitterType& grid, element_t& elem )
     for( int i=0; i<4; ++i )
     {
       assert( item.myneighbour( i ).first->isRealObject() );
+      if( ! item.myneighbour( i ).first->isRealObject()  )
+        std::abort();
     }
   }
   else
@@ -168,6 +172,8 @@ void checkElement( GitterType& grid, element_t& elem )
     for( int i=0; i<6; ++i )
     {
       assert( item.myneighbour( i ).first->isRealObject() );
+      if( ! item.myneighbour( i ).first->isRealObject() )
+        std::abort();
     }
   }
 }
@@ -268,20 +274,21 @@ int main (int argc, char ** argv)
   std::stringstream databuf;
 
   const int dim = 3;
+  const bool conformingRefinement = false ;
   {
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid(dim, macroname.c_str(),a);
+    ALUGrid::GitterDunePll grid(dim, conformingRefinement,  macroname.c_str(),a);
     grid.loadBalance() ;
 
     grid.tovtk( "out" );
 #else
     std::ifstream infile( macroname.c_str());
-    ALUGrid::GitterDuneImpl grid1( dim, infile );
+    ALUGrid::GitterDuneImpl grid1( dim, conformingRefinement, infile );
     infile.close();
 
     std::ifstream infile2( macroname.c_str());
-    ALUGrid::GitterDuneImpl grid2( dim, infile2 );
+    ALUGrid::GitterDuneImpl grid2( dim, conformingRefinement, infile2 );
     infile2.close();
     ALUGrid::GitterDuneImpl& grid = grid2;
 
@@ -302,9 +309,9 @@ int main (int argc, char ** argv)
     // read grid from file
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid( dim, file, a);
+    ALUGrid::GitterDunePll grid( dim, conformingRefinement, file, a);
 #else
-    ALUGrid::GitterDuneImpl grid( dim, file );
+    ALUGrid::GitterDuneImpl grid( dim, conformingRefinement, file );
 #endif
     grid.printsize();
 
@@ -327,9 +334,9 @@ int main (int argc, char ** argv)
     // read grid from file
 #if HAVE_MPI
     ALUGrid::MpAccessMPI a (MPI_COMM_WORLD);
-    ALUGrid::GitterDunePll grid( dim, databuf, a);
+    ALUGrid::GitterDunePll grid( dim, conformingRefinement, databuf, a);
 #else
-    ALUGrid::GitterDuneImpl grid( dim, databuf );
+    ALUGrid::GitterDuneImpl grid( dim, conformingRefinement, databuf );
 #endif
     grid.printsize();
     grid.restore( databuf );
