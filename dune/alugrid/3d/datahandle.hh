@@ -97,7 +97,7 @@ namespace ALUGrid
     GatherScatterBaseImpl(const GridType & grid, EntityType & en,
         RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity) , dc_(dc)
-      , variableSize_( ! dc_.fixedsize(EntityType::dimension,codim) )
+      , variableSize_( ! dc_.fixedSize(EntityType::dimension,codim) )
     {
     }
 
@@ -225,7 +225,7 @@ namespace ALUGrid
     GatherScatterBaseImpl(const GridType & grid, EntityType & en,
         RealEntityType & realEntity , DataCollectorType & dc)
       : grid_(grid), entity_(en), realEntity_(realEntity)
-      , dc_(dc) , variableSize_ ( ! dc_.fixedsize( EntityType :: dimension, codim ))
+      , dc_(dc) , variableSize_ ( ! dc_.fixedSize( EntityType :: dimension, codim ))
     {}
 
     // This method is called in gitter_dune_pll_impl.cc with arguments 3,codimension
