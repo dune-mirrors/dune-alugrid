@@ -35,8 +35,8 @@ try
     return 0;
   }
 
-#if 0
-  using GridType = Dune::ALUGrid<2, 3, Dune::simplex, Dune::nonconforming>;
+#if 1
+  using GridType = Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
   GridType& grid = *gridPtr;
   grid.loadBalance();
@@ -45,6 +45,17 @@ try
   {
     for(const auto& elem : Dune::elements( grid.leafGridView() ) )
     {
+      for( const auto& intersection : Dune::intersections( grid.leafGridView(), elem ))
+      {
+        if( intersection.boundary() )
+        {
+          if( intersection.impl().boundaryId() < 1 ||
+              intersection.impl().boundaryId() > 4)
+          {
+            std::cout << intersection.impl().boundaryId() << std::endl;
+          }
+        }
+      }
       grid.mark( 1, elem );
     }
   }
