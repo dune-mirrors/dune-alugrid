@@ -31,7 +31,7 @@ debian:11--gcc-9-17:headercheck:
   image: duneci/debian:11
   script:
     - duneci-install-module https://gitlab.dune-project.org/extensions/dune-alugrid.git
-    - cd /builds/extensions/dune-alugrid/build-cmake
+    - cd /duneci/modules/dune-alugrid/build-cmake
     - make headercheck
   variables:
     DUNECI_TOOLCHAIN: gcc-9-17
