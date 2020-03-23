@@ -1,25 +1,28 @@
 ---
-include:
-  - "https://gitlab.dune-project.org/core/ci-config/raw/master/config/common/master.yml"
-  - "https://gitlab.dune-project.org/core/ci-config/raw/master/jobs/common/master.yml"
-
 variables:
   # remove some unused 3rd party packages to speed up tests.
   DUNECI_CMAKE_FLAGS: "-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE"
 
+  
 before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
 
-debian:10  gcc:c++17:
-  image: duneci/debian:10
+debian:11--gcc-9-17:
+  image: duneci/debian:11
   script: duneci-standard-test
+  variables:
+    DUNECI_TOOLCHAIN: gcc-9-17
     
-ubuntu:18.04--gcc:
+ubuntu:18.04--gcc-7-17:
   image: duneci/ubuntu:18.04
   script: duneci-standard-test
+  variables:
+    DUNECI_TOOLCHAIN: gcc-7-17
 
 ubuntu:18.04--clang:
   image: duneci/ubuntu:18.04
   script: duneci-standard-test
+  variables: 
+    DUNECI_TOOLCHAIN: clang-6-17
