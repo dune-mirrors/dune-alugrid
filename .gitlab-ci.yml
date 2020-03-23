@@ -11,18 +11,21 @@ before_script:
 debian:11--gcc-9-17:
   image: duneci/debian:11
   script: duneci-standard-test
+  tags: [duneci]
     
 ubuntu:18.04--gcc-7-17:
   image: duneci/ubuntu:18.04
   script: duneci-standard-test
   variables:
     DUNECI_TOOLCHAIN: gcc-7-17
+  tags: [duneci]
 
 ubuntu:18.04--clang:
   image: duneci/ubuntu:18.04
   script: duneci-standard-test
   variables: 
     DUNECI_TOOLCHAIN: clang-6-17
+  tags: [duneci]
 
 debian:11--gcc-9-17:headercheck:
   image: duneci/debian:11
@@ -32,3 +35,4 @@ debian:11--gcc-9-17:headercheck:
     - make headercheck
   variables:
     DUNECI_TOOLCHAIN: gcc-9-17
+  tags: [duneci]
