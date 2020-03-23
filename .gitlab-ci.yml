@@ -1,4 +1,8 @@
 ---
+variables:
+  # remove some unused 3rd party packages to speed up tests.
+  DUNECI_CMAKE_FLAGS: "-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE"
+
 before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
@@ -7,7 +11,6 @@ before_script:
 debian:10  gcc:c++17:
   image: duneci/debian:10
   script: duneci-standard-test
-  variables: {DUNECI_OPTS: /duneci/opts.gcc.c++17}
 
 ubuntu:18.04--gcc:
   image: duneci/ubuntu:18.04
@@ -16,4 +19,3 @@ ubuntu:18.04--gcc:
 ubuntu:18.04--clang:
   image: duneci/ubuntu:18.04
   script: duneci-standard-test
-  variables: {DUNECI_OPTS: /duneci/opts.clang}
