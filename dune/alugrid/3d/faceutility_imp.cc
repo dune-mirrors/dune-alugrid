@@ -104,11 +104,12 @@ namespace Dune
         // get face number
         innerFaceNumber_ = p.second;
 
+#ifndef NDEBUG
         // this doesn't count as outer boundary
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
         alugrid_assert (ghost);
-
         alugrid_assert(isInnerRear_ == ghost->isRear(innerFaceNumber_));
+#endif
       }
       else
       {
@@ -234,9 +235,11 @@ namespace Dune
             GhostPairType p  = bnd->getGhost();
             outerFaceNumber_ = p.second;
 
+#ifndef NDEBUG
             const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
             alugrid_assert ( ghost );
             alugrid_assert(isInnerRear_ == !(ghost->isRear(outerFaceNumber_)));
+#endif
           }
         }
         else // the normal boundary case

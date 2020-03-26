@@ -384,8 +384,6 @@ namespace Dune
     // (Vertices that are not on edge i are on edge 5-i)
     static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {1,2}, {0,3}, {1,3}, {2,3} };
 
-    const int numVertices = 4;
-
     //create the vertex priority List
     const int numberOfElements = elements_.size();
 
@@ -853,18 +851,19 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   bool
-  ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int> & simplexTypes)
+  ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int>& simplexTypes )
   {
     bool result = false;
 #if HAVE_CONSISTENT_EDGE_ORIENTATION
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
-      std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
+      std::vector< Dune::FieldVector<double,3> > vertices(vertices_.size());
       for(unsigned i = 0 ; i < vertices_.size(); ++i)
       {
         vertices[i] = vertices_[i].first;
       }
+
       std::size_t elementSize = elements_.size();
       if(!faceTransformations_.empty())
       {
