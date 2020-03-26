@@ -958,7 +958,6 @@ namespace ALUGrid
       // write coordinates of the face
       for(int vx=0; vx<3; ++vx)
       {
-        //const alucoord_t (&p)[3] = mytetra().myvertex(face, vx)->Point();
         const alucoord_t (&p)[3] = f.myvertex(vx)->Point();
         os.write( p[0] );
         os.write( p[1] );
@@ -967,7 +966,8 @@ namespace ALUGrid
 
       {
         // write point opposite to face
-        const alucoord_t (&p)[3] = mytetra().myvertex(face)->Point();
+        const int oppVx = Gitter::Geometric::tetra_GEO::oppositeVertex[ face ];
+        const alucoord_t (&p)[3] = mytetra().myvertex( oppVx )->Point();
         os.write( p[0] );
         os.write( p[1] );
         os.write( p[2] );

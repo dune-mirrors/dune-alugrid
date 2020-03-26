@@ -183,10 +183,11 @@ namespace ALUGrid
                                                     (*i)->ldbVertexIndex(), (*i)->master(),
                                                     gh , gpair.second );
           }
-          // until here
-          else
+          else // if gh
+          {
             _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isRear (0),
                                                     (*i)->ldbVertexIndex(), (*i)->master() );
+          }
 
           toDeleteHbnd.push_back( (*i) );
         }

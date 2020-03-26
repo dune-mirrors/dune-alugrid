@@ -142,18 +142,17 @@ namespace ALUGrid
   MacroGhostInfoTetra::MacroGhostInfoTetra ( const Gitter::Geometric::tetra_GEO *tetra, const int fce )
   {
     _simplexTypeFlag = tetra->simplexTypeFlag();
-    alugrid_assert ( points == this->nop() );
+    alugrid_assert ( points == 1 );
     // get vertex opposite to face
-    const int oppositeVertex = Gitter::Geometric::tetra_GEO::oppositeVertex[fce];
-    const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( oppositeVertex );
-    alugrid_assert ( vertex );
-    for(int vx=0; vx<points; ++vx)
     {
-      this->_vxface[vx] = vertex->ident();
+      const int oppositeVertex = Gitter::Geometric::tetra_GEO::oppositeVertex[fce];
+      const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( oppositeVertex );
+      alugrid_assert ( vertex );
+      this->_vxface[ 0 ] = vertex->ident();
       const alucoord_t (&p) [3] = vertex->Point();
-      this->_p[vx][0] = p[0];
-      this->_p[vx][1] = p[1];
-      this->_p[vx][2] = p[2];
+      this->_p[0][0] = p[0];
+      this->_p[0][1] = p[1];
+      this->_p[0][2] = p[2];
     }
 
     for( int i = 0; i < noVx; ++i )
