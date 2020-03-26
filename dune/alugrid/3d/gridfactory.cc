@@ -390,7 +390,7 @@ namespace Dune
     for(int el = 0; el < numberOfElements ; ++el )
     {
       auto& element = elements_[ el ];
-      assert( int(element.size()) == numVertices );
+      assert( int(element.size()) == 4 ); // 4 vertices for a tetrahedron
 
       // find longest edge
       int edge = -1;
@@ -851,19 +851,18 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   bool
-  ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int>& simplexTypes )
+  ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int> & simplexTypes)
   {
     bool result = false;
 #if HAVE_CONSISTENT_EDGE_ORIENTATION
     //apply mesh-consistency algorithm to hexas
     if( elementType == hexa )
     {
-      std::vector< Dune::FieldVector<double,3> > vertices(vertices_.size());
+      std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
       for(unsigned i = 0 ; i < vertices_.size(); ++i)
       {
         vertices[i] = vertices_[i].first;
       }
-
       std::size_t elementSize = elements_.size();
       if(!faceTransformations_.empty())
       {
