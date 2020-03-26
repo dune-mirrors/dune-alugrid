@@ -247,7 +247,6 @@ namespace ALUGrid
         inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int);
         ~HexaEmpty () {}
 
-        // Neu: burriad 29.4.05
         int preCoarsening();
         int postRefinement();
 

@@ -16,11 +16,12 @@ namespace ALUGrid
   void GitterBasis::Objects::TetraEmpty::
   os2VertexData ( ObjectStream &os, GatherScatterType &gs, int borderFace )
   {
-      //for the 2d case we do not want to transmit data for
-      //non-2d elements
-    if(!is2d() || myvertex(borderFace)->is2d())
+    const int oppVx = Gitter::Geometric::tetra_GEO::oppositeVertex[ borderFace ];
+    //for the 2d case we do not want to transmit data for
+    //non-2d elements
+    if(!is2d() || myvertex( oppVx )->is2d())
     // only one opposite vertex for tetras
-    gs.setData( os, *myvertex( borderFace ) );
+    gs.setData( os, *myvertex( oppVx ) );
   }
 
   void GitterBasis::Objects::TetraEmpty ::
@@ -58,11 +59,12 @@ namespace ALUGrid
   void GitterBasis::Objects::TetraEmpty ::
   VertexData2os(ObjectStream & os, GatherScatterType & gs, int borderFace )
   {
+    const int oppVx = Gitter::Geometric::tetra_GEO::oppositeVertex[ borderFace ];
     // only send one vertex
     //for the 2d case we do not want to transmit data for
     //non-2d elements
-    if(!is2d() || myvertex(borderFace)->is2d())
-    gs.sendData( os, *myvertex(borderFace) );
+    if(!is2d() || myvertex( oppVx )->is2d())
+    gs.sendData( os, *myvertex( oppVx ) );
   }
 
   void GitterBasis::Objects::TetraEmpty ::

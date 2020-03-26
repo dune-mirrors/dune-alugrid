@@ -426,7 +426,8 @@ namespace ALUGrid
         }
 
         // set vertex opposite to face
-        this->myvertex( face )->setCoordinates( newCoords[ 3 ] );
+        const int oppVx = Gitter::Geometric::tetra_GEO::oppositeVertex[ face ];
+        this->myvertex( oppVx )->setCoordinates( newCoords[ 3 ] );
 
         _volume = volume;
       }
