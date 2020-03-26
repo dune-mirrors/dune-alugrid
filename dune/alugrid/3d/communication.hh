@@ -5,6 +5,7 @@
 #include <utility>
 #include <type_traits>
 
+#include <dune/common/visibility.hh>
 #include <dune/common/stdstreams.hh>
 
 #include <dune/grid/common/datahandleif.hh>
@@ -203,7 +204,7 @@ namespace Dune
 
   protected:
     template< class DataHandle, class Data >
-    struct Storage
+    struct DUNE_PRIVATE Storage
       : Base::Storage
     {
       typedef Dune::CommDataHandleIF< DataHandle, Data > CommDataHandleIF;
@@ -272,7 +273,7 @@ namespace Dune
 
   protected:
     template< class DataHandle, class Data >
-    struct Storage
+    struct DUNE_PRIVATE Storage
       : Base::Storage
     {
       typedef Dune::CommDataHandleIF< DataHandle, Data > CommDataHandleIF;
