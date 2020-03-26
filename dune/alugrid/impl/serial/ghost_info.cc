@@ -196,9 +196,9 @@ namespace ALUGrid
     // global vertex number of the elements vertices
     for(int k=0; k<noFace; ++k)
     {
-      bool vx = tetra.isRear(k);
-      os.write( vx );
+      os.write( tetra.isRear(k) );
     }
+
     // write simplex type flag
     tetra.simplexTypeFlag().write( os );
   }
