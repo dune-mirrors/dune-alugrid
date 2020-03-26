@@ -35,11 +35,11 @@ namespace ALUGrid
 
   // edge which tell from which face with which edge number we get edge 0 to 5
   const int Gitter::Geometric::Tetra::edgeMap [6][2] = {{0, 0},
-                                                              {0, 1},
-                                                              {0, 2},
-                                                              {1, 1},
-                                                              {1, 2},
-                                                              {2, 2}};
+                                                        {0, 1},
+                                                        {0, 2},
+                                                        {1, 1},
+                                                        {1, 2},
+                                                        {2, 2}};
 
 
   const std::vector< std::vector< int > > Gitter::Geometric::Tetra::_verticesNotOnFace( Gitter::Geometric::Tetra::initVerticesNotOnFace() );
@@ -53,7 +53,7 @@ namespace ALUGrid
     for(int f=0; f<4; ++f)
     {
       verticesNotFace[f].resize(1);
-      verticesNotFace[f][0] = f;
+      verticesNotFace[f][0] = Gitter::Geometric::Tetra::oppositeVertex[ f ];
     }
     return verticesNotFace;
   }
