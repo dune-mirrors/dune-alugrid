@@ -104,9 +104,16 @@ namespace ALUGrid
       writeT( a, false );
     }
 
+    inline void write (const bool a)
+    {
+      signed char val = a ? 1 : 0;
+      write( val );
+    }
+
     ////////////////////////////////////
     // to behave like stringstream
     ////////////////////////////////////
+    //
     // put char
     inline void put (const signed char a)  { write(a); }
 
@@ -168,6 +175,12 @@ namespace ALUGrid
     // read value from stream
     template <class T>
     inline void read (T & a) { readT( a, true ); }
+
+    inline void read(bool& a)
+    {
+      signed char val = get();
+      a = (val == 0) ? false : true;
+    }
 
     template<class T>
     inline void readUnchecked ( T& a ) { readT( a, false ); }
@@ -388,6 +401,8 @@ namespace ALUGrid
     inline void readObject (float & a) { this->read(a);  }
     inline void writeObject (int a)     { this->write(a); }
     inline void readObject (int & a)    { this->read(a);  }
+    inline void writeObject (bool a)    { assert(false); this->write(a); }
+    inline void readObject (bool& a)    { assert(false); this->read(a);  }
 
     // return true if object stream was not set yet
     bool notReceived () const { return notReceived_; }
@@ -519,6 +534,8 @@ namespace ALUGrid
     inline void readObject (float & a)  { this->read(a);  }
     inline void writeObject (int a)     { this->write(a); }
     inline void readObject (int & a)    { this->read(a);  }
+    inline void writeObject (bool a)    { assert(false); this->write(a); }
+    inline void readObject (bool& a)    { assert(false); this->read(a);  }
   };
 
   //
