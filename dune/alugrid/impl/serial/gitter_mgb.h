@@ -41,8 +41,9 @@ namespace ALUGrid
       MacroGhostInfoTetra * _ptr;
       // internal face
       hface3_GEO * _first;
-      // twist of face
-      int _second;
+      // isRear of face
+      bool _second;
+
       // ldb vertex index
       int _ldbVertexIndex;
       int _master;
@@ -55,13 +56,13 @@ namespace ALUGrid
       ~Hbnd3IntStorage();
 
       // store point and face and twist
-      Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master, const tetra_GEO * tetra, int fce);
+      Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master, const tetra_GEO * tetra, int fce);
 
       // store point and face and twist
-      Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoTetra* p);
+      Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master, MacroGhostInfoTetra* p);
 
       // store face and twist and set point to default
-      Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master );
+      Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master );
 
       // release internal MacroGhostInfoTetra pointer
       MacroGhostInfoTetra* release ();
@@ -71,7 +72,7 @@ namespace ALUGrid
 
       // this two method are just like in pair
       hface3_GEO * first  () const { return _first;  }
-      int          second () const { return _second; }
+      bool         second () const { return _second; }
 
       // return ldb vertex index
       int ldbVertexIndex() const { return _ldbVertexIndex; }
@@ -86,7 +87,7 @@ namespace ALUGrid
       // internal face
       hface4_GEO * _first;
       // twist of face
-      int _second;
+      bool _second;
       // ldb vertex index
       int _ldbVertexIndex;
       int _master;
@@ -99,13 +100,13 @@ namespace ALUGrid
       ~Hbnd4IntStorage ();
 
       // store point and face and twist
-      Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, const hexa_GEO * hexa, int fce);
+      Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master, const hexa_GEO * hexa, int fce);
 
       // store point and face and twist
-      Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoHexa* );
+      Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master, MacroGhostInfoHexa* );
 
       // store face and twist and set point to default
-      Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master );
+      Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master );
 
       // release internal ghost info pointer
       MacroGhostInfoHexa* ghInfo ();
@@ -287,24 +288,24 @@ namespace ALUGrid
 
   //- Hbnd3IntStorage
   inline MacroGridBuilder::Hbnd3IntStorage::
-  Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master, const tetra_GEO * tetra, int fce)
+  Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master, const tetra_GEO * tetra, int fce)
    : _ptr(new MacroGhostInfoTetra(tetra,fce))
-   , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+   , _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     alugrid_assert ( _ldbVertexIndex >= 0 );
   }
 
   inline MacroGridBuilder::Hbnd3IntStorage::
-  Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoTetra *p)
-   : _ptr(p) , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+  Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master, MacroGhostInfoTetra *p)
+   : _ptr(p) , _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     alugrid_assert ( _ldbVertexIndex >= 0 );
     alugrid_assert ( _ptr );
   }
 
   inline MacroGridBuilder::Hbnd3IntStorage::
-  Hbnd3IntStorage( hface3_GEO * f, int tw, int ldbVertexIndex, int master )
-   : _ptr(0), _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+  Hbnd3IntStorage( hface3_GEO * f, bool isRear, int ldbVertexIndex, int master )
+   : _ptr(nullptr), _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     // for this constructor we need to allow ldbVertexIndex < 0
     // since this can happen on parallel construction via several macro files.
@@ -316,7 +317,7 @@ namespace ALUGrid
     if( _ptr )
     {
       delete _ptr;
-      _ptr = 0;
+      _ptr = nullptr;
     }
   }
 
@@ -328,30 +329,30 @@ namespace ALUGrid
   inline MacroGhostInfoTetra* MacroGridBuilder::Hbnd3IntStorage::release ()
   {
     MacroGhostInfoTetra* p = _ptr;
-    _ptr = 0;
+    _ptr = nullptr;
     return p;
   }
 
   //- Hbnd4IntStorage
   inline MacroGridBuilder::Hbnd4IntStorage::
-  Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, const hexa_GEO * hexa, int fce)
-   : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+  Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master, const hexa_GEO * hexa, int fce)
+   : _ptr( new MacroGhostInfoHexa(hexa,fce) ), _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     alugrid_assert ( _ldbVertexIndex >= 0 );
   }
 
   // hface4 storage
   inline MacroGridBuilder::Hbnd4IntStorage::
-  Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master, MacroGhostInfoHexa* p)
-   : _ptr(p) , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+  Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master, MacroGhostInfoHexa* p)
+   : _ptr(p) , _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     alugrid_assert ( _ldbVertexIndex >= 0 );
     alugrid_assert ( _ptr );
   }
 
   inline MacroGridBuilder::Hbnd4IntStorage::
-  Hbnd4IntStorage( hface4_GEO * f, int tw, int ldbVertexIndex, int master )
-   : _ptr(0) , _first(f) , _second(tw), _ldbVertexIndex( ldbVertexIndex ), _master(master)
+  Hbnd4IntStorage( hface4_GEO * f, bool isRear, int ldbVertexIndex, int master )
+   : _ptr(nullptr) , _first(f) , _second(isRear), _ldbVertexIndex( ldbVertexIndex ), _master(master)
   {
     // for this constructor we need to allow ldbVertexIndex < 0
     // since this can happen on parallel construction via several macro files.
@@ -363,7 +364,7 @@ namespace ALUGrid
     if( _ptr )
     {
       delete _ptr;
-      _ptr = 0;
+      _ptr = nullptr;
     }
   }
 
@@ -375,7 +376,7 @@ namespace ALUGrid
   inline MacroGhostInfoHexa* MacroGridBuilder::Hbnd4IntStorage::release()
   {
     MacroGhostInfoHexa* p = _ptr;
-    _ptr = 0;
+    _ptr = nullptr;
     return p;
   }
 
