@@ -1151,6 +1151,10 @@ namespace ALUGrid
     os.writeObject (mytetra ().myvertex (2)->ident ());
     os.writeObject (mytetra ().myvertex (3)->ident ());
 
+    // write isRear information
+    for( int i=0; i<4; ++i )
+      os.put( char(mytetra ().isRear(i) ) );
+
     // write bisection simplex type and orientation
     mytetra ().simplexTypeFlag().write( os );
 

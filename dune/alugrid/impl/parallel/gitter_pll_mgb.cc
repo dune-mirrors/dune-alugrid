@@ -639,11 +639,13 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    bool isRear[4];
-    os.read (isRear[0]);
-    os.read (isRear[1]);
-    os.read (isRear[2]);
-    os.read (isRear[3]);
+    bool isRear[ 4 ];
+    for( int i=0; i<4; ++i )
+    {
+      char isR = os.get();
+      assert( isR == 0 || isR == 1 );
+      isRear[ i ] = bool( isR );
+    }
 
     SimplexTypeFlag elementType;
     elementType.read( os );
@@ -799,7 +801,10 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
-    char isRear = os.get();
+
+    signed char isR = os.get();
+    assert( isR == 0 || isR == 1 );
+    const bool isRear = bool(isR);
 
     const signed char readPoint = os.get();
 
@@ -814,7 +819,7 @@ namespace ALUGrid
     if( b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo, bool(isRear) );
+      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = 0;
@@ -826,7 +831,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd3 (v, bool(isRear), b, ldbVertexIndex, master, pv );
+      InsertUniqueHbnd3 (v, isRear, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
