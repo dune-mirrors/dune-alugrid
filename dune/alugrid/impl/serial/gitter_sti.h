@@ -1916,6 +1916,7 @@ namespace ALUGrid
       public :
         using hasFace3    ::accessPllX;
         static const int prototype [4][3];
+        static const int oppositeVertex [4];
         static const int edgeMap [6][2];
 
         // returns 3 which is the lenght of the edges not on face number

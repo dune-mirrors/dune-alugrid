@@ -30,6 +30,9 @@ namespace ALUGrid
   // prototype of Tetra type ( the faces of a tetrahedron )
   const int Gitter::Geometric::Tetra::prototype [4][3] = {{0,1,2},{0,1,3},{0,2,3},{1,2,3}};
 
+  // vertex opposite to face (mostly 3 - face)
+  const int Gitter::Geometric::Tetra::oppositeVertex [4] = { 3, 2, 1, 0 }; // opposite vertex of given face
+
   // edge which tell from which face with which edge number we get edge 0 to 5
   const int Gitter::Geometric::Tetra::edgeMap [6][2] = {{0, 0},
                                                               {0, 1},

@@ -92,12 +92,12 @@ namespace ALUGrid
       this->_p[vx][2] = p[2];
     }
 
-    for(int i=0; i<noVx; i++)
+    for(int i=0; i<noVx; ++i)
     {
       this->_vx[i] = hexa->myvertex(i)->ident();
     }
 
-    for(int i=0; i<noFace; i++)
+    for(int i=0; i<noFace; ++i)
     {
       this->_isRear[i] = hexa->isRear(i);
     }
@@ -131,6 +131,7 @@ namespace ALUGrid
       os.writeObject ( p[1] );
       os.writeObject ( p[2] );
     }
+
     for(int i=0; i<noFace; ++i)
     {
       os.write( hexa.isRear(i) );
@@ -142,7 +143,9 @@ namespace ALUGrid
   {
     _simplexTypeFlag = tetra->simplexTypeFlag();
     alugrid_assert ( points == this->nop() );
-    const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( fce );
+    // get vertex opposite to face
+    const int oppositeVertex = Gitter::Geometric::tetra_GEO::oppositeVertex[fce];
+    const Gitter::Geometric::VertexGeo * vertex = tetra->myvertex( oppositeVertex );
     alugrid_assert ( vertex );
     for(int vx=0; vx<points; ++vx)
     {
@@ -179,7 +182,8 @@ namespace ALUGrid
     }
 
     {
-      const Gitter::Geometric::VertexGeo * vertex = tetra.myvertex(fce);
+      const int oppositeVertex = Gitter::Geometric::tetra_GEO::oppositeVertex[fce];
+      const Gitter::Geometric::VertexGeo * vertex = tetra.myvertex( oppositeVertex );
       alugrid_assert ( vertex );
 
       // know identifier of transmitted point
@@ -188,9 +192,9 @@ namespace ALUGrid
 
       // store the missing point to form a tetra
       const alucoord_t (&p)[3] = vertex->Point();
-      os.writeObject ( p[0] );
-      os.writeObject ( p[1] );
-      os.writeObject ( p[2] );
+      os.write( p[0] );
+      os.write( p[1] );
+      os.write( p[2] );
     }
 
     // global vertex number of the elements vertices
