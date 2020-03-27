@@ -43,7 +43,7 @@ namespace ALUGrid
         class Hbnd3Default : public hbndseg3_GEO
         {
           protected :
-           inline Hbnd3Default (myhface3_t *, int);
+           inline Hbnd3Default (myhface3_t *, bool);
            virtual ~Hbnd3Default () {}
            //! return pointer to grid
            Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
@@ -86,7 +86,7 @@ namespace ALUGrid
         class Hbnd4Default : public hbndseg4_GEO
         {
           protected :
-            inline Hbnd4Default (myhface4_t *, int);
+            inline Hbnd4Default (myhface4_t *, bool);
             virtual ~Hbnd4Default () {}
             //! return pointer to grid
             Gitter * myGrid() { return myhface(0)->myvertex(0)->myGrid(); }
@@ -167,7 +167,7 @@ namespace ALUGrid
         typedef hface3_IMPL innerface_t;
         typedef hedge1_IMPL inneredge_t;
         typedef VertexEmpty innervertex_t;
-        inline TetraEmpty (myhface3_t *,int,myhface3_t *,int,myhface3_t *,int,myhface3_t *,int);
+        inline TetraEmpty (myhface3_t *,bool,myhface3_t *,bool,myhface3_t *,bool,myhface3_t *,bool);
 
       public:
         ////////////////////////////////////////////////
@@ -244,7 +244,7 @@ namespace ALUGrid
         typedef hface4_IMPL innerface_t;
         typedef hedge1_IMPL inneredge_t;
         typedef VertexEmpty innervertex_t;
-        inline HexaEmpty (myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int,myhface4_t *,int);
+        inline HexaEmpty (myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool,myhface4_t *,bool);
         ~HexaEmpty () {}
 
         int preCoarsening();
@@ -452,8 +452,8 @@ namespace ALUGrid
   }
 
   inline GitterBasis::Objects::Hbnd3Default::
-  Hbnd3Default (myhface3_t * f, int i )
-   : Gitter::Geometric::hbndseg3_GEO (f, i)
+  Hbnd3Default (myhface3_t * f, bool isRear )
+   : Gitter::Geometric::hbndseg3_GEO (f, isRear)
   {
     return;
   }
@@ -470,8 +470,8 @@ namespace ALUGrid
     return leaf();
   }
 
-  inline GitterBasis::Objects::Hbnd4Default::Hbnd4Default (myhface4_t * f, int i) :
-    Gitter::Geometric::hbndseg4_GEO (f, i)
+  inline GitterBasis::Objects::Hbnd4Default::Hbnd4Default (myhface4_t * f, bool isRear) :
+    Gitter::Geometric::hbndseg4_GEO (f, isRear)
   {
     return;
   }
@@ -489,8 +489,8 @@ namespace ALUGrid
   }
 
   inline GitterBasis::Objects::TetraEmpty::
-  TetraEmpty (myhface3_t * f0, int t0, myhface3_t * f1, int t1,
-              myhface3_t * f2, int t2, myhface3_t * f3, int t3) :
+  TetraEmpty (myhface3_t * f0, bool t0, myhface3_t * f1, bool t1,
+              myhface3_t * f2, bool t2, myhface3_t * f3, bool t3) :
     Gitter::Geometric::Tetra (f0, t0, f1, t1, f2, t2, f3, t3)
   {
     attachleafs();
@@ -530,9 +530,9 @@ namespace ALUGrid
 
   // Neu: burriad 29.4.05
   inline GitterBasis::Objects::HexaEmpty::
-  HexaEmpty (myhface4_t * f0, int t0, myhface4_t * f1, int t1,
-             myhface4_t * f2, int t2, myhface4_t * f3, int t3,
-             myhface4_t * f4, int t4, myhface4_t * f5, int t5) :
+  HexaEmpty (myhface4_t * f0, bool t0, myhface4_t * f1, bool t1,
+             myhface4_t * f2, bool t2, myhface4_t * f3, bool t3,
+             myhface4_t * f4, bool t4, myhface4_t * f5, bool t5) :
     Gitter::Geometric::hexa_GEO(f0, t0, f1, t1, f2, t2, f3, t3, f4, t4, f5, t5)
   {
     attachleafs();

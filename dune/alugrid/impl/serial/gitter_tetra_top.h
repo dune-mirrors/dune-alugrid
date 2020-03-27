@@ -183,9 +183,9 @@ namespace ALUGrid
 
     public:
       // constructor for serial macro boundary elements
-      inline Hbnd3Top (int,myhface_t *,int, const bnd_t b );
+      inline Hbnd3Top (int,myhface_t *, bool, const bnd_t b );
       // constructor for children
-      inline Hbnd3Top (int, myhface_t *,int,
+      inline Hbnd3Top (int, myhface_t *, bool,
                        innerbndseg_t * up, const bnd_t b,
                        typename Gitter::helement_STI * gh, int gFace );
 
@@ -1124,8 +1124,8 @@ namespace ALUGrid
 
   // serial macro bnd constructor
   template < class A > inline Hbnd3Top < A > ::
-  Hbnd3Top (int l, myhface_t * f, int i, const bnd_t bt) :
-    A (f, i ),
+  Hbnd3Top (int l, myhface_t * f, bool isRear, const bnd_t bt) :
+    A (f, isRear ),
     _bbb (0), _dwn (0), _up (0) ,
     _bt( bt )
   {
@@ -1144,10 +1144,10 @@ namespace ALUGrid
   }
 
   template < class A > inline Hbnd3Top < A > ::
-  Hbnd3Top (int l, myhface_t * f, int i,
+  Hbnd3Top (int l, myhface_t * f, bool isRear,
             innerbndseg_t * up, bnd_t bt,
             Gitter::helement_STI * gh, int gFace ) :
-    A (f, i ), _bbb (0), _dwn (0), _up (up) ,
+    A (f, isRear ), _bbb (0), _dwn (0), _up (up) ,
     _bt (bt)
   {
     // set level (declared in hbdnseg3_GEO to save memory usage)

@@ -371,10 +371,10 @@ namespace ALUGrid
       inline void append (innerbndseg_t *);
     public :
       // constructor for refinement
-      inline Hbnd4Top (int,myhface4_t *,int, innerbndseg_t *, Gitter::helement_STI *, int);
+      inline Hbnd4Top (int,myhface4_t *, bool, innerbndseg_t *, Gitter::helement_STI *, int);
 
       // constructor for macro element in the serial case
-      inline Hbnd4Top (int,myhface4_t *,int, const bnd_t bt );
+      inline Hbnd4Top (int,myhface4_t *, bool, const bnd_t bt );
 
       virtual ~Hbnd4Top ();
       using A::refineBalance;
@@ -1060,9 +1060,9 @@ namespace ALUGrid
 
 
   template < class A > inline Hbnd4Top < A >::
-  Hbnd4Top (int l, myhface4_t * f, int i,
+  Hbnd4Top (int l, myhface4_t * f, bool isRear,
             innerbndseg_t * up, Gitter::helement_STI * gh, int gFace ) :
-    A (f, i), _bbb (0), _dwn (0), _up(up) ,
+    A (f, isRear), _bbb (0), _dwn (0), _up(up) ,
     _bt(_up->_bt)
   {
     // set level (declared in hbndseg4_GEO for memory reasons)
@@ -1094,8 +1094,8 @@ namespace ALUGrid
   }
 
   template < class A > inline Hbnd4Top < A >::
-  Hbnd4Top (int l, myhface4_t * f, int i, const bnd_t bt )
-    : A (f, i),
+  Hbnd4Top (int l, myhface4_t * f, bool isRear, const bnd_t bt )
+    : A (f, isRear),
       _bbb (0), _dwn (0), _up(0) ,
       _bt(bt)
   {
