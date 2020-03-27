@@ -181,6 +181,10 @@ namespace ALUGrid
       os.readObject (v[1]);
       os.readObject (v[2]);
 
+      // read isRear information (see gitter_pll_impl.cc)
+      bool isRear;
+      os.read( isRear );
+
       const signed char pointTransmitted = os.get();
 
       // the following makes only sense if information has been transmitted

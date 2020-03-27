@@ -21,7 +21,7 @@ namespace ALUGrid
       typedef typename A::myhface4_t myhface4_t;
       typedef typename A::bnd_t     bnd_t;
     public :
-      inline Hbnd4PllExternal (myhface4_t *, int, const bnd_t bt);
+      inline Hbnd4PllExternal (myhface4_t *, bool, const bnd_t bt);
       inline ~Hbnd4PllExternal ();
       ElementPllXIF_t & accessPllX ();
       const ElementPllXIF_t & accessPllX () const;
@@ -50,7 +50,7 @@ namespace ALUGrid
           typedef typename A::balrule_t  balrule_t;
           typedef typename A::bnd_t     bnd_t;
 
-          inline HbndPll (myhface4_t *, int);
+          inline HbndPll (myhface4_t *, bool);
          ~HbndPll () {}
           virtual bool bndNotifyBalance (balrule_t,int);
           virtual bool lockedAgainstCoarsening () const;
@@ -105,11 +105,11 @@ namespace ALUGrid
           virtual bool bndNotifyBalance (balrule_t,int);
           virtual bool lockedAgainstCoarsening () const;
         public :
-          HbndPllMacro (myhface4_t *,int,
+          HbndPllMacro (myhface4_t *,bool,
                         const bnd_t bt,
                         BuilderIF & ,
                         MacroGhostInfoHexa* );
-          HbndPllMacro (myhface4_t *,int,
+          HbndPllMacro (myhface4_t *,bool,
                         const bnd_t bt,
                         BuilderIF & );
 
@@ -149,8 +149,8 @@ namespace ALUGrid
     //
 
   template < class A, class MX > inline Hbnd4PllExternal < A, MX >::
-  Hbnd4PllExternal (myhface4_t * f, int t, const bnd_t bt)
-    : Hbnd4Top < A > (0,f,t,bt), _mxt (new MX (*this))
+  Hbnd4PllExternal (myhface4_t * f, bool isRear, const bnd_t bt)
+    : Hbnd4Top < A > (0,f,isRear,bt), _mxt (new MX (*this))
   {
     this->restoreFollowFace ();
     return;
@@ -179,7 +179,7 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > inline Hbnd4PllInternal < A, X, MX >::HbndPll::
-  HbndPll (myhface4_t * f, int t) : A (f,t), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
+  HbndPll (myhface4_t * f, bool isRear) : A (f,isRear), _ext (*this) , _ghostPair((helement_STI *) 0 ,-1) {
     return;
   }
 
@@ -231,11 +231,11 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::
-  HbndPllMacro::HbndPllMacro (myhface4_t * f, int t,
+  HbndPllMacro::HbndPllMacro (myhface4_t * f, bool isRear,
                 const bnd_t bt,
                 BuilderIF & mgb,
                 MacroGhostInfoHexa* ghInfo )
-  : Hbnd4Top < micro_t > (0,f,t,bt)
+  : Hbnd4Top < micro_t > (0,f,isRear,bt)
   , _mxt (0)
   , _mgb(mgb)
   , _gm(  new MacroGhostHexa( _mgb , ghInfo, f ) )
@@ -250,10 +250,10 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > Hbnd4PllInternal < A, X, MX >::
-  HbndPllMacro::HbndPllMacro (myhface4_t * f, int t,
+  HbndPllMacro::HbndPllMacro (myhface4_t * f, bool isRear,
                                 const bnd_t bt,
                                 BuilderIF & mgb)
-  : Hbnd4Top < micro_t > (0,f,t,bt)
+  : Hbnd4Top < micro_t > (0,f,isRear,bt)
   , _mxt (new MX (*this))
   , _mgb(mgb)
   , _gm(0)

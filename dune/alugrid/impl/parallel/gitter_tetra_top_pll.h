@@ -24,7 +24,7 @@ namespace ALUGrid
       typedef typename A :: myhface3_t myhface3_t ;
       typedef typename A :: bnd_t     bnd_t ;
     public :
-      inline Hbnd3PllExternal (myhface3_t *, int, const bnd_t bt) ;
+      inline Hbnd3PllExternal (myhface3_t *, bool, const bnd_t bt) ;
       inline ~Hbnd3PllExternal () ;
       ElementPllXIF_t & accessPllX () ;
       const ElementPllXIF_t & accessPllX () const ;
@@ -55,7 +55,7 @@ namespace ALUGrid
           typedef typename A :: balrule_t balrule_t ;
           typedef typename A :: bnd_t     bnd_t ;
 
-          inline HbndPll (myhface3_t *, int);
+          inline HbndPll (myhface3_t *, bool);
           ~HbndPll () {}
           virtual bool bndNotifyBalance (balrule_t,int) ;
           virtual bool lockedAgainstCoarsening () const ;
@@ -109,9 +109,9 @@ namespace ALUGrid
           virtual bool bndNotifyBalance (balrule_t,int) ;
           virtual bool lockedAgainstCoarsening () const ;
         public :
-          HbndPllMacro (myhface3_t *,int, const bnd_t bt ,
+          HbndPllMacro (myhface3_t *,bool, const bnd_t bt ,
                         BuilderIF& , MacroGhostInfoTetra* ) ;
-          HbndPllMacro (myhface3_t *,int, const bnd_t bt, BuilderIF& ) ;
+          HbndPllMacro (myhface3_t *,bool, const bnd_t bt, BuilderIF& ) ;
          ~HbndPllMacro () ;
           ElementPllXIF_t & accessPllX () ;
           const ElementPllXIF_t & accessPllX () const ;
@@ -145,8 +145,8 @@ namespace ALUGrid
   //    #    #    #  ######     #    #    #  ######
   //
   template < class A, class MX > inline Hbnd3PllExternal < A, MX > ::
-  Hbnd3PllExternal (myhface3_t * f, int t, const bnd_t bt)
-      : Hbnd3Top < A > (0,f,t,bt), _mxt (new MX (*this)) {
+  Hbnd3PllExternal (myhface3_t * f, bool isRear, const bnd_t bt)
+      : Hbnd3Top < A > (0,f,isRear,bt), _mxt (new MX (*this)) {
     this->restoreFollowFace () ;
     return ;
   }
@@ -174,8 +174,8 @@ namespace ALUGrid
   }
 
   template < class A, class X, class MX > inline Hbnd3PllInternal < A, X, MX > :: HbndPll ::
-  HbndPll (myhface3_t * f, int t )
-    : A (f,t), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
+  HbndPll (myhface3_t * f, bool isRear )
+    : A (f, isRear), _ext (*this), _ghostPair( (helement_STI *) 0, -1) {
     return ;
   }
 
@@ -227,11 +227,11 @@ namespace ALUGrid
   //***************************************************************************************
   template < class A, class X, class MX >
   Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
-  HbndPllMacro (myhface3_t * f, int t,
+  HbndPllMacro (myhface3_t * f, bool isRear,
                 const bnd_t bt,
                 BuilderIF& mgb ,
                 MacroGhostInfoTetra* ghInfo)
-   : Hbnd3Top < micro_t > (0,f,t,bt)
+   : Hbnd3Top < micro_t > (0,f,isRear,bt)
    , _mxt(0)
    , _mgb(mgb)
    , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) )
@@ -246,10 +246,10 @@ namespace ALUGrid
 
   template < class A, class X, class MX >
   Hbnd3PllInternal < A, X, MX > :: HbndPllMacro ::
-  HbndPllMacro (myhface3_t * f, int t,
+  HbndPllMacro (myhface3_t * f, bool isRear,
                 const bnd_t bt,
                 BuilderIF& mgb )
-   : Hbnd3Top < micro_t > (0,f,t,bt)
+   : Hbnd3Top < micro_t > (0,f,isRear,bt)
    , _mxt ( new MX (*this) )
    , _mgb(mgb)
    , _gm( 0 )
