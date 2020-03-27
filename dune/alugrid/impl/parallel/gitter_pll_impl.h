@@ -1121,7 +1121,8 @@ namespace ALUGrid
       for (int i = 0; i < myhface_t::polygonlength; ++i)
         os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
     }
-    os.put( char(myhbnd().isRear(fce)) );
+
+    os.write( bool(myhbnd().isRear(fce)) );
 
     const typename ProjectVertex::ProjectionType projectionType = myhbnd().projectionType();
     os.put( projectionType );

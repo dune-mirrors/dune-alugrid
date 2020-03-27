@@ -913,9 +913,8 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    IsRearFlag isR;
-    isR.read( os );
-    const bool isRear =isR[ 0 ];
+    bool isRear;
+    os.read( isRear );
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
@@ -934,9 +933,8 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    IsRearFlag isR;
-    isR.read( os );
-    const bool isRear = isR[ 0 ];
+    bool isRear ;
+    os.read( isRear );
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 

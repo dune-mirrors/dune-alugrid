@@ -827,10 +827,10 @@ namespace ALUGrid
       {
         // get face and isRear
         myhface_t* face = myhface( i );
-        const bool twst = isRear( i );
+        const bool rearFace = isRear( i );
 
         // check whether this face has unresolved previous attached elements
-        if( face->moreAttachments( twst ) )
+        if( face->moreAttachments( rearFace ) )
         {
           // search face in father
           for( int ff=0; ff<4; ++ff )
@@ -841,7 +841,7 @@ namespace ALUGrid
             {
               // set face number of face in father
               connect.second = ff ;
-              face->detachElement ( twst, connect );
+              face->detachElement ( rearFace, connect );
               // break for loop for ff
               break ;
             }
@@ -850,7 +850,7 @@ namespace ALUGrid
         else
         {
           // normal detachment
-          face->detachElement ( twst );
+          face->detachElement ( rearFace );
         }
       }
     }
