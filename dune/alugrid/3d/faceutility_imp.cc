@@ -959,25 +959,24 @@ namespace Dune
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
-      const alu3d_ctype (&_p0)[3] = face.myvertex(0)->Point();
-      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
+      const alu3d_ctype (&p0)[3] = face.myvertex(0)->Point();
+      const alu3d_ctype (&p1)[3] = face.myvertex(1)->Point();
 
-      int innerFaceIndex = this->connector_.innerALUFaceIndex();
-      const alu3d_ctype (&_p3)[3] = this->connector_.innerEntity().myhface((innerFaceIndex % 2 == 0) ? innerFaceIndex + 1 : innerFaceIndex -1)->myvertex(0)->Point();
+      const alu3d_ctype (&p3)[3] = this->connector_.outerPoint();
       alugrid_assert(dimworld == 2);
       //implemented in iterator_imp.cc
       //else if(dimworld == 3)
 
       // we want the length of the intersection and orthogonal to it
-      outerNormal_[0] =  (_p0[1] - _p1[1]);
-      outerNormal_[1] =  (_p1[0] - _p0[0]);
+      outerNormal_[0] =  (p0[1] - p1[1]);
+      outerNormal_[1] =  (p1[0] - p0[0]);
 
-      double det = outerNormal_[0] * (_p3[0] - _p1[0]) + outerNormal_[1] * (_p3[1] - _p1[1]);
+      double det = outerNormal_[0] * (p3[0] - p1[0]) + outerNormal_[1] * (p3[1] - p1[1]);
 
       if(det > 0)
       {
-        outerNormal_[0] *= -1;
-        outerNormal_[1] *= -1;
+        outerNormal_[0] = -outerNormal_[0] ;
+        outerNormal_[1] = -outerNormal_[1];
       }
       normalUp2Date_ = true;
     } // end if mapp ...
