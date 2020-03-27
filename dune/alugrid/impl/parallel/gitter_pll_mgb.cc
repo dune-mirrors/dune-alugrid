@@ -509,7 +509,7 @@ namespace ALUGrid
         }
         else
         {
-           alugrid_assert ( face->ref == 2 );
+          alugrid_assert ( face->ref == 2 );
           _hface3List.push_back ( face );
           ++ i;
         }
@@ -751,7 +751,7 @@ namespace ALUGrid
     if (_hbnd3Int.find (key) == _hbnd3Int.end ())
     {
       alugrid_assert ( ghInfo );
-      hface3_GEO * face =  InsertUniqueHface3 (v).first;
+      hface3_GEO * face = InsertUniqueHface3 (v).first;
       // here the point is stored
       _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master, ghInfo);
       return true;
@@ -773,7 +773,7 @@ namespace ALUGrid
     if (_hbnd4Int.find (key) == _hbnd4Int.end ())
     {
       alugrid_assert ( ghInfo );
-      hface4_GEO * face =  InsertUniqueHface4 (v).first;
+      hface4_GEO * face = InsertUniqueHface4 (v).first;
       _hbnd4Int [key] = new Hbnd4IntStorage (face, isRear, ldbVertexIndex, master, ghInfo);
       return true;
     }
@@ -801,7 +801,7 @@ namespace ALUGrid
 
     const signed char readPoint = os.get();
 
-    MacroGhostInfoTetra * ghInfo = 0;
+    MacroGhostInfoTetra * ghInfo = nullptr;
     if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )
     {
       // read ghost data from stream in any case
@@ -815,7 +815,7 @@ namespace ALUGrid
       const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
 
       // if inserted then clear pointer to avoid deleting it
-      if( inserted ) ghInfo = 0;
+      if( inserted ) ghInfo = nullptr;
     }
     else
     {
@@ -854,7 +854,7 @@ namespace ALUGrid
 
     const signed char readPoint = os.get();
 
-    MacroGhostInfoHexa* ghInfo = 0;
+    MacroGhostInfoHexa* ghInfo = nullptr;
     if( readPoint == MacroGridMoverIF::POINTTRANSMITTED )
     {
       // read ghost data from stream
@@ -868,7 +868,7 @@ namespace ALUGrid
       const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
 
       // if inserted then clear pointer to avoid deleting it
-      if( inserted ) ghInfo = 0;
+      if( inserted ) ghInfo = nullptr;
     }
     else
     {
