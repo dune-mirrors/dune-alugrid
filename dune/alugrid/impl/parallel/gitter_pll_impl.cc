@@ -888,7 +888,8 @@ namespace ALUGrid
         os.writeObject (this->myhbnd ().myvertex (fce,i)->ident ());
     }
 
-    os.put(char(this->myhbnd().isRear(fce)));
+    // write isRear information as bool
+    os.write( bool(this->myhbnd().isRear(fce)) );
 
     if(_ghInfo) // is stored ghost point exists
     {
@@ -1152,8 +1153,7 @@ namespace ALUGrid
     os.writeObject (mytetra ().myvertex (3)->ident ());
 
     // write isRear information
-    for( int i=0; i<4; ++i )
-      os.put( char(mytetra ().isRear(i) ) );
+    mytetra ().isRearFlag().write( os );
 
     // write bisection simplex type and orientation
     mytetra ().simplexTypeFlag().write( os );
@@ -1196,7 +1196,9 @@ namespace ALUGrid
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
 
-    os.put ( char(mytetra ().isRear(fce)));
+    // write isRear information as bool
+    os.write( bool(mytetra ().isRear(fce)) );
+
     // see method unpackHbnd3Int
     if( packGhost )
     {
@@ -1416,6 +1418,7 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (4)->ident ());
     os.writeObject (myperiodic ().myvertex (5)->ident ());
 
+    // TODO: use isRearFlag here
     os.put (char(myperiodic ().isRear(0)));
     os.put (char(myperiodic ().isRear(1)));
 
@@ -1883,6 +1886,9 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (6)->ident ());
     os.writeObject (myhexa ().myvertex (7)->ident ());
 
+    // write isRear information
+    myhexa ().isRearFlag().write( os );
+
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myhexa_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
@@ -1932,7 +1938,9 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (fce,2)->ident ());
     os.writeObject (myhexa ().myvertex (fce,3)->ident ());
 
-    os.put (char(myhexa().isRear(fce)));
+    // write isRear information (bool)
+    os.write( bool(myhexa().isRear(fce)) );
+
     // see method unpackHbnd4Int
     if( packGhost )
     {

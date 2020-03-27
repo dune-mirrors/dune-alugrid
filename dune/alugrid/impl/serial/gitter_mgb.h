@@ -166,8 +166,18 @@ namespace ALUGrid
       virtual std::pair< hface4_GEO *, bool >    InsertUniqueHface (int (&)[4]);
 
       virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4], bool (&isRear)[4] ) { return InsertUniqueTetra( v, isRear, SimplexTypeFlag(0,0) ); }
+      virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&v)[4], const IsRearFlag &isRearFlag, SimplexTypeFlag simplexType )
+      {
+        bool isRear[ 4 ] = { isRearFlag[ 0 ], isRearFlag[ 1 ], isRearFlag[ 2 ], isRearFlag[ 3 ] };
+        return InsertUniqueTetra( v, isRear, simplexType );
+      }
       virtual std::pair< tetra_GEO *, bool >     InsertUniqueTetra (int (&)[4], bool (&isRear)[4], SimplexTypeFlag );
       virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&)[8], bool (&isRear)[6]);
+      virtual std::pair< hexa_GEO *, bool >      InsertUniqueHexa (int (&v)[8], const IsRearFlag& isRearFlag )
+      {
+        bool isRear[ 6 ] = { isRearFlag[ 0 ], isRearFlag[ 1 ], isRearFlag[ 2 ], isRearFlag[ 3 ], isRearFlag[ 4 ], isRearFlag[ 5 ] };
+        return InsertUniqueHexa( v, isRear );
+      }
 
       virtual std::pair< periodic3_GEO *, bool > InsertUniquePeriodic (int (&)[6], bool (&)[2], const Gitter::hbndseg::bnd_t (&)[2]);
       virtual std::pair< periodic4_GEO *, bool > InsertUniquePeriodic (int (&)[8], bool (&)[2], const Gitter::hbndseg::bnd_t (&)[2]);

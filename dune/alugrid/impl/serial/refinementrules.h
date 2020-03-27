@@ -155,6 +155,84 @@ namespace ALUGrid
     }
   };
 
+  // Info class for creating tetrahedrons,
+  // bisection simplex type and orientation
+  class IsRearFlag
+  {
+    static constexpr signed char inValid = -127 ;
+
+    void set ( const int& position )
+    {
+      _flag |= (1 << position);
+    }
+
+    void unset ( const int& position )
+    {
+      _flag &= ~(1 << position);
+    }
+
+    bool isSet ( const int& position ) const
+    {
+      return (_flag & (1 << position));
+    }
+
+    void set( const bool val, const int position )
+    {
+      if( val ) set( position );
+      else unset( position );
+    }
+
+  public:
+    signed char _flag;
+
+    // default constructor
+    IsRearFlag() : _flag( inValid ) {}
+
+    // constructor for boundary segments
+    explicit IsRearFlag( const bool t0 )
+    {
+      set( t0, 0 );
+    }
+
+    // constructor for Tetras taking 4 bools
+    explicit IsRearFlag( const bool t0, const bool t1, const bool t2, const bool t3 )
+    {
+      set( t0, 0 );
+      set( t1, 1 );
+      set( t2, 2 );
+      set( t3, 3 );
+    }
+
+    // constructor for Hexas taking 6 bools
+    explicit IsRearFlag( const bool t0, const bool t1, const bool t2,
+                         const bool t3, const bool t4, const bool t5 )
+    {
+      set( t0, 0 );
+      set( t1, 1 );
+      set( t2, 2 );
+      set( t3, 3 );
+      set( t4, 4 );
+      set( t5, 5 );
+    }
+
+    bool operator [] ( const int i ) const
+    {
+      return isSet( i );
+    }
+
+    template <class stream>
+    void write( stream& s ) const
+    {
+      s.put( _flag );
+    }
+
+    template <class stream>
+    void read( stream& s )
+    {
+      _flag = s.get();
+    }
+  };
+
   // #     #                                    #    ######
   // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######
   // #     #  #       #    #  #    #  #       # #    #     #  #    #  #       #

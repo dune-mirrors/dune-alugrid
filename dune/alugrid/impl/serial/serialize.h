@@ -179,6 +179,8 @@ namespace ALUGrid
     inline void read(bool& a)
     {
       signed char val = get();
+      // make sure that the value read is actually a bool and nothing else
+      alugrid_assert( val == 0 || val == 1 );
       a = (val == 0) ? false : true;
     }
 

@@ -640,13 +640,8 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    bool isRear[ 4 ];
-    for( int i=0; i<4; ++i )
-    {
-      char isR = os.get();
-      assert( isR == 0 || isR == 1 );
-      isRear[ i ] = bool( isR );
-    }
+    IsRearFlag isRear;
+    isRear.read( os );
 
     SimplexTypeFlag elementType;
     elementType.read( os );
@@ -677,6 +672,7 @@ namespace ALUGrid
     os.readObject (v[4]);
     os.readObject (v[5]);
 
+    // TODO: Use IsRearFlag
     char isRear0 = os.get();
     char isRear1 = os.get();
     bool isRear[2] = {bool(isRear0),bool(isRear1)};
@@ -730,14 +726,11 @@ namespace ALUGrid
     os.readObject (v[6]);
     os.readObject (v[7]);
 
-    bool isRear [6];
-    os.read (isRear[0]);
-    os.read (isRear[1]);
-    os.read (isRear[2]);
-    os.read (isRear[3]);
-    os.read (isRear[4]);
-    os.read (isRear[5]);
+    IsRearFlag isRear;
+    isRear.read( os );
+
     std::pair< hexa_GEO *, bool > p = InsertUniqueHexa (v, isRear);
+
     // set unique element number
     p.first->setLoadBalanceVertexIndex( ldbVertexIndex );
     p.first->accessPllX ().duneUnpackSelf (os, p.second, gs );
@@ -760,7 +753,7 @@ namespace ALUGrid
       alugrid_assert ( ghInfo );
       hface3_GEO * face =  InsertUniqueHface3 (v).first;
       // here the point is stored
-      _hbnd3Int [key] = new Hbnd3IntStorage (face,isRear, ldbVertexIndex, master, ghInfo);
+      _hbnd3Int [key] = new Hbnd3IntStorage (face, isRear, ldbVertexIndex, master, ghInfo);
       return true;
     }
     return false;
@@ -803,9 +796,8 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    signed char isR = os.get();
-    assert( isR == 0 || isR == 1 );
-    const bool isRear = bool(isR);
+    bool isRear;
+    os.read( isRear );
 
     const signed char readPoint = os.get();
 
@@ -857,7 +849,9 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    char isRear = os.get();
+    bool isRear;
+    os.read( isRear );
+
     const signed char readPoint = os.get();
 
     MacroGhostInfoHexa* ghInfo = 0;
@@ -871,7 +865,7 @@ namespace ALUGrid
     if(b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo, bool(isRear) );
+      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = 0;
@@ -883,7 +877,7 @@ namespace ALUGrid
       // create normal bnd face, and make sure that no Point was send
       alugrid_assert ( readPoint == MacroGridMoverIF::NO_POINT );
       // old method defined in base class
-      InsertUniqueHbnd4 (v, bool(isRear), b, ldbVertexIndex, master, pv );
+      InsertUniqueHbnd4 (v, isRear, b, ldbVertexIndex, master, pv );
     }
 
     // delete to avoid memory leak
@@ -918,13 +912,16 @@ namespace ALUGrid
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
-    char isRear = os.get ();
+
+    IsRearFlag isR;
+    isR.read( os );
+    const bool isRear =isR[ 0 ];
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd3 (v, bool(isRear), Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
+    InsertUniqueHbnd3 (v, isRear, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
@@ -936,13 +933,16 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
     os.readObject (v[3]);
-    char isRear = os.get ();
+
+    IsRearFlag isR;
+    isR.read( os );
+    const bool isRear = isR[ 0 ];
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
     int ldbVertexIndex = -1;
     int master = -1;
-    InsertUniqueHbnd4 (v, bool(isRear), Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
+    InsertUniqueHbnd4 (v, isRear, Gitter::hbndseg::bnd_t (b), ldbVertexIndex, master, pv );
     return;
   }
 
