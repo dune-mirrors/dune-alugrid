@@ -145,6 +145,24 @@ namespace Dune
     //! reset flags
     void setFlags( const bool conformingRefinement, const bool ghostCellsEnabled );
 
+    const alu3d_ctype(&outerPoint() const)[3]
+    {
+      if( type == tetra )
+      {
+        return ghostElem_ ?
+          ghostElem_->myvertex( 3 - innerALUFaceIndex() )->Point() :
+          innerEntity().myvertex( 3 - innerALUFaceIndex() )->Point();
+      }
+      else
+      {
+        int innerFaceIndex = innerALUFaceIndex();
+        int face = (innerFaceIndex % 2 == 0) ? innerFaceIndex + 1 : innerFaceIndex -1;
+        return ghostElem_ ?
+          ghostElem_->myhface( face )->myvertex(0)->Point() :
+          innerEntity().myhface( face )->myvertex(0)->Point();
+      }
+    }
+
   private:
     //! Description of conformance on the face
     ConformanceState getConformanceState(const int innerLevel) const;
@@ -159,6 +177,8 @@ namespace Dune
     const GEOFaceType* face_;
     const HasFaceType* innerElement_;
     const HasFaceType* outerElement_;
+
+    const GEOElementType* ghostElem_;
 
     int  innerFaceNumber_;
     int  outerFaceNumber_;

@@ -8,9 +8,10 @@ namespace Dune
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
   inline ALU3dGridFaceInfo< dim, dimworld, type, Comm >::
   ALU3dGridFaceInfo( const bool levelIntersection ) :
-    face_(0),
-    innerElement_(0),
-    outerElement_(0),
+    face_(nullptr),
+    innerElement_(nullptr),
+    outerElement_(nullptr),
+    ghostElem_(nullptr),
     innerFaceNumber_(-1),
     outerFaceNumber_(-1),
     isInnerRear_(false),
@@ -45,8 +46,9 @@ namespace Dune
   {
     face_ = &face;
 
-    innerElement_ = 0;
-    outerElement_ = 0;
+    innerElement_ = nullptr;
+    outerElement_ = nullptr;
+    ghostElem_    = nullptr;
     innerFaceNumber_ = -1;
     outerFaceNumber_ = -1;
     bndType_ = noBoundary;
@@ -102,14 +104,14 @@ namespace Dune
         GhostPairType p  = bnd->getGhost();
 
         // get face number
-        innerFaceNumber_ = p.second;
-
-#ifndef NDEBUG
         // this doesn't count as outer boundary
         const GEOElementType* ghost = static_cast<const GEOElementType*> (p.first);
+        innerFaceNumber_ = p.second;
+#ifndef NDEBUG
         alugrid_assert (ghost);
         alugrid_assert(isInnerRear_ == ghost->isRear(innerFaceNumber_));
 #endif
+        ghostElem_ = ghost;
       }
       else
       {
@@ -596,27 +598,26 @@ namespace Dune
     {
       // calculate the normal
       const GEOFaceType & face = this->connector_.face();
-      const alu3d_ctype (&_p0)[3] = face.myvertex(0)->Point();
-      const alu3d_ctype (&_p1)[3] = face.myvertex(1)->Point();
-      const alu3d_ctype (&_p2)[3] = face.myvertex(2)->Point();
-
-      const alu3d_ctype (&_p3)[3] = connector_.innerEntity().myvertex(3 - connector_.innerALUFaceIndex())->Point();
+      const alu3d_ctype (&p0)[3] = face.myvertex(0)->Point();
+      const alu3d_ctype (&p1)[3] = face.myvertex(1)->Point();
+      const alu3d_ctype (&p2)[3] = face.myvertex(2)->Point();
 
       // cross product of two vectors
-      outerNormal_[0] =  ((_p1[1]-_p0[1]) *(_p2[2]-_p0[2]) - (_p2[1]-_p0[1]) *(_p1[2]-_p0[2]));
-      outerNormal_[1] =  ((_p1[2]-_p0[2]) *(_p2[0]-_p0[0]) - (_p2[2]-_p0[2]) *(_p1[0]-_p0[0]));
-      outerNormal_[2] =  ((_p1[0]-_p0[0]) *(_p2[1]-_p0[1]) - (_p2[0]-_p0[0]) *(_p1[1]-_p0[1]));
+      outerNormal_[0] = ((p1[1] - p0[1]) * (p2[2] - p0[2]) - (p2[1] - p0[1]) * (p1[2] - p0[2]));
+      outerNormal_[1] = ((p1[2] - p0[2]) * (p2[0] - p0[0]) - (p2[2] - p0[2]) * (p1[0] - p0[0]));
+      outerNormal_[2] = ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]));
 
-      double det = outerNormal_[0] * (_p3[0] - _p0[0]) +outerNormal_[1] * (_p3[1] - _p0[1]) + outerNormal_[2] * (_p3[2] - _p0[2]);
+      const alu3d_ctype (&p3)[3] = connector_.outerPoint();
+      const double det = outerNormal_[0] * (p3[0] - p0[0]) + outerNormal_[1] * (p3[1] - p0[1]) + outerNormal_[2] * (p3[2] - p0[2]);
 
       if(det > 0)
       {
-        outerNormal_[0] *=-1;
-        outerNormal_[1] *=-1;
-        outerNormal_[2] *=-1;
+        outerNormal_[0] = -outerNormal_[0];
+        outerNormal_[1] = -outerNormal_[1];
+        outerNormal_[2] = -outerNormal_[2];
       }
       normalUp2Date_ = true;
-    } // end if mapp ...
+    } // end if normalUp2Date_
 
     return outerNormal_;
   }
@@ -687,15 +688,17 @@ namespace Dune
         );
       mappingGlobalUp2Date_ = true;
       mappingGlobal_.normal(local, outerNormal_);
+
       int innerFaceIndex = this->connector_.innerALUFaceIndex();
-      const alu3d_ctype (&_p)[3] = this->connector_.innerEntity().myhface((innerFaceIndex % 2 == 0) ? innerFaceIndex + 1 : innerFaceIndex -1)->myvertex(0)->Point();
-      const alu3d_ctype (&_p0)[3] = face.myvertex( 0 )->Point();
-      double det = outerNormal_[0] * (_p[0] - _p0[0]) +outerNormal_[1] * (_p[1] - _p0[1]) + outerNormal_[2] * (_p[2] - _p0[2]);
+      const alu3d_ctype (&p)[3]  = this->connector_.outerPoint();
+      const alu3d_ctype (&p0)[3] = face.myvertex( 0 )->Point();
+      double det = outerNormal_[0] * (p[0] - p0[0]) + outerNormal_[1] * (p[1] - p0[1]) + outerNormal_[2] * (p[2] - p0[2]);
+
       if(det > 0)
       {
-        outerNormal_[0] *=-1;
-        outerNormal_[1] *=-1;
-        outerNormal_[2] *=-1;
+        outerNormal_[0] = -outerNormal_[0];
+        outerNormal_[1] = -outerNormal_[1];
+        outerNormal_[2] = -outerNormal_[2];
         negativeNormal_ = true;
       }
       else
