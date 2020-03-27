@@ -1357,9 +1357,9 @@ namespace ALUGrid
       virtual const hbndseg * next () const = 0;
       virtual int level () const = 0;
       virtual int nChild () const = 0;
-       int leaf () const;
+      int leaf () const;
 
-       bool isRear(int) const;
+      bool isRear(int) const;
       // for dune
       virtual int ghostLevel () const = 0;
       virtual bool ghostLeaf () const = 0;
