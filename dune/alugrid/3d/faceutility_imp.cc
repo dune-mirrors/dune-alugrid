@@ -593,11 +593,11 @@ namespace Dune
   ALU3dGridGeometricFaceInfoTetra< dim, dimworld, Comm >::
   outerNormal(const FieldVector<alu3d_ctype, 2>& local) const
   {
-    // if geomInfo was not reseted then normal is still correct
+    // if geomInfo was not reset then normal is still correct
     if(!normalUp2Date_)
     {
       // calculate the normal
-      const GEOFaceType & face = this->connector_.face();
+      const GEOFaceType& face    = this->connector_.face();
       const alu3d_ctype (&p0)[3] = face.myvertex(0)->Point();
       const alu3d_ctype (&p1)[3] = face.myvertex(1)->Point();
       const alu3d_ctype (&p2)[3] = face.myvertex(2)->Point();
