@@ -60,8 +60,11 @@ add_subdirectory(lib)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
-add_subdirectory("python")
-dune_python_install_package(PATH "python")
+# if Python bindings are enabled, include necessary sub directories.
+if( DUNE_ENABLE_PYTHONBINDINGS )
+  add_subdirectory("python")
+  dune_python_install_package(PATH "python")
+endif()
 
 #look for testgrids.hh header in dune-grid doc sub directory
 find_path(DUNE_TESTGRIDS_INCLUDE_DIR testgrids.hh
