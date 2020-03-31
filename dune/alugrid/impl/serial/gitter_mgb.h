@@ -15,20 +15,6 @@
 namespace ALUGrid
 {
 
-  // re-implementation of std::rotate due to compiler bug in clang
-  inline void rotateVec( int* first, int* middle, int* last)
-  {
-    int * next = middle;
-    while (first!=next)
-    {
-      std::swap (*first++,*next++);
-      if (next==last)
-        next=middle;
-      else if (first==middle)
-        middle=next;
-    }
-  }
-
   class MacroGridBuilder
   : protected Gitter::Geometric
   {
