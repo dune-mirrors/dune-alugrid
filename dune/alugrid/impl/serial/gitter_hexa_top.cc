@@ -171,7 +171,7 @@ namespace ALUGrid
   //    |       |       |
   //   0|_______|_______|1
   //            2
-  // so we just need to add two inner faces - one inner edges - no inner vertices
+  // so we just need to add two inner faces - one inner edge - no inner vertices
 
   template< class A >  void Hface4Top < A >::splitISO2 () {
     int l = 1 + level ();
@@ -181,7 +181,8 @@ namespace ALUGrid
     myvertex_t * ev2 = myhedge(2)->subvertex (0);
     myvertex_t * ev3 = myhedge(3)->subvertex (0);
     alugrid_assert (ev2 && ev3 );
-    alugrid_assert (ev2->getIndex() == ev3->getIndex() -1 );
+
+    // alugrid_assert (ev2->getIndex() == ev3->getIndex() -1 );
 
     inneredge_t * e0 = new inneredge_t (l, ev2, ev3);
     alugrid_assert ( e0 );
@@ -1182,8 +1183,8 @@ namespace ALUGrid
       {
         verticesFound.insert( hexa->myvertex( fce, i )->getIndex() );
         // use proto type to check face
-        if( hexa->myvertex( Gitter::Geometric::Hexa::prototype[ fce ][ i ] )
-              != hexa->myvertex( fce, i ) )
+        if(    hexa->myvertex( Gitter::Geometric::Hexa::prototype[ fce ][ i ] )
+            != hexa->myvertex( fce, i ) )
         {
           std::cout << "Face" << fce <<" is wrong" << std::endl;
           facesOk = false ;
@@ -1191,10 +1192,12 @@ namespace ALUGrid
         }
       }
 
-      if( ! isGhost && ! hexa->myneighbour( fce ).first->isRealObject()  )
+      // this is only true for non-ghost elements and non-2d faces
+      if( ! isGhost && ! hexa->myhface( fce )->is2d() && ! hexa->myneighbour( fce ).first->isRealObject()  )
       {
-        std::cout << "Neighbour(type="<<hexa->isInterior() << ") " << fce << " of Hexa " << hexa->getIndex()  << " is wrong " << std::endl;
-        std::cout << "Check face " << hexa->myhface4( fce ) ;
+        std::cout << "Neighbour(type="<<hexa->isInterior() << ") "
+                  << fce << " of Hexa " << hexa->getIndex()  << " is wrong " << std::endl;
+        std::cout << "Check " << hexa->myhface4( fce ) ;
       }
       // make sure neighbor is something meaningful
       //alugrid_assert ( hexa->myneighbour( fce ).first->isRealObject() );

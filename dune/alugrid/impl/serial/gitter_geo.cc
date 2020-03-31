@@ -189,8 +189,12 @@ namespace ALUGrid
     //
 
   // defines from which vertices one face is created
-  const int Gitter::Geometric::Hexa::prototype [6][4] =
-          {{0,2,4,6},{1,3,5,7},{0,1,4,5},{2,3,6,7},{0,1,2,3},{4,5,6,7}};
+  const int Gitter::Geometric::Hexa::prototype [6][4] = {{0,2,4,6},
+                                                         {1,3,5,7},
+                                                         {0,1,4,5},
+                                                         {2,3,6,7},
+                                                         {0,1,2,3},
+                                                         {4,5,6,7}};
 
   const int Gitter::Geometric::Hexa::oppositeFace [6] = { 1 , 0 , 3, 2 , 5, 4 }; // opposite face of given face
 
