@@ -291,11 +291,12 @@ int main (int argc, char ** argv)
     ALUGrid::GitterDuneImpl grid2( dim, conformingRefinement, infile2 );
     infile2.close();
     ALUGrid::GitterDuneImpl& grid = grid2;
+#endif
 
     std::cout << "Grid generated! \n";
+
     globalRefine(grid, mxl);
     std::cout << "---------------------------------------------\n";
-#endif
 
     std::ofstream file( backupname.str().c_str() );
     grid.backup( file );
