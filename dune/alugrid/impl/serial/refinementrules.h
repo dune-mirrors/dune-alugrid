@@ -155,11 +155,14 @@ namespace ALUGrid
     }
   };
 
-  // Info class for creating tetrahedrons,
-  // bisection simplex type and orientation
+  // Info class for isRear bool flags for faces
+  // We assume that only up to 6 bits are set.
+  // This allows the storage to be a simple char.
   class IsRearFlag
   {
-    static constexpr signed char inValid = -127 ;
+    static constexpr signed char inValid      = -128 ; // only the last bis is set
+    static constexpr signed char defaultFalse = 0 ;    // all flags are false
+    static constexpr int         lastBit      = 7;     // position of the last bit
 
     void set ( const int& position )
     {
@@ -176,10 +179,12 @@ namespace ALUGrid
       return (_flag & (1 << position));
     }
 
-    void set( const bool val, const int position )
+    void print( std::ostream& s ) const
     {
-      if( val ) set( position );
-      else unset( position );
+      s << "isRearFlag::_flag = " << int(_flag) << " (";
+      for( int i=0; i<8; ++i )
+        s << isSet( i ) << ",";
+      s << std::endl;
     }
 
   public:
@@ -188,35 +193,62 @@ namespace ALUGrid
     // default constructor
     IsRearFlag() : _flag( inValid ) {}
 
+    // default constructor
+    IsRearFlag( const IsRearFlag& other) : _flag( other._flag ) {}
+
     // constructor for boundary segments
-    explicit IsRearFlag( const bool t0 )
+    explicit IsRearFlag( const bool t0 ) : _flag( defaultFalse )
     {
-      set( t0, 0 );
+      if( t0 ) set( 0 );
+    }
+
+    // constructor for periodic elements
+    explicit IsRearFlag( const bool t0, const bool t1 ) : _flag( defaultFalse )
+    {
+      if( t0 ) set( 0 );
+      if( t1 ) set( 1 );
     }
 
     // constructor for Tetras taking 4 bools
-    explicit IsRearFlag( const bool t0, const bool t1, const bool t2, const bool t3 )
+    explicit IsRearFlag( const bool t0, const bool t1, const bool t2, const bool t3 ) : _flag( defaultFalse )
     {
-      set( t0, 0 );
-      set( t1, 1 );
-      set( t2, 2 );
-      set( t3, 3 );
+      if( t0 ) set( 0 );
+      if( t1 ) set( 1 );
+      if( t2 ) set( 2 );
+      if( t3 ) set( 3 );
     }
 
     // constructor for Hexas taking 6 bools
     explicit IsRearFlag( const bool t0, const bool t1, const bool t2,
-                         const bool t3, const bool t4, const bool t5 )
+                         const bool t3, const bool t4, const bool t5 ) : _flag( defaultFalse )
     {
-      set( t0, 0 );
-      set( t1, 1 );
-      set( t2, 2 );
-      set( t3, 3 );
-      set( t4, 4 );
-      set( t5, 5 );
+      if( t0 ) set( 0 );
+      if( t1 ) set( 1 );
+      if( t2 ) set( 2 );
+      if( t3 ) set( 3 );
+      if( t4 ) set( 4 );
+      if( t5 ) set( 5 );
+    }
+
+    // constructor taking std::vector with at most 6 flags
+    explicit IsRearFlag( const std::vector< bool >& flags ) : _flag( defaultFalse )
+    {
+      const int size = flags.size();
+      alugrid_assert( size < lastBit );
+      for( int i=0; i<size; ++i )
+        if( flags[ i ] ) set( i );
+    }
+
+    bool valid() const
+    {
+      // make sure that the last bit is not set, which means
+      // the _flag has not been initialized properly
+      return ! isSet( lastBit );
     }
 
     bool operator [] ( const int i ) const
     {
+      alugrid_assert( valid() );
       return isSet( i );
     }
 
@@ -232,6 +264,22 @@ namespace ALUGrid
       _flag = s.get();
     }
   };
+
+  inline std::ostream& operator<< (std::ostream& s, const IsRearFlag& isRear )
+  {
+    // write as asciii integer number (-128,127)
+    s << int(isRear._flag);
+    return s;
+  }
+
+  inline std::istream& operator>> (std::istream& s, IsRearFlag& isRear )
+  {
+    // read as ascii integer number (-128,127)
+    int v; s >> v;
+    alugrid_assert( v >= -128 && v <= 127 );
+    isRear._flag = v;
+    return s;
+  }
 
   // #     #                                    #    ######
   // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######

@@ -889,7 +889,7 @@ namespace ALUGrid
     }
 
     // write isRear information as bool
-    os.write( bool(this->myhbnd().isRear(fce)) );
+    this->myhbnd().isRearFlag().write( os );
 
     if(_ghInfo) // is stored ghost point exists
     {
@@ -1196,8 +1196,9 @@ namespace ALUGrid
     os.writeObject ( mytetra ().myvertex (fce,1)->ident () );
     os.writeObject ( mytetra ().myvertex (fce,2)->ident () );
 
-    // write isRear information as bool
-    os.write( bool(mytetra ().isRear(fce)) );
+    // write isRear information for this face only
+    IsRearFlag isRear( mytetra ().isRear(fce) );
+    isRear.write( os );
 
     // see method unpackHbnd3Int
     if( packGhost )
@@ -1419,8 +1420,7 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (5)->ident ());
 
     // TODO: use isRearFlag here
-    os.put (char(myperiodic ().isRear(0)));
-    os.put (char(myperiodic ().isRear(1)));
+    myperiodic ().isRearFlag().write( os );
 
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
@@ -1599,8 +1599,8 @@ namespace ALUGrid
     os.writeObject (myperiodic ().myvertex (6)->ident ());
     os.writeObject (myperiodic ().myvertex (7)->ident ());
 
-    os.put (char(myperiodic ().isRear(0)));
-    os.put (char(myperiodic ().isRear(1)));
+    myperiodic ().isRearFlag().write( os );
+
     // make sure ENDOFSTREAM is not a valid refinement rule
     alugrid_assert ( ! myperiodic_t::myrule_t::isValid (ObjectStream::ENDOFSTREAM) );
 
@@ -1938,8 +1938,9 @@ namespace ALUGrid
     os.writeObject (myhexa ().myvertex (fce,2)->ident ());
     os.writeObject (myhexa ().myvertex (fce,3)->ident ());
 
-    // write isRear information (bool)
-    os.write( bool(myhexa().isRear(fce)) );
+    // write isRear information (bool) for this face only
+    IsRearFlag isRear( myhexa().isRear(fce) );
+    isRear.write( os );
 
     // see method unpackHbnd4Int
     if( packGhost )
@@ -2179,50 +2180,59 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::hexa_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hexa (hface4_GEO *(&f)[6], bool (&t)[6])
+  insert_hexa (hface4_GEO *(&f)[6], const IsRearFlag& isRear)
   {
-    return new ObjectsPll::HexaEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], f[4], t[4], f[5], t[5]);
+    return new ObjectsPll::HexaEmptyPllMacro (f [0], isRear[0],
+                                              f [1], isRear[1],
+                                              f [2], isRear[2],
+                                              f [3], isRear[3],
+                                              f [4], isRear[4],
+                                              f [5], isRear[5]);
   }
 
   Gitter::Geometric::tetra_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_tetra (hface3_GEO *(&f)[4], bool (&t)[4], SimplexTypeFlag simplexType )
+  insert_tetra (hface3_GEO *(&f)[4], const IsRearFlag& isRear, SimplexTypeFlag simplexType )
   {
-    return new ObjectsPll::TetraEmptyPllMacro (f [0], t[0], f [1], t[1], f [2], t[2], f[3], t[3], simplexType );
+    return new ObjectsPll::TetraEmptyPllMacro (f [0], isRear[0],
+                                               f [1], isRear[1],
+                                               f [2], isRear[2],
+                                               f [3], isRear[3],
+                                               simplexType );
   }
 
   Gitter::Geometric::periodic3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic3 (hface3_GEO *(&f)[2], bool (&t)[2],
+  insert_periodic3 (hface3_GEO *(&f)[2], const IsRearFlag& isRear,
                     const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
-    return new ObjectsPll::Periodic3EmptyPllMacro (f [0], t[0], f [1], t[1], bt);
+    return new ObjectsPll::Periodic3EmptyPllMacro (f [0], isRear[0], f [1], isRear[1], bt);
   }
 
   Gitter::Geometric::periodic4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_periodic4 (hface4_GEO *(&f)[2], bool (&t)[2],
+  insert_periodic4 (hface4_GEO *(&f)[2], const IsRearFlag& isRear,
                     const Gitter::hbndseg_STI::bnd_t (&bt)[2] )
   {
-    return new ObjectsPll::Periodic4EmptyPllMacro (f [0], t[0], f [1], t[1], bt );
+    return new ObjectsPll::Periodic4EmptyPllMacro (f [0], isRear[0], f [1], isRear[1], bt );
   }
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, bool t, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear, Gitter::hbndseg_STI::bnd_t b)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
     if (b == Gitter::hbndseg_STI::closure)
     {
       // internal face always get dummy index manager
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
-            BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::macro_t (f,t, b, *this );
+            BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::macro_t (f, isRear[0], b, *this );
     }
     else
     {
-      return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
+      return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f, isRear[0], b );
     }
   }
 
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, bool t,
+  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b,
                 MacroGhostInfoHexa* ghInfo)
   {
@@ -2231,23 +2241,23 @@ namespace ALUGrid
     if (b == Gitter::hbndseg_STI::closure )
     {
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
-        return insert_hbnd4( f, t, b );
+        return insert_hbnd4( f, isRear, b );
 
       alugrid_assert ( ghInfo );
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >::
-            macro_t (f,t, b, *this, ghInfo );
+            macro_t (f, isRear[0], b, *this, ghInfo );
     }
     else
     {
       return new Hbnd4PllExternal < Hbnd4DefaultType ,
-          BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg4_GEO > > (f, isRear[0], b );
     }
   }
 
   // version with point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd3 (hface3_GEO * f, bool t,
+  insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b,
                 MacroGhostInfoTetra * ghInfo)
   {
@@ -2255,24 +2265,24 @@ namespace ALUGrid
     if (b == Gitter::hbndseg_STI::closure)
     {
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
-        return insert_hbnd3( f, t, b );
+        return insert_hbnd3( f, isRear, b );
 
       alugrid_assert ( ghInfo );
       // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
       return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
             BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::
-                macro_t (f,t, b, *this, ghInfo );
+                macro_t (f, isRear[0], b, *this, ghInfo );
     }
     else
     {
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-          BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg3_GEO > > (f, isRear[0], b );
     }
   }
 
   // version without point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd3 (hface3_GEO * f, bool t,
+  insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b )
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
@@ -2280,12 +2290,12 @@ namespace ALUGrid
     {
       // here we have a ghost of the ghost, therefor we need the element index manager
       return new Hbnd3PllInternal < Hbnd3DefaultType , BndsegPllBaseXClosure < Hbnd3DefaultType > ,
-            BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::macro_t (f,t, b, *this );
+            BndsegPllBaseXMacroClosure < Hbnd3DefaultType > >::macro_t (f, isRear[0], b, *this );
     }
     else
     {
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-             BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+             BndsegPllBaseXMacro < hbndseg3_GEO > > (f, isRear[0], b );
     }
   }
 

@@ -844,23 +844,23 @@ namespace ALUGrid
           virtual VertexGeo     * insert_ghostvx (double,double,double,int);
 
           // insert hbnd_int without ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t);
           // insert hbnd_int with ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
 
           // normal insert hbnd3 version
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t);
           // version that get point and create ghost macro
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
           // version that created internal boundary on ghost elements
           virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *);
           virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]);
           virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]);
-          virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]);
-          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool (&)[4], SimplexTypeFlag);
+          virtual hexa_GEO      * insert_hexa  (hface4_GEO *(&)[6], const IsRearFlag&);
+          virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], const IsRearFlag&, SimplexTypeFlag);
 
-          virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], bool (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
-          virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], bool (&)[2], const Gitter::hbndseg_STI::bnd_t (&)[2] );
+          virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], const IsRearFlag&, const Gitter::hbndseg_STI::bnd_t (&)[2] );
+          virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], const IsRearFlag&, const Gitter::hbndseg_STI::bnd_t (&)[2] );
 
           using GitterBasis::MacroGitterBasis::iterator;
         public :
@@ -1122,7 +1122,8 @@ namespace ALUGrid
         os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
     }
 
-    os.write( bool(myhbnd().isRear(fce)) );
+    // write isRear information
+    myhbnd().isRearFlag().write( os );
 
     const typename ProjectVertex::ProjectionType projectionType = myhbnd().projectionType();
     os.put( projectionType );

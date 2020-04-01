@@ -740,22 +740,22 @@ namespace ALUGrid
       const hexalist_t::const_iterator end = _hexaList.end ();
       for (hexalist_t::const_iterator i = _hexaList.begin (); i != end; ++i )
       {
-        for (int j = 0; j < 7; ++ j )
+        for (int j = 0; j < 8; ++ j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
-        os << (*i)->myvertex (7)->ident() << std::endl ;
+        os << (*i)->isRearFlag() << std::endl;
       }
 
       os << int(_periodic4List.size ()) << ws << int(_hbndseg4List.size ()) << std::endl;
       const periodic4list_t::const_iterator pend = _periodic4List.end ();
       for (periodic4list_t::const_iterator i = _periodic4List.begin (); i != pend; ++i)
       {
-        for (int j = 0; j < 7; ++j )
+        for (int j = 0; j < 8; ++j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
-        os << (*i)->myvertex (7)->ident() << std::endl;
+        os << (*i)->isRearFlag() << std::endl;
       }
       const hbndseg4list_t::const_iterator hend = _hbndseg4List.end ();
       for (hbndseg4list_t::const_iterator i = _hbndseg4List.begin (); i != hend; ++i)
@@ -777,22 +777,22 @@ namespace ALUGrid
       const tetralist_t::const_iterator end = _tetraList.end ();
       for (tetralist_t::const_iterator i = _tetraList.begin (); i != end; ++i )
       {
-        for (int j = 0; j < 3; ++ j )
+        for (int j = 0; j < 4; ++ j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
-        os << (*i)->myvertex (3)->ident() << std::endl ;
+        os << (*i)->isRearFlag() << std::endl;
       }
 
       os << int(_periodic3List.size ()) << ws << int(_hbndseg3List.size ()) << std::endl;
       const periodic3list_t::const_iterator pend = _periodic3List.end ();
       for (periodic3list_t::const_iterator i = _periodic3List.begin (); i != pend; ++i )
       {
-        for (int j = 0; j < 5; ++j )
+        for (int j = 0; j < 6; ++j )
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
-        os << (*i)->myvertex (5)->ident() << std::endl;
+        os << (*i)->isRearFlag() << std::endl;
       }
 
       const hbndseg3list_t::const_iterator hend = _hbndseg3List.end ();

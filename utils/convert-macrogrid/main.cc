@@ -25,7 +25,9 @@
 #include <dune/alugrid/impl/serial/serialize.h>
 #include <dune/alugrid/impl/serial/gitter_sti.h>
 #include <dune/alugrid/impl/serial/gitter_mgb.h>
+#include <dune/alugrid/impl/serial/refinementrules.h>
 
+#include <dune/alugrid/3d/gridfactory.cc>
 
 #include "partition.hh"
 #include "dgfparser.hh"
@@ -254,7 +256,10 @@ void writeMacroGrid ( stream_t &output,
     output << elements[ i ].vertices[ 0 ];
     for( int j = 1; j < Element< rawId >::numVertices; ++j )
       output << ws << elements[ i ].vertices[ j ];
-    output << std::endl;
+
+    ALUGrid::IsRearFlag isRear( true,false,false,true,true,false );
+    // TODO: Add element ordering here using mesh-consistency
+    output << ws << isRear << std::endl;
   }
 
   int bndSegPartSize   = ( writeParallel ) ? 0 : bndSegListSize;
@@ -431,6 +436,17 @@ void writeNewFormat ( const std::string& filename,
                       std::vector< BndSeg< rawId > > &bndSegs,
                       std::vector< Periodic< rawId > > &periodics )
 {
+  if( rawId == HEXA_RAW )
+  {
+    result = MeshConsistency::orient_consistently(vertices, elements, MeshConsistency::hexahedronType);
+    FaceConsistency faceConsistency(elements_, interiorFaces_, boundaryFaces_, elements.size());
+    if(!faceConsistency.consistencyCheck(true))
+    {
+      faceConsistency.makeFaceConsistent();
+      faceConsistency.returnElements(elements);
+    }
+  }
+
   // partition might change the order of elements due to space filling curve ordering
   partition( vertices, elements, bndSegs, periodics, options.nPartition, options.partitionMethod );
 
@@ -609,17 +625,16 @@ void readDGF ( stream_t &input,
       std::exit( 1 );
     }
     for( int j = 0; j < Element< rawId >::numVertices; ++j )
-      elements[ i ].vertices[ DuneTopologyMapping::dune2aluVertex( j ) ] = dgf.element( i )[ j ];
+      elements[ i ].vertices[ j ] = dgf.element( i )[ j ];
     for( int j = 0; j < Dune::ElementFaceUtil::nofFaces( 3, dgf.element( i ) ); ++j )
     {
       const DGFParser::facemap_t::const_iterator pos = dgf.facemap().find( Dune::ElementFaceUtil::generateFace( 3, dgf.element( i ), j ) );
       if( pos != dgf.facemap().end() )
       {
-        const int jalu = DuneTopologyMapping::generic2aluFace( j );
         BndSeg< rawId > bndSeg;
         bndSeg.bndid = pos->second.first;
         for( int k = 0; k < BndSeg< rawId >::numVertices; ++k )
-          bndSeg.vertices[ k ] = elements[ i ].vertices[ DuneTopologyMapping::faceVertex( jalu, k ) ];
+          bndSeg.vertices[ k ] = elements[ i ].vertices[ DuneTopologyMapping::faceVertex( j, k ) ];
         bndSegs.push_back( bndSeg );
       }
     }

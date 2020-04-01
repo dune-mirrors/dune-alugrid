@@ -25,7 +25,7 @@ namespace ALUGrid
       binary ;
 #endif
 
-    static const int currentVersion = 1;
+    static const int currentVersion = 2; // increased from 1 to 2 after introduction of isRear
 
     static std::string toString ( Type type ) { return stringType[ type ]; }
     static std::string toString ( Format format ) { return stringFormat[ format ]; }

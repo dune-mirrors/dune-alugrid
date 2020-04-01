@@ -568,17 +568,14 @@ namespace Dune
       std::ofstream out( filename.c_str() );
       out.setf( std::ios_base::scientific, std::ios_base::floatfield );
       out.precision( 16 );
-      if( elementType == tetra )
-        out << "!Tetrahedra";
-      else
-        out << "!Hexahedra";
+      // write ALU macro format header
+      ALU3DSPACE MacroFileHeader header;
+      header.setType( elementType == hexa ?
+          ALU3DSPACE MacroFileHeader::hexahedra : ALU3DSPACE MacroFileHeader::tetrahedra );
+      header.write( out );
 
+      // write data of macro grid
       const unsigned int numVertices = vertices_.size();
-      // print information about vertices and elements
-      // to header to have an easy check
-      out << "  ( noVertices = " << numVertices;
-      out << " | noElements = " << elements_.size() << " )" << std :: endl;
-
       // now start writing grid
       out << numVertices << std :: endl;
       typedef typename VertexVector::iterator VertexIteratorType;
@@ -594,7 +591,7 @@ namespace Dune
       }
 
       const unsigned int elemSize = elements_.size();
-      out << elemSize << " " << int(numCorners) << std :: endl;
+      out << elemSize << std :: endl;
       for( unsigned int el = 0; el<elemSize; ++el )
       {
         const size_t elemIndex = ordering[ el ];
@@ -607,7 +604,9 @@ namespace Dune
         out << element[ 0 ];
         for( unsigned int i = 1; i < numCorners; ++i )
           out << " " << element[ i ];
-        out << std :: endl;
+
+        ALU3DSPACE IsRearFlag isRear( isRearElements[elemIndex] );
+        out << " " << isRear << std::endl;
       }
 
       out << int(periodicBoundaries_.size()) << " " << int(boundaryIds.size()) << std :: endl;
@@ -665,25 +664,19 @@ namespace Dune
         if( elementType == hexa )
         {
           int element[ 8 ];
-          bool isRear[ 6 ];
           for( unsigned int i = 0; i < 8; ++i )
           {
             element[ i ] = globalId( elements_[ elemIndex ][ i ] );
           }
-          for( unsigned int i = 0; i < 6; ++i )
-          {
-            isRear[ i ] = isRearElements[elemIndex][i];
-          }
+          ALU3DSPACE IsRearFlag isRear( isRearElements[elemIndex] );
           mgb.InsertUniqueHexa( element, isRear );
         }
         else if( elementType == tetra )
         {
           int element[ 4 ];
-          bool isRear[ 4 ];
           for( unsigned int i = 0; i < 4; ++i )
           {
             element[ i ] = globalId( elements_[ elemIndex ][ i ] );
-            isRear[ i ] = isRearElements[elemIndex][i];
           }
 
           // bisection element type: orientation and type (default 0)
@@ -692,13 +685,14 @@ namespace Dune
           {
             type = simplexTypes[ elemIndex ];
           }
+
+          ALU3DSPACE IsRearFlag isRear( isRearElements[elemIndex] );
           ALU3DSPACE SimplexTypeFlag simplexTypeFlag( 0, type );
           mgb.InsertUniqueTetra( element, isRear, simplexTypeFlag );
         }
         else
           DUNE_THROW( GridError, "Invalid element type");
       }
-
 
       const auto endB = boundaryIds.end();
       for( auto it = boundaryIds.begin(); it != endB; ++it )
@@ -731,87 +725,31 @@ namespace Dune
           pv = globalProjection_;
         }
 
-        if( elementType == hexa )
+        int bndface[ numFaceCorners ];
+        for( unsigned int i = 0; i < numFaceCorners; ++i )
         {
-          int bndface[ 4 ];
-          bool isRear = isRearBoundaries[faceId];
-          for( unsigned int i = 0; i < numFaceCorners; ++i )
-          {
-            bndface[ i ] = globalId( boundaryId.first[ i ] );
-          }
-          mgb.InsertUniqueHbnd4( bndface, isRear, bndType, pv );
+          bndface[ i ] = globalId( boundaryId.first[ i ] );
         }
-        else if( elementType == tetra )
-        {
-          int bndface[ 3 ];
-          bool isRear = isRearBoundaries[faceId];
-          for( unsigned int i = 0; i < numFaceCorners; ++i )
-          {
-            bndface[ i ] = globalId( boundaryId.first[ i ] );
-          }
-          mgb.InsertUniqueHbnd3( bndface, isRear, bndType, pv );
-        }
-        else
-          DUNE_THROW( GridError, "Invalid element type");
+        mgb.InsertUniqueHbnd( bndface, bndType, pv );
       }
 
       const typename PeriodicBoundaryVector::iterator endP = periodicBoundaries_.end();
       for( typename PeriodicBoundaryVector::iterator it = periodicBoundaries_.begin(); it != endP; ++it )
       {
         const std::pair< BndPair, BndPair > &facePair = *it;
-        if( elementType == hexa )
+        int perel[ numFaceCorners*2 ];
+        for( unsigned int i = 0, k=numFaceCorners; i < numFaceCorners; ++i, ++k )
         {
-          int perel[ 8 ];
-          for( unsigned int i = 0; i < numFaceCorners; ++i )
-          {
-            perel[ i+0 ] = globalId( facePair.first.first[ i ] );
-            perel[ i+4 ] = globalId( facePair.second.first[ i ] );
-          }
-
-          bool isRear[ 2 ];
-          {
-            FaceType faceId = facePair.first.first;
-            std::sort(faceId.begin(),faceId.end());
-            isRear[0]  = isRearBoundaries[faceId];
-          }
-          {
-            FaceType faceId = facePair.second.first;
-            std::sort(faceId.begin(),faceId.end());
-            isRear[1]  = isRearBoundaries[faceId];
-          }
-
-          typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
-          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
-                               bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic4( perel, isRear, bndId );
-
+          // first periodic element
+          perel[ i ] = globalId( facePair.first.first [ i ] );
+          // second periodic element
+          perel[ k ] = globalId( facePair.second.first[ i ] );
         }
-        else if( elementType == tetra )
-        {
-          int perel[ 6 ];
-          for( unsigned int i = 0; i < 3; ++i )
-          {
-            perel[ i+0 ] = globalId( facePair.first.first[ i  ] );
-            perel[ i+3 ] = globalId( facePair.second.first[ i ] );
-          }
-          bool isRear[ 2 ];
-          {
-            FaceType faceId = facePair.first.first;
-            std::sort(faceId.begin(),faceId.end());
-            isRear[0]  = isRearBoundaries[faceId];
-          }
-          {
-            FaceType faceId = facePair.second.first;
-            std::sort(faceId.begin(),faceId.end());
-            isRear[1]  = isRearBoundaries[faceId];
-          }
-          typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
-          bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
-                               bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic3( perel, isRear, bndId );
-        }
-        else
-          DUNE_THROW( GridError, "Invalid element type" );
+
+        typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
+        bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
+                             bnd_t( facePair.second.second ) };
+        mgb.InsertUniquePeriodic( perel, bndId );
       }
     }
 
@@ -935,7 +873,10 @@ namespace Dune
     //The benefit is, that we do not need communication, as this works for consistently oriented grids
     if(dimension == dimensionworld)
     {
-      std::vector<bool> isRear = (elementType == tetra) ? std::vector<bool>({false, true, false, true}) : std::vector<bool>( {false, true, true, false, false, true});
+      std::vector<bool> isRear = (elementType == tetra) ?
+        std::vector<bool>({false, true, false, true}) : // based on reference tetrahedron
+        std::vector<bool>({false, true, true,  false, false, true}); // based on reference hexahedron
+
       //walk over all elements
       for( std::size_t el =0 ; el < elements_.size(); ++el)
       {
@@ -954,10 +895,6 @@ namespace Dune
           //set isRear on all faces correctly
           bool rear = (det < 0) ? isRear[face] : !isRear[face];
           isRearElements[el][face] = rear;
-          FaceType faceId;
-          generateFace(element, face, faceId);
-          std::sort(faceId.begin(),faceId.end());
-          isRearBoundaries.insert(std::make_pair(faceId, !rear));
         }
       }
     }

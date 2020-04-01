@@ -521,58 +521,71 @@ namespace ALUGrid
   }
 
   GitterBasis::tetra_GEO * GitterBasis::MacroGitterBasis::
-  insert_tetra (hface3_GEO *(&f)[4], bool (&t)[4], SimplexTypeFlag simplexType )
+  insert_tetra (hface3_GEO *(&f)[4], const IsRearFlag& isRear, SimplexTypeFlag simplexType )
   {
-    return new Objects::tetra_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3], simplexType );
+    return new Objects::tetra_IMPL (0, // level
+                                    f[0], isRear[0], // face 0, isRear 0
+                                    f[1], isRear[1], // face 1, isRear 1
+                                    f[2], isRear[2], // face 2, isRear 2
+                                    f[3], isRear[3], // face 3, isRear 3
+                                    simplexType );
   }
 
   GitterBasis::periodic3_GEO *
   GitterBasis::MacroGitterBasis::
-  insert_periodic3 (hface3_GEO *(&f)[2], bool (&t)[2],
+  insert_periodic3 (hface3_GEO *(&f)[2], const IsRearFlag& isRear,
                     const Gitter:: hbndseg_STI::bnd_t (&bnd)[2] )
   {
-    return new Objects::periodic3_IMPL (0,f[0],t[0],f[1],t[1], bnd);
+    return new Objects::periodic3_IMPL (0,f[0],isRear[0],f[1],isRear[1], bnd);
   }
 
   GitterBasis::periodic4_GEO * GitterBasis::MacroGitterBasis::
-  insert_periodic4 (hface4_GEO *(&f)[2], bool (&t)[2],
+  insert_periodic4 (hface4_GEO *(&f)[2], const IsRearFlag& isRear,
                     const Gitter:: hbndseg_STI::bnd_t (&bnd)[2] )
   {
-    return new Objects::periodic4_IMPL (0, f [0], t[0], f [1], t[1], bnd );
+    return new Objects::periodic4_IMPL (0, f [0], isRear[0], f [1], isRear[1], bnd );
   }
 
   GitterBasis::hexa_GEO * GitterBasis::MacroGitterBasis::
-  insert_hexa (hface4_GEO *(&f)[6], bool (&t)[6])
+  insert_hexa (hface4_GEO *(&f)[6], const IsRearFlag& isRear)
   {
-    return new Objects::hexa_IMPL (0,f[0],t[0],f[1],t[1],f[2],t[2],f[3],t[3],f[4],t[4],f[5],t[5]);
+    return new Objects::hexa_IMPL (0, // level
+                                   f[0], isRear[0],  // face 0, isRear 0
+                                   f[1], isRear[1],  // face 1, isRear 1
+                                   f[2], isRear[2],  // face 2, isRear 2
+                                   f[3], isRear[3],  // face 3, isRear 3
+                                   f[4], isRear[4],  // face 4, isRear 4
+                                   f[5], isRear[5]); // face 5, isRear 5
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd3 (hface3_GEO * f, bool i,
+  insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b)
   {
     // the NULL pointer is the pointer to the father which does not exists
-    return new Objects::hbndseg3_IMPL ( 0, f, i, b );
+    return new Objects::hbndseg3_IMPL ( 0, // level
+                                        f, isRear[0], // face and isRear
+                                        b ); // bnd value
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd3 (hface3_GEO * f, bool i,
+  insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoTetra* )
   {
-    return insert_hbnd3(f,i,b);
+    return insert_hbnd3(f,isRear,b);
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, bool i, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear, Gitter::hbndseg_STI::bnd_t b)
   {
-    return new Objects::hbndseg4_IMPL ( 0, f, i, b );
+    return new Objects::hbndseg4_IMPL ( 0, f, isRear[0], b );
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, bool i,
+  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoHexa* )
   {
-    return insert_hbnd4 (f,i,b);
+    return insert_hbnd4 (f, isRear, b);
   }
 
 

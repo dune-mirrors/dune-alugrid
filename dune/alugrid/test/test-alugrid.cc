@@ -853,8 +853,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          //filename = "./dgf/simplex-testgrid-3-3.dgf";
-          filename = "./dgf/reference-simplex-3-3.dgf";
+          filename = "./dgf/simplex-testgrid-3-3.dgf";
+          //filename = "./dgf/reference-simplex-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );

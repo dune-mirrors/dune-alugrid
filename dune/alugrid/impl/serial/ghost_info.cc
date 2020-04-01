@@ -25,11 +25,8 @@ namespace ALUGrid
       os.write( _p[i][2] );
     }
 
-    //isRear for each face
-    for(int i=0; i<noFace; ++i)
-    {
-      os.write( _isRear[i] );
-    }
+    // write isRear info for faces
+    _isRear.write( os );
   }
 
   template<int points>
@@ -67,11 +64,7 @@ namespace ALUGrid
       os.read(pr[2]);
     }
 
-    //isRear for each face
-    for(int i=0; i<noFace; ++i)
-    {
-      os.read( _isRear[i] );
-    }
+    _isRear.read( os );
 
     alugrid_assert ( _fce != invalidFace );
   }
@@ -97,10 +90,7 @@ namespace ALUGrid
       this->_vx[i] = hexa->myvertex(i)->ident();
     }
 
-    for(int i=0; i<noFace; ++i)
-    {
-      this->_isRear[i] = hexa->isRear(i);
-    }
+    this->_isRear = hexa->isRearFlag();
 
     this->_fce = fce;
   }
@@ -132,10 +122,8 @@ namespace ALUGrid
       os.writeObject ( p[2] );
     }
 
-    for(int i=0; i<noFace; ++i)
-    {
-      os.write( hexa.isRear(i) );
-    }
+    // write isRear info for all faces
+    hexa.isRearFlag().write( os );
   }
 
 
@@ -158,8 +146,7 @@ namespace ALUGrid
     for( int i = 0; i < noVx; ++i )
       this->_vx[i] = tetra->myvertex(i)->ident();
 
-    for( int i = 0; i < noFace; ++i )
-      this->_isRear[i] = tetra->isRear(i);
+    this->_isRear = tetra->isRearFlag();
 
     this->_fce = tetra->simplexTypeFlag().orientation() ? -fce-1 : fce;
   }
@@ -196,11 +183,8 @@ namespace ALUGrid
       os.write( p[2] );
     }
 
-    // global vertex number of the elements vertices
-    for(int k=0; k<noFace; ++k)
-    {
-      os.write( tetra.isRear(k) );
-    }
+    // write isRear information of faces
+    tetra.isRearFlag().write( os );
 
     // write simplex type flag
     tetra.simplexTypeFlag().write( os );

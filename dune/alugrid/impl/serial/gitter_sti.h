@@ -1359,7 +1359,6 @@ namespace ALUGrid
       virtual int nChild () const = 0;
       int leaf () const;
 
-      //bool isRear(int) const;
       // for dune
       virtual int ghostLevel () const = 0;
       virtual bool ghostLeaf () const = 0;
@@ -1825,6 +1824,11 @@ namespace ALUGrid
           neighbour_t rear ();
           const_neighbour_t rear () const;
           friend class hface4;
+
+          // return true if no element is attached to rear
+          bool emptyRear () const { return _numRear < 0; }
+          // return true if no element is attached to front
+          bool emptyFront () const { return _numFront < 0; }
         } nb; // 24 byte
       public :
         typedef VertexGeo   myvertex_t;
@@ -2098,9 +2102,11 @@ namespace ALUGrid
                                             is_leaf < const helement_STI > > ( this ).size ();
           return weight;
         }
+
+        const IsRearFlag& isRearFlag() const { return _isRearFlag; }
       private :
         myhface_t * f [2];
-        signed char s [2];
+        IsRearFlag _isRearFlag;
       } periodic3_GEO;
 
       // Anfang - Neu am 23.5.02 (BS)
@@ -2314,9 +2320,12 @@ namespace ALUGrid
                                             is_leaf < const helement_STI > > ( this ).size ();
           return weight;
         }
+
+        const IsRearFlag& isRearFlag() const { return _isRearFlag; }
+
       private :
         myhface_t * f [2];
-        signed char s [2];
+        IsRearFlag _isRearFlag;
       } periodic4_GEO;
 
 
@@ -2392,11 +2401,12 @@ namespace ALUGrid
         const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; }
         ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; }
 
+        const IsRearFlag& isRearFlag() const { return _isRearFlag; }
       protected :
         myhface_t*       _face;   //  8 bytes
         ProjectVertexPtr _pvPtr;  // 16 bytes
 
-        bool _isRear;             //  1 byte
+        IsRearFlag    _isRearFlag;//  1 byte
         unsigned char _lvl;       //  1 byte    = 8 bytes
       public:
       } hbndseg3_GEO;
@@ -2467,11 +2477,12 @@ namespace ALUGrid
         const ProjectVertex& projection() const { alugrid_assert( _pvPtr ); return *_pvPtr; }
         ProjectVertex& projection() { alugrid_assert( _pvPtr ); return *_pvPtr; }
 
+        const IsRearFlag& isRearFlag() const { return _isRearFlag; }
       protected :
         myhface_t*       _face;   //  8 bytes
         ProjectVertexPtr _pvPtr;  // 16 bytes
 
-        bool _isRear;             //  1 byte
+        IsRearFlag    _isRearFlag;//  1 byte
         unsigned char _lvl;       //  1 byte   = 8 bytes
 
       public:
@@ -2546,23 +2557,23 @@ namespace ALUGrid
         virtual hedge1_GEO    * insert_hedge1 (VertexGeo *, VertexGeo *) = 0;
         virtual hface3_GEO    * insert_hface3 (hedge1_GEO *(&)[3]) = 0;
         virtual hface4_GEO    * insert_hface4 (hedge1_GEO *(&)[4]) = 0;
-        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], bool (&)[4], SimplexTypeFlag) = 0;
+        virtual tetra_GEO     * insert_tetra (hface3_GEO *(&)[4], const IsRearFlag&, SimplexTypeFlag) = 0;
 
-        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], bool (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
-        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], bool (&)[2], const hbndseg_STI::bnd_t (&)[2] ) = 0;
+        virtual periodic3_GEO * insert_periodic3 (hface3_GEO *(&)[2], const IsRearFlag&, const hbndseg_STI::bnd_t (&)[2] ) = 0;
+        virtual periodic4_GEO * insert_periodic4 (hface4_GEO *(&)[2], const IsRearFlag&, const hbndseg_STI::bnd_t (&)[2] ) = 0;
 
-        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], bool (&)[6]) = 0;
+        virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], const IsRearFlag&) = 0;
 
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, hbndseg_STI::bnd_t) = 0;
 
         // insert ghost element
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, bool, hbndseg_STI:: bnd_t,
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, hbndseg_STI:: bnd_t,
                                               MacroGhostInfoTetra* ) = 0;
 
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, const IsRearFlag&, hbndseg_STI::bnd_t) = 0;
 
         // method to insert internal boundary with ghost
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, bool, hbndseg_STI::bnd_t,
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, const IsRearFlag&, hbndseg_STI::bnd_t,
                                               MacroGhostInfoHexa* ) = 0;
 
         IteratorSTI < vertex_STI >    *iterator (const vertex_STI *) const;
@@ -3938,22 +3949,22 @@ namespace ALUGrid
   // #        ######  #    #     #     ####   #####      #     ####   #####
 
   inline Gitter::Geometric::Periodic3::
-  Periodic3 (myhface_t * f0, bool t0, myhface_t * f1, bool t1)
+  Periodic3 (myhface_t * f0, bool t0, myhface_t * f1, bool t1) : _isRearFlag( t0, t1 )
   {
-    (f [0] = f0)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 0),(s [0] = t0));
-    (f [1] = f1)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 1),(s [1] = t1));
+    (f [0] = f0)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 0), t0);
+    (f [1] = f1)->attachElement (std::pair< hasFace3 *, bool > (InternalHasFace3 ()(this), 1), t1);
     return;
   }
 
   inline Gitter::Geometric::Periodic3::~Periodic3 () {
-    f [0] ->detachElement (s [0]);
-    f [1] ->detachElement (s [1]);
+    f [0] ->detachElement ( isRear(0) );
+    f [1] ->detachElement ( isRear(1) );
     return;
   }
 
   inline bool Gitter::Geometric::Periodic3::isRear (int i) const {
     alugrid_assert (0 <= i && i < 2);
-    return s [i];
+    return _isRearFlag[i];
   }
 
   inline Gitter::Geometric::Periodic3::myhface_t * Gitter::Geometric::Periodic3::myhface (int i) {
@@ -4021,22 +4032,22 @@ namespace ALUGrid
   // #        ######  #    #     #     ####   #####      #     ####       #
 
   inline Gitter::Geometric::Periodic4::
-  Periodic4 (myhface_t * f0, bool t0, myhface_t * f1, bool t1)
+  Periodic4 (myhface_t * f0, bool t0, myhface_t * f1, bool t1) : _isRearFlag( t0, t1 )
   {
-    (f [0] = f0)->attachElement (std::pair< hasFace4 *, int > (InternalHasFace4 ()(this), 0),(s [0] = t0));
-    (f [1] = f1)->attachElement (std::pair< hasFace4 *, int > (InternalHasFace4 ()(this), 1),(s [1] = t1));
+    (f [0] = f0)->attachElement (std::pair< hasFace4 *, int > (InternalHasFace4 ()(this), 0), t0 );
+    (f [1] = f1)->attachElement (std::pair< hasFace4 *, int > (InternalHasFace4 ()(this), 1), t1 );
     return;
   }
 
   inline Gitter::Geometric::Periodic4::~Periodic4 () {
-    f [0] ->detachElement (s [0]);
-    f [1] ->detachElement (s [1]);
+    f [0] ->detachElement ( isRear(0) );
+    f [1] ->detachElement ( isRear(1) );
     return;
   }
 
   inline bool Gitter::Geometric::Periodic4::isRear (int i) const {
     alugrid_assert (0 <= i && i < 2);
-    return s [i];
+    return _isRearFlag[i];
   }
 
   inline Gitter::Geometric::Periodic4::myhface_t * Gitter::Geometric::Periodic4::myhface (int i) {
@@ -4218,9 +4229,9 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hbndseg3::hbndseg3 (myhface_t * a, bool b)
     : _face( a ),
-      _isRear( b )
+      _isRearFlag( b )
   {
-    _face->attachElement (std::pair< hasFace3 *, int > (InternalHasFace3 ()(this),0), isRear(0) );
+    _face->attachElement (std::pair< hasFace3 *, int > (InternalHasFace3 ()(this),0), b );
     return;
   }
 
@@ -4279,7 +4290,7 @@ namespace ALUGrid
   inline bool Gitter::Geometric::hbndseg3::isRear (int i) const
   {
     alugrid_assert (i == 0);
-    return _isRear;
+    return _isRearFlag[ 0 ];
   }
   inline Gitter::Geometric::hbndseg3::myhface_t * Gitter::Geometric::hbndseg3::myhface (int i) const {
     alugrid_assert (i == 0);
@@ -4314,9 +4325,9 @@ namespace ALUGrid
 
   inline Gitter::Geometric::hbndseg4::hbndseg4 (myhface_t * a, bool b)
     : _face( a ),
-      _isRear( b )
+      _isRearFlag( b )
   {
-    _face->attachElement (std::pair< hasFace4 *, bool > (InternalHasFace4 ()(this),0), isRear(0) );
+    _face->attachElement (std::pair< hasFace4 *, bool > (InternalHasFace4 ()(this),0), b );
     return;
   }
 
@@ -4376,7 +4387,7 @@ namespace ALUGrid
   inline bool Gitter::Geometric::hbndseg4::isRear (int i) const
   {
     alugrid_assert (i == 0);
-    return _isRear;
+    return _isRearFlag[ 0 ];
   }
 
   inline Gitter::Geometric::hbndseg4::myhface_t * Gitter::Geometric::hbndseg4::myhface (int i) const {

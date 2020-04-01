@@ -49,8 +49,8 @@ namespace ALUGrid
     // vertex idents of all not internal vertices
     int _vxface[noFaceVx]; // 4 or 16 bytes
 
-    // bool for isRear for all faces
-    bool _isRear[noFace]; // 4 or 6 bytes
+    // flags isRear for all faces
+    IsRearFlag _isRear;
 
     // face number of internal face
     signed char _fce; // 1 byte
@@ -85,7 +85,7 @@ namespace ALUGrid
     }
 
     // return isRear flags
-    bool (& isRear () )[noFace]
+    const IsRearFlag& isRear () const
     {
       return _isRear;
     }

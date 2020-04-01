@@ -134,13 +134,13 @@ namespace ALUGrid
           hexa_GEO * gh = dynamic_cast<hexa_GEO *> (gpair.first);
           if( gh )
           {
-            _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->isRear (0),
+            _hbnd4Int [key] = new Hbnd4IntStorage (face , (*i)->isRearFlag(),
                                                    (*i)->ldbVertexIndex(),
                                                    (*i)->master(),
                                                    gh, gpair.second );
           }
           else
-            _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->isRear (0),
+            _hbnd4Int [key] = new Hbnd4IntStorage (face ,(*i)->isRearFlag(),
                                                    (*i)->ldbVertexIndex(), (*i)->master() );
 
           toDeleteHbnd.push_back( (*i ) );
@@ -179,13 +179,13 @@ namespace ALUGrid
           if( gh )
           {
             // insert new internal storage
-            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isRear (0),
+            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isRearFlag(),
                                                     (*i)->ldbVertexIndex(), (*i)->master(),
                                                     gh , gpair.second );
           }
           else // if gh
           {
-            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isRear (0),
+            _hbnd3Int [key] = new Hbnd3IntStorage ( face , (*i)->isRearFlag(),
                                                     (*i)->ldbVertexIndex(), (*i)->master() );
           }
 
@@ -672,10 +672,8 @@ namespace ALUGrid
     os.readObject (v[4]);
     os.readObject (v[5]);
 
-    // TODO: Use IsRearFlag
-    char isRear0 = os.get();
-    char isRear1 = os.get();
-    bool isRear[2] = {bool(isRear0),bool(isRear1)};
+    IsRearFlag isRear;
+    isRear.read( os );
 
     std::pair< periodic3_GEO *, bool > p = InsertUniquePeriodic (v, isRear, b);
     p.first->accessPllX ().unpackSelf (os,p.second);
@@ -703,9 +701,8 @@ namespace ALUGrid
     os.readObject (v[6]);
     os.readObject (v[7]);
 
-    char isRear0 = os.get();
-    char isRear1 = os.get();
-    bool isRear[2] = {bool(isRear0),bool(isRear1)};
+    IsRearFlag isRear;
+    isRear.read( os );
 
     std::pair< periodic4_GEO *, bool > p = InsertUniquePeriodic (v, isRear, b);
     p.first->accessPllX ().unpackSelf (os,p.second);
@@ -740,11 +737,11 @@ namespace ALUGrid
   // new method that gets coord of ghost point
   bool ParallelGridMover::
   InsertUniqueHbnd3_withPoint (int (&v)[3],
+                               const IsRearFlag& isRear,
                                Gitter::hbndseg_STI ::bnd_t bt,
                                int ldbVertexIndex,
                                int master,
-                               MacroGhostInfoTetra * ghInfo,
-                               bool isRear)
+                               MacroGhostInfoTetra * ghInfo )
   {
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
@@ -762,11 +759,11 @@ namespace ALUGrid
   // new method that gets coord of ghost point
   bool ParallelGridMover::
   InsertUniqueHbnd4_withPoint (int (&v)[4],
+                               const IsRearFlag& isRear,
                                Gitter::hbndseg_STI ::bnd_t bt,
                                int ldbVertexIndex,
                                int master,
-                               MacroGhostInfoHexa* ghInfo,
-                               bool isRear)
+                               MacroGhostInfoHexa* ghInfo )
   {
     faceKey_t key (v [0], v [1], v [2]);
     alugrid_assert ( bt == Gitter::hbndseg_STI::closure );
@@ -796,8 +793,8 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    bool isRear;
-    os.read( isRear );
+    IsRearFlag isRear;
+    isRear.read( os );
 
     const signed char readPoint = os.get();
 
@@ -812,7 +809,7 @@ namespace ALUGrid
     if( b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd3_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
+      const bool inserted = InsertUniqueHbnd3_withPoint (v, isRear, b, ldbVertexIndex, master, ghInfo );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = nullptr;
@@ -849,8 +846,8 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    bool isRear;
-    os.read( isRear );
+    IsRearFlag isRear;
+    isRear.read( os );
 
     const signed char readPoint = os.get();
 
@@ -865,7 +862,7 @@ namespace ALUGrid
     if(b == Gitter::hbndseg::closure && ghInfo )
     {
       // ghInfo is stored in the macro ghost created internally
-      const bool inserted = InsertUniqueHbnd4_withPoint (v, b, ldbVertexIndex, master, ghInfo, isRear );
+      const bool inserted = InsertUniqueHbnd4_withPoint (v, isRear, b, ldbVertexIndex, master, ghInfo );
 
       // if inserted then clear pointer to avoid deleting it
       if( inserted ) ghInfo = nullptr;
@@ -913,8 +910,8 @@ namespace ALUGrid
     os.readObject (v[1]);
     os.readObject (v[2]);
 
-    bool isRear;
-    os.read( isRear );
+    IsRearFlag isRear;
+    isRear.read( os );
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
@@ -933,8 +930,8 @@ namespace ALUGrid
     os.readObject (v[2]);
     os.readObject (v[3]);
 
-    bool isRear ;
-    os.read( isRear );
+    IsRearFlag isRear;
+    isRear.read( os );
 
     ProjectVertexPtr pv = unpackVertexProjection( os );
 
@@ -1025,7 +1022,7 @@ namespace ALUGrid
   {
     GitterPll::MacroGitterPll& _containerPll;
     MpAccessLocal&      _mpa;
-    ParallelGridMover*  _pgm;
+    std::unique_ptr< ParallelGridMover > _pgm;
     GatherScatterType*  _gs;
 
     UnpackLBData( const UnpackLBData& );
@@ -1037,15 +1034,9 @@ namespace ALUGrid
                   LoadBalancer::DataBase& db )
       : _containerPll( containerPll ),
         _mpa( mpa ),
-        _pgm( 0 ),
+        _pgm(),
         _gs( gs )
     {
-    }
-
-    // destructor deleting parallel macro grid mover
-    ~UnpackLBData()
-    {
-      delete _pgm;
     }
 
     void pack( const int link, ObjectStream& os )
@@ -1061,7 +1052,7 @@ namespace ALUGrid
       // create ParallelGridMover when all data was packed, otherwise the link packing
       // will fail since this will modify the macro grid, since the
       // parallel macro grid mover clears the lists of macro elements
-      if( ! _pgm ) _pgm = new ParallelGridMover( _containerPll );
+      if( ! _pgm ) _pgm.reset( new ParallelGridMover( _containerPll ) );
 
       // clear linkage patterns
       // _containerPll.clearLinkagePattern();

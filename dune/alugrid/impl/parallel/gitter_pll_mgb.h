@@ -34,19 +34,19 @@ namespace ALUGrid
 
       // creates Hbnd3IntStorage with ghost info if needed
       bool InsertUniqueHbnd3_withPoint (int (&)[3],
+                                        const IsRearFlag&,
                                         Gitter::hbndseg::bnd_t,
                                         int ldbVertexIndex,
                                         int master,
-                                        MacroGhostInfoTetra*,
-                                        bool isRear);
+                                        MacroGhostInfoTetra* );
 
       // creates Hbnd4IntStorage with ghost info if needed
       bool InsertUniqueHbnd4_withPoint (int (&)[4],
+                                        const IsRearFlag&,
                                         Gitter::hbndseg::bnd_t,
                                         int ldbVertexIndex,
                                         int master,
-                                        MacroGhostInfoHexa*,
-                                        bool isRear);
+                                        MacroGhostInfoHexa*);
 
 
       // former constructor
