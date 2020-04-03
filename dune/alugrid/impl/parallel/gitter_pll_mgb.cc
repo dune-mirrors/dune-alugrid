@@ -781,14 +781,15 @@ namespace ALUGrid
   inline void ParallelGridMover::unpackHbnd3Int (ObjectStream & os)
   {
     // see also gitter_{tetra,hexa}_pll_top.* for methods buildGhost
-    int bfake, v [3];
-    os.readObject (bfake);
-    Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
+    int bnd;
+    os.readObject (bnd);
+    Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bnd;
 
     int ldbVertexIndex,master;
     os.readObject( ldbVertexIndex );
     os.readObject( master );
 
+    int v[3];
     os.readObject (v[0]);
     os.readObject (v[1]);
     os.readObject (v[2]);
@@ -905,15 +906,15 @@ namespace ALUGrid
   void ParallelGridMover::unpackHbnd3Ext (ObjectStream & os)
   {
     int b, v [3];
-    os.readObject (b);
-    os.readObject (v[0]);
-    os.readObject (v[1]);
-    os.readObject (v[2]);
+    os.readObject (b);    // boundary type
+    os.readObject (v[0]); // vx 0
+    os.readObject (v[1]); // vx 1
+    os.readObject (v[2]); // vx 2
 
     IsRearFlag isRear;
-    isRear.read( os );
+    isRear.read( os ); // isRear
 
-    ProjectVertexPtr pv = unpackVertexProjection( os );
+    ProjectVertexPtr pv = unpackVertexProjection( os ); // projection type
 
     int ldbVertexIndex = -1;
     int master = -1;
