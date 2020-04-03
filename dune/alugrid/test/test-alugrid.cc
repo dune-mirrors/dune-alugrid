@@ -393,11 +393,11 @@ void checkForPeriodicBoundaries( GridType& grid )
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
 {
-  const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
-    GridType* gr = new GridType();
+    std::cout << "  CHECKING: create and destroy empty grid next to existing grid " << std::endl<<std::endl;
+    std::unique_ptr< GridType > gr( new GridType() );
     assert ( gr );
-    delete gr;
+    gr.reset();
   }
 
   writeFile( grid.leafGridView() );
@@ -407,6 +407,9 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // be careful, each global refine create 8 x maxlevel elements
   std::cout << "  CHECKING: Macro" << std::endl;
   checkGrid(grid);
+
+  const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
+
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
@@ -571,8 +574,12 @@ int main (int argc , char **argv) {
       // check empty grids
 
 #ifndef NO_3D
-      if (myrank == 0 && (testALU3dCube || testALU3dSimplex) )
-        std::cout << "Check empty grids" << std::endl;
+      if (myrank == 0 && (testALU3dCube || testALU3dSimplex || testALU3dConform) )
+      {
+        std::cout << "**************************************************" << std::endl;
+        std::cout << "***    Checking empty grids..." << std::endl;
+        std::cout << "**************************************************" << std::endl << std::endl;
+      }
 
       if( testALU3dCube )
       {
@@ -597,7 +604,11 @@ int main (int argc , char **argv) {
       // check grid factory (test only available for dune-grid 3.0 or later)
 
       if( myrank == 0 )
-        std::cout << "Checking grid factory..." << std::endl;
+      {
+        std::cout << "**************************************************" << std::endl;
+        std::cout << "***    Checking grid factory..." << std::endl;
+        std::cout << "**************************************************" << std::endl << std::endl;
+      }
 
 #if HAVE_DUNE_GRID_TESTGRIDS
 #ifndef NO_2D
@@ -624,6 +635,14 @@ int main (int argc , char **argv) {
 #endif // HAVE_DUNE_GRID_TESTGRIDS
 
 #ifndef NO_2D
+
+      if( myrank == 0 )
+      {
+        std::cout << "**************************************************" << std::endl;
+        std::cout << "***    Checking grid from dgf files..." << std::endl;
+        std::cout << "**************************************************" << std::endl << std::endl;
+      }
+
       // check non-conform ALUGrid for 2d
       if( testALU2dCube )
       {
@@ -884,8 +903,8 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          filename = "./dgf/simplex-testgrid-3-3.dgf";
-          //filename = "./dgf/reference-simplex-3-3.dgf";
+          //filename = "./dgf/simplex-testgrid-3-3.dgf";
+          filename = "./dgf/reference-simplex-3-3.dgf";
 
         typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
