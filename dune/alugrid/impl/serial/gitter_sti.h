@@ -1238,8 +1238,12 @@ namespace ALUGrid
       }
       virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
       {
-        alugrid_assert ( up() != 0 );
-        up()->packAsBnd(a,b,os, ghostCellsEnabled);
+        // this method is overloaded on the tetra class, because only there it's
+        // needed due to the fact, that for conforming refinement
+        // the situation can occur, where a macro face may have
+        // a non-macro element as face neighbor
+        alugrid_assert( false );
+        std::abort();
       }
       virtual bool erasable () const
       {
@@ -1982,6 +1986,9 @@ namespace ALUGrid
           }
           return false;
         }
+
+        // packAsBnd on a non-macro element forward the call to the macro element
+        virtual void packAsBnd (int fce, int who, ObjectStream &os, const bool ghostCellsEnabled ) const;
 
       public :
         // return the rule that lead to this tetra
@@ -3939,6 +3946,42 @@ namespace ALUGrid
   inline int Gitter::Geometric::Tetra::preCoarsening () {
     return 0;
   }
+
+  inline void Gitter::Geometric::Tetra::packAsBnd( int fce, int who, ObjectStream &os, const bool ghostCellsEnabled ) const
+  {
+    // this method is overloaded here, because only here it's
+    // needed due to the fact, that for conforming refinement
+    // the situation can occur, where a macro face may have
+    // a non-macro element as face neighbor
+
+    // search corresponding face number in father and call packAsBnd with
+    // that number on the father element
+
+    const myhface_t* face = myhface( fce );
+    const Tetra* father = static_cast< const Tetra* > (up());
+    alugrid_assert ( father );
+
+    // fce is the face number with respect to this element, but we need to
+    // find the face number with respect to the father element
+    if( face != father->myhface( fce ) )
+    {
+      // test the other 3 possibilities
+      for( int i=1; i<4; ++i )
+      {
+        const int faceInFather = (fce + i)%4;
+        // if the face matches then we found it
+        if( face == father->myhface( faceInFather ) )
+        {
+          fce = faceInFather;
+          break;
+        }
+      }
+    }
+
+    // forward call to father until we find the macro element
+    father->packAsBnd( fce, who, os, ghostCellsEnabled);
+  }
+
 
   // ######                                                           #####
   // #     #  ######  #####      #     ####   #####      #     ####  #     #
