@@ -164,10 +164,10 @@ namespace ALUGrid
     alugrid_assert ( code == MacroGridMoverIF::HBND3INT );
 
     {
-      int bfake;
-      os.readObject (bfake);
+      int bnd;
+      os.readObject (bnd);
 #ifdef ALUGRIDDEBUG
-      Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bfake;
+      Gitter::hbndseg::bnd_t b = (Gitter::hbndseg::bnd_t) bnd;
       alugrid_assert ( b == Gitter::hbndseg::closure );
 #endif
       // read global graph vertex index
@@ -182,8 +182,8 @@ namespace ALUGrid
       os.readObject (v[2]);
 
       // read isRear information (see gitter_pll_impl.cc)
-      bool isRear;
-      os.read( isRear );
+      IsRearFlag isRear;
+      isRear.read( os );
 
       const signed char pointTransmitted = os.get();
 
@@ -191,7 +191,8 @@ namespace ALUGrid
       if( pointTransmitted != MacroGridMoverIF::POINTTRANSMITTED )
       {
         std::cerr << "ERROR: No point transmitted, building ghost cells impossible in " << __FILE__ << ", " << __LINE__ << std::endl;
-        abort();
+        alugrid_assert( false );
+        std::abort();
       }
 
       // create macro ghost cell
