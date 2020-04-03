@@ -689,7 +689,6 @@ namespace Dune
       mappingGlobalUp2Date_ = true;
       mappingGlobal_.normal(local, outerNormal_);
 
-      int innerFaceIndex = this->connector_.innerALUFaceIndex();
       const alu3d_ctype (&p)[3]  = this->connector_.outerPoint();
       const alu3d_ctype (&p0)[3] = face.myvertex( 0 )->Point();
       double det = outerNormal_[0] * (p[0] - p0[0]) + outerNormal_[1] * (p[1] - p0[1]) + outerNormal_[2] * (p[2] - p0[2]);
