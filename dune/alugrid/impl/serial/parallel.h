@@ -82,14 +82,14 @@ namespace ALUGrid
     public :
       typedef MacroGridMoverIF :: moveto_t moveto_t ;
 
-      virtual void attach2   (int) { alugrid_assert (false);abort(); }
-      virtual void unattach2 (int) { alugrid_assert (false);abort(); }
+      virtual void attach2   (int) { alugrid_assert (false); std::abort(); }
+      virtual void unattach2 (int) { alugrid_assert (false); std::abort(); }
 
-      virtual bool packAll ( std::vector< ObjectStream > &) { alugrid_assert (false); abort(); }
-      virtual moveto_t* moveToMap () { alugrid_assert (false); abort(); return ((moveto_t *) 0); }
+      virtual bool packAll ( std::vector< ObjectStream > &) { alugrid_assert (false); std::abort(); }
+      virtual moveto_t* moveToMap () { alugrid_assert (false); std::abort(); return ((moveto_t *) 0); }
       virtual bool dunePackAll ( std::vector< ObjectStream > &, GatherScatterType & ) { alugrid_assert (false); return false; }
-      virtual void unpackSelf ( ObjectStream &, bool ) { alugrid_assert (false); abort(); }
-      virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {alugrid_assert (false);}
+      virtual void unpackSelf ( ObjectStream &, bool ) { alugrid_assert (false); std::abort(); }
+      virtual void duneUnpackSelf (ObjectStream &, const bool, GatherScatterType *) {alugrid_assert (false); std::abort(); }
       virtual void computeBaryCenter( double (&center)[3] ) const { center[ 0 ] = center[ 1 ] = center[ 2 ] = 0; }
   } ;
 
@@ -184,9 +184,9 @@ namespace ALUGrid
   {
     public :
       virtual ~LinkedObjectDefault () {}
-      virtual Identifier getIdentifier () const { alugrid_assert (false);abort(); return Identifier(); }
-      virtual std::vector< int > estimateLinkage () const { alugrid_assert (false); abort(); return std::vector< int >(); }
-      virtual void checkAndAddLinkage ( const int ) { alugrid_assert (false); abort(); }
+      virtual Identifier getIdentifier () const { alugrid_assert (false); std::abort(); return Identifier(); }
+      virtual std::vector< int > estimateLinkage () const { alugrid_assert (false); std::abort(); return std::vector< int >(); }
+      virtual void checkAndAddLinkage ( const int ) { alugrid_assert (false); std::abort(); }
   } ;
 
   // Die Schnittstelle 'RefineableObject' ist diejenige, an die sich
@@ -217,8 +217,8 @@ namespace ALUGrid
       RefineableObjectDefault () {}
       virtual ~RefineableObjectDefault () {}
     public :
-      virtual void getRefinementRequest (ObjectStream &) const { alugrid_assert (false);abort(); }
-      virtual bool setRefinementRequest (ObjectStream &) { alugrid_assert (false);abort(); return false ;}
+      virtual void getRefinementRequest (ObjectStream &) const { alugrid_assert (false); std::abort(); }
+      virtual bool setRefinementRequest (ObjectStream &) { alugrid_assert (false); std::abort(); return false ;}
   } ;
 
     //

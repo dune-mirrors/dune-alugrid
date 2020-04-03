@@ -395,7 +395,7 @@ namespace ALUGrid
   inline int GitterBasis::Objects::VertexEmpty::ident () const
   {
     std::cerr << "ERROR (FATAL): vertex::ident() may only be called for macro vertices." << std::endl;
-    abort();
+    std::abort();
     return -1;
   }
 

@@ -387,16 +387,16 @@ namespace ALUGrid
     protected :
       virtual ~VertexPllXDefault () {}
     public :
-      virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); abort(); return false; }
+      virtual bool setLinkage ( const std::vector< int >& ) { alugrid_assert (false); std::abort(); return false; }
       virtual bool setLinkageSorted ( const std::vector< int >& ) { return false; }
-      virtual void clearLinkage () { alugrid_assert (false); abort(); }
-      virtual int linkagePosition () const { alugrid_assert (false); abort(); return -1; }
+      virtual void clearLinkage () { alugrid_assert (false); std::abort(); }
+      virtual int linkagePosition () const { alugrid_assert (false); std::abort(); return -1; }
 
       typedef VertexPllXIF :: linkageset_t  linkageset_t ;
-      virtual bool insertLinkedElements( const linkageset_t& ) { alugrid_assert (false); abort(); return false; }
+      virtual bool insertLinkedElements( const linkageset_t& ) { alugrid_assert (false); std::abort(); return false; }
 
       typedef VertexPllXIF :: ElementLinkage_t ElementLinkage_t;
-      virtual const ElementLinkage_t& linkedElements() const { alugrid_assert (false); abort(); return *((ElementLinkage_t * ) 0 ); }
+      virtual const ElementLinkage_t& linkedElements() const { alugrid_assert (false); std::abort(); return *((ElementLinkage_t * ) 0 ); }
     };
 
 
@@ -423,9 +423,9 @@ namespace ALUGrid
       protected :
         virtual ~EdgePllXDefault () {}
       public :
-        virtual bool lockAndTry () { alugrid_assert (false);abort(); return false; }
-        virtual bool unlockAndResume (bool) { alugrid_assert (false);abort(); return false; }
-        virtual bool lockedAgainstCoarsening () const { alugrid_assert (false);abort(); return false; }
+        virtual bool lockAndTry () { alugrid_assert (false); std::abort(); return false; }
+        virtual bool unlockAndResume (bool) { alugrid_assert (false); std::abort(); return false; }
+        virtual bool lockedAgainstCoarsening () const { alugrid_assert (false); std::abort(); return false; }
     };
 
     //  hasFace needs to be one of the basic classes
@@ -525,7 +525,7 @@ namespace ALUGrid
         virtual accesspair_t accessInnerPllX (const accesspair_t&, int f) { return accesspair_t( this , f ); }
         virtual constaccesspair_t accessInnerPllX (const constaccesspair_t &, int f) const { return constaccesspair_t( this , f ); }
 
-        virtual void computeVertexLinkage( vertexelementlinkage_t& ) { alugrid_assert (false); abort(); }
+        virtual void computeVertexLinkage( vertexelementlinkage_t& ) { alugrid_assert (false); std::abort(); }
       public :
         typedef std::pair< helement *, int > ghostpair_t;
 
@@ -559,27 +559,27 @@ namespace ALUGrid
         }
 
         virtual void writeStaticState (ObjectStream &, int) const
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void readStaticState (ObjectStream &, int)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
 
         virtual void writeDynamicState (ObjectStream &, int) const
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void readDynamicState (ObjectStream &, int)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
 
         virtual void VertexData2os(ObjectStream &, GatherScatterType &, int)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void EdgeData2os  (ObjectStream &, GatherScatterType &, int)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void FaceData2os  (ObjectStream &, GatherScatterType &, int)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void writeElementData (ObjectStream &, GatherScatterType &)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void writeDynamicState(ObjectStream &, GatherScatterType &) const
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual void readDynamicState (ObjectStream &, GatherScatterType &)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
 
         // pack as ghost, default does nothing but macro elements are pack as
         // ghosts
@@ -590,22 +590,22 @@ namespace ALUGrid
 
       public :
         virtual bool ldbUpdateGraphVertex ( LoadBalancer::DataBase &, GatherScatter * )
-        { alugrid_assert (false);abort(); return false;  }
+        { alugrid_assert (false); std::abort(); return false;  }
       public :
         virtual void packAsBnd (int,int,ObjectStream &, const bool) const
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual bool erasable () const
-        { alugrid_assert (false);abort(); return false;  }
+        { alugrid_assert (false); std::abort(); return false;  }
       public :
         virtual void getRefinementRequest (ObjectStream &)
-        { alugrid_assert (false);abort(); }
+        { alugrid_assert (false); std::abort(); }
         virtual bool setRefinementRequest (ObjectStream &)
-        { alugrid_assert (false);abort(); return false;  }
+        { alugrid_assert (false); std::abort(); return false;  }
       public :
         virtual bool lockAndTry ()
-        { alugrid_assert (false);abort(); return false;  }
+        { alugrid_assert (false); std::abort(); return false;  }
         virtual bool unlockAndResume (bool)
-        { alugrid_assert (false);abort(); return false;  }
+        { alugrid_assert (false); std::abort(); return false;  }
     };
 
 
@@ -637,13 +637,13 @@ namespace ALUGrid
       protected :
         virtual ~FacePllXDefault () {}
       public :
-        virtual std::vector< int > checkParallelConnectivity () const { alugrid_assert ( false ); abort(); return std::vector< int >(); }
-        virtual std::pair< ElementPllXIF *, int > accessOuterPllX () { alugrid_assert ( false ); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< const ElementPllXIF *, int > accessOuterPllX () const  { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< ElementPllXIF *, int > accessInnerPllX ()  { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
-        virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const { alugrid_assert ( false); abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::vector< int > checkParallelConnectivity () const { alugrid_assert ( false ); std::abort(); return std::vector< int >(); }
+        virtual std::pair< ElementPllXIF *, int > accessOuterPllX () { alugrid_assert ( false ); std::abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< const ElementPllXIF *, int > accessOuterPllX () const  { alugrid_assert ( false); std::abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< ElementPllXIF *, int > accessInnerPllX ()  { alugrid_assert ( false); std::abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
+        virtual std::pair< const ElementPllXIF *, int > accessInnerPllX () const { alugrid_assert ( false); std::abort(); return std::pair< ElementPllXIF *, int > ( (ElementPllXIF *) 0, -1); }
 
-        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) { alugrid_assert (false);abort(); return false; }
+        virtual bool ldbUpdateGraphEdge (LoadBalancer::DataBase &, const bool ) { alugrid_assert (false); std::abort(); return false; }
     };
 
     /////////////////////////////////////////////////////////////////////////////
@@ -1138,13 +1138,13 @@ namespace ALUGrid
       //testweise us
       virtual helement * up () = 0;
       virtual const helement * up () const = 0;
-      virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
-      virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
-      virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
+      virtual void os2VertexData(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort();}
+      virtual void os2EdgeData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort();}
+      virtual void os2FaceData  (ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort();}
 
-      virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort();}
-      virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort(); }
-      virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); abort(); }
+      virtual void VertexData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort();}
+      virtual void EdgeData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort(); }
+      virtual void FaceData2os(ObjectStream &, GatherScatterType &, int) { alugrid_assert (false); std::abort(); }
       //us
       virtual helement * down () = 0;
       virtual const helement * down () const = 0;
@@ -1251,8 +1251,8 @@ namespace ALUGrid
         return up()->erasable();
       }
 
-      virtual double volume () const { alugrid_assert (false); abort(); return 0.0; } //= 0;
-      virtual void setIndicesAndBndId (const hface & , int ) { alugrid_assert (false); abort(); }
+      virtual double volume () const { alugrid_assert (false); std::abort(); return 0.0; } //= 0;
+      virtual void setIndicesAndBndId (const hface & , int ) { alugrid_assert (false); std::abort(); }
       virtual void resetGhostIndices() = 0;
     public :
       virtual bool refine () = 0;
