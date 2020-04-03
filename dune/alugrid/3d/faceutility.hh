@@ -183,8 +183,6 @@ namespace Dune
     int  innerFaceNumber_;
     int  outerFaceNumber_;
 
-    bool  isInnerRear_;
-
     mutable int segmentId_;
     int bndId_;
 
@@ -194,9 +192,12 @@ namespace Dune
                       domainBoundary      = 3, // boundary with domain, no outside
                       outerGhostBoundary  = 4};// process boundary, outside might be ghost
 
+    ConformanceState conformanceState_;
+
     boundary_t bndType_;
 
-    ConformanceState conformanceState_;
+    bool  isInnerRear_;                // true is the inner element is obtained  from rear instead of front
+
     bool conformingRefinement_ ;       // true if conforming refinement is enabled
     bool ghostCellsEnabled_ ;          // true if ghost cells are present
     const bool levelIntersection_ ;    // true if called from a levelintersection iterator

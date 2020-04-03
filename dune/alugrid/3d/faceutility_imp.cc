@@ -14,11 +14,11 @@ namespace Dune
     ghostElem_(nullptr),
     innerFaceNumber_(-1),
     outerFaceNumber_(-1),
-    isInnerRear_(false),
     segmentId_( -1 ),
     bndId_( -1 ),
-    bndType_( noBoundary ),
     conformanceState_(UNDEFINED),
+    bndType_( noBoundary ),
+    isInnerRear_(false),
     conformingRefinement_( false ),
     ghostCellsEnabled_( false ),
     levelIntersection_( levelIntersection )
