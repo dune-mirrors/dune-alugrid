@@ -1020,7 +1020,9 @@ namespace ALUGrid
     std::vector< int > v (A::polygonlength + 1);
     int i;
     for (i = 0; i < A::polygonlength; ++i )
-      v [i] = myhface ().myvertex (0)->ident ();
+    {
+      v [i] = myhface ().myvertex (i)->ident ();
+    }
     v [i] = myhface ().level ();
     return v;
   }
@@ -1115,7 +1117,13 @@ namespace ALUGrid
     alugrid_assert (!fce);
     if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3EXT);
     else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4EXT);
-    else abort ();
+    else
+    {
+      std::cerr << "ERROR (fatal): Wrong face type in BndsegPllBaseXMacro::packAsBnd." << std::endl;
+      alugrid_assert(false);
+      std::abort ();
+    }
+
     os.writeObject (myhbnd ().bndtype ());
     {
       for (int i = 0; i < myhface_t::polygonlength; ++i)
