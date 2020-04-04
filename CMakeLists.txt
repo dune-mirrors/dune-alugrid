@@ -60,11 +60,9 @@ add_subdirectory(lib)
 add_subdirectory(examples EXCLUDE_FROM_ALL)
 add_subdirectory(utils)
 
-if(dune-python_FOUND)
-  add_subdirectory(python)
-  dune_python_install_package(PATH "python")
-elseif(dune-corepy_FOUND)
-  add_subdirectory(python)
+# if Python bindings are enabled, include necessary sub directories.
+if( DUNE_ENABLE_PYTHONBINDINGS )
+  add_subdirectory("python")
   dune_python_install_package(PATH "python")
 endif()
 
