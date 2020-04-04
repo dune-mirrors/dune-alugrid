@@ -1213,44 +1213,6 @@ namespace ALUGrid
 
       virtual void changeVertexCoordinates( const int, const std::array< std::array<alucoord_t,3>, 8 >&, const double ) { std::abort(); }
 
-      using ElementPllXIF::writeDynamicState;
-      using ElementPllXIF::readDynamicState;
-
-      virtual void writeDynamicState (ObjectStream &os, int i) const
-      {
-        alugrid_assert ( up() != 0 );
-        up()->writeDynamicState(os,i);
-      }
-      virtual void readDynamicState (ObjectStream &os, int i)
-      {
-        alugrid_assert ( up() != 0 );
-        up()->readDynamicState(os,i);
-      }
-      virtual void writeStaticState (ObjectStream &os, int i) const
-      {
-        alugrid_assert ( up() != 0 );
-        up()->writeStaticState(os,i);
-      }
-      virtual void readStaticState (ObjectStream &os, int i)
-      {
-        alugrid_assert ( up() != 0 );
-        up()->readStaticState(os,i);
-      }
-      virtual void packAsBnd (int a,int b,ObjectStream &os, const bool ghostCellsEnabled ) const
-      {
-        // this method is overloaded on the tetra class, because only there it's
-        // needed due to the fact, that for conforming refinement
-        // the situation can occur, where a macro face may have
-        // a non-macro element as face neighbor
-        alugrid_assert( false );
-        std::abort();
-      }
-      virtual bool erasable () const
-      {
-        alugrid_assert ( up() != 0 );
-        return up()->erasable();
-      }
-
       virtual double volume () const { alugrid_assert (false); std::abort(); return 0.0; } //= 0;
       virtual void setIndicesAndBndId (const hface & , int ) { alugrid_assert (false); std::abort(); }
       virtual void resetGhostIndices() = 0;
@@ -1987,9 +1949,45 @@ namespace ALUGrid
           return false;
         }
 
+        /////////////////////////////////////////////////////////////////////////
+        //
+        //  Overloaded methods from ElementPllXIF that forward the call to the
+        //  ancestor. This is used for conforming refinement only,
+        //  where a macro face may have a non-macro element as face neighbor
+        //
+        /////////////////////////////////////////////////////////////////////////
+
         // packAsBnd on a non-macro element forward the call to the macro element
         virtual void packAsBnd (int fce, int who, ObjectStream &os, const bool ghostCellsEnabled ) const;
 
+        using ElementPllXIF::writeDynamicState;
+        using ElementPllXIF::readDynamicState;
+
+        virtual void writeDynamicState (ObjectStream &os, int i) const
+        {
+          alugrid_assert ( up() != 0 );
+          up()->writeDynamicState(os,i);
+        }
+        virtual void readDynamicState (ObjectStream &os, int i)
+        {
+          alugrid_assert ( up() != 0 );
+          up()->readDynamicState(os,i);
+        }
+        virtual void writeStaticState (ObjectStream &os, int i) const
+        {
+          alugrid_assert ( up() != 0 );
+          up()->writeStaticState(os,i);
+        }
+        virtual void readStaticState (ObjectStream &os, int i)
+        {
+          alugrid_assert ( up() != 0 );
+          up()->readStaticState(os,i);
+        }
+        virtual bool erasable () const
+        {
+          alugrid_assert ( up() != 0 );
+          return up()->erasable();
+        }
       public :
         // return the rule that lead to this tetra
         virtual myrule_t getrule () const = 0;
