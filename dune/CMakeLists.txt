@@ -9,3 +9,8 @@ foreach(i ${SUBDIRS})
   add_subdirectory(${i} ${opt})
   unset(opt)
 endforeach(i ${SUBDIRS})
+
+# if Python bindings are enabled, include necessary sub directories.
+if( DUNE_ENABLE_PYTHONBINDINGS )
+  add_subdirectory("python")
+endif()
