@@ -40,7 +40,6 @@ namespace ALUGrid
   {
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
-    // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
 
     /*
                       2
@@ -100,7 +99,6 @@ namespace ALUGrid
   {
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
-    // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
 
     /*                  2
 
@@ -166,7 +164,8 @@ namespace ALUGrid
   {
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
-    // the new edge needs to be in the middle (meaning edge 1 out of {0,1,2})
+    // the new edge is directed away from the father vertex 1
+    // NOTE: in this case the children of edge 1 are not both edge 1 with respect to their corresponding children
     //
 
     /*                  2
@@ -232,6 +231,25 @@ namespace ALUGrid
 
   template< class A >  void Hface3Top < A >::split_iso4 ()
   {
+    /*                  2
+
+                       /2 \
+                      /    \
+                     /      \
+                    /1      2\
+                   /          \
+                  /0    0     1\
+               1 /______________\  2
+                /2\1    2     2/2\
+               /   \          /   \
+              /     \0     1 /     \
+             /1     2\      /1     2\
+            /         \    /         \
+           /           \0 /           \
+          / 0   0    1  \/0     0    1 \
+          -----------------------------
+        0              0                 1
+      */
     alugrid_assert ( _inner == 0 );
     alugrid_assert ( !(this->is2d()) );
     int l = 1 + level () ;
