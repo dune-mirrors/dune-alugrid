@@ -165,6 +165,8 @@ namespace ALUGrid
     // NOTE: edge numbering is not opposite vertex !!!
     // see gitter_geo.cc
     // the new edge is directed away from the father vertex 1
+    // This implies that for all 3d split_ij methods with j>i+1 the new vertex has to be inserted
+    // directly before j, and all resulting edges are directed ascendingly
     // NOTE: in this case the children of edge 1 are not both edge 1 with respect to their corresponding children
     //
 
@@ -511,10 +513,6 @@ namespace ALUGrid
     this->splitGhost( ghostInfo );
 
     //int gFace = this->getGhost().second ;
-
-    // In the case of facerule == e02 the second child flips
-    // rear and front are exchanged
-
 
     innerbndseg_t * b0 = new innerbndseg_t (l, subface (0,0), isRear (0), this , _bt, ghostInfo.child(0), ghostInfo.face(0) ) ;
     innerbndseg_t * b1 = new innerbndseg_t (l, subface (0,1), isRear (0), this , _bt, ghostInfo.child(1), ghostInfo.face(1) ) ;
@@ -975,16 +973,16 @@ namespace ALUGrid
 
       3               2
          ___________
-        |3         2|     new inner face ( 4, 3 , 2 )
+        |3         2|     new inner face ( 4, 2 , 3 )
         |*\       .*|
         |  \     .  |     child 0 is the child which contains node 0
         | * \   . * |     child 1 is the child which contains node 1
         |    \ .    |
         |  *  \  *  |
         |    . \    |     4 becomes node 1 in child 0
-        |   *.  \   |     4 becomes node 0 in child 1
-        |  .     \  |
-        | .  * *  \ |
+        |   *.  \   |     child 0: (0,4,2,3)
+        |  .     \  |     4 becomes node 0 in child 1
+        | .  * *  \ |     child 1: (4,1,2,3)
         |0   1 0   1|
         ------*------
       0       4       1
@@ -1008,7 +1006,7 @@ namespace ALUGrid
     alugrid_assert (h0 && h1) ;
 
     // the new vertices are the ones that are missing
-    // i.e. 3 in child 0  and  0 in child 1
+    // i.e. 1 in child 0  and  0 in child 1
     alugrid_assert ( h0->myvertex( 0 ) == myvertex( 0 ) );
     alugrid_assert ( h0->myvertex( 2 ) == myvertex( 2 ) );
     alugrid_assert ( h0->myvertex( 3 ) == myvertex( 3 ) );
@@ -1018,7 +1016,7 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    // split e01 then 1 is new in child 0 and 0 is new in child 1
     alugrid_assert ( h0->myvertex( 1 ) == h1->myvertex( 0 ) );
 
     // remap vertices of children
@@ -1061,9 +1059,9 @@ namespace ALUGrid
         |    \ .    * 4
         |     \   *2|
         |    . \*   |     4 becomes node 2 in child 0
-        |   . * \   |     4 becomes node 1 in child 1
-        |  .*    \  |
-        | *       \ |
+        |   . * \   |     child 0: (0, 1, 4, 3)
+        |  .*    \  |     4 becomes node 1 in child 1
+        | *       \ |     child 1: (0, 4, 2, 3)
         *0         1|
         -------------
       0               1
@@ -1087,7 +1085,7 @@ namespace ALUGrid
     alugrid_assert (h0 && h1) ;
 
     // the new vertices are the ones that are missing
-    // i.e. 3 in child 0  and  0 in child 1
+    // i.e. 2 in child 0  and  1 in child 1
     alugrid_assert ( h0->myvertex( 0 ) == myvertex( 0 ) );
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 3 ) == myvertex( 3 ) );
@@ -1097,7 +1095,7 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    // split e12 then 2 is new in child 0 and 1 is new in child 1
     alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 1 ) );
 
     // remap vertices of children
@@ -1118,7 +1116,7 @@ namespace ALUGrid
     innerface_t * newFace =
       new innerface_t (newLevel,
                        this->subedge(0,0),
-                       myhedge(4), // from face 1 get subedge 0
+                       myhedge(4),
                        this->subedge(2,0) // from face 2 get subedge 0
                       ) ;
     alugrid_assert ( newFace );
@@ -1129,7 +1127,7 @@ namespace ALUGrid
 
     /*
 
-      3       4       2
+      3              2
          ___________
         |3         2|     new inner face ( 1, 4 , 2 )
         |*\       . |
@@ -1137,10 +1135,10 @@ namespace ALUGrid
         | * \   .   |     child 1 is the child which contains node 2
         |    \ .    |
         |  *  \     |
-        |   0. \    |     4 becomes node 2 in child 0
-        |  4*   \   |     4 becomes node 0 in child 1
-        |  .2 *  \  |
-        | .     * \ |
+        |   1. \    |     4 becomes node 2 in child 0
+        |  4*   \   |     child 0: (0, 1, 4, 3)
+        |  .2 *  \  |     4 becomes node 1rin child 1
+        | .     * \ |     child 1: (1, 4, 2, 3)
         |0         1|
         -------------
       0               1
@@ -1164,7 +1162,7 @@ namespace ALUGrid
     alugrid_assert (h0 && h1) ;
 
     // the new vertices are the ones that are missing
-    // i.e. 3 in child 0  and  0 in child 1
+    // i.e. 2 in child 0  and  1 in child 1
     alugrid_assert ( h0->myvertex( 0 ) == myvertex( 0 ) );
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 3 ) == myvertex( 3 ) );
@@ -1174,7 +1172,7 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    // split e02 then 2 is new in child 0 and 1 is new in child 1
     alugrid_assert ( h0->myvertex( 2 ) == h1->myvertex( 1 ) );
 
     // remap vertices of children
@@ -1194,8 +1192,8 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       myhedge(0), // from face 2 get subedge 0
-                       this->subedge(2,0), // from face 1 get subedge 0
+                       myhedge(0),
+                       this->subedge(2,0), // from face 2 get subedge 0
                        this->subedge(3,0)
                       ) ;
     alugrid_assert ( newFace );
@@ -1208,16 +1206,16 @@ namespace ALUGrid
 
       3       4       2
          ___________
-        |3   2*3   2|     new inner face ( 1, 4 , 2 )
+        |3   2*3   2|     new inner face ( 0, 1, 4 )
         | \       . |
         |  \ * * .  |     child 0 is the child which contains node 2
         |   \   .   |     child 1 is the child which contains node 3
         |   *\ .*   |
         |     \     |
         |  * . \ *  |     4 becomes node 3 in child 0
-        |3  .   \   |     4 becomes node 0 in child 1
-        | *.     \* |
-        | .       \ |
+        |3  .   \   |     child 0: (0, 1, 2, 4)
+        | *.     \* |     4 becomes node 2 in child 1
+        | .       \ |     child 1: (0, 1, 4, 3)
         |0         1|
         -------------
       0               1
@@ -1241,16 +1239,16 @@ namespace ALUGrid
     alugrid_assert (h0 && h1) ;
 
     // the new vertices are the ones that are missing
-    // i.e. 3 in child 0  and  0 in child 1
-    alugrid_assert ( h1->myvertex( 0 ) == myvertex( 0 ) );
-    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 1 ) );
-    alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
-
+    // i.e. 3 in child 0  and  2 in child 1
     alugrid_assert ( h0->myvertex( 0 ) == myvertex( 0 ) );
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 2 ) == myvertex( 2 ) );
 
-    // this is always the edge combo, i.e. if we
+    alugrid_assert ( h1->myvertex( 0 ) == myvertex( 0 ) );
+    alugrid_assert ( h1->myvertex( 1 ) == myvertex( 1 ) );
+    alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
+
+    // see picture above - location of new vertex
     alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
@@ -1270,16 +1268,16 @@ namespace ALUGrid
 
       3               2
          ___________
-        |3        *2|     new inner face ( 1, 4 , 2 )
+        |3        *2|     new inner face ( 1, 2, 4 )
         | \     * . |
         |  \  *  .  |     child 0 is the child which contains node 0
         |   \  .    |     child 1 is the child which contains node 3
         |0*  \.     |
       4 *    .\     |
         | *  . \    |     4 becomes node 3 in child 0
-        |3 .*   \   |     4 becomes node 0 in child 1
-        | .   *  \  |
-        |.      * \ |
+        |3 .*   \   |     child 0: (0, 1, 2, 4)
+        | .   *  \  |     4 becomes node 2 in child 1
+        |.      * \ |     child 1> (1, 2, 4, 3)
         |0         1|
         -------------
       0               1
@@ -1289,7 +1287,7 @@ namespace ALUGrid
     // new inner face
     innerface_t * newFace =
       new innerface_t (newLevel,
-                       myhedge(2), // from face 2 get subedge 0
+                       myhedge(2),
                        this->subedge(1,0), // from face 1 get subedge 0
                        this->subedge(2,0)
                       ) ;
@@ -1327,7 +1325,7 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 2 is new in child 1
     alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
@@ -1349,7 +1347,7 @@ namespace ALUGrid
       new innerface_t (newLevel,
                        myhedge(1),
                        this->subedge(1,0),  // from face 1 get subedge 0
-                       this->subedge(3,0)  // from face 2 get subedge 0
+                       this->subedge(3,0)  // from face 3 get subedge 0
                       ) ;
 
     alugrid_assert ( newFace ) ;
@@ -1358,15 +1356,15 @@ namespace ALUGrid
 
       3               2
          ___________
-        |3         2|     new inner face ( 0, 4, 2 )
+        |3         2|     new inner face ( 0, 2, 4 )
         | \       .*|
         |  \     .  |     child 0 is the child which contains node 1
         |   \   . * |     child 1 is the child which contains node 3
         |    \ .    |
-        |     \  *  |
-        |    . \    |      4 becomes node 3 in child 0
-        |   .  1*  <--- 4  4 becomes node 1 in child 1
-        |  .  * 3\  |
+        |     \  *  |      4 becomes node 3 in child 0
+        |    . \    |      child 0: (0, 1, 2, 4)
+        |   .  1*  <--- 4  4 becomes node 2 in child 1
+        |  .  * 3\  |      child 1: (0, 2, 4, 3)
         | . *     \ |
         |0*       1\|
         -------------
@@ -1395,7 +1393,7 @@ namespace ALUGrid
     alugrid_assert (h0 && h1) ;
 
     // the new vertices are the ones that are missing
-    // i.e. 3 in child 0  and  0 in child 1
+    // i.e. 3 in child 0  and  1 in child 1
     alugrid_assert ( h0->myvertex( 0 ) == myvertex( 0 ) );
     alugrid_assert ( h0->myvertex( 1 ) == myvertex( 1 ) );
     alugrid_assert ( h0->myvertex( 2 ) == myvertex( 2 ) );
@@ -1406,7 +1404,7 @@ namespace ALUGrid
     alugrid_assert ( h1->myvertex( 3 ) == myvertex( 3 ) );
 
     // this is always the edge combo, i.e. if we
-    // split e03 then 3 is new in child 0 and 0 is new in child 1
+    // split e03 then 3 is new in child 0 and 2 is new in child 1
     alugrid_assert ( h0->myvertex( 3 ) == h1->myvertex( 2 ) );
 
     // remap vertices of children
