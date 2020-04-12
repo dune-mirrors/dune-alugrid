@@ -41,11 +41,11 @@ inline static std::string dgfUnitCube ( int dimWorld, int cells )
 template< class Grid >
 std::pair< std::string, std::size_t > backup ()
 {
-  std::istringstream input( dgfUnitCube( Grid::dimensionworld, 2 ) );
+  std::istringstream input( dgfUnitCube( Grid::dimensionworld, 4 ) );
   Dune::GridPtr< Grid > grid( input );
 
   grid->loadBalance();
-  grid->globalRefine( 4 );
+  grid->globalRefine( 3 );
 
   std::ostringstream output;
   Dune::BackupRestoreFacility< Grid >::backup( *grid, output );
