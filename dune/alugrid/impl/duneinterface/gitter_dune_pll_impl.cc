@@ -1096,8 +1096,9 @@ namespace ALUGrid
 
   void GitterDunePll::Communication::wait ()
   {
-    if( pending() )
+    if( exchange_ )
     {
+      alugrid_assert( ! ready() );
       exchange_->receive( *dataHandle_ );
       delete exchange_;
       exchange_ = 0;
