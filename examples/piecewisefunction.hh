@@ -449,7 +449,7 @@ struct PiecewiseFunction< View, Range >::CommDataHandle
   }
 
   //! see documentation in Dune::CommDataHandleIF
-  bool fixedsize ( int dim, int codim ) const
+  bool fixedSize ( int dim, int codim ) const
   {
     return true;
   }
