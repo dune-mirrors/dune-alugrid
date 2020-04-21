@@ -19,7 +19,8 @@ if ( MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUN
   message (STATUS "Downloading mesh-consistency")
   include (ExternalProject)
   externalProject_Add (mesh-consistency
-    GIT_REPOSITORY https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
+    #GIT_REPOSITORY https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
+    GIT_REPOSITORY https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
     GIT_TAG master
     UPDATE_COMMAND ""
     INSTALL_COMMAND ""
