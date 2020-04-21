@@ -25,7 +25,12 @@ if ( MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUN
     INSTALL_COMMAND ""
     )
 
-  set(MESH_CONSISTENCY_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/utils/mesh-consistency-prefix/src/mesh-consistency/include)
+  # search mesh-consistency header
+  find_path(MESH_CONSISTENCY_INCLUDE_DIR mesh-consistency.hh
+    PATHS ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
+    PATH_SUFFIXES include
+    NO_DEFAULT_PATH
+    DOC "Include directory of mesh-consistency")
 endif ()
 
 # build library libdunealugrid
