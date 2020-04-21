@@ -12,7 +12,7 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
-  - duneci-install-module https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
+  - git clone https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
 
 debian:11--gcc-9-17:
   image: duneci/debian:11
