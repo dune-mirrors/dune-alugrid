@@ -23,5 +23,7 @@ set(alucommon_HEADERS  alugrid_assert.hh
                        typetraits.hh
                        writeparalleldgf.hh
    )
+exclude_from_headercheck( bisectioncompatibility.hh )
+
 # installation of the header files
 install(FILES ${alucommon_HEADERS} DESTINATION ${alucommondir})

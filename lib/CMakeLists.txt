@@ -1,3 +1,9 @@
+# exclude mesh-consistency if it was put here
+file(GLOB_RECURSE list RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.hh")
+foreach(item ${list})
+  exclude_from_headercheck( ${item} )
+endforeach()
+
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   set(ALUGRID_LIB_SOURCES
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/iterator.cc

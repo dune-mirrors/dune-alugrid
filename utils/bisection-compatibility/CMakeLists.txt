@@ -1,6 +1,8 @@
 set(compatibilitydir  ${CMAKE_INSTALL_INCLUDEDIR}/utils/bisection-compatibility)
 set(compatibility_HEADERS  bisectioncompatibility.hh)
 
+exclude_from_headercheck( bisectioncompatibility.hh )
+
 #set(EXTRA_PROGRAMS  test-compatibility estimate-closure )
 #add_executable(test-compatibility test-compatibility.cc)
 #add_executable(estimate-closure estimate-closure.cc)

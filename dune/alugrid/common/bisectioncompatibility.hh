@@ -3,13 +3,15 @@
 
 #include <iostream>
 #include <array>
-#include <map>
 #include <list>
 #include <vector>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <random>
+#include <map>
+#include <unordered_map>
 
+#include <dune/common/hash.hh>
 #include <dune/common/timer.hh>
 
 struct BisectionCompatibilityParameters

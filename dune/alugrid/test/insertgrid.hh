@@ -53,7 +53,8 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
         element[ 6 ] = 2*dgf.element( el )[ 3 ]+1;
         element[ 7 ] = 2*dgf.element( el )[ 2 ]+1;
 
-      mgb.InsertUniqueHexa( element );
+      ALU3DSPACE IsRearFlag isRear;
+      mgb.InsertUniqueHexa( element, isRear );
     }
     else
     {
@@ -67,8 +68,9 @@ void insertGrid( DGFParser& dgf, ALUGrid::GitterDuneImpl* grid )
       element[ 2 ] = dgf.element( el )[ 2 ]+1;
 
       int dimension = grid->dimension();
+      ALU3DSPACE IsRearFlag isRear;
       ALU3DSPACE SimplexTypeFlag simplexTypeFlag( int(dimension == 3 ? (el % 2) : 0), 0 );
-      mgb.InsertUniqueTetra( element, simplexTypeFlag );
+      mgb.InsertUniqueTetra( element, isRear, simplexTypeFlag );
     }
   }
 
