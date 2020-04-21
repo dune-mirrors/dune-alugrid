@@ -1,6 +1,7 @@
 # exclude mesh-consistency if it was put here
 file(GLOB_RECURSE list RELATIVE ${CMAKE_CURRENT_BINARY_DIR} "*.hh")
 foreach(item ${list})
+  message("Exclude ${item} from headercheck")
   exclude_from_headercheck( ${item} )
 endforeach()
 
