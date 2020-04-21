@@ -447,6 +447,19 @@ namespace Dune
 
     dgf::GridParameterBlock parameter( file );
 
+    // check for Interval block
+    if( eltype == cube )
+    {
+      // if found let grid factory know that the
+      // the grid is Cartesian and thus not orientation
+      // check is needed
+      dgf::IntervalBlock interval( file );
+      if( interval.isactive() )
+      {
+        factory_.setCartesian( true );
+      }
+    }
+
     typedef FieldVector< typename DGFGridType :: ctype, dimworld > CoordinateType ;
 
     ALUParallelBlock aluParallelBlock( file );
@@ -485,14 +498,6 @@ namespace Dune
       if( !dgf_.readDuneGrid( file, dimgrid, dimworld ) )
         DUNE_THROW( InvalidStateException, "DGF file not recognized on second call." );
 
-/*      if( eltype == simplex )
-      {
-        if(dimgrid == 3)
-          dgf_.setOrientation( 2, 3 );
-        else
-          dgf_.setRefinement( 0, 1);
-      }
-*/
       if( parallelFileExists && !globalVertexIndexFound )
         DUNE_THROW( DGFException, "Parallel DGF file requires GLOBALVERTEXINDEX block." );
 

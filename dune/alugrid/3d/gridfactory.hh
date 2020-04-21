@@ -359,6 +359,19 @@ namespace Dune
     //! set longest edge marking for biscetion grids (default is off)
     void setLongestEdgeFlag (bool flag = true) { markLongestEdge_ = flag ; }
 
+    //! set true if grid was created using DGF Interval or StructuredGridFactory
+    void setCartesian ( const bool cartesian )
+    {
+      if ( elementType == hexa )
+      {
+        cartesian_ = cartesian;
+      }
+      else
+      {
+        DUNE_THROW(GridError,"Only cube grids can be Cartesian!");
+      }
+    }
+
     /** \brief Return the Communication used by the grid factory
      *
      * Use the Communication available from the grid.
@@ -451,6 +464,7 @@ namespace Dune
     std::vector< unsigned int > ordering_;
 
     bool markLongestEdge_;
+    bool cartesian_;
   };
 
 
@@ -557,7 +571,8 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -582,7 +597,8 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -607,7 +623,8 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -738,9 +755,18 @@ namespace Dune
     return -1;
   }
 
+  namespace detail
+  {
+    // returns true if mesh-consistency was found during compilation of library
+    bool correctCubeOrientationAvailable();
+
+    // implemented in grifactory.cc to be compiled into the lib
+    bool correctCubeOrientation( const int dimension,
+                                 const std::vector< Dune::FieldVector<double,3> >& vertices,
+                                 std::vector<std::vector<unsigned int> >& elements) ;
+  }
+
 } // end namespace Dune
 
-#if COMPILE_ALUGRID_INLINE
-  #include "gridfactory.cc"
-#endif
+#include "gridfactory_imp.cc"
 #endif

@@ -7,6 +7,26 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/entity_imp.cc)
 endif()
 
+# search mesh-consistency header
+find_path(MESH_CONSISTENCY_INCLUDE_DIR mesh-consistency.hh
+  PATHS ${MESH_CONSISTENCY_ROOT} ${PROJECT_SOURCE_DIR}/utils/mesh-consistency ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
+  PATH_SUFFIXES include
+  NO_DEFAULT_PATH
+  DOC "Include directory of mesh-consistency")
+
+# download mesh-consistency if not already there
+if ( MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
+  message (STATUS "Downloading mesh-consistency")
+  include (ExternalProject)
+  externalProject_Add (mesh-consistency
+    GIT_REPOSITORY https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
+    GIT_TAG master
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND ""
+    )
+
+  set(MESH_CONSISTENCY_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/utils/mesh-consistency-prefix/src/mesh-consistency/include)
+endif ()
 
 # build library libdunealugrid
 dune_add_library(dunealugrid
@@ -14,8 +34,15 @@ dune_add_library(dunealugrid
   _DUNE_TARGET_OBJECTS:parallel_
   ${ALUGRID_LIB_SOURCES}
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/gridfactory.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/nonconfmappings.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
+
+if (NOT MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
+  target_compile_options(dunealugrid PRIVATE "-DHAVE_MESH_CONSISTENCY=1")
+  set_property(TARGET dunealugrid APPEND PROPERTY
+               INCLUDE_DIRECTORIES "${MESH_CONSISTENCY_INCLUDE_DIR}")
+endif()
 
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   target_compile_options(dunealugrid PRIVATE -include${CMAKE_BINARY_DIR}/config.h)
@@ -33,7 +60,7 @@ endif()
 if(METIS_FOUND)
   target_link_libraries(dunealugrid ${METIS_LIBRARIES})
   set_property(TARGET dunealugrid APPEND PROPERTY
-              INCLUDE_DIRECTORIES "${METIS_INCLUDE_DIRS}")
+               INCLUDE_DIRECTORIES "${METIS_INCLUDE_DIRS}")
 endif()
 # zoltan dependencies
 if(ZOLTAN_FOUND)

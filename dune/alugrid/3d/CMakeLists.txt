@@ -8,7 +8,7 @@ set(alu3dgrid_HEADERS  aluinline.hh alu3dinclude.hh communication.hh
     indexsets.hh indexsets.cc iterator.hh iterator.cc iterator_imp.cc alu3diterators.hh
     alu3diterators_imp.cc
     alugrid.hh)
-exclude_from_headercheck( gridfactory.hh gridfactory.cc )
+exclude_from_headercheck( gridfactory.hh gridfactor_imp.cc gridfactory.cc )
 
 # include not needed for CMake
 # include $(top_srcdir)/am/global-rules

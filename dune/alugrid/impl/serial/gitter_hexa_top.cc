@@ -1197,7 +1197,9 @@ namespace ALUGrid
         std::cout << "Neighbour(type="<<hexa->isInterior() << ") "
                   << fce << " of Hexa " << hexa->getIndex()  << " is wrong " << std::endl;
         std::cout << "Check " << hexa->myhface4( fce ) ;
+        std::cout << "This happens for inconsistently ordered meshes!" << std::endl;
         alugrid_assert( false );
+        std::abort();
       }
       // make sure neighbor is something meaningful
       //alugrid_assert ( hexa->myneighbour( fce ).first->isRealObject() );

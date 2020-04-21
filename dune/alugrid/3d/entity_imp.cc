@@ -8,7 +8,7 @@
 
 // this include is needed because of the GridFactory being used in the
 // geometryInFather method
-#include "gridfactory.cc"
+#include "gridfactory_imp.cc"
 
 #include <dune/alugrid/common/declaration.hh>
 #include "alu3dinclude.hh"

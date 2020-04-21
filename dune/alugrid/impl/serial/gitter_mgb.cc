@@ -722,8 +722,13 @@ namespace ALUGrid
       else
       {
         if(((hface4_GEO *)(*i).second)->ref != 2)
-          std::cout << (hface4_GEO *)(*i).second  ;
-        alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
+        {
+          std::cout << (hface4_GEO *)(*i).second  << std::endl;
+          std::cerr << "ERROR: Inconsistent element ordering, face with only 1 attached neighbor found!" << std::endl;
+          std::cerr << "Each face needs 2 neighboring elements( or a boundary )." << std::endl;
+          alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
+          std::abort();
+        }
         myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
       }
     }
@@ -745,9 +750,12 @@ namespace ALUGrid
           if(((hface3_GEO *)(*i).second)->ref != 2)
           {
             auto face = (hface3_GEO *)(*i).second;
-            std::cout << face << std::endl;
+            std::cerr << face << std::endl;
+            std::cerr << "ERROR: Inconsistent element ordering, face with only 1 attached neighbor found!" << std::endl;
+            std::cerr << "Each face needs 2 neighboring elements( or a boundary )." << std::endl;
+            alugrid_assert (((hface3_GEO *)(*i).second)->ref == 2);
+            std::abort();
           }
-          alugrid_assert (((hface3_GEO *)(*i).second)->ref == 2);
           myBuilder ()._hface3List.push_back ((hface3_GEO *)(*i ++).second );
         }
       }

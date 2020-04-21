@@ -43,7 +43,9 @@ public:
     //build the information about neighbours
     Dune::Timer timer;
     buildNeighbors();
+#ifndef NDEBUG
     std::cout << "Build neighbors took " << timer.elapsed() << " sec." << std::endl;
+#endif
   }
 
   //check grid for compatibility
