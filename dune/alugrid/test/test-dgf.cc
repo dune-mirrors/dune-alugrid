@@ -14,6 +14,7 @@
 #include <dune/alugrid/grid.hh>
 #include <dune/alugrid/dgf.hh>
 
+#include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 using namespace Dune;
@@ -36,9 +37,14 @@ try
   }
 
 #if 1
-  using GridType = Dune::ALUGrid<2, 2, Dune::simplex, Dune::nonconforming>;
+  using GridType = Dune::ALUGrid<2, 2, Dune::cube, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
+
+
   GridType& grid = *gridPtr;
+  DGFWriter< typename GridType::LeafGridView > writer( grid.leafGridView() );
+  writer.write( filename + "-out.dgf" );
+
   grid.loadBalance();
 
   if( rank == 0 )
