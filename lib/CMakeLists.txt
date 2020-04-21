@@ -1,5 +1,5 @@
 # exclude mesh-consistency if it was put here
-file(GLOB_RECURSE list RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.hh")
+file(GLOB_RECURSE list RELATIVE ${CMAKE_CURRENT_BINARY_DIR} "*.hh")
 foreach(item ${list})
   exclude_from_headercheck( ${item} )
 endforeach()
