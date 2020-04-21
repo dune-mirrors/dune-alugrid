@@ -6,13 +6,13 @@ workflow:
 
 variables:
   # remove some unused 3rd party packages to speed up tests.
-  DUNECI_CMAKE_FLAGS: "-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE -DENABLE_HEADERCHECK=ON"
+  DUNECI_CMAKE_FLAGS: "-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DMESH_CONSISTENCY_ROOT=/duneci/modules/mesh-consistency -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE -DENABLE_HEADERCHECK=ON"
   
 before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
-  - git clone https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
+  - git clone https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git /duneci/modules/mesh-consistency
 
 debian:11--gcc-9-17:
   image: duneci/debian:11
