@@ -9,6 +9,7 @@ variables:
   DUNECI_CMAKE_FLAGS: "-DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE -DENABLE_HEADERCHECK=ON"
   
 before_script:
+  - duneci-install-module https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-common.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git

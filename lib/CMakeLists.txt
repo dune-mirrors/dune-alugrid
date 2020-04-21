@@ -9,7 +9,7 @@ endif()
 
 # search mesh-consistency header
 find_path(MESH_CONSISTENCY_INCLUDE_DIR mesh-consistency.hh
-  PATHS ${MESH_CONSISTENCY_ROOT} ${PROJECT_SOURCE_DIR}/utils/mesh-consistency ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
+  PATHS ${MESH_CONSISTENCY_ROOT} ${PROJECT_SOURCE_DIR}/../mesh-consistency ${PROJECT_SOURCE_DIR}/utils/mesh-consistency ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
   PATH_SUFFIXES include
   NO_DEFAULT_PATH
   DOC "Include directory of mesh-consistency")
