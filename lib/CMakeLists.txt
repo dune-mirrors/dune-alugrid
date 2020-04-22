@@ -35,7 +35,7 @@ if( ALUGRID_DOWNLOAD_MESH_CONSISTENCY )
       UPDATE_COMMAND ""
       INSTALL_COMMAND ""
     )
-    set(MESH_CONSISTENCY_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/mesh-consistency-prefix/src/mesh-consistency)
+    set(MESH_CONSISTENCY_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/mesh-consistency/src/mesh-consistency)
 
     # search mesh-consistency header
     find_path(MESH_CONSISTENCY_INCLUDE_DIR
