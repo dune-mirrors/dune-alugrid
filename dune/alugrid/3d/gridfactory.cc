@@ -11,6 +11,8 @@
 // provided by consistent-edge-orientation module
 #if HAVE_MESH_CONSISTENCY
 #include <mesh-consistency.hh>
+#else
+#warning "mesh-consistency is disabled for cube meshes. Install manually or set cmake flag ALUGRID_DOWNLOAD_MESH_CONSISTENCY to TRUE."
 #endif
 
 namespace Dune
