@@ -13,7 +13,7 @@
 // Local includes
 #include "alu3dinclude.hh"
 #include "topology.hh"
-#include "../impl/serial/mappings.hh"
+//#include "../impl/serial/mappings.hh"
 #include "nonconfmappings.hh"
 #include <dune/alugrid/common/memory.hh>
 
@@ -29,8 +29,6 @@ namespace Dune
   class ALU3dGridGeometry;
   template< int dim, int dimworld, ALU3dGridElementType, class >
   class ALU3dGrid;
-  class BilinearSurfaceMapping;
-  class TrilinearMapping;
 
   template< class GridImp >
   class ALU3dGridIntersectionIterator;
