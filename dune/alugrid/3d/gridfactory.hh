@@ -400,7 +400,7 @@ namespace Dune
     void doInsertVertex ( const VertexInputType &pos, const GlobalIdType globalId );
     void doInsertBoundary ( int element, int face, int boundaryId );
     void doInsertFace ( const unsigned elIndex, const int faceNumber );
-    void doInsertFace ( const FaceType face, const unsigned elIndex );
+    void doInsertFace ( FaceType face, const unsigned elIndex );
 
     GlobalIdType globalId ( const VertexId &id ) const
     {
