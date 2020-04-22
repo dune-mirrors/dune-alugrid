@@ -127,7 +127,7 @@ struct SimplePartition
   {
     const int id = macroView_.macroId( element );
     // return rank destination number
-    return 0;///id % grid_.comm().size();
+    return id % grid_.comm().size();
   }
 
   // recompute imported ranks
