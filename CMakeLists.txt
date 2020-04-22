@@ -14,6 +14,9 @@ endif()
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
 set(ALUGRID_DISABLE_METIS TRUE)
 
+# set to on to aitmatically download the mesh-consistency package
+set(ALUGRID_DOWNLOAD_MESH_CONSISTENCY FALSE)
+
 # set to true to compile more things into library
 set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
 

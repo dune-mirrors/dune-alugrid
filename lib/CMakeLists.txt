@@ -1,10 +1,3 @@
-# exclude mesh-consistency if it was put here
-file(GLOB_RECURSE list RELATIVE ${CMAKE_CURRENT_BINARY_DIR} "*.hh")
-foreach(item ${list})
-  message("Exclude ${item} from headercheck")
-  exclude_from_headercheck( ${item} )
-endforeach()
-
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   set(ALUGRID_LIB_SOURCES
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/iterator.cc
@@ -14,31 +7,50 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/entity_imp.cc)
 endif()
 
-# search mesh-consistency header
-find_path(MESH_CONSISTENCY_INCLUDE_DIR mesh-consistency.hh
-  PATHS ${MESH_CONSISTENCY_ROOT} ${PROJECT_SOURCE_DIR}/../mesh-consistency ${PROJECT_SOURCE_DIR}/utils/mesh-consistency ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
-  PATH_SUFFIXES include
-  NO_DEFAULT_PATH
-  DOC "Include directory of mesh-consistency")
+set(MESH_CONSISTENCY_ROOT "" CACHE PATH "Path with mesh-consistency package inside")
+mark_as_advanced(MESH_CONSISTENCY_ROOT)
 
-# download mesh-consistency if not already there
-if ( MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
-  message (STATUS "Downloading mesh-consistency")
-  include (ExternalProject)
-  externalProject_Add (mesh-consistency
-    #GIT_REPOSITORY https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
-    GIT_REPOSITORY https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
-    GIT_TAG master
-    UPDATE_COMMAND ""
-    INSTALL_COMMAND ""
-    )
-
+set(MESH_CONSISTENCY_INCLUDE_DIR "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND")
+if( ${MESH_CONSISTENCY_ROOT} )
   # search mesh-consistency header
-  find_path(MESH_CONSISTENCY_INCLUDE_DIR mesh-consistency.hh
-    PATHS ${PROJECT_SOURCE_DIR}/lib/mesh-consistency-prefix/src/mesh-consistency/
+  find_path(MESH_CONSISTENCY_INCLUDE_DIR
+    NAMES "mesh-consistency.hh"
+    PATHS ${MESH_CONSISTENCY_ROOT}
     PATH_SUFFIXES include
     NO_DEFAULT_PATH
-    DOC "Include directory of mesh-consistency")
+    DOC "Include directory of mesh-consistency headers.")
+endif()
+
+# download mesh-consistency if not found
+if( ALUGRID_DOWNLOAD_MESH_CONSISTENCY )
+  if ( MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
+    message (STATUS "Downloading mesh-consistency")
+    include (ExternalProject)
+    externalProject_Add (mesh-consistency
+      # original repo does not work on duneci
+      #GIT_REPOSITORY https://zivgitlab.uni-muenster.de/marckoch/mesh-consistency.git
+      GIT_REPOSITORY https://gitlab.dune-project.org/robert.kloefkorn/mesh-consistency.git
+      GIT_TAG master
+      PREFIX mesh-consistency
+      UPDATE_COMMAND ""
+      INSTALL_COMMAND ""
+    )
+    set(MESH_CONSISTENCY_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/mesh-consistency-prefix/src/mesh-consistency)
+
+    # search mesh-consistency header
+    find_path(MESH_CONSISTENCY_INCLUDE_DIR
+      NAMES "mesh-consistency.hh"
+      PATHS ${MESH_CONSISTENCY_DOWNLOAD_DIR}
+      PATH_SUFFIXES include
+      NO_DEFAULT_PATH
+      DOC "Include directory of mesh-consistency headers.")
+  endif()
+
+  # exclude mesh-consistency if it was put here
+  file(GLOB_RECURSE list RELATIVE ${MESH_CONSISTENCY_DOWNLOAD_DIR} "*.hh")
+  foreach(item ${list})
+    exclude_from_headercheck( ${item} )
+  endforeach()
 endif ()
 
 # build library libdunealugrid
