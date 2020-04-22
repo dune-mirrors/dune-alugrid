@@ -36,7 +36,7 @@ try
     return 0;
   }
 
-#if 1
+#if 0
   using GridType = Dune::ALUGrid<2, 2, Dune::cube, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
 
@@ -75,11 +75,15 @@ try
   vtkWriter.write( "sphere-out" );
 #else
   {
-    using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
+    using GridType = Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming>;
     Dune::GridPtr< GridType > gridPtr( filename );
     gridPtr.loadBalance();
+    GridType& grid = *gridPtr;
 
     // grid is ready and load balanced at that point
+
+    DGFWriter< typename GridType::LeafGridView > writer( grid.leafGridView() );
+    writer.write( filename + "-out.dgf" );
 
     std::cout << "P[ " << rank << " ] parameters = " << gridPtr.nofParameters( 0 ) << std::endl;
     auto lvlView = gridPtr->levelGridView( 0 );
