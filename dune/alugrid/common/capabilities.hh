@@ -32,6 +32,16 @@ namespace Dune
         Impl :: SimplexTopology< dim > :: type :: id ;
     };
 
+
+    /** \brief ALUGrid is a twist free grid
+    \ingroup ALUGrid
+    */
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct isTwistFree< ALUGrid< dim, dimworld, eltype, refinementtype, Comm > >
+    {
+      static const bool v = true;
+    };
+
     /** \brief ALUGrid has entities for all codimension
     \ingroup ALUGrid
     */

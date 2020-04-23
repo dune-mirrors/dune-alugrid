@@ -31,6 +31,7 @@
 #include <dune/grid/test/checkgeometryinfather.hh>
 #include <dune/grid/test/checkiterators.hh>
 #include <dune/grid/test/checkcommunicate.hh>
+#include <dune/grid/test/checktwists.hh>
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 
 // use overloaded test because intersection test fails for manifold
@@ -413,12 +414,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
-
-  // only check twists for simplex grids
-  // const bool checkTwist = grid.geomTypes(0)[0].isSimplex();
-
-  //if( checkTwist )
-  //  checkTwists( grid.leafGridView(), NoMapTwist() );
+  std::cout << "  CHECKING: Macro-twists " << std::endl;
+  checkTwistFree( grid.leafGridView() );
 
   for(int i=0; i<mxl; i++)
   {
@@ -427,8 +424,8 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     checkGrid(grid);
     std::cout << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
-    // if( checkTwist )
-    //  checkTwists( grid.leafGridView(), NoMapTwist() );
+    std::cout << "  CHECKING: twists " << std::endl;
+    checkTwistFree( grid.leafGridView() );
   }
 
   writeFile( grid.leafGridView(), 1 );
@@ -445,8 +442,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   std::cout << "  CHECKING: non-conform" << std::endl;
   checkGrid(grid);
   std::cout << "  CHECKING: twists " << std::endl;
-  // if( checkTwist )
-  //  checkTwists( grid.leafGridView(), NoMapTwist() );
+  checkTwistFree( grid.leafGridView() );
 
   // check the method geometryInFather()
   if( GridType::dimension == GridType::dimensionworld )
