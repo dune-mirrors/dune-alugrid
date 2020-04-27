@@ -26,12 +26,14 @@ endif()
 # general stuff
 cmake_minimum_required(VERSION 2.8.12)
 
-# guess dune-common build dir
-if(NOT (dune-common_DIR OR dune-common_ROOT OR
-        "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))
-    string(REPLACE ${CMAKE_PROJECT_NAME} dune-common dune-common_DIR
+# guess dune-common, dune-grid build dir
+foreach(_module dune-common dune-grid)
+  if(NOT (${_module}_DIR OR ${_module}_ROOT OR
+        "${CMAKE_PREFIX_PATH}" MATCHES ".*${_module}.*"))
+    string(REPLACE ${CMAKE_PROJECT_NAME} ${_module} ${_module}_DIR
       ${PROJECT_BINARY_DIR})
-endif()
+  endif()
+endforeach()
 
 #find dune-common and set the module path
 find_package(dune-common REQUIRED)
