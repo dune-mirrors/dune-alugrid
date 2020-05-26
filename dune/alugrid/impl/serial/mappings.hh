@@ -35,7 +35,7 @@ namespace ALUGrid {
     mat_t Df;
     mat_t Dfi;
     mat_t invTransposed_;
-    alucoord_t DetDf ;
+    alucoord_t DetDf = 0.0 ;
 
     bool calcedDet_;
     bool calcedLinear_;
@@ -211,7 +211,7 @@ namespace ALUGrid {
     mutable mat3_t Df,Dfi;
     mutable inv_t invTransposed_;
     mutable matrix_t matrix_;
-    mutable alucoord_t DetDf;
+    mutable alucoord_t DetDf = 0.0;
 
     mutable coord3_t normal_;
     mutable coord3_t tmp_;
