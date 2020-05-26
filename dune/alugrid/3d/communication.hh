@@ -47,9 +47,12 @@ namespace Dune
   {
     typedef ALU3dGrid< dim, dimworld, elType, ALUGridNoComm > Grid;
 
-    bool pending () const { return false; }
+    bool ready() const { return true; }
 
     void wait () {}
+
+    [[deprecated]]
+    bool pending () const { return ! ready(); }
   };
 
 
@@ -178,10 +181,12 @@ namespace Dune
       return *this;
     }
 
-    bool pending () const { return communication_.pending(); }
+    bool ready () const { return communication_.ready(); }
 
     void wait () { communication_.wait(); }
 
+    [[ deprecated ]]
+    bool pending () const { return ! ready(); }
   private:
     std::unique_ptr< Storage > storage_;
     ALU3DSPACE GitterDunePll::Communication communication_;

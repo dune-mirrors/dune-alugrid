@@ -295,10 +295,12 @@ namespace ALUGrid
 
     Communication &operator= ( Communication &&other );
 
-    bool pending () const { return bool( exchange_ ); }
+    bool ready () const { return ! bool( exchange_ ); }
 
     void wait ();
 
+    [[ deprecated ]]
+    bool pending () const { return ! ready(); }
   private:
     std::unique_ptr< MpAccessLocal::NonBlockingExchange::DataHandleIF > dataHandle_;
     MpAccessLocal::NonBlockingExchange *exchange_;
