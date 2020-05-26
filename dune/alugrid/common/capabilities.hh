@@ -16,6 +16,10 @@ namespace Dune
 
   namespace Capabilities
   {
+    // forward declaration in until decision in dune-grid was made.
+    template<class Grid>
+    struct isTwistFree;
+
 
     // Capabilities for ALUGrid
     // ------------------------
