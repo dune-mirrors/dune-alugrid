@@ -41,6 +41,15 @@ namespace Dune
       static const bool v = true;
     };
 
+    /** \brief ALUGrid has entities for all codimension
+    \ingroup ALUGrid
+    */
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm, int cdim >
+    struct hasEntityIterator< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, cdim >
+      : public hasEntity< ALUGrid< dim, dimworld, eltype, refinementtype, Comm >, cdim >
+    {
+    };
+
     /** \brief ALUGrid can communicate when Comm == ALUGridMPIComm
     \ingroup ALUGrid
     */
