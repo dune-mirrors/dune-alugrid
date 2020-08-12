@@ -32,19 +32,26 @@ debian:11--gcc-9-17:
     PYTHONPATH:         /duneci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:/duneci/modules/dune-grid/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
   tags: [duneci]
 
-ubuntu:18.04--gcc-7-17:
-  image: duneci/ubuntu:18.04
+ubuntu:20.04--gcc-7-17:
+  image: duneci/ubuntu:20.04
   script: duneci-standard-test
   variables:
-    DUNECI_TOOLCHAIN: gcc-7-17
+    DUNECI_TOOLCHAIN: gcc-9-17
   tags: [duneci]
 
-ubuntu:18.04--clang:
-  image: duneci/ubuntu:18.04
-  script: duneci-standard-test
-  variables: 
-    DUNECI_TOOLCHAIN: clang-6-17
-  tags: [duneci]
+  #ubuntu:18.04--gcc-7-17:
+  #  image: duneci/ubuntu:18.04
+  #  script: duneci-standard-test
+  #  variables:
+  #    DUNECI_TOOLCHAIN: gcc-7-17
+  #  tags: [duneci]
+
+  #ubuntu:18.04--clang:
+  #  image: duneci/ubuntu:18.04
+  #  script: duneci-standard-test
+  #  variables: 
+  #    DUNECI_TOOLCHAIN: clang-6-17
+  #  tags: [duneci]
 
 debian:11--gcc-9-17:headercheck:
   image: duneci/debian:11
