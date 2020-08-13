@@ -14,7 +14,7 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
 
 
-ubuntu:20.04 clang-10-20:  i
+ubuntu:20.04 clang-10-20:
   image: registry.dune-project.org/docker/ci/ubuntu:20.04
   variables:
     DUNECI_TOOLCHAIN: clang-10-20
