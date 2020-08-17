@@ -1,9 +1,4 @@
 ---
-workflow:
-  rules:
-    - if: '$CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TITLE !~ /^WIP/'   # Execute jobs in merge request context and not in WIP status
-    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
-
 variables:
   DUNECI_BRANCH: releases/2.7
   # remove some unused 3rd party packages to speed up tests.
@@ -14,14 +9,6 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
 
-
-ubuntu:20.04-clang-10-20:
-  image: registry.dune-project.org/docker/ci/ubuntu:20.04
-  variables:
-    DUNECI_TOOLCHAIN: clang-10-20
-    # cmake flags we use for all dune moudle - important is that build shared libs is set (need some better way of doi
-    DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
-  tags: [duneci]
 
   #debian:10 gcc-7-17:
   # This image has Vc
