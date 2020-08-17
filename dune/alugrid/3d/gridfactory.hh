@@ -258,7 +258,7 @@ namespace Dune
      */
     virtual void
     insertBoundarySegment ( const std::vector< VertexId >& vertices,
-                            const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment ) ;
+                            const std::shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment ) ;
 
     /** \brief insert a boundary projection object, (a copy is made)
      *
@@ -600,7 +600,7 @@ namespace Dune
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
   insertBoundarySegment ( const std::vector< unsigned int >& vertices,
-                          const shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
+                          const std::shared_ptr<BoundarySegment<dimension,dimensionworld> >& boundarySegment )
   {
     const std::size_t numVx = vertices.size();
 
