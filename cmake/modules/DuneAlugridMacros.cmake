@@ -1,3 +1,5 @@
+# from dune-grid/cmake/modules
+include(GridType)
 #define available alugrid types
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
@@ -25,8 +27,6 @@ if( ALUGRID_CPPFLAGS )
   remove the --with-alugrid from the configure options,
   use the --without-alugrid configure option,
   and rebuild dune-grid and dune-alugrid!")
-  #else()
-  #set(HAVE_DUNE_ALUGRID 1)
 endif()
 
 set_property(GLOBAL APPEND PROPERTY ALL_PKG_FLAGS "-DENABLE_ALUGRID")
