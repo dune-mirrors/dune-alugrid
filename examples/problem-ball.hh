@@ -52,7 +52,7 @@ struct BallData
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return 1.0;
+    return 1.5;
   }
 
   int bndType( const DomainType &normal, const DomainType &x, const double time) const
@@ -126,7 +126,6 @@ struct BallModel : public TransportModel<dimD>
   BallModel( unsigned int problem )
   : problem_( new BallData< dimDomain >( problem ) )
   {
-    std::cout << "Creating BallModel with problem " << problem << std::endl;
   }
 
   /** \copydoc TransportProblem::data */
