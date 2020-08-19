@@ -1391,7 +1391,7 @@ namespace ALUGrid
 
       typedef typename myhface4_t::myrule_t myhface4rule_t;
       int opp = 1 - fce; // (fce == 0) ? 1 : 0;
-      if (myhface4 (opp)->refine (myhface4rule_t (r).rotate (twist (opp)), twist (opp)))
+      if (myhface4 (opp)->refine (myhface4rule_t (r), isRear (opp)))
       {
         refineImmediate( r );
         return true;
