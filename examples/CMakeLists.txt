@@ -29,7 +29,7 @@ foreach(variant ball euler transport)
   if("${variant}" STREQUAL "ball")
     target_compile_definitions(main_${variant} PRIVATE "ALUGRID_COUNT_GLOBALCOMM")
   endif()
-  target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CUBE" "GRIDDIM=3" "WORLDDIM=3")
+  target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CUBE" "GRIDDIM=2" "WORLDDIM=2")
 
   foreach(type cube simplex conform)
     string(TOUPPER ${type} type_upper)

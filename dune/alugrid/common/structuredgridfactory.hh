@@ -258,6 +258,16 @@ namespace Dune
       CollectiveCommunication comm( MPIHelper :: getCommunicator() );
       static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
 
+      // if periodic transformations are active we cannot use the YaspGrid
+      // approach to insert the grid cells, otherwise the periodic elements
+      // are not inserted
+      dgf::PeriodicFaceTransformationBlock trafoBlock( input, dimworld );
+      if( trafoBlock.isactive() )
+      {
+        Dune::GridPtr< Grid > grid( input, mpiComm );
+        return SharedPtrType( grid.release() );
+      }
+
       Dune::dgf::IntervalBlock intervalBlock( input );
       if( !intervalBlock.isactive() )
       {

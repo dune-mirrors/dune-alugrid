@@ -61,7 +61,6 @@ namespace ALUGridZoltan
 {
   using ::ALUGrid::MpAccessGlobal;
   using ::ALUGrid::MpAccessLocal;
-  using ::ALUGrid::MpAccessMPI;
 
 #if HAVE_ZOLTAN
   template < class ldb_vertex_map_t, class ldb_edge_set_t >
@@ -272,6 +271,8 @@ namespace ALUGridZoltan
                                  const bool verbose )
   {
 #if HAVE_ZOLTAN && HAVE_MPI
+    using ::ALUGrid::MpAccessMPI;
+
     MpAccessMPI* mpaMPI = dynamic_cast<MpAccessMPI *> (&mpa);
     if( mpaMPI == 0 )
     {
@@ -286,7 +287,7 @@ namespace ALUGridZoltan
     typedef ObjectCollection< ldb_vertex_map_t, ldb_edge_set_t > ObjectCollectionType;
 
     ObjectCollectionType objects( rank, vertexMap, edgeSet );
-    Zoltan *zz = new Zoltan( comm );
+    std::unique_ptr< Zoltan > zz( new Zoltan( comm ) );
     alugrid_assert ( zz );
 
     // General parameters
@@ -422,7 +423,7 @@ namespace ALUGridZoltan
     Zoltan::LB_Free_Part(&exportGlobalIds, &exportLocalIds, &exportProcs, &exportToPart);
 
     // delete zoltan structure
-    delete zz;
+    zz.reset();
 
     // return true if partition changed
     return (changes > 0);

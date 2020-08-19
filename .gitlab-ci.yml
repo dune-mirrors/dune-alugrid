@@ -13,8 +13,18 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
 
-debian:11--gcc-9-17:
-  image: duneci/debian:11
+
+ubuntu:20.04-clang-10-20:
+  image: registry.dune-project.org/docker/ci/ubuntu:20.04
+  script: duneci-standard-test
+  variables:
+    DUNECI_TOOLCHAIN: clang-10-20
+    # cmake flags we use for all dune moudle - important is that build shared libs is set (need some better way of doi
+    DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
+  tags: [duneci]
+
+debian:11--gcc-9-17-python:
+  image: registry.dune-project.org/docker/ci/debian:11
   script: duneci-standard-test
   variables:
     DUNECI_TOOLCHAIN:   gcc-9-17
@@ -32,22 +42,8 @@ debian:11--gcc-9-17:
     PYTHONPATH:         /duneci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:/duneci/modules/dune-grid/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
   tags: [duneci]
 
-ubuntu:18.04--gcc-7-17:
-  image: duneci/ubuntu:18.04
-  script: duneci-standard-test
-  variables:
-    DUNECI_TOOLCHAIN: gcc-7-17
-  tags: [duneci]
-
-ubuntu:18.04--clang:
-  image: duneci/ubuntu:18.04
-  script: duneci-standard-test
-  variables: 
-    DUNECI_TOOLCHAIN: clang-6-17
-  tags: [duneci]
-
 debian:11--gcc-9-17:headercheck:
-  image: duneci/debian:11
+  image: registry.dune-project.org/docker/ci/debian:11
   script:
     - duneci-install-module https://gitlab.dune-project.org/extensions/dune-alugrid.git
     - cd /duneci/modules/dune-alugrid/build-cmake
