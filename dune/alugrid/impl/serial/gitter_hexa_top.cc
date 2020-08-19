@@ -1422,8 +1422,8 @@ namespace ALUGrid
     return;
   }
 
-  template< class A > void Periodic4Top < A >::refineImmediate (myrule_t r) {
-
+  template< class A > void Periodic4Top < A >::refineImmediate (myrule_t r)
+  {
     // Die Methode wird nur vom restore () und vom refineBalance () auf-
     // gerufen und geht davon aus, dass das betroffene Element noch nicht
     // verfeinert ist -> ist ein Blatt der Hierarchie.
@@ -1475,9 +1475,10 @@ namespace ALUGrid
       // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
       // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
       // der angeforderten Regel in einer 'case' Anweisung.
+      alugrid_assert( fce == 0 || fce == 1 );
 
       typedef typename myhface4_t::myrule_t myhface4rule_t;
-      int opp = fce == 0 ? 1 : 0;
+      int opp = 1 - fce; // (fce == 0) ? 1 : 0;
       if (myhface4 (opp)->refine (myhface4rule_t (r).rotate (twist (opp)), twist (opp)))
       {
         refineImmediate( r );

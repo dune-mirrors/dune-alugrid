@@ -5,6 +5,7 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 #include <dune/common/fvector.hh>
 
@@ -22,21 +23,27 @@ struct BallData
 
   const static int dimDomain = DomainType::dimension;
 
-  explicit BallData (const int problem) : c_(0.5), r0_(0.3), problem_( dimDomain == 3 ? problem : 0)
+  explicit BallData (const int problem)
+    : c_(0.5), r0_(0.3), problem_( problem ) //dimDomain == 3 ? problem : 0)
   {}
 
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
     std::ostringstream dgfFileName;
-    if( problem_ == 1 )
-      dgfFileName << path << "/dgf/cube_hc_512.dgf";
-    else if ( problem_ == 2 )
-      dgfFileName << path << "/dgf/cube_hc_4096.dgf";
-    else if ( problem_ == 3 )
-      dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+    if( dimDomain == 3 && problem_ < 4 )
+    {
+      if( problem_ == 1 )
+        dgfFileName << path << "/dgf/cube_hc_512.dgf";
+      else if ( problem_ == 2 )
+        dgfFileName << path << "/dgf/cube_hc_4096.dgf";
+      else if ( problem_ == 3 )
+        dgfFileName << path << "/dgf/cube_hc_32768.dgf";
+    }
     else if ( problem_ == 4 )
       dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
+    else if ( problem_ == 5 )
+      dgfFileName << path << "/dgf/periodic" << dimDomain << ".dgf";
     else
       dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
     return dgfFileName.str();
@@ -60,8 +67,19 @@ struct BallData
     DomainType xx(x);
     xx -= c_;
     DomainType y(0);
-    y[0] = std::cos(time*2.*M_PI)*r0_;
-    y[1] = std::sin(time*2.*M_PI)*r0_;
+
+    if( problem_ < 5 )
+    {
+      y[0] = std::cos(time*2.*M_PI)*r0_;
+      y[1] = std::sin(time*2.*M_PI)*r0_;
+    }
+    else
+    {
+      // lateral translation of marking zone
+      int inter = int(time);
+      y[0] = time - double(inter) -0.5;
+    }
+
     xx -= y;
     double r = xx.two_norm();
     return ( (r>0.15 && r<0.25)? 1 : 0 );
@@ -106,27 +124,9 @@ struct BallModel : public TransportModel<dimD>
    *  \param problem switch between different data settings
    */
   BallModel( unsigned int problem )
-  : problem_( 0 )
+  : problem_( new BallData< dimDomain >( problem ) )
   {
-    switch( problem )
-    {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-      problem_ = new BallData< dimDomain >( problem );
-      break;
-
-    default:
-      std::cerr << "ProblemData not defined - using problem 1!" << std::endl;
-      problem_ = new BallData< dimDomain >( problem );
-    }
-  }
-
-  /** \brief destructor */
-  ~BallModel()
-  {
-    delete problem_;
+    std::cout << "Creating BallModel with problem " << problem << std::endl;
   }
 
   /** \copydoc TransportProblem::data */
@@ -158,7 +158,7 @@ struct BallModel : public TransportModel<dimD>
     return indicator( normal,time,xGlobal, uLeft, problem().boundaryValue(xGlobal,time) );
   }
 
-  Problem *problem_;
+  std::unique_ptr< Problem > problem_;
 };
 
 #endif

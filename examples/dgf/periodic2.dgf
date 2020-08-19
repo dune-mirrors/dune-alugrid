@@ -1,0 +1,13 @@
+DGF
+
+Interval
+ 0.0  0.0    % first corner
+ 1.0  1.0    % second corner
+ 8    8      % 8 cells in each direction (x, y)
+#
+
+
+PERIODICFACETRANSFORMATION
+1 0, 0 1 + 1 0
+#
+
