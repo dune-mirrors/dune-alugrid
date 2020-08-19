@@ -1408,11 +1408,9 @@ namespace ALUGrid
   {
     alugrid_assert (_dwn == 0);
 
-    //TODO: get the right faces here
-
     const int l = 1 + this->level ();
-    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,1), twist (1), this, 1);
+    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,0), twist (1), this, 0);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,1), twist (1), this, 1);
 
     alugrid_assert (p0 && p1 );
     p0->append(p1);
