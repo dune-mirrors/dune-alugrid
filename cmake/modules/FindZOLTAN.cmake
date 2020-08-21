@@ -8,7 +8,6 @@
 #  HAVE_ZOLTAN         - like ZOLTAN_FOUND, but for the inclusion in config.h
 #  ZOLTAN_INCLUDE_DIR  - incude paths to use libzoltan
 #  ZOLTAN_LIBRARIES    - Link these to use libzoltan
-
 set(ZOLTAN_SEARCH_PATH "/usr" "/usr/local" "/opt" "/opt/local")
 set(ZOLTAN_NO_DEFAULT_PATH "")
 if(ZOLTAN_ROOT)
@@ -18,7 +17,6 @@ endif()
 
 # Make sure we have checked for the underlying partitioners.
 find_package(PTScotch)
-#find_package(ParMETIS)
 
 # search for files which implements this module
 find_path (ZOLTAN_INCLUDE_DIRS
@@ -26,6 +24,8 @@ find_path (ZOLTAN_INCLUDE_DIRS
   PATHS ${ZOLTAN_SEARCH_PATH}
   PATH_SUFFIXES "include"
   ${ZOLTAN_NO_DEFAULT_PATH})
+
+message("Found ${ZOLTAN_INCLUDE_DIRS}")
 
 # only search in architecture-relevant directory
 if (CMAKE_SIZEOF_VOID_P)
@@ -37,6 +37,8 @@ find_library(ZOLTAN_LIBRARIES
   PATHS ${ZOLTAN_SEARCH_PATH}
   PATH_SUFFIXES "lib/.libs" "lib" "lib${_BITS}" "lib/${CMAKE_LIBRARY_ARCHITECTURE}"
   ${ZOLTAN_NO_DEFAULT_PATH})
+
+message("Found ${ZOLTAN_LIBRARIES}")
 
 set (ZOLTAN_FOUND FALSE)
 if (ZOLTAN_INCLUDE_DIRS OR ZOLTAN_LIBRARIES)

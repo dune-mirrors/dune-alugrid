@@ -1073,7 +1073,8 @@ namespace ALUGrid
       {
         if( ! db.methodConsitentWithPeriodicBnd( _ldbMethod ) )
         {
-          std::cerr << "ERROR: Partitioning method " << _ldbMethod << " does not work with periodic boundaries! Select a different method!" << std::endl;
+          std::cerr << "ERROR: Partitioning method " << db.methodToString(_ldbMethod)
+                    << " does not work with periodic boundaries! Select a different method!" << std::endl;
           std::abort();
         }
 

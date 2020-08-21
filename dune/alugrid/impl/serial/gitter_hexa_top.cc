@@ -1408,11 +1408,9 @@ namespace ALUGrid
   {
     alugrid_assert (_dwn == 0);
 
-    //TODO: get the right faces here
-
     const int l = 1 + this->level ();
-    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this, 0);
-    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,1), twist (1), this, 1);
+    innerperiodic4_t * p0 = new innerperiodic4_t (l, subface (0,1), twist (0), subface (1,0), twist (1), this, 0);
+    innerperiodic4_t * p1 = new innerperiodic4_t (l, subface (0,0), twist (0), subface (1,1), twist (1), this, 1);
 
     alugrid_assert (p0 && p1 );
     p0->append(p1);
@@ -1422,8 +1420,8 @@ namespace ALUGrid
     return;
   }
 
-  template< class A > void Periodic4Top < A >::refineImmediate (myrule_t r) {
-
+  template< class A > void Periodic4Top < A >::refineImmediate (myrule_t r)
+  {
     // Die Methode wird nur vom restore () und vom refineBalance () auf-
     // gerufen und geht davon aus, dass das betroffene Element noch nicht
     // verfeinert ist -> ist ein Blatt der Hierarchie.
@@ -1475,9 +1473,10 @@ namespace ALUGrid
       // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
       // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
       // der angeforderten Regel in einer 'case' Anweisung.
+      alugrid_assert( fce == 0 || fce == 1 );
 
       typedef typename myhface4_t::myrule_t myhface4rule_t;
-      int opp = fce == 0 ? 1 : 0;
+      int opp = 1 - fce; // (fce == 0) ? 1 : 0;
       if (myhface4 (opp)->refine (myhface4rule_t (r).rotate (twist (opp)), twist (opp)))
       {
         refineImmediate( r );
