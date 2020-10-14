@@ -27,6 +27,9 @@ add_dune_mpi_flags( dunealugrid )
 # on macOS, we have to explicitly link against the Dune libraries
 if(CMAKE_HOST_APPLE)
   target_link_libraries(dunealugrid ${DUNE_LIBS})
+else()
+  # at least we have to link against dunecommon
+  target_link_libraries(dunealugrid dunecommon)
 endif()
 
 # METIS dependencies
