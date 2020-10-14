@@ -1,3 +1,6 @@
+# general stuff
+cmake_minimum_required(VERSION 3.13)
+
 # set up project
 project("dune-alugrid" C CXX)
 
