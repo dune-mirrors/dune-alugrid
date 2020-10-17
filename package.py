@@ -16,7 +16,6 @@ graft doc
 graft dune
 graft lib
 graft python
-graft examples
 graft utils
 include CMakeLists.txt
 include config.h.cmake

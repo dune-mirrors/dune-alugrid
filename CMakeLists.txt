@@ -52,7 +52,9 @@ add_subdirectory(doc/doxygen)
 add_subdirectory(dune)
 add_subdirectory(lib)
 
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+if(EXISTS "${PROJECT_SOURCE_DIR}/examples")
+  add_subdirectory(examples EXCLUDE_FROM_ALL)
+endif()
 add_subdirectory(utils)
 
 # if Python bindings are enabled, include necessary sub directories.
