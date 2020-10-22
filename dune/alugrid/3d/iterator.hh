@@ -800,6 +800,9 @@ public:
   //! the normal Constructor
   ALU3dGridHierarchicIterator(const ThisType &org);
 
+  //! the default Constructor
+  ALU3dGridHierarchicIterator();
+
   //! increment
   void increment();
 
