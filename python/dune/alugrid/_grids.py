@@ -9,7 +9,7 @@ from dune.common.checkconfiguration import assertHave, ConfigurationError
 try:
     assertHave("HAVE_DUNE_ALUGRID")
 
-    def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, **parameters):
+    def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, serial=False, **parameters):
         from dune.grid.grid_generator import module, getDimgrid
 
         if not dimgrid:
@@ -33,23 +33,28 @@ try:
         if refinement=="Dune::conforming" and elementType=="Dune::cube":
             raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
-        typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", " + elementType + ", " + refinement + " >"
+        typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", " + elementType + ", " + refinement
+        # if serial flag is true serial version is forced.
+        if serial:
+            typeName += ", Dune::ALUGridNoComm"
+
+        typeName += " >"
         includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
         gridModule = module(includes, typeName)
 
         return gridModule.LeafGrid(gridModule.reader(constructor))
 
 
-    def aluConformGrid(constructor, dimgrid=None, dimworld=None, **parameters):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming")
+    def aluConformGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming", serial=serial)
 
 
-    def aluCubeGrid(constructor, dimgrid=None, dimworld=None, **parameters):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::cube", refinement="Dune::nonconforming")
+    def aluCubeGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::cube", refinement="Dune::nonconforming", serial=serial)
 
 
-    def aluSimplexGrid(constructor, dimgrid=None, dimworld=None):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::nonconforming")
+    def aluSimplexGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::nonconforming", serial=serial)
 
     grid_registry = {
             "ALU"        : aluGrid,

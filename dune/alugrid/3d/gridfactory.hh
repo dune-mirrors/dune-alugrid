@@ -474,10 +474,23 @@ namespace Dune
     : BaseType( communicator )
     {}
 
+    /** \brief Default constructor ignoring MPIComm */
+    template <class MPIComm>
+    explicit GridFactory ( const MPIComm & )
+    : BaseType( Grid::defaultCommunicator() )
+    {}
+
     /** \brief constructor taking filename */
     explicit GridFactory ( const std::string &filename,
                            const MPICommunicatorType &communicator = Grid::defaultCommunicator() )
     : BaseType( filename, communicator )
+    {}
+
+    /** \brief constructor taking filename and ignoring MPIComm */
+    template <class MPIComm>
+    explicit GridFactory ( const std::string &filename,
+                           const MPIComm & )
+    : BaseType( filename, Grid::defaultCommunicator() )
     {}
   };
 
