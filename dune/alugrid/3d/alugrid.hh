@@ -35,9 +35,9 @@ namespace Dune
     typedef ALUGrid< dim, dimworld, elType, refineType, Comm > This;
     typedef typename ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid  BaseType;
 
+   public:
     typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
 
-   public:
     //! type of boundary projection
     typedef typename BaseType :: ALUGridVertexProjectionPairType  ALUGridVertexProjectionPairType;
 
