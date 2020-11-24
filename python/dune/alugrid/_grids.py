@@ -9,7 +9,7 @@ from dune.common.checkconfiguration import assertHave, ConfigurationError
 try:
     assertHave("HAVE_DUNE_ALUGRID")
 
-    def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, serial=False, **parameters):
+    def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, **parameters):
         from dune.grid.grid_generator import module, getDimgrid
 
         if not dimgrid:
@@ -42,19 +42,23 @@ try:
         includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
         gridModule = module(includes, typeName)
 
-        return gridModule.LeafGrid(gridModule.reader(constructor))
+        if comm is not None:
+            raise Exception("Passing communicator to grid construction is not yet implemented in Python bindings of dune-grid")
+            return gridModule.LeafGrid(gridModule.reader(constructor, comm))
+        else:
+            return gridModule.LeafGrid(gridModule.reader(constructor))
 
 
-    def aluConformGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming", serial=serial)
+    def aluConformGrid(constructor, dimgrid=None, dimworld=None, comm=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming", comm=comm, serial=serial)
 
 
-    def aluCubeGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::cube", refinement="Dune::nonconforming", serial=serial)
+    def aluCubeGrid(constructor, dimgrid=None, dimworld=None, comm=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::cube", refinement="Dune::nonconforming", comm=comm, serial=serial)
 
 
-    def aluSimplexGrid(constructor, dimgrid=None, dimworld=None, serial=False, **parameters):
-        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::nonconforming", serial=serial)
+    def aluSimplexGrid(constructor, dimgrid=None, dimworld=None, comm=None, serial=False, **parameters):
+        return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::nonconforming", comm=comm, serial=serial)
 
     grid_registry = {
             "ALU"        : aluGrid,
