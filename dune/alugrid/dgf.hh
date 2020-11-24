@@ -322,19 +322,19 @@ namespace Dune
       testfile.close();
       return true;
     }
-    static int rank( MPICommunicatorType MPICOMM )
+    static int rank( MPICommunicatorType mpiComm )
     {
       int rank = 0;
 #if HAVE_MPI
-      MPI_Comm_rank( MPICOMM, &rank );
+      MPI_Comm_rank( mpiComm, &rank );
 #endif
       return rank;
     }
-    static int size( MPICommunicatorType MPICOMM )
+    static int size( MPICommunicatorType mpiComm )
     {
       int size = 1;
 #if HAVE_MPI
-      MPI_Comm_size( MPICOMM, &size );
+      MPI_Comm_size( mpiComm, &size );
 #endif
       return size;
     }
@@ -355,8 +355,18 @@ namespace Dune
     using BaseType :: callDirectly;
   public:
     explicit DGFGridFactory ( std::istream &input,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
-    : BaseType( comm )
+                              MPICommunicatorType mpiComm )
+      : DGFGridFactory( input, Comm(mpiComm) )
+    {}
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType mpiComm )
+      : DGFGridFactory( filename, Comm(mpiComm) )
+    {}
+
+    DGFGridFactory ( std::istream &input,
+                     Comm comm = Comm() ) // casts from and to MPI_Comm
+      : BaseType( MPICommunicatorType(comm) )
     {
       input.clear();
       input.seekg( 0 );
@@ -366,8 +376,8 @@ namespace Dune
     }
 
     explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator())
-    : BaseType( comm )
+                              Comm comm = Comm() ) // casts from and to MPI_Comm
+      : BaseType( MPICommunicatorType(comm) )
     {
       std::ifstream input( filename.c_str() );
       bool fileFound = input.is_open() ;

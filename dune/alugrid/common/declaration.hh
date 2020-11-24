@@ -33,6 +33,7 @@ namespace Dune
     ALUGridNoComm() : noComm_() {}
     ALUGridNoComm( const No_Comm& comm ) : noComm_( comm ) {}
 #if ALU3DGRID_PARALLEL
+    ALUGridNoComm( MPI_Comm comm ) : noComm_() {}
     operator MPI_Comm () const { return MPI_COMM_SELF; }
 #endif
     operator No_Comm () const { return noComm_; }
