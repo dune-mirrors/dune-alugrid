@@ -43,6 +43,7 @@ try:
         gridModule = module(includes, typeName)
 
         if comm is not None:
+            raise Exception("Passing communicator to grid construction is not yet implemented in Python bindings of dune-grid")
             return gridModule.LeafGrid(gridModule.reader(constructor, comm))
         else:
             return gridModule.LeafGrid(gridModule.reader(constructor))
