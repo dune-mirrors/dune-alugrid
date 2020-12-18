@@ -8,8 +8,8 @@ DEPENDENCIES=@REQUIRES@
 
 Name: @PACKAGE_NAME@
 Version: @VERSION@
-Description: DUNE Adaptive, Load-balanced, and Unstructured Grid Module
-URL: https://gitlab.dune-project.org/extensions/dune-alugrid
+Description: @DESCRIPTION@
+URL: @URL@
 Requires: ${DEPENDENCIES}
 Libs: -L${libdir} -ldunealugrid
 Cflags: -I${includedir}

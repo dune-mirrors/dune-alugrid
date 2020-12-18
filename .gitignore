@@ -22,3 +22,7 @@ libdunealugrid.a
 dune-alugrid-targets.cmake
 dune-alugrid.pc
 *config*.cmake
+# ignore files generated during python setup.py sdist
+MANIFEST
+_skbuild/
+dist
