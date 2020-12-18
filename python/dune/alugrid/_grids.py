@@ -11,7 +11,7 @@ try:
 
     def _module(includes, typeName, defaultGrid, *args, **kwargs):
 
-        #module = None
+        module = None
         if defaultGrid is not None:
             # try to load default module
             try:
