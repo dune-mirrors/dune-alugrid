@@ -2190,37 +2190,39 @@ namespace ALUGrid
     // verfeinert ist -> ist ein Blatt der Hierarchie.
 
     alugrid_assert (this->leaf()) ;
+    typedef typename myhface_t::myrule_t face3rule_t;
     switch(r)
     {
       case myrule_t::iso4 :
+        {
         // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
         // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
         // "uberall hface3::refine (..) true geliefert hat, wohl aber z.B. von
         // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
         // erzwingen m"ussen und d"urfen.
 
-        if( myhface (0)->is2d() )
+        myhface_t* face0 = myhface (0);
+        myhface_t* face1 = myhface (1);
+        if( face0->is2d() )
         {
-          typedef typename myhface_t::myrule_t face3rule_t;
           // for 2d use e01
           face3rule_t( myrule_t::e01 );
-          myhface (0)->refineImmediate (face3rule_t (r)) ;
-          myhface (1)->refineImmediate (face3rule_t (r)) ;
+          face0->refineImmediate (face3rule_t (r)) ;
+          face1->refineImmediate (face3rule_t (r)) ;
           split_bisection () ;
         }
         else
         {
-          typedef typename myhface_t::myrule_t face3rule_t;
-          myhface (0)->refineImmediate (face3rule_t (r)) ;
-          myhface (1)->refineImmediate (face3rule_t (r)) ;
+          face0->refineImmediate (face3rule_t (r)) ;
+          face1->refineImmediate (face3rule_t (r)) ;
           split_iso4 () ;
-          break ;
+        }
+        break ;
         }
 
       case myrule_t::e01 :
       case myrule_t::e02 :
       case myrule_t::e12 :
-        typedef typename myhface_t::myrule_t face3rule_t;
         myhface (0)->refineImmediate (face3rule_t (r)) ;
         myhface (1)->refineImmediate (face3rule_t (r)) ;
         split_bisection () ;
