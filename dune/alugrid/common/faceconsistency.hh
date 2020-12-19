@@ -64,7 +64,11 @@ public:
   {
     for(auto&& face : neighbours_)
     {
-      std::cout << face.first[0] << "," << face.first[1] << "," << face.first[2] << "," << face.first[3] << " : " << face.second[0] << ", " << face.second[1] << std::endl;
+      std::cout << face.first[0] << "," << face.first[1] << "," << face.first[2] << "," << face.first[3] << " : " << face.second.first << ", " << face.second.second << std::endl;
+    }
+    for(auto&& face : boundaryFaces_)
+    {
+      std::cout << face.first[0] << "," << face.first[1] << "," << face.first[2] << "," << face.first[3] << " : " << face.second << std::endl;
     }
   }
 
@@ -90,7 +94,7 @@ public:
       unsigned int startElIndex = startFace->second.first;
       ElementType el = elements_[startElIndex];
       int startFaceIndexInEl = getFaceIndex(el, startFace->first);
-      int oppIndex = (startFaceIndexInEl % 2) ? startFaceIndexInEl + 1 : startFaceIndexInEl - 1;
+      int oppIndex = (startFaceIndexInEl % 2) ? startFaceIndexInEl - 1 : startFaceIndexInEl + 1;
       FaceType face = getFace(el, startFaceIndexInEl);
       FaceType oppFace = getFace(el, oppIndex);
       walkIntoDirection( face, startElIndex, untreatedFaces);
