@@ -2206,7 +2206,7 @@ namespace ALUGrid
         if( face0->is2d() )
         {
           // for 2d use e01
-          face3rule_t( myrule_t::e01 );
+          face3rule_t( face3rule_t::e01 );
           face0->refineImmediate (face3rule_t (r)) ;
           face1->refineImmediate (face3rule_t (r)) ;
           split_bisection () ;
