@@ -378,6 +378,8 @@ namespace ALUGrid
                   neigh.first->refineBalance (r, neigh.second);
                   neigh = isRear ? this->nb.front () : this->nb.rear()  ;
                 }
+
+                /*
                 for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
                 {
                   // assert faces are leaf - this is not true anymore with weak compatibility
@@ -386,6 +388,7 @@ namespace ALUGrid
                   //alugrid_assert(f->nb.rear().first->nbLeaf());
                 ;
                 }
+                */
               }
             }
             else
@@ -2196,11 +2199,23 @@ namespace ALUGrid
         // restore () oder abgeleiteten Funktionen die eine direkte Verfeinerung
         // erzwingen m"ussen und d"urfen.
 
-        typedef typename myhface_t::myrule_t face3rule_t;
-        myhface (0)->refineImmediate (face3rule_t (r)) ;
-        myhface (1)->refineImmediate (face3rule_t (r)) ;
-        split_iso4 () ;
-        break ;
+        if( myhface (0)->is2d() )
+        {
+          typedef typename myhface_t::myrule_t face3rule_t;
+          // for 2d use e01
+          face3rule_t( myrule_t::e01 );
+          myhface (0)->refineImmediate (face3rule_t (r)) ;
+          myhface (1)->refineImmediate (face3rule_t (r)) ;
+          split_bisection () ;
+        }
+        else
+        {
+          typedef typename myhface_t::myrule_t face3rule_t;
+          myhface (0)->refineImmediate (face3rule_t (r)) ;
+          myhface (1)->refineImmediate (face3rule_t (r)) ;
+          split_iso4 () ;
+          break ;
+        }
 
       case myrule_t::e01 :
       case myrule_t::e02 :
@@ -2211,13 +2226,8 @@ namespace ALUGrid
         split_bisection () ;
         break ;
 
-        std::cerr << "**ERROR (FATAL) refinement of Periodic3Top didd not work: " ;
-        std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
-        std::abort () ;
-        break ;
-
       default :
-        std::cerr << "**FEHLER (FATAL) beim unbedingten Verfeinern mit unbekannter Regel: " ;
+        std::cerr << "**ERROR (FATAL) refinement of Periodic3Top did not work: " ;
         std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
         std::abort () ;
         break ;
