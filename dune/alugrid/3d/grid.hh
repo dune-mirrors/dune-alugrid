@@ -144,6 +144,7 @@ namespace Dune
       return new GitterImplType ( dim, conformingRefinement, stream, projection );
     }
 
+    // ALUGridNoComm casts into No_Comm and MPI_Comm and here the default is MPI_COMM_SELF
     static ALUGridNoComm defaultComm () { return ALUGridNoComm(); }
 
     static int getRank ( ALUGridNoComm comm ) { return 0; }
@@ -194,7 +195,8 @@ namespace Dune
       return new GitterImplType ( dim, conformingRefinement, stream, mpAccess_, projections );
     }
 
-    static MPI_Comm defaultComm () { return MPI_COMM_WORLD; }
+    // ALUGridMPIComm casts into MPI_Comm and the default is MPI_COMM_WORLD
+    static ALUGridMPIComm defaultComm () { return ALUGridMPIComm(); }
 
     static int getRank ( MPI_Comm comm )
     {

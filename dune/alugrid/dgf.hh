@@ -250,7 +250,39 @@ namespace Dune
                                const char *filename,
                                MPICommunicatorType communicator )
     {
-      if( !std::is_same< MPICommunicatorType, No_Comm >::value )
+      typedef typename Grid::MPICommunicatorType  GridCommunicatorType;
+      static const bool isSameComm = std::is_same< GridCommunicatorType, MPICommunicatorType >::value;
+      return callDirectlyImpl( gridname, rank, filename, communicator, std::integral_constant< bool, isSameComm >() );
+    }
+
+    static Grid* callDirectlyImpl( const std::string& gridname,
+                                   const int rank,
+                                   const char *filename,
+                                   MPICommunicatorType communicator,
+                                   std::false_type )
+    {
+      // for rank 0 we also check the normal file name
+      if( rank == 0 )
+      {
+        if( fileExists( filename ) )
+          return new Grid( filename );
+
+        // only throw this exception on rank 0 because
+        // for the other ranks we can still create empty grids
+        DUNE_THROW( GridError, "Unable to create " << gridname << " from '"
+                    << filename << "'." );
+      }
+      // return empty grid on all other processes
+      return new Grid();
+    }
+
+    static Grid* callDirectlyImpl( const std::string& gridname,
+                                   const int rank,
+                                   const char *filename,
+                                   MPICommunicatorType communicator,
+                                   std::true_type )
+    {
+      if constexpr ( !std::is_same< MPICommunicatorType, No_Comm >::value )
       {
         // in parallel runs add rank to filename
         std :: stringstream tmps;
@@ -290,19 +322,19 @@ namespace Dune
       testfile.close();
       return true;
     }
-    static int rank( MPICommunicatorType MPICOMM )
+    static int rank( MPICommunicatorType mpiComm )
     {
       int rank = 0;
 #if HAVE_MPI
-      MPI_Comm_rank( MPICOMM, &rank );
+      MPI_Comm_rank( mpiComm, &rank );
 #endif
       return rank;
     }
-    static int size( MPICommunicatorType MPICOMM )
+    static int size( MPICommunicatorType mpiComm )
     {
       int size = 1;
 #if HAVE_MPI
-      MPI_Comm_size( MPICOMM, &size );
+      MPI_Comm_size( mpiComm, &size );
 #endif
       return size;
     }
@@ -323,8 +355,18 @@ namespace Dune
     using BaseType :: callDirectly;
   public:
     explicit DGFGridFactory ( std::istream &input,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator() )
-    : BaseType( comm )
+                              MPICommunicatorType mpiComm )
+      : DGFGridFactory( input, Comm(mpiComm) )
+    {}
+
+    explicit DGFGridFactory ( const std::string &filename,
+                              MPICommunicatorType mpiComm )
+      : DGFGridFactory( filename, Comm(mpiComm) )
+    {}
+
+    DGFGridFactory ( std::istream &input,
+                     Comm comm = Comm() ) // casts from and to MPI_Comm
+      : BaseType( MPICommunicatorType(comm) )
     {
       input.clear();
       input.seekg( 0 );
@@ -334,8 +376,8 @@ namespace Dune
     }
 
     explicit DGFGridFactory ( const std::string &filename,
-                              MPICommunicatorType comm = MPIHelper::getCommunicator())
-    : BaseType( comm )
+                              Comm comm = Comm() ) // casts from and to MPI_Comm
+      : BaseType( MPICommunicatorType(comm) )
     {
       std::ifstream input( filename.c_str() );
       bool fileFound = input.is_open() ;

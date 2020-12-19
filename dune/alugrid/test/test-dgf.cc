@@ -36,7 +36,7 @@ try
     return 0;
   }
 
-#if 0
+#if 1
   using GridType = Dune::ALUGrid<2, 2, Dune::cube, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
 
@@ -47,6 +47,7 @@ try
 
   grid.loadBalance();
 
+  /*
   if( rank == 0 )
   {
     for(const auto& elem : Dune::elements( grid.leafGridView() ) )
@@ -65,11 +66,12 @@ try
       grid.mark( 1, elem );
     }
   }
+  */
 
-  grid.preAdapt();
-  grid.adapt();
-  grid.postAdapt();
-  // grid.globalRefine( 5 );
+  //grid.preAdapt();
+  //grid.adapt();
+  //grid.postAdapt();
+  grid.globalRefine( 2 );
 
   Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid.leafGridView());
   vtkWriter.write( "sphere-out" );

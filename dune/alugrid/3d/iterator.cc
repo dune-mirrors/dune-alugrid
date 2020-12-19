@@ -238,6 +238,17 @@ alu_inline void ALU3dGridLeafIterator<cdim, pitype, GridImp> :: increment ()
 // --HierarchicIterator
 template <class GridImp>
 alu_inline ALU3dGridHierarchicIterator<GridImp> ::
+  ALU3dGridHierarchicIterator()
+  : ALU3dGridEntityPointer<0,GridImp> ()
+  , elem_( nullptr )
+  , ghostElem_( )
+  , maxlevel_( -1 )
+{
+}
+
+// --HierarchicIterator
+template <class GridImp>
+alu_inline ALU3dGridHierarchicIterator<GridImp> ::
   ALU3dGridHierarchicIterator(const HElementType & elem, int maxlevel ,bool end)
   : ALU3dGridEntityPointer<0,GridImp> ()
   , elem_(&elem)

@@ -1,9 +1,15 @@
+# general stuff
+cmake_minimum_required(VERSION 3.13)
+
 # set up project
 project("dune-alugrid" C CXX)
 
 #circumvent not building docs
 set(BUILD_DOCS 1)
 set(DUNE_REENABLE_ADD_TEST TRUE)
+
+# enable or disable pre-compiled python modules
+
 
 # Set the default DUNE_MAX_TEST_CORES that is used in the parallel tests
 if(NOT DUNE_MAX_TEST_CORES)
@@ -25,6 +31,7 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
   set(DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB 1)
 endif()
 
+option(ENABLE_PRECOMPILED_PYTHON_MODULES OFF)
 
 # general stuff
 cmake_minimum_required(VERSION 2.8.12)
@@ -55,7 +62,9 @@ add_subdirectory(doc/doxygen)
 add_subdirectory(dune)
 add_subdirectory(lib)
 
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+if(EXISTS "${PROJECT_SOURCE_DIR}/examples")
+  add_subdirectory(examples EXCLUDE_FROM_ALL)
+endif()
 add_subdirectory(utils)
 
 # if Python bindings are enabled, include necessary sub directories.

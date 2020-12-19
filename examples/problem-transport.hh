@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 #include <dune/common/fvector.hh>
 
@@ -18,7 +19,20 @@ class TransportProblemData1
 {
   typedef ProblemData< dimD, 1 > Base;
 
+  std::string gridFile_;
 public:
+  TransportProblemData1( const int problem )
+  {
+    if( problem == 3 )
+    {
+      gridFile_ = "/dgf/periodic" + std::to_string(dimDomain) + ".dgf";
+    }
+    else
+    {
+      gridFile_ = "/dgf/unitcube" + std::to_string(dimDomain) + "d.dgf";
+    }
+  }
+
   const static int dimDomain = Base::dimDomain;
   const static int dimRange = Base::dimRange;
 
@@ -39,9 +53,7 @@ public:
 
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
-    std::ostringstream dgfFileName;
-    dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
-    return dgfFileName.str();
+    return path + gridFile_;
   }
 
   RangeType boundaryValue ( const DomainType &x, double time ) const
@@ -82,7 +94,20 @@ class TransportProblemData2
 {
   typedef ProblemData< dimD, 1  > Base;
 
+  std::string gridFile_;
 public:
+  TransportProblemData2( const int problem )
+  {
+    if( problem == 4 )
+    {
+      gridFile_ = "/dgf/periodic" + std::to_string(dimDomain) + ".dgf";
+    }
+    else
+    {
+      gridFile_ = "/dgf/unitcube" + std::to_string(dimDomain) + "d.dgf";
+    }
+  }
+
   const static int dimDomain = Base::dimDomain;
   const static int dimRange = Base::dimRange;
 
@@ -92,8 +117,9 @@ public:
   //! \copydoc ProblemData::initial
   RangeType initial ( const DomainType &x ) const
   {
-    DomainType r(0);
-    return ((x-r).two_norm() < 0.5 ? RangeType( 1 ) : RangeType( 0 ) );
+    DomainType r(0.5);
+    return ((x-r).two_norm() < 0.25 ? RangeType( 1 ) : RangeType( 0 ) );
+    //return ((x-r).two_norm() < 0.5 ? RangeType( 1 ) : RangeType( 0 ) );
   }
 
   //! \copydoc ProblemData::endTime
@@ -105,9 +131,7 @@ public:
   //! \copydoc ProblemData::gridFile
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
-    std::ostringstream dgfFileName;
-    dgfFileName << path << "/dgf/unitcube" << dimDomain << "d.dgf";
-    return dgfFileName.str();
+    return path + gridFile_;
   }
 
   RangeType boundaryValue ( const DomainType &x, double time ) const
@@ -170,25 +194,28 @@ struct TransportModel
     switch( problem )
     {
     case 1:
-      problem_ = new TransportProblemData1< dimDomain >();
+    case 3:
+      problem_.reset( new TransportProblemData1< dimDomain >( problem ) );
       break;
     case 2:
-      problem_ = new TransportProblemData2< dimDomain >();
+    case 4:
+      problem_.reset( new TransportProblemData2< dimDomain >( problem ) );
       break;
     default:
       std::cerr << "Problem " << problem << " does not exists." << std::endl;
-      exit( 1 );
+      std::abort();
     }
 
-    // set transport velocity
-    velocity_ = DomainType( 1.25 );
-  }
-
-  /** \brief destructor
-   */
-  ~TransportModel ()
-  {
-    delete problem_;
+    if( problem < 3 )
+    {
+      // set transport velocity
+      velocity_ = DomainType( 1.25 );
+    }
+    else
+    {
+      velocity_ = 0.0;
+      velocity_[ 0 ] = 1.25;
+    }
   }
 
   /** \brief obtain problem */
@@ -291,9 +318,9 @@ struct TransportModel
   }
 
 protected:
-  TransportModel ( ) : problem_(0), velocity_(1) {}
+  TransportModel ( ) : problem_(), velocity_(1) {}
 private:
-  Problem *problem_;
+  std::unique_ptr< Problem > problem_;
   DomainType velocity_;
 }; // end class TransportModel
 

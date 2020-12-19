@@ -1,3 +1,6 @@
+# do not ignore <PACKAGE>_ROOT variables
+cmake_policy(SET CMP0074 NEW)
+
 # from dune-grid/cmake/modules
 include(GridType)
 #define available alugrid types

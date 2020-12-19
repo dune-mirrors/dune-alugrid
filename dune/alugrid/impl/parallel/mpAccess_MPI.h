@@ -2,6 +2,7 @@
 #define MPACCESS_MPI_H_INCLUDED
 
 #include <memory>
+#include <dune/common/parallel/communication.hh>
 
 #include "mpAccess.h"
 
@@ -58,6 +59,12 @@ namespace ALUGrid
   public :
     // constructor taking MPI_Comm
     explicit MpAccessMPI ( MPI_Comm mpicomm ) ;
+
+    // constructor taking Dune::No_Comm and creating MpAccessMPI with MPI_COMM_SELF
+    explicit MpAccessMPI ( const Dune::No_Comm& )
+      : MpAccessMPI( MPI_COMM_SELF )
+    {}
+
     // copy constructor
     MpAccessMPI (const MpAccessMPI &);
     // destructor
