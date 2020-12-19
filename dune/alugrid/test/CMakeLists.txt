@@ -9,7 +9,8 @@ set(EXTRA_TESTS
   test-adaptivity
   test-fromtogridfactory
   test-iterators
-  test-structuredgridfactory
+  test-periodic
+  test-twists
   test-hierarchic
   test-ball-projection
   test-gmsh
