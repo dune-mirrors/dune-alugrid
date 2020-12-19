@@ -2,7 +2,9 @@ set(DGFS
   2-3-testgrid.dgf
   ball.dgf
   cube-testgrid-2-2.dgf
+  cube-testgrid-2-2-inconsistent.dgf
   cube-testgrid-2-3.dgf
+  cube-testgrid-3-3-inconsistent.dgf
   grid2d_str1d.dgf
   periodic2.dgf
   periodic3.dgf
