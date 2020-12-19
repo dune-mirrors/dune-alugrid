@@ -71,7 +71,7 @@ integrationElement (const LocalCoordinate& local) const
     return 6.0 * geoImpl().volume();
   }
   else
-    return geoImpl().mapping().det( local );
+    return std::abs(geoImpl().mapping().det( local ));
 }
 
 template<int mydim, int cdim, class GridImp>
