@@ -53,9 +53,11 @@ int main( int argc, char** argv )
 try
 {
   static const int dim = 2;
+  //using GridType = Dune::ALUGrid<dim, dim, Dune::simplex, Dune::conforming>;
+  using GridType = Dune::ALUGrid<dim, dim, Dune::simplex, Dune::nonconforming>;
+  //using GridType = Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming>;
 
-  auto& mpiHelper = MPIHelper::instance( argc, argv );
-  const int rank = mpiHelper.rank();
+  MPIHelper::instance( argc, argv );
 
   std::string filename = "dgf/periodic" + std::to_string( dim ) + ".dgf";
   if( argc > 1 )
@@ -63,7 +65,6 @@ try
     filename = std::string(argv[1]);
   }
 
-  using GridType = Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
   GridType& grid = *gridPtr;
   grid.loadBalance();
@@ -81,12 +82,12 @@ try
 
   return 0;
 }
-catch ( Dune::Exception &e )
+catch ( const Dune::Exception &e )
 {
   std::cerr << e << std::endl;
   return 1;
 }
-catch (std::exception &e) {
+catch (const std::exception &e) {
   std::cerr << e.what() << std::endl;
   return 1;
 }
