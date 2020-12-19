@@ -15,7 +15,6 @@
 #include <dune/grid/io/file/dgfparser/dgfwriter.hh>
 
 #include <dune/grid/test/checkintersectionit.hh>
-//#include "checktwists.cc"
 
 #include <dune/grid/io/file/vtk/vtkwriter.hh>
 

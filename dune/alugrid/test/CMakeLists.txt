@@ -10,7 +10,6 @@ set(EXTRA_TESTS
   test-fromtogridfactory
   test-iterators
   test-periodic
-  test-twists
   test-hierarchic
   test-ball-projection
   test-gmsh
@@ -31,6 +30,6 @@ add_subdirectory(dgf)
 add_subdirectory(gmsh)
 
 set(alutestdir ${CMAKE_INSTALL_INCLUDEDIR}/dune/alugrid/test)
-set(alugridtest_HEADERS checkintersectionit.hh  checktwists.hh  insertgrid.hh )
+set(alugridtest_HEADERS checkintersectionit.hh  insertgrid.hh )
 
 install( FILES ${alugridtest_HEADERS} DESTINATION ${alutestdir} )
