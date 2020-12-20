@@ -499,6 +499,7 @@ namespace Dune
     std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
     //use consistency algorithm or bisection compatibility
     bool madeCompatible = correctElementOrientation(simplexTypes);
+    madeCompatible = bool(comm().max( int(madeCompatible) ) ) ;
     if( elementType == hexa && madeCompatible )
     {
       const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
@@ -784,6 +785,8 @@ namespace Dune
   ALU3dGridFactory< ALUGrid >::correctElementOrientation ( std::vector<int>& simplexTypes )
   {
     bool result = false;
+    //if there are no elements, skip correction
+    if(elements_.empty()) return result;
     // apply mesh-consistency algorithm to hexas if not Cartesian mesh
     // and mesh-consistency package was found during library build
     if( elementType == hexa && ! cartesian_ &&
