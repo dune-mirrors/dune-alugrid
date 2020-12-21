@@ -125,7 +125,7 @@ public:
   //! \copydoc ProblemData::endTime
   double endTime () const
   {
-    return 0.8;
+    return 1.8;
   }
 
   //! \copydoc ProblemData::gridFile
