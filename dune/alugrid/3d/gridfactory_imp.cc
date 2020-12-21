@@ -79,9 +79,8 @@ namespace Dune
         // are of globalId +1 to the real ones
         // odd indices are the 2d vertices
         vertices_.push_back( std::make_pair( pos, 2*globalId+1 ) );
-        VertexType pos1 (pos);
-        pos1[2] += 1.0 ;
-        vertices_.push_back( std::make_pair( pos1, 2*globalId+2 ) );
+        pos[2] += 1.0 ;
+        vertices_.push_back( std::make_pair( pos, 2*globalId+2 ) );
       }
     }
   }
@@ -112,11 +111,21 @@ namespace Dune
         element.resize( 8 );
         for (int i = 0; i < 4; ++i)
         {
-          // multiply original number with 2 to get the indices of the 2dvalid vertices
-          element[ i ]    = vertices[ i ] * 2;
-          element[ i+4 ]  = element [ i ] + 1;
+          // multiply original number with 2 to get the indices of the 2d valid vertices
+          element[ i ]   = vertices[ i ] * 2; // all even numbers means bottom face
+          element[ i+4 ] = element [ i ] + 1; // all odd numbers means top face
         }
         elements_.push_back(element);
+        /*
+        std::cout << "Insert vertices: [";
+        for( int i = 0; i < 4; ++i)
+          std::cout << vertices[ i ] << ",";
+        std::cout << "]" << std::endl;
+        std::cout << "Insert Element: [";
+        for( int i = 0; i < 8; ++i)
+          std::cout << element[ i ] << ",";
+        std::cout << "]" << std::endl;
+        */
         insertBoundary(elements_.size()-1,4,boundaryId2d);
         insertBoundary(elements_.size()-1,5,boundaryId2d);
       }
@@ -476,20 +485,19 @@ namespace Dune
     //found faces from the boundaryIds_
     if( !faceTransformations_.empty() )
     {
+      // make a copy of the boundary face map because the boundaryFaces_
+      // is altered during the search for periodic neighbors
       BoundaryFaceMap faceMap(boundaryFaces_);
+
       for(auto it = boundaryFaces_.begin(); it != boundaryFaces_.end(); ++it)
       {
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
-        if(dimension == 2)
+        if( isArtificialFace( it->first ) )
         {
-          //if the first vertex is not the artificial vertex
-          if(elementType == tetra && it->first[0] != 0)
-            continue;
-          //if the first and third vertex do not differ by 1
-          if(elementType == hexa && (it->first[0] != it->first[2] -1) )
-            continue;
+          continue;
         }
+
         auto pos = faceMap.find( it->first );
         if( pos != faceMap.end() )
           searchPeriodicNeighbor( faceMap, pos, 1 );
@@ -792,11 +800,13 @@ namespace Dune
     if( elementType == hexa && ! cartesian_ &&
         detail::correctCubeOrientationAvailable() )
     {
+      std::abort();
       std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
       for(unsigned i = 0 ; i < vertices_.size(); ++i)
       {
         vertices[i] = vertices_[i].first;
       }
+
       std::size_t elementSize = elements_.size();
       if(!faceTransformations_.empty())
       {
@@ -827,6 +837,7 @@ namespace Dune
       }
       else //if dimension == 2
       {
+        std::abort();
         //get quad grid
         std::vector<std::vector<unsigned int> > quadElements(elements_);
         for( auto&& quad : quadElements )
@@ -837,8 +848,22 @@ namespace Dune
         {
           for(unsigned int i = 0 ; i < elements_.size() ; ++i)
           {
+            std::cout << "Correct element [";
+            for(int j = 0 ; j < 8 ; ++j)
+            {
+              std::cout << elements_[i][j] << ",";
+            }
+            std::cout << "]" << std::endl;
+            std::cout << "with element [";
+            for(int j = 0 ; j < 8 ; ++j)
+            {
+              std::cout << quadElements[i][j] << ",";
+            }
+            std::cout << "]" << std::endl;
+
             for(int j = 0 ; j < 4 ; ++j)
             {
+
               elements_[i][j] = quadElements[i][j];
               elements_[i][j+4] = quadElements[i][j]+1;
             }
@@ -935,18 +960,22 @@ namespace Dune
     std::vector<double> vertexWeights;
     if( ALUGrid::elementType == tetra && ! elements_.empty() )
     {
-      for(std::size_t i = 0; i<vertices_.size(); ++i)
+      const std::size_t vSize = vertices_.size();
+      for(std::size_t i = 0; i<vSize; ++i)
       {
         //Dim = 2 is only needed for consistency,
         //initial refinement edge is always the longest
         if(dimension == 2)
-          vertexWeights.push_back(globalId(i) +1 );
+        {
+          vertexWeights.push_back( globalId(i) + 1 );
+        }
         //For dim = 2 the ordering presets the refinement edge
         //for structured (and axis-aligned) grids the following results in
         //criss-cross reffinement
         else
         {
-          auto pos = inputPosition(i);
+          const VertexType& pos = position( i );
+          //auto pos = inputPosition(i);
           double weight = 256 * pos[0] + 16 * pos[1] + pos[2];
           vertexWeights.push_back(weight);
         }
@@ -1003,59 +1032,159 @@ namespace Dune
     return madeCompatible;
   }
 
+  namespace detail
+  {
+    template <int dim>
+    struct SimpleIntegerSet
+    {
+      std::array< int, dim > data_;
+      unsigned int counter_;
+      SimpleIntegerSet() : data_(), counter_( 0 )
+      {
+        for( int i=0; i<dim; ++i )
+        {
+          data_[ i ] = -1;
+        }
+      }
+
+      // only store numbers smaller then dimension
+      void insert( int item )
+      {
+        assert( counter_ < (data_.size()));
+        assert( item < dim );
+        data_[ counter_ ] = item;
+        ++counter_;
+      }
+
+      bool contains( int item ) const
+      {
+        for( unsigned int i=0; i<counter_; ++i )
+          if( item == data_[ i ] )
+            return true;
+
+        return false;
+      }
+
+      int operator [] ( const int i ) const
+      {
+        assert( i < int(counter_) );
+        return data_[ i ];
+      }
+
+      unsigned int size() const { return counter_; }
+
+      void insertMissing()
+      {
+        // this should only be called for hexas
+        // after 3 corners have been identified
+        // then we insert the forth corner at the end
+        std::array< bool, dim > found;
+        for( int i=0; i<dim; ++i ) found[ i ] = false;
+        assert( counter_ == 3 );
+        for( unsigned int i = 0 ; i<counter_; ++i )
+          found[ data_[ i ] ] = true ;
+
+        for( int i=0; i<dim; ++i )
+        {
+          if( ! found[ i ] )
+          {
+            insert( i );
+            return ;
+          }
+        }
+      }
+    };
+  }
+
   //Get two sorted face keys,
   //If the faces match by world transformation,
   //key1 and resorted key2 are added into periodicBoundaryVector
   //Also checks boundaryIds_ and erases face there
   template< class ALUGrid >
   alu_inline
-  bool ALU3dGridFactory< ALUGrid >
-    ::identifyFaces ( const Transformation &transformation,
-                      const FaceType &key1, const FaceType &key2,
-                      const int defaultId )
+  bool ALU3dGridFactory< ALUGrid >::
+    identifyFaces ( const Transformation &transformation,
+                    const FaceType &key1, const FaceType &key2,
+                    const int defaultId )
   {
-    FaceType key0;
-    //set of indices to match
-    std::vector<unsigned int> indices;
-    if(elementType == tetra)
+    const ctype tolerance2 = 1e-12;
+    WorldVector w;
+    VertexInputType fakeVx;
+    VertexType transVx;
+
+    unsigned int startCount = 0;
+    // for hexahedral (2d and 3d) we have to check 3 vertices
+    // and for tetrahedral element also 3 vertices
+    static const unsigned int numCornersToCheck = 3 ;
+
+    // contains all local vertex numbers that have been matched
+    detail::SimpleIntegerSet< numFaceCorners > matched;
+
+    // for triangles (tetra and 2d)
+    // we can skip the vertex 0 because that is always the same
+    if constexpr (elementType == tetra && dimension == 2)
     {
-      if(dimension == 2)
-        indices = {{1,2}};
-      else
-        indices = {{0,1,2}};
-    }
-    else
-    {
-      if(dimension == 2)
-        indices = {{0,1}};
-      else
-        indices = {{0,1,2,3}};
+      startCount = 1;
+      matched.insert( 0 );
     }
 
-    for( unsigned int j  : indices)
+    for( unsigned int i = startCount; i < numCornersToCheck; ++i )
     {
-      WorldVector w = transformation.evaluate( inputPosition( key1[ j ] ) );
-      int org = -1;
-      for( unsigned int i  : indices )
+      const VertexType& realVx = position( key1[ i ] );
+      if constexpr ( dimension == 2 )
       {
-        if( (w - inputPosition( key2[ i ] )).two_norm() < 1e-6 )
+        for(unsigned int d = 0 ; d < dimensionworld ; ++d)
+          fakeVx[ d ] = realVx[ d ];
+
+        // evaluate transformation of vertex position
+        w = transformation.evaluate( fakeVx );
+
+        for(unsigned int d = 0 ; d < dimensionworld ; ++d)
+          transVx[ d ] = w[ d ];
+        transVx[ 2 ] = realVx[ 2 ];
+      }
+      else
+      {
+        // evaluate transformation of vertex position
+        transVx = transformation.evaluate( realVx );
+      }
+
+      bool foundOne = false ;
+      for( unsigned int j = startCount; j < numCornersToCheck; ++j )
+      {
+        // if j was already matched then simply skip here
+        if( matched.contains( j ) )
+          continue;
+
+        // check that difference is small then we have a match
+        if( (transVx - position( key2[ j ] )).two_norm2() < tolerance2 )
         {
-          org = i;
+          matched.insert( j );
+          foundOne = true;
           break;
         }
       }
-      if( org < 0 )
-        return false;
 
-      key0[ j ] = key2[ org ];
-      if(elementType == hexa && dimension == 2)
-      {
-        key0[ j + 2 ] = key2[ org + 2];
-      }
+      // if no match was found then faces don't match
+      if( !foundOne) return false ;
     }
-    if(dimension == 2 && elementType == tetra)
+
+    if( matched.size() < numCornersToCheck )
+      return false;
+
+    if( numCornersToCheck < numFaceCorners )
     {
-        key0[ 0 ] = key1[ 0 ]; // = 0
+      // insert the missing vertex number
+      matched.insertMissing();
+    }
+
+    // at this point matched should contain numFaceCorners numbers
+    assert( matched.size() == numFaceCorners );
+
+    FaceType key0; // resorted face
+    for( unsigned int i = 0; i < numFaceCorners; ++i )
+    {
+      key0[ i ] = key2[ matched[ i ] ];
     }
 
     int bndId[ 2 ] = { 20, 20 };
@@ -1077,12 +1206,50 @@ namespace Dune
       }
     }
 
+    // convention is that both periodic faces
+    // are inserted with matching vertices
     BndPair bnd0 ( key0, bndId[ 0 ] );
     BndPair bnd1 ( key1, bndId[ 1 ] );
+
     periodicBoundaries_.push_back( std::make_pair( bnd0, bnd1 ) );
 
     return true;
   }
+
+  template< class ALUGrid >
+  alu_inline
+  bool ALU3dGridFactory< ALUGrid >
+    ::isArtificialFace( const FaceType& face ) const
+  {
+    if( dimension == 2 )
+    {
+      // if the first vertex is not the artificial vertex
+      // then the face is the bottom face which is the artificial face
+      if(elementType == tetra && face[0] != 0)
+        return true;
+
+      //if the first and third vertex do not differ by 1
+      if(elementType == hexa )
+      {
+        //&& (face[0] != face[1]-1) )
+        int odd = 0;
+        int even = 0;
+        for( const auto& vx : face )
+        {
+          if( vx % 2 == 0 )
+            ++even;
+          if( vx % 2 == 1 )
+            ++odd;
+        }
+
+        if( even == 4 || odd == 4 )
+          return true;
+      }
+    }
+
+    return false;
+  }
+
 
 
   template< class ALUGrid >
@@ -1102,17 +1269,14 @@ namespace Dune
       for( BoundaryFaceMapIterator fit = boundaryFaceMap.begin(); fit != boundaryFaceMap.end(); ++fit )
       {
         if( fit == pos ) continue;
+
         //for dimension == 2 we do not want to search
         // the artificially introduced faces
-        if(dimension == 2)
+        if( isArtificialFace( fit->first ) )
         {
-          //if the first vertex is not the artificial vertex
-          if(elementType == tetra && fit->first[0] != 0)
-            continue;
-          //if the first and third vertex do not differ by 1
-          if(elementType == hexa && (fit->first[0] != fit->first[2] -1) )
-            continue;
+          continue;
         }
+
         FaceType key2 = fit->first;
 
         const TrafoIterator trend = faceTransformations_.end();
@@ -1185,6 +1349,7 @@ namespace Dune
         FaceIterator pos = boundaryFaces_.find( key0 );
         if( pos == boundaryFaces_.end() )
         {
+          std::cout << key0 << std::endl;
           DUNE_THROW( GridError, "Inserted periodic boundary segment is not part of the boundary." );
         }
         generateFace( elements_[pos->second], getFaceIndex(pos->second, pos->first), periodicPair.first.first);

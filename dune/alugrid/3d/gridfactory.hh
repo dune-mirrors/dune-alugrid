@@ -414,16 +414,6 @@ namespace Dune
       return vertices_[ id ].first;
     }
 
-    const VertexInputType inputPosition ( const VertexId &id ) const
-    {
-      alugrid_assert ( id < vertices_.size() );
-      VertexType vertex = vertices_[ id ].first;
-      VertexInputType iVtx(0.);
-      for(unsigned i = 0 ; i < dimensionworld ; ++i)
-        iVtx[i] = vertex[i];
-      return iVtx;
-    }
-
     void assertGeometryType( const GeometryType &geometry );
     static void generateFace ( const ElementType &element, const int f, FaceType &face );
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
@@ -433,6 +423,7 @@ namespace Dune
     void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::unordered_map<FaceType, bool> & isRearBoundaries );
     bool bisectionCompatibility ( std::vector<int> & simplexTypes );
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
+    bool isArtificialFace ( const FaceType& face ) const;
     void searchPeriodicNeighbor ( BoundaryFaceMap &boundaryFaceMap, typename BoundaryFaceMap::iterator &pos, const int defaultId  );
     void reinsertBoundary ( const typename BoundaryFaceMap::const_iterator &pos, const int id );
     void recreateBoundaryIds ( const int defaultId = 1 );
