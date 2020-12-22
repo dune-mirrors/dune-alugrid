@@ -1349,7 +1349,6 @@ namespace Dune
         FaceIterator pos = boundaryFaces_.find( key0 );
         if( pos == boundaryFaces_.end() )
         {
-          std::cout << key0 << std::endl;
           DUNE_THROW( GridError, "Inserted periodic boundary segment is not part of the boundary." );
         }
         generateFace( elements_[pos->second], getFaceIndex(pos->second, pos->first), periodicPair.first.first);
