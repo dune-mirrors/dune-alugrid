@@ -122,17 +122,20 @@ namespace Dune {
         double shortestFaceEdge = 1e308 ;
         double longestFaceEdge = 0;
 
-        const int faceEdges = face.subEntities( dim-1 );
-        for( int e = 0 ; e < faceEdges ; ++ e )
+        if( dim > 2 )
         {
-          const int fe = Dune::ReferenceElements<double, dim>::simplex().subEntity(f,1,e,2);
-          const auto& edge = element.template subEntity<dim-1>( fe );
-          const auto& geo  = edge.geometry();
-          assert( geo.corners() == 2 );
-          //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
-          double edgeLength = geo.volume();
-          shortestFaceEdge = std::min( shortestFaceEdge, edgeLength );
-          longestFaceEdge  = std::max( longestFaceEdge,  edgeLength );
+          const int faceEdges = face.subEntities( dim-1 );
+          for( int e = 0 ; e < faceEdges ; ++ e )
+          {
+            const int fe = Dune::ReferenceElements<double, dim>::simplex().subEntity(f,1,e,2);
+            const auto& edge = element.template subEntity<dim-1>( fe );
+            const auto& geo  = edge.geometry();
+            assert( geo.corners() == 2 );
+            //( geo.corner( 1 ) - geo.corner( 0 ) ).two_norm();
+            double edgeLength = geo.volume();
+            shortestFaceEdge = std::min( shortestFaceEdge, edgeLength );
+            longestFaceEdge  = std::max( longestFaceEdge,  edgeLength );
+          }
         }
 
         //in a regular tetrahedron, we have
