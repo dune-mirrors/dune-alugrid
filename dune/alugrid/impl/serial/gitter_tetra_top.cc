@@ -2190,7 +2190,8 @@ namespace ALUGrid
     // verfeinert ist -> ist ein Blatt der Hierarchie.
 
     alugrid_assert (this->leaf()) ;
-    typedef typename myhface_t::myrule_t face3rule_t;
+    // myhface_t::myrule_t and myrule_t should be the same
+    // typedef typename myhface_t::myrule_t face3rule_t;
     switch(r)
     {
       case myrule_t::iso4 :
@@ -2206,15 +2207,15 @@ namespace ALUGrid
         if( face0->is2d() )
         {
           // for 2d use e01
-          face3rule_t( face3rule_t::e01 );
-          face0->refineImmediate (face3rule_t (r)) ;
-          face1->refineImmediate (face3rule_t (r)) ;
+          myrule_t fr( myrule_t::e01 );
+          face0->refineImmediate ( fr ) ;
+          face1->refineImmediate ( fr ) ;
           split_bisection () ;
         }
         else
         {
-          face0->refineImmediate (face3rule_t (r)) ;
-          face1->refineImmediate (face3rule_t (r)) ;
+          face0->refineImmediate (r) ;
+          face1->refineImmediate (r) ;
           split_iso4 () ;
         }
         break ;
@@ -2223,8 +2224,8 @@ namespace ALUGrid
       case myrule_t::e01 :
       case myrule_t::e02 :
       case myrule_t::e12 :
-        myhface (0)->refineImmediate (face3rule_t (r)) ;
-        myhface (1)->refineImmediate (face3rule_t (r)) ;
+        myhface (0)->refineImmediate (r) ;
+        myhface (1)->refineImmediate (r) ;
         split_bisection () ;
         break ;
 
