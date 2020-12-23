@@ -800,7 +800,6 @@ namespace Dune
     if( elementType == hexa && ! cartesian_ &&
         detail::correctCubeOrientationAvailable() )
     {
-      std::abort();
       std::vector<Dune::FieldVector<double,3> > vertices(vertices_.size());
       for(unsigned i = 0 ; i < vertices_.size(); ++i)
       {
@@ -837,7 +836,6 @@ namespace Dune
       }
       else //if dimension == 2
       {
-        std::abort();
         //get quad grid
         std::vector<std::vector<unsigned int> > quadElements(elements_);
         for( auto&& quad : quadElements )
@@ -848,7 +846,7 @@ namespace Dune
         {
           for(unsigned int i = 0 ; i < elements_.size() ; ++i)
           {
-            std::cout << "Correct element [";
+            /*std::cout << "Correct element [";
             for(int j = 0 ; j < 8 ; ++j)
             {
               std::cout << elements_[i][j] << ",";
@@ -859,7 +857,7 @@ namespace Dune
             {
               std::cout << quadElements[i][j] << ",";
             }
-            std::cout << "]" << std::endl;
+            std::cout << "]" << std::endl; */
 
             for(int j = 0 ; j < 4 ; ++j)
             {
