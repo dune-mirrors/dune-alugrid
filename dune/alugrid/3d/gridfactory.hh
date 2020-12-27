@@ -419,6 +419,7 @@ namespace Dune
     void generateFace ( const SubEntity &subEntity, FaceType &face ) const;
     static int getFaceIndex ( const ElementType &element, const FaceType &face );
     int getFaceIndex ( const unsigned int elIndex, const FaceType &face ) const;
+    void globalRefineOnce();
     bool correctElementOrientation ( std::vector<int> & simplexTypes );
     void calculateIsRear ( std::vector<std::vector<bool> > & isRearElements, std::unordered_map<FaceType, bool> & isRearBoundaries );
     bool bisectionCompatibility ( std::vector<int> & simplexTypes );

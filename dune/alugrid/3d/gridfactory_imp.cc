@@ -505,8 +505,18 @@ namespace Dune
     }
 
     std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
+    bool madeCompatible = false;
+    try
+    {
     //use consistency algorithm or bisection compatibility
-    bool madeCompatible = correctElementOrientation(simplexTypes);
+    madeCompatible = correctElementOrientation(simplexTypes);
+    }
+    catch ( const std::exception& e)
+    {
+      std::cout << "Continue with refinement" << std::endl;
+      globalRefineOnce();
+      madeCompatible = correctElementOrientation(simplexTypes);
+    }
     madeCompatible = bool(comm().max( int(madeCompatible) ) ) ;
     if( elementType == hexa && madeCompatible )
     {
@@ -786,6 +796,203 @@ namespace Dune
     }
   }
 
+  //optionally refine the grid globally, if madeCompatible returns not possible
+  template< class ALUGrid >
+  alu_inline
+  void ALU3dGridFactory< ALUGrid >::globalRefineOnce ()
+  {
+    // assert not parallel and cube
+    if(elements_.empty()) return;
+    if(elementType == tetra) return;
+
+    // keep original vertices - nothing to do
+    //store vertices in map with key as sorted array of ints and value  index in vertices_
+    typedef std::array<unsigned, 2> EdgeType;
+    //edge vert key: [v1Id,v2Id]
+    //face vert key: [v1Id, v2Id, v3Id, v4Id] - only necessary in 3d
+    std::map<EdgeType, unsigned> edgeVtxMap;
+    std::map<FaceType, unsigned> faceVtxMap;
+
+    std::vector<ElementType> origElements;
+    //clear elements and face structures
+    std::swap(origElements,elements_);
+    interiorFaces_.clear();
+    boundaryFaces_.clear();
+    // for each original element
+    const double weight = (dimension == 2) ? 0.25 : 0.125;
+    const unsigned numVertices = (dimension == 2) ? 4 : 8;
+    const unsigned numEdges = (dimension == 2) ? 4 : 12;
+    const std::vector<std::array<unsigned, 2> > elmEdgeMap = (dimension == 2) ?
+    std::vector<std::array<unsigned, 2> >({{0,2},{1,3},{0,1},{2,3}}) :
+    std::vector<std::array<unsigned, 2> >({{0,4},{1,5},{2,6},{3,7},{0,2},{1,3},{0,1},{2,3},{4,6},{5,7},{4,5},{6,7}});
+    GeometryType elementType( Dune::Impl::CubeTopology< dimension >::type::id, dimension );
+    for(const auto& elm : origElements)
+    {
+      //insert center vertex
+      unsigned int centerIdx;
+      VertexInputType center(0);
+      for(unsigned i = 0 ; i < dimension; ++i)
+      {
+        for(unsigned vtx = 0; vtx < numVertices ; vtx++)
+        {
+          center[i] += weight* position(elm[vtx])[i];
+        }
+      }
+      centerIdx = vertices_.size();
+      insertVertex(center);
+      //Store indices of edge centers
+      std::vector<unsigned> edgeIndices;
+      //for each edge
+      for(unsigned i = 0; i < numEdges; i++)
+      {
+        //check if edge centers have been inserted
+        EdgeType edge = {{elm[elmEdgeMap[i][0]],elm[elmEdgeMap[i][1]]}};
+        std::sort(edge.begin(),edge.end());
+        auto it = edgeVtxMap.find(edge);
+        //if not - insert edge center into vertices and store index in edgeVtxMapa
+        if(it == edgeVtxMap.end())
+        {
+          VertexInputType center(0);
+          for(unsigned i = 0 ; i < dimension; ++i)
+          {
+            for(unsigned vtx = 0; vtx < 2 ; vtx++)
+            {
+              center[i] += 0.5* position(edge[vtx])[i];
+            }
+          }
+          unsigned int index = vertices_.size();
+          insertVertex(center);
+          edgeVtxMap.insert(std::make_pair(edge,index));
+          edgeIndices.push_back(index);
+        }
+        else
+        {
+          edgeIndices.push_back(it->second);
+        }
+
+      }
+      std::vector<unsigned> faceIndices;
+      if constexpr (dimension == 3)
+      {
+        //3d: for each face
+        for(unsigned i = 0; i < numFaces; i++)
+        {
+          //check if face centers have been inserted
+          FaceType face;
+          generateFace(elm, i, face);
+          std::sort(face.begin(),face.end());
+          auto it = faceVtxMap.find(face);
+          //if not - insert face center into vertices and store index in faceVtxMap
+          if(it == faceVtxMap.end())
+          {
+            VertexInputType center(0);
+            for(unsigned i = 0 ; i < dimension; ++i)
+            {
+              for(unsigned vtx = 0; vtx < 4 ; vtx++)
+              {
+                center[i] += 0.25* position(face[vtx])[i];
+              }
+            }
+            unsigned int index = vertices_.size();
+            insertVertex(center);
+            faceVtxMap.insert(std::make_pair(face,index));
+            faceIndices.push_back(index);
+          }
+          else
+          {
+            faceIndices.push_back(it->second);
+          }
+        }
+      }
+      //insert refined elements
+      if constexpr(dimension == 2)
+      {
+        //0, 01, 02. center
+        insertElement(elementType, {{elm[0], edgeIndices[2], edgeIndices[0], centerIdx}});
+        //01, 1, center, 13
+        insertElement(elementType, {{edgeIndices[2], elm[1], centerIdx, edgeIndices[1]}});
+        //02, center, 2, 23
+        insertElement(elementType, {{edgeIndices[0], centerIdx, elm[2], edgeIndices[3]}});
+        //center, 13, 23, 3
+        insertElement(elementType, {{centerIdx, edgeIndices[1], edgeIndices[3], elm[3]}});
+      }
+      //3d
+      else
+      {
+        //0, 01, 02, 0123, 04, 0145, 0246, center
+        insertElement(elementType, {{elm[0], edgeIndices[6], edgeIndices[4], faceIndices[4], edgeIndices[0], faceIndices[2], faceIndices[0], centerIdx}});
+        //01, 1, 0123, 13, 0145, 15, center, 1357
+        insertElement(elementType, {{edgeIndices[6], elm[1], faceIndices[4], edgeIndices[5], faceIndices[2], edgeIndices[1], centerIdx, faceIndices[1]}});
+        //02, 0123, 2, 23, 0246, center, 26, 2367
+        insertElement(elementType, {{edgeIndices[4], faceIndices[4], elm[2], edgeIndices[7], faceIndices[0], centerIdx, edgeIndices[2], faceIndices[3]}});
+        //0123, 13, 23, 3, center, 1357, 2367, 37
+        insertElement(elementType, {{faceIndices[4], edgeIndices[5], edgeIndices[7], elm[3], centerIdx, faceIndices[1], faceIndices[3], edgeIndices[3]}});
+        //04, 0145, 0246, center, 4, 45, 46, 4567
+        insertElement(elementType, {{edgeIndices[0], faceIndices[2], faceIndices[0], centerIdx, elm[4], edgeIndices[10], edgeIndices[8], faceIndices[5]}});
+        //0145, 15, center, 1357, 45, 5, 4567, 57
+        insertElement(elementType, {{faceIndices[2], edgeIndices[1], centerIdx, faceIndices[1], edgeIndices[10], elm[5], faceIndices[5], edgeIndices[9]}});
+        //0246, center, 26, 2367, 46, 4567, 6, 67
+        insertElement(elementType, {{faceIndices[0], centerIdx, edgeIndices[2], faceIndices[3], edgeIndices[8], faceIndices[5], elm[6], edgeIndices[11]}});
+        //center, 1357, 2367, 37, 4567, 57, 67, 7
+        insertElement(elementType, {{centerIdx, faceIndices[1], faceIndices[3], edgeIndices[3], faceIndices[5], edgeIndices[9], edgeIndices[11], elm[7]}});
+      }
+    }
+    //clear boundaryIds_
+    BoundaryIdMap origBoundaryIds;
+    std::swap(origBoundaryIds, boundaryIds_);
+    const std::vector<std::array<unsigned, 2> > faceEdgeMap =
+    std::vector<std::array<unsigned, 2> >({{0,2},{1,3},{0,1},{2,3}});
+    // for each boundary
+    for( const auto& bnd : boundaryIds_)
+    {
+      FaceType face(bnd.first);
+      std::sort(face.begin(), face.end());
+      unsigned int centerIdx = faceVtxMap[face];
+      auto bndProjIt = boundaryProjections_.find(face);
+      bool bndProjExists = (bndProjIt != boundaryProjections_.end());
+      std::vector<unsigned> edgeIndices;
+      EdgeType edge;
+      for(unsigned int i = 0; i < 4; ++i)
+      {
+        edge[0] = (bnd.first)[faceEdgeMap[i][0]];
+        edge[1] = (bnd.first)[faceEdgeMap[i][1]];
+        edgeIndices.push_back(edgeVtxMap[edge]);
+      }
+      //child 0
+      face[0]=(bnd.first)[0]; face[1]=edgeIndices[0]; face[2]=edgeIndices[2]; face[3]=centerIdx;
+      boundaryIds_.insert(std::make_pair(face, bnd.second));
+      if(bndProjExists)
+      {
+        std::sort(face.begin(),face.end());
+        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+      }
+      //child 1
+      face[1]=(bnd.first)[1]; face[0] = edgeIndices[0]; face[3]=edgeIndices[3]; face[2]=centerIdx;
+      boundaryIds_.insert(std::make_pair(face, bnd.second));
+      if(bndProjExists)
+      {
+        std::sort(face.begin(),face.end());
+        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+      }
+      //child 2
+      face[2]=(bnd.first)[2]; face[0] = edgeIndices[2]; face[3]=edgeIndices[1]; face[1]=centerIdx;
+      boundaryIds_.insert(std::make_pair(face, bnd.second));
+      if(bndProjExists)
+      {
+        std::sort(face.begin(),face.end());
+        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+      }
+      //child 3
+      face[3]=(bnd.first)[3]; face[1] = edgeIndices[2]; face[2]=edgeIndices[1]; face[0]=centerIdx;
+      boundaryIds_.insert(std::make_pair(face, bnd.second));
+      if(bndProjExists)
+      {
+        std::sort(face.begin(),face.end());
+        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+      }
+      if(bndProjExists) boundaryProjections_.erase(bndProjIt);
+    }
+  }
 
   template< class ALUGrid >
   alu_inline
