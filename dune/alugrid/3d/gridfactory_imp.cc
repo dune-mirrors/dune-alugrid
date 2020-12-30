@@ -513,9 +513,11 @@ namespace Dune
     }
     catch ( const std::exception& e)
     {
-      std::cout << "Continue with refinement" << std::endl;
+      std::cout << "Continue with refinement (breaks insertionOrder!)" << std::endl;
       globalRefineOnce();
       madeCompatible = correctElementOrientation(simplexTypes);
+      // sort element given a hilbert space filling curve (if Zoltan is available)
+      sortElements( vertices_, elements_, ordering );
     }
     madeCompatible = bool(comm().max( int(madeCompatible) ) ) ;
     if( elementType == hexa && madeCompatible )
@@ -818,6 +820,9 @@ namespace Dune
     std::swap(origElements,elements_);
     interiorFaces_.clear();
     boundaryFaces_.clear();
+    //clear boundaryIds_
+    BoundaryIdMap origBoundaryIds;
+    std::swap(origBoundaryIds, boundaryIds_);
     // for each original element
     const double weight = (dimension == 2) ? 0.25 : 0.125;
     const unsigned numVertices = (dimension == 2) ? 4 : 8;
@@ -835,10 +840,11 @@ namespace Dune
       {
         for(unsigned vtx = 0; vtx < numVertices ; vtx++)
         {
-          center[i] += weight* position(elm[vtx])[i];
+          center[i] += weight * position(elm[vtx])[i];
         }
       }
       centerIdx = vertices_.size();
+      if(dimension == 2) centerIdx /=2;
       insertVertex(center);
       //Store indices of edge centers
       std::vector<unsigned> edgeIndices;
@@ -862,6 +868,7 @@ namespace Dune
           }
           unsigned int index = vertices_.size();
           insertVertex(center);
+          if(dimension == 2) index /= 2;
           edgeVtxMap.insert(std::make_pair(edge,index));
           edgeIndices.push_back(index);
         }
@@ -895,6 +902,7 @@ namespace Dune
             }
             unsigned int index = vertices_.size();
             insertVertex(center);
+            if(dimension == 2) index /= 2;
             faceVtxMap.insert(std::make_pair(face,index));
             faceIndices.push_back(index);
           }
@@ -908,13 +916,13 @@ namespace Dune
       if constexpr(dimension == 2)
       {
         //0, 01, 02. center
-        insertElement(elementType, {{elm[0], edgeIndices[2], edgeIndices[0], centerIdx}});
+        insertElement(elementType, {{elm[0]/2, edgeIndices[2], edgeIndices[0], centerIdx}});
         //01, 1, center, 13
-        insertElement(elementType, {{edgeIndices[2], elm[1], centerIdx, edgeIndices[1]}});
+        insertElement(elementType, {{edgeIndices[2], elm[1]/2, centerIdx, edgeIndices[1]}});
         //02, center, 2, 23
-        insertElement(elementType, {{edgeIndices[0], centerIdx, elm[2], edgeIndices[3]}});
+        insertElement(elementType, {{edgeIndices[0], centerIdx, elm[2]/2, edgeIndices[3]}});
         //center, 13, 23, 3
-        insertElement(elementType, {{centerIdx, edgeIndices[1], edgeIndices[3], elm[3]}});
+        insertElement(elementType, {{centerIdx, edgeIndices[1], edgeIndices[3], elm[3]/2}});
       }
       //3d
       else
@@ -937,60 +945,96 @@ namespace Dune
         insertElement(elementType, {{centerIdx, faceIndices[1], faceIndices[3], edgeIndices[3], faceIndices[5], edgeIndices[9], edgeIndices[11], elm[7]}});
       }
     }
-    //clear boundaryIds_
-    BoundaryIdMap origBoundaryIds;
-    std::swap(origBoundaryIds, boundaryIds_);
-    const std::vector<std::array<unsigned, 2> > faceEdgeMap =
-    std::vector<std::array<unsigned, 2> >({{0,2},{1,3},{0,1},{2,3}});
-    // for each boundary
-    for( const auto& bnd : boundaryIds_)
+    std::cout << "Size of Vertices: " << vertices_.size() << std::endl;
+    //update boundaryIds
+    if(dimension == 3)
     {
-      FaceType face(bnd.first);
-      std::sort(face.begin(), face.end());
-      unsigned int centerIdx = faceVtxMap[face];
-      auto bndProjIt = boundaryProjections_.find(face);
-      bool bndProjExists = (bndProjIt != boundaryProjections_.end());
-      std::vector<unsigned> edgeIndices;
-      EdgeType edge;
-      for(unsigned int i = 0; i < 4; ++i)
+      const std::vector<std::array<unsigned, 2> > faceEdgeMap =
+        std::vector<std::array<unsigned, 2> >({{0,2},{1,3},{0,1},{2,3}});
+      // for each boundary
+      for( const auto& bnd : origBoundaryIds)
       {
-        edge[0] = (bnd.first)[faceEdgeMap[i][0]];
-        edge[1] = (bnd.first)[faceEdgeMap[i][1]];
-        edgeIndices.push_back(edgeVtxMap[edge]);
+        FaceType face(bnd.first);
+        std::sort(face.begin(), face.end());
+        unsigned int centerIdx = faceVtxMap[face];
+        auto bndProjIt = boundaryProjections_.find(face);
+        bool bndProjExists = (bndProjIt != boundaryProjections_.end());
+        std::vector<unsigned> edgeIndices;
+        EdgeType edge;
+        for(unsigned int i = 0; i < 4; ++i)
+        {
+          edge[0] = (bnd.first)[faceEdgeMap[i][0]];
+          edge[1] = (bnd.first)[faceEdgeMap[i][1]];
+          edgeIndices.push_back(edgeVtxMap[edge]);
+        }
+        //child 0
+        face[0]=(bnd.first)[0]; face[1]=edgeIndices[0]; face[2]=edgeIndices[2]; face[3]=centerIdx;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        //child 1
+        face[1]=(bnd.first)[1]; face[0] = edgeIndices[0]; face[3]=edgeIndices[3]; face[2]=centerIdx;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        //child 2
+        face[2]=(bnd.first)[2]; face[0] = edgeIndices[2]; face[3]=edgeIndices[1]; face[1]=centerIdx;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        //child 3
+        face[3]=(bnd.first)[3]; face[1] = edgeIndices[2]; face[2]=edgeIndices[1]; face[0]=centerIdx;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        if(bndProjExists) boundaryProjections_.erase(bndProjIt);
       }
-      //child 0
-      face[0]=(bnd.first)[0]; face[1]=edgeIndices[0]; face[2]=edgeIndices[2]; face[3]=centerIdx;
-      boundaryIds_.insert(std::make_pair(face, bnd.second));
-      if(bndProjExists)
+    }
+    //In 2d the fake boundaries are inserted by the insertElement method
+    else
+    {
+      const unsigned int boundaryId2d = ALU3DSPACE Gitter::hbndseg_STI::closure_2d;
+      // for each boundary
+      for( const auto& bnd : origBoundaryIds)
       {
-        std::sort(face.begin(),face.end());
-        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        if( bnd.second == boundaryId2d ) continue;
+        FaceType face(bnd.first);
+        std::sort(face.begin(), face.end());
+        auto bndProjIt = boundaryProjections_.find(face);
+        bool bndProjExists = (bndProjIt != boundaryProjections_.end());
+        std::vector<unsigned> edgeIndices;
+        EdgeType edge = {{(bnd.first)[0], (bnd.first)[1]}};
+        unsigned int centerIdx = edgeVtxMap[edge];
+        //child 0
+        face[0]=(bnd.first)[0]; face[1]=centerIdx; face[2]=face[0]+1; face[3]=centerIdx+1;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        //child 1
+        face[1]=(bnd.first)[1]; face[0] = centerIdx; face[3]=face[1]+1; face[2]=centerIdx+1;
+        boundaryIds_.insert(std::make_pair(face, bnd.second));
+        if(bndProjExists)
+        {
+          std::sort(face.begin(),face.end());
+          boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
+        }
+        if(bndProjExists) boundaryProjections_.erase(bndProjIt);
       }
-      //child 1
-      face[1]=(bnd.first)[1]; face[0] = edgeIndices[0]; face[3]=edgeIndices[3]; face[2]=centerIdx;
-      boundaryIds_.insert(std::make_pair(face, bnd.second));
-      if(bndProjExists)
-      {
-        std::sort(face.begin(),face.end());
-        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
-      }
-      //child 2
-      face[2]=(bnd.first)[2]; face[0] = edgeIndices[2]; face[3]=edgeIndices[1]; face[1]=centerIdx;
-      boundaryIds_.insert(std::make_pair(face, bnd.second));
-      if(bndProjExists)
-      {
-        std::sort(face.begin(),face.end());
-        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
-      }
-      //child 3
-      face[3]=(bnd.first)[3]; face[1] = edgeIndices[2]; face[2]=edgeIndices[1]; face[0]=centerIdx;
-      boundaryIds_.insert(std::make_pair(face, bnd.second));
-      if(bndProjExists)
-      {
-        std::sort(face.begin(),face.end());
-        boundaryProjections_.insert(std::make_pair(face, bndProjIt->second));
-      }
-      if(bndProjExists) boundaryProjections_.erase(bndProjIt);
     }
   }
 
