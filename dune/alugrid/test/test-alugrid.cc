@@ -922,7 +922,7 @@ int main (int argc , char **argv) {
         if( newfilename )
           filename = newfilename;
         else
-          filename = "./dgf/periodic.dgf";
+          filename = "./dgf/periodic3.dgf";
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         // periodic boundaries require certain load balancing methods
         GridType::setLoadBalanceMethod( 10 );
