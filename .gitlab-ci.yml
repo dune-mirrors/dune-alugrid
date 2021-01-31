@@ -50,3 +50,4 @@ debian:11--gcc-9-17:headercheck:
     - make headercheck
   variables:
     DUNECI_TOOLCHAIN: gcc-9-17
+  tags: [duneci]
