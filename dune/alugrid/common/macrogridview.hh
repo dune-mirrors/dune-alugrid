@@ -243,12 +243,6 @@ namespace Dune
       return intersection.impl().weight();
     }
 
-    DUNE_DEPRECATED
-    int weight ( const IntersectionIterator &intersectionIterator ) const // should perhaps be intersection but that class a default is used...
-    {
-      return weight( *intersectionIterator );
-    }
-
   protected:
     const Grid *grid_;
     const int level_;
