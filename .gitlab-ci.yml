@@ -21,6 +21,7 @@ ubuntu:20.04-clang-10-17:
     DUNECI_TOOLCHAIN: clang-10-17
     # cmake flags we use for all dune moudle - important is that build shared libs is set (need some better way of doi
     DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
+  tags: [duneci]
 
 debian:11--gcc-9-17-python:
   image: registry.dune-project.org/docker/ci/debian:11
@@ -39,6 +40,7 @@ debian:11--gcc-9-17-python:
     DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
     # finally set the python path to all modules
     PYTHONPATH:         /duneci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:/duneci/modules/dune-grid/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
+  tags: [duneci]
 
 debian:11--gcc-9-17:headercheck:
   image: registry.dune-project.org/docker/ci/debian:11
