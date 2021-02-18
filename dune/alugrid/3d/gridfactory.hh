@@ -671,6 +671,9 @@ namespace Dune
 
 } // end namespace Dune
 
+#define alu_extern extern
+#include <dune/alugrid/3d/gridfactoryexpltemp.hh>
+
 #if COMPILE_ALUGRID_INLINE
   #include "gridfactory.cc"
 #endif

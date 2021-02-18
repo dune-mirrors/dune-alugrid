@@ -679,6 +679,12 @@ protected:
 
 #include "entity_inline.hh"
 
+#define alu_extern extern
+#include <dune/alugrid/3d/entityexpltemp.hh>
+
+#define alu_extern extern
+#include <dune/alugrid/3d/iteratorexpltemp.hh>
+
 #if COMPILE_ALUGRID_INLINE
   #include "entity_imp.cc"
 #endif

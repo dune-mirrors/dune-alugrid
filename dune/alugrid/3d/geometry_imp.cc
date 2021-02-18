@@ -1,11 +1,6 @@
 #ifndef DUNE_ALUGRID_GEOMETRY_IMP_CC
 #define DUNE_ALUGRID_GEOMETRY_IMP_CC
 
-//#if COMPILE_ALUGRID_INLINE
-//#define COMPILE_INTO_ALUGRID_LIB 0
-//#endif
-//#define COMPILE_INTO_ALUGRID_LIB 1
-
 #include "grid.hh"
 #include "mappings.hh"
 #include "geometry.hh"
@@ -136,7 +131,7 @@ print (std::ostream& ss) const
   }
   ss << "} \n";
 }
-
+#if 0
 // built Geometry
 template <int mydim, int cdim, class GridImp>
 template <class Geometry>
@@ -163,6 +158,7 @@ buildGeomInFather(const Geometry &fatherGeom, const Geometry &myGeom)
 
   return true;
 }
+#endif
 
 //--hexaBuildGeom
 template <int mydim, int cdim, class GridImp>
@@ -297,6 +293,7 @@ buildGeom(const HFaceType & item, int t)
   return true;
 }
 
+#if 0
 // --buildFaceGeom
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
@@ -340,6 +337,7 @@ buildGeom(const coord_t& p0,
   geoImpl().update( p0, p1 );
   return true;
 }
+#endif
 
 
 template <int mydim, int cdim, class GridImp> // for faces
@@ -404,77 +402,7 @@ buildGeom(const VertexType & item, int twist)
   return true;
 }
 
-
-#if COMPILE_INTO_ALUGRID_LIB
-  // Instantiation - 2-2
-  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, hexa, ALUGridNoComm > >;
-
-
-  // Instantiation with MPI
-  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<0, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<1, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<2, 2, const ALU3dGrid< 2, 2, hexa, ALUGridMPIComm > >;
-
-  // Instantiation -2-3
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, hexa, ALUGridNoComm > >;
-
-  // Instantiation with MPI
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 2, 3, hexa, ALUGridMPIComm > >;
-
-
-  // Instantiation  -3-3
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
-
-  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, tetra, ALUGridNoComm > >;
-  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, hexa, ALUGridNoComm > >;
-
-  // Instantiation with MPI
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<0, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<1, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<2, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
-
-  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, tetra, ALUGridMPIComm > >;
-  template class ALU3dGridGeometry<3, 3, const ALU3dGrid< 3, 3, hexa, ALUGridMPIComm > >;
-
-#endif // COMPILE_INTO_ALUGRID_LIB
-
 } // end namespace Dune
+
+#include <dune/alugrid/3d/geometryexpltemp.hh>
 #endif // end DUNE_ALUGRID_GEOMETRY_IMP_CC

@@ -310,6 +310,20 @@ namespace ALUGrid
     return this->level ();
   }
 
+
+  // template instantiation
+  typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
+  extern template class Hbnd4PllInternal < Hbnd4DefaultType ,
+                                BndsegPllBaseXClosure < Hbnd4DefaultType > ,
+                                BndsegPllBaseXMacroClosure < Hbnd4DefaultType > >;
+
+  // from serial part with different template argument
+  extern template class Hedge1Top< GitterBasisPll::ObjectsPll::Hedge1EmptyPll >;
+  extern template class Hface4Top< GitterBasisPll::ObjectsPll::Hface4EmptyPll >;
+  extern template class HexaTop< GitterBasisPll::ObjectsPll::HexaEmptyPll >;
+  extern template class Periodic4Top < GitterBasisPll::ObjectsPll::Periodic4EmptyPll >;
+
+
 } // namespace ALUGrid
 
 #endif // #ifndef GITTER_HEXA_TOP_PLL_H_INCLUDED

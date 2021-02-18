@@ -766,8 +766,99 @@ namespace Dune
     mutable ALU3DSPACE SharedPointer< GeometryImplType > geoImplPtr_;
   };
 
+  ////////////////////////////////////////////////////////////////
+  //
+  //    ###  #     #  #        ###  #     #  #######
+  //     #   ##    #  #         #   ##    #  #
+  //     #   # #   #  #         #   # #   #  #
+  //     #   #  #  #  #         #   #  #  #  #####
+  //     #   #   # #  #         #   #   # #  #
+  //     #   #    ##  #         #   #    ##  #
+  //    ###  #     #  #######  ###  #     #  #######
+  //
+  //
+  ////////////////////////////////////////////////////////////////
+
+  // --buildFaceGeom
+  template <int mydim, int cdim, class GridImp>
+  template <class coord_t>
+  alu_inline bool
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
+  buildGeom(const coord_t& p0,
+            const coord_t& p1,
+            const coord_t& p2,
+            const coord_t& p3)
+  {
+    // update geometry implementation
+    geoImpl().update( p0, p1, p2, p3 );
+    return true;
+  }
+
+  // --buildFaceGeom
+  template <int mydim, int cdim, class GridImp>
+  template <class coord_t>
+  alu_inline bool
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
+  buildGeom(const coord_t& p0,
+            const coord_t& p1,
+            const coord_t& p2)
+  {
+    // update geometry implementation
+    geoImpl().update( p0, p1, p2 );
+    return true;
+  }
+
+
+  // --buildFaceGeom for edges
+  template <int mydim, int cdim, class GridImp>
+  template <class coord_t>
+  alu_inline bool
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
+  buildGeom(const coord_t& p0,
+            const coord_t& p1)
+  {
+    alugrid_assert (mydim == 1 );
+    // update geometry implementation
+    geoImpl().update( p0, p1 );
+    return true;
+  }
+
+
+  // built Geometry
+  template <int mydim, int cdim, class GridImp>
+  template <class Geometry>
+  inline bool
+  ALU3dGridGeometry<mydim, cdim, GridImp >::
+  buildGeomInFather(const Geometry &fatherGeom, const Geometry &myGeom)
+  {
+    // update geo impl
+    geoImpl().updateInFather( fatherGeom, myGeom );
+
+    // my volume is a part of 1 for hexas, for tetra adjust with factor
+    double volume = myGeom.volume() / fatherGeom.volume() ;
+    if( elementType == tetra && mydim == 3 )
+    {
+      volume /= 6.0; // ???
+      geoImpl().setVolume( volume );
+#ifdef ALUGRIDDEBUG
+      LocalCoordinate local( 0.0 );
+      alugrid_assert ( std::abs( 6.0 * geoImpl().volume() - integrationElement( local ) ) < 1e-12 );
+#endif
+    }
+    else
+      geoImpl().setVolume( volume );
+
+    return true;
+  }
+
 } // namespace Dune
 
+#include "grid.hh"
+#define alu_extern extern
+#include <dune/alugrid/3d/geometryexpltemp.hh>
+
+#if COMPILE_ALUGRID_INLINE
 #include "geometry_imp.cc"
+#endif
 
 #endif

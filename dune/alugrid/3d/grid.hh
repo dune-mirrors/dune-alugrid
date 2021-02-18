@@ -605,9 +605,6 @@ namespace Dune
                 const ALUGridVertexProjectionPairType& bndPrj,
                 const ALUGridRefinementType refinementType );
 
-    //! \brief Desctructor
-    virtual ~ALU3dGrid() {}
-
     //! \brief for grid identification
     static inline std::string name ();
 

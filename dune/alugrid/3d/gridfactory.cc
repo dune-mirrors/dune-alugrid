@@ -1389,35 +1389,8 @@ namespace Dune
       reinsertBoundary( faceMap, faceIt, defaultId );
 
   }
-
-#if ! COMPILE_ALUGRID_INLINE
-  // Instantiation -3-3
-  template class ALUGrid< 3, 3, cube, nonconforming >;
-  template class ALUGrid< 3, 3, simplex, nonconforming >;
-  template class ALUGrid< 3, 3, simplex, conforming >;
-
-  template class ALU3dGridFactory< ALUGrid< 3, 3, cube, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 3, 3, simplex, conforming > >;
-
-  // Instantiation -2-3
-  template class ALUGrid< 2, 3, cube, nonconforming >;
-  template class ALUGrid< 2, 3, simplex, nonconforming >;
-  template class ALUGrid< 2, 3, simplex, conforming >;
-
-  template class ALU3dGridFactory< ALUGrid< 2, 3, cube, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 2, 3, simplex, conforming > >;
-
-  // Instantiation -2-2
-  template class ALUGrid< 2, 2, cube, nonconforming >;
-  template class ALUGrid< 2, 2, simplex, nonconforming >;
-  template class ALUGrid< 2, 2, simplex, conforming >;
-
-  template class ALU3dGridFactory< ALUGrid< 2, 2, cube, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, nonconforming > >;
-  template class ALU3dGridFactory< ALUGrid< 2, 2, simplex, conforming > >;
-#endif // ! COMPILE_ALUGRID_INLINE
 }
+
+#include <dune/alugrid/3d/gridfactoryexpltemp.hh>
 
 #endif // end DUNE_ALU3DGRID_FACTORY_CC

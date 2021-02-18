@@ -219,8 +219,8 @@ namespace ALUGrid
         // for _myGrid
         friend class TetraTop < TetraEmpty >;
     };
-    typedef TetraTop < TetraEmpty > tetra_IMPL;
 
+    typedef TetraTop < TetraEmpty > tetra_IMPL;
 
     class Periodic3Empty : public periodic3_GEO {
       protected :
@@ -293,6 +293,7 @@ namespace ALUGrid
         //ghost tetra gets indices of grid, to which it belongs actually
         void setGhostBoundaryIds();
       };
+
       typedef HexaTop < HexaEmpty > hexa_IMPL;
 
 
@@ -586,6 +587,16 @@ namespace ALUGrid
   {
     return _macrogitter->numMacroBndSegments();
   }
+
+  extern template class Hface3Top< GitterBasis::Objects::Hface3Empty >;
+  extern template class Hbnd3Top< GitterBasis::Objects::Hbnd3Default >;
+  extern template class TetraTop < GitterBasis::Objects::TetraEmpty >;
+  extern template class Periodic3Top < GitterBasis::Objects::Periodic3Empty >;
+  extern template class Hedge1Top< GitterBasis::Objects::Hedge1Empty >;
+  extern template class Hface4Top< GitterBasis::Objects::Hface4Empty >;
+  extern template class Hbnd4Top< GitterBasis::Objects::Hbnd4Default >;
+  extern template class HexaTop < GitterBasis::Objects::HexaEmpty >;
+  extern template class Periodic4Top < GitterBasis::Objects::Periodic4Empty >;
 
 } // namespace ALUGrid
 

@@ -836,8 +836,13 @@ private:
   int maxlevel_;
 };
 
-
 } // end namespace Dune
+
+
+// this is included in entity.hh because of the needed
+// entity types
+//#define alu_extern extern
+//#include <dune/alugrid/3d/iteratorexpltemp.hh>
 
 #if COMPILE_ALUGRID_INLINE
   #include "iterator.cc"

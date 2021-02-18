@@ -653,4 +653,6 @@ setNewFace(const GEOFaceType& newFace)
 
 } // end namespace Dune
 
+#include <dune/alugrid/3d/iteratorexpltemp.hh>
+
 #endif // DUNE_ALUGRID_ITERATOR_IMP_CC

@@ -4,6 +4,8 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/indexsets.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings_imp.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/grid_imp.cc
+    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/gridfactory.cc
+    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/geometry_imp.cc
     ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/entity_imp.cc)
 endif()
 
@@ -15,7 +17,8 @@ dune_add_library(dunealugrid
   ${ALUGRID_LIB_SOURCES}
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
   ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc
+  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/alugrid.cc)
 
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   target_compile_options(dunealugrid PRIVATE -include${CMAKE_BINARY_DIR}/config.h)

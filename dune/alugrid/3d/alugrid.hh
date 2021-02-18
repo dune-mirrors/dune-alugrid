@@ -186,13 +186,18 @@ namespace Dune
     template< class > friend class ALU3dGridFactory;
 
     //! Copy constructor should not be used
-    ALUGrid( const ALUGrid & g ); //  : BaseType(g) {}
+    ALUGrid( const ALUGrid & g ) = delete;
 
     //! assignment operator should not be used
-    This& operator = (const ALUGrid& g);
+    This& operator = (const ALUGrid& g) = delete;
   };
 
+
+
 } //end  namespace Dune
+
+#define alu_extern extern
+#include <dune/alugrid/3d/alugridexpltemplates.hh>
 
 //#undef alu_inline
 #endif // #ifndef DUNE_ALU3DGRID_ALUGRID_HH
