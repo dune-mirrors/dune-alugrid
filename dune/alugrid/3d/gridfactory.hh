@@ -617,10 +617,9 @@ namespace Dune
   {
     const std::size_t numVx = vertices.size();
 
-    const unsigned int faceTopoId = (elementType == tetra) ?
-            Dune::Impl::SimplexTopology< dimension-1 >::type::id :
-            Dune::Impl::CubeTopology< dimension-1 >::type::id ;
-    GeometryType type( faceTopoId, dimension-1 );
+    GeometryType type = (elementType == tetra) ?
+        GeometryTypes::simplex(dimension-1) :
+        GeometryTypes::cube(dimension-1);
 
     // we need double here because of the structure of BoundarySegment
     // and BoundarySegmentWrapper which have double as coordinate type

@@ -383,11 +383,8 @@ alu_inline GeometryType
 ALU3dGridIntersectionIterator<GridImp>::
 type () const
 {
-  return GeometryType(
-      GridImp::elementType == tetra ?
-        Impl :: SimplexTopology< dim-1 > :: type :: id :
-        Impl :: CubeTopology   < dim-1 > :: type :: id,
-          dim-1 );
+  return GridImp::elementType == tetra ?
+    GeometryTypes::simplex(dim-1) : GeometryTypes::cube(dim-1);
 }
 
 template<class GridImp>

@@ -515,10 +515,10 @@ namespace Dune
       }
     }
 
-    const unsigned int elemTopoId = (eltype == simplex) ?
-            Dune::Impl::SimplexTopology< dimgrid >::type::id : Dune::Impl::CubeTopology< dimgrid >::type::id ;
-    const unsigned int faceTopoId = (eltype == simplex) ?
-            Dune::Impl::SimplexTopology< dimgrid-1 >::type::id : Dune::Impl::CubeTopology< dimgrid-1 >::type::id ;
+    const GeometryType elementType = (eltype == simplex) ?
+            GeometryTypes::simplex(dimgrid) : GeometryTypes::cube(dimgrid);
+    const GeometryType faceType = (eltype == simplex) ?
+            GeometryTypes::simplex(dimgrid-1) : GeometryTypes::cube(dimgrid-1);
 
     GlobalVertexIndexBlock vertexIndex( file );
     const bool globalVertexIndexFound = vertexIndex.isactive();
@@ -555,8 +555,6 @@ namespace Dune
         }
       }
 
-      GeometryType elementType( elemTopoId, dimgrid );
-
       const int nFaces = (eltype == simplex) ? dimgrid+1 : 2*dimgrid;
       for( int n = 0; n < dgf_.nofelements; ++n )
       {
@@ -589,13 +587,12 @@ namespace Dune
     if( rank == 0 || globalVertexIndexFound )
     {
       const size_t numBoundaryProjections = projectionBlock.numBoundaryProjections();
-      GeometryType type( faceTopoId, dimgrid-1 );
       for( size_t i = 0; i < numBoundaryProjections; ++i )
       {
         const std::vector< unsigned int > &vertices = projectionBlock.boundaryFace( i );
         const DuneBoundaryProjection< dimworld > *projection
           = projectionBlock.boundaryProjection< dimworld >( i );
-        factory_.insertBoundaryProjection( type, vertices, projection );
+        factory_.insertBoundaryProjection( faceType, vertices, projection );
       }
 
       typedef dgf::PeriodicFaceTransformationBlock::AffineTransformation Transformation;
