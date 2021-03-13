@@ -243,13 +243,15 @@ namespace Dune
   template<int dim>
   struct ALU3dGridTwists< dim, tetra, 0 >
   {
-    typedef TrivialTwists< Impl::SimplexTopology< dim >::type::id, dim > Type;
+    static const unsigned int topoId = GeometryTypes::simplex(dim).id();
+    typedef TrivialTwists< topoId, dim > Type;
   };
 
   template<int dim>
   struct ALU3dGridTwists< dim, hexa, 0 >
   {
-    typedef TrivialTwists< Impl::CubeTopology< dim >::type::id, dim > Type;
+    static const unsigned int topoId = GeometryTypes::cube(dim).id();
+    typedef TrivialTwists< topoId, dim > Type;
   };
 
   template< int dim, ALU3dGridElementType elType >

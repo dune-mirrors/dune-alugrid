@@ -28,8 +28,7 @@ namespace Dune
     {
       static const bool v = true;
       static const unsigned int topologyId = (eltype == cube) ?
-        Impl :: CubeTopology< dim > :: type :: id :
-        Impl :: SimplexTopology< dim > :: type :: id ;
+        GeometryTypes::cube(dim).id() : GeometryTypes::simplex(dim).id();
     };
 
     /** \brief ALUGrid has entities for all codimension

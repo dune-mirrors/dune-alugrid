@@ -18,10 +18,9 @@ template< int mydim, int cdim, class GridImp>
 alu_inline GeometryType
 ALU3dGridGeometry< mydim, cdim, GridImp > :: type () const
 {
-  return GeometryType( (elementType == tetra) ?
-      Impl :: SimplexTopology< mydim > :: type :: id :
-      Impl :: CubeTopology   < mydim > :: type :: id,
-      mydim );
+  return (elementType == tetra) ?
+      GeometryTypes::simplex( mydim ) :
+      GeometryTypes::cube( mydim );
 }
 
 template< int mydim, int cdim, class GridImp>
