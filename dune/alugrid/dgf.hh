@@ -520,8 +520,8 @@ namespace Dune
         std::ifstream newfile(newfilename.c_str());
         if ( !newfile )
         {
-          std::cout << "process " << rank << " failed to open file " << newfilename << " ... abort" << std::endl;
-          DUNE_THROW( InvalidStateException, "parallel DGF file could not be opened" );
+          std::cout << "prozess " << rank << " failed to open file " << newfilename << " ... abort" << std::endl;
+          DUNE_THROW( InvalidStateException, "parallel DGF file could not opend" );
         }
         assert( newfile );
         return generateALUGrid(eltype, refinementtype, newfile, communicator, filename);
