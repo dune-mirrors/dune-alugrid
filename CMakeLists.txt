@@ -8,9 +8,6 @@ project("dune-alugrid" C CXX)
 set(BUILD_DOCS 1)
 set(DUNE_REENABLE_ADD_TEST TRUE)
 
-# enable or disable pre-compiled python modules
-
-
 # Set the default DUNE_MAX_TEST_CORES that is used in the parallel tests
 if(NOT DUNE_MAX_TEST_CORES)
   set(DUNE_MAX_TEST_CORES 4)
@@ -27,8 +24,6 @@ set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   set(DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB 1)
 endif()
-
-option(ENABLE_PRECOMPILED_PYTHON_MODULES OFF)
 
 # general stuff
 cmake_minimum_required(VERSION 2.8.12)

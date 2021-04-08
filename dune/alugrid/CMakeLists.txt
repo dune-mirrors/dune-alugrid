@@ -2,7 +2,6 @@ set(SUBDIRS
   3d
   common
   impl
-  python
   test)
 
 foreach(i ${SUBDIRS})
