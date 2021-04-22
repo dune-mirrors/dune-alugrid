@@ -1,6 +1,10 @@
 #ifndef DUNE_ALU_BNDPROJECTION_HH
 #define DUNE_ALU_BNDPROJECTION_HH
 
+#include <memory>
+#include <dune/common/exceptions.hh>
+
+
 namespace Dune {
 
   //! \brief ALUGrid boundary projection implementation
