@@ -24,10 +24,8 @@ endif()
 # add mpi flags to compile library
 add_dune_mpi_flags( dunealugrid )
 
-# on macOS, we have to explicitly link against the Dune libraries
-if(CMAKE_HOST_APPLE)
-  target_link_libraries(dunealugrid ${DUNE_LIBS})
-endif()
+# link against the Dune libraries
+target_link_libraries(dunealugrid ${DUNE_LIBS})
 
 # METIS dependencies
 if(METIS_FOUND)
