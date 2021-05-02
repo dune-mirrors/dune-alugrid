@@ -7,8 +7,6 @@ logger = logging.getLogger(__name__)
 from dune.common.checkconfiguration import assertHave, ConfigurationError
 
 try:
-    assertHave("HAVE_DUNE_ALUGRID")
-
     def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, **parameters):
         from dune.grid.grid_generator import module, getDimgrid
 
