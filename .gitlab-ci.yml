@@ -1,8 +1,8 @@
 ---
-workflow:
-  rules:
-    - if: '$CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TITLE !~ /^WIP/'   # Execute jobs in merge request context and not in WIP status
-    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
+#workflow:
+#  rules:
+#    - if: '$CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TITLE !~ /^WIP/'   # Execute jobs in merge request context and not in WIP status
+#    - if: $CI_COMMIT_BRANCH == 'master'      # Execute jobs when a new commit is pushed to master branch
 
 variables:
   # remove some unused 3rd party packages to speed up tests.
@@ -28,18 +28,9 @@ debian:11--gcc-9-17-python:
   script: duneci-standard-test
   variables:
     DUNECI_TOOLCHAIN:   gcc-9-17
-    # so we need some variables to build the dune-py module during execution of the first python test:
-    # we need to find the dune mdoule
-    DUNE_CONTROL_PATH:  /duneci/modules:$CI_PROJECT_DIR
-    # the position for the dune-py module
-    DUNE_PY_DIR:        /duneci/modules/dune-py
-    # during dune-py build this variable is used - do know a way to access
-    # the CMAKE_FLAGS used to build the modules...
-    DUNE_CMAKE_FLAGS:   "-DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_FLAGS='-std=c++17 -O2 -g -Wall -fdiagnostics-color=always' -DDUNE_ENABLE_PYTHONBINDINGS=ON -DDUNE_MAX_TEST_CORES=4 -DBUILD_SHARED_LIBS=TRUE -DDUNE_PYTHON_INSTALL_LOCATION=none -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_LATEX=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE"
-    # cmake flags we use for all dune moudle - important is that build shared libs is set (need some better way of doing this)
-    DUNECI_CMAKE_FLAGS: $DUNE_CMAKE_FLAGS
-    # finally set the python path to all modules
-    PYTHONPATH:         /duneci/modules/dune-common/build-cmake/python:/duneci/modules/dune-geometry/build-cmake/python:/duneci/modules/dune-grid/build-cmake/python:$CI_PROJECT_DIR/build-cmake/python
+    # the CMAKE_FLAGS used to build the modules - set python bindings to on
+    # Note: DUNE_RUNNING_IN_CI only needed unti ci image updating fixed on gitlab
+    DUNE_CMAKE_FLAGS:   "-DDUNE_RUNNING_IN_CI=TRUE -DDUNE_ENABLE_PYTHONBINDINGS=ON -DCMAKE_DISABLE_FIND_PACKAGE_LATEX=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Alberta=TRUE -DCMAKE_DISABLE_FIND_PACKAGE_Vc=TRUE -DCMAKE_DISABLE_DOCUMENTATION=TRUE"
   tags: [duneci]
 
 debian:11--gcc-9-17:headercheck:
