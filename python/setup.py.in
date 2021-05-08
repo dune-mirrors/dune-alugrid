@@ -1,6 +1,6 @@
 from setuptools import setup, find_namespace_packages
 
-pkg = [m for m in "${ProjectPythonRequires}".split(' ') if "dune" not in m]
+pkg = [m for m in "${ProjectPythonRequires} ${dune-alugrid_DEPENDS}".split(' ')]
 
 setup(name="${ProjectName}",
     packages=find_namespace_packages(include=['dune.*']),
