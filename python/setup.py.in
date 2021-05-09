@@ -1,17 +1,6 @@
 from setuptools import setup, find_namespace_packages
-import sys
-from pip._internal import main as pip_main
 
-pkg = '${ProjectPythonRequires} ${ALL_DEPENDENCIES}'.replace(';',' ').split(' ')
-
-def install(package):
-    pip_main(['install', package])
-
-for p in pkg:
-    try:
-        install(p)
-    except:
-        pass
+pkg = '${RequiredPythonModules}'.replace(';',' ').split(' ')
 
 setup(name="${ProjectName}",
     packages=find_namespace_packages(include=['dune.*']),
@@ -21,5 +10,6 @@ setup(name="${ProjectName}",
     author_email="${ProjectMaintainerEmail}",
     zip_safe = 0,
     package_data = {'': ['*.so']},
+    install_requires = pkg,
     include_package_data=True,
   )
