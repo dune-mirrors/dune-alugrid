@@ -57,7 +57,7 @@ debian:11--buildpackage:
     - pip install -i https://gitlab.dune-project.org/api/v4/projects/812/packages/pypi/simple --no-build-isolation twine 
     - pip install -i https://gitlab.dune-project.org/api/v4/projects/812/packages/pypi/simple --no-build-isolation scikit-build 
     - python3 /duneci/modules/dune-common/bin/dunepackaging.py --onlysdist
-    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python3 -m twine upload --repository gitlab --repository-url https://gitlab.dune-project.org/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python3 -m twine upload --repository gitlab --repository-url https://gitlab.dune-project.org/api/v4/projects/${CI_PROJECT_ID}/packages/pypi dist/*
   variables:
     DUNECI_TOOLCHAIN: gcc-9-17
   tags: [duneci]
