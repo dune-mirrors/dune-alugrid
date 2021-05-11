@@ -41,6 +41,7 @@ debian:11--gcc-9-17:headercheck:
     - cd /duneci/modules/dune-alugrid/build-cmake
     - make headercheck
     - cd /duneci/modules/dune-alugrid/
+    - pip install -i https://gitlab.dune-project.org/api/v4/projects/812/packages/pypi/simple --no-build-isolation wheel twine scikit-build
     - python3 /duneci/modules/dune-common/bin/dunepackaging.py --onlysdist
     - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python3 -m twine upload --repository-url https://gitlab.dune-project.org/api/v4/projects/${CI_PROJECT_ID}/packages/pypi
   variables:
