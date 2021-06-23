@@ -28,11 +28,8 @@ add_dune_mpi_flags( dunealugrid )
 target_link_libraries(dunealugrid ${DUNE_LIBS})
 
 # METIS dependencies
-if(METIS_FOUND)
-  target_link_libraries(dunealugrid ${METIS_LIBRARIES})
-  set_property(TARGET dunealugrid APPEND PROPERTY
-              INCLUDE_DIRECTORIES "${METIS_INCLUDE_DIRS}")
-endif()
+add_dune_metis_flags(dunealugrid)
+
 # zoltan dependencies
 if(ZOLTAN_FOUND)
   target_link_libraries(dunealugrid ${ZOLTAN_LIBRARIES})
