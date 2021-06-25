@@ -441,24 +441,6 @@ namespace Dune
 
   } //end namespace dgf
 
-  namespace detail {
-
-    template <class Grid>
-    Grid* release(
-#if DUNE_VERSION_NEWER( DUNE_GRID, 2, 7)
-        ToUniquePtr< Grid >&&
-#else
-        Grid*
-#endif
-        gridPtr )
-    {
-#if DUNE_VERSION_NEWER( DUNE_GRID, 2, 7)
-      return gridPtr.release();
-#else
-      return gridPtr;
-#endif
-    }
-  }
 
   template < class G >
   inline bool DGFBaseFactory< G > ::
@@ -626,9 +608,9 @@ namespace Dune
       factory_.setLongestEdgeFlag();
 
     if( !parameter.dumpFileName().empty() )
-      grid_ = detail::release( factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() ) ) ;
+      grid_ = std::unique_ptr<Grid>(factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() )).release() ;
     else
-      grid_ = detail::release( factory_.createGrid( addMissingBoundariesGlobal, true, filename ) );
+      grid_ = std::unique_ptr<Grid>(factory_.createGrid( addMissingBoundariesGlobal, true, filename )).release();
     return true;
   }
 

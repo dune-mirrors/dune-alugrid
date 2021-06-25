@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <dune/common/version.hh>
-#include <dune/common/to_unique_ptr.hh>
 
 #include <dune/grid/common/gridfactory.hh>
 #include <dune/grid/common/exceptions.hh>
@@ -35,10 +34,12 @@ namespace Dune
   protected:
     typedef FromToGridFactory< Grid > This;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 7)
-    typedef ToUniquePtr< Grid > GridPtrType;
+#if DUNE_VERSION_LT(DUNE_COMMON, 2, 7)
+  typedef Grid*  GridPtrType;
+#elif DUNE_VERSION_LT(DUNE_COMMON, 2, 8)
+  typedef ToUniquePtr< Grid > GridPtrType;
 #else
-    typedef Grid*  GridPtrType;
+  typedef std::unique_ptr< Grid > GridPtrType;
 #endif
 
     std::vector< unsigned int > ordering_ ;

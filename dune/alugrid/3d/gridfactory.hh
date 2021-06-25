@@ -8,7 +8,6 @@
 #include <vector>
 
 // #include <dune/common/shared_ptr.hh>
-#include <dune/common/to_unique_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/version.hh>
 
@@ -62,10 +61,12 @@ namespace Dune
 
     typedef typename Grid::CollectiveCommunication Communication;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 7)
-    typedef ToUniquePtr< Grid > GridPtrType;
+#if DUNE_VERSION_LT(DUNE_COMMON, 2, 7)
+  typedef Grid*  GridPtrType;
+#elif DUNE_VERSION_LT(DUNE_COMMON, 2, 8)
+  typedef ToUniquePtr< Grid > GridPtrType;
 #else
-    typedef Grid*  GridPtrType;
+  typedef std::unique_ptr< Grid > GridPtrType;
 #endif
 
   private:
