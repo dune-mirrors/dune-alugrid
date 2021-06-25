@@ -34,13 +34,9 @@ namespace Dune
   protected:
     typedef FromToGridFactory< Grid > This;
 
-#if DUNE_VERSION_LT(DUNE_COMMON, 2, 7)
-  typedef Grid*  GridPtrType;
-#elif DUNE_VERSION_LT(DUNE_COMMON, 2, 8)
-  typedef ToUniquePtr< Grid > GridPtrType;
-#else
-  typedef std::unique_ptr< Grid > GridPtrType;
-#endif
+    // typedef grid pointer type based on what the grid factory interface defines
+    typedef Dune::GridFactoryInterface< Grid >  GridFactoryInterfaceType;
+    typedef decltype(std::declval< GridFactoryInterfaceType* > ()->createGrid())  GridPtrType;
 
     std::vector< unsigned int > ordering_ ;
 
