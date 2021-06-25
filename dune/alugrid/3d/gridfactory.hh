@@ -62,8 +62,7 @@ namespace Dune
     typedef typename Grid::CollectiveCommunication Communication;
 
     // typedef grid pointer type based on what the grid factory interface defines
-    typedef Dune::GridFactoryInterface< Grid >  GridFactoryInterfaceType;
-    typedef decltype(std::declval< GridFactoryInterfaceType* > ()->createGrid())  GridPtrType;
+    typedef decltype(std::declval< Dune::GridFactoryInterface< Grid >* >()->createGrid())  GridPtrType;
 
   private:
     static_assert ( (elementType == tetra || elementType == hexa),

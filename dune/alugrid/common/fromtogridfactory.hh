@@ -35,8 +35,7 @@ namespace Dune
     typedef FromToGridFactory< Grid > This;
 
     // typedef grid pointer type based on what the grid factory interface defines
-    typedef Dune::GridFactoryInterface< Grid >  GridFactoryInterfaceType;
-    typedef decltype(std::declval< GridFactoryInterfaceType* > ()->createGrid())  GridPtrType;
+    typedef decltype(std::declval< Dune::GridFactoryInterface< Grid >* >()->createGrid())  GridPtrType;
 
     std::vector< unsigned int > ordering_ ;
 
