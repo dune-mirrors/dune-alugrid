@@ -25,9 +25,6 @@ if( DUNE_ALUGRID_COMPILE_BINDINGS )
   set(DUNE_ALUGRID_COMPILE_BINDINGS_IN_LIB 1)
 endif()
 
-# general stuff
-cmake_minimum_required(VERSION 2.8.12)
-
 # guess dune-common build dir
 if(NOT (dune-common_DIR OR dune-common_ROOT OR
         "${CMAKE_PREFIX_PATH}" MATCHES ".*dune-common.*"))
