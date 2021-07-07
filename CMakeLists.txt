@@ -15,7 +15,7 @@ endif()
 
 # grid selector in separate file to avoid excessive dependencies
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
-set(ALUGRID_DISABLE_METIS TRUE)
+set(ALUGRID_DISABLE_METIS FALSE)
 
 # set to true to compile more things into library
 set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
