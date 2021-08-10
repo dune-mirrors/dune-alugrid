@@ -1,6 +1,8 @@
 #ifndef DUNE_ALU3DGRIDMEMORY_HH
 #define DUNE_ALU3DGRIDMEMORY_HH
 
+#include <dune/common/visibility.hh>
+
 #include <dune/alugrid/common/alugrid_assert.hh>
 #include <cstdlib>
 #include <vector>
@@ -179,7 +181,7 @@ namespace ALUGrid
     typedef ReferenceCountedObject< ObjectType >              ReferenceCountedObjectType;
     typedef ALUMemoryProvider< ReferenceCountedObjectType >   MemoryPoolType;
 
-    static MemoryPoolType& memoryPool()
+    DUNE_EXPORT static MemoryPoolType& memoryPool()
     {
       static thread_local MemoryPoolType pool;
       return pool;
@@ -192,7 +194,7 @@ namespace ALUGrid
       getObject();
     }
 
-    // copy contructor making shallow copy
+    // copy constructor making shallow copy
     SharedPointer( const SharedPointer& other )
     {
       assign( other );
