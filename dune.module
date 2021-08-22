@@ -1,5 +1,5 @@
 Module: dune-alugrid
-Version: 2.8-git
+Version: 2.8.0
 Author: Robert Kloefkorn, Martin Alkaemper, Andreas Dedner and Martin Nolte
 Maintainer: dune-devel@lists.dune-project.org
 Description: Module providing the DUNE grid interface for unstructured simplicial and cube grids in 2 and 3 space dimensions
