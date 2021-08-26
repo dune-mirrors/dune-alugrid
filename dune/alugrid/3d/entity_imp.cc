@@ -137,13 +137,6 @@ namespace Dune {
   }
 
   template<int dim, class GridImp>
-  template<int cc>
-  alu_inline int ALU3dGridEntity<0,dim,GridImp> :: count () const
-  {
-    return subEntities( cc );
-  }
-
-  template<int dim, class GridImp>
   alu_inline unsigned int ALU3dGridEntity<0,dim,GridImp> :: subEntities (unsigned int codim) const
   {
     return GridImp::referenceElement().size( codim );
