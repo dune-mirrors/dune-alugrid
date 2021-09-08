@@ -181,7 +181,7 @@ namespace Dune
   //
   // The template parameter IntegerType allows to switch between
   // more elements in the grid and a smaller size of the global Ids
-  template <class MacroKeyImp, class IntegerImp = int>
+  template <class MacroKeyImp, class IntegerImp = uint>
   class ALUGridId
   {
   public:
@@ -196,7 +196,7 @@ namespace Dune
 
   public:
     ALUGridId() : key_()
-                , nChild_(-1)
+                , nChild_(0)
                 , codim_(-1)
                 , level_(-1)
     {}
@@ -216,8 +216,8 @@ namespace Dune
 
     ALUGridId & operator = (const ALUGridId & org )
     {
-      key_         = org.key_;
-      nChild_      = org.nChild_;
+      key_    = org.key_;
+      nChild_ = org.nChild_;
       codim_  = org.codim_;
       level_  = org.level_;
       return *this;
@@ -262,12 +262,12 @@ namespace Dune
 
     bool isValid () const
     {
-      return ( (nChild_ >= 0) && (codim_  >= 0) && (level_ >= 0) );
+      return ( (codim_ >= 0) && (level_ >= 0) );
     }
 
     void reset()
     {
-      nChild_ = -1;
+      nChild_ = 0;
       codim_  = -1;
       level_ = -1;
     }
