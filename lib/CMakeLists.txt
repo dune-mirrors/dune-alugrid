@@ -27,6 +27,7 @@ add_dune_mpi_flags( dunealugrid )
 # link against the Dune libraries
 target_link_libraries(dunealugrid PUBLIC ${DUNE_LIBS})
 
+include(AddMETISFlags)
 # METIS dependencies
 add_dune_metis_flags(dunealugrid)
 
