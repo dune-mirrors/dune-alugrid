@@ -88,22 +88,20 @@ void checkCapabilities(const Grid& grid)
      == reallyCanCommunicate;
    static_assert ( canCommunicate, "canCommunicate is not set correctly");
 
-   std::cout << "Sizes of interface implementation classes: " << std::endl;
-   std::cout << "  Entity< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::Entity) << std::endl;
-   std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
-   std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
-   std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-   std::cout << "  EntityPointer< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::EntityPointer) << std::endl;
-   std::cout << "  EntityPointer< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::EntityPointer) << std::endl;
-#endif // #if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-   std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
-   std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
-   std::cout << "  GlobalId = " << sizeof(typename Grid::GlobalIdSet::IdType) << std::endl;
-   std::cout << "  LocalId  = " << sizeof(typename Grid::LocalIdSet::IdType) << std::endl;
-   std::cout << std::endl;
+   // only print for main rank
+   if( grid.comm().rank() == 0 )
+   {
+     std::cout << "Sizes of interface implementation classes: " << std::endl;
+     std::cout << "  Entity< " << 0 << " > = " << sizeof(typename Grid::template Codim<0>::Entity) << std::endl;
+     std::cout << "  Entity< " << 1 << " > = " << sizeof(typename Grid::template Codim<1>::Entity) << std::endl;
+     std::cout << "  Entity< " << 2 << " > = " << sizeof(typename Grid::template Codim<2>::Entity) << std::endl;
+     std::cout << "  Entity< " << Grid::dimension << " > = " << sizeof(typename Grid::template Codim<Grid::dimension>::Entity) << std::endl;
+     std::cout << "  LeafIntersection   = " << sizeof(typename Grid::Traits::LeafIntersection) << std::endl;
+     std::cout << "  LevelIntersection  = " << sizeof(typename Grid::Traits::LevelIntersection) << std::endl;
+     std::cout << "  GlobalId = " << sizeof(typename Grid::GlobalIdSet::IdType) << std::endl;
+     std::cout << "  LocalId  = " << sizeof(typename Grid::LocalIdSet::IdType) << std::endl;
+     std::cout << std::endl;
+   }
 }
 
 template< class Grid >
@@ -402,14 +400,16 @@ void checkALUSerial(GridType & grid, int mxl = 2)
 
   writeFile( grid.leafGridView() );
 
-  std::cout << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
+  std::stringstream null;
+  std::ostream& out = (grid.comm().rank() == 0) ? std::cout : null;
+
+  out << "  CHECKING: grid size = " << grid.size( 0 ) << std::endl;
 
   // be careful, each global refine create 8 x maxlevel elements
-  std::cout << "  CHECKING: Macro" << std::endl;
+  out << "  CHECKING: Macro" << std::endl;
   checkGrid(grid);
 
   const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
-
   std::cout << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
@@ -418,9 +418,9 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   for(int i=0; i<mxl; i++)
   {
     grid.globalRefine( Dune::DGFGridInfo< GridType >::refineStepsForHalf() );
-    std::cout << "  CHECKING: Refined" << std::endl;
+    out << "  CHECKING: Refined" << std::endl;
     checkGrid(grid);
-    std::cout << "  CHECKING: intersections" << std::endl;
+    out << "  CHECKING: intersections" << std::endl;
     checkIntersectionIterator(grid, skipLevelIntersections);
   }
 
@@ -435,36 +435,36 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // check iterators
   checkALUIterators( grid );
 
-  std::cout << "  CHECKING: non-conform" << std::endl;
+  out << "  CHECKING: non-conform" << std::endl;
   checkGrid(grid);
 
   // check the method geometryInFather()
   if( GridType::dimension == GridType::dimensionworld )
   {
-    std::cout << "  CHECKING: geometry in father" << std::endl;
+    out << "  CHECKING: geometry in father" << std::endl;
     checkGeometryInFather(grid);
   }
   // check the intersection iterator and the geometries it returns
-  std::cout << "  CHECKING: intersections" << std::endl;
+  out << "  CHECKING: intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
-  std::cout << "  CHECKING: Iterator Assignment" << std::endl;
+  out << "  CHECKING: Iterator Assignment" << std::endl;
   // some checks for assignment of iterators
   checkIteratorAssignment(grid);
 
-  std::cout << "  CHECKING: Nonconforming Index Sets" << std::endl;
+  out << "  CHECKING: Nonconforming Index Sets" << std::endl;
   // check level index sets on nonconforming grids
   checkLevelIndexNonConform(grid);
 
   // check life time of geometry implementation
-  std::cout << "  CHECKING: geometry lifetime" << std::endl;
+  out << "  CHECKING: geometry lifetime" << std::endl;
   checkGeometryLifetime( grid.leafGridView() );
 
   // check persistent container
-  std::cout << "  CHECKING: persistent container" << std::endl;
+  out << "  CHECKING: persistent container" << std::endl;
   checkPersistentContainer( grid );
 
-  std::cout << std::endl << std::endl;
+  out << std::endl << std::endl;
 }
 
 template <class GridType>
@@ -841,6 +841,7 @@ int main (int argc , char **argv) {
           filename = newfilename;
         else
           filename = "./dgf/periodic-3d.dgf";
+
         typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
         // periodic boundaries require certain load balancing methods
         GridType::setLoadBalanceMethod( 10 );

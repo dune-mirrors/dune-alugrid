@@ -243,13 +243,15 @@ namespace Dune
   template<int dim>
   struct ALU3dGridTwists< dim, tetra, 0 >
   {
-    typedef TrivialTwists< Impl::SimplexTopology< dim >::type::id, dim > Type;
+    static const unsigned int topoId = GeometryTypes::simplex(dim).id();
+    typedef TrivialTwists< topoId, dim > Type;
   };
 
   template<int dim>
   struct ALU3dGridTwists< dim, hexa, 0 >
   {
-    typedef TrivialTwists< Impl::CubeTopology< dim >::type::id, dim > Type;
+    static const unsigned int topoId = GeometryTypes::cube(dim).id();
+    typedef TrivialTwists< topoId, dim > Type;
   };
 
   template< int dim, ALU3dGridElementType elType >
@@ -736,23 +738,6 @@ namespace Dune
 
     //! View for te macro grid with some alu specific methods (All_Partition)
     MacroGridView macroGridView() const
-    {
-      typedef MacroGridView View;
-      return View(*this);
-    }
-
-    //! View for te macro grid with some alu specific methods
-    template<PartitionIteratorType pitype>
-    DUNE_DEPRECATED_MSG("macroView is deprecated, use macroGridView")
-    typename Partition<pitype>::MacroGridView macroView() const
-    {
-      typedef typename Traits::template Partition<pitype>::MacroGridView View;
-      return View(*this);
-    }
-
-    //! View for te macro grid with some alu specific methods (All_Partition)
-    DUNE_DEPRECATED_MSG("macroView is deprecated, use macroGridView")
-    MacroGridView macroView() const
     {
       typedef MacroGridView View;
       return View(*this);

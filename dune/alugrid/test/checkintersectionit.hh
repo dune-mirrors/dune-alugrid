@@ -116,10 +116,10 @@ void checkIntersection ( const Intersection &intersection, bool isCartesian = fa
 
 #if !DISABLE_DEPRECATED_METHOD_CHECK
   DUNE_NO_DEPRECATED_BEGIN
-  DUNE_UNUSED const int dimension = Intersection::dimension;
+  const int dimension = Intersection::dimension;
   DUNE_NO_DEPRECATED_END
 #else
-  DUNE_UNUSED const int dimension = Entity::dimension;
+  const int dimension = Entity::dimension;
 #endif
   const int mydimension = Intersection::mydimension;
 
@@ -475,7 +475,7 @@ void checkIntersectionIterator ( const GridViewType &view,
 
 
   // check default constructibility of intersections
-  DUNE_UNUSED Intersection default_construct_intersection;
+  Intersection default_construct_intersection;
 
   // initialize variables for element checks
 

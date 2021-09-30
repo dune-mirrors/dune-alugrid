@@ -54,8 +54,8 @@ try
 {
   static const int dim = 2;
   //using GridType = Dune::ALUGrid<dim, dim, Dune::simplex, Dune::conforming>;
-  using GridType = Dune::ALUGrid<dim, dim, Dune::simplex, Dune::nonconforming>;
-  //using GridType = Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming>;
+  //using GridType = Dune::ALUGrid<dim, dim, Dune::simplex, Dune::nonconforming>;
+  using GridType = Dune::ALUGrid<dim, dim, Dune::cube, Dune::nonconforming>;
 
   MPIHelper::instance( argc, argv );
 

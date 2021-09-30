@@ -9,42 +9,6 @@ from dune.common.checkconfiguration import assertHave, ConfigurationError
 try:
     assertHave("HAVE_DUNE_ALUGRID")
 
-    def _module(includes, typeName, defaultGrid, *args, **kwargs):
-
-        module = None
-        if defaultGrid is not None:
-            # try to load default module
-            try:
-                import importlib
-                module = importlib.import_module( "dune.alugrid."+defaultGrid )
-            except ImportError:
-                module = None
-
-        if module is None:
-            # generate module code, compile and load
-            try:
-                generator = kwargs.pop("generator")
-            except KeyError:
-                from dune.generator.generator import SimpleGenerator
-                generator = SimpleGenerator("HierarchicalGrid", "Dune::Python")
-
-            from dune.common.hashit import hashIt
-            includes = includes + ["dune/python/grid/hierarchical.hh"]
-            typeHash = "hierarchicalgrid_" + hashIt(typeName)
-            module = generator.load(includes, typeName, typeHash, *args, **kwargs)
-
-        from dune.grid.grid_generator import addAttr, levelView, persistentContainer
-        addAttr(module, module.LeafGrid)
-
-        # register reference element for this grid
-        import dune.geometry
-        for d in range(module.LeafGrid.dimension+1):
-            dune.geometry.module(d)
-        setattr(module.HierarchicalGrid,"levelView",levelView)
-        setattr(module.HierarchicalGrid,"persistentContainer",persistentContainer)
-        return module
-
-
     def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, **parameters):
         from dune.grid.grid_generator import module, getDimgrid
 
@@ -76,14 +40,7 @@ try:
 
         typeName += " >"
         includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
-
-        if dimgrid == dimworld and serial == False:
-            _, _, shortElType  = elementType.partition('::')
-            _, _, shortRefType = refinement.partition('::')
-            defaultGrid = '_defaultalu' + shortElType + shortRefType + str(dimgrid) + str(dimworld)
-        else:
-            defaultGrid = None
-        gridModule = _module(includes, typeName, defaultGrid)
+        gridModule = module(includes, typeName)
 
         if comm is not None:
             raise Exception("Passing communicator to grid construction is not yet implemented in Python bindings of dune-grid")

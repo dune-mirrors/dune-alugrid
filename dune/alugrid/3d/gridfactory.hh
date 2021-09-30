@@ -9,7 +9,6 @@
 #include <vector>
 
 // #include <dune/common/shared_ptr.hh>
-#include <dune/common/to_unique_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/version.hh>
 
@@ -87,11 +86,8 @@ namespace Dune
 
     typedef typename Grid::CollectiveCommunication Communication;
 
-#if DUNE_VERSION_NEWER(DUNE_GRID, 2, 7)
-    typedef ToUniquePtr< Grid > GridPtrType;
-#else
-    typedef Grid*  GridPtrType;
-#endif
+    // typedef grid pointer type based on what the grid factory interface defines
+    typedef decltype(std::declval< Dune::GridFactoryInterface< Grid >* >()->createGrid())  GridPtrType;
 
   private:
     static_assert ( (elementType == tetra || elementType == hexa),
@@ -675,10 +671,9 @@ namespace Dune
   {
     const std::size_t numVx = vertices.size();
 
-    const unsigned int faceTopoId = (elementType == tetra) ?
-            Dune::Impl::SimplexTopology< dimension-1 >::type::id :
-            Dune::Impl::CubeTopology< dimension-1 >::type::id ;
-    GeometryType type( faceTopoId, dimension-1 );
+    GeometryType type = (elementType == tetra) ?
+        GeometryTypes::simplex(dimension-1) :
+        GeometryTypes::cube(dimension-1);
 
     // we need double here because of the structure of BoundarySegment
     // and BoundarySegmentWrapper which have double as coordinate type

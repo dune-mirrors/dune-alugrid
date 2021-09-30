@@ -314,11 +314,10 @@ namespace Dune
       return SGF :: createCubeGridImpl( lowerLeft, upperRight, dims, comm, nameYasp );
     }
 
-    template < class int_t >
     static SharedPtrType
     createSimplexGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                         const FieldVector<ctype,dimworld>& upperRight,
-                        const std::array< int_t, dim>& elements,
+                        const std::array<unsigned int, dim>& elements,
                         MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       // create DGF interval block and use DGF parser to create simplex grid
@@ -342,11 +341,10 @@ namespace Dune
       return SharedPtrType( grid.release() );
     }
 
-    template < class int_t >
     static SharedPtrType
     createCubeGrid ( const FieldVector<ctype,dimworld>& lowerLeft,
                      const FieldVector<ctype,dimworld>& upperRight,
-                     const std::array< int_t, dim>& elements,
+                     const std::array<unsigned int, dim>& elements,
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
       CollectiveCommunication comm( mpiComm );

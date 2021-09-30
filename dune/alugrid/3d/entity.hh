@@ -281,16 +281,11 @@ public:
 
   /*! Intra-element access to entities of codimension cc > codim. Return number of entities
       with codimension cc.
-  */
-  template<int cc> int count () const ;
-
-  /*! Intra-element access to entities of codimension cc > codim. Return number of entities
-      with codimension cc.
    */
   unsigned int subEntities (unsigned int codim) const;
 
   //! Provide access to mesh entity i of given codimension. Entities
-  //!  are numbered 0 ... count<cc>()-1
+  //!  are numbered 0 ... subEntities(codim)-1
   template< int codim >
   typename Codim< codim >::Entity subEntity ( int i ) const;
 
