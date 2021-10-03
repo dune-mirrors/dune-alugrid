@@ -13,6 +13,15 @@ dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
     DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming, ALUGridNoComm >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming, ALUGridNoComm >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming, ALUGridNoComm >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 
 # for ALUGrid module we write a separate grid selector file to avoid
 # dependencies of the library files to all headers, for all other module
