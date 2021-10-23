@@ -5,13 +5,22 @@ cmake_policy(SET CMP0074 NEW)
 include(GridType)
 #define available alugrid types
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM
-    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, conforming >"
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::conforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE
-    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, cube, nonconforming >"
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::cube, Dune::nonconforming >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX
-    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, simplex, nonconforming >"
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::nonconforming >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CONFORM_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::conforming, Dune::ALUGridNoComm >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_CUBE_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::cube, Dune::nonconforming, Dune::ALUGridNoComm >"
+    HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
+dune_define_gridtype(GRIDSELECTOR_GRIDS GRIDTYPE ALUGRID_SIMPLEX_NOCOMM
+    DUNETYPE "Dune::ALUGrid< dimgrid, dimworld, Dune::simplex, Dune::nonconforming, Dune::ALUGridNoComm >"
     HEADERS dune/alugrid/grid.hh dune/alugrid/dgf.hh)
 
 # for ALUGrid module we write a separate grid selector file to avoid
