@@ -10,6 +10,7 @@
 #include "mappings.hh"
 #include "geometry.hh"
 #include <dune/alugrid/common/twists.hh>
+#include <dune/common/math.hh>
 
 namespace Dune {
 // --Geometry
@@ -86,10 +87,9 @@ volume () const
   }
   else if ( mydim == 2 && elementType == tetra )
   {
-    enum { factor = Factorial<mydim>::factorial };
     // local vector does not affect the result
     const LocalCoordinate dummy(0);
-    return integrationElement( dummy ) / ((ctype) factor);
+    return integrationElement( dummy ) / static_cast<ctype>( factorial(mydim) );
   }
   else
   {
