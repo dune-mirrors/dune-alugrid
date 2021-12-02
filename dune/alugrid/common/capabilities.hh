@@ -94,6 +94,24 @@ namespace Dune
       static const bool v = true;
     };
 
+
+    /** \brief ALUGrid is not generally thread safe (only grid iteration is)
+    \ingroup ALUGrid
+    */
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct threadSafe< ALUGrid< dim, dimworld, eltype, refinementtype, Comm > > {
+      static const bool v = false;
+    };
+
+    /** \brief ALUGrid is view thread safe (i.e. things that don't modify the grid)
+    \ingroup ALUGrid
+    */
+    template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
+    struct viewThreadSafe< ALUGrid< dim, dimworld, eltype, refinementtype, Comm > > {
+      static const bool v = true;
+    };
+
+
   } // end namespace Capabilities
 
 } //end  namespace Dune
