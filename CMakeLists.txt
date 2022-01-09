@@ -44,6 +44,9 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
+# Define the dune-alugrid library
+dune_add_library(dunealugrid)
+
 add_subdirectory(cmake/modules)
 
 add_subdirectory(doc/doxygen)
