@@ -124,7 +124,7 @@ namespace Dune
 
     typedef ALU3DSPACE GitterDuneImpl GitterImplType;
 
-    typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
+    typedef Dune::Communication< No_Comm > Communication;
 
     explicit ALU3dGridCommunications ( ALUGridNoComm comm ) {}
 
@@ -163,7 +163,7 @@ namespace Dune
     void print( std::ostream& out ) const
     {}
 
-    CollectiveCommunication ccobj_;
+    Communication ccobj_;
   };
 
 #if ALU3DGRID_PARALLEL
@@ -175,7 +175,7 @@ namespace Dune
 
     typedef ALU3DSPACE GitterDunePll GitterImplType;
 
-    typedef Dune::CollectiveCommunication< MPI_Comm > CollectiveCommunication;
+    typedef Dune::Communication< MPI_Comm > Communication;
 
     explicit ALU3dGridCommunications ( MPI_Comm comm )
     : ccobj_( comm ), mpAccess_( comm )
@@ -227,7 +227,7 @@ namespace Dune
       grid.rebuildGhostCells();
     }
 
-    CollectiveCommunication ccobj_;
+    Communication ccobj_;
     ALU3DSPACE MpAccessMPI mpAccess_;
   };
 #endif // #if ALU3DGRID_PARALLEL
@@ -380,7 +380,11 @@ namespace Dune
       typedef IdSet< Grid, GlobalIdSetImp, GlobalIdType > GlobalIdSet;
 
       //! Type of the communication class
-      typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::CollectiveCommunication CollectiveCommunication;
+      typedef typename ALU3dGridCommunications< dim, dimworld, elType, Comm >::Communication Communication;
+
+      [[deprecated("Use Communication instead!")]]
+      typedef Communication CollectiveCommunication;
+
     }; // struct Traits
 
     //! Type of the level index set implementation
@@ -548,8 +552,11 @@ namespace Dune
     typedef ALU3DSPACE ProjectVertexPtr       ALUGridVertexProjectionPointerType;
     typedef ALU3DSPACE ProjectVertexPtrPair   ALUGridVertexProjectionPairType;
 
-    //! type of collective communication object
-    typedef typename Traits::CollectiveCommunication CollectiveCommunication;
+    //! type of communication object
+    typedef typename Traits::Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     typedef ALULeafCommunication< dim, dimworld, elType, Comm > LeafCommunication;
     typedef ALULevelCommunication< dim, dimworld, elType, Comm > LevelCommunication;
@@ -998,7 +1005,7 @@ namespace Dune
 
   public:
     /** \brief @copydoc Dune::Grid::comm() */
-    const CollectiveCommunication &comm () const { return communications().ccobj_; }
+    const Communication &comm () const { return communications().ccobj_; }
 
     //! returns if a least one entity was marked for coarsening
     bool preAdapt ( );

@@ -31,7 +31,7 @@ namespace Dune {
   template <class GridType>
   class Diagnostics
   {
-    typedef typename GridType :: Traits :: CollectiveCommunication CommunicatorType;
+    typedef typename GridType :: Traits :: Communication CommunicatorType;
     const CommunicatorType& comm_;
     const std::string runFileName_;
     const int writeDiagnostics_; // 0 don't, 1 only speedup file, 2 write all runfiles

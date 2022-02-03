@@ -37,8 +37,11 @@ namespace Dune
     typedef typename Grid :: Traits :: LevelIntersectionIterator
     IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Grid :: Traits :: CollectiveCommunication CollectiveCommunication;
+    /** \brief type of the communication */
+    typedef typename Grid :: Traits :: Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     template< int cd >
     struct Codim
@@ -91,8 +94,11 @@ namespace Dune
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+    /** \brief type of the communication */
+    typedef typename Traits :: Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
@@ -172,8 +178,8 @@ namespace Dune
       return grid().ilevelend( entity );
     }
 
-    /** \brief obtain collective communication object */
-    const CollectiveCommunication &comm () const
+    /** \brief obtain communication object */
+    const Communication &comm () const
     {
       return grid().comm();
     }
@@ -228,8 +234,11 @@ namespace Dune
     typedef typename Grid :: Traits :: LeafIntersectionIterator
     IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Grid :: Traits :: CollectiveCommunication CollectiveCommunication;
+    /** \brief type of the communication */
+    typedef typename Grid :: Traits :: Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     template< int cd >
     struct Codim
@@ -282,8 +291,11 @@ namespace Dune
     /** \brief type of the intersection iterator */
     typedef typename Traits :: IntersectionIterator IntersectionIterator;
 
-    /** \brief type of the collective communication */
-    typedef typename Traits :: CollectiveCommunication CollectiveCommunication;
+    /** \brief type of the communication */
+    typedef typename Traits :: Communication Communication;
+
+    [[deprecated("Use Communication instead!")]]
+    typedef Communication CollectiveCommunication;
 
     /** \brief Codim Structure */
     template< int cd >
@@ -363,8 +375,8 @@ namespace Dune
       return grid().ileafend( entity );
     }
 
-    /** \brief obtain collective communication object */
-    const CollectiveCommunication &comm () const
+    /** \brief obtain communication object */
+    const Communication &comm () const
     {
       return grid().comm();
     }

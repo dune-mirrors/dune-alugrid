@@ -268,7 +268,7 @@ namespace Dune
     {
       // apply space filling curve orderung to the inserted elements
       // see common/hsfc.hh for details
-      typename ALUGrid::CollectiveCommunication comm( communicator_ );
+      typename ALUGrid::Communication comm( communicator_ );
 
       // if we are in parallel insertion mode we need communication
       const bool foundGlobalIndex = comm.max( foundGlobalIndex_ );
@@ -1304,7 +1304,7 @@ namespace Dune
 
     // communicate unidentified boundaries and find process borders)
     // use the Grids communicator (ALUGridNoComm or ALUGridMPIComm)
-    typename ALUGrid::CollectiveCommunication comm( communicator_ );
+    typename ALUGrid::Communication comm( communicator_ );
 
     int numBoundariesMine = faceMap.size();
     std::vector< int > boundariesMine( numFaceCorners * numBoundariesMine );
