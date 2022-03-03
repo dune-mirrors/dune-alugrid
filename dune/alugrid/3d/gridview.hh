@@ -118,6 +118,13 @@ namespace Dune
       return grid().levelIndexSet( level_ );
     }
 
+    /** \brief return true if current state of grid view represents a conforming grid */
+    bool isConforming() const
+    {
+      // macro level is always conforming
+      return level_ == 0 ? true : bool(conforming);
+    }
+
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
     {
@@ -308,6 +315,9 @@ namespace Dune
     {
       return grid().leafIndexSet();
     }
+
+    /** \brief return true if current state of grid view represents a conforming grid */
+    bool isConforming() const { return grid().conformingRefinement(); }
 
     /** \brief obtain number of entities in a given codimension */
     int size ( int codim ) const
