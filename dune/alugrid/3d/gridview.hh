@@ -121,8 +121,9 @@ namespace Dune
     /** \brief return true if current state of grid view represents a conforming grid */
     bool isConforming() const
     {
-      // macro level is always conforming
-      return level_ == 0 ? true : bool(conforming);
+      // macro level is always conforming, otherwise the level view is
+      // conforming if non-conforming refinement is used
+      return level_ == 0 ? true : ! grid().conformingRefinement();
     }
 
     /** \brief obtain number of entities in a given codimension */
