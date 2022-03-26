@@ -7,7 +7,8 @@
 
 // Dune includes
 #include <dune/common/version.hh>
-#include <dune/common/power.hh>
+#include <dune/common/math.hh>
+
 #include <dune/grid/common/grid.hh>
 
 // Local includes
@@ -651,7 +652,7 @@ namespace Dune
     typedef ElementTopologyMapping<elementType> ElementTopo;
     typedef FaceTopologyMapping<elementType> FaceTopo;
 
-    enum { corners_      = (elementType == hexa) ? StaticPower<2,(mydim> -1) ? mydim : 0 >::power : mydim+1 };
+    static const int corners_  = (elementType == hexa) ? Dune::power( int(2) , int((mydim> -1) ? mydim : 0 ) ) : mydim+1;
 
     // type of specialized geometry implementation
     typedef typename MyALUGridGeometryImplementation<cdim> ::

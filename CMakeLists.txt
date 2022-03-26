@@ -47,6 +47,9 @@ include(DuneMacros)
 # start a dune project with information from dune.module
 dune_project()
 
+# Define the dune-alugrid library
+dune_add_library(dunealugrid)
+
 add_subdirectory(cmake/modules)
 
 add_subdirectory(doc/doxygen)
@@ -62,7 +65,6 @@ add_subdirectory(utils)
 # if Python bindings are enabled, include necessary sub directories.
 if( DUNE_ENABLE_PYTHONBINDINGS )
   add_subdirectory("python")
-  dune_python_install_package(PATH "python")
 endif()
 
 #look for testgrids.hh header in dune-grid doc sub directory

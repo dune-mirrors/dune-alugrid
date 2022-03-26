@@ -25,8 +25,6 @@ find_path (ZOLTAN_INCLUDE_DIRS
   PATH_SUFFIXES "include"
   ${ZOLTAN_NO_DEFAULT_PATH})
 
-message("Found ${ZOLTAN_INCLUDE_DIRS}")
-
 # only search in architecture-relevant directory
 if (CMAKE_SIZEOF_VOID_P)
   math (EXPR _BITS "8 * ${CMAKE_SIZEOF_VOID_P}")
@@ -37,8 +35,6 @@ find_library(ZOLTAN_LIBRARIES
   PATHS ${ZOLTAN_SEARCH_PATH}
   PATH_SUFFIXES "lib/.libs" "lib" "lib${_BITS}" "lib/${CMAKE_LIBRARY_ARCHITECTURE}"
   ${ZOLTAN_NO_DEFAULT_PATH})
-
-message("Found ${ZOLTAN_LIBRARIES}")
 
 set (ZOLTAN_FOUND FALSE)
 if (ZOLTAN_INCLUDE_DIRS OR ZOLTAN_LIBRARIES)

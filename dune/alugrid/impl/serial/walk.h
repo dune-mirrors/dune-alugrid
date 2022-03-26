@@ -53,7 +53,8 @@ namespace ALUGrid
   public :
     typedef A val_t;
     any_has_level (int i = 0) : lvl (i) { }
-    any_has_level ( const any_has_level & org ) : lvl (org.lvl) { }
+    any_has_level ( const any_has_level & org ) = default;
+    any_has_level& operator= ( const any_has_level & org ) = default;
     int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return x.level () == lvl ? 1 : 0; }
 
@@ -69,7 +70,8 @@ namespace ALUGrid
   public :
     typedef A val_t;
     any_has_level_periodic (int i = 0) : lvl (i) { }
-    any_has_level_periodic ( const any_has_level_periodic & org ) : lvl (org.lvl) { }
+    any_has_level_periodic ( const any_has_level_periodic & org ) = default;
+    any_has_level_periodic& operator= ( const any_has_level_periodic & org ) = default;
 
     int operator () (const A * x) const { return (*this)( *x ); }
     int operator () (const A & x) const { return (x.level () == lvl) && ( ! x.leaf()  || x.isLeafEntity() ); }

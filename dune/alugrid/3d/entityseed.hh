@@ -364,6 +364,13 @@ public:
     : ALU3dGridEntitySeedBase<cd,GridImp> (org)
   {
   }
+
+  //! assignment operator
+  ThisType & operator = (const ThisType & org)
+  {
+    BaseType :: operator = (org);
+    return *this;
+  }
 };
 
 

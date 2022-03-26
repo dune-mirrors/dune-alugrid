@@ -10,6 +10,21 @@ set(alu3dgrid_HEADERS  aluinline.hh alu3dinclude.hh communication.hh
     alugrid.hh)
 exclude_from_headercheck( gridfactory.hh gridfactor_imp.cc gridfactory.cc )
 
+# Add sources to the dunealugrid library
+if(DUNE_ALUGRID_COMPILE_BINDINGS)
+  target_sources(dunealugrid PRIVATE
+    iterator.cc
+    indexsets.cc
+    mappings_imp.cc
+    grid_imp.cc
+    entity_imp.cc)
+endif()
+
+target_sources(dunealugrid PRIVATE
+  faceutility.cc
+  mappings.cc
+  topology.cc)
+
 # include not needed for CMake
 # include $(top_srcdir)/am/global-rules
 install(FILES ${alu3dgrid_HEADERS} DESTINATION ${alu3dgriddir})

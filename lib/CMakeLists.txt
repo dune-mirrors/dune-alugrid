@@ -1,12 +1,3 @@
-if( DUNE_ALUGRID_COMPILE_BINDINGS )
-  set(ALUGRID_LIB_SOURCES
-    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/iterator.cc
-    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/indexsets.cc
-    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/mappings_imp.cc
-    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/grid_imp.cc
-    ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/entity_imp.cc)
-endif()
-
 set(MESH_CONSISTENCY_ROOT "" CACHE PATH "Path with mesh-consistency package inside")
 mark_as_advanced(MESH_CONSISTENCY_ROOT)
 
@@ -53,22 +44,7 @@ if( ALUGRID_DOWNLOAD_MESH_CONSISTENCY )
   endforeach()
 endif ()
 
-# build library libdunealugrid
-dune_add_library(dunealugrid
-  _DUNE_TARGET_OBJECTS:serial_
-  _DUNE_TARGET_OBJECTS:parallel_
-  ${ALUGRID_LIB_SOURCES}
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/faceutility.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/gridfactory.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/nonconfmappings.cc
-  ${PROJECT_SOURCE_DIR}/dune/alugrid/3d/topology.cc)
-
-if (NOT MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
-  target_compile_options(dunealugrid PRIVATE "-DHAVE_MESH_CONSISTENCY=1")
-  set_property(TARGET dunealugrid APPEND PROPERTY
-               INCLUDE_DIRECTORIES "${MESH_CONSISTENCY_INCLUDE_DIR}")
-endif()
-
+# configure the library dune-alugrid
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   target_compile_options(dunealugrid PRIVATE -include${CMAKE_BINARY_DIR}/config.h)
 endif()

@@ -501,7 +501,7 @@ namespace Dune {
       const int childOffSet = offset[creatorCodim][cd];
 
       alugrid_assert ( nChild < childOffSet );
-      alugrid_assert ( creatorNumber < nEntitiesFactor[creatorCodim] * nElements );
+      alugrid_assert ( (unsigned int)creatorNumber < nEntitiesFactor[creatorCodim] * nElements );
 
       typename IdType::IntegerType newChild =  creatorNumber * childOffSet  + nChild;
       for(int i=cd ; i > creatorCodim ; i--)
