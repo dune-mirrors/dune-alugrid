@@ -21,8 +21,8 @@ if(DUNE_ALUGRID_COMPILE_BINDINGS)
 endif()
 
 target_sources(dunealugrid PRIVATE
+  gridfactory.cc
   faceutility.cc
-  mappings.cc
   topology.cc)
 
 # include not needed for CMake

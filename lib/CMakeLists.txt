@@ -44,6 +44,12 @@ if( ALUGRID_DOWNLOAD_MESH_CONSISTENCY )
   endforeach()
 endif ()
 
+if (NOT MESH_CONSISTENCY_INCLUDE_DIR STREQUAL "MESH_CONSISTENCY_INCLUDE_DIR-NOTFOUND" )
+  target_compile_options(dunealugrid PRIVATE "-DHAVE_MESH_CONSISTENCY=1")
+  set_property(TARGET dunealugrid APPEND PROPERTY
+               INCLUDE_DIRECTORIES "${MESH_CONSISTENCY_INCLUDE_DIR}")
+endif()
+
 # configure the library dune-alugrid
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
   target_compile_options(dunealugrid PRIVATE -include${CMAKE_BINARY_DIR}/config.h)

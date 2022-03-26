@@ -769,7 +769,7 @@ namespace Dune
       grid->completeGrid();
     }
 
-    return grid;
+    return GridPtrType(grid);
   }
 
 
