@@ -1,8 +1,6 @@
 #ifndef DUNE_ALUGRID_COMMON_TWISTS_HH
 #define DUNE_ALUGRID_COMMON_TWISTS_HH
 
-#include <iterator>
-
 #include <dune/common/fvector.hh>
 
 #include <dune/geometry/affinegeometry.hh>
@@ -29,8 +27,13 @@ namespace Dune
 
   template< class Twist >
   struct ALUTwistIterator
-    : public std::iterator< std::input_iterator_tag, Twist, int >
   {
+    typedef std::input_iterator_tag iterator_category;
+    typedef Twist value_type;
+    typedef int difference_type;
+    typedef Twist* pointer;
+    typedef Twist& reference;
+
     explicit ALUTwistIterator ( Twist twist ) : twist_( twist ) {}
 
     const Twist &operator* () const { return twist_; }
