@@ -1657,7 +1657,7 @@ namespace ALUGrid
           in >> i;
           _ldbMethod = (LoadBalancer::DataBase::method) i;
         }
-        else
+        else if (ALUGridExternalParameters::verbosityLevel() > 1)
         {
           std::cerr << "WARNING (ignored): Could not open file 'alugrid.cfg', using default values ";
           std::cerr << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;

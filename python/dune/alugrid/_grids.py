@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sys
+import sys, os
 import logging
 logger = logging.getLogger(__name__)
 
-def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, **parameters):
+def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False, **parameters):
     from dune.grid.grid_generator import module, getDimgrid
 
     if not dimgrid:
@@ -33,16 +33,24 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
     if serial:
         typeName += ", Dune::ALUGridNoComm"
 
+    deleteEnvVar = False
+    if 'ALUGRID_VERBOSITY_LEVEL' not in os.environ:
+        os.environ['ALUGRID_VERBOSITY_LEVEL'] = '0'
+        deleteEnvVar = True
+
     typeName += " >"
     includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
     gridModule = module(includes, typeName)
 
     if comm is not None:
         raise Exception("Passing communicator to grid construction is not yet implemented in Python bindings of dune-grid")
-        return gridModule.LeafGrid(gridModule.reader(constructor, comm))
-    else:
-        return gridModule.LeafGrid(gridModule.reader(constructor))
+        # return gridModule.LeafGrid(gridModule.reader(constructor, comm))
 
+    gridView = gridModule.LeafGrid(gridModule.reader(constructor))
+
+    if deleteEnvVar:
+        del os.environ['ALUGRID_VERBOSITY_LEVEL']
+    return gridView
 
 def aluConformGrid(constructor, dimgrid=None, dimworld=None, comm=None, serial=False, **parameters):
     return aluGrid(constructor, dimgrid, dimworld, elementType="Dune::simplex", refinement="Dune::conforming", comm=comm, serial=serial)

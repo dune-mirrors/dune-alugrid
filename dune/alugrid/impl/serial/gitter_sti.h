@@ -92,6 +92,11 @@ namespace ALUGrid
       ldbParam.first.second = ldbOver ;
       ldbParam.second       = method ;
     }
+
+    static int verbosityLevel()
+    {
+      return getenv("ALUGRID_VERBOSITY_LEVEL") ? atoi (getenv("ALUGRID_VERBOSITY_LEVEL")) : 2;
+    }
   };
 
   // linkage pattern map for parallel grid (stored in IndexManagerStorage for convenience)
@@ -1486,17 +1491,19 @@ namespace ALUGrid
       {
         std::string name;
         std::mutex mtx;
-        bool ptr;
-        MkGitName( const std::string& n ) : name( n ), ptr( false ){}
+        int ptr;
+        MkGitName( const std::string& n ) : name( n ),
+              ptr(2-ALUGridExternalParameters::verbosityLevel() )
+        {}
         template <class T>
         inline void dump( T t )
         {
           {
             std::unique_lock<std::mutex> lck (mtx,std::defer_lock); lck.lock();
-            if( ! ptr && ! t ) { std::cerr << std::endl << name; ptr = true ; }
+            if( ! ptr && ! t ) { std::cerr << std::endl << name; ptr++ ; }
             lck.unlock();
           }
-        } ~MkGitName() { if( ptr ) std::cout << std::endl << name ; }
+        } ~MkGitName() { if( ptr == 1 ) std::cout << std::endl << name ; }
       };
       static MkGitName _msg;
 
