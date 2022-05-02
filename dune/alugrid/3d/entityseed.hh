@@ -236,12 +236,8 @@ public:
   typedef ALU3dGridEntitySeed<cd,GridImp> ALU3dGridEntitySeedType;
 
   //! Constructor for EntitySeed that points to an element
-  ALU3dGridEntitySeed(const ImplementationType & item)
-  {
-    // this constructor should only be called by codim=0 entity keys
-    alugrid_assert ( false );
-    abort();
-  }
+  //! this constructor should only be called by codim=0 entity keys
+  ALU3dGridEntitySeed(const ImplementationType & item) = delete;
 
   //! Constructor for EntitySeed that points to an element
   ALU3dGridEntitySeed(const HElementType & item,
