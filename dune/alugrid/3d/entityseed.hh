@@ -41,14 +41,14 @@ protected:
   {
     static Key* toKey(const HBndSegType*)
     {
-      return (Key*) 0;
+      return nullptr;
     }
     static HElementType* getItem(KeyType* key)
     {
       return static_cast< HElementType* > ( key );
     }
     static bool isGhost(KeyType*) { return false; }
-    static BNDFaceType* ghost( KeyType*  ) { return ( BNDFaceType* ) 0; }
+    static BNDFaceType* ghost( KeyType*  ) { return nullptr; }
   };
   template <class Key>
   struct Bnd<0, Key>
@@ -73,7 +73,7 @@ protected:
         }
       }
       else
-        return static_cast< HElementType * > (0) ;
+        return nullptr;
     }
     static bool isGhost(KeyType* key) { alugrid_assert ( key ); return key->isboundary(); }
     static BNDFaceType* ghost( KeyType* key ) { alugrid_assert ( key ); return (static_cast< BNDFaceType* > ( key )); }
@@ -152,7 +152,7 @@ public:
   //! invalidate seed
   void clear()
   {
-    item_ = 0;
+    item_ = nullptr;
   }
 
   //! get item from key
