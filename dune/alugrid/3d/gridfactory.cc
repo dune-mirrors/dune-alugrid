@@ -11,6 +11,7 @@
 #include <fstream>
 #include <list>
 
+#include <dune/common/debugstream.hh>
 #include <dune/common/parallel/mpicommunication.hh>
 #include <dune/alugrid/3d/gridfactory.hh>
 
@@ -198,7 +199,7 @@ namespace Dune
   insertBoundaryProjection( const DuneBoundaryProjectionType& bndProjection, const bool isSurfaceProjection )
   {
 #ifndef NDEBUG
-    std::cout << "Inserting Surface Projection:" << std::boolalpha << isSurfaceProjection << std::endl << std::endl;
+    Dune::dinfo << "Inserting Surface Projection:" << std::boolalpha << isSurfaceProjection << '\n' << std::endl;
 #endif
     if( isSurfaceProjection )
     {
@@ -537,7 +538,7 @@ namespace Dune
       if( bisComp.make6CompatibilityCheck()  )
       {
 #ifndef NDEBUG
-        std::cout << rankstr << "Grid is compatible!" << std::endl;
+        Dune::dinfo << rankstr << "Grid is compatible!" << std::endl;
 #endif
       }
       else
@@ -551,12 +552,12 @@ namespace Dune
           markLongestEdge( elementOrientation );
         }
 #ifndef NDEBUG
-        std::cout << rankstr << "Making compatible" << std::endl;
+        Dune::dinfo << rankstr << "Making compatible" << std::endl;
 #endif
         if( bisComp.type0Algorithm() )
         {
 #ifndef NDEBUG
-          std::cout << rankstr << "Grid is compatible!!" << std::endl;
+          Dune::dinfo << rankstr << "Grid is compatible!!" << std::endl;
 #endif
           bisComp.stronglyCompatibleFaces();
           // obtain new element sorting, orientations, and types
@@ -565,12 +566,12 @@ namespace Dune
         }
 #ifndef NDEBUG
         else
-          std::cout << rankstr << "Could not make compatible!" << std::endl;
+          Dune::dinfo << rankstr << "Could not make compatible!" << std::endl;
 #endif
       }
 #ifndef NDEBUG
-      std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
-      std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
+      Dune::dinfo << rankstr << "BisectionCompatibility done:" << std::endl;
+      Dune::dinfo << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
 #endif
     }
 
