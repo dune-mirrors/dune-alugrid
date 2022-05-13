@@ -17,12 +17,15 @@ class ALUGridEnvVar:
             del os.environ[self._varname]
 #-------------------------------------------------------------------
 
-def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False,
+def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refinement=None, comm=None, serial=False, verbose=False,
             lbMethod=9, lbUnder=0.0, lbOver=1.2, **parameters):
     """
     Create an ALUGrid instance.
-    Arguments:
-        constructor  grid file or dictionary holding macro grid information
+    Parameters:
+    -----------
+
+        constructor  means of constructing the grid, i.e. a grid reader or a
+                     dictionary holding macro grid information
         dimgrid      dimension of grid, i.e. 2 or 3
         dimworld     dimension of world, i.e. 2 or 3 and >= dimension
         comm         MPI communication (not yet implemented)
@@ -36,7 +39,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
                          5  ALUGRID_SpaceFillingCurveSerialLinkage (serial version
                             of 4 which requires the entire graph to fit to one core)
                          9  ALUGRID_SpaceFillingCurve (like 4 without linkage
-                            storage)
+                            storage), this is the default option.
                          10 ALUGRID_SpaceFillingCurveSerial (serial version
                             of 10 which requires the entire graph to fit to one core)
                          11 METIS_PartGraphKway, METIS method PartGraphKway, see
@@ -52,6 +55,11 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
                             https://sandialabs.github.io/Zoltan/
         lbUnder      value between 0.0 and 1.0 (default 0.0)
         lbOver       value between 1.0 and 2.0 (default 1.2)
+
+    Returns:
+    --------
+
+    An ALUGrid instance with given refinement (conforming or nonconforming) and element type (simplex or cube).
     """
     from dune.grid.grid_generator import module, getDimgrid
 
@@ -62,7 +70,6 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         dimworld = dimgrid
     if elementType is None:
         elementType = parameters.pop("type")
-    refinement = parameters["refinement"]
 
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
 
@@ -73,11 +80,6 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
     lbUnd = ALUGridEnvVar('ALUGRID_LB_UNDER',  lbUnder)
     lbOve = ALUGridEnvVar('ALUGRID_LB_OVER',   lbOver)
 
-    if refinement == "conforming":
-        refinement="Dune::conforming"
-    elif refinement == "nonconforming":
-        refinement="Dune::nonconforming"
-
     if not (2 <= dimgrid and dimgrid <= dimworld):
         raise KeyError("Parameter error in ALUGrid with dimgrid=" + str(dimgrid) + ": dimgrid has to be either 2 or 3")
     if not (2 <= dimworld and dimworld <= 3):
@@ -85,7 +87,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
     if refinement=="Dune::conforming" and elementType=="Dune::cube":
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
-    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", " + elementType + ", " + refinement
+    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType + ", Dune::" + refinement
     # if serial flag is true serial version is forced.
     if serial:
         typeName += ", Dune::ALUGridNoComm"
@@ -103,16 +105,16 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
 
 def aluConformGrid(*args, **kwargs):
     aluConformGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="Dune::simplex", refinement="Dune::conforming")
+    return aluGrid(*args, **kwargs, elementType="simplex", refinement="conforming")
 
 def aluCubeGrid(*args, **kwargs):
     aluCubeGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="Dune::cube", refinement="Dune::nonconforming")
+    return aluGrid(*args, **kwargs, elementType="cube", refinement="nonconforming")
 
 
 def aluSimplexGrid(*args, **kwargs):
     aluSimplexGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="Dune::simplex", refinement="Dune::nonconforming")
+    return aluGrid(*args, **kwargs, elementType="simplex", refinement="nonconforming")
 
 grid_registry = {
         "ALU"        : aluGrid,
