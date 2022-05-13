@@ -1659,8 +1659,7 @@ namespace ALUGrid
         }
         else if (ALUGridExternalParameters::verbosityLevel() > 1)
         {
-          std::cerr << "WARNING (ignored): Could not open file 'alugrid.cfg', using default values ";
-          std::cerr << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;
+          std::cerr << "WARNING (ignored): Could not open file 'alugrid.cfg', using default values!" << std::endl;
         }
       } // got values on rank 0
 
@@ -1676,6 +1675,11 @@ namespace ALUGrid
       _ldbOver   = buff[ 0 ];
       _ldbUnder  = buff[ 1 ];
       _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
+    }
+
+    if (ALUGridExternalParameters::verbosityLevel() > 1)
+    {
+      std::cerr << "ALUGrid-LB values: " << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;
     }
 
     // we possibly need to initialize zoltan at some point - we will do it here...

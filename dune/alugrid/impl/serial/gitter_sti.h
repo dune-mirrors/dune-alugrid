@@ -72,6 +72,15 @@ namespace ALUGrid
     static LoadBalancerParameterType& loadBalanceParameters()
     {
       static LoadBalancerParameterType ldbParam( std::make_pair( 0.0, 1.2 ), -1 );
+
+      // overload parameters from environment variables, if set.
+      if( getenv("ALUGRID_LB_METHOD") )
+        ldbParam.second = atoi(getenv("ALUGRID_LB_METHOD"));
+      if( getenv("ALUGRID_LB_UNDER") )
+        ldbParam.first.first = atof( getenv("ALUGRID_LB_UNDER") );
+      if( getenv("ALUGRID_LB_OVER") )
+        ldbParam.first.second = atof( getenv("ALUGRID_LB_OVER") );
+
       return ldbParam;
     }
 
