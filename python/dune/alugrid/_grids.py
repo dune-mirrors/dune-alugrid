@@ -21,6 +21,10 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
             lbMethod=9, lbUnder=0.0, lbOver=1.2, **parameters):
     """
     Create an ALUGrid instance.
+
+    Note: This functions has to be called on all cores and the parameters passed should be the same.
+          Otherwise unexpected behavior will occur.
+
     Parameters:
     -----------
 
