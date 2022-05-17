@@ -1,6 +1,11 @@
 #ifndef ALUGRID_ZOLTAN_H_INCLUDED
 #define ALUGRID_ZOLTAN_H_INCLUDED
 
+#if USING_DUNE_PYTHON
+// include this header here to avoid warnings about HAVE_PROTOTYPES
+#include <dune/python/pybind11/pybind11.h>
+#endif
+
 #include <iostream>
 #include <cmath>
 #include <dune/alugrid/common/alugrid_assert.hh>
