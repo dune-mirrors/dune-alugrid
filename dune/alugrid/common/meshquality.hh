@@ -70,8 +70,10 @@ namespace Dune {
       const double vol = element.geometry().volume();
       const Dune::GeometryType geomType = element.type();
 
-      if( ! geomType.isSimplex() )
+      static bool firstCall = true;
+      if( ! geomType.isSimplex() && firstCall )
       {
+        firstCall = false;
         if( gridView.comm().rank() == 0 )
         {
           std::cout << "MeshQuality check only works for simplex grids, skipping check!" << std::endl;
