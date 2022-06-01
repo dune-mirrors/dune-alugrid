@@ -13,6 +13,8 @@
 
 #include "cachedcommmanager.hh"
 
+#define USE_VECTOR_FOR_PWF 1
+
 // PiecewiseFunction
 // ----------
 /** \class PiecewiseFunction
@@ -36,6 +38,9 @@ public:
   typedef typename GridView :: Grid Grid;
   typedef Range RangeType;
 
+  typedef typename RangeType :: field_type DofType;
+  static const int blockSize = RangeType::dimension;
+
   static const unsigned int order = 0;
 
   class Data
@@ -43,6 +48,10 @@ public:
     RangeType val_;
     bool visited_;
   public:
+
+  typedef typename RangeType :: field_type DofType;
+  static const int blockSize = RangeType::dimension;
+
     Data () : val_( 0 ), visited_(false) {}
 
     operator RangeType& () { return val_; }
@@ -58,6 +67,9 @@ public:
       val_ /= scalar;
       return *this;
     }
+
+    DofType& operator [](const int i) { return val_[i]; }
+    const DofType& operator [](const int i) const { return val_[i]; }
 
     void axpy( const typename RangeType :: value_type& scalar,
                const RangeType& other )
@@ -107,6 +119,7 @@ public:
     dof_( gridView.grid(), 0 ) // codim 0
 #endif
   {
+    cachedComm_.init( gridView.comm() );
     cachedComm_.rebuild( gridView );
   }
 
@@ -428,11 +441,15 @@ inline void PiecewiseFunction< View, Range >
 template< class View, class Range >
 inline void PiecewiseFunction< View, Range >::communicate ()
 {
+  auto op = [](const double& a, double& b) { b = a; };
+  cachedComm_.exchange( gridView(), dof_, op );
+  /*
   const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
   const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
 
   CommDataHandle handle( *this );
   gridView().communicate( handle, interface, direction );
+  */
 }
 
 // PiecewiseFunction::CommDataHandle

@@ -504,12 +504,16 @@ namespace Dune
       {
         const auto &indexMap = sendIndexMap_[ dest( link ) ];
         const int size = indexMap.size();
-        typedef typename Data :: DofType DofType;
+        //typedef typename Data :: DofType DofType;
+        typedef typename Data::value_type value_type;
+        typedef typename value_type :: DofType DofType;
+
 
         // Dune::Fem::BlockVectorInterface and derived
         // if constexpr ( std::is_base_of< IsBlockVector, Data > :: value )
         {
-          static const int blockSize = Data::blockSize;
+          //static const int blockSize = Data::blockSize;
+          static const int blockSize = value_type::blockSize;
           str.reserve( size * blockSize * sizeof( DofType ) );
           for( int i = 0; i < size; ++i )
           {
@@ -534,12 +538,15 @@ namespace Dune
         // get index map of rank belonging to link
         const auto &indexMap = recvIndexMap_[ dest( link ) ];
         const int size = indexMap.size();
-        typedef typename Data :: DofType DofType;
+
+        typedef typename Data::value_type value_type;
+        typedef typename value_type :: DofType DofType;
 
         // Dune::Fem::BlockVectorInterface and derived
         // if constexpr ( std::is_base_of< IsBlockVector, Data > :: value )
         {
-          static const int blockSize = Data::blockSize;
+          //static const int blockSize = value_type::dimension;
+          static const int blockSize = value_type::blockSize;
           assert( static_cast< std::size_t >( size * blockSize * sizeof( DofType ) ) <= static_cast< std::size_t >( str.size() ) );
           for( int i = 0; i < size; ++i )
           {
