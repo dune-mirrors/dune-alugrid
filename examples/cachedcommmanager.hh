@@ -26,14 +26,6 @@
 #include <dune/alugrid/3d/alu3dinclude.hh>
 #endif
 
-//- dune-fem includes
-#include <dune/fem/common/hybrid.hh>
-#include <dune/fem/storage/singletonlist.hh>
-#include <dune/fem/space/common/commoperations.hh>
-#include <dune/fem/space/common/commindexmap.hh>
-#include <dune/fem/misc/functor.hh>
-#include <dune/fem/misc/mpimanager.hh>
-
 namespace Dune
 {
 
@@ -62,8 +54,7 @@ namespace Dune
       typedef std::size_t IndexType;
 
     protected:
-      // type of communication indices
-      typedef CommunicationIndexMap IndexMapType;
+      typedef std::vector< IndexType > IndexMapType;
 
       // type of IndexMapVector
       typedef std::vector< std::vector< IndexType > >  IndexMapVectorType;
@@ -226,12 +217,6 @@ namespace Dune
           dependencyCache_.detachComm() ;
         }
 
-        template < class DiscreteFunctionSpace >
-        void send( const PetscDiscreteFunction< DiscreteFunctionSpace >& discreteFunction )
-        {
-          // nothing to do for the PetscDiscreteFunction here
-        }
-
         template < class DiscreteFunction >
         void send( const DiscreteFunction& discreteFunction )
         {
@@ -267,20 +252,6 @@ namespace Dune
 
           // store time needed for sending
           exchangeTime_ = sendTimer.elapsed();
-        }
-
-        //! receive data for discrete function and given operation
-        template < class DiscreteFunctionSpace, class Operation >
-        double receive( PetscDiscreteFunction< DiscreteFunctionSpace >& discreteFunction,
-                        const Operation& operation )
-        {
-          // take time
-          Dune::Timer exchTimer;
-
-          // PetscDiscreteFunction has it's own communication
-          discreteFunction.dofVector().communicateNow( operation );
-
-          return exchTimer.elapsed();
         }
 
         //! receive data for discrete function and given operation
@@ -486,7 +457,7 @@ namespace Dune
           Dune::Timer buildTime;
 
           // rebuild maps holding exchange dof information
-          buildMaps( space );
+          buildMaps( gridView );
           // update sequence number
           //sequence_ = spcSequence;
 
@@ -524,15 +495,6 @@ namespace Dune
       }
 
     protected:
-      // specialization for PetscDiscreteFunction doing nothing
-      template< class DiscreteFunctionSpace >
-      inline void writeBuffer( const int link,
-                               ObjectStreamType &str,
-                               const PetscDiscreteFunction< DiscreteFunctionSpace > &discreteFunction ) const
-      {
-        DUNE_THROW(NotImplemented,"writeBuffer not implemented for PetscDiscteteFunction" );
-      }
-
       // write data of DataImp& vector to object stream
       // --writeBuffer
       template< class Data >
@@ -556,17 +518,6 @@ namespace Dune
               str.writeUnchecked( block[ k ] );
           }
         }
-      }
-
-      // read data from object stream to DataImp& data vector
-      // specialization for PetscDiscreteFunction doing nothing
-      template< class DiscreteFunctionSpace, class Operation >
-      inline void readBuffer( const int link,
-                              ObjectStreamType &str,
-                              PetscDiscreteFunction< DiscreteFunctionSpace > &discreteFunction,
-                              const Operation& ) const
-      {
-        DUNE_THROW(NotImplemented,"readBuffer not implemented for PetscDiscteteFunction" );
       }
 
       // read data from object stream to DataImp& data vector
@@ -686,6 +637,7 @@ namespace Dune
         {
           auto& indices = sendIndexMap_[ dest[link] ];
           const size_t idxSize = indices.size();
+          auto& buffer = osv[link];
           buffer.write( idxSize );
           for(size_t i=0; i<idxSize; ++i)
           {
@@ -699,7 +651,9 @@ namespace Dune
         // read all send maps from buffer
         for(int link=0; link<nlinks; ++link)
         {
+          auto& indices = sendIndexMap_[ dest[link] ];
           size_t idxSize;
+          auto& buffer = osv[link];
           buffer.read( idxSize );
           indices.resize( idxSize );
           for(size_t i=0; i<idxSize; ++i)
@@ -797,7 +751,8 @@ namespace Dune
 
             // if data has been send and we are receive entity
             // then insert indices into send map of rank
-            sendIndexMap_[ rank ].insert( indices );
+            //sendIndexMap_[ rank ].insert( indices );
+            insert( sendIndexMap_[rank], indices );
 
             // build local mapping for receiving of dofs
             const int numDofs = 1 ;//blockMapper_.numEntityDofs( entity );
@@ -806,13 +761,32 @@ namespace Dune
             // map each entity dof and store in indices
             indices[ 0 ] = blockMapper_.index( entity );
             // blockMapper_.mapEachEntityDof( entity, AssignFunctor< IndicesType >( indices ) );
+            //
+            insert( recvIndexMap_[rank], indices );
 
-            // insert receiving dofs
-            recvIndexMap_[ rank ].insert( indices );
           }
         }
       }
 
+      template <class Vector>
+      void insert(Vector& idxMap, const Vector& indices)
+      {
+        {
+          const size_t size = indices.size();
+          size_t count = idxMap.size();
+
+          // reserve memory
+          idxMap.resize( count + size );
+          assert( idxMap.size() == (count + size) );
+
+          // copy indices to index vector
+          for( size_t i = 0; i < size; ++i, ++count )
+          {
+            assert( indices[ i ] >= 0 );
+            idxMap[ count ] = indices[ i ];
+          }
+        }
+      }
       //! return local dof size to be communicated
       template< class Entity >
       size_t size( const Entity &entity ) const
@@ -946,16 +920,16 @@ namespace Dune
     :: exchange( const GridView& gv, Vector &vector, const Operation& operation )
     {
       // on serial runs: do nothing
-      if( space.gridPart().comm().size() <= 1 ) return;
+      if( gv.comm().size() <= 1 ) return;
 
       // create non-blocking communication object
-      NonBlockingCommunicationType nbc( space, *this );
+      NonBlockingCommunicationType nbc( gv, *this );
 
       // perform send operation
-      nbc.send( discreteFunction );
+      nbc.send( vector );
 
       // store time for send and receive of data
-      exchangeTime_ = nbc.receive( discreteFunction, operation );
+      exchangeTime_ = nbc.receive( vector, operation );
     }
 
     template< class BlockMapper >

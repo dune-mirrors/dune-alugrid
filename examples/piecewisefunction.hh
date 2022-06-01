@@ -11,7 +11,7 @@
 #include <dune/grid/common/datahandleif.hh>
 #include <dune/grid/utility/persistentcontainer.hh>
 
-#include <dune/alugrid/examples/cachedcommmanager.hh>
+#include "cachedcommmanager.hh"
 
 // PiecewiseFunction
 // ----------
@@ -32,7 +32,7 @@ class PiecewiseFunction
 public:
   typedef View GridView;
   typedef typename GridView::IndexSet IndexSet;
-  typedef DependencyCache< IndexSet > CachedComm;
+  typedef Dune::DependencyCache< IndexSet > CachedComm;
   typedef typename GridView :: Grid Grid;
   typedef Range RangeType;
 
@@ -99,7 +99,8 @@ public:
    */
   PiecewiseFunction( const GridView &gridView )
   : gridView_( gridView ),
-    cachedComm_( gridView.comm().size(), InteriorBorder_All_Interface, ForwardDirection )
+    cachedComm_( gridView.comm().size(),
+        Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication ),
 #ifdef USE_VECTOR_FOR_PWF
     dof_( gridView.indexSet().size( 0 ) )
 #else
