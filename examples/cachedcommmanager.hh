@@ -386,8 +386,6 @@ namespace Dune
 
           // rebuild maps holding exchange dof information
           buildMaps( gridView, blockMapper );
-          // update sequence number
-          //sequence_ = spcSequence;
 
           // store time needed
           buildTime_ = buildTime.elapsed();
