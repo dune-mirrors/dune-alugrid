@@ -34,7 +34,30 @@ class PiecewiseFunction
 public:
   typedef View GridView;
   typedef typename GridView::IndexSet IndexSet;
-  typedef Dune::DependencyCache< IndexSet > CachedComm;
+
+  struct Mapper
+  {
+    const IndexSet& indexSet_;
+
+    typedef typename IndexSet::IndexType GlobalKeyType;
+
+    Mapper( const IndexSet& indexSet ) : indexSet_( indexSet ) {}
+
+    bool contains( const int codim ) const { return codim == 0; }
+
+    template <class Entity>
+    unsigned int numEntityDofs(const Entity& entity) const { return 1; }
+
+    template <class Entity, class Vector> // Vector = std::vector< GlobalKeyType >
+    void obtainEntityDofs( const Entity& entity, Vector& vector ) const
+    {
+      vector.resize( numEntityDofs( entity ) ); // numEntityDofs
+      vector[ 0 ] = indexSet_.index( entity );
+    }
+  };
+
+
+  typedef Dune::CommunicationPattern< Mapper > CachedComm;
   typedef typename GridView :: Grid Grid;
   typedef Range RangeType;
 
@@ -111,16 +134,15 @@ public:
    */
   PiecewiseFunction( const GridView &gridView )
   : gridView_( gridView ),
-    cachedComm_( gridView.comm().size(),
-        Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication ),
+    cachedComm_( Dune::InteriorBorder_All_Interface, Dune::ForwardCommunication ),
 #ifdef USE_VECTOR_FOR_PWF
     dof_( gridView.indexSet().size( 0 ) )
 #else
     dof_( gridView.grid(), 0 ) // codim 0
 #endif
   {
-    cachedComm_.init( gridView.comm() );
-    cachedComm_.rebuild( gridView );
+    Mapper mapper( gridView.indexSet() );
+    cachedComm_.rebuild( gridView, mapper );
   }
 
   /** \brief access the DoFs on one entity (of codimension 0)
