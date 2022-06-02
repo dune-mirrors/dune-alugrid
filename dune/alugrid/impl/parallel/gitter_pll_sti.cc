@@ -1677,7 +1677,7 @@ namespace ALUGrid
       _ldbMethod = (LoadBalancer::DataBase::method ) buff[ 2 ];
     }
 
-    if (ALUGridExternalParameters::verbosityLevel() > 1)
+    if( mpa.myrank() == 0 && ALUGridExternalParameters::verbosityLevel() > 1)
     {
       std::cerr << "ALUGrid-LB values: " << _ldbUnder << " < [balance] < " << _ldbOver << ", partitioning method '" << LoadBalancer::DataBase::methodToString( _ldbMethod ) << "'." << std::endl;
     }
