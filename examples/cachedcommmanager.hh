@@ -89,7 +89,7 @@ namespace Dune
     protected:
       template< class Communication, class LinkStorage,
                 class IndexMapVector, InterfaceType CommInterface >
-      class LinkBuilder;
+      class PatternBuilder;
 
       /////////////////////////////////////////////////////////////////
       //  begin NonBlockingCommunication
@@ -122,7 +122,8 @@ namespace Dune
                                   CommunicationPatternType& dependencyCache )
           : dependencyCache_( dependencyCache ),
             exchangeTime_( 0.0 ),
-            mySize_( gridView.comm().size() )
+            mySize_( gridView.comm().size() ),
+            tag_( getMessageTag() )
         {
           // notify dependency cache of open communication
           dependencyCache_.attachComm();
@@ -132,7 +133,8 @@ namespace Dune
         NonBlockingCommunication( const NonBlockingCommunication& other )
           : dependencyCache_( other.dependencyCache_ ),
             exchangeTime_( 0.0 ),
-            mySize_( other.mySize_ )
+            mySize_( other.mySize_ ),
+            tag_( other.tag_ )
         {
           // notify dependency cache of open communication
           dependencyCache_.attachComm();
@@ -144,17 +146,14 @@ namespace Dune
           dependencyCache_.detachComm() ;
         }
 
-        template < class DiscreteFunction >
-        int send( const DiscreteFunction& discreteFunction )
+        template < class Data >
+        void send( const Data& data )
         {
           // on serial runs: do nothing
-          if( mySize_ <= 1 ) return -1;
+          if( mySize_ <= 1 ) return;
 
           sendFutures_.clear();
           recvFutures_.clear();
-
-          // get new message tag
-          int tag = getMessageTag();
 
           // take time
           Dune::Timer sendTimer ;
@@ -165,19 +164,18 @@ namespace Dune
           for( const auto& dest : linkStorage )
           {
             BufferType buffer( comm );
-            pack( dest, buffer, discreteFunction);
-            //sendFutures_.insert( std::make_pair( dest, comm.isend(std::move(buffer), dest, tag_) ) );
-            comm.send(buffer, dest, tag);
+            pack( dest, buffer, data);
+            sendFutures_.insert( std::make_pair( dest, comm.isend(std::move(buffer), dest, tag_) ) );
+            //comm.send(buffer, dest, tag_);
           }
 
           // store time needed for sending
           exchangeTime_ = sendTimer.elapsed();
-          return tag;
         }
 
         //! receive data for discrete function and given operation
-        template < class DiscreteFunction, class Operation >
-        double receive( DiscreteFunction& discreteFunction, const Operation& operation, const int tag )
+        template < class Data, class Operation >
+        double receive( Data& data, const Operation& operation )
         {
           // on serial runs: do nothing
           if( mySize_ <= 1 ) return 0.0;
@@ -185,30 +183,33 @@ namespace Dune
           // take time
           Dune::Timer recvTimer ;
 
+          typedef typename Data::value_type value_type;
+          typedef typename value_type :: DofType DofType;
+
+          static const int blockSize = value_type::blockSize;
+          const size_t dataSize = static_cast< std::size_t >( blockSize * sizeof( DofType ) );
+
           const auto& comm = dependencyCache_.comm();
           for( const auto& source : dependencyCache_.linkStorage() )
           {
-            //recvFutures_.insert( std::make_pair( source, comm.irecv( BufferType(comm), source, tag_ ) ) );
-            auto buffer = comm.rrecv( BufferType(comm), source, tag );
-            unpack( source, buffer, discreteFunction, operation );
+            const size_t bufSize = dependencyCache_.recvBufferSize( source ) * dataSize;
+            recvFutures_.insert( std::make_pair( source, comm.irecv( BufferType(comm, bufSize), source, tag_ ) ) );
+            //auto buffer = comm.rrecv( BufferType(comm), source, tag_ );
+            //unpack( source, buffer, data, operation );
           }
 
-          /*
           for( auto& [rank, future] : recvFutures_ )
           {
             auto buffer = future.get();
-            unpack( rank, buffer, discreteFunction, operation );
+            unpack( rank, buffer, data, operation );
           }
-          */
 
-          /*
           // wait for all sends to finish
           for( auto& [rank, future] : sendFutures_ )
           {
             if( !future.ready() )
               future.wait();
           }
-          */
 
           // store time needed for sending
           exchangeTime_ += recvTimer.elapsed();
@@ -216,30 +217,29 @@ namespace Dune
         }
 
         //! receive method with default operation
-        template < class DiscreteFunction >
-        double receive( DiscreteFunction& discreteFunction, const int tag )
+        template < class Data >
+        double receive( Data& data )
         {
+          // TODO
           // get type of default operation
-          typedef typename DiscreteFunction :: DiscreteFunctionSpaceType
-            :: template CommDataHandle< DiscreteFunction > :: OperationType  DefaultOperationType;
-          DefaultOperationType operation;
-          return receive( discreteFunction, operation, tag );
+          auto op = [](const double& a, double& b) { b = a; };
+          return receive( data, op );
         }
 
       protected:
-        template <class Buffer, class DiscreteFunction>
-        void pack( const int rank, Buffer& buffer, const DiscreteFunction& discreteFunction )
+        template <class Buffer, class Data>
+        void pack( const int rank, Buffer& buffer, const Data& data )
         {
           // write data of discrete function to message buffer
-          dependencyCache_.writeBuffer( rank, buffer, discreteFunction );
+          dependencyCache_.writeBuffer( rank, buffer, data );
         }
 
-        template <class Buffer, class DiscreteFunction, class Operation>
+        template <class Buffer, class Data, class Operation>
         void unpack( const int rank, Buffer& buffer,
-                     DiscreteFunction& discreteFunction, const Operation& operation )
+                     Data& data, const Operation& operation )
         {
           // read data of discrete function from message buffer
-          dependencyCache_.readBuffer( rank, buffer, discreteFunction, operation );
+          dependencyCache_.readBuffer( rank, buffer, data, operation );
         }
 
       protected:
@@ -252,6 +252,7 @@ namespace Dune
 
         double exchangeTime_ ;
         const int mySize_;
+        const int tag_;
       };
 
     public:
@@ -339,6 +340,13 @@ namespace Dune
         return true ;
       }
 
+      size_t recvBufferSize( const int rank ) const
+      {
+        auto it = recvIndexMap_.find( rank );
+        const auto &indexMap = it->second;
+        return indexMap.size();
+      }
+
     protected:
       // build linkage and index maps
       template < class GridView >
@@ -348,7 +356,7 @@ namespace Dune
       inline void checkConsistency();
 
       template< class GridView, class Comm, class LS, class IMV, InterfaceType CI >
-      inline void buildMaps( const GridView& gv, LinkBuilder< Comm, LS, IMV, CI > &handle );
+      inline void buildMaps( const GridView& gv, PatternBuilder< Comm, LS, IMV, CI > &handle );
 
     public:
       /** \brief Rebuild underlying exchange dof mapping.
@@ -387,8 +395,8 @@ namespace Dune
       }
 
       //! exchange data of discrete function
-      template< class Space, class DiscreteFunction, class Operation >
-      inline void exchange( const Space& space, DiscreteFunction &discreteFunction, const Operation& operation );
+      template< class Space, class Data, class Operation >
+      inline void exchange( const Space& space, Data &data, const Operation& operation );
 
       //! return reference to communication object
       inline CommunicationType &comm()
@@ -472,7 +480,7 @@ namespace Dune
       }
     };
 
-    /** --LinkBuilder
+    /** --PatternBuilder
      *
      *  BlockMapperInterface:
      *    bool contains( codim ) returns true if dofs are attached to entities with this codim
@@ -484,9 +492,9 @@ namespace Dune
      */
     template< class BlockMapper >
     template< class Communication, class LinkStorage, class IndexVectorMap, InterfaceType CommInterface >
-    class CommunicationPattern< BlockMapper > :: LinkBuilder
+    class CommunicationPattern< BlockMapper > :: PatternBuilder
     : public CommDataHandleIF
-      < LinkBuilder< Communication, LinkStorage, IndexVectorMap, CommInterface >,
+      < PatternBuilder< Communication, LinkStorage, IndexVectorMap, CommInterface >,
                      std::size_t >
     {
     public:
@@ -514,7 +522,7 @@ namespace Dune
 
 
     public:
-      LinkBuilder( const CommunicationType& comm,
+      PatternBuilder( const CommunicationType& comm,
                    const BlockMapperType& blockMapper,
                    LinkStorageType &linkStorage,
                    IndexVectorMapType &sendIdxMap,
@@ -578,7 +586,7 @@ namespace Dune
 
     public:
       //! destructor
-      ~LinkBuilder()
+      ~PatternBuilder()
       {
         sendBackSendMaps();
       }
@@ -661,6 +669,7 @@ namespace Dune
             // then insert indices into send map of rank
             insert( sendIndexMap_[rank], indices );
 
+            // resize vector
             indices.resize( blockMapper_.numEntityDofs( entity ) );
 
             // build local mapping for receiving of dofs
@@ -710,7 +719,7 @@ namespace Dune
       typedef typename GridView::CollectiveCommunication CommunicationType;
       if( interface_ == InteriorBorder_All_Interface )
       {
-        LinkBuilder< CommunicationType, LinkStorageType, IndexVectorMapType,
+        PatternBuilder< CommunicationType, LinkStorageType, IndexVectorMapType,
                      InteriorBorder_All_Interface >
           handle( gv.comm(),
                   blockMapper,
@@ -719,7 +728,7 @@ namespace Dune
       }
       else if( interface_ == InteriorBorder_InteriorBorder_Interface )
       {
-        LinkBuilder< CommunicationType, LinkStorageType, IndexVectorMapType,
+        PatternBuilder< CommunicationType, LinkStorageType, IndexVectorMapType,
                      InteriorBorder_InteriorBorder_Interface >
           handle( gv.comm(),
                   blockMapper,
@@ -728,7 +737,7 @@ namespace Dune
       }
       else if( interface_ == All_All_Interface )
       {
-        LinkBuilder< CommunicationType, LinkStorageType, IndexVectorMapType, All_All_Interface >
+        PatternBuilder< CommunicationType, LinkStorageType, IndexVectorMapType, All_All_Interface >
           handle( gv.comm(),
                   blockMapper,
                   linkStorage_, sendIndexMap_, recvIndexMap_ );
@@ -746,7 +755,7 @@ namespace Dune
     template< class BlockMapper >
     template< class GridView, class Comm, class LS, class IMV, InterfaceType CI >
     inline void CommunicationPattern< BlockMapper >
-    :: buildMaps( const GridView& gv, LinkBuilder< Comm, LS, IMV, CI > &handle )
+    :: buildMaps( const GridView& gv, PatternBuilder< Comm, LS, IMV, CI > &handle )
     {
       linkStorage_.clear();
       const size_t size = recvIndexMap_.size();
@@ -758,13 +767,6 @@ namespace Dune
 
       // make one all to all communication to build up communication pattern
       gv.communicate( handle, All_All_Interface , ForwardCommunication );
-
-      /*
-      // remove old linkage
-      mpAccess().removeLinkage();
-      // create new linkage
-      mpAccess().insertRequestSymetric( linkStorage_ );
-      */
     }
 
     template< class BlockMapper >
@@ -784,10 +786,10 @@ namespace Dune
       NonBlockingCommunicationType nbc( gv, *this );
 
       // perform send operation
-      int tag = nbc.send( vector );
+      nbc.send( vector );
 
       // store time for send and receive of data
-      exchangeTime_ = nbc.receive( vector, operation, tag );
+      exchangeTime_ = nbc.receive( vector, operation);
     }
     //@}
 

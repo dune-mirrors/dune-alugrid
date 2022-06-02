@@ -51,7 +51,7 @@ public:
     template <class Entity, class Vector> // Vector = std::vector< GlobalKeyType >
     void obtainEntityDofs( const Entity& entity, Vector& vector ) const
     {
-      vector.resize( numEntityDofs( entity ) ); // numEntityDofs
+      assert( vector.size() == numEntityDofs( entity ) ); // numEntityDofs
       vector[ 0 ] = indexSet_.index( entity );
     }
   };
@@ -463,8 +463,10 @@ inline void PiecewiseFunction< View, Range >
 template< class View, class Range >
 inline void PiecewiseFunction< View, Range >::communicate ()
 {
+  // cached comm
   auto op = [](const double& a, double& b) { b = a; };
   cachedComm_.exchange( gridView(), dof_, op );
+
   /*
   const Dune::InterfaceType interface = Dune::InteriorBorder_All_Interface;
   const Dune::CommunicationDirection direction = Dune::ForwardCommunication;
