@@ -204,8 +204,8 @@ namespace Dune
           alugrid_assert ( dynamic_cast< const BNDFaceType * >( outerElement_ ) );
           bnd = static_cast< const BNDFaceType * >( outerElement_ );
         }
-        else
-          alugrid_assert(isInnerRear_ == !(outerEntity().isRear( outerFaceNumber_ )));
+        //else
+        //  alugrid_assert(isInnerRear_ == !(outerEntity().isRear( outerFaceNumber_ )));
       }
       if ( bnd ) // the boundary case
       {
