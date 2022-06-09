@@ -23,6 +23,7 @@ endif()
 target_sources(dunealugrid PRIVATE
   gridfactory.cc
   faceutility.cc
+  nonconfmappings.cc
   topology.cc)
 
 # include not needed for CMake
