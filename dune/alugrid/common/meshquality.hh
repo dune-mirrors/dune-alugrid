@@ -72,8 +72,10 @@ namespace Dune {
 
       if( ! geomType.isSimplex() )
       {
-        if( gridView.comm().rank() == 0 )
+        static bool firstCall = true;
+        if( gridView.comm().rank() == 0 && firstCall )
         {
+          firstCall = false;
           std::cout << "MeshQuality check only works for simplex grids, skipping check!" << std::endl;
         }
         return ;

@@ -5,6 +5,7 @@
 
 // 3d version
 #include <dune/alugrid/common/capabilities.hh>
+#include <dune/alugrid/3d/alu3dinclude.hh>
 #include <dune/alugrid/3d/indexsets.hh>
 #include <dune/alugrid/3d/iterator.hh>
 #include <dune/alugrid/3d/entity.hh>
@@ -29,6 +30,8 @@ namespace Dune
   class ALUGrid
   : public ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid
   {
+    typedef ::ALUGrid::ALUGridExternalParameters ALUGridExternalParameters;
+
     // the cube version of ALUGrid only works with nonconforming refinement
     static_assert( elType == cube ? refineType == nonconforming : true, "cube only works with nonconforming refinement");
 
@@ -71,7 +74,7 @@ namespace Dune
             const bool verb = true ) :
       BaseType(macroName, mpiComm, bndPrj, refineType )
     {
-      const bool verbose = verb && this->comm().rank() == 0;
+      const bool verbose = verb && (this->comm().rank() == 0) && bool(ALUGridExternalParameters::verbosityLevel());
       if( verbose )
       {
         std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix()
@@ -106,7 +109,7 @@ namespace Dune
             const bool verb = true ) :
       BaseType("", mpiComm, bndPrj, refineType )
     {
-      const bool verbose = verb && this->comm().rank() == 0;
+      const bool verbose = verb && (this->comm().rank() == 0) && bool(ALUGridExternalParameters::verbosityLevel());
       if( verbose )
       {
         std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix();
@@ -122,7 +125,7 @@ namespace Dune
     ALUGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
       BaseType("", mpiComm, ALUGridVertexProjectionPairType(), refineType )
     {
-      if(this->comm().rank() == 0)
+      if(this->comm().rank() == 0 && bool(ALUGridExternalParameters::verbosityLevel()) )
       {
         std::cout << "\nCreated empty " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix() << "." << std::endl << std::endl;
       }

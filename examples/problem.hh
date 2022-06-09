@@ -92,6 +92,11 @@ struct ProblemData
   /**\brief return maximal number of timesteps to run (for scaling experiment) */
   virtual unsigned int maxTimeSteps() const { return std::numeric_limits<unsigned int>::max(); }
 
+  virtual void velocity ( const DomainType &x, double time, const RangeType& u, DomainType& v ) const
+  {
+    v = 0;
+  }
+
 }; // end class ProblemData
 // Code moved to problem-transport.hh
 
