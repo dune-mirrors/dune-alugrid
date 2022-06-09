@@ -822,7 +822,7 @@ namespace Dune
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic4( perel, bndId );
+          mgb.InsertUniquePeriodic( perel, bndId );
 
         }
         else if( elementType == tetra )
@@ -836,7 +836,7 @@ namespace Dune
           typedef typename ALU3DSPACE Gitter::hbndseg::bnd_t bnd_t ;
           bnd_t bndId[ 2 ] = { bnd_t( facePair.first.second ),
                                bnd_t( facePair.second.second ) };
-          mgb.InsertUniquePeriodic3( perel, bndId );
+          mgb.InsertUniquePeriodic( perel, bndId );
         }
         else
           DUNE_THROW( GridError, "Invalid element type" );

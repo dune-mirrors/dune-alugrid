@@ -143,7 +143,7 @@ namespace Dune
       // this check is only need in the parallel case
       // if this cast fails we have a periodic element
       const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
-      const bool periodicBnd = ( bnd == 0 ) ;
+      const bool periodicBnd = ( bnd == nullptr ) ;
 
       if( periodicBnd ) // the periodic case
       {
@@ -398,8 +398,9 @@ namespace Dune
     const int twist =
       (ElementTopo::faceOrientation( faceIdx ) * sign(aluTwist) < 0 ?
        mappedZero : -mappedZero-1);
+
     // see topology.* files for aluTwistMap
-    if( dim == 2 )
+    if constexpr ( dim == 2 )
     {
       // in 2d twists are either 0 or 1, but because
       // of the underlying 3d alu grid they could be different
