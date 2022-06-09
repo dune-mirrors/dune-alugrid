@@ -149,7 +149,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     // adjust connector flags
     connector_.setFlags( org.connector_.conformingRefinement(), org.connector_.ghostCellsEnabled() );
 
-    // else it's a end iterator
+    // else it's an end iterator
     item_       = org.item_;
     ghost_      = org.ghost_;
     grid_       = org.grid_;
@@ -311,7 +311,26 @@ template< class GridImp >
 alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInOutside () const
 {
-  return Twist( connector_.duneTwist( indexInOutside(), connector_.outerTwist() ) );
+  const int indexOutside = indexInOutside();
+  auto twist = Twist( connector_.duneTwist( indexOutside, connector_.outerTwist() ) );
+
+  if constexpr ( GridImp :: dimension == 2 )
+  {
+    // fix for periodic boundaries (in 2d)
+    if( neighbor() && boundary() )
+    {
+      const int indexInside = indexInInside();
+      // max face number in 2d, 3 for quads and 2 for triangles
+      constexpr int maxFaceNum  = (GridImp::elementType == hexa) ? 3 : 2;
+      if( indexInside == indexOutside ||
+          std::abs(indexInside - indexOutside ) == maxFaceNum )
+      {
+        // flip twist in these cases
+        twist = Twist( 1 - int(twist) );
+      }
+    }
+  }
+  return twist;
 }
 
 template< class GridImp >
