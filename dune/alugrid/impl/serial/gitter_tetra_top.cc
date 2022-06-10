@@ -2526,51 +2526,55 @@ namespace ALUGrid
   }
 
   template< class A > typename Periodic3Top < A >:: myhface_t * Periodic3Top < A >::subface (int i, int j) {
-    switch (myhface (i)->getrule ()) {
+    myhface_t * face = myhface(i);
+    switch (face->getrule ())
+    {
     case myhface_t::myrule_t::e01 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0 ||  twist(i) == 1  ||  twist(i) == -1 )
-        return myhface(i)->subface(j) ;
+        return face->subface(j) ;
       if ( twist(i) == 2 ||  twist(i) == -2 ||  twist(i) == -3 )
-        return myhface(i)->subface(!j) ;
+        return face->subface(!j) ;
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::e12 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
-        return myhface(i)->subface(j) ;
+        return face->subface(j) ;
       if ( twist(i) == -1 ||  twist(i) == 1 ||  twist(i) == -2 )
-        return myhface(i)->subface(!j) ;
+        return face->subface(!j) ;
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::e20 :
       alugrid_assert ( j < 2 );
       if ( twist(i) == 1 ||  twist(i) == 2 ||  twist(i) == -2 )
-        return myhface(i)->subface(j) ;
+        return face->subface(j) ;
       if ( twist(i) == 0 ||  twist(i) == -1 || twist(i) == -3 )
         return myhface(i)->subface(!j) ;
       std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
       return 0;
     case myhface_t::myrule_t::iso4 :
       // in 2d case do the same as e12
-      if(this->is2d()){
+      if(face->is2d())
+      {
         alugrid_assert ( j < 2 );
         if ( twist(i) == 0  ||  twist(i) == 2 ||  twist(i) == -3 )
-          return myhface(i)->subface(j) ;
+          return face->subface(j) ;
         if ( twist(i) == -1 ||  twist(i) == 1 ||  twist(i) == -2 )
-          return myhface(i)->subface(!j) ;
+          return face->subface(!j) ;
         std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
         return 0;
       }
+
       alugrid_assert ( j < 4 );
       if ( j == 3 )
       {
-        return myhface(i)->subface (3) ;
+        return face->subface (3) ;
       }
       else // ( j < 3 )
       {
         alugrid_assert( j < 3 );
-        return myhface (i)->subface (twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
+        return face->subface (twist(i) < 0 ? (7 - j + twist(i)) % 3 : (j + twist(i)) % 3) ;
       }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
@@ -2589,6 +2593,7 @@ namespace ALUGrid
 
   template< class A > void Periodic3Top < A >::split_iso4 ()
   {
+    alugrid_assert( ! myhface(0)->is2d() );
     const int l = 1 + this->level () ;
     innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,0), twist (0), subface (1,0), twist (1), this , 0) ;
     innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,1), twist (0), subface (1,2), twist (1), this , 1) ;
@@ -2605,7 +2610,23 @@ namespace ALUGrid
     p2->append(p3) ;
     _dwn = p0 ;
     _rule = myrule_t::iso4 ;
-    p0->_up = p1->_up = p2->_up = p3->_up = this; //us
+    p0->_up = p1->_up = p2->_up = p3->_up = this;
+    return ;
+  }
+
+  template< class A > void Periodic3Top < A >::split_iso2 ()
+  {
+    alugrid_assert( myhface(0)->is2d() );
+    const int l = 1 + this->level () ;
+    innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,1), twist (0), subface (1,0), twist (1), this , 0) ;
+    innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,0), twist (0), subface (1,1), twist (1), this , 1) ;
+
+    alugrid_assert (p0 && p1) ;
+    p0->append(p1) ;
+    _dwn = p0 ;
+    // nevertheless, set iso4 rule
+    _rule = myrule_t::iso4 ;
+    p0->_up = p1->_up = this;
     return ;
   }
 
@@ -2619,7 +2640,19 @@ namespace ALUGrid
     switch(r)
     {
       case myrule_t::iso4 :
-        if(!this->is2d())
+        if(myhface (0)->is2d()) // 2d refinement
+        {
+          //std::cerr << "**ERROR (FATAL) refinement of Periodic3Top in 2d not implemented yet! " ;
+          //std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
+          //std::abort () ;
+
+          typedef typename myhface_t::myrule_t face3rule_t;
+          myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
+          myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
+          split_iso2 () ;
+          break ;
+        }
+        else // 3d case
         {
           // Das refineImmediate (..) auf allen Fl"achen wird vom periodic3::refine (..)
           // zwar nicht ben"otigt, da schliesslich alle Fl"achen sauber sind, wenn
@@ -2642,6 +2675,8 @@ namespace ALUGrid
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
+        split_iso2 () ;
+        break;
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
 
