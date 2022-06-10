@@ -17,6 +17,7 @@ namespace Dune {
   static void meshQuality( const GridView& gridView, const double time, std::ostream& out )
   {
     static const int dim = GridView::dimension;
+    if ( dim < 3 ) return ;
 
     double minVolShortestEdgeRatio = 1e308;
     double maxVolShortestEdgeRatio = 0;
