@@ -699,7 +699,9 @@ namespace ALUGrid
       void split_e01 ();
       void split_e12 ();
       void split_e20 ();
+
       void split_iso4 ();
+      void split_iso2 ();
     protected :
       myhedge_t * subedge (int,int);
       const myhedge_t * subedge (int,int) const;
