@@ -38,6 +38,24 @@ namespace Dune
     typedef ALUGrid< dim, dimworld, elType, refineType, Comm > This;
     typedef typename ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid  BaseType;
 
+    ALUGridRefinementType getRefinementType( const ALUGridRefinementType defaultRefType )
+    {
+      // for simplex grid we allow to dynamically switch to conforming refinement (experimental)
+      if constexpr ( elType == Dune::simplex && refineType == nonconforming )
+      {
+        // if environment var has been set (mainly from Python side)
+        if( getenv("ALUGRID_CONFORMING_REFINEMENT") )
+        {
+          const int conformingRefinement = atoi(getenv("ALUGRID_CONFORMING_REFINEMENT"));
+          if( bool(ALUGridExternalParameters::verbosityLevel()) )
+            std::cout << "ALUGrid: setting conforming refinement in constructor!" <<std::endl;
+          return conformingRefinement ? Dune::conforming : Dune::nonconforming;
+        }
+      }
+
+      return defaultRefType;
+    }
+
    public:
     typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
 
@@ -72,22 +90,22 @@ namespace Dune
             const MPICommunicatorType mpiComm = BaseType::defaultCommunicator(),
             const ALUGridVertexProjectionPairType& bndPrj = ALUGridVertexProjectionPairType(),
             const bool verb = true ) :
-      BaseType(macroName, mpiComm, bndPrj, refineType )
+      BaseType(macroName, mpiComm, bndPrj, getRefinementType(refinementType) )
     {
       const bool verbose = verb && (this->comm().rank() == 0) && bool(ALUGridExternalParameters::verbosityLevel());
       if( verbose )
       {
-        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix()
+        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix( this->conformingRefinement() )
                   << " from macro grid file '" << macroName << "'. \n\n";
       }
     }
 
     static std::string name () { return std::string("ALUGrid"); }
 
-    static std::string nameSuffix()
+    static std::string nameSuffix( const bool conformingRefinement = false )
     {
-      std::string elt ( elType == cube ? "cube," : "simplex," );
-      std::string ref ( refineType == nonconforming ? "nonconforming>" : "conforming>" );
+      std::string elt ( elType == cube ? "cube>" : "simplex>" );
+      std::string ref ( conformingRefinement ? " (conforming)": "" );
       std::stringstream suffix;
       suffix << "<"<< dimension <<","<< dimensionworld <<"," << elt << ref;
       return suffix.str();
@@ -107,12 +125,12 @@ namespace Dune
             const ALUGridVertexProjectionPairType& bndPrj,
             const std::string macroName,
             const bool verb = true ) :
-      BaseType("", mpiComm, bndPrj, refineType )
+      BaseType("", mpiComm, bndPrj, getRefinementType(refinementType) )
     {
       const bool verbose = verb && (this->comm().rank() == 0) && bool(ALUGridExternalParameters::verbosityLevel());
       if( verbose )
       {
-        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix();
+        std::cout << "\nCreated " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix( this->conformingRefinement() );
         if( macroName.empty() )
           std::cout << " from input stream. \n";
         else
@@ -123,11 +141,12 @@ namespace Dune
 
     //! constructor creating empty grid, empty string creates empty grid
     ALUGrid(const MPICommunicatorType mpiComm = BaseType::defaultCommunicator()) :
-      BaseType("", mpiComm, ALUGridVertexProjectionPairType(), refineType )
+      BaseType("", mpiComm, ALUGridVertexProjectionPairType(), getRefinementType(refinementType) )
     {
       if(this->comm().rank() == 0 && bool(ALUGridExternalParameters::verbosityLevel()) )
       {
-        std::cout << "\nCreated empty " << ALUGridParallelSerial< Comm >() << " " << name() << nameSuffix() << "." << std::endl << std::endl;
+        std::cout << "\nCreated empty " << ALUGridParallelSerial< Comm >() << " "
+                  << name() << nameSuffix( this->conformingRefinement() ) << "." << std::endl << std::endl;
       }
     }
 
@@ -194,6 +213,9 @@ namespace Dune
     //! assignment operator should not be used
     This& operator = (const ALUGrid& g);
   };
+
+  //template< int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType, class Comm >
+  //using ALUGrid = ALUGrid< dim, dimworld, elType, Comm >;
 
 } //end  namespace Dune
 

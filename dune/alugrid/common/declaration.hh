@@ -22,8 +22,9 @@ namespace Dune
   //! \brief available refinement types for ALUGrid
   enum ALUGridRefinementType
   {
-    conforming,   //!< use conforming bisection refinement
-    nonconforming //!< use non-conforming (red) refinement
+    conforming,   //!< use only conforming bisection refinement
+    nonconforming //!< use non-conforming (red) refinement by default,
+                  //!< conforming can be enabled by env flag (experimental).
   };
 
   //! \brief type of class for specialization of serial ALUGrid (No_Comm as communicator)
@@ -60,14 +61,15 @@ namespace Dune
    * \tparam  dim         dimension of the grid (2 or 3)
    * \tparam  dimworld    dimension of the surrounding space (dim <= dimworld <=3)
    * \tparam  elType      type of elements (Dune::simplex or Dune::cube)
-   * \tparam  refineType  type of refinement (Dune::conforming or Dune::nonconforming)
+   * \tparam  refineType  defaults to Dune::nonconforming, Dune::conforming is deprecated
    * \tparam  Comm        type of communicator (Dune::ALUGridMPIComm or Dune::ALUGridNoComm)
    *
    * \note For cube elements, only nonconforming refinement is available.
    * \note The template parameter Comm defaults to ALUGridMPIComm, if MPI is available.
    *       Otherwise it defaults to ALUGridNoComm.
    */
-  template <int dim, int dimworld, ALUGridElementType elType, ALUGridRefinementType refineType,
+  template <int dim, int dimworld, ALUGridElementType elType,
+            ALUGridRefinementType refineType = nonconforming,
             class Comm =
 #if ALU3DGRID_PARALLEL
               ALUGridMPIComm

@@ -53,30 +53,19 @@ struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimworld, Dune:
   static const bool v = false;
 };
 
-template <bool leafconform, class Grid>
+template <class Grid>
 void checkCapabilities(const Grid& grid)
 {
    static_assert ( Dune::Capabilities::hasSingleGeometryType< Grid > :: v == true,
                   "hasSingleGeometryType is not set correctly");
-   static_assert ( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == ! leafconform,
+   static_assert ( Dune::Capabilities::isLevelwiseConforming< Grid > :: v == false,
                   "isLevelwiseConforming is not set correctly");
-   static_assert ( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == leafconform,
+   static_assert ( Dune::Capabilities::isLeafwiseConforming< Grid > :: v == (Grid::refinementType == Dune::conforming),
                   "isLevelwiseConforming is not set correctly");
    static const bool hasEntity = Dune::Capabilities::hasEntity<Grid, 1> :: v == true;
    static_assert ( hasEntity, "hasEntity is not set correctly");
    static_assert ( Dune::Capabilities::hasBackupRestoreFacilities< Grid > :: v == true,
                    "hasBackupRestoreFacilities is not set correctly");
-
-#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
-   static const bool reallyParallel =
-#if ALU3DGRID_PARALLEL
-    true ;
-#else
-    false ;
-#endif
-   static_assert ( Dune::Capabilities::isParallel< Grid > :: v == reallyParallel,
-                   "isParallel is not set correctly");
-#endif //#if !DUNE_VERSION_NEWER(DUNE_GRID,2,5)
 
    static const bool reallyCanCommunicate =
 #if ALU3DGRID_PARALLEL
@@ -507,7 +496,7 @@ void checkForPeriodicBoundaries( GridType& grid )
 template <class GridType>
 void checkALUSerial(GridType & grid, int mxl = 2)
 {
-  const bool skipLevelIntersections = ! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
+  const bool skipLevelIntersections = grid.conformingRefinement();//! EnableLevelIntersectionIteratorCheck< GridType > :: v ;
   {
     GridType* gr = new GridType();
     assert ( gr );
@@ -524,6 +513,7 @@ void checkALUSerial(GridType & grid, int mxl = 2)
   // be careful, each global refine create 8 x maxlevel elements
   out << "  CHECKING: Macro" << std::endl;
   checkGrid(grid);
+
   out << "  CHECKING: Macro-intersections" << std::endl;
   checkIntersectionIterator(grid, skipLevelIntersections);
 
@@ -608,13 +598,20 @@ void checkALUParallel(GridType & grid, int gref, int mxl = 3)
   // -1 stands for leaf check
   checkCommunication(grid, -1, std::cout);
 
-  if( Dune :: Capabilities :: isLevelwiseConforming< GridType > :: v )
+  if( ! grid.conformingRefinement() )
   {
     for(int l=0; l<= mxl; ++l)
       checkCommunication(grid, l , Dune::dvverb);
   }
 #endif
 }
+
+struct EnableConformingRefinement
+{
+  EnableConformingRefinement() { setenv("ALUGRID_CONFORMING_REFINEMENT", "1", 1 ); }
+  ~EnableConformingRefinement() { unsetenv("ALUGRID_CONFORMING_REFINEMENT"); }
+  void operator = (int) {}
+};
 
 
 int main (int argc , char **argv) {
@@ -695,20 +692,22 @@ int main (int argc , char **argv) {
 
       if( testALU3dCube )
       {
-        Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > grid;
+        Dune::ALUGrid< 3, 3, Dune::cube > grid;
         checkALUSerial( grid );
       }
 
       if( testALU3dSimplex )
       {
-        Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > grid;
+        Dune::ALUGrid< 3, 3, Dune::simplex > grid;
         checkALUSerial( grid );
       }
 
       if( testALU3dConform )
       {
-        Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > grid;
+        EnableConformingRefinement conforming;
+        Dune::ALUGrid< 3, 3, Dune::simplex > grid;
         checkALUSerial( grid );
+        conforming = 0;
       }
 #endif // #ifndef NO_3D
 
@@ -721,24 +720,32 @@ int main (int argc , char **argv) {
 #if HAVE_DUNE_GRID_TESTGRIDS
 #ifndef NO_2D
       if( testALU2dCube )
-        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > >( Dune::TestGrids::unitSquare );
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::cube > >( Dune::TestGrids::unitSquare );
 
       if( testALU2dSimplex )
-        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > >( Dune::TestGrids::kuhn2d );
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex > >( Dune::TestGrids::kuhn2d );
 
       if( testALU2dConform )
-        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn2d );
+      {
+        EnableConformingRefinement conforming;
+        Dune::checkGridFactory< Dune::ALUGrid< 2, 2, Dune::simplex > >( Dune::TestGrids::kuhn2d );
+        conforming = 0;
+      }
 #endif // #ifndef NO_2D
 
 #ifndef NO_3D
       if( testALU3dCube )
-        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > >( Dune::TestGrids::unitCube );
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::cube > >( Dune::TestGrids::unitCube );
 
       if( testALU3dSimplex )
-        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > >( Dune::TestGrids::kuhn3d );
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex > >( Dune::TestGrids::kuhn3d );
 
       if( testALU3dConform )
-        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > >( Dune::TestGrids::kuhn3d );
+      {
+        EnableConformingRefinement conforming;
+        Dune::checkGridFactory< Dune::ALUGrid< 3, 3, Dune::simplex > >( Dune::TestGrids::kuhn3d );
+        conforming = 0;
+      }
 #endif // #ifndef NO_3D
 #endif // HAVE_DUNE_GRID_TESTGRIDS
 
@@ -746,7 +753,7 @@ int main (int argc , char **argv) {
       // check non-conform ALUGrid for 2d
       if( testALU2dCube )
       {
-        typedef Dune::ALUGrid< 2, 2, Dune::cube, Dune::nonconforming > GridType;
+        typedef Dune::ALUGrid< 2, 2, Dune::cube > GridType;
         std::string filename;
         if( newfilename )
           filename = newfilename;
@@ -758,7 +765,7 @@ int main (int argc , char **argv) {
 
         GridType & grid = *gridPtr;
 
-        checkCapabilities< false >( grid );
+        checkCapabilities( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -779,20 +786,20 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        typedef Dune::ALUGrid< 2, 3, Dune::cube, Dune::nonconforming > SurfaceGridType;
+        typedef Dune::ALUGrid< 2, 3, Dune::cube > SurfaceGridType;
         std::string surfaceFilename( "./dgf/cube-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
         surfaceGrid.loadBalance();
-        checkCapabilities< false >( surfaceGrid );
+        checkCapabilities( surfaceGrid );
         checkALUSerial( surfaceGrid, 1 );
       }
 
       // check non-conform ALUGrid for 2d
       if( testALU2dSimplex )
       {
-        typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::nonconforming > GridType;
+        typedef Dune::ALUGrid< 2, 2, Dune::simplex > GridType;
         std::string filename;
         if( newfilename )
           filename = newfilename;
@@ -803,7 +810,7 @@ int main (int argc , char **argv) {
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
 
-        checkCapabilities< false >( grid );
+        checkCapabilities( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -824,22 +831,25 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming > SurfaceGridType;
+        typedef Dune::ALUGrid< 2, 3, Dune::simplex > SurfaceGridType;
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3-noproj.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
 
-        std::cerr << "WARNING: surface projection disabled for ALUGrid< 2, 3, Dune::simplex, Dune::nonconforming >" << std::endl;
+        std::cerr << "WARNING: surface projection disabled for ALUGrid< 2, 3, Dune::simplex >" << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
         surfaceGrid.loadBalance();
-        checkCapabilities< false >( surfaceGrid );
+        checkCapabilities( surfaceGrid );
         checkALUSerial( surfaceGrid, 1 );
       }
 
       // check conform ALUGrid for 2d
       if( testALU2dConform )
       {
-        typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
+        EnableConformingRefinement conforming;
+
+        //typedef Dune::ALUGrid< 2, 2, Dune::simplex, Dune::conforming > GridType;
+        typedef Dune::ALUGrid< 2, 2, Dune::simplex > GridType;
         std::string filename;
         if( newfilename )
           filename = newfilename;
@@ -849,7 +859,7 @@ int main (int argc , char **argv) {
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
 
-        checkCapabilities< true >( grid );
+        checkCapabilities( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -870,15 +880,17 @@ int main (int argc , char **argv) {
         //GridType grid("alu2d.triangle", &bndPrj );
         //checkALUSerial(grid,2);
 
-        typedef Dune::ALUGrid< 2, 3, Dune::simplex, Dune::conforming > SurfaceGridType;
+        typedef Dune::ALUGrid< 2, 3, Dune::simplex > SurfaceGridType;
         //typedef ALUConformGrid< 2, 3 > SurfaceGridType;
         std::string surfaceFilename( "./dgf/simplex-testgrid-2-3.dgf" );
         std::cout << "READING from '" << surfaceFilename << "'..." << std::endl;
         Dune::GridPtr< SurfaceGridType > surfaceGridPtr( surfaceFilename );
         surfaceGridPtr.loadBalance();
         SurfaceGridType & surfaceGrid = *surfaceGridPtr ;
-        checkCapabilities< true >( surfaceGrid );
+        checkCapabilities( surfaceGrid );
         checkALUSerial( surfaceGrid, 1 );
+
+        conforming = 0;
       }
 #endif // #ifndef NO_2D
 
@@ -891,13 +903,13 @@ int main (int argc , char **argv) {
         else
           filename = "./dgf/simplex-testgrid-3-3.dgf";
 
-        typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
+        typedef Dune::ALUGrid< 3, 3, Dune::cube > GridType;
         {
           Dune::GridPtr< GridType > gridPtr( filename );
           gridPtr.loadBalance();
           GridType & grid = *gridPtr;
 
-          checkCapabilities< false >( grid );
+          checkCapabilities( grid );
 
           {
             std::cout << "Check serial grid" << std::endl;
@@ -924,7 +936,7 @@ int main (int argc , char **argv) {
           filename = newfilename;
         else
           filename = "./dgf/periodic3.dgf";
-        typedef Dune::ALUGrid< 3, 3, Dune::cube, Dune::nonconforming > GridType;
+        typedef Dune::ALUGrid< 3, 3, Dune::cube > GridType;
         // periodic boundaries require certain load balancing methods
         GridType::setLoadBalanceMethod( 10 );
         Dune::GridPtr< GridType > gridPtr( filename );
@@ -947,11 +959,11 @@ int main (int argc , char **argv) {
         else
           filename = "./dgf/simplex-testgrid-3-3.dgf";
 
-        typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::nonconforming > GridType;
+        typedef Dune::ALUGrid< 3, 3, Dune::simplex > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        checkCapabilities< false >( grid );
+        checkCapabilities( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -971,17 +983,19 @@ int main (int argc , char **argv) {
 
       if( testALU3dConform )
       {
+        EnableConformingRefinement conforming;
+
         std::string filename;
         if( newfilename )
           filename = newfilename;
         else
           filename = "./dgf/simplex-testgrid-3-3.dgf";
 
-        typedef Dune::ALUGrid< 3, 3, Dune::simplex, Dune::conforming > GridType;
+        typedef Dune::ALUGrid< 3, 3, Dune::simplex > GridType;
         Dune::GridPtr< GridType > gridPtr( filename );
         gridPtr.loadBalance();
         GridType & grid = *gridPtr;
-        checkCapabilities< true >( grid );
+        checkCapabilities( grid );
 
         {
           std::cout << "Check serial grid" << std::endl;
@@ -997,6 +1011,8 @@ int main (int argc , char **argv) {
           if (myrank == 0) std::cout << "Check non-conform grid" << std::endl;
           checkALUParallel(grid,0,4);  //1,3
         }
+
+        conforming = 0;
       }
 #endif
     };
