@@ -304,7 +304,7 @@ template< class GridImp >
 alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInInside () const
 {
-  return Twist( connector_.duneTwist( indexInInside(), connector_.innerTwist() ) );
+  return Twist( connector_.duneTwist( indexInInside(), connector_.innerTwist(), false ) );
 }
 
 template< class GridImp >
@@ -312,8 +312,9 @@ alu_inline typename ALU3dGridIntersectionIterator< GridImp >::Twist
 ALU3dGridIntersectionIterator< GridImp >::twistInOutside () const
 {
   const int indexOutside = indexInOutside();
-  auto twist = Twist( connector_.duneTwist( indexOutside, connector_.outerTwist() ) );
+  auto twist = Twist( connector_.duneTwist( indexOutside, connector_.outerTwist(), true ) );
 
+  /*
   if constexpr ( GridImp :: dimension == 2 )
   {
     // fix for periodic boundaries (in 2d)
@@ -330,6 +331,7 @@ ALU3dGridIntersectionIterator< GridImp >::twistInOutside () const
       }
     }
   }
+  */
   return twist;
 }
 

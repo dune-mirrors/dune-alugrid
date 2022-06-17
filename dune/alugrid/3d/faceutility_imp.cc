@@ -387,7 +387,7 @@ namespace Dune
   }
 
   template< int dim, int dimworld, ALU3dGridElementType type, class Comm >
-  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::duneTwist(const int faceIdx, const int aluTwist) const
+  inline int ALU3dGridFaceInfo< dim, dimworld, type, Comm >::duneTwist(const int faceIdx, const int aluTwist, const bool outside) const
   {
     typedef ElementTopologyMapping<type> ElementTopo;
     typedef FaceTopologyMapping<type> FaceTopo;
@@ -405,8 +405,23 @@ namespace Dune
       // in 2d twists are either 0 or 1, but because
       // of the underlying 3d alu grid they could be different
       // therefore we adjust to the right range
-      const int duneTwst = FaceTopo :: aluTwistMap( twist );
-      return (duneTwst == 0) ? 0 : 1;
+      int duneTwst = FaceTopo :: aluTwistMap( twist );
+      duneTwst = (duneTwst == 0) ? 0 : 1;
+
+      // fix for periodic boundaries (in 2d)
+      if( outside && bndType_ == periodicBoundary )
+      {
+        const int indexInside = ElementTopo::alu2dune2Face( innerALUFaceIndex() );
+        // max face number in 2d, 3 for quads and 2 for triangles
+        constexpr int maxFaceNum  = (GridImp::elementType == hexa) ? 3 : 2;
+        if( indexInside == faceIdx ||
+            std::abs(indexInside - faceIdx ) == maxFaceNum )
+        {
+          // flip twist in these cases
+          duneTwst = 1 - duneTwst;
+        }
+      }
+      return duneTwst;
     }
     else
     {

@@ -114,7 +114,7 @@ namespace Dune
     int outerTwist() const;
 
     //! Twist of the face seen from the inner element
-    int duneTwist(const int faceIdx, const int aluTwist) const;
+    int duneTwist(const int faceIdx, const int aluTwist, const bool outside) const;
 
     //! Local number of the face in inner element (ALU3dGrid reference element)
     int innerALUFaceIndex() const;
