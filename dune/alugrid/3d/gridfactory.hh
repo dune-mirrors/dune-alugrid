@@ -416,7 +416,6 @@ namespace Dune
 
   template< class ALUGrid >
   struct ALU3dGridFactory< ALUGrid >::FaceLess
-  : public std::binary_function< FaceType, FaceType, bool >
   {
     bool operator() ( const FaceType &a, const FaceType &b ) const
     {
