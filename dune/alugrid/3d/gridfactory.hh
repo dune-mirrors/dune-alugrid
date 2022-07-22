@@ -7,9 +7,7 @@
 #include <memory>
 #include <vector>
 
-// #include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 

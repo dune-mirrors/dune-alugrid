@@ -6,7 +6,6 @@
 #include <type_traits>
 
 // Dune includes
-#include <dune/common/version.hh>
 #include <dune/common/math.hh>
 
 #include <dune/grid/common/grid.hh>
