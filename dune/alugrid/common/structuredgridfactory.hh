@@ -180,7 +180,7 @@ namespace Dune
 
         int rank = 0;
         size_t elementCount  = maxPerProc ;
-        size_t elementNumber = 0;
+        [[maybe_unused]] size_t elementNumber = 0;
         size_t localElementNumber = 0;
         const int lastRank = nRanks - 1;
 
