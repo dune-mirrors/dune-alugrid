@@ -59,7 +59,7 @@ namespace Dune
     //! type of matrix from world coordinates to world coordinates
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
-    typedef typename Grid::CollectiveCommunication Communication;
+    typedef typename Grid::Communication Communication;
 
     // typedef grid pointer type based on what the grid factory interface defines
     typedef decltype(std::declval< Dune::GridFactoryInterface< Grid >* >()->createGrid())  GridPtrType;
