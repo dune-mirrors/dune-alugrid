@@ -39,6 +39,7 @@ namespace Dune
 
     /** \brief type of the communication */
     typedef typename Grid :: Traits :: Communication Communication;
+    typedef Communication CollectiveCommunication;
 
     template< int cd >
     struct Codim
@@ -239,6 +240,7 @@ namespace Dune
 
     /** \brief type of the communication */
     typedef typename Grid :: Traits :: Communication Communication;
+    typedef Communication CollectiveCommunication;
 
     template< int cd >
     struct Codim
