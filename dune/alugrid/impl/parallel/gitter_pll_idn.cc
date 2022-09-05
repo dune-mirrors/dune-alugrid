@@ -749,7 +749,6 @@ namespace ALUGrid
 
     {
       bool repeat = true ;
-      int count = 0;
       SendRecvElementRankInfo data( elements, db, mpAccess.nlinks() );
       while ( repeat )
       {
@@ -760,7 +759,6 @@ namespace ALUGrid
         repeat = mpAccess.gmax( data.repeat() ) ;
         //repeat = data.repeat() ;
         //alugrid_assert( mpAccess.gmax( data.repeat() ) == repeat );
-        ++ count ;
       }
     }
 

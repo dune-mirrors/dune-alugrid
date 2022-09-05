@@ -7,9 +7,7 @@
 #include <memory>
 #include <vector>
 
-// #include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -418,7 +416,6 @@ namespace Dune
 
   template< class ALUGrid >
   struct ALU3dGridFactory< ALUGrid >::FaceLess
-  : public std::binary_function< FaceType, FaceType, bool >
   {
     bool operator() ( const FaceType &a, const FaceType &b ) const
     {
