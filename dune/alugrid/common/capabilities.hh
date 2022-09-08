@@ -67,16 +67,16 @@ namespace Dune
       static const bool v = true;
     };
 
-    /** \brief ALUGrid has conforming level grids
+    /** \brief ALUGrid has potentially nonconforming level grids
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
     struct isLevelwiseConforming< ALUGrid< dim, dimworld, eltype, refinementtype, Comm > >
     {
-      static const bool v = refinementtype == nonconforming;
+      static const bool v = false;
     };
 
-    /** \brief ALUGrid has conforming level grids
+    /** \brief ALUGrid has potentially nonconforming leaf grids (unless refinementtype is conforming)
     \ingroup ALUGrid
     */
     template< int dim, int dimworld, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >

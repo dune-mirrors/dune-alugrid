@@ -18,6 +18,19 @@
 
 using namespace Dune;
 
+template <class Point>
+bool  comparePoints(const Point& a, const Point& b )
+{
+  auto diff = a - b;
+
+  if( std::abs(diff.two_norm() - 1.0 ) > 1e-12 )
+  {
+    std::cout << a << " " << b << " " << diff << std::endl;
+    return false;
+  }
+  return true;
+}
+
 template <class GridView>
 void checkPeriodic( const GridView& gv )
 {
@@ -31,18 +44,34 @@ void checkPeriodic( const GridView& gv )
         const auto& inside = intersection.inside();
         const auto& outside = intersection.outside();
 
-        auto centerInside  = intersection.geometryInInside().center();
-        auto centerOutside = intersection.geometryInOutside().center();
+        auto insideGeom  = intersection.geometryInInside();
+        auto outsideGeom = intersection.geometryInOutside();
+        auto centerInside  = insideGeom.center();
+        auto centerOutside = outsideGeom.center();
 
         auto gIn  = inside.geometry().global ( centerInside );
         auto gOut = outside.geometry().global ( centerOutside );
+        bool ok = comparePoints( gIn, gOut );
+        if( ! ok )
+          DUNE_THROW(Dune::InvalidStateException,"Centers on periodic boundary differ!");
 
-        auto diff = gIn - gOut;
-
-        if( std::abs(diff.two_norm() - 1.0 ) > 1e-12 )
+        if ( GridView::dimension == 2 )
         {
-          std::cout << gIn << " " << gOut << " " << diff << std::endl;
-          DUNE_THROW(Dune::InvalidStateException,"Centers of periodic boundary differ");
+          auto twistInside  = intersection.impl().twistInInside();
+          auto twistOutside = intersection.impl().twistInOutside();
+          // obtain mapped points on each side of the periodic boundary
+          auto pIn  = inside.geometry().global ( insideGeom.corner( twistInside(0) ) );
+          auto pOut = outside.geometry().global ( outsideGeom.corner( twistOutside(0) ) );
+          ok = comparePoints( pIn, pOut );
+          if( ! ok )
+          {
+            for( int i=0; i<2; ++i )
+            {
+              std::cout << inside.geometry().global ( insideGeom.corner( i ) )  <<
+                " == " << outside.geometry().global ( outsideGeom.corner( i ) ) << std::endl;
+            }
+            DUNE_THROW(Dune::InvalidStateException,"Points on periodic boundary differ!");
+          }
         }
       }
     }

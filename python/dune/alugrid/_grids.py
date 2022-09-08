@@ -91,7 +91,11 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     if refinement=="Dune::conforming" and elementType=="Dune::cube":
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
-    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType + ", Dune::" + refinement
+    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType
+    if refinement is not None:
+        assert refinement == 'conforming' or refinement == 'nonconforming', "Refinement should be 'conforming' or 'nonconforming' if selected."
+        typename += ", Dune::" + refinement
+
     # if serial flag is true serial version is forced.
     if serial:
         typeName += ", Dune::ALUGridNoComm"
@@ -108,17 +112,19 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     return gridView
 
 def aluConformGrid(*args, **kwargs):
+    # enable conforming refinement for duration of grid creation
+    refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
     aluConformGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="simplex", refinement="conforming")
+    return aluGrid(*args, **kwargs, elementType="simplex")
 
 def aluCubeGrid(*args, **kwargs):
     aluCubeGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="cube", refinement="nonconforming")
+    return aluGrid(*args, **kwargs, elementType="cube")
 
 
 def aluSimplexGrid(*args, **kwargs):
     aluSimplexGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="simplex", refinement="nonconforming")
+    return aluGrid(*args, **kwargs, elementType="simplex")
 
 grid_registry = {
         "ALU"        : aluGrid,
