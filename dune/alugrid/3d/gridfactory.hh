@@ -8,9 +8,7 @@
 #include <memory>
 #include <vector>
 
-// #include <dune/common/shared_ptr.hh>
 #include <dune/common/parallel/mpihelper.hh>
-#include <dune/common/version.hh>
 
 #include <dune/geometry/referenceelements.hh>
 
@@ -84,7 +82,7 @@ namespace Dune
     //! type of matrix from world coordinates to world coordinates
     typedef typename Transformation::WorldMatrix WorldMatrix;
 
-    typedef typename Grid::CollectiveCommunication Communication;
+    typedef typename Grid::Communication Communication;
 
     // typedef grid pointer type based on what the grid factory interface defines
     typedef decltype(std::declval< Dune::GridFactoryInterface< Grid >* >()->createGrid())  GridPtrType;
@@ -458,7 +456,6 @@ namespace Dune
 
   template< class ALUGrid >
   struct ALU3dGridFactory< ALUGrid >::FaceLess
-  : public std::binary_function< FaceType, FaceType, bool >
   {
     bool operator() ( const FaceType &a, const FaceType &b ) const
     {

@@ -162,7 +162,6 @@ namespace ALUGrid
       }
     }
 
-    int cnt = 0;
     for( int i = 0; i < psize(); ++i )
     {
       if( std::find (in[ i ].begin(), in[ i ].end(), me) != in[ i ].end()  )
@@ -172,7 +171,6 @@ namespace ALUGrid
         {
           int n = _sendLinkage.size ();
           _sendLinkage [i] = n;
-          cnt ++;
         }
       }
     }

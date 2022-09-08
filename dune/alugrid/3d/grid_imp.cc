@@ -124,7 +124,7 @@ namespace Dune
     ElementIteratorType it ( grid, grid.maxLevel() , grid.nlinks() );
 
 #ifdef ALUGRIDDEBUG
-    int count = 0;
+    [[maybe_unused]] int count = 0;
 #endif
     for( it.first(); !it.done() ; it.next())
     {

@@ -28,12 +28,12 @@ namespace ALUGridSFC {
   class ZoltanSpaceFillingCurveOrdering
   {
     // type of communicator
-    typedef Dune :: CollectiveCommunication< typename Dune :: MPIHelper :: MPICommunicator >
-        CollectiveCommunication ;
+    typedef Dune :: Communication< typename Dune :: MPIHelper :: MPICommunicator >
+        Communication ;
 
 #if ! HAVE_ZOLTAN
     typedef void                      Zoltan_Struct;
-    typedef CollectiveCommunication   Zoltan;
+    typedef Communication   Zoltan;
 #endif
 
     // type of Zoltan HSFC ordering function
@@ -51,8 +51,8 @@ namespace ALUGridSFC {
   public:
     ZoltanSpaceFillingCurveOrdering( const Coordinate& lower,
                                      const Coordinate& upper,
-                                     const CollectiveCommunication& comm =
-                                     CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
+                                     const Communication& comm =
+                                     Communication( Dune::MPIHelper::getCommunicator() ) )
       : lower_( lower ),
         length_( upper ),
 #if HAVE_ZOLTAN
@@ -169,8 +169,8 @@ namespace Dune {
     typedef ::ALUGridSFC::ZoltanSpaceFillingCurveOrdering< Coordinate > HilbertOrderingType;
 
     // type of communicator
-    typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
-        CollectiveCommunication ;
+    typedef Dune :: Communication< typename MPIHelper :: MPICommunicator >
+        Communication ;
   public:
     enum CurveType { ZCurve, Hilbert, None };
 
@@ -190,8 +190,8 @@ namespace Dune {
     SpaceFillingCurveOrdering( const CurveType& curveType,
                                const Coordinate& lower,
                                const Coordinate& upper,
-                               const CollectiveCommunication& comm =
-                               CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) )
+                               const Communication& comm =
+                               Communication( Dune::MPIHelper::getCommunicator() ) )
       : zCurve_ ( lower, upper, comm )
       , hilbert_( lower, upper, comm )
       , curveType_( curveType )
@@ -204,11 +204,11 @@ namespace Dune {
                                const Coordinate& upper,
                                const OtherComm& otherComm )
       : zCurve_ ( lower, upper,
-                  otherComm.size() > 1 ? CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) :
-                                         CollectiveCommunication( Dune::MPIHelper::getLocalCommunicator() ) )
+                  otherComm.size() > 1 ? Communication( Dune::MPIHelper::getCommunicator() ) :
+                                         Communication( Dune::MPIHelper::getLocalCommunicator() ) )
       , hilbert_( lower, upper,
-                  otherComm.size() > 1 ? CollectiveCommunication( Dune::MPIHelper::getCommunicator() ) :
-                                         CollectiveCommunication( Dune::MPIHelper::getLocalCommunicator() ) )
+                  otherComm.size() > 1 ? Communication( Dune::MPIHelper::getCommunicator() ) :
+                                         Communication( Dune::MPIHelper::getLocalCommunicator() ) )
       , curveType_( curveType )
     {
     }

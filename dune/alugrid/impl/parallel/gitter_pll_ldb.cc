@@ -662,8 +662,8 @@ namespace ALUGrid
 
       // 'ned' ist die Anzahl der Kanten im Graphen, 'nel' die Anzahl der Knoten.
       // Der Container 'nodes' enth"alt alle Knoten des gesamten Grobittergraphen
-      // durch Zusammenführen der einzelnen Container aus den Teilgrobgittern.
-      // Der Container 'edges' enthält alle Kanten des gesamten Grobgittergraphen
+      // durch Zusammenf"uhren der einzelnen Container aus den Teilgrobgittern.
+      // Der Container 'edges' enth"alt alle Kanten des gesamten Grobgittergraphen
       // doppelt, einmal mit jeder Orientierung (vorw"arts/r"uckw"arts). Diese Form
       // der Datenhaltung ist vorteilhaft, wenn die Eingangsdaten der Partitionierer
       // im CSR Format daraus erstellt werden m"ussen.

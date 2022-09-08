@@ -77,15 +77,14 @@ namespace Dune
       typedef typename Element::Geometry::GlobalCoordinate VertexType;
 
       // type of communicator
-      typedef Dune :: CollectiveCommunication< typename MPIHelper :: MPICommunicator >
-        CollectiveCommunication ;
+      typedef Dune :: Communication< typename MPIHelper :: MPICommunicator >  Communication ;
 
 #ifdef USE_ALUGRID_SFC_ORDERING
       typedef SpaceFillingCurveOrdering< VertexType >  SpaceFillingCurveOrderingType;
 #endif
 
     public:
-      SimplePartitioner ( const GridView &gridView, const CollectiveCommunication& comm,
+      SimplePartitioner ( const GridView &gridView, const Communication& comm,
                           const VertexType& lowerLeft, const VertexType& upperRight )
       : comm_( comm ),
         gridView_( gridView ),
@@ -181,7 +180,7 @@ namespace Dune
 
         int rank = 0;
         size_t elementCount  = maxPerProc ;
-        size_t elementNumber = 0;
+        [[maybe_unused]] size_t elementNumber = 0;
         size_t localElementNumber = 0;
         const int lastRank = nRanks - 1;
 
@@ -215,7 +214,7 @@ namespace Dune
         //  std::cout << "P[ " << p << " ] = " << elementCuts_[ p ] << std::endl;
       }
 
-      const CollectiveCommunication& comm_;
+      const Communication& comm_;
 
       const GridView& gridView_;
       const IndexSet &indexSet_;
@@ -235,8 +234,8 @@ namespace Dune
     typedef typename MPIHelper :: MPICommunicator MPICommunicatorType ;
 
     // type of communicator
-    typedef Dune :: CollectiveCommunication< MPICommunicatorType >
-        CollectiveCommunication ;
+    typedef Dune :: Communication< MPICommunicatorType >
+        Communication ;
 
     static SharedPtrType
     createCubeGrid( const std::string& filename,
@@ -255,7 +254,7 @@ namespace Dune
                     const std::string& name,
                     MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
-      CollectiveCommunication comm( MPIHelper :: getCommunicator() );
+      Communication comm( MPIHelper :: getCommunicator() );
       static_assert( dim == dimworld, "YaspGrid is used for creation of the structured grid which only supports dim == dimworld");
 
       // if periodic transformations are active we cannot use the YaspGrid
@@ -347,7 +346,7 @@ namespace Dune
                      const std::array<unsigned int, dim>& elements,
                      MPICommunicatorType mpiComm = MPIHelper :: getCommunicator() )
     {
-      CollectiveCommunication comm( mpiComm );
+      Communication comm( mpiComm );
       std::string name( "Cartesian ALUGrid via YaspGrid" );
       return createCubeGridImpl( lowerLeft, upperRight, elements, comm, name );
     }
@@ -364,7 +363,7 @@ namespace Dune
     createCubeGridImpl ( const FieldVector<ctype,dimworld>& lowerLeft,
                          const FieldVector<ctype,dimworld>& upperRight,
                          const std::array< int_t, dim>& elements,
-                         const CollectiveCommunication& comm,
+                         const Communication& comm,
                          const std::string& name )
     {
       const int myrank = comm.rank();
@@ -373,7 +372,7 @@ namespace Dune
       std::array< int, dim > dims;
       for( int i=0; i<dim; ++i ) dims[ i ] = elements[ i ];
 
-      CollectiveCommunication commSelf( MPIHelper :: getLocalCommunicator() );
+      Communication commSelf( MPIHelper :: getLocalCommunicator() );
       // create YaspGrid to partition and insert elements that belong to process directly
       CartesianGridType sgrid( lowerLeft, upperRight, dims, std::bitset<dim>(0ULL), 1, commSelf );
 
