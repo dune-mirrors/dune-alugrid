@@ -632,12 +632,15 @@ namespace Dune
   {
     static const ALU3dGridElementType elementType = GridImp::elementType;
 
+    typedef ALU3dGridGeometry< mydim, cdim, GridImp > ThisType;
     typedef typename GridImp::MPICommunicatorType Comm;
 
     //friend class ALU3dGridIntersectionIterator<GridImp>;
     typedef ALU3dImplTraits< elementType, Comm > ALU3dImplTraitsType ;
 
   public:
+    typedef ThisType Implementation;
+
     typedef typename ALU3dImplTraitsType::IMPLElementType IMPLElementType;
     typedef typename ALU3dImplTraitsType::GEOFaceType     GEOFaceType;
     typedef typename ALU3dImplTraitsType::GEOEdgeType     GEOEdgeType;
@@ -755,6 +758,8 @@ namespace Dune
     //! invalidate geometry implementation to avoid errors
     bool valid () const { return geoImpl().valid(); }
 
+    const Implementation& impl() const { return *this; }
+
   protected:
     // return reference to geometry implementation
     GeometryImplType& geoImpl() const
@@ -765,6 +770,22 @@ namespace Dune
     // proxy object holding GeometryImplType* with reference counting
     mutable ALU3DSPACE SharedPointer< GeometryImplType > geoImplPtr_;
   };
+
+  //! \copydoc Dune::referenceElement
+  template< int mydim, int cdim, class GridImp >
+  auto referenceElement(const ALU3dGridGeometry<mydim,cdim,GridImp>& geo)
+    -> decltype(referenceElement(geo,geo.impl()))
+  {
+    return referenceElement(geo,geo.impl());
+  }
+
+  template< int mydim, int cdim, class GridImp, typename Impl>
+  auto referenceElement(const ALU3dGridGeometry<mydim,cdim,GridImp>& geo, const Impl&)
+    -> decltype(referenceElement<typename GridImp::ctype,mydim>(geo.type()))
+  {
+    using Geo = ALU3dGridGeometry<mydim,cdim,GridImp>;
+    return referenceElement<typename Geo::ctype,Geo::mydimension>(geo.type());
+  }
 
 } // namespace Dune
 

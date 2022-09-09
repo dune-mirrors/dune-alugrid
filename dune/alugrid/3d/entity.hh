@@ -46,6 +46,8 @@ template<int cd, int dim, class GridImp>
 class ALU3dGridEntity :
 public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
 {
+  typedef ALU3dGridEntity< cd, dim, GridImp > ThisType;
+
   // default just returns level
   template <class GridType, int dm, int cdim>
   struct GetLevel
@@ -85,6 +87,8 @@ public EntityDefaultImplementation <cd,dim,GridImp,ALU3dGridEntity>
   typedef typename GridImp::Traits::template Codim< cd >::GeometryImpl GeometryImpl;
 
 public:
+  typedef ThisType Implementation;
+
   typedef ALU3dImplTraits< GridImp::elementType, Comm > ImplTraits;
   typedef typename ImplTraits::template Codim<dim, cd>::InterfaceType      HItemType;
   typedef typename ImplTraits::template Codim<dim, cd>::ImplementationType ItemType;
@@ -133,6 +137,9 @@ public:
     return seed_ == org.seed_;
   }
 
+  bool operator == ( const ALU3dGridEntity<cd,dim,GridImp> & org ) const { return equals(org); }
+  bool operator != ( const ALU3dGridEntity<cd,dim,GridImp> & org ) const { return ! equals(org); }
+
   //! set item from other entity, mainly for copy constructor of entity pointer
   void setEntity ( const ALU3dGridEntity<cd,dim,GridImp> & org );
 
@@ -152,6 +159,9 @@ public:
 
   //! return partition type of this entity ( see grid.hh )
   PartitionType partitionType() const { return this->convertBndId( getItem() ); }
+
+  const Implementation& impl() const { return *this; }
+  Implementation& impl() { return *this; }
 
 protected:
   //! index is unique within the grid hierarchy and per codim
@@ -190,6 +200,8 @@ template<int dim, class GridImp>
 class ALU3dGridEntity<0,dim,GridImp>
 : public EntityDefaultImplementation<0,dim,GridImp,ALU3dGridEntity>
 {
+  typedef ALU3dGridEntity<0,dim,GridImp> ThisType;
+
   static const int dimworld = std::remove_const< GridImp >::type::dimensionworld;
   static const ALU3dGridElementType elementType = std::remove_const< GridImp >::type::elementType;
 
@@ -235,9 +247,13 @@ class ALU3dGridEntity<0,dim,GridImp>
   typedef typename GridImp::Traits::template Codim< 0 >::LocalGeometryImpl LocalGeometryImpl;
 
 public:
+  typedef ThisType Implementation;
+
   typedef typename GridImp::template Codim< 0 >::Geometry Geometry;
   typedef typename GridImp::template Codim< 0 >::LocalGeometry LocalGeometry;
   typedef ALU3dGridIntersectionIterator<GridImp> IntersectionIteratorImp;
+
+  typedef typename GridImp::HierarchicIterator HierarchicIterator;
 
   typedef LeafIntersectionIteratorWrapper <GridImp>  ALU3dGridIntersectionIteratorType;
   typedef LeafIntersectionIteratorWrapper <GridImp>  ALU3dGridLeafIntersectionIteratorType;
@@ -367,6 +383,9 @@ public:
   //! compare 2 entities, which means compare the item pointers
   bool equals ( const ALU3dGridEntity<0,dim,GridImp> & org ) const;
 
+  bool operator == ( const ALU3dGridEntity<0,dim,GridImp> & org ) const { return equals(org); }
+  bool operator != ( const ALU3dGridEntity<0,dim,GridImp> & org ) const { return ! equals(org); }
+
   void setEntity ( const ALU3dGridEntity<0,dim,GridImp> & org );
 
   //! return index of sub entity with codim = cc and local number i
@@ -418,6 +437,9 @@ public:
   {
     return (isGhost()) ? getGhost().master() : getItem().master();
   }
+
+  const Implementation& impl() const { return *this; }
+  Implementation& impl() { return *this; }
 
 protected:
   //! index is unique within the grid hierachy and per codim
@@ -669,6 +691,14 @@ public:
 protected:
   void updateEntityPointer( HElementType * item , int level );
 };
+
+  template< int cd, int dim, class GridImp >
+  auto referenceElement(const ALU3dGridEntity< cd, dim, GridImp >& entity )
+    -> decltype(referenceElement<typename GridImp::ctype,GridImp::template Codim<cd>::Geometry::mydimension>(entity.type()))
+  {
+    typedef typename GridImp::template Codim<cd>::Geometry Geo;
+    return referenceElement< typename Geo::ctype, Geo::mydimension >(entity.type());
+  }
 
 } // end namespace Dune
 
