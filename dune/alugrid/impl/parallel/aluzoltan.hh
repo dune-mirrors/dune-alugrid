@@ -56,7 +56,7 @@
 
 #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
 // redefine our definition of HAVE_PARMETIS if it was undef'd before
-#define HAVE_PARMETIS ENABLE_PARMETIS
+#define HAVE_PARMETIS 1
 #undef HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
 
