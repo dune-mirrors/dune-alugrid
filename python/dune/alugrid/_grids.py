@@ -109,6 +109,14 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
         # return gridModule.LeafGrid(gridModule.reader(constructor, comm))
 
     gridView = gridModule.LeafGrid(gridModule.reader(constructor))
+
+    # in case of a carteisan domain store if old or new boundary ids was used
+    # this can be removed in later version - it is only used in dune-fem
+    # to give a warning that the boundary ids for the cartesian domains have changed
+    try:
+        gridView.hierarchicalGrid._cartesianConstructionWithIds = constructor.boundaryWasSet
+    except AttributeError:
+        pass
     return gridView
 
 def aluConformGrid(*args, **kwargs):
