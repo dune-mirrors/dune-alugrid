@@ -2614,7 +2614,7 @@ namespace ALUGrid
     return ;
   }
 
-  template< class A > void Periodic3Top < A >::split_iso2 ()
+  template< class A > void Periodic3Top < A >::split_bisection (myrule_t r)
   {
     alugrid_assert( myhface(0)->is2d() );
     const int l = 1 + this->level () ;
@@ -2625,7 +2625,7 @@ namespace ALUGrid
     p0->append(p1) ;
     _dwn = p0 ;
     // nevertheless, set iso4 rule
-    _rule = myrule_t::iso4 ;
+    _rule = r ;
     p0->_up = p1->_up = this;
     return ;
   }
@@ -2649,7 +2649,7 @@ namespace ALUGrid
           typedef typename myhface_t::myrule_t face3rule_t;
           myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
           myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
-          split_iso2 () ;
+          split_bisection (r) ;
           break ;
         }
         else // 3d case
@@ -2675,8 +2675,21 @@ namespace ALUGrid
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
-        split_iso2 () ;
-        break;
+        if(myhface (0)->is2d()) // 2d refinement
+        {
+          //std::cerr << "**ERROR (FATAL) refinement of Periodic3Top in 2d not implemented yet! " ;
+          //std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;
+          //std::abort () ;
+
+          typedef typename myhface_t::myrule_t face3rule_t;
+          myhface (0)->refineImmediate (face3rule_t (r).rotate (twist (0))) ;
+          myhface (1)->refineImmediate (face3rule_t (r).rotate (twist (1))) ;
+          split_bisection( r ) ;
+
+          assert( myhface(0)->level() == myhface(1)->level() );
+
+          break ;
+        }
 
         // Mit den drei anisotropen Regeln k"onnen wir leider noch nichts anfangen.
 
@@ -2702,36 +2715,46 @@ namespace ALUGrid
 
   template< class A > bool Periodic3Top < A >::refineBalance (balrule_t r, int fce)
   {
-    if (r != balrule_t::iso4)
+    switch (r)
     {
-      std::cerr << "**WARNING (IGNORED) in Periodic3Top < A >::refineBalance (..) , file "
-         << __FILE__ << " line " << __LINE__ << " periodic refinement is only implemented for isometric refinement!" << std::endl ;
+      case balrule_t::iso4:
+      case balrule_t::e01:
+      case balrule_t::e12:
+      case balrule_t::e20:
+        {
+          // Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
+          // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
+          // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
+          // der angeforderten Regel in einer 'case' Anweisung.
 
-    // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
-    // falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
-    // die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
-    // Elements f"allt flach.
+          // take opposite face
+          const int opp = 1 - fce ;
+          if (myhface (opp)->refine (typename myhface_t::myrule_t (r).rotate (twist (opp)), twist (opp)))
+          {
+            refineImmediate (r) ;
+            return true ;
+          }
+          else
+          {
+            return false ;
+          }
+        }
 
-      return false ;
-    }
-    else
-    {
-      // Der nachfolgende Aufruf nutzt aus, dass die Regel der periodischen R"ander
-      // sich direkt auf die Balancierungsregel des entsprechenden Polygonverbinders
-      // projezieren l"asst (n"amlich 1:1). Deshalb unterscheidet der Aufruf nicht nach
-      // der angeforderten Regel in einer 'case' Anweisung.
+      default:
+        {
+          std::cerr << "**WARNING (IGNORED) in Periodic3Top < A >::refineBalance ( "<< r << " ) , file "
+             << __FILE__ << ":" << __LINE__ << " periodic refinement is only implemented for isometric refinement!" << std::endl ;
 
-      // take opposite face
-      const int opp = 1 - fce ;
-      if (myhface (opp)->refine (typename myhface_t::myrule_t (r).rotate (twist (opp)), twist (opp)))
-      {
-        refineImmediate (r) ;
-        return true ;
-      }
-      else
-      {
-        return false ;
-      }
+          assert(false);
+          std::abort();
+
+          // Bisher kann die Balancierung nur die isotrope Achtelung handhaben,
+          // falls mehr gew"unscht wird, muss es hier eingebaut werden. Im Moment wird
+          // die Balancierung einfach verweigert, d.h. die Verfeinerung des anfordernden
+          // Elements f"allt flach.
+
+          return false ;
+        }
     }
   }
 
