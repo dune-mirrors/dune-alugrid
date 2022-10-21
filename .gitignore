@@ -26,3 +26,4 @@ dune-alugrid.pc
 MANIFEST
 _skbuild/
 dist
+*.egg-info/
