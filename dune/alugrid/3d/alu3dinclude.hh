@@ -25,7 +25,6 @@
 #include <dune/alugrid/impl/serial/gitter_impl.h>
 #include <dune/alugrid/impl/serial/gitter_mgb.h>
 #include <dune/alugrid/impl/serial/key.h>
-#include <dune/alugrid/impl/serial/lock.h>
 
 #include <dune/alugrid/impl/duneinterface/gitter_dune_impl.h>
 
