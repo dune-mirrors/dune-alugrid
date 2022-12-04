@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <optional>
 
 #include <dune/common/parallel/mpihelper.hh>
 
@@ -52,13 +53,31 @@ struct GridFunction_Ptr
   void unbind() { element_ = nullptr; }
 };
 
+template <class Grid>
+struct GridFunction_Optional
+{
+  typedef typename Grid::template Codim<0>::Entity Element;
+
+  const Grid& grid_;
+  std::optional<Element> element_ = {};
+
+  GridFunction_Optional( const Grid& grid )
+    : grid_( grid )
+  {}
+
+  void bind(const Element& element) { element_ = element; }
+  void unbind() { element_.reset(); }
+};
+
 
 template <class Grid, class GridFctObj>
 void timing(const Grid& grid, const GridFctObj& grdFct, const std::string& descr)
 {
   std::vector< GridFctObj > vec(25, grdFct);
   std::cout << "---------------------------------------" << std::endl;
-  std::cout << descr << " sizeof(GrdFct) = " << sizeof(grdFct) << std::endl;
+  std::cout << descr << " sizeof(GrdFct) = " << sizeof(grdFct)
+            << " grid size: " << grid.size(0)
+            << std::endl;
 
   Dune::Timer timer;
   for(const auto& entity : Dune::elements( grid.leafGridView() ) )
@@ -88,8 +107,8 @@ try
   }
 
 #if 1
-  //using GridType = Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming>;
-  using GridType = Dune::YaspGrid< 3 >;
+  using GridType = Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming>;
+  // using GridType = Dune::YaspGrid< 3 >;
   Dune::GridPtr< GridType > gridPtr( filename );
   GridType& grid = *gridPtr;
   grid.loadBalance();
@@ -119,15 +138,23 @@ try
   //grid.adapt();
   //grid.postAdapt();
 
-  for(int i=0; i<5; ++i )
+  std::cout << "*****************************\n";
+  for(int i=0; i<4; ++i )
   {
     grid.globalRefine( 1 );
+
     GridFunction_Obj< GridType > fctO( grid );
     timing( grid, fctO, "GrdFct with Obj:" );
 
     GridFunction_Ptr< GridType > fctP( grid );
     timing( grid, fctP, "GrdFct with Ptr:" );
+
+    GridFunction_Optional< GridType > fctOpt( grid );
+    timing( grid, fctOpt, "GrdFct with Optinal:" );
+
+    std::cout << "--------------------------------------------------\n";
   }
+  std::cout << "*****************************\n";
 
   //Dune::VTKWriter<typename GridType::LeafGridView> vtkWriter( grid.leafGridView());
   //vtkWriter.write( "sphere-out" );
