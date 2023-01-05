@@ -122,17 +122,16 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
 def aluConformGrid(*args, **kwargs):
     # enable conforming refinement for duration of grid creation
     refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
-    aluConformGrid.__doc__ = aluGrid.__doc__
     return aluGrid(*args, **kwargs, elementType="simplex")
+aluConformGrid.__doc__ = aluGrid.__doc__
 
 def aluCubeGrid(*args, **kwargs):
-    aluCubeGrid.__doc__ = aluGrid.__doc__
     return aluGrid(*args, **kwargs, elementType="cube")
-
+aluCubeGrid.__doc__ = aluGrid.__doc__
 
 def aluSimplexGrid(*args, **kwargs):
-    aluSimplexGrid.__doc__ = aluGrid.__doc__
     return aluGrid(*args, **kwargs, elementType="simplex")
+aluSimplexGrid.__doc__ = aluGrid.__doc__
 
 grid_registry = {
         "ALU"        : aluGrid,
