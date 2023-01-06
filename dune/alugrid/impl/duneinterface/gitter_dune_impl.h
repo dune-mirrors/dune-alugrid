@@ -6,7 +6,6 @@
 
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include "../serial/gitter_impl.h"
-#include "../serial/lock.h"
 
 namespace ALUGrid
 {
