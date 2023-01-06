@@ -38,7 +38,8 @@ namespace Dune
     typedef ALUGrid< dim, dimworld, elType, refineType, Comm > This;
     typedef typename ALUGridBaseGrid< dim, dimworld, elType, Comm > :: BaseGrid  BaseType;
 
-    ALUGridRefinementType getRefinementType( const ALUGridRefinementType defaultRefType )
+   public:
+    static ALUGridRefinementType getRefinementType( const ALUGridRefinementType defaultRefType )
     {
       // for simplex grid we allow to dynamically switch to conforming refinement (experimental)
       if constexpr ( elType == Dune::simplex && refineType == nonconforming )
@@ -56,7 +57,6 @@ namespace Dune
       return defaultRefType;
     }
 
-   public:
     typedef typename BaseType::MPICommunicatorType MPICommunicatorType;
 
     //! type of boundary projection
