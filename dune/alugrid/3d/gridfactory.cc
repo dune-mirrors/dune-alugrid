@@ -493,7 +493,8 @@ namespace Dune
   {
     correctElementOrientation();
 
-    if( dimension == 2 && ALUGrid::refinementType == conforming )
+    auto refinementType = ALUGrid::getRefinementType( ALUGrid::refinementType );
+    if( dimension == 2 && refinementType == conforming )
     {
       if( markLongestEdge_ )
       {
@@ -515,11 +516,11 @@ namespace Dune
     // BisectionCompatibility only works in serial because of the sorting
     // algorithm, therefore it needs to be run as a preprocessing step in case a
     // parallel bisection compatible grid should be read
-    if( dimension == 3 && ALUGrid::refinementType == conforming && numNonEmptyPartitions > 1 )
+    if( dimension == 3 && refinementType == conforming && numNonEmptyPartitions > 1 )
     {
       std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
     }
-    else if( dimension == 3 && ALUGrid::refinementType == conforming && ! elements_.empty() )
+    else if( dimension == 3 && refinementType == conforming && ! elements_.empty() )
     {
       assert( numNonEmptyPartitions == 1 );
 
@@ -737,7 +738,7 @@ namespace Dune
           // bisection element type: orientation and type (default 0)
           int type = 0;
           int orientation = (dimension == 3 ? (elemIndex % 2) : 0);
-          if(dimension == 3 && ALUGrid::refinementType == conforming && !(make6) )
+          if(dimension == 3 && refinementType == conforming && !(make6) )
           {
             assert( !elementOrientation.empty() );
             orientation = elementOrientation[ elemIndex ];
