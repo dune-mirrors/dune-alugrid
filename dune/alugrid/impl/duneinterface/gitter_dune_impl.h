@@ -90,7 +90,7 @@ namespace ALUGrid
       if( conformingRefinement )
       {
         this->enableConformingClosure();
-        this->disableGhostCells();
+        //this->disableGhostCells();
       }
     }
 

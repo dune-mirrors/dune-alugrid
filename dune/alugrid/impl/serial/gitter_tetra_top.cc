@@ -408,21 +408,18 @@ namespace ALUGrid
               {
                 //the neighbour may have changed
                 neighbour_t neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
-                //refine neighbour as long as it is leaf.
-                //We are at the refinement face, so the neighbour of the refined element
-                //has to be refined too
-                while(neigh.first->nbLeaf())
+
+                // this fails for ghost elements, so skip it if neighbor is not real
+                if( neigh.first->isRealObject() )
                 {
-                  neigh.first->refineBalance (r, neigh.second);
-                  neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
-                }
-                for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
-                {
-                  // assert faces are leaf - this is not true anymore with weak compatibility
-               //   alugrid_assert(f->leaf());
-                 // alugrid_assert(f->nb.front().first->nbLeaf());
-                  //alugrid_assert(f->nb.rear().first->nbLeaf());
-                ;
+                  //refine neighbour as long as it is leaf.
+                  //We are at the refinement face, so the neighbour of the refined element
+                  //has to be refined too
+                  while(neigh.first->nbLeaf())
+                  {
+                    neigh.first->refineBalance (r, neigh.second);
+                    neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
+                  }
                 }
               }
             }
