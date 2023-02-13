@@ -90,8 +90,8 @@ void method ( int problem, int startLvl, int maxLvl,
   grid.globalRefine( startLevel );
 
   /* get view to leaf grid */
-  typedef Grid::Partition< Dune::Interior_Partition >::LeafGridView GridView;
-  GridView gridView = grid.leafGridView< Dune::Interior_Partition >();
+  typedef Grid::LeafGridView GridView;
+  GridView gridView = grid.leafGridView();
 
   /* construct data vector for solution */
   typedef PiecewiseFunction< GridView, Dune::FieldVector< double, ModelType::dimRange > > DataType;
