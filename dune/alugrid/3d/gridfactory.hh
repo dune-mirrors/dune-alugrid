@@ -144,6 +144,12 @@ namespace Dune
     void markLongestEdge();
 
   private:
+    // return refinement type that will be used by created grid
+    static auto getRefinementType()
+    {
+      return ALUGrid::getRefinementType( ALUGrid::refinementType );
+    }
+
     // return grid object
     virtual Grid* createGridObj( const std::string& name ) const
     {
@@ -327,6 +333,9 @@ namespace Dune
     //! set longest edge marking for biscetion grids (default is off)
     void setLongestEdgeFlag (bool flag = true) { markLongestEdge_ = flag ; }
 
+    //! disable compatibility check for biscetion grids (default is on)
+    void disableCompatibilityCheck () { compatibilityCheck_ = false ; }
+
     /** \brief Return the Communication used by the grid factory
      *
      * Use the Communication available from the grid.
@@ -410,6 +419,7 @@ namespace Dune
     std::vector< unsigned int > ordering_;
 
     bool markLongestEdge_;
+    bool compatibilityCheck_;
   };
 
 
@@ -528,7 +538,9 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -548,7 +560,9 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
@@ -568,7 +582,9 @@ namespace Dune
     foundGlobalIndex_( false ),
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
-    markLongestEdge_( ALUGrid::dimension == 2 )
+    markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {
     BoundarySegmentWrapperType::registerFactory();
     ALUProjectionType::registerFactory();
