@@ -105,8 +105,17 @@ namespace Dune
   template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
   struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype, Comm > >
   {
-    static int refineStepsForHalf () { return ( refinementtype == conforming ) ? dimg : 1; }
-    static double refineWeight () { return ( refinementtype == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg))); }
+    static int refineStepsForHalf ()
+    {
+      typedef ALUGrid< dimg, dimw, eltype, refinementtype, Comm > ALUGridType;
+      auto actualRefinementType = ALUGridType::getRefinementType( refinementtype );
+      return ( actualRefinementType == conforming ) ? dimg : 1;
+    }
+    static double refineWeight () {
+      typedef ALUGrid< dimg, dimw, eltype, refinementtype, Comm > ALUGridType;
+      auto actualRefinementType = ALUGridType::getRefinementType( refinementtype );
+      return ( actualRefinementType == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg)));
+    }
   };
   /** \endcond */
 
