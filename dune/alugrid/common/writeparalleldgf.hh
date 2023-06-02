@@ -47,9 +47,6 @@ private:
 
   typedef typename IndexSet::IndexType Index;
 
-  typedef Dune::ReferenceElement< typename Grid::ctype, dimGrid > RefElement;
-  typedef Dune::ReferenceElements< typename Grid::ctype, dimGrid > RefElements;
-
 public:
   /** \brief constructor
    *
@@ -216,7 +213,7 @@ inline std::string DGFWriter< GV >::write ( const std::string &fileName, const L
     if( !element.hasBoundaryIntersections() )
       continue;
 
-    const RefElement &refElement = RefElements::general( element.type() );
+    const auto &refElement = Dune::referenceElement( element.type() );
 
     const IntersectionIterator iend = gridView_.iend( element ) ;
     for( IntersectionIterator iit = gridView_.ibegin( element ); iit != iend; ++iit )
