@@ -36,7 +36,7 @@ try
   }
 
 #if 1
-  using GridType = Dune::ALUGrid<2, 2, Dune::cube, Dune::nonconforming>;
+  using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
   GridType& grid = *gridPtr;
   grid.loadBalance();

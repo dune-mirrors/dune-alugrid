@@ -105,8 +105,17 @@ namespace Dune
   template<int dimg, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm >
   struct DGFGridInfo< Dune::ALUGrid< dimg, dimw, eltype, refinementtype, Comm > >
   {
-    static int refineStepsForHalf () { return ( refinementtype == conforming ) ? dimg : 1; }
-    static double refineWeight () { return ( refinementtype == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg))); }
+    static int refineStepsForHalf ()
+    {
+      typedef ALUGrid< dimg, dimw, eltype, refinementtype, Comm > ALUGridType;
+      auto actualRefinementType = ALUGridType::getRefinementType( refinementtype );
+      return ( actualRefinementType == conforming ) ? dimg : 1;
+    }
+    static double refineWeight () {
+      typedef ALUGrid< dimg, dimw, eltype, refinementtype, Comm > ALUGridType;
+      auto actualRefinementType = ALUGridType::getRefinementType( refinementtype );
+      return ( actualRefinementType == conforming ) ? 0.5 : 1.0/(std::pow( 2.0, double(dimg)));
+    }
   };
   /** \endcond */
 
@@ -604,8 +613,15 @@ namespace Dune
 #endif
 
     // pass longest edge marking (default is off)
-    if( ( refinementtype == conforming ) && parameter.markLongestEdge() )
-      factory_.setLongestEdgeFlag();
+    if( refinementtype == conforming )
+    {
+      if( parameter.markLongestEdge() )
+        factory_.setLongestEdgeFlag();
+      // if grid was created from interval block (make6)
+      // then the compatibility check can be avoided
+      if( parameter.bisectionCompatibility() )
+        factory_.disableCompatibilityCheck();
+    }
 
     if( !parameter.dumpFileName().empty() )
       grid_ = std::unique_ptr<Grid>(factory_.createGrid( addMissingBoundariesGlobal, false, parameter.dumpFileName() )).release() ;
@@ -614,11 +630,13 @@ namespace Dune
     return true;
   }
 
-  template <int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementtype, class Comm>
-  inline bool DGFGridFactory< ALUGrid< dim, dimw, eltype, refinementtype, Comm > >
+  template <int dim, int dimw, ALUGridElementType eltype, ALUGridRefinementType refinementType, class Comm>
+  inline bool DGFGridFactory< ALUGrid< dim, dimw, eltype, refinementType, Comm > >
     ::generate( std::istream &file, MPICommunicatorType communicator, const std::string &filename )
   {
-    return BaseType :: generateALUGrid( eltype, refinementtype, file, communicator, filename );
+    typedef ALUGrid< dim, dimw, eltype, refinementType, Comm > ALUGridType;
+    auto actualRefinementType = ALUGridType::getRefinementType( refinementType );
+    return BaseType :: generateALUGrid( eltype, actualRefinementType, file, communicator, filename );
   }
 
 

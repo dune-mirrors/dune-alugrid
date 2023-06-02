@@ -107,7 +107,9 @@ public:
     //build the information about neighbours
     Dune::Timer timer;
     buildNeighbors();
+#ifndef NDEBUG
     std::cout << "Build neighbors took " << timer.elapsed() << " sec." << std::endl;
+#endif
   }
 
   //check for strong compatibility
@@ -132,8 +134,10 @@ public:
         }
       }
     }
+#ifndef NDEBUG
     std::cout << "NotStrongCompatibleMacroFaces"  << " InnerFaces "  << " TotalFaces " << "Maximum/Vertex " << " Minimum/Vertex "  << std::endl;
     std::cout << result << " " << neighbours_.size() - bndFaces << " " << neighbours_.size() << " " <<  *(std::max_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " " << *(std::min_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << std::endl << std::endl;
+#endif
     return result;
   }
 

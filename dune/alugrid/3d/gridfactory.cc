@@ -493,7 +493,7 @@ namespace Dune
   {
     correctElementOrientation();
 
-    auto refinementType = ALUGrid::getRefinementType( ALUGrid::refinementType );
+    auto refinementType = getRefinementType();
     if( dimension == 2 && refinementType == conforming )
     {
       if( markLongestEdge_ )
@@ -503,7 +503,7 @@ namespace Dune
     }
 
     std::vector< unsigned int >& ordering = ordering_;
-    // sort element given a hilbert space filling curve (if Zoltan is available)
+    // sort element given a Hilbert space filling curve (if Zoltan is available)
     sortElements( vertices_, elements_, ordering );
 
 
@@ -511,68 +511,73 @@ namespace Dune
     std::vector< bool > elementOrientation;
     std::vector< int  > simplexTypes;
 
-    const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
-
-    // BisectionCompatibility only works in serial because of the sorting
-    // algorithm, therefore it needs to be run as a preprocessing step in case a
-    // parallel bisection compatible grid should be read
-    if( dimension == 3 && refinementType == conforming && numNonEmptyPartitions > 1 )
+    // for conforming refinement if grid is not known
+    // to be compatible a check has to be performed
+    if( compatibilityCheck_ )
     {
-      std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
-    }
-    else if( dimension == 3 && refinementType == conforming && ! elements_.empty() )
-    {
-      assert( numNonEmptyPartitions == 1 );
+      const int numNonEmptyPartitions = comm().sum( int( !elements_.empty() ) );
 
-      Dune::Timer timer;
-
-      BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
-
-      std::string rankstr ;
+      // BisectionCompatibility only works in serial because of the sorting
+      // algorithm, therefore it needs to be run as a preprocessing step in case a
+      // parallel bisection compatible grid should be read
+      if( dimension == 3 && refinementType == conforming && numNonEmptyPartitions > 1 )
       {
-        std::stringstream str;
-        str << "P[ " << rank_ << " ]: ";
-        rankstr = str.str();
+        std::cerr << "WARNING: Bisection compatibility check for ALUGrid< d, 3, simplex, conforming > is disabled for parallel grid construction!" << std::endl;
       }
-
-      if( bisComp.make6CompatibilityCheck()  )
+      else if( dimension == 3 && refinementType == conforming && ! elements_.empty() )
       {
-#ifndef NDEBUG
-        std::cout << rankstr << "Grid is compatible!" << std::endl;
-#endif
-      }
-      else
-      {
-        make6 = false;
+        assert( numNonEmptyPartitions == 1 );
 
-        // mark longest edge for initial refinement
-        // successive refinement is done via Newest Vertex Bisection
-        if( markLongestEdge_ )
+        Dune::Timer timer;
+
+        BisectionCompatibility< VertexVector > bisComp( vertices_, elements_, false);
+
+        std::string rankstr ;
         {
-          markLongestEdge( elementOrientation );
+          std::stringstream str;
+          str << "P[ " << rank_ << " ]: ";
+          rankstr = str.str();
         }
-#ifndef NDEBUG
-        std::cout << rankstr << "Making compatible" << std::endl;
-#endif
-        if( bisComp.type0Algorithm() )
+
+        if( bisComp.make6CompatibilityCheck()  )
         {
 #ifndef NDEBUG
-          std::cout << rankstr << "Grid is compatible!!" << std::endl;
+          std::cout << rankstr << "Grid is compatible!" << std::endl;
 #endif
-          bisComp.stronglyCompatibleFaces();
-          // obtain new element sorting, orientations, and types
-          bisComp.returnElements( elements_, elementOrientation, simplexTypes );
-          markLongestEdge( elementOrientation, false );
         }
-#ifndef NDEBUG
         else
-          std::cout << rankstr << "Could not make compatible!" << std::endl;
+        {
+          make6 = false;
+
+          // mark longest edge for initial refinement
+          // successive refinement is done via Newest Vertex Bisection
+          if( markLongestEdge_ )
+          {
+            markLongestEdge( elementOrientation );
+          }
+#ifndef NDEBUG
+          std::cout << rankstr << "Making compatible" << std::endl;
+#endif
+          if( bisComp.type0Algorithm() )
+          {
+#ifndef NDEBUG
+            std::cout << rankstr << "Grid is compatible!!" << std::endl;
+#endif
+            bisComp.stronglyCompatibleFaces();
+            // obtain new element sorting, orientations, and types
+            bisComp.returnElements( elements_, elementOrientation, simplexTypes );
+            markLongestEdge( elementOrientation, false );
+          }
+#ifndef NDEBUG
+          else
+            std::cout << rankstr << "Could not make compatible!" << std::endl;
+#endif
+        }
+#ifndef NDEBUG
+        std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
+        std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
 #endif
       }
-#ifndef NDEBUG
-      std::cout << rankstr << "BisectionCompatibility done:" << std::endl;
-      std::cout << rankstr << "Elements: " << elements_.size() << " " << timer.elapsed() << " seconds used. " << std::endl;
-#endif
     }
 
     numFacesInserted_ = boundaryIds_.size();
