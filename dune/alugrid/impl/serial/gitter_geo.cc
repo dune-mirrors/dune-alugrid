@@ -721,7 +721,7 @@ namespace ALUGrid
   }
 
   MacroFileHeader Gitter::Geometric::BuilderIF::
-  dumpMacroGrid ( std::ostream &os, const MacroFileHeader::Format format ) const
+  dumpMacroGrid ( std::ostream &os, const bool conforming, const MacroFileHeader::Format format ) const
   {
     MacroFileHeader header;
     if( _tetraList.empty() )
@@ -733,6 +733,11 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal) Gitter::Geometric::BuilderIF::dumpMacroGrid( std::ostream & ) can only write pure tetrahedral or pure hexahedral grids." << std::endl;
       std::abort();
     }
+
+    if( conforming )
+      header.setRefinement( MacroFileHeader::conforming );
+    else
+      header.setRefinement( MacroFileHeader::nonconforming );
 
     header.setFormat( format );
     header.setSystemByteOrder();

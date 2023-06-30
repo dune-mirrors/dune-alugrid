@@ -85,15 +85,6 @@ namespace ALUGrid
     // read status of grid istream
     virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
   protected:
-    void checkForConformingRefinement( const bool conformingRefinement )
-    {
-      if( conformingRefinement )
-      {
-        this->enableConformingClosure();
-        this->disableGhostCells();
-      }
-    }
-
     void restoreImpl( std::istream &in, const bool restoreBndFaces );
   };
 
@@ -105,28 +96,28 @@ namespace ALUGrid
 
     friend class PureElementLeafIterator < Gitter::helement_STI >;
 
-    using GitterDuneBasis :: checkForConformingRefinement;
+    //using GitterDuneBasis :: checkForConformingRefinement;
   public:
 
     //! constructor creating grid from std::istream
     GitterDuneImpl ( const int dim, const bool conformingRefinement, std::istream &in, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
     : GitterBasisImpl ( dim, in, ppv )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     //! constructor creating grid from macro grid file
     inline GitterDuneImpl (const int dim, const bool conformingRefinement, const char *filename, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
       : GitterBasisImpl ( dim, filename, ppv )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     //! constructor creating empty grid
     explicit GitterDuneImpl ( const int dim, const bool conformingRefinement )
       : GitterBasisImpl ( dim )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     // compress memory of given grid and return new object (holding equivalent information)
@@ -182,7 +173,7 @@ namespace ALUGrid
   inline void GitterDuneBasis::backup ( std::ostream &out, const MacroFileHeader::Format format )
   {
     // backp macro grid
-    MacroFileHeader header = container ().dumpMacroGrid ( out, format );
+    MacroFileHeader header = container ().dumpMacroGrid ( out, this->conformingClosureNeeded(), format );
 
     // flag for zbinary format
     const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;

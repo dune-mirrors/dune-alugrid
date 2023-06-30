@@ -1044,7 +1044,7 @@ namespace ALUGrid
       std::cout << "INFO: MacroGridBuilder::inflateMacroGrid() used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " s." << std::endl;
   }
 
-  void Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
+  bool Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
   {
     MacroFileHeader header;
     if( !header.read( in, true ) )
@@ -1052,6 +1052,8 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal): Unable to read macro grid header." << std::endl;
       std::abort();
     }
+
+    const bool conforming = header.refinement() == MacroFileHeader::conforming;
 
     MacroGridBuilder mm (*this);
     const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
@@ -1083,6 +1085,8 @@ namespace ALUGrid
     }
     else
       mm.inflateMacroGrid( in, type );
+
+    return conforming;
   }
 
 } // namespace ALUGrid
