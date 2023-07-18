@@ -788,7 +788,7 @@ namespace ALUGrid
   }
 
   template <class stream_t>
-  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
+  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type, const bool conforming )
   {
     const int start = clock ();
     int nv = 0;
@@ -828,9 +828,23 @@ namespace ALUGrid
         {
           in >> v[ j ] ;
         }
-        int orientation = i%2;
-        int elementType = 0;
-        InsertUniqueTetra (v, SimplexTypeFlag(orientation, elementType) );
+
+        if( conforming )
+        {
+          // read stored orientation and element type
+          int f;
+          in >> f;
+          const signed char flag = f;
+          InsertUniqueTetra (v, SimplexTypeFlag( flag) );
+        }
+        else
+        {
+          // default orientation and element type
+          int orientation = i%2;
+          int elementType = 0;
+          InsertUniqueTetra (v, SimplexTypeFlag(orientation, elementType) );
+        }
+
       }
     }
 
@@ -1063,19 +1077,19 @@ namespace ALUGrid
       {
         ObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else if( header.byteOrder() == MacroFileHeader::bigendian )
       {
         BigEndianObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else if ( header.byteOrder() == MacroFileHeader::littleendian )
       {
         LittleEndianObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else
       {
@@ -1084,7 +1098,7 @@ namespace ALUGrid
       }
     }
     else
-      mm.inflateMacroGrid( in, type );
+      mm.inflateMacroGrid( in, type, conforming );
 
     return conforming;
   }

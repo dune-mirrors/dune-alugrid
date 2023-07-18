@@ -2668,7 +2668,7 @@ namespace ALUGrid
         }
 
         template <class ostream_t>
-        void dumpMacroGridImpl (ostream_t &) const;
+        void dumpMacroGridImpl (ostream_t &, const bool) const;
       };
     };
   private :

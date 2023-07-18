@@ -285,6 +285,7 @@ namespace Dune
     }
 
     // set refinement type
+    //std::cout << "Restored grid: conf = " << mygrid_->conformingClosureNeeded() << std::endl;
     refinementType_ = mygrid_->conformingClosureNeeded() ? conforming : nonconforming;
 
     // check for element type

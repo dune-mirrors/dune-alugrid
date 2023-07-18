@@ -2,6 +2,7 @@
 #define REFINEMENTRULES_H_INCLUDED
 
 #include <dune/alugrid/common/alugrid_assert.hh>
+#include <dune/alugrid/impl/serial/serialize.h>
 #include <iostream>
 
 namespace ALUGrid
@@ -119,6 +120,9 @@ namespace ALUGrid
     SimplexTypeFlag() : _flag( inValid ) {}
 
     // constructor taking orientation and simplex type
+    explicit SimplexTypeFlag( const signed char flag ) : _flag( flag ) {}
+
+    // constructor taking orientation and simplex type
     explicit SimplexTypeFlag( const int orientation,
                               const int type )
     {
@@ -151,7 +155,28 @@ namespace ALUGrid
     {
       _flag = s.get();
     }
+
+    template <class Stream>
+    void print(Stream& s) const
+    {
+      int f = _flag;
+      s << f;
+    }
   };
+
+  inline std::ostream& operator<< (std::ostream& s, const SimplexTypeFlag& flag )
+  {
+    flag.print(s);
+    return s;
+  }
+
+  template <class Traits>
+  inline BasicObjectStream< Traits >& operator<< (BasicObjectStream< Traits >& s, const SimplexTypeFlag& flag )
+  {
+    flag.print(s);
+    return s;
+  }
+
 
   // #     #                                    #    ######
   // #     #  ######  #####    ####   ######   ##    #     #  #    #  #       ######
