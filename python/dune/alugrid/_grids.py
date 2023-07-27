@@ -94,7 +94,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType
     if refinement is not None:
         assert refinement == 'conforming' or refinement == 'nonconforming', "Refinement should be 'conforming' or 'nonconforming' if selected."
-        typename += ", Dune::" + refinement
+        typeName += ", Dune::" + refinement
 
     # if serial flag is true serial version is forced.
     if serial:
