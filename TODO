@@ -6,8 +6,3 @@ Periodic Grids
 Improvements to the parallel 2d grid:
 
 Test parallel reading of mesh files
-
-Other:
-
-Get the EntityPointer Entity change done
-
