@@ -5,7 +5,7 @@ DUNE-ALUGrid
 module which implements the DUNE grid interface
 providing unstructured simplicial and cube grids.
 
-A detailed description of all the new features and some more
+A detailed description of all the newer features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
 in the paper
 
@@ -16,13 +16,14 @@ in the paper
 Download via git:
 git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
 
-New features and improvements include
+Features of DUNE-ALUGrid include
 
-  *  Conforming refinement for the 3D simplex grid
-  *  All grids are now parallel (i.e. 2D and 3D)
+  *  Cube and simplex grids in 2D and 3D with nonconforming refinement
+  *  Simplex grids with conforming refinement (newest vertex bisection) for 2D and 3D
+  *  Parallelization and dynamic load balancing for all grids
   *  Internal load balancing based on space filling curves
      making DUNE-ALUGrid self contained also in parallel
-  *  Bindings for fully parallel partitioners using [Zoltan][4]
+  *  Bindings for fully parallel partitioning using [Zoltan][4]
   *  Complete user control of the load balancing
   *  Improved memory footprint
 
