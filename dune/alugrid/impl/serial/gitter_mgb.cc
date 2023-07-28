@@ -832,10 +832,9 @@ namespace ALUGrid
         if( conforming )
         {
           // read stored orientation and element type
-          int f;
-          in >> f;
-          const signed char flag = f;
-          InsertUniqueTetra (v, SimplexTypeFlag( flag) );
+          SimplexTypeFlag flag;
+          in >> flag;
+          InsertUniqueTetra (v, flag );
         }
         else
         {

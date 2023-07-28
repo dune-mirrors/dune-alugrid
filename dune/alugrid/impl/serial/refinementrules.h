@@ -120,9 +120,6 @@ namespace ALUGrid
     SimplexTypeFlag() : _flag( inValid ) {}
 
     // constructor taking orientation and simplex type
-    explicit SimplexTypeFlag( const signed char flag ) : _flag( flag ) {}
-
-    // constructor taking orientation and simplex type
     explicit SimplexTypeFlag( const int orientation,
                               const int type )
     {
@@ -156,24 +153,43 @@ namespace ALUGrid
       _flag = s.get();
     }
 
-    template <class Stream>
-    void print(Stream& s) const
+    void writeAscii(std::ostream& s) const
     {
       int f = _flag;
       s << f;
+    }
+
+    void readAscii(std::istream& s)
+    {
+      int f;
+      s >> f;
+      _flag = (signed char) f;
     }
   };
 
   inline std::ostream& operator<< (std::ostream& s, const SimplexTypeFlag& flag )
   {
-    flag.print(s);
+    flag.writeAscii(s);
+    return s;
+  }
+
+  inline std::istream& operator>> (std::istream& s, SimplexTypeFlag& flag )
+  {
+    flag.readAscii(s);
     return s;
   }
 
   template <class Traits>
   inline BasicObjectStream< Traits >& operator<< (BasicObjectStream< Traits >& s, const SimplexTypeFlag& flag )
   {
-    flag.print(s);
+    flag.write(s);
+    return s;
+  }
+
+  template <class Traits>
+  inline BasicObjectStream< Traits >& operator>> (BasicObjectStream< Traits >& s, SimplexTypeFlag& flag )
+  {
+    flag.read(s);
     return s;
   }
 
