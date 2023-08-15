@@ -721,7 +721,7 @@ namespace ALUGrid
   }
 
   MacroFileHeader Gitter::Geometric::BuilderIF::
-  dumpMacroGrid ( std::ostream &os, const MacroFileHeader::Format format ) const
+  dumpMacroGrid ( std::ostream &os, const bool conforming, const MacroFileHeader::Format format ) const
   {
     MacroFileHeader header;
     if( _tetraList.empty() )
@@ -734,6 +734,11 @@ namespace ALUGrid
       std::abort();
     }
 
+    if( conforming )
+      header.setRefinement( MacroFileHeader::conforming );
+    else
+      header.setRefinement( MacroFileHeader::nonconforming );
+
     header.setFormat( format );
     header.setSystemByteOrder();
 
@@ -745,12 +750,12 @@ namespace ALUGrid
       os.setf( std::ios::fixed, std::ios::floatfield );
       os.precision( ALUGridExternalParameters::precision() );
       os << std::scientific;
-      dumpMacroGridImpl( os );
+      dumpMacroGridImpl( os, conforming );
     }
     else // binary or zbinary
     {
       ObjectStream data;
-      dumpMacroGridImpl( data );
+      dumpMacroGridImpl( data, conforming );
       data.put( char(' ') ); // make consistent with ascii stream
 
       // write binary data to stream
@@ -762,7 +767,7 @@ namespace ALUGrid
   }
 
   template<class ostream_t>
-  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os ) const
+  void Gitter::Geometric::BuilderIF::dumpMacroGridImpl (ostream_t & os, const bool conforming ) const
   {
     // Bisher enth"alt die erste Zeile der Datei entweder "!Tetraeder"
     // oder "!Hexaeder" je nachdem, ob ein reines Tetraeder- oder
@@ -833,7 +838,16 @@ namespace ALUGrid
         {
           os << (*i)->myvertex (j)->ident() << ws ;
         }
-        os << (*i)->myvertex (3)->ident() << std::endl ;
+
+        if( conforming )
+        {
+          auto flag = (*i)->simplexTypeFlag();
+          os << (*i)->myvertex (3)->ident() << ws << flag << std::endl ;
+        }
+        else
+        {
+          os << (*i)->myvertex (3)->ident() << std::endl ;
+        }
       }
 
       os << int(_periodic3List.size ()) << ws << int(_hbndseg3List.size ()) << std::endl;
