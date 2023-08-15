@@ -488,7 +488,8 @@ namespace ALUGrid
   {
     this->indexManagerStorage().setDimAndGrid( dim, mygrid );
     this->setProjections( ppv );
-    macrogridBuilder( in );
+    const bool conforming = macrogridBuilder( in );
+    mygrid->checkForConformingRefinement( conforming );
   }
 
   GitterBasis::MacroGitterBasis::MacroGitterBasis ( const int dim, Gitter * mygrid, const ProjectVertexPtrPair& ppv )

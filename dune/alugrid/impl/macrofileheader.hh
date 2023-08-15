@@ -15,6 +15,7 @@ namespace ALUGrid
   struct MacroFileHeader
   {
     enum Type { tetrahedra, hexahedra };
+    enum Refinement { conforming, nonconforming };
     enum Format { ascii, binary, zbinary };
     enum ByteOrder { native, bigendian, littleendian };
 
@@ -25,28 +26,30 @@ namespace ALUGrid
       binary ;
 #endif
 
-    static const int currentVersion = 1;
+    static const int currentVersion = 2;
 
     static std::string toString ( Type type ) { return stringType[ type ]; }
+    static std::string toString ( Refinement refinement ) { return stringRefinement[ refinement ]; }
     static std::string toString ( Format format ) { return stringFormat[ format ]; }
     static std::string toString ( ByteOrder byteOrder ) { return stringByteOrder[ byteOrder ]; }
 
     MacroFileHeader ()
-      : version_( currentVersion ), type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
+      : version_( currentVersion ), type_( hexahedra ), refinement_( nonconforming ),
+        format_( ascii ), byteOrder_( native ), size_( 0 )
     {}
 
-    MacroFileHeader ( Type type, Format format )
-      : version_( currentVersion ), type_( type ), format_( format ), byteOrder_( native ), size_( 0 )
+    MacroFileHeader ( Type type, Refinement refinement, Format format )
+      : version_( currentVersion ), type_( type ), refinement_( refinement ), format_( format ), byteOrder_( native ), size_( 0 )
     {}
 
     explicit MacroFileHeader ( const std::string &firstLine, bool verbose = false )
-      : version_( currentVersion ), type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
+      : version_( currentVersion ), type_( hexahedra ), refinement_( nonconforming ), format_( ascii ), byteOrder_( native ), size_( 0 )
     {
       read( firstLine, verbose );
     }
 
     explicit MacroFileHeader ( std::istream &in, bool verbose = false )
-      : type_( hexahedra ), format_( ascii ), byteOrder_( native ), size_( 0 )
+      : type_( hexahedra ), refinement_( nonconforming ), format_( ascii ), byteOrder_( native ), size_( 0 )
     {
       read( in, verbose );
     }
@@ -56,6 +59,10 @@ namespace ALUGrid
     Type type () const { return type_; }
     void setType ( Type type ) { type_ = type; }
     bool setType ( const std::string &type );
+
+    Refinement refinement () const { return refinement_; }
+    void setRefinement ( Refinement refinement ) { refinement_ = refinement; }
+    bool setRefinement ( const std::string &refinement );
 
     Format format () const { return format_; }
     void setFormat ( Format format ) { format_ = format; }
@@ -79,11 +86,13 @@ namespace ALUGrid
 
   private:
     static const char *stringType[ 2 ];
+    static const char *stringRefinement[ 2 ];
     static const char *stringFormat[ 3 ];
     static const char *stringByteOrder[ 3 ];
 
     int version_;
     Type type_;
+    Refinement refinement_;
     Format format_;
     ByteOrder byteOrder_;
     std::size_t size_;

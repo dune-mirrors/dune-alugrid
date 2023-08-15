@@ -49,6 +49,12 @@ std::pair< std::string, std::size_t > backup ()
 
   std::ostringstream output;
   Dune::BackupRestoreFacility< Grid >::backup( *grid, output );
+
+  /*
+  std::ofstream file( "dump.alu" );
+  file << output.str();
+  file.close();
+  */
   return std::make_pair( output.str(), grid->leafGridView().size( 0 ) );
 }
 
