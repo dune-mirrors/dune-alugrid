@@ -134,12 +134,12 @@ namespace ALUGrid
       virtual void restore (ObjectStream &);
 
       // backup and restore index for std::streams
-      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
-      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
       // backup and restore index for ObjectStream
-      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
-      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
     protected:
       myvertex_t* vertexNotOnSplitEdge( const int );
@@ -655,12 +655,12 @@ namespace ALUGrid
       void restore (ObjectStream &);
 
       // backup and restore index for std::streams
-      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
-      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
       // backup and restore index for ObjectStream
-      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
-      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
     protected:
       // non-virtual methods of down and innerVertex

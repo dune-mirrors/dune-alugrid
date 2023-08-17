@@ -42,8 +42,7 @@ namespace ALUGrid
 
   class GitterDuneBasis :  public virtual GitterBasis
   {
-    enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3,
-                     hierarchic_face = 4, hierarchic_edge = 5 };
+    enum IndexType { no_index = 0 , hierarchic_index = 1, leaf_index = 3 };
 
   protected:
     // adaptation callback handler
@@ -75,7 +74,7 @@ namespace ALUGrid
     bool duneAdapt (AdaptRestrictProlongType & arp);
 
     template <class ostream_t>
-    void backupIndices  (ostream_t & out, const bool faces = true, const bool edges = true  );
+    void backupIndices  (ostream_t & out);
 
     template <class istream_t>
     void restoreIndices (istream_t & in );
@@ -241,7 +240,7 @@ namespace ALUGrid
   }
 
   template <class ostream_t>
-  inline void GitterDuneBasis::backupIndices (ostream_t & out, const bool faces, const bool edges )
+  inline void GitterDuneBasis::backupIndices (ostream_t & out)
   {
     // get byte order of stream
     out.put( RestoreInfo::systemByteOrder() );
@@ -261,18 +260,13 @@ namespace ALUGrid
     }
 
     // backup index of faces
-    unsigned char bkupFaces = faces ? hierarchic_face : no_index;
-    out.put( bkupFaces );
-    if( faces )
     {
       AccessIterator <hface_STI>::Handle ew (container ());
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
     }
 
-    // backup index of edges
-    unsigned char bkupEdges = edges ? hierarchic_edge : no_index;
-    out.put( bkupEdges );
-    if( edges )
+    // backup index of edges (only 3d grids)
+    if( this->dimension() > 2 )
     {
       AccessIterator <hedge_STI>::Handle ew (container ());
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
@@ -334,9 +328,6 @@ namespace ALUGrid
 
       // restore index of faces (and internal edges)
       // mark all visited items as not a hole
-      unsigned char faces = no_index;
-      faces = in.get();
-      if( faces == hierarchic_face )
       {
         AccessIterator < hface_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
@@ -344,9 +335,7 @@ namespace ALUGrid
 
       // restore index of edges
       // mark all visited items as not a hole
-      unsigned char edges = no_index;
-      edges = in.get();
-      if( edges == hierarchic_edge )
+      if( this->dimension() > 2 )
       {
         AccessIterator < hedge_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
@@ -359,9 +348,12 @@ namespace ALUGrid
         for( w->first(); ! w->done(); w->next () ) w->item().restoreIndex(in, restoreInfo );
       }
 
+      const int skipCodim = this->dimension() == 2 ? BuilderIF ::IM_Edges : -1;
       // reconstruct holes for elements, faces, edges, vertices
       for( int codim=BuilderIF::IM_Elements; codim <= BuilderIF ::IM_Vertices; ++codim )
       {
+        if( codim == skipCodim ) continue ;
+
         IndexManagerType& indexManager = this->indexManager( codim );
         indexManager.generateHoles( restoreInfo( codim ) );
       }

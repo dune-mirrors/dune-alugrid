@@ -509,12 +509,12 @@ namespace ALUGrid
       void restore (std::istream &);
 
       // backup and restore index for std::streams
-      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
-      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
       // backup and restore index for ObjectStream
-      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
-      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
       int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
@@ -801,6 +801,9 @@ namespace ALUGrid
   template < class A > template <class OutStream_t>
   inline void Hedge1Top < A >::backupIndexImpl (OutStream_t& os) const
   {
+    // this is only needed for 3d grids
+    if( this->is2d() ) return ;
+
     // in DuneIndexProvider::doBackupIndex
     this->doBackupIndex( os );
     {
@@ -832,6 +835,9 @@ namespace ALUGrid
   template < class A > template <class InStream_t>
   inline void Hedge1Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
   {
+    // this is only needed for 3d grids
+    if( this->is2d() ) return ;
+
     // mark this element a non hole
     typedef typename Gitter::Geometric::BuilderIF BuilderIF;
 
@@ -1096,7 +1102,11 @@ namespace ALUGrid
     // in DuneIndexProvider::doBackupIndex
     this->doBackupIndex( os );
 
-    { for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backupIndex (os); }
+    if( ! this->is2d() ) // only for 3d grids
+    {
+      for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backupIndex (os);
+    }
+
     { for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backupIndex (os); }
   }
 
@@ -1126,7 +1136,11 @@ namespace ALUGrid
 
     this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
 
-    {for (inneredge_t * e = inEd(); e; e = e->next ()) e->restoreIndex (is, restoreInfo); }
+    if( ! this->is2d() ) // this is only needed for 3d grids
+    {
+      for (inneredge_t * e = inEd(); e; e = e->next ()) e->restoreIndex (is, restoreInfo);
+    }
+
     {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo); }
   }
 

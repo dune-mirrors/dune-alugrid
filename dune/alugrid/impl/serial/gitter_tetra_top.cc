@@ -514,11 +514,27 @@ namespace ALUGrid
   }
 
   template< class A >
+  void Hface3Top < A >::backupIndex (std::ostream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
+  void Hface3Top < A >::backupIndex (ObjectStream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
   template< class OutStream_t>
   void Hface3Top < A >::backupIndexImpl (OutStream_t & os) const
   {
     this->doBackupIndex( os );
-    {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ; }
+    if ( ! this->is2d() ) // only for 3d grids
+    {
+      for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ;
+    }
+
     {for (const innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ; }
   }
 
@@ -549,8 +565,28 @@ namespace ALUGrid
     typedef typename Gitter::Geometric::BuilderIF BuilderIF;
 
     this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
-    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo) ; }
+    if ( ! this->is2d() ) // only for 3d grids
+    {
+      for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo) ;
+    }
+
     {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo) ; }
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void Hface3Top < A >::
+  restoreIndex( std::istream& is,  RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void Hface3Top < A >::
+  restoreIndex( ObjectStream& is,  RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
   // #     #                          #####  #######
@@ -2357,12 +2393,31 @@ namespace ALUGrid
     this->doBackupIndex( os );
 
     // write inner objects and children
+    if ( ! this->is2d() ) // only for 3d grids
     {
       for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ;
+    }
+
+    {
       for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backupIndex (os) ;
       for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ;
     }
     return;
+  }
+
+  // overloaded backupIndex Method
+  template< class A >
+  void TetraTop < A >::
+  backupIndex( std::ostream &os ) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  // overloaded backupIndex Method
+  template< class A >
+  void TetraTop < A >::backupIndex( ObjectStream& os ) const
+  {
+    this->backupIndexImpl( os );
   }
 
   // buckupTetra
@@ -2390,6 +2445,23 @@ namespace ALUGrid
 
   // overloaded restoreIndex Method
   template< class A >
+  void TetraTop < A >::
+  restoreIndex( std::istream &is, RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void TetraTop < A >::
+  restoreIndex( ObjectStream &is, RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+
+  // overloaded restoreIndex Method
+  template< class A >
   template< class istream_t>
   void TetraTop < A >::
   restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo )
@@ -2403,8 +2475,12 @@ namespace ALUGrid
     // TODO
     // restore other indices
 
+    if ( ! this->is2d() ) // only for 3d grids
     {
       for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo );
+    }
+
+    {
       for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restoreIndex (is, restoreInfo );
       for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo ) ;
     }

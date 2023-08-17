@@ -1046,9 +1046,25 @@ namespace ALUGrid
   void HexaTop< A >::backupIndexImpl ( OutStream_t &os ) const
   {
     this->doBackupIndex( os );
-    for (const inneredge_t * e = innerHedge (); e; e = e->next ()) e->backupIndex (os);
+    if( ! this->is2d() ) // this is only needed for 3d grids
+    {
+      for (const inneredge_t * e = innerHedge (); e; e = e->next ()) e->backupIndex (os);
+    }
+
     for (const innerface_t * f = innerHface (); f; f = f->next ()) f->backupIndex (os);
     for (const innerhexa_t* c = down(); c; c = c->next()) c->backupIndex( os );
+  }
+
+  template< class A >
+  void HexaTop< A >::backupIndex ( std::ostream& os ) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
+  void HexaTop< A >::backupIndex ( ObjectStream& os ) const
+  {
+    this->backupIndexImpl( os );
   }
 
   template< class A >
@@ -1088,9 +1104,27 @@ namespace ALUGrid
 
     this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Elements );
 
-    {for (inneredge_t * e = innerHedge (); e; e = e->next ()) e->restoreIndex (is, restoreInfo); }
+    if( ! this->is2d() ) // this is only needed for 3d grids
+    {
+      for (inneredge_t * e = innerHedge (); e; e = e->next ()) e->restoreIndex (is, restoreInfo);
+    }
+
     {for (innerface_t * f = innerHface (); f; f = f->next ()) f->restoreIndex (is, restoreInfo); }
     {for (innerhexa_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo ); }
+  }
+
+  template< class A >
+  void HexaTop < A >::
+  restoreIndex (std::istream& is, RestoreInfo& restoreInfo)
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  template< class A >
+  void HexaTop < A >::
+  restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo)
+  {
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
   template< class A >
