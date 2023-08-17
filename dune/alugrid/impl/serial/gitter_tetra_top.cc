@@ -514,6 +514,15 @@ namespace ALUGrid
   }
 
   template< class A >
+  template< class OutStream_t>
+  void Hface3Top < A >::backupIndexImpl (OutStream_t & os) const
+  {
+    this->doBackupIndex( os );
+    {for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ; }
+    {for (const innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ; }
+  }
+
+  template< class A >
   void Hface3Top< A >::restore ( std::istream &is )
   {
     doRestore( is );
@@ -531,6 +540,17 @@ namespace ALUGrid
     {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
     {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ; }
     return ;
+  }
+
+  template< class A > template<class InStream_t>
+  void Hface3Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo& restoreInfo )
+  {
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
+    {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo) ; }
+    {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo) ; }
   }
 
   // #     #                          #####  #######
@@ -2331,24 +2351,15 @@ namespace ALUGrid
   }
 
   // buckupIndex of tetra
-  template< class A > void TetraTop < A >::backupIndex ( std::ostream &os ) const
+  template< class A > template <class OutStream_t>
+  void TetraTop < A >::backupIndexImpl ( OutStream_t &os ) const
   {
     this->doBackupIndex( os );
 
-    // write children
+    // write inner objects and children
     {
-      for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ;
-    }
-    return;
-  }
-
-  // buckupIndex of tetra
-  template< class A > void TetraTop < A >::backupIndex (ObjectStream& os) const
-  {
-    this->doBackupIndex( os );
-
-    // write children
-    {
+      for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ;
+      for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backupIndex (os) ;
       for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ;
     }
     return;
@@ -2393,23 +2404,11 @@ namespace ALUGrid
     // restore other indices
 
     {
+      for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo );
+      for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restoreIndex (is, restoreInfo );
       for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo ) ;
     }
     return;
-  }
-
-  // overloaded restoreIndex Method
-  template< class A >
-  void TetraTop< A >::restoreIndex ( std::istream & is, RestoreInfo &restoreInfo )
-  {
-    restoreIndexImpl( is, restoreInfo );
-  }
-
-  // overloaded restoreIndex Method
-  template< class A > void TetraTop < A >::
-  restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo )
-  {
-    restoreIndexImpl( is, restoreInfo );
   }
 
   // restoreTetra

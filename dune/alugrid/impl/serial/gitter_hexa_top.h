@@ -233,11 +233,20 @@ namespace ALUGrid
       virtual bool coarse ();
 
     public :
-      virtual void backup (std::ostream &) const;
-      virtual void restore (std::istream &);
+      void backup (std::ostream &) const;
+      void restore (std::istream &);
 
-      virtual void backup (ObjectStream&) const;
-      virtual void restore (ObjectStream&);
+      void backup (ObjectStream&) const;
+      void restore (ObjectStream&);
+
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+
     protected:
       bool isRealLine() const;
       // non-virtual methods of down and innerVertex
@@ -250,6 +259,12 @@ namespace ALUGrid
       void doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
+
+      template< class istream_t >
+      void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );
   };
 
   template < class A > class Hface4Top : public A
@@ -322,6 +337,15 @@ namespace ALUGrid
 
       virtual void backup (ObjectStream&) const;
       virtual void restore (ObjectStream&);
+
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+
     protected:
       // non-virtual methods of down and innerVertex
       innerface_t* dwnPtr();
@@ -335,6 +359,12 @@ namespace ALUGrid
       void doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
+
+      template< class istream_t >
+      void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );
   };
 
   template < class A > class Hbnd4Top : public A
@@ -478,15 +508,13 @@ namespace ALUGrid
       int  backup  (std::ostream &) const;
       void restore (std::istream &);
 
-      // backup and restore index
-      void backupIndex (std::ostream &) const;
-      // set entry of element to false when index is read
-      void restoreIndex (std::istream &, RestoreInfo& );
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
 
-      // backup and restore index
-      void backupIndex (ObjectStream &) const;
-      // set entry of element to false when index is read
-      void restoreIndex (ObjectStream &, RestoreInfo& );
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
 
       int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
@@ -533,6 +561,9 @@ namespace ALUGrid
       int  doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl( ostream_t & ) const;
       template< class istream_t >
       void restoreIndexImpl( istream_t &, RestoreInfo& );
   };
@@ -767,6 +798,17 @@ namespace ALUGrid
     return;
   }
 
+  template < class A > template <class OutStream_t>
+  inline void Hedge1Top < A >::backupIndexImpl (OutStream_t& os) const
+  {
+    // in DuneIndexProvider::doBackupIndex
+    this->doBackupIndex( os );
+    {
+      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backupIndex(os);
+    }
+    return;
+  }
+
   template < class A > inline void Hedge1Top < A >::restore (std::istream & is)
   {
     doRestore( is );
@@ -786,6 +828,21 @@ namespace ALUGrid
     }
     return;
   }
+
+  template < class A > template <class InStream_t>
+  inline void Hedge1Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
+  {
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Edges );
+    {
+      for (inneredge_t * d = dwnPtr(); d; d = d->next ())
+        d->restoreIndex (is, restoreInfo );
+    }
+    return;
+  }
+
 
   template < class A >  inline void Hedge1Top < A >::append (inneredge_t * e) {
     alugrid_assert (!_bbb && e);
@@ -1033,6 +1090,16 @@ namespace ALUGrid
     return;
   }
 
+  template < class A > template <class OutStream_t>
+  inline void Hface4Top < A >::backupIndexImpl (OutStream_t& os) const
+  {
+    // in DuneIndexProvider::doBackupIndex
+    this->doBackupIndex( os );
+
+    { for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backupIndex (os); }
+    { for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backupIndex (os); }
+  }
+
   template < class A > inline void Hface4Top < A >::restore (std::istream & is)
   {
     doRestore( is );
@@ -1050,6 +1117,19 @@ namespace ALUGrid
     {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restore (is); }
     return;
   }
+
+  template < class A > template <class InStream_t>
+  inline void Hface4Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
+  {
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
+
+    {for (inneredge_t * e = inEd(); e; e = e->next ()) e->restoreIndex (is, restoreInfo); }
+    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo); }
+  }
+
 
   // #     #                         #       #######
   // #     #  #####   #    #  #####  #    #     #      ####   #####
