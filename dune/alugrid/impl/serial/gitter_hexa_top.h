@@ -240,12 +240,12 @@ namespace ALUGrid
       void restore (ObjectStream&);
 
       // backup and restore index for std::streams
-      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
-      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
       // backup and restore index for ObjectStream
-      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
-      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
     protected:
       bool isRealLine() const;
@@ -339,12 +339,12 @@ namespace ALUGrid
       virtual void restore (ObjectStream&);
 
       // backup and restore index for std::streams
-      void backupIndex (std::ostream & os) const{ this->backupIndexImpl( os ); }
-      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
       // backup and restore index for ObjectStream
-      void backupIndex ( ObjectStream& os ) const { this->backupIndexImpl( os ); }
-      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo ) { this->restoreIndexImpl( is, restoreInfo ); }
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
     protected:
       // non-virtual methods of down and innerVertex
@@ -778,78 +778,6 @@ namespace ALUGrid
     return _bbb;
   }
 
-  template < class A > inline void Hedge1Top < A >::backup (std::ostream & os) const
-  {
-    doBackup( os );
-  }
-
-  template < class A > inline void Hedge1Top < A >::backup (ObjectStream& os) const
-  {
-    doBackup( os );
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hedge1Top < A >::doBackup (OutStream_t& os) const
-  {
-    os.put ((char) getrule ());
-    {
-      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backup (os);
-    }
-    return;
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hedge1Top < A >::backupIndexImpl (OutStream_t& os) const
-  {
-    // this is only needed for 3d grids
-    if( this->is2d() ) return ;
-
-    // in DuneIndexProvider::doBackupIndex
-    this->doBackupIndex( os );
-    {
-      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backupIndex(os);
-    }
-    return;
-  }
-
-  template < class A > inline void Hedge1Top < A >::restore (std::istream & is)
-  {
-    doRestore( is );
-  }
-  template < class A > inline void Hedge1Top < A >::restore (ObjectStream& is)
-  {
-    doRestore( is );
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hedge1Top < A >::doRestore (InStream_t & is)
-  {
-    char r = (char) is.get ();
-    refineImmediate (myrule_t (r));
-    {
-      for (inneredge_t * d = dwnPtr(); d; d = d->next ()) d->restore (is);
-    }
-    return;
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hedge1Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
-  {
-    // this is only needed for 3d grids
-    if( this->is2d() ) return ;
-
-    // mark this element a non hole
-    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
-
-    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Edges );
-    {
-      for (inneredge_t * d = dwnPtr(); d; d = d->next ())
-        d->restoreIndex (is, restoreInfo );
-    }
-    return;
-  }
-
-
   template < class A >  inline void Hedge1Top < A >::append (inneredge_t * e) {
     alugrid_assert (!_bbb && e);
     _bbb = e;
@@ -889,6 +817,7 @@ namespace ALUGrid
   template < class A > inline const typename Hedge1Top < A >::innervertex_t * Hedge1Top < A >::subvertex (int) const {
     return inVx();
   }
+
 
   // #     #                                 #       #######
   // #     #  ######    ##     ####   ###### #    #     #      ####   #####
@@ -1076,72 +1005,6 @@ namespace ALUGrid
   template < class A > inline typename Hface4Top < A >::myrule_t
   Hface4Top < A >::getrule () const {
     return myrule_t (_rule);
-  }
-
-  template < class A > inline void Hface4Top < A >::backup (std::ostream & os) const
-  {
-    doBackup(os);
-  }
-  template < class A > inline void Hface4Top < A >::backup (ObjectStream& os) const
-  {
-    doBackup(os);
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hface4Top < A >::doBackup (OutStream_t& os) const
-  {
-    os.put ((char) getrule ());
-    {for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backup (os); }
-    {for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backup (os); }
-    return;
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hface4Top < A >::backupIndexImpl (OutStream_t& os) const
-  {
-    // in DuneIndexProvider::doBackupIndex
-    this->doBackupIndex( os );
-
-    if( ! this->is2d() ) // only for 3d grids
-    {
-      for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backupIndex (os);
-    }
-
-    { for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backupIndex (os); }
-  }
-
-  template < class A > inline void Hface4Top < A >::restore (std::istream & is)
-  {
-    doRestore( is );
-  }
-  template < class A > inline void Hface4Top < A >::restore (ObjectStream& is)
-  {
-    doRestore( is );
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hface4Top < A >::doRestore (InStream_t & is)
-  {
-    refineImmediate (myrule_t ((char) is.get ()));
-    {for (inneredge_t * e = inEd(); e; e = e->next ()) e->restore (is); }
-    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restore (is); }
-    return;
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hface4Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
-  {
-    // mark this element a non hole
-    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
-
-    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
-
-    if( ! this->is2d() ) // this is only needed for 3d grids
-    {
-      for (inneredge_t * e = inEd(); e; e = e->next ()) e->restoreIndex (is, restoreInfo);
-    }
-
-    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo); }
   }
 
 
