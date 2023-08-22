@@ -259,7 +259,18 @@ namespace ALUGrid
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
     }
 
-    // TODO: backup face and edge indices
+    // backup index of faces
+    {
+      AccessIterator <hface_STI>::Handle ew (container ());
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
+    }
+
+    // backup index of edges (only 3d grids)
+    if( this->dimension() > 2 )
+    {
+      AccessIterator <hedge_STI>::Handle ew (container ());
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
+    }
 
     {
       // backup index of vertices
@@ -314,6 +325,22 @@ namespace ALUGrid
         AccessIterator < helement_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
       }
+
+      // restore index of faces (and internal edges)
+      // mark all visited items as not a hole
+      {
+        AccessIterator < hface_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
+      }
+
+      // restore index of edges
+      // mark all visited items as not a hole
+      if( this->dimension() > 2 )
+      {
+        AccessIterator < hedge_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
+      }
+
       // restore index of vertices
       // mark all visited items as not a hole
       {
@@ -321,18 +348,16 @@ namespace ALUGrid
         for( w->first(); ! w->done(); w->next () ) w->item().restoreIndex(in, restoreInfo );
       }
 
-      // reconstruct holes
+      const int skipCodim = this->dimension() == 2 ? BuilderIF ::IM_Edges : -1;
+      // reconstruct holes for elements, faces, edges, vertices
+      for( int codim=BuilderIF::IM_Elements; codim <= BuilderIF ::IM_Vertices; ++codim )
       {
-        IndexManagerType& elementManager = this->indexManager(BuilderIF::IM_Elements);
-        elementManager.generateHoles( restoreInfo( BuilderIF::IM_Elements ) );
+        if( codim == skipCodim ) continue ;
+
+        IndexManagerType& indexManager = this->indexManager( codim );
+        indexManager.generateHoles( restoreInfo( codim ) );
       }
 
-      // TODO indices for faces and edges
-
-      {
-        IndexManagerType& vertexManager = this->indexManager(BuilderIF::IM_Vertices);
-        vertexManager.generateHoles( restoreInfo( BuilderIF ::IM_Vertices ) );
-      }
       return;
     }
 
