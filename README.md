@@ -14,7 +14,10 @@ in the paper
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
 Download via git:
+
+```
 git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
+```
 
 Features of DUNE-ALUGrid include
 
