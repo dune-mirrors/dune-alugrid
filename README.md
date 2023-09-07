@@ -49,6 +49,16 @@ Installation
 
 For installation instructions please see the [DUNE website][2].
 
+For installation of Zoltan we recommend to download the package from the
+[Zoltan][4] page, unpack and configure with the following parameters:
+
+```
+configure CXXFLAGS="-O3 -DNDEBUG -fPIC" CFLAGS="-O3 -DNDEBUG -fPIC" --prefix=PATH_TO_INSTALL_ZOLTAN --with-mpi-compilers=yes --enable-shared
+
+make
+make install
+```
+
 [0]: https://gitlab.dune-project.org/extensions/dune-alugrid
 [1]: http://www.dune-project.org
 [2]: http://www.dune-project.org/doc/installation
