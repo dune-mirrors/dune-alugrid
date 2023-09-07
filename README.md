@@ -47,7 +47,7 @@ See the file [COPYING][5] for full copying permissions.
 Installation
 ------------
 
-For installation instructions please see the [DUNE website][2].
+For general installation instructions please see the [DUNE website][2].
 
 For installation of Zoltan we recommend to download the package from the
 [Zoltan][4] page, unpack and configure with the following parameters:
