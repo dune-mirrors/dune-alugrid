@@ -6,6 +6,8 @@ add_subdirectory(loadbalance)
 add_subdirectory(quality)
 add_subdirectory(testEfficiency)
 
+set(DEFAULT_GRID_TYPE ALUGRID_CUBE)
+
 set(examplesdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples)
 set(examples_HEADERS adaptation.hh
                      diagnostics.hh
@@ -29,7 +31,7 @@ foreach(variant ball euler transport)
   if("${variant}" STREQUAL "ball")
     target_compile_definitions(main_${variant} PRIVATE "ALUGRID_COUNT_GLOBALCOMM")
   endif()
-  target_compile_definitions(main_${variant} PUBLIC "ALUGRID_CONFORM" "GRIDDIM=2" "WORLDDIM=2")
+  target_compile_definitions(main_${variant} PUBLIC "${DEFAULT_GRID_TYPE}" "GRIDDIM=2" "WORLDDIM=2")
 
   foreach(type cube simplex conform)
     string(TOUPPER ${type} type_upper)
