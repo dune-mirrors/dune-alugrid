@@ -416,14 +416,16 @@ namespace ALUGrid
                   neigh.first->refineBalance (r, neigh.second);
                   neigh = ( twist < 0 ) ? this->nb.front () : this->nb.rear()  ;
                 }
+                /*
                 for (innerface_t * f = dwnPtr() ; f ; f = f->next ())
                 {
-                  // assert faces are leaf - this is not true anymore with weak compatibility
-               //   alugrid_assert(f->leaf());
-                 // alugrid_assert(f->nb.front().first->nbLeaf());
-                  //alugrid_assert(f->nb.rear().first->nbLeaf());
+                  assert faces are leaf - this is not true anymore with weak compatibility
+                  alugrid_assert(f->leaf());
+                  alugrid_assert(f->nb.front().first->nbLeaf());
+                  alugrid_assert(f->nb.rear().first->nbLeaf());
                 ;
                 }
+                */
               }
             }
             else
@@ -2732,6 +2734,9 @@ namespace ALUGrid
           if (myhface (opp)->refine (typename myhface_t::myrule_t (r).rotate (twist (opp)), twist (opp)))
           {
             refineImmediate (r) ;
+
+            if( r.bisection() )
+              markForConformingClosure();
             return true ;
           }
           else

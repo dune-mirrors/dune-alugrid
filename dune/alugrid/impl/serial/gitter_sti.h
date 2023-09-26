@@ -462,6 +462,9 @@ namespace ALUGrid
       virtual bool refineBalance (Hface4Rule, int) { abort(); return false; }
       virtual bool bndNotifyCoarsen () { abort(); return false; }
 
+      // for bisection refinement
+      virtual void markForBisection() { abort(); }
+
       // returns true, if underlying object is real (default impl)
       virtual bool isRealObject () const { return true; }
 
@@ -1439,6 +1442,16 @@ namespace ALUGrid
       }
 
       virtual bnd_t bndtype ( const int ) const = 0;
+
+      virtual hperiodic * down () { abort(); return nullptr; }
+      virtual const hperiodic * down () const { abort(); return nullptr; }
+
+      virtual hperiodic * up () { abort(); return nullptr; }
+      virtual const hperiodic * up () const { abort(); return nullptr; }
+
+      virtual hperiodic * next() { abort(); return nullptr; }
+      virtual const hperiodic * next () const { abort(); return nullptr; }
+
     protected :
       hperiodic () {}
       virtual ~hperiodic () {}
@@ -1564,7 +1577,7 @@ namespace ALUGrid
       // this class is used as default value for the face neighbour
       // the pointer is set in gitter_geo.cc where the null neigbours are
       // initialized. This means that having no neighbour will not result in
-      // a segementation falut, but just return some default values
+      // a segmentation fault, but just return some default values
       class hasFaceEmpty : public hasFace
       {
       public :
@@ -2097,7 +2110,8 @@ namespace ALUGrid
       public:
         virtual myrule_t getrule () const = 0;
         virtual void request (myrule_t) = 0;
-        virtual bool markForConformingClosure () { return true; }
+        // overloaded in PeriodicTop
+        //virtual bool markForConformingClosure () { return true; }
         virtual void markEdgeCoarsening () { }
         int tagForGlobalRefinement ();
         int tagForGlobalCoarsening ();
@@ -2672,11 +2686,12 @@ namespace ALUGrid
       };
     };
   private :
-    IteratorSTI < vertex_STI >   * iterator (const vertex_STI *);
-    IteratorSTI < hedge_STI >    * iterator (const hedge_STI *);
-    IteratorSTI < hface_STI >    * iterator (const hface_STI *);
-    IteratorSTI < hbndseg_STI >  * iterator (const hbndseg_STI *);
-    IteratorSTI < helement_STI > * iterator (const helement_STI *);
+    IteratorSTI < vertex_STI >    * iterator (const vertex_STI *);
+    IteratorSTI < hedge_STI >     * iterator (const hedge_STI *);
+    IteratorSTI < hface_STI >     * iterator (const hface_STI *);
+    IteratorSTI < hbndseg_STI >   * iterator (const hbndseg_STI *);
+    IteratorSTI < helement_STI >  * iterator (const helement_STI *);
+    IteratorSTI < hperiodic_STI > * iterator (const hperiodic_STI *);
 
     IteratorSTI < vertex_STI >   * levelIterator (const vertex_STI *, const any_has_level<vertex_STI> &);
     IteratorSTI < hedge_STI >    * levelIterator (const hedge_STI *, const any_has_level<hedge_STI> & );
@@ -2693,6 +2708,9 @@ namespace ALUGrid
 
     template <class StopRule_t >
     IteratorSTI < helement_STI > * createIterator(const helement_STI * ,const StopRule_t rule);
+
+    template <class StopRule_t >
+    IteratorSTI < hperiodic_STI > * createIterator(const hperiodic_STI * ,const StopRule_t rule);
 
     template <class StopRule_t >
     IteratorSTI < hbndseg_STI >  * createIterator(const hbndseg_STI * , const StopRule_t rule);
@@ -3098,6 +3116,16 @@ namespace ALUGrid
                tree_element__macro_element__iterator;
 
     return new tree_element__macro_element__iterator (container (), rule );
+  }
+
+  template <class StopRule_t>
+  inline IteratorSTI< Gitter::hperiodic_STI > * Gitter::createIterator(const hperiodic_STI * , const StopRule_t rule)
+  {
+    typedef Insert < AccessIterator < Gitter::hperiodic_STI >::Handle,
+                     TreeIterator < Gitter::hperiodic_STI, StopRule_t > >
+               tree_element__macro_periodic__iterator;
+
+    return new tree_element__macro_periodic__iterator (container (), rule );
   }
 
   template <class StopRule_t>

@@ -1091,9 +1091,6 @@ namespace ALUGrid
 
         // do real coarsening of elements
         Gitter::doCoarse ();
-
-        // reset edge coarsen flags to avoid problems with coarsening
-        // Gitter::resetEdgeCoarsenFlags ();
       }
       catch( Parallel::AccessPllException& )
       {

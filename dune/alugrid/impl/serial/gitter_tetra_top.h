@@ -633,6 +633,8 @@ namespace ALUGrid
       bool refineBalance (balrule_t,int);
       bool coarse ();
       bool bndNotifyCoarsen ();
+      using A :: markForBisection;
+      void markForBisection() { request(myrule_t::bisect); }
 
       int  backup (std::ostream &) const;
       void restore (std::istream &);
@@ -670,14 +672,15 @@ namespace ALUGrid
     public:
       using A :: twist;
       using A :: myhface;
+      //using A :: myGrid;
 
     protected :
       typedef Periodic3Top < A >          innerperiodic3_t ;
       typedef typename A :: innervertex_t innervertex_t;
       typedef typename A :: inneredge_t   inneredge_t;
       typedef typename A :: innerface_t   innerface_t;
-      typedef typename A :: myhedge_t    myhedge_t;
-      typedef typename A :: myhface_t    myhface_t;
+      typedef typename A :: myhedge_t     myhedge_t;
+      typedef typename A :: myhface_t     myhface_t;
       typedef typename A :: myrule_t      myrule_t;
       typedef typename A :: balrule_t     balrule_t;
       typedef typename A :: bnd_t         bnd_t;
@@ -746,6 +749,72 @@ namespace ALUGrid
       bool refineBalance (balrule_t,int);
       bool coarse ();
       bool bndNotifyCoarsen ();
+
+      // return true if further refinement is needed to create conforming closure
+      virtual bool markForConformingClosure ()
+      {
+        //std::cout << "Periodic3Top::MarkForConf" << std::endl;
+        // this is only needed for conforming refinement
+        //alugrid_assert ( myGrid()->conformingClosureNeeded() );
+        // check if any of the faces is refined in a bisect fashion
+        //alugrid_assert( nFaces() == 2 );
+
+        myhface_t* chfaces [2] = { myhface(0)->down(), myhface(1)->down() };
+
+        for( int fce =0; fce < 2; ++ fce )
+        {
+          // take opposite face
+          const int opp = 1 - fce ;
+          // if considered faces is finer than opposite face, do something
+          if( chfaces[ fce ] && ! chfaces[ opp ] )
+          {
+            this->myneighbour( opp ).first->markForBisection();
+            return true;
+          }
+        }
+
+        /*
+        // for the real 3d case we also need to check edges
+        // if an edge exits, that has children, we also have to refine this tetra
+        alugrid_assert ( nEdges() == 6 );
+        for (int e=0; e < 6; ++e)
+        {
+          if( myhedge( e )->down() )
+          {
+            request ( myrule_t::bisect );
+            return true;
+          }
+        }
+        */
+        return false;
+      }
+
+      // mark edges to prohibit coarsening
+      virtual void markEdgeCoarsening ()
+      {
+        // this is only needed for conforming refinement
+        //alugrid_assert ( myGrid()->conformingClosureNeeded() );
+        // check if any of the faces is refined in a bisect fashion
+        //alugrid_assert( nFaces() == 2 );
+
+        myhface_t* faces [2] = { myhface(0), myhface(1) };
+        for( int fce =0; fce < 2; ++ fce )
+        {
+          // take opposite face
+          const int opp = 1 - fce ;
+          for (int e=0; e<3; ++e)
+          {
+            myhedge_t* e0 = faces[ fce ]->myhedge( e );
+            myhedge_t* e1 = faces[ opp ]->myhedge( e );
+            if( bool(e0->noCoarsen()) != bool(e1->noCoarsen()) )
+            {
+              e0->disableEdgeCoarsen();
+              e1->disableEdgeCoarsen();
+            }
+          }
+        }
+      }
+
     public:
       int  backup (std::ostream &) const;
       void restore (std::istream &);

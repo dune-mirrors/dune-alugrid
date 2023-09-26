@@ -40,6 +40,9 @@ namespace ALUGrid
   typedef Insert < AccessIterator < Gitter::helement_STI >::Handle,
     TreeIterator < Gitter::helement_STI, is_leaf < Gitter::helement_STI> > > leaf_element__macro_element__iterator;
 
+  typedef Insert < AccessIterator < Gitter::hperiodic_STI >::Handle,
+    TreeIterator < Gitter::hperiodic_STI, is_leaf < Gitter::hperiodic_STI> > > leaf_periodic__macro_periodic__iterator;
+
   IteratorSTI < Gitter::vertex_STI > * Gitter::iterator (const Gitter::vertex_STI *) {
 
     std::vector< IteratorSTI < vertex_STI > * > _iterators;
@@ -143,6 +146,12 @@ namespace ALUGrid
   IteratorSTI < Gitter::helement_STI > * Gitter::iterator (const helement_STI *el)
   {
     is_leaf <helement_STI> rule;
+    return this->createIterator(el, rule);
+  }
+
+  IteratorSTI < Gitter::hperiodic_STI > * Gitter::iterator (const hperiodic_STI *el)
+  {
+    is_leaf <hperiodic_STI> rule;
     return this->createIterator(el, rule);
   }
 
@@ -331,16 +340,31 @@ namespace ALUGrid
     // for the conforming closure
     if( conformingClosureNeeded() )
     {
-      leaf_element__macro_element__iterator i ( container () );
-      for( i.first(); ! i.done(); i.next())
       {
-        // this should only be called for tetra
-        // (although default impl for other elements exists and
-        //  returns false )
-        alugrid_assert ( i.item ().type() == tetra );
-        // stores the result if it is true
-        needConformingClosure |= i.item ().markForConformingClosure();
+        leaf_element__macro_element__iterator i ( container () );
+        for( i.first(); ! i.done(); i.next())
+        {
+          // this should only be called for tetra
+          // (although default impl for other elements exists and
+          //  returns false )
+          alugrid_assert ( i.item ().type() == tetra );
+          // stores the result if it is true
+          needConformingClosure |= i.item ().markForConformingClosure();
+        }
       }
+      {
+        leaf_periodic__macro_periodic__iterator i( container () );
+        for( i.first(); ! i.done(); i.next())
+        {
+          // this should only be called for tetra
+          // (although default impl for other elements exists and
+          //  returns false )
+          alugrid_assert ( i.item ().type() == tetra_periodic );
+          // stores the result if it is true
+          needConformingClosure |= i.item ().markForConformingClosure();
+        }
+      }
+
     }
     return needConformingClosure;
   }
@@ -353,11 +377,23 @@ namespace ALUGrid
       resetEdgeCoarsenFlags ();
 
       // now check for each tetra whether it could really be coarsened
-      leaf_element__macro_element__iterator i (container ());
-      for( i.first(); ! i.done(); i.next() )
       {
-        // mark coarsening will unset some edge flags
-        i.item().markEdgeCoarsening();
+        leaf_element__macro_element__iterator i (container ());
+        for( i.first(); ! i.done(); i.next() )
+        {
+          // mark coarsening will unset some edge flags
+          i.item().markEdgeCoarsening();
+        }
+      }
+      {
+        leaf_periodic__macro_periodic__iterator i( container () );
+        for( i.first(); ! i.done(); i.next())
+        {
+          // this should only be called for tetra_periodic
+          alugrid_assert ( i.item ().type() == tetra_periodic );
+          // stores the result if it is true
+          i.item ().markEdgeCoarsening();
+        }
       }
       return true;
     }
