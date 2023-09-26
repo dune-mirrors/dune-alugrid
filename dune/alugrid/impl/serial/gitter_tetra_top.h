@@ -133,6 +133,14 @@ namespace ALUGrid
       virtual void backup (ObjectStream &) const;
       virtual void restore (ObjectStream &);
 
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
+
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
+
     protected:
       myvertex_t* vertexNotOnSplitEdge( const int );
       edgepair_t subEdges( myhedge_t* , const myvertex_t* , const myvertex_t*  );
@@ -148,6 +156,12 @@ namespace ALUGrid
 
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
+
+      template< class istream_t >
+      void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );
   };
 
 
@@ -640,13 +654,14 @@ namespace ALUGrid
       int  backup (ObjectStream &) const;
       void restore (ObjectStream &);
 
-      // backup and restore index
-      void backupIndex (std::ostream &) const;
-      void restoreIndex (std::istream &, RestoreInfo& restoreInfo );
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
-      // backup and restore index
-      void backupIndex ( ObjectStream& ) const;
-      void restoreIndex (ObjectStream&, RestoreInfo& restoreInfo );
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
+
     protected:
       // non-virtual methods of down and innerVertex
       innertetra_t* dwnPtr();
@@ -661,6 +676,9 @@ namespace ALUGrid
 
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
 
       template< class istream_t >
       void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );

@@ -233,11 +233,20 @@ namespace ALUGrid
       virtual bool coarse ();
 
     public :
-      virtual void backup (std::ostream &) const;
-      virtual void restore (std::istream &);
+      void backup (std::ostream &) const;
+      void restore (std::istream &);
 
-      virtual void backup (ObjectStream&) const;
-      virtual void restore (ObjectStream&);
+      void backup (ObjectStream&) const;
+      void restore (ObjectStream&);
+
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
+
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
+
     protected:
       bool isRealLine() const;
       // non-virtual methods of down and innerVertex
@@ -250,6 +259,12 @@ namespace ALUGrid
       void doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
+
+      template< class istream_t >
+      void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );
   };
 
   template < class A > class Hface4Top : public A
@@ -322,6 +337,15 @@ namespace ALUGrid
 
       virtual void backup (ObjectStream&) const;
       virtual void restore (ObjectStream&);
+
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
+
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
+
     protected:
       // non-virtual methods of down and innerVertex
       innerface_t* dwnPtr();
@@ -335,6 +359,12 @@ namespace ALUGrid
       void doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl ( ostream_t & ) const;
+
+      template< class istream_t >
+      void restoreIndexImpl ( istream_t &, RestoreInfo &restoreInfo );
   };
 
   template < class A > class Hbnd4Top : public A
@@ -478,15 +508,13 @@ namespace ALUGrid
       int  backup  (std::ostream &) const;
       void restore (std::istream &);
 
-      // backup and restore index
-      void backupIndex (std::ostream &) const;
-      // set entry of element to false when index is read
-      void restoreIndex (std::istream &, RestoreInfo& );
+      // backup and restore index for std::streams
+      void backupIndex (std::ostream & os) const;
+      void restoreIndex (std::istream &is, RestoreInfo& restoreInfo );
 
-      // backup and restore index
-      void backupIndex (ObjectStream &) const;
-      // set entry of element to false when index is read
-      void restoreIndex (ObjectStream &, RestoreInfo& );
+      // backup and restore index for ObjectStream
+      void backupIndex ( ObjectStream& os ) const;
+      void restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo );
 
       int  backup  (ObjectStream&) const;
       void restore (ObjectStream&);
@@ -533,6 +561,9 @@ namespace ALUGrid
       int  doBackup(OutStream_t &) const;
       template <class InStream_t>
       void doRestore(InStream_t &);
+
+      template< class ostream_t >
+      void backupIndexImpl( ostream_t & ) const;
       template< class istream_t >
       void restoreIndexImpl( istream_t &, RestoreInfo& );
   };
@@ -747,46 +778,6 @@ namespace ALUGrid
     return _bbb;
   }
 
-  template < class A > inline void Hedge1Top < A >::backup (std::ostream & os) const
-  {
-    doBackup( os );
-  }
-
-  template < class A > inline void Hedge1Top < A >::backup (ObjectStream& os) const
-  {
-    doBackup( os );
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hedge1Top < A >::doBackup (OutStream_t& os) const
-  {
-    os.put ((char) getrule ());
-    {
-      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backup (os);
-    }
-    return;
-  }
-
-  template < class A > inline void Hedge1Top < A >::restore (std::istream & is)
-  {
-    doRestore( is );
-  }
-  template < class A > inline void Hedge1Top < A >::restore (ObjectStream& is)
-  {
-    doRestore( is );
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hedge1Top < A >::doRestore (InStream_t & is)
-  {
-    char r = (char) is.get ();
-    refineImmediate (myrule_t (r));
-    {
-      for (inneredge_t * d = dwnPtr(); d; d = d->next ()) d->restore (is);
-    }
-    return;
-  }
-
   template < class A >  inline void Hedge1Top < A >::append (inneredge_t * e) {
     alugrid_assert (!_bbb && e);
     _bbb = e;
@@ -826,6 +817,7 @@ namespace ALUGrid
   template < class A > inline const typename Hedge1Top < A >::innervertex_t * Hedge1Top < A >::subvertex (int) const {
     return inVx();
   }
+
 
   // #     #                                 #       #######
   // #     #  ######    ##     ####   ###### #    #     #      ####   #####
@@ -1015,41 +1007,6 @@ namespace ALUGrid
     return myrule_t (_rule);
   }
 
-  template < class A > inline void Hface4Top < A >::backup (std::ostream & os) const
-  {
-    doBackup(os);
-  }
-  template < class A > inline void Hface4Top < A >::backup (ObjectStream& os) const
-  {
-    doBackup(os);
-  }
-
-  template < class A > template <class OutStream_t>
-  inline void Hface4Top < A >::doBackup (OutStream_t& os) const
-  {
-    os.put ((char) getrule ());
-    {for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backup (os); }
-    {for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backup (os); }
-    return;
-  }
-
-  template < class A > inline void Hface4Top < A >::restore (std::istream & is)
-  {
-    doRestore( is );
-  }
-  template < class A > inline void Hface4Top < A >::restore (ObjectStream& is)
-  {
-    doRestore( is );
-  }
-
-  template < class A > template <class InStream_t>
-  inline void Hface4Top < A >::doRestore (InStream_t & is)
-  {
-    refineImmediate (myrule_t ((char) is.get ()));
-    {for (inneredge_t * e = inEd(); e; e = e->next ()) e->restore (is); }
-    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restore (is); }
-    return;
-  }
 
   // #     #                         #       #######
   // #     #  #####   #    #  #####  #    #     #      ####   #####
