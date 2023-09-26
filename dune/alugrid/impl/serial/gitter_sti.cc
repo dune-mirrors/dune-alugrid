@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "lock.h"
 #include "gitter_sti.h"
 #include "walk.h"
 
