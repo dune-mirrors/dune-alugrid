@@ -2675,7 +2675,7 @@ namespace ALUGrid
       case myrule_t::e01 :
       case myrule_t::e12 :
       case myrule_t::e20 :
-        if(myhface (0)->is2d()) // 2d refinement
+        // if(myhface (0)->is2d()) // 2d refinement
         {
           //std::cerr << "**ERROR (FATAL) refinement of Periodic3Top in 2d not implemented yet! " ;
           //std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;

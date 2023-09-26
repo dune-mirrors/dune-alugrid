@@ -478,7 +478,7 @@ namespace ALUGrid
     return mySize;
   }
 
-  // define index stack tpye for all grids
+  // define index stack type for all grids
   enum { lengthOfFiniteStack = 262144 }; // 2^18
   typedef ALUGridIndexStack<int,lengthOfFiniteStack> IndexManagerType;
 
