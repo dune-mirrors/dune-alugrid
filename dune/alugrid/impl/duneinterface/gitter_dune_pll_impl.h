@@ -25,7 +25,7 @@ namespace ALUGrid
 
     friend class PackUnpackInteriorGhostData ;
 
-    using GitterDuneBasis :: checkForConformingRefinement;
+    using Gitter :: checkForConformingRefinement;
   protected:
     bool balanceGrid_;
 

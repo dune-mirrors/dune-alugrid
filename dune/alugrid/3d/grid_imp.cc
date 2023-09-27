@@ -284,6 +284,10 @@ namespace Dune
       DUNE_THROW(InvalidStateException,"ALUGrid::restore failed");
     }
 
+    // set refinement type
+    //std::cout << "Restored grid: conf = " << mygrid_->conformingClosureNeeded() << std::endl;
+    refinementType_ = mygrid_->conformingClosureNeeded() ? conforming : nonconforming;
+
     // check for element type
     this->checkMacroGrid ();
 

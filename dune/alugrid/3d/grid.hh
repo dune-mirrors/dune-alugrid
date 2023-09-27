@@ -1305,7 +1305,7 @@ namespace Dune
     std::unique_ptr< Communications > communications_;
 
     // refinement type (nonconforming or conforming)
-    const ALUGridRefinementType refinementType_ ;
+    ALUGridRefinementType refinementType_ ;
   }; // end class ALU3dGrid
 
 

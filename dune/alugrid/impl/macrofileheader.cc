@@ -57,6 +57,10 @@ namespace ALUGrid
     return parseOption( string, stringType, type_ );
   }
 
+  bool MacroFileHeader::setRefinement ( const std::string &string )
+  {
+    return parseOption( string, stringRefinement, refinement_ );
+  }
 
   bool MacroFileHeader::setFormat ( const std::string &string )
   {
@@ -148,6 +152,21 @@ namespace ALUGrid
     if( !header.setType( pos->second ) )
       return fail( verbose, "Invalid 'type': '" + pos->second + "'." );
 
+    // introduced in version 2
+    if( header.version_ > 1 )
+    {
+      pos = options.find( "refinement" );
+      if( pos == options.end() )
+        return fail( verbose, "Option 'refinement' missing." );
+      if( !header.setRefinement( pos->second ) )
+        return fail( verbose, "Invalid 'refinement': '" + pos->second + "'." );
+    }
+    else
+    {
+      // otherwise default to nonconforming
+      header.setRefinement( nonconforming );
+    }
+
     pos = options.find( "format" );
     if( pos == options.end() )
       return fail( verbose, "Option 'format' missing." );
@@ -187,6 +206,7 @@ namespace ALUGrid
     out << "!ALU";
     out << " version=" << version_;
     out << " type=" << toString( type() );
+    out << " refinement=" << toString( refinement() );
     out << " format=" << toString( format() );
 
     if( isBinary() )
@@ -202,6 +222,7 @@ namespace ALUGrid
   const int MacroFileHeader::currentVersion;
 
   const char *MacroFileHeader::stringType[ 2 ] = { "tetrahedra", "hexahedra" };
+  const char *MacroFileHeader::stringRefinement[ 2 ] = { "conforming", "nonconforming" };
   const char *MacroFileHeader::stringFormat[ 3 ] = { "ascii", "binary", "zbinary" };
   const char *MacroFileHeader::stringByteOrder[ 3 ] = { "native", "bigendian", "littleendian" };
 
