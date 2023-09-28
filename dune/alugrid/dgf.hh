@@ -619,8 +619,8 @@ namespace Dune
         factory_.setLongestEdgeFlag();
       // if grid was created from interval block (make6)
       // then the compatibility check can be avoided
-      if( parameter.bisectionCompatibility() )
-        factory_.disableCompatibilityCheck();
+      // if( parameter.bisectionCompatibility() )
+      //   factory_.disableCompatibilityCheck();
     }
 
     if( !parameter.dumpFileName().empty() )
