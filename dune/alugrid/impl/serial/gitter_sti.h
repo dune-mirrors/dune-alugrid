@@ -1501,18 +1501,19 @@ namespace ALUGrid
         std::string name;
         std::mutex mtx;
         int ptr;
-        MkGitName( const std::string& n ) : name( n ),
-              ptr(2-ALUGridExternalParameters::verbosityLevel() )
-        {}
+        int ptrVal() { return 2-ALUGridExternalParameters::verbosityLevel(); }
+        MkGitName( const std::string& n ) : name( n ), ptr(-1){}
         template <class T>
         inline void dump( T t )
         {
           {
+            if( ptr < 0 ) ptr = ptrVal();
             std::unique_lock<std::mutex> lck (mtx,std::defer_lock); lck.lock();
             if( ! ptr && ! t ) { std::cerr << std::endl << name; ptr++ ; }
             lck.unlock();
           }
-        } ~MkGitName() { if( ptr == 1 ) std::cout << std::endl << name ; }
+        } ~MkGitName() {
+          if( ptr == 1 ) std::cout << std::endl << name ; }
       };
       static MkGitName _msg;
 
