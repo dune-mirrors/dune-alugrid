@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <dune/common/parallel/communication.hh>
+#include <dune/common/visibility.hh>
 
 #include "mpAccess.h"
 
@@ -36,7 +37,7 @@ namespace ALUGrid
     typedef MpAccessLocal::NonBlockingExchange  NonBlockingExchange;
 
     // MPI communication tag
-    enum { messagetag = 123 };
+    static const int initialMessageTag = 125;
 
     // conversion operator to MPI_Comm
     MPI_Comm communicator () const { return _mpiComm; }
@@ -70,30 +71,32 @@ namespace ALUGrid
     // destructor
     ~MpAccessMPI ();
   protected:
+    DUNE_EXPORT static int16_t& getMTagRef()
+    {
+      static int16_t tag = initialMessageTag ;
+      return tag;
+    }
+
     MinMaxSumIF* copyMPIComm( MPI_Comm mpicomm );
     int getSize ();
     int getRank ();
     // return new tag number for the exchange messages
-    static int getMessageTag( const unsigned int icrement )
+    DUNE_EXPORT static int getMessageTag()
     {
-      static int tag = messagetag + 2 ;
-      // increase tag counter
-      const int retTag = tag;
-      tag += icrement ;
-      // the MPI standard guaratees only up to 2^15-1
+      // get unique tag reference
+      int16_t& tag = getMTagRef();
+
+      // increase counter
+      ++tag ;
+
+      // the MPI standard guarantees only up to 2^15-1
       // this needs to be revised for the all-to-all communication
-      if( tag < 0 ) // >= 32767 )
+      if( tag < 0 )
       {
         // reset tag to initial value
-        tag = messagetag + 2 ;
+        tag = initialMessageTag  ;
       }
-      return retTag;
-    }
-
-    // return new tag number for the exchange messages
-    static int getMessageTag()
-    {
-      return getMessageTag( 1 );
+      return int(tag);
     }
 
   public:
