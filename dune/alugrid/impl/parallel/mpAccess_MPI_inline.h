@@ -1026,14 +1026,14 @@ namespace ALUGrid
   inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag, const std::vector< ObjectStream > & in ) const
   {
-    alugrid_assert ( tag > messagetag+1 );
+    alugrid_assert ( tag >= initialMessageTag );
     return new NonBlockingExchangeMPI( *this, tag, in );
   }
 
   inline MpAccessMPI::NonBlockingExchange*
   MpAccessMPI::nonBlockingExchange( const int tag ) const
   {
-    alugrid_assert ( tag > messagetag+1 );
+    alugrid_assert ( tag >= initialMessageTag );
     return new NonBlockingExchangeMPI( *this, tag );
   }
 
