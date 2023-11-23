@@ -5,6 +5,14 @@
 
 #if HAVE_METIS
 
+// if METIS is provided by Scotch, the corresponding
+// Scotch header must be included first
+#if HAVE_SCOTCH_METIS
+extern "C" {
+  #include <scotch.h>
+}
+#endif
+
 // make sure that metis compiles and does not include
 // parmetis which would include the mpi header
 #if ! HAVE_MPI && ! HAVE_PARMETIS
