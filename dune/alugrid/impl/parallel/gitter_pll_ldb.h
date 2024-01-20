@@ -2,6 +2,7 @@
 #ifndef GITTER_PLL_LDB_H_INCLUDED
 #define GITTER_PLL_LDB_H_INCLUDED
 
+#include <iterator>
 #include <map>
 #include <set>
 #include <vector>
