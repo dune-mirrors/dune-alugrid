@@ -45,7 +45,7 @@ include(DuneMacros)
 dune_project()
 
 # Define the dune-alugrid library
-dune_add_library(dunealugrid)
+dune_add_library(dunealugrid EXPORT_NAME ALUGrid)
 
 add_subdirectory(cmake/modules)
 
