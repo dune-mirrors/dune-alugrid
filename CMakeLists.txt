@@ -46,6 +46,7 @@ dune_project()
 
 # Define the dune-alugrid library
 dune_add_library(dunealugrid EXPORT_NAME ALUGrid)
+target_link_libraries(dunealugrid PUBLIC Dune::Grid)
 
 add_subdirectory(cmake/modules)
 
@@ -75,4 +76,4 @@ if(DUNE_TESTGRIDS_INCLUDE_DIR)
 endif()
 
 # finalize the dune project, e.g., generate config.h etc.
-finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
+finalize_dune_project()
