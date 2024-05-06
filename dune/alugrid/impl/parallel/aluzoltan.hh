@@ -19,6 +19,10 @@
 
 #if HAVE_ZOLTAN
 
+#ifndef HAVE_PROTOTYPES
+#define __PROTOTYPES_DEFINED_HERE__
+#endif
+
 // if DUNE was built with MPI
 #if HAVE_MPI
 // undefine our definition of HAVE_MPI before including zoltan_cpp.h
@@ -445,5 +449,10 @@ namespace ALUGridZoltan
   } // CALL_Zoltan_LB_Partition
 
 } // namespace ALUGridZoltan
+
+#ifdef __PROTOTYPES_DEFINED_HERE__
+#undef HAVE_PROTOTYPES
+#undef __PROTOTYPES_DEFINED_HERE__
+#endif
 
 #endif // #ifndef ALUGRID_ZOLTAN_H_INCLUDED
