@@ -481,8 +481,6 @@ namespace Dune
     // The Interface Methods
     //**********************************************************
   public:
-    enum { refineStepsForHalf = 1 };
-
     static const ALU3dGridElementType elementType = elType;
 
     typedef typename ALU3DSPACE GatherScatterType::ObjectStreamType ObjectStreamType;
@@ -1222,6 +1220,9 @@ namespace Dune
     {
       return (refinementType_ == conforming) ;
     }
+
+    //! return number of global refinements needed to half grid width
+    int refineStepsForHalf () const { return conformingRefinement() ? dimension : 1; }
 
     // return true if ghost cells are available
     bool ghostCellsEnabled () const
