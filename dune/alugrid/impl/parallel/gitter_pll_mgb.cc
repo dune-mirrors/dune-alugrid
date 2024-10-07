@@ -266,27 +266,37 @@ namespace ALUGrid
 
     // delete all periodic boundaries
     {
-      const elementMap_t::iterator _periodic3Mapend = _periodic3Map.end ();
-      for (elementMap_t::iterator i = _periodic3Map.begin (); i != _periodic3Mapend; ++i)
+      elementMap_t::iterator _periodic3Mapend = _periodic3Map.end ();
+      for (elementMap_t::iterator i = _periodic3Map.begin (); i != _periodic3Mapend; )
       {
         periodic3_GEO * p3 = (periodic3_GEO *)(*i).second;
         if( p3->erasable () )
         {
           delete p3;
           i = _periodic3Map.erase( i );
+          _periodic3Mapend = _periodic3Map.end ();
+        }
+        else
+        {
+          ++i;
         }
       }
 
-      const elementMap_t::iterator _periodic4Mapend = _periodic4Map.end ();
-      size_t pI = 0;
-      for ( elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; ++i, ++pI )
+      elementMap_t::iterator _periodic4Mapend = _periodic4Map.end ();
+      for ( elementMap_t::iterator i = _periodic4Map.begin (); i != _periodic4Mapend; )
       {
         periodic4_GEO * p4 = (periodic4_GEO *)(*i).second;
         if( p4->erasable () )
         {
           delete p4;
           i = _periodic4Map.erase( i );
+          _periodic4Mapend = _periodic4Map.end ();
         }
+        else
+        {
+          ++i;
+        }
+
       }
     }
 
