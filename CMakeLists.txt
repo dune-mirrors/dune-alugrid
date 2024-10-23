@@ -15,7 +15,11 @@ endif()
 
 # grid selector in separate file to avoid excessive dependencies
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
-set(ALUGRID_DISABLE_METIS TRUE)
+
+option(ALUGRID_DISABLE_METIS "Disable METIS as partitioner" TRUE)
+if(ALUGRID_DISABLE_METIS)
+  set(CMAKE_DISABLE_FIND_PACKAGE_METIS TRUE)
+endif()
 
 # set to true to compile more things into library
 set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
