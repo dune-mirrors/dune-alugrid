@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#if HAVE_METIS
+#if ALUGRID_HAVE_METIS
 
 // if METIS is provided by Scotch, the corresponding
 // Scotch header must be included first
@@ -141,11 +141,11 @@ namespace ALUGridMETIS
 
 #endif // #else // #ifdef HAVE_METIS_VERSION_4
 
-#else // #if HAVE_METIS
+#else // #if ALUGRID_HAVE_METIS
     std::cerr << "**ERROR The use of METIS_PartGraphRecursive is not supported, when the METIS library is missing!  in: " << __FILE__ << " line: " << __LINE__ << "\n";
     std::cerr << metmess << std::endl ;
     exit(1);
-#endif // #else // #if HAVE_METIS
+#endif // #else // #if ALUGRID_HAVE_METIS
   }
 
 } // namespace ALUGridMETIS
