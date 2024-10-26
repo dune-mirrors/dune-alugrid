@@ -11,7 +11,12 @@ target_link_libraries(dunealugrid PUBLIC ${DUNE_LIBS})
 
 include(AddMETISFlags)
 # METIS dependencies
-add_dune_metis_flags(dunealugrid)
+if(NOT ALUGRID_DISABLE_METIS)
+  add_dune_metis_flags(dunealugrid)
+
+  # Indicate that METIS is linked into dune-alugrid
+  set(ALUGRID_HAVE_METIS TRUE)
+endif()
 
 # zoltan dependencies
 if(ZOLTAN_FOUND)
