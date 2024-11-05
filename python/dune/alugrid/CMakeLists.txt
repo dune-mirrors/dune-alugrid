@@ -4,18 +4,21 @@ add_python_targets(alugrid
 )
 
 dune_add_pybind11_module(NAME _alugrid SOURCES _alugrid.cc)
+target_link_libraries(_alugrid PUBLIC Dune::ALUGrid)
+
 if( DUNE_ENABLE_PYTHONMODULE_PRECOMPILE )
   set(DIMS 2 3)
   set(GEOMTYPES simplex cube)
   foreach( DIM ${DIMS} )
     foreach( GT ${GEOMTYPES} )
-      dune_add_pybind11_submodule(NAME alugrid_${GT}_${DIM}
-                                  MODULE _alugrid SOURCES registeralugrid.cc
-                                  COMPILE_DEFINITIONS DIM=${DIM} GEOMTYPE=Dune::${GT})
+      add_library(alugrid_${GT}_${DIM} OBJECT registeralugrid.cc)
+      target_compile_definitions(alugrid_${GT}_${DIM} PRIVATE DIM=${DIM} GEOMTYPE=Dune::${GT})
+      target_link_libraries(alugrid_${GT}_${DIM} PRIVATE Dune::ALUGrid)
+
+      target_link_libraries(_alugrid PRIVATE alugrid_${GT}_${DIM})
     endforeach()
   endforeach()
 endif()
-set_property(TARGET _alugrid PROPERTY LINK_LIBRARIES Dune::ALUGrid APPEND)
 
 if(SKBUILD)
   install(TARGETS _alugrid LIBRARY DESTINATION python/dune/alugrid)
