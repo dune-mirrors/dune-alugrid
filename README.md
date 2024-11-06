@@ -52,7 +52,8 @@ Installation
 
 For general installation instructions please see the [DUNE website][2].
 
-For installation of Zoltan we recommend to download the package from the
+For installation of Zoltan we recommend to use the [build-zoltan.sh][7] script
+or download the package from the
 [Zoltan][4] page, unpack and configure with the following parameters:
 
 ```
@@ -69,3 +70,4 @@ make install
 [4]: https://sandialabs.github.io/Zoltan/
 [5]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/COPYING
 [6]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/doc/dunealugrid.bib
+[7]: https://gitlab.dune-project.org/extensions/dune-alugrid/-/blob/master/scripts/build-zoltan.sh?ref_type=heads
