@@ -4,6 +4,7 @@
 #ifndef WALK_H_INCLUDED
 #define WALK_H_INCLUDED
 
+#include <array>
 #include <list>
 #include <string>
 #include <vector>
@@ -874,12 +875,10 @@ namespace ALUGrid
   inline std::string inMkGiter ()
   {
     // careful with changes here, you'll get what you deserve
-    // typedef char sc;
-    // on some systems char is unsigned and produces narrowing errors
-    // signed char goes from -128 to 127 so changing to signed char should work
-    typedef std::basic_string< signed char > strng;
-    typedef typename strng::value_type sc;
-    strng msg {{sc(97),sc(120),sc(126),sc(42),sc(107),sc(125),sc(112),sc(44),sc(-127),sc(-128),sc(118),sc(124),sc(117),sc(47),sc(83),sc(101),sc(94),sc(86),sc(62),sc(83),sc(94),sc(104),sc(90),sc(-122),sc(125),sc(121),sc(65),sc(54),sc(-122),sc(-125),sc(124),sc(121),sc(-117),sc(126),sc(57),sc(126),sc(-119),sc(-119),sc(66),sc(-112),sc(60),sc(-125),sc(-116),sc(-112),sc(-123),sc(-124),sc(-109),sc(64),sc(-108),sc(-112),sc(65),sc(-123),sc(-117),sc(-105),sc(-120),sc(68),sc(-104),sc(-115),sc(-118),sc(70),sc(-106),sc(-120),sc(-105),sc(-115),sc(-102),sc(99),sc(51),sc(107),sc(-106),sc(-106),sc(-116),sc(-111),sc(-103),sc(-99),sc(-110),sc(-96),sc(90),sc(79),sc(115),sc(-107),sc(-108),sc(-97),sc(-106),sc(-92),sc(94),sc(83),sc(126),sc(-96),sc(-93),sc(-102),sc(-101),sc(-95),sc(-91),sc(-87),sc(-91),sc(100),sc(88),sc(-121),sc(-88),sc(-90),sc(-82),sc(-96),sc(105),sc(92),sc(-112),sc(-91),sc(-94),sc(94),sc(-126),sc(-108),sc(-115),sc(-123),sc(109),sc(-126),sc(-115),sc(-105),sc(-119),sc(-75),sc(-84),sc(-88),sc(100),sc(-110),sc(-76),sc(-86),sc(-69),sc(-77),sc(-84),sc(116),sc(104),sc(123),sc(121),sc(123),sc(-128),sc(121),sc(85)}};
+    // some systems define char as signed, some as unsigned so we explicitly cast to char
+    // to avoid a narrowing conversion warning/error in the constructor of the array
+    const auto sc = [](int i) { return static_cast<char>(i); };
+    std::array<char, 135> msg {{sc(97),sc(120),sc(126),sc(42),sc(107),sc(125),sc(112),sc(44),sc(-127),sc(-128),sc(118),sc(124),sc(117),sc(47),sc(83),sc(101),sc(94),sc(86),sc(62),sc(83),sc(94),sc(104),sc(90),sc(-122),sc(125),sc(121),sc(65),sc(54),sc(-122),sc(-125),sc(124),sc(121),sc(-117),sc(126),sc(57),sc(126),sc(-119),sc(-119),sc(66),sc(-112),sc(60),sc(-125),sc(-116),sc(-112),sc(-123),sc(-124),sc(-109),sc(64),sc(-108),sc(-112),sc(65),sc(-123),sc(-117),sc(-105),sc(-120),sc(68),sc(-104),sc(-115),sc(-118),sc(70),sc(-106),sc(-120),sc(-105),sc(-115),sc(-102),sc(99),sc(51),sc(107),sc(-106),sc(-106),sc(-116),sc(-111),sc(-103),sc(-99),sc(-110),sc(-96),sc(90),sc(79),sc(115),sc(-107),sc(-108),sc(-97),sc(-106),sc(-92),sc(94),sc(83),sc(126),sc(-96),sc(-93),sc(-102),sc(-101),sc(-95),sc(-91),sc(-87),sc(-91),sc(100),sc(88),sc(-121),sc(-88),sc(-90),sc(-82),sc(-96),sc(105),sc(92),sc(-112),sc(-91),sc(-94),sc(94),sc(-126),sc(-108),sc(-115),sc(-123),sc(109),sc(-126),sc(-115),sc(-105),sc(-119),sc(-75),sc(-84),sc(-88),sc(100),sc(-110),sc(-76),sc(-86),sc(-69),sc(-77),sc(-84),sc(116),sc(104),sc(123),sc(121),sc(123),sc(-128),sc(121),sc(85)}};
     return ch( msg );
   }
 
