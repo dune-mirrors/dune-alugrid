@@ -56,9 +56,9 @@ find_package(DLMalloc)
 
 # set ZOLTAN_ROOT from environment variable if set
 # -DZOLTAN_ROOT overrules the env variable
-if( NOT ZOLTAN_ROOT )
-  set(ZOLTAN_ROOT $ENV{ZOLTAN_ROOT})
-endif()
+#if( NOT ZOLTAN_ROOT )
+#  set(ZOLTAN_ROOT $ENV{ZOLTAN_ROOT})
+#endif()
 
 find_package(ZOLTAN)
 find_package(METIS)
