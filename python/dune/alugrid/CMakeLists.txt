@@ -14,6 +14,7 @@ if( DUNE_ENABLE_PYTHONMODULE_PRECOMPILE )
       add_library(alugrid_${GT}_${DIM} OBJECT registeralugrid.cc)
       target_compile_definitions(alugrid_${GT}_${DIM} PRIVATE DIM=${DIM} GEOMTYPE=Dune::${GT})
       target_link_libraries(alugrid_${GT}_${DIM} PRIVATE Dune::ALUGrid)
+      dune_target_enable_all_packages( alugrid_${GT}_${DIM} )
 
       target_link_libraries(_alugrid PRIVATE alugrid_${GT}_${DIM})
     endforeach()
