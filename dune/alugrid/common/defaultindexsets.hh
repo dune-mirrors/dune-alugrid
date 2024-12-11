@@ -295,7 +295,7 @@ namespace Dune
         const int mySize = size_[cd];
         if( mySize > gridSize )
         {
-          std::cout << "DefaultIndexSet[ " << level_ << " ]: " << mySize << " s | g " << gridSize << std::endl;
+          std::cout << "DefaultIndexSet[ " << level_ << " ] (codim = " << cd << "): " << mySize << " s | g " << gridSize << std::endl;
         }
         // this assertion currently fails for 3d conforming
         // alugrid_assert ( ( grid_.conformingRefinement() && dim == 3 && level_ >= 0 ) ? true : (mySize <= gridSize) );
