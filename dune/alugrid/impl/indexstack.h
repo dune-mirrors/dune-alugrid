@@ -162,7 +162,7 @@ namespace ALUGrid
     StackType * stack_;
 
     // current maxIndex
-    int maxIndex_;
+    T maxIndex_;
     int dim_;
   public:
     //! Constructor, create new ALUGridIndexStack
