@@ -1,6 +1,9 @@
 #ifndef DUNE_ALUGRID_HH
 #define DUNE_ALUGRID_HH
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+
 // only include this code, if HAVE_ALUGRID is true
 #if HAVE_ALUGRID
 #ifndef DUNE_ALUGRID_HH_INCLUDED
@@ -20,6 +23,8 @@
 #include <dune/alugrid/common/structuredgridfactory.hh>
 #include <dune/alugrid/common/persistentcontainer.hh>
 #include <dune/alugrid/common/backuprestore.hh>
+
+#pragma GCC diagnostic pop
 
 #endif // else if HAVE_ALUGRID
 
