@@ -775,6 +775,7 @@ namespace ALUGrid
                             myvertex(2)->Point(), myvertex(3)->Point(),
                             myvertex(4)->Point(), myvertex(5)->Point(),
                             myvertex(6)->Point(), myvertex(7)->Point());
+
     // calculate volume
     _volume = QuadraturCube3D < VolumeCalc > (trMap).integrate2 (0.0);
 
@@ -782,16 +783,18 @@ namespace ALUGrid
     if( ! trMap.affine() )
       this->setNonAffineGeometry();
 
+    alugrid_assert ( this->level() == l );
+    this->setIndexAnd2dFlag( indexManager() );
+
 #ifdef ALUGRIDDEBUG
+    // this check will fail for certain configurations in a 2-3 grid
+    if ( ! this->is2d() )
+    {
       // make sure determinant is ok
       alucoord_t point[3] = { 0.0, 0.0, 0.0 };
       alugrid_assert ( trMap.det( point ) > 0 );
+    }
 #endif
-
-    alugrid_assert ( this->level() == l );
-
-    this->setIndexAnd2dFlag( indexManager() );
-
     return;
   }
 
@@ -828,9 +831,13 @@ namespace ALUGrid
                                myvertex(7)->Point() );
 
 #ifdef ALUGRIDDEBUG
-      // make sure determinant is ok
-      alucoord_t point[3] = { 0.0, 0.0, 0.0 };
-      alugrid_assert ( triMap.det( point ) > 0 );
+      // this check will fail for certain configurations in a 2-3 grid
+      if ( ! this->is2d() )
+      {
+        // make sure determinant is ok
+        alucoord_t point[3] = { 0.0, 0.0, 0.0 };
+        alugrid_assert ( triMap.det( point ) > 0 );
+      }
 #endif
 
       // calculate volume
@@ -841,13 +848,16 @@ namespace ALUGrid
 
     // make sure that given volume is the same as calulated
 #ifdef ALUGRIDDEBUG
-    const double calculatedVolume =
-        QuadraturCube3D < VolumeCalc >
-         (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
-                            myvertex(2)->Point(), myvertex(3)->Point(),
-                            myvertex(4)->Point(), myvertex(5)->Point(),
-                            myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
-     alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    if ( ! this->is2d() )
+    {
+      const double calculatedVolume =
+          QuadraturCube3D < VolumeCalc >
+           (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
+                              myvertex(2)->Point(), myvertex(3)->Point(),
+                              myvertex(4)->Point(), myvertex(5)->Point(),
+                              myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
+       alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    }
 #endif
 
     return;
