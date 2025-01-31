@@ -3,6 +3,7 @@ set(DGFS
   ball.dgf
   cube-testgrid-2-2.dgf
   cube-testgrid-2-3.dgf
+  another-testgrid-2-3.dgf
   grid2d_str1d.dgf
   periodic2.dgf
   periodic3.dgf
