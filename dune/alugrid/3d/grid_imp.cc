@@ -81,7 +81,7 @@ namespace Dune
         visited_[idx] = 1;
       }
     }
-    alugrid_assert ( count == (int) vxList.size());;
+    alugrid_assert ( count == (int) vxList.size());
     up2Date_ = true;
   }
 
