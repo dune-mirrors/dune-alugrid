@@ -117,13 +117,18 @@ public:
   {
     int result = 0;
     bool verbose = false;
+#ifndef NDEBUG
     unsigned int bndFaces = 0;
+#endif
     std::vector<int> nonCompatFacesAtVertex(nVertices_, 0 );
     for(auto&& face : neighbours_)
     {
       if( face.second[0] == face.second[1] )
       {
+#ifndef NDEBUG
         bndFaces++;
+#endif
+        continue;
       }
       else if(! checkStrongCompatibility(face, verbose))
       {
@@ -1091,6 +1096,7 @@ private:
         break;
       default: ;
     }
+#ifndef NDEBUG
     int sizeOfV1 = 0;
     int sizeOfV0 = 0;
     for(unsigned int i =0 ; i < nVertices_; ++i)
@@ -1104,7 +1110,6 @@ private:
         ++sizeOfV1;
       }
     }
-#ifndef NDEBUG
     std::cout << "#V0 #V1" << std::endl   << sizeOfV0 << " " << sizeOfV1 << std::endl;
 #endif
   }
