@@ -45,12 +45,16 @@ list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH}
 #include the dune macros
 include(DuneMacros)
 
+# deactivate global include-directories
+dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
+
 # start a dune project with information from dune.module
 dune_project()
 
 # Define the dune-alugrid library
 dune_add_library(dunealugrid EXPORT_NAME ALUGrid)
 target_link_libraries(dunealugrid PUBLIC Dune::Grid)
+dune_default_include_directories(dunealugrid PUBLIC)
 
 add_subdirectory(cmake/modules)
 
