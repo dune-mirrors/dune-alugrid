@@ -50,8 +50,9 @@ namespace Dune
     enum { nVx = ElementTopologyMapping < elType > :: numVertices };
 
     ElementLevelIteratorType it ( grid, level, grid.nlinks() );
-
+#ifdef ALUGRIDDEBUG
     int count = 0;
+#endif
     for( it.first(); !it.done() ; it.next())
     {
       val_t & item = it.item();
@@ -76,12 +77,14 @@ namespace Dune
         if(visited_[idx] == 0)
         {
           vxList.push_back(vx);
+#ifdef ALUGRIDDEBUG
           ++count;
+#endif
         }
         visited_[idx] = 1;
       }
     }
-    alugrid_assert ( count == (int) vxList.size());;
+    alugrid_assert ( count == (int) vxList.size());
     up2Date_ = true;
   }
 
