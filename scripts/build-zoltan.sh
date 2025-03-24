@@ -11,8 +11,8 @@ tar zxvf v$ZOLTAN_VERSION.tar.gz
 cd ../
 if test -d zoltan; then
   rm -rf zoltan
-  mkdir zoltan
 fi
+mkdir zoltan
 cd zoltan
 
 ../ZoltanDist/Zoltan-$ZOLTAN_VERSION/configure CXXFLAGS="-O3 -DNDEBUG -fPIC" CFLAGS="-O3 -DNDEBUG -fPIC" --prefix=`pwd` --with-mpi-compilers=yes --enable-shared
