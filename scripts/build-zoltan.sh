@@ -15,13 +15,14 @@ fi
 mkdir zoltan
 cd zoltan
 
-../ZoltanDist/Zoltan-$ZOLTAN_VERSION/configure CXXFLAGS="-O3 -DNDEBUG -fPIC" CFLAGS="-O3 -DNDEBUG -fPIC" --prefix=`pwd` --with-mpi-compilers=yes --enable-shared
+../ZoltanDist/Zoltan-$ZOLTAN_VERSION/configure CXXFLAGS="-Ofast -DNDEBUG -fPIC" CFLAGS="-Ofast -DNDEBUG -fPIC" --prefix=`pwd` --with-mpi-compilers=yes --enable-shared
 make -j6
 make install
 
 echo "#################################################################################################"
 echo "##"
-echo "##  echo Use -DZOLTAN_ROOT=`pwd` in DUNE's config.opts"
+echo "##  Use -DZOLTAN_ROOT=`pwd` in DUNE's config.opts"
+echo "##  Or define 'export ZOLTAN_ROOT=`pwd`' as environment variable."
 echo "##"
 echo "#################################################################################################"
 
