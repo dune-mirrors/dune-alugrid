@@ -35,6 +35,11 @@
 #define HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif
 
+#if HAVE_SCOTCH
+#undef HAVE_SCOTCH
+#define HAVE_SCOTCH_WAS_UNDEFED_HERE
+#endif
+
 // include Zoltan's C++ header
 #include <zoltan_cpp.h>
 
@@ -46,6 +51,11 @@
 // undefine any definition of HAVE_PARMETIS made by Zoltan
 #ifdef HAVE_PARMETIS
 #undef HAVE_PARMETIS
+#endif
+
+// undefine any definition of HAVE_SCOTCH made by Zoltan
+#ifdef HAVE_SCOTCH
+#undef HAVE_SCOTCH
 #endif
 
 #ifdef HAVE_MPI_WAS_UNDEFED_HERE
@@ -68,6 +78,17 @@
 
 #undef HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
+
+#ifdef HAVE_SCOTCH_WAS_UNDEFED_HERE
+// redefine our definition of HAVE_SCOTCH if it was undef'd before
+#ifdef ENABLE_SCOTCH
+#define HAVE_SCOTCH ENABLE_SCOTCH
+#else
+#define HAVE_SCOTCH 1
+#endif
+
+#undef HAVE_SCOTCH_WAS_UNDEFED_HERE
+#endif // #ifdef HAVE_SCOTCH_WAS_UNDEFED_HERE
 
 #endif // #if HAVE_ZOLTAN
 
