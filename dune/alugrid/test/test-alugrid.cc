@@ -3,9 +3,6 @@
 
 #include <config.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdangling-reference"
-
 #ifndef NDEBUG
 #ifndef DUNE_DEVEL_MODE
 #define DUNE_DEVEL_MODE
@@ -1033,5 +1030,3 @@ int main (int argc , char **argv) {
 
   return 0;
 }
-
-#pragma GCC diagnostic pop

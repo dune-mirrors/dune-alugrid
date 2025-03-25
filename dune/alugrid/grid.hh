@@ -1,8 +1,8 @@
 #ifndef DUNE_ALUGRID_HH
 #define DUNE_ALUGRID_HH
 
-#if defined(__GNUC__) && not defined(__clang__)
 #pragma GCC diagnostic push
+#if defined(__GNUC__) && __GNUC__ >= 13
 #pragma GCC diagnostic ignored "-Wdangling-reference"
 #endif // #if defined(__GNUC__)
 
@@ -26,10 +26,7 @@
 #include <dune/alugrid/common/persistentcontainer.hh>
 #include <dune/alugrid/common/backuprestore.hh>
 
-#if defined(__GNUC__) && not defined(__clang__)
-#pragma GCC diagnostic pop
-#endif // #if defioned(__GNUC__)
-
 #endif // else if HAVE_ALUGRID
 
+#pragma GCC diagnostic pop
 #endif // #ifndef DUNE_ALUGRID_HH
