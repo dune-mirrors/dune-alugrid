@@ -2,11 +2,7 @@
 #define DUNE_ALUGRID_HH
 
 #pragma GCC diagnostic push
-#if defined( __has_warning )
-#if __has_warning( "-Wdangling-reference" )
 #pragma GCC diagnostic ignored "-Wdangling-reference"
-#endif
-#endif
 
 // only include this code, if HAVE_ALUGRID is true
 #if HAVE_ALUGRID
