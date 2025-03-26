@@ -52,12 +52,13 @@ Installation
 
 For general installation instructions please see the [DUNE website][2].
 
-For installation of Zoltan we recommend to use the [build-zoltan.sh][7] script
-or download the package from the
+For installation of Zoltan we recommend to install the system package, e.g.
+`libtrilinos-zoltan-dev` under Debian or Ubuntu or if not available simple
+use the [build-zoltan.sh][7] script or download the package from the
 [Zoltan][4] page, unpack and configure with the following parameters:
 
 ```
-configure CXXFLAGS="-O3 -DNDEBUG -fPIC" CFLAGS="-O3 -DNDEBUG -fPIC" --prefix=PATH_TO_INSTALL_ZOLTAN --with-mpi-compilers=yes --enable-shared
+configure CXXFLAGS="-Ofast -DNDEBUG -fPIC" CFLAGS="-Ofast -DNDEBUG -fPIC" --prefix=PATH_TO_INSTALL_ZOLTAN --with-mpi-compilers=yes --enable-shared
 
 make
 make install
