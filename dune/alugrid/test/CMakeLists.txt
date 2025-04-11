@@ -16,14 +16,16 @@ set(EXTRA_TESTS
   test-gmsh
 )
 
+link_libraries(dunealugrid)
+
 foreach(TEST ${TESTS})
-  dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc MPI_RANKS 1 2 3 4 TIMEOUT 3600 LINK_LIBRARIES dunealugrid)
+  dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc MPI_RANKS 1 2 3 4 TIMEOUT 3600)
 endforeach()
 
 # the extra tests are only enabled in torture mode
 if(ALUGRID_TORTURE_TESTS)
   foreach(TEST ${EXTRA_TESTS})
-    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc LINK_LIBRARIES dunealugrid)
+    dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc)
   endforeach()
 endif()
 
