@@ -51,7 +51,11 @@ if(ZLIB_FOUND)
   dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} LIBRARIES ${ZLIB_LIBRARIES})
 endif()
 
-find_package(SIONlib)
+if( NOT SIONLib_ROOT AND SIONLIB_ROOT)
+  set(SIONLib_ROOT ${SIONLIB_ROOT})
+endif()
+
+find_package(SIONLib)
 find_package(DLMalloc)
 
 # set ZOLTAN_ROOT from environment variable if set

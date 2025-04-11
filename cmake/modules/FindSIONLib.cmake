@@ -74,7 +74,7 @@ cmake_pop_check_state()
 # behave like a CMake module is supposed to behave
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
-  "SIONlib"
+  "SIONLib"
   DEFAULT_MSG
   SIONLIB_INCLUDE_DIR
   SIONLIB_LIBRARY
@@ -114,5 +114,3 @@ if(SIONLIB_FOUND)
   dune_register_package_flags(INCLUDE_DIRS ${SIONLIB_INLUDE_DIRS}
                               COMPILE_DEFINITIONS ${SIONLIB_DUNE_COMPILE_FLAGS})
 endif()
-
-

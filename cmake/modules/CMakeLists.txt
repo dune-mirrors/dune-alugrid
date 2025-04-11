@@ -3,7 +3,7 @@ set(modules
     DuneAlugridMacros.cmake
     FindDLMalloc.cmake
     FindPThreads.cmake
-    FindSIONlib.cmake
+    FindSIONLib.cmake
     FindZOLTAN.cmake
     AlugridTortureTests.cmake
 )
