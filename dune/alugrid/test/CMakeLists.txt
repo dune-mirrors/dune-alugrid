@@ -16,18 +16,18 @@ set(EXTRA_TESTS
   test-gmsh
 )
 
-link_libraries(dunealugrid)
+# enable all flags and link against alugrid library
+link_libraries(Dune::ALUGrid)
+dune_enable_all_packages()
 
 foreach(TEST ${TESTS})
   dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc MPI_RANKS 1 2 3 4 TIMEOUT 3600)
-  dune_target_enable_all_packages( ${TEST} )
 endforeach()
 
 # the extra tests are only enabled in torture mode
 if(ALUGRID_TORTURE_TESTS)
   foreach(TEST ${EXTRA_TESTS})
     dune_add_test(NAME ${TEST} SOURCES ${TEST}.cc)
-    dune_target_enable_all_packages( ${TEST} )
   endforeach()
 endif()
 

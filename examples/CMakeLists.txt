@@ -22,11 +22,13 @@ set(examples_HEADERS adaptation.hh
 
 configure_file(alugrid.cfg ${CMAKE_CURRENT_BINARY_DIR}/alugrid.cfg COPYONLY)
 
+# enable all flags and link against alugrid library
+link_libraries(Dune::ALUGrid)
+dune_enable_all_packages()
+
 foreach(variant ball euler transport)
   string(TOUPPER ${variant} variant_upper)
   add_executable(main_${variant} main.cc )
-  dune_target_enable_all_packages(main_${variant})
-  set_property(TARGET main_${variant} APPEND PROPERTY LINK_LIBRARIES dunealugrid)
   target_compile_definitions(main_${variant} PRIVATE ${variant_upper})
   if("${variant}" STREQUAL "ball")
     target_compile_definitions(main_${variant} PRIVATE "ALUGRID_COUNT_GLOBALCOMM")
@@ -38,8 +40,6 @@ foreach(variant ball euler transport)
     foreach(dim RANGE 2 3)
       add_executable(main_${variant}_${type}_${dim}d EXCLUDE_FROM_ALL main.cc)
       target_compile_definitions(main_${variant}_${type}_${dim}d PRIVATE "${variant_upper}" "ALUGRID_${type_upper}" "GRIDDIM=${dim}" "WORLDDIM=${dim}")
-      dune_target_enable_all_packages(main_${variant}_${type}_${dim}d)
-      set_property(TARGET main_${variant}_${type}_${dim}d APPEND PROPERTY LINK_LIBRARIES dunealugrid)
     endforeach()
   endforeach()
 endforeach()
