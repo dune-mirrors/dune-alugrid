@@ -49,13 +49,13 @@ include(DuneMacros)
 dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
 
 # deactivate global calls to add_dune_all_flags in tests
-# dune_policy(SET DP_TEST_ADD_ALL_FLAGS NEW)
+dune_policy(SET DP_TEST_ADD_ALL_FLAGS NEW)
 
 # start a dune project with information from dune.module
 dune_project()
 
 # Define the dune-alugrid library
-dune_add_library(dunealugrid EXPORT_NAME ALUGrid)
+dune_add_library(dunealugrid EXPORT_NAME ALUGrid NAMESPACE Dune::)
 target_link_libraries(dunealugrid PUBLIC Dune::Grid)
 dune_default_include_directories(dunealugrid PUBLIC)
 
