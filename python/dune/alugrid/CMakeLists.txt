@@ -3,12 +3,11 @@ add_python_targets(alugrid
   _grids
 )
 
-dune_add_pybind11_module(NAME _alugrid SOURCES _alugrid.cc)
-
 # link against alugrid library and enable all package flags
 link_libraries(Dune::ALUGrid)
 dune_enable_all_packages()
 
+dune_add_pybind11_module(NAME _alugrid SOURCES _alugrid.cc)
 
 if( DUNE_ENABLE_PYTHONMODULE_PRECOMPILE )
   set(DIMS 2 3)
