@@ -381,7 +381,8 @@ namespace Dune
       alugrid_assert ( id < vertices_.size() );
       VertexType vertex = vertices_[ id ].first;
       VertexInputType iVtx(0.);
-      for(unsigned i = 0 ; i < dimensionworld ; ++i)
+      static const int vxDim = (VertexInputType::dimension < VertexType::dimension) ? VertexInputType::dimension : VertexType::dimension;
+      for(int i = 0 ; i < vxDim ; ++i)
         iVtx[i] = vertex[i];
       return iVtx;
     }
