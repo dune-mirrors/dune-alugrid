@@ -256,14 +256,14 @@ namespace Dune
     // default ordering
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
-#ifdef DISABLE_ALUGRID_SFC_ORDERING
-    std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
-    return ;
-#endif
-
     // if type of curve is chosen to be None, nothing more to be done here
     if( curveType_ == SpaceFillingCurveOrderingType :: None )
+    {
+#ifndef NDEBUG
+      std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
+#endif
       return ;
+    }
 
     {
       // apply space filling curve orderung to the inserted elements
