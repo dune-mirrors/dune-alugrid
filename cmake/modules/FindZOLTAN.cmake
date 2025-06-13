@@ -46,7 +46,8 @@ if (ZOLTAN_INCLUDE_DIRS OR ZOLTAN_LIBRARIES)
 
   # register all ZOLTAN related flags
   dune_register_package_flags(LIBRARIES "${ZOLTAN_LIBRARIES}"
-                            INCLUDE_DIRS "${ZOLTAN_INCLUDE_DIRS}")
+                            INCLUDE_DIRS "${ZOLTAN_INCLUDE_DIRS}"
+                            COMPILE_DEFINITIONS "HAVE_ZOLTAN=1")
   set (ZOLTAN_CONFIG_VAR HAVE_ZOLTAN)
 endif()
 
