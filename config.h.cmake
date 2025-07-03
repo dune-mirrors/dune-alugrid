@@ -45,9 +45,6 @@
 /* Define if we have dlmalloc */
 #cmakedefine HAVE_DLMALLOC 1
 
-/* Define if we have zoltan */
-#cmakedefine HAVE_ZOLTAN 1
-
 /* Define if we have ZLIB */
 #cmakedefine HAVE_ZLIB 1
 
