@@ -1,16 +1,17 @@
 set(callbackdir  ${CMAKE_INSTALL_INCLUDEDIR}/examples/callback)
-set(callback_HEADERS adaptation.hh  
-                          diagnostics.hh  
-                          paralleldgf.hh        
-                          problem-ball.hh   
+set(callback_HEADERS adaptation.hh
+                          diagnostics.hh
+                          paralleldgf.hh
+                          problem-ball.hh
                           problem-transport.hh
-                          datamap.hh     
-                          fvscheme.hh     
-                          piecewisefunction.hh  
-                          problem-euler.hh  
+                          datamap.hh
+                          fvscheme.hh
+                          piecewisefunction.hh
+                          problem-euler.hh
                           problem.hh)
 
 add_definitions("-DALUGRID_CUBE")
+add_definitions("-DUSE_ALUGRID_SFC_ORDERING")
 add_definitions("-DGRIDDIM=3")
 add_definitions("-DWORLDDIM=3")
 
