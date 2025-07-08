@@ -31,16 +31,7 @@ struct BallData
   std::string gridFile ( const std::string &path, const int mpiSize ) const
   {
     std::ostringstream dgfFileName;
-    if( dimDomain == 3 && problem_ < 4 )
-    {
-      if( problem_ == 1 )
-        dgfFileName << path << "/dgf/cube_hc_512.dgf";
-      else if ( problem_ == 2 )
-        dgfFileName << path << "/dgf/cube_hc_4096.dgf";
-      else if ( problem_ == 3 )
-        dgfFileName << path << "/dgf/cube_hc_32768.dgf";
-    }
-    else if ( problem_ == 4 )
+    if ( problem_ == 4 )
       dgfFileName << path << "/dgf/input" << dimDomain << ".dgf";
     else if ( problem_ == 5 )
       dgfFileName << path << "/dgf/periodic" << dimDomain << ".dgf";
