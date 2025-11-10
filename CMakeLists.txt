@@ -59,6 +59,7 @@ dune_project()
 
 # Define the dune-alugrid library
 dune_add_library(dunealugrid EXPORT_NAME ALUGrid NAMESPACE Dune::)
+dune_enable_all_packages()
 target_link_libraries(dunealugrid PUBLIC Dune::Grid)
 dune_default_include_directories(dunealugrid PUBLIC)
 
