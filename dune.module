@@ -1,9 +1,9 @@
 Module: dune-alugrid
-Version: 2.11-git
+Version: 2.12-git
 Author: Robert Kloefkorn, Martin Alkaemper, Andreas Dedner and Martin Nolte
 Maintainer: dune-devel@lists.dune-project.org
 Description: Module providing the DUNE grid interface for unstructured simplicial and cube grids in 2 and 3 space dimensions
 URL: https://gitlab.dune-project.org/extensions/dune-alugrid
 Python-Requires:
-Depends: dune-grid (>= 2.11)
+Depends: dune-grid (>= 2.12)
 Whitespace-Hook: Yes
