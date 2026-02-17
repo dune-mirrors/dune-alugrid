@@ -6,7 +6,6 @@
 
 #include <dune/alugrid/impl/macrofileheader.hh>
 #include "../serial/gitter_impl.h"
-#include "../serial/lock.h"
 
 namespace ALUGrid
 {
@@ -86,15 +85,6 @@ namespace ALUGrid
     // read status of grid istream
     virtual void restore ( std::istream &in ) { restoreImpl(in, true ); }
   protected:
-    void checkForConformingRefinement( const bool conformingRefinement )
-    {
-      if( conformingRefinement )
-      {
-        this->enableConformingClosure();
-        this->disableGhostCells();
-      }
-    }
-
     void restoreImpl( std::istream &in, const bool restoreBndFaces );
   };
 
@@ -106,28 +96,28 @@ namespace ALUGrid
 
     friend class PureElementLeafIterator < Gitter::helement_STI >;
 
-    using GitterDuneBasis :: checkForConformingRefinement;
+    //using GitterDuneBasis :: checkForConformingRefinement;
   public:
 
     //! constructor creating grid from std::istream
     GitterDuneImpl ( const int dim, const bool conformingRefinement, std::istream &in, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
     : GitterBasisImpl ( dim, in, ppv )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     //! constructor creating grid from macro grid file
     inline GitterDuneImpl (const int dim, const bool conformingRefinement, const char *filename, const ProjectVertexPtrPair& ppv = ProjectVertexPtrPair() )
       : GitterBasisImpl ( dim, filename, ppv )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     //! constructor creating empty grid
     explicit GitterDuneImpl ( const int dim, const bool conformingRefinement )
       : GitterBasisImpl ( dim )
     {
-      checkForConformingRefinement( conformingRefinement );
+      this->checkForConformingRefinement( conformingRefinement );
     }
 
     // compress memory of given grid and return new object (holding equivalent information)
@@ -183,7 +173,7 @@ namespace ALUGrid
   inline void GitterDuneBasis::backup ( std::ostream &out, const MacroFileHeader::Format format )
   {
     // backp macro grid
-    MacroFileHeader header = container ().dumpMacroGrid ( out, format );
+    MacroFileHeader header = container ().dumpMacroGrid ( out, this->conformingClosureNeeded(), format );
 
     // flag for zbinary format
     const char zbinaryFlag = (header.format() == MacroFileHeader::zbinary) ? 1 : 0 ;
@@ -269,7 +259,18 @@ namespace ALUGrid
       for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
     }
 
-    // TODO: backup face and edge indices
+    // backup index of faces
+    {
+      AccessIterator <hface_STI>::Handle ew (container ());
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
+    }
+
+    // backup index of edges (only 3d grids)
+    if( this->dimension() > 2 )
+    {
+      AccessIterator <hedge_STI>::Handle ew (container ());
+      for (ew.first (); ! ew.done (); ew.next ()) ew.item ().backupIndex (out);
+    }
 
     {
       // backup index of vertices
@@ -324,6 +325,22 @@ namespace ALUGrid
         AccessIterator < helement_STI >:: Handle ew(container());
         for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
       }
+
+      // restore index of faces (and internal edges)
+      // mark all visited items as not a hole
+      {
+        AccessIterator < hface_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
+      }
+
+      // restore index of edges
+      // mark all visited items as not a hole
+      if( this->dimension() > 2 )
+      {
+        AccessIterator < hedge_STI >:: Handle ew(container());
+        for ( ew.first(); !ew.done(); ew.next()) ew.item().restoreIndex (in, restoreInfo);
+      }
+
       // restore index of vertices
       // mark all visited items as not a hole
       {
@@ -331,18 +348,16 @@ namespace ALUGrid
         for( w->first(); ! w->done(); w->next () ) w->item().restoreIndex(in, restoreInfo );
       }
 
-      // reconstruct holes
+      const int skipCodim = this->dimension() == 2 ? BuilderIF ::IM_Edges : -1;
+      // reconstruct holes for elements, faces, edges, vertices
+      for( int codim=BuilderIF::IM_Elements; codim <= BuilderIF ::IM_Vertices; ++codim )
       {
-        IndexManagerType& elementManager = this->indexManager(BuilderIF::IM_Elements);
-        elementManager.generateHoles( restoreInfo( BuilderIF::IM_Elements ) );
+        if( codim == skipCodim ) continue ;
+
+        IndexManagerType& indexManager = this->indexManager( codim );
+        indexManager.generateHoles( restoreInfo( codim ) );
       }
 
-      // TODO indices for faces and edges
-
-      {
-        IndexManagerType& vertexManager = this->indexManager(BuilderIF::IM_Vertices);
-        vertexManager.generateHoles( restoreInfo( BuilderIF ::IM_Vertices ) );
-      }
       return;
     }
 

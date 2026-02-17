@@ -5,7 +5,7 @@ DUNE-ALUGrid
 module which implements the DUNE grid interface
 providing unstructured simplicial and cube grids.
 
-A detailed description of all the new features and some more
+A detailed description of all the newer features and some more
 details concerning the inner workings of DUNE-ALUGrid can be found
 in the paper
 
@@ -14,15 +14,19 @@ in the paper
 **This is the paper we would ask everyone to cite when using DUNE-ALUGrid.**
 
 Download via git:
+
+```
 git clone https://gitlab.dune-project.org/extensions/dune-alugrid.git
+```
 
-New features and improvements include
+Features of DUNE-ALUGrid include
 
-  *  Conforming refinement for the 3D simplex grid
-  *  All grids are now parallel (i.e. 2D and 3D)
+  *  Cube and simplex grids in 2D and 3D with nonconforming refinement
+  *  Simplex grids with conforming refinement (newest vertex bisection) for 2D and 3D
+  *  Parallelization and dynamic load balancing for all grids
   *  Internal load balancing based on space filling curves
      making DUNE-ALUGrid self contained also in parallel
-  *  Bindings for fully parallel partitioners using [Zoltan][4]
+  *  Bindings for fully parallel partitioning using [Zoltan][4]
   *  Complete user control of the load balancing
   *  Improved memory footprint
 
@@ -46,12 +50,25 @@ See the file [COPYING][5] for full copying permissions.
 Installation
 ------------
 
-For installation instructions please see the [DUNE website][2].
+For general installation instructions please see the [DUNE website][2].
+
+For installation of Zoltan we recommend to install the system package, e.g.
+`libtrilinos-zoltan-dev` under Debian or Ubuntu or if not available simple
+use the [build-zoltan.sh][7] script or download the package from the
+[Zoltan][4] page, unpack and configure with the following parameters:
+
+```
+configure CXXFLAGS="-Ofast -DNDEBUG -fPIC" CFLAGS="-Ofast -DNDEBUG -fPIC" --prefix=PATH_TO_INSTALL_ZOLTAN --with-mpi-compilers=yes --enable-shared
+
+make
+make install
+```
 
 [0]: https://gitlab.dune-project.org/extensions/dune-alugrid
 [1]: http://www.dune-project.org
 [2]: http://www.dune-project.org/doc/installation
 [3]: http://journals.ub.uni-heidelberg.de/index.php/ans/article/view/23252
-[4]: http://www.cs.sandia.gov/Zoltan/
+[4]: https://sandialabs.github.io/Zoltan/
 [5]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/COPYING
 [6]: https://gitlab.dune-project.org/extensions/dune-alugrid/blob/master/doc/dunealugrid.bib
+[7]: https://gitlab.dune-project.org/extensions/dune-alugrid/-/blob/master/scripts/build-zoltan.sh?ref_type=heads

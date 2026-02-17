@@ -2,6 +2,7 @@
 #define REFINEMENTRULES_H_INCLUDED
 
 #include <dune/alugrid/common/alugrid_assert.hh>
+#include <dune/alugrid/impl/serial/serialize.h>
 #include <iostream>
 
 namespace ALUGrid
@@ -152,6 +153,19 @@ namespace ALUGrid
     void read( stream& s )
     {
       _flag = s.get();
+    }
+
+    void writeAscii(std::ostream& s) const
+    {
+      int f = _flag;
+      s << f;
+    }
+
+    void readAscii(std::istream& s)
+    {
+      int f;
+      s >> f;
+      _flag = (signed char) f;
     }
   };
 

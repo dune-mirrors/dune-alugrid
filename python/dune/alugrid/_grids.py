@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import sys, os
+import os
 import logging
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,19 @@ class ALUGridEnvVar:
         if self._deleteEnvVar:
             del os.environ[self._varname]
 #-------------------------------------------------------------------
+# grid module loading
+def checkModule(includes, typeName, typeTag):
+    from importlib import import_module
+    from dune.grid.grid_generator import module
+
+    # check if pre-compiled module exists and if so load it
+    try:
+        gridModule = import_module("dune.alugrid._alugrid._alugrid_" + typeTag)
+        return gridModule
+    except ImportError:
+        # otherwise proceed with generate, compile, load
+        gridModule = module(includes, typeName)
+        return gridModule
 
 def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refinement=None, comm=None, serial=False, verbose=False,
             lbMethod=9, lbUnder=0.0, lbOver=1.2, **parameters):
@@ -91,34 +104,48 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     if refinement=="Dune::conforming" and elementType=="Dune::cube":
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
-    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType + ", Dune::" + refinement
+    typeTag = str(dimgrid) + str(dimworld) + "_" + elementType
+    typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType
+    if refinement is not None:
+        assert refinement == 'conforming' or refinement == 'nonconforming', "Refinement should be 'conforming' or 'nonconforming' if selected."
+        typeName += ", Dune::" + refinement
+
     # if serial flag is true serial version is forced.
     if serial:
         typeName += ", Dune::ALUGridNoComm"
 
     typeName += " >"
     includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
-    gridModule = module(includes, typeName)
+    gridModule = checkModule(includes, typeName, typeTag)
 
     if comm is not None:
         raise Exception("Passing communicator to grid construction is not yet implemented in Python bindings of dune-grid")
         # return gridModule.LeafGrid(gridModule.reader(constructor, comm))
 
     gridView = gridModule.LeafGrid(gridModule.reader(constructor))
+
+    # in case of a carteisan domain store if old or new boundary ids was used
+    # this can be removed in later version - it is only used in dune-fem
+    # to give a warning that the boundary ids for the cartesian domains have changed
+    try:
+        gridView.hierarchicalGrid._cartesianConstructionWithIds = constructor.boundaryWasSet
+    except AttributeError:
+        pass
     return gridView
 
 def aluConformGrid(*args, **kwargs):
-    aluConformGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="simplex", refinement="conforming")
+    # enable conforming refinement for duration of grid creation
+    refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
+    return aluGrid(*args, **kwargs, elementType="simplex")
+aluConformGrid.__doc__ = aluGrid.__doc__
 
 def aluCubeGrid(*args, **kwargs):
-    aluCubeGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="cube", refinement="nonconforming")
-
+    return aluGrid(*args, **kwargs, elementType="cube")
+aluCubeGrid.__doc__ = aluGrid.__doc__
 
 def aluSimplexGrid(*args, **kwargs):
-    aluSimplexGrid.__doc__ = aluGrid.__doc__
-    return aluGrid(*args, **kwargs, elementType="simplex", refinement="nonconforming")
+    return aluGrid(*args, **kwargs, elementType="simplex")
+aluSimplexGrid.__doc__ = aluGrid.__doc__
 
 grid_registry = {
         "ALU"        : aluGrid,

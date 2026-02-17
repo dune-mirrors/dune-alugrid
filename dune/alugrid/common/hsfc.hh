@@ -174,11 +174,15 @@ namespace Dune {
   public:
     enum CurveType { ZCurve, Hilbert, None };
 
+#ifdef DISABLE_ALUGRID_SFC_ORDERING
+    static const CurveType DefaultCurve = None ;
+#else
 #if HAVE_ZOLTAN
     static const CurveType DefaultCurve = Hilbert ;
 #else
     static const CurveType DefaultCurve = ZCurve ;
-#endif
+#endif // HAVE_ZOLTAN
+#endif // DISABLE_ALUGRID_SFC_ORDERING
 
   protected:
     ZCurveOrderingType   zCurve_;

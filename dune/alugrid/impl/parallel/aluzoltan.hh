@@ -19,6 +19,10 @@
 
 #if HAVE_ZOLTAN
 
+#ifndef HAVE_PROTOTYPES
+#define __PROTOTYPES_DEFINED_HERE__
+#endif
+
 // if DUNE was built with MPI
 #if HAVE_MPI
 // undefine our definition of HAVE_MPI before including zoltan_cpp.h
@@ -29,6 +33,11 @@
 #if HAVE_PARMETIS
 #undef HAVE_PARMETIS
 #define HAVE_PARMETIS_WAS_UNDEFED_HERE
+#endif
+
+#if HAVE_SCOTCH
+#undef HAVE_SCOTCH
+#define HAVE_SCOTCH_WAS_UNDEFED_HERE
 #endif
 
 // include Zoltan's C++ header
@@ -44,6 +53,11 @@
 #undef HAVE_PARMETIS
 #endif
 
+// undefine any definition of HAVE_SCOTCH made by Zoltan
+#ifdef HAVE_SCOTCH
+#undef HAVE_SCOTCH
+#endif
+
 #ifdef HAVE_MPI_WAS_UNDEFED_HERE
 #ifdef ENABLE_MPI
 // redefine our definition of HAVE_MPI if it was undef'd before
@@ -56,9 +70,25 @@
 
 #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
 // redefine our definition of HAVE_PARMETIS if it was undef'd before
+#ifdef ENABLE_PARMETIS
 #define HAVE_PARMETIS ENABLE_PARMETIS
+#else
+#define HAVE_PARMETIS 1
+#endif
+
 #undef HAVE_PARMETIS_WAS_UNDEFED_HERE
 #endif // #ifdef HAVE_PARMETIS_WAS_UNDEFED_HERE
+
+#ifdef HAVE_SCOTCH_WAS_UNDEFED_HERE
+// redefine our definition of HAVE_SCOTCH if it was undef'd before
+#ifdef ENABLE_SCOTCH
+#define HAVE_SCOTCH ENABLE_SCOTCH
+#else
+#define HAVE_SCOTCH 1
+#endif
+
+#undef HAVE_SCOTCH_WAS_UNDEFED_HERE
+#endif // #ifdef HAVE_SCOTCH_WAS_UNDEFED_HERE
 
 #endif // #if HAVE_ZOLTAN
 
@@ -440,5 +470,10 @@ namespace ALUGridZoltan
   } // CALL_Zoltan_LB_Partition
 
 } // namespace ALUGridZoltan
+
+#ifdef __PROTOTYPES_DEFINED_HERE__
+#undef HAVE_PROTOTYPES
+#undef __PROTOTYPES_DEFINED_HERE__
+#endif
 
 #endif // #ifndef ALUGRID_ZOLTAN_H_INCLUDED

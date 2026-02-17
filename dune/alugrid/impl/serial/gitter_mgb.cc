@@ -817,7 +817,7 @@ namespace ALUGrid
   }
 
   template <class stream_t>
-  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type )
+  void MacroGridBuilder::inflateMacroGrid ( stream_t& in, int type, const bool conforming )
   {
     const int start = clock ();
     int nv = 0;
@@ -1081,7 +1081,7 @@ namespace ALUGrid
       std::cout << "INFO: MacroGridBuilder::inflateMacroGrid() used " << (float)(clock () - start)/(float)(CLOCKS_PER_SEC) << " s." << std::endl;
   }
 
-  void Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
+  bool Gitter::Geometric::BuilderIF::macrogridBuilder ( std::istream &in )
   {
     MacroFileHeader header;
     if( !header.read( in, true ) )
@@ -1089,6 +1089,8 @@ namespace ALUGrid
       std::cerr << "ERROR (fatal): Unable to read macro grid header." << std::endl;
       std::abort();
     }
+
+    const bool conforming = header.refinement() == MacroFileHeader::conforming;
 
     MacroGridBuilder mm (*this);
     const int type = (header.type() == MacroFileHeader::tetrahedra ? MacroGridBuilder::TETRA_RAW : MacroGridBuilder::HEXA_RAW);
@@ -1098,19 +1100,19 @@ namespace ALUGrid
       {
         ObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else if( header.byteOrder() == MacroFileHeader::bigendian )
       {
         BigEndianObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else if ( header.byteOrder() == MacroFileHeader::littleendian )
       {
         LittleEndianObjectStream os;
         ALUGrid::readBinary( in, os, header );
-        mm.inflateMacroGrid( os, type );
+        mm.inflateMacroGrid( os, type, conforming );
       }
       else
       {
@@ -1119,7 +1121,9 @@ namespace ALUGrid
       }
     }
     else
-      mm.inflateMacroGrid( in, type );
+      mm.inflateMacroGrid( in, type, conforming );
+
+    return conforming;
   }
 
 } // namespace ALUGrid

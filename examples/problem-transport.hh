@@ -29,8 +29,9 @@ public:
 protected:
   std::string gridFile_;
   DomainType velocity_;
+  int problem_;
 public:
-  TransportProblemData1( const int problem )
+  TransportProblemData1( const int problem ) : problem_( problem )
   {
     if( problem == 3 )
     {
@@ -61,6 +62,13 @@ public:
   //! \copydoc ProblemData::initial
   RangeType initial ( const DomainType &x ) const
   {
+    if( problem_ == 3 )
+    {
+      DomainType xc( x );
+      xc -= 0.5;
+      return (xc*xc) < 0.0625 ? 1.0 : 0;
+    }
+
     return sin( 2 * M_PI * (x*x) );
   }
 

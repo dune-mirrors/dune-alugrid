@@ -22,7 +22,7 @@ find_package(PTScotch)
 find_path (ZOLTAN_INCLUDE_DIRS
   NAMES "zoltan.h"
   PATHS ${ZOLTAN_SEARCH_PATH}
-  PATH_SUFFIXES "include"
+  PATH_SUFFIXES "include" "include/trilinos"
   ${ZOLTAN_NO_DEFAULT_PATH})
 
 # only search in architecture-relevant directory
@@ -31,7 +31,7 @@ if (CMAKE_SIZEOF_VOID_P)
 endif (CMAKE_SIZEOF_VOID_P)
 
 find_library(ZOLTAN_LIBRARIES
-  NAMES "zoltan"
+  NAMES "zoltan" "trilinos_zoltan"
   PATHS ${ZOLTAN_SEARCH_PATH}
   PATH_SUFFIXES "lib/.libs" "lib" "lib${_BITS}" "lib/${CMAKE_LIBRARY_ARCHITECTURE}"
   ${ZOLTAN_NO_DEFAULT_PATH})
@@ -46,14 +46,15 @@ if (ZOLTAN_INCLUDE_DIRS OR ZOLTAN_LIBRARIES)
 
   # register all ZOLTAN related flags
   dune_register_package_flags(LIBRARIES "${ZOLTAN_LIBRARIES}"
-                            INCLUDE_DIRS "${ZOLTAN_INCLUDE_DIRS}")
+                            INCLUDE_DIRS "${ZOLTAN_INCLUDE_DIRS}"
+                            COMPILE_DEFINITIONS "HAVE_ZOLTAN=1")
   set (ZOLTAN_CONFIG_VAR HAVE_ZOLTAN)
 endif()
 
 # print a message to indicate status of this package
-#include (FindPackageHandleStandardArgs)
-#find_package_handle_standard_args(ZOLTAN
-#  DEFAULT_MSG
-#  ZOLTAN_LIBRARIES
-#  ZOLTAN_INCLUDE_DIRS
-#  )
+include (FindPackageHandleStandardArgs)
+find_package_handle_standard_args(ZOLTAN
+  DEFAULT_MSG
+  ZOLTAN_LIBRARIES
+  ZOLTAN_INCLUDE_DIRS
+)

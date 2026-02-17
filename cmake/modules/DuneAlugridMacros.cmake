@@ -1,6 +1,3 @@
-# do not ignore <PACKAGE>_ROOT variables
-cmake_policy(SET CMP0074 NEW)
-
 # from dune-grid/cmake/modules
 include(GridType)
 #define available alugrid types
@@ -54,7 +51,11 @@ if(ZLIB_FOUND)
   dune_register_package_flags(INCLUDE_DIRS ${ZLIB_INCLUDE_DIR} LIBRARIES ${ZLIB_LIBRARIES})
 endif()
 
-find_package(SIONlib)
+if( NOT SIONLib_ROOT AND SIONLIB_ROOT)
+  set(SIONLib_ROOT ${SIONLIB_ROOT})
+endif()
+
+find_package(SIONLib)
 find_package(DLMalloc)
 
 # set ZOLTAN_ROOT from environment variable if set
@@ -65,9 +66,6 @@ endif()
 
 find_package(ZOLTAN)
 find_package(METIS)
-if( METIS_FOUND AND ALUGRID_DISABLE_METIS )
-  unset( HAVE_METIS )
-endif()
 
 # check for phtreads
 include(FindPThreads)

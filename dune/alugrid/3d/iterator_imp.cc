@@ -149,7 +149,7 @@ assign(const ALU3dGridIntersectionIterator<GridImp> & org)
     // adjust connector flags
     connector_.setFlags( org.connector_.conformingRefinement(), org.connector_.ghostCellsEnabled() );
 
-    // else it's a end iterator
+    // else it's an end iterator
     item_       = org.item_;
     ghost_      = org.ghost_;
     grid_       = org.grid_;

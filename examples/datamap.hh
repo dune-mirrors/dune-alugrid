@@ -91,7 +91,7 @@ public:
 
   //! see documentation in Dune::CommDataHandleIF (method for general entities)
   template< class Buffer, class E >
-  void scatter ( Buffer &buffer, E &entity, size_t n )
+  void scatter ( Buffer &buffer, const E &entity, size_t n )
   {
     assert( n == size( entity ) );
   }

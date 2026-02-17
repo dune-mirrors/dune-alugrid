@@ -101,6 +101,107 @@ namespace ALUGrid
     return x;
   }
 
+  template < class A >
+  void Hedge1Top < A >::backup (std::ostream & os) const
+  {
+    doBackup( os );
+  }
+
+  template < class A >
+  void Hedge1Top < A >::backup (ObjectStream& os) const
+  {
+    doBackup( os );
+  }
+
+  template < class A > template <class OutStream_t>
+  void Hedge1Top < A >::doBackup (OutStream_t& os) const
+  {
+    os.put ((char) getrule ());
+    {
+      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backup (os);
+    }
+    return;
+  }
+
+  template < class A > template <class OutStream_t>
+  void Hedge1Top < A >::backupIndexImpl (OutStream_t& os) const
+  {
+    // this is only needed for 3d grids
+    if( this->is2d() ) return ;
+
+    // in DuneIndexProvider::doBackupIndex
+    this->doBackupIndex( os );
+    {
+      for (const inneredge_t * d = dwnPtr(); d; d = d->next ()) d->backupIndex(os);
+    }
+    return;
+  }
+
+  template < class A >
+  void Hedge1Top < A >::backupIndex ( std::ostream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template < class A >
+  void Hedge1Top < A >::backupIndex ( ObjectStream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template < class A >
+  void Hedge1Top < A >::restore (std::istream & is)
+  {
+    doRestore( is );
+  }
+
+  template < class A >
+  void Hedge1Top < A >::restore (ObjectStream& is)
+  {
+    doRestore( is );
+  }
+
+  template < class A > template <class InStream_t>
+  void Hedge1Top < A >::doRestore (InStream_t & is)
+  {
+    char r = (char) is.get ();
+    refineImmediate (myrule_t (r));
+    {
+      for (inneredge_t * d = dwnPtr(); d; d = d->next ()) d->restore (is);
+    }
+    return;
+  }
+
+  template < class A > template <class InStream_t>
+  void Hedge1Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
+  {
+    // this is only needed for 3d grids
+    if( this->is2d() ) return ;
+
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Edges );
+    {
+      for (inneredge_t * d = dwnPtr(); d; d = d->next ())
+        d->restoreIndex (is, restoreInfo );
+    }
+    return;
+  }
+
+  template < class A >
+  void Hedge1Top < A >::restoreIndex (std::istream& is, RestoreInfo &restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  template < class A >
+  void Hedge1Top < A >::restoreIndex (ObjectStream& is, RestoreInfo &restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+
   // #     #                                 #       #######
   // #     #  ######    ##     ####   ###### #    #     #      ####   #####
   // #     #  #        #  #   #    #  #      #    #     #     #    #  #    #
@@ -321,6 +422,102 @@ namespace ALUGrid
       {for (int i = 0; i < 4; ++i ) myhedge (i)->coarse (); }
     }
     return x;
+  }
+
+  template < class A >
+  void Hface4Top < A >::backup (std::ostream & os) const
+  {
+    doBackup(os);
+  }
+
+  template < class A >
+  void Hface4Top < A >::backup (ObjectStream& os) const
+  {
+    doBackup(os);
+  }
+
+  template < class A > template <class OutStream_t>
+  void Hface4Top < A >::doBackup (OutStream_t& os) const
+  {
+    os.put ((char) getrule ());
+    {for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backup (os); }
+    {for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backup (os); }
+    return;
+  }
+
+  template < class A > template <class OutStream_t>
+  void Hface4Top < A >::backupIndexImpl (OutStream_t& os) const
+  {
+    // in DuneIndexProvider::doBackupIndex
+    this->doBackupIndex( os );
+
+    if( ! this->is2d() ) // only for 3d grids
+    {
+      for (const inneredge_t * e = inEd(); e; e = e->next ()) e->backupIndex (os);
+    }
+
+    { for (const innerface_t * c = dwnPtr(); c; c = c->next ()) c->backupIndex (os); }
+  }
+
+  template < class A >
+  void Hface4Top < A >::backupIndex (std::ostream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template < class A >
+  void Hface4Top < A >::backupIndex (ObjectStream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template < class A >
+  void Hface4Top < A >::restore (std::istream & is)
+  {
+    doRestore( is );
+  }
+
+  template < class A >
+  void Hface4Top < A >::restore (ObjectStream& is)
+  {
+    doRestore( is );
+  }
+
+  template < class A > template <class InStream_t>
+  void Hface4Top < A >::doRestore (InStream_t & is)
+  {
+    refineImmediate (myrule_t ((char) is.get ()));
+    {for (inneredge_t * e = inEd(); e; e = e->next ()) e->restore (is); }
+    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restore (is); }
+    return;
+  }
+
+  template < class A > template <class InStream_t>
+  void Hface4Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo &restoreInfo )
+  {
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
+
+    if( ! this->is2d() ) // this is only needed for 3d grids
+    {
+      for (inneredge_t * e = inEd(); e; e = e->next ()) e->restoreIndex (is, restoreInfo);
+    }
+
+    {for (innerface_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo); }
+  }
+
+  template < class A >
+  void Hface4Top < A >::restoreIndex (std::istream& is, RestoreInfo &restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  template < class A >
+  void Hface4Top < A >::restoreIndex (ObjectStream& is, RestoreInfo &restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
   // #     #                         #       #######
@@ -585,16 +782,17 @@ namespace ALUGrid
     if( ! trMap.affine() )
       this->setNonAffineGeometry();
 
-#ifdef ALUGRIDDEBUG
-      // make sure determinant is ok
-      //Dune::FieldVector<double, 3> point = { 0.0, 0.0, 0.0 };
-      //alugrid_assert ( trMap.det( point ) > 0 );
-#endif
-
     alugrid_assert ( this->level() == l );
-
     this->setIndexAnd2dFlag( indexManager() );
 
+#ifdef ALUGRIDDEBUG
+    // this check will fail for certain configurations in a 2-3 grid
+    if ( ! this->is2d() )
+    {
+      // make sure determinant is ok
+      Dune::FieldVector<double, 3> point = { 0.0, 0.0, 0.0 };
+      alugrid_assert ( trMap.det( point ) > 0 );
+#endif
     return;
   }
 
@@ -634,6 +832,13 @@ namespace ALUGrid
       // make sure determinant is ok
       //Dune::FieldVector<double,3> point = { 0.0, 0.0, 0.0 };
       //alugrid_assert ( triMap.det( point ) > 0 );
+      // this check will fail for certain configurations in a 2-3 grid
+      if ( ! this->is2d() )
+      {
+        // make sure determinant is ok
+        alucoord_t point[3] = { 0.0, 0.0, 0.0 };
+        alugrid_assert ( triMap.det( point ) > 0 );
+      }
 #endif
 
       // calculate volume
@@ -644,19 +849,16 @@ namespace ALUGrid
 
     // make sure that given volume is the same as calulated
 #ifdef ALUGRIDDEBUG
-      TrilinearMapping triMap (myvertex(0)->Point(),
-                               myvertex(1)->Point(),
-                               myvertex(2)->Point(),
-                               myvertex(3)->Point(),
-                               myvertex(4)->Point(),
-                               myvertex(5)->Point(),
-                               myvertex(6)->Point(),
-                               myvertex(7)->Point() );
-
-
-      // calculate volume
-      const double calculatedVolume = triMap.volume();
-     alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    if ( ! this->is2d() )
+    {
+      const double calculatedVolume =
+          QuadraturCube3D < VolumeCalc >
+           (TrilinearMapping (myvertex(0)->Point(), myvertex(1)->Point(),
+                              myvertex(2)->Point(), myvertex(3)->Point(),
+                              myvertex(4)->Point(), myvertex(5)->Point(),
+                              myvertex(6)->Point(), myvertex(7)->Point())).integrate2 (0.0);
+       alugrid_assert ( std::abs( calculatedVolume - _volume ) / _volume  < 1e-10 );
+    }
 #endif
 
     return;
@@ -1037,20 +1239,29 @@ namespace ALUGrid
   template< class A >
   bool HexaTop< A >::bndNotifyCoarsen () { return true; }
 
-  template< class A >
-  void HexaTop< A >::backupIndex ( std::ostream &os ) const
+  template< class A > template <class OutStream_t>
+  void HexaTop< A >::backupIndexImpl ( OutStream_t &os ) const
   {
     this->doBackupIndex( os );
-    for (const innerhexa_t* c = down(); c; c = c->next())
-      c->backupIndex( os );
+    if( ! this->is2d() ) // this is only needed for 3d grids
+    {
+      for (const inneredge_t * e = innerHedge (); e; e = e->next ()) e->backupIndex (os);
+    }
+
+    for (const innerface_t * f = innerHface (); f; f = f->next ()) f->backupIndex (os);
+    for (const innerhexa_t* c = down(); c; c = c->next()) c->backupIndex( os );
   }
 
   template< class A >
-  void HexaTop < A >::backupIndex (ObjectStream& os) const
+  void HexaTop< A >::backupIndex ( std::ostream& os ) const
   {
-    this->doBackupIndex( os );
-    for (const innerhexa_t* c = down(); c; c = c->next())
-      c->backupIndex(os);
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
+  void HexaTop< A >::backupIndex ( ObjectStream& os ) const
+  {
+    this->backupIndexImpl( os );
   }
 
   template< class A >
@@ -1090,22 +1301,27 @@ namespace ALUGrid
 
     this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Elements );
 
-    for (innerhexa_t * c = dwnPtr(); c; c = c->next ())
+    if( ! this->is2d() ) // this is only needed for 3d grids
     {
-      c->restoreIndex (is, restoreInfo );
+      for (inneredge_t * e = innerHedge (); e; e = e->next ()) e->restoreIndex (is, restoreInfo);
     }
+
+    {for (innerface_t * f = innerHface (); f; f = f->next ()) f->restoreIndex (is, restoreInfo); }
+    {for (innerhexa_t * c = dwnPtr(); c; c = c->next ()) c->restoreIndex (is, restoreInfo ); }
   }
 
   template< class A >
-  void HexaTop< A >::restoreIndex ( std::istream &is, RestoreInfo &restoreInfo )
+  void HexaTop < A >::
+  restoreIndex (std::istream& is, RestoreInfo& restoreInfo)
   {
-    restoreIndexImpl( is, restoreInfo );
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
-  template< class A > void HexaTop < A >::
+  template< class A >
+  void HexaTop < A >::
   restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo)
   {
-    restoreIndexImpl( is, restoreInfo );
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
   template< class A >

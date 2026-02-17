@@ -1467,25 +1467,26 @@ namespace ALUGrid
         std::string name;
         std::mutex mtx;
         int ptr;
-        MkGitName( const std::string& n ) : name( n ),
-              ptr(2-ALUGridExternalParameters::verbosityLevel() )
-        {}
+        int ptrVal() { return 2-ALUGridExternalParameters::verbosityLevel(); }
+        MkGitName( const std::string& n ) : name( n ), ptr(-1){}
         template <class T>
         inline void dump( T t )
         {
           {
+            if( ptr < 0 ) ptr = ptrVal();
             std::unique_lock<std::mutex> lck (mtx,std::defer_lock); lck.lock();
             if( ! ptr && ! t ) { std::cerr << std::endl << name; ptr++ ; }
             lck.unlock();
           }
-        } ~MkGitName() { if( ptr == 1 ) std::cout << std::endl << name ; }
+        } ~MkGitName() {
+          if( ptr == 1 ) std::cout << std::endl << name ; }
       };
       static MkGitName _msg;
 
       virtual void dumpInfo(int i=1) const { _msg.dump( i ); }
 
       virtual int iterators_attached () const;
-      virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const = 0;
+      virtual MacroFileHeader dumpMacroGrid (std::ostream &, const bool conforming, const MacroFileHeader::Format ) const = 0;
 
       // return size of used memory of macro gitter
       // (size of lists storing the pointers )
@@ -2571,7 +2572,7 @@ namespace ALUGrid
         // generates macro image from macro file
         void generateRawHexaImage (std::istream &, std::ostream &);
 
-        virtual void macrogridBuilder (std::istream &);
+        virtual bool macrogridBuilder (std::istream &);
 
         virtual VertexGeo     * insert_vertex (double, double, double, int) = 0;
         virtual VertexGeo     * insert_ghostvx(double, double, double, int) = 0;
@@ -2655,7 +2656,7 @@ namespace ALUGrid
         // compress all index manager
         virtual void compressIndexManagers();
 
-        virtual MacroFileHeader dumpMacroGrid (std::ostream &, const MacroFileHeader::Format ) const;
+        virtual MacroFileHeader dumpMacroGrid (std::ostream &, const bool conforming, const MacroFileHeader::Format ) const;
         friend class MacroGridBuilder;
         friend class MacroGhostBuilder;
         friend class ParallelGridMover;
@@ -2668,7 +2669,7 @@ namespace ALUGrid
         }
 
         template <class ostream_t>
-        void dumpMacroGridImpl (ostream_t &) const;
+        void dumpMacroGridImpl (ostream_t &, const bool) const;
       };
     };
   private :
@@ -2793,6 +2794,15 @@ namespace ALUGrid
 
     virtual bool ghostCellsEnabled() const { return enableGhostCells_; }
     virtual void disableGhostCells() { enableGhostCells_ = false; }
+
+    virtual void checkForConformingRefinement( const bool conformingRefinement )
+    {
+      if( conformingRefinement )
+      {
+        this->enableConformingClosure();
+        this->disableGhostCells();
+      }
+    }
 
     // flags to say if an edge can be coarsened during conform bisection
   protected:

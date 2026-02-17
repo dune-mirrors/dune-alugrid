@@ -1,6 +1,11 @@
 #ifndef DUNE_ALUGRID_HH
 #define DUNE_ALUGRID_HH
 
+#pragma GCC diagnostic push
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic ignored "-Wdangling-reference"
+#endif // #if defined(__GNUC__)
+
 // only include this code, if HAVE_ALUGRID is true
 #if HAVE_ALUGRID
 #ifndef DUNE_ALUGRID_HH_INCLUDED
@@ -23,4 +28,5 @@
 
 #endif // else if HAVE_ALUGRID
 
+#pragma GCC diagnostic pop
 #endif // #ifndef DUNE_ALUGRID_HH

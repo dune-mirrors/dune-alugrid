@@ -75,7 +75,10 @@ void method ( int problem, int startLvl, int maxLvl,
 
   /* ... some global refinement steps */
   if( verboseRank )
+  {
+    std::cout << "Setup: " << grid.comm().size() << " x 1 (MPI x threads)" << std::endl;
     std::cout << "globalRefine: " << startLevel << std::endl;
+  }
   grid.globalRefine( startLevel );
 
   /* get view to leaf grid */

@@ -181,7 +181,7 @@ namespace Dune
   //
   // The template parameter IntegerType allows to switch between
   // more elements in the grid and a smaller size of the global Ids
-  template <class MacroKeyImp, class IntegerImp = uint>
+  template <class MacroKeyImp, class IntegerImp = unsigned int>
   class ALUGridId
   {
   public:

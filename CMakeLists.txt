@@ -1,5 +1,5 @@
 # general stuff
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 
 # set up project
 project("dune-alugrid" C CXX)
@@ -15,7 +15,11 @@ endif()
 
 # grid selector in separate file to avoid excessive dependencies
 set(ALUGRID_EXTRA_GRIDSELECTOR_FILE TRUE)
-set(ALUGRID_DISABLE_METIS TRUE)
+
+option(ALUGRID_DISABLE_METIS "Disable METIS as partitioner" TRUE)
+if(ALUGRID_DISABLE_METIS)
+  set(CMAKE_DISABLE_FIND_PACKAGE_METIS TRUE)
+endif()
 
 # set to on to aitmatically download the mesh-consistency package
 set(ALUGRID_DOWNLOAD_MESH_CONSISTENCY FALSE)
@@ -44,11 +48,23 @@ list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH}
 #include the dune macros
 include(DuneMacros)
 
+# deactivate global include-directories
+dune_policy(SET DP_DEFAULT_INCLUDE_DIRS OLD)
+
+# deactivate global calls to add_dune_all_flags in tests
+dune_policy(SET DP_TEST_ADD_ALL_FLAGS OLD)
+
+# do not make suggested dependencies required automatically
+dune_policy(SET DP_SUGGESTED_MODULE_DEPENDENCIES_REQUIRED_DOWNSTREAM OLD)
+
 # start a dune project with information from dune.module
 dune_project()
 
 # Define the dune-alugrid library
-dune_add_library(dunealugrid)
+dune_add_library(dunealugrid EXPORT_NAME ALUGrid NAMESPACE Dune::)
+dune_enable_all_packages()
+target_link_libraries(dunealugrid PUBLIC Dune::Grid)
+dune_default_include_directories(dunealugrid PUBLIC)
 
 add_subdirectory(cmake/modules)
 
@@ -78,4 +94,4 @@ if(DUNE_TESTGRIDS_INCLUDE_DIR)
 endif()
 
 # finalize the dune project, e.g., generate config.h etc.
-finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
+finalize_dune_project()

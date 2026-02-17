@@ -2074,8 +2074,9 @@ namespace ALUGrid
       GitterBasis:: MacroGitterBasis (dim, mygrid, ppv),
       _linkagePatterns( indexManagerStorage().linkagePatterns() )
   {
-    macrogridBuilder (in );
+    const bool conforming = macrogridBuilder (in );
     indexManagerStorage().setRank( mygrid->mpAccess().myrank() );
+    mygrid->checkForConformingRefinement( conforming );
   }
 
   GitterBasisPll::MacroGitterBasisPll::

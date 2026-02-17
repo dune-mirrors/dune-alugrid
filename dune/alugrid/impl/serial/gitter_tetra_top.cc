@@ -479,6 +479,31 @@ namespace ALUGrid
   }
 
   template< class A >
+  void Hface3Top < A >::backupIndex (std::ostream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
+  void Hface3Top < A >::backupIndex (ObjectStream& os) const
+  {
+    this->backupIndexImpl( os );
+  }
+
+  template< class A >
+  template< class OutStream_t>
+  void Hface3Top < A >::backupIndexImpl (OutStream_t & os) const
+  {
+    this->doBackupIndex( os );
+    if ( ! this->is2d() ) // only for 3d grids
+    {
+      for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ;
+    }
+
+    {for (const innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ; }
+  }
+
+  template< class A >
   void Hface3Top< A >::restore ( std::istream &is )
   {
     doRestore( is );
@@ -496,6 +521,37 @@ namespace ALUGrid
     {for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restore (is) ; }
     {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restore (is) ; }
     return ;
+  }
+
+  template< class A > template<class InStream_t>
+  void Hface3Top < A >::restoreIndexImpl (InStream_t & is, RestoreInfo& restoreInfo )
+  {
+    // mark this element a non hole
+    typedef typename Gitter::Geometric::BuilderIF BuilderIF;
+
+    this->doRestoreIndex( is, restoreInfo, BuilderIF::IM_Faces );
+    if ( ! this->is2d() ) // only for 3d grids
+    {
+      for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo) ;
+    }
+
+    {for (innerface_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo) ; }
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void Hface3Top < A >::
+  restoreIndex( std::istream& is,  RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void Hface3Top < A >::
+  restoreIndex( ObjectStream& is,  RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
   }
 
   // #     #                          #####  #######
@@ -1920,27 +1976,37 @@ namespace ALUGrid
   }
 
   // buckupIndex of tetra
-  template< class A > void TetraTop < A >::backupIndex ( std::ostream &os ) const
+  template< class A > template <class OutStream_t>
+  void TetraTop < A >::backupIndexImpl ( OutStream_t &os ) const
   {
     this->doBackupIndex( os );
 
-    // write children
+    // write inner objects and children
+    if ( ! this->is2d() ) // only for 3d grids
     {
+      for (const inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->backupIndex (os) ;
+    }
+
+    {
+      for (const innerface_t * f = innerHface () ; f ; f = f->next ()) f->backupIndex (os) ;
       for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ;
     }
     return;
   }
 
-  // buckupIndex of tetra
-  template< class A > void TetraTop < A >::backupIndex (ObjectStream& os) const
+  // overloaded backupIndex Method
+  template< class A >
+  void TetraTop < A >::
+  backupIndex( std::ostream &os ) const
   {
-    this->doBackupIndex( os );
+    this->backupIndexImpl( os );
+  }
 
-    // write children
-    {
-      for (const innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->backupIndex (os) ;
-    }
-    return;
+  // overloaded backupIndex Method
+  template< class A >
+  void TetraTop < A >::backupIndex( ObjectStream& os ) const
+  {
+    this->backupIndexImpl( os );
   }
 
   // buckupTetra
@@ -1968,6 +2034,23 @@ namespace ALUGrid
 
   // overloaded restoreIndex Method
   template< class A >
+  void TetraTop < A >::
+  restoreIndex( std::istream &is, RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+  // overloaded restoreIndex Method
+  template< class A >
+  void TetraTop < A >::
+  restoreIndex( ObjectStream &is, RestoreInfo& restoreInfo )
+  {
+    this->restoreIndexImpl( is, restoreInfo );
+  }
+
+
+  // overloaded restoreIndex Method
+  template< class A >
   template< class istream_t>
   void TetraTop < A >::
   restoreIndexImpl (istream_t & is, RestoreInfo& restoreInfo )
@@ -1981,24 +2064,16 @@ namespace ALUGrid
     // TODO
     // restore other indices
 
+    if ( ! this->is2d() ) // only for 3d grids
     {
+      for (inneredge_t * e = innerHedge () ; e ; e = e->next ()) e->restoreIndex (is, restoreInfo );
+    }
+
+    {
+      for (innerface_t * f = innerHface () ; f ; f = f->next ()) f->restoreIndex (is, restoreInfo );
       for (innertetra_t * c = dwnPtr() ; c ; c = c->next ()) c->restoreIndex (is, restoreInfo ) ;
     }
     return;
-  }
-
-  // overloaded restoreIndex Method
-  template< class A >
-  void TetraTop< A >::restoreIndex ( std::istream & is, RestoreInfo &restoreInfo )
-  {
-    restoreIndexImpl( is, restoreInfo );
-  }
-
-  // overloaded restoreIndex Method
-  template< class A > void TetraTop < A >::
-  restoreIndex (ObjectStream& is, RestoreInfo& restoreInfo )
-  {
-    restoreIndexImpl( is, restoreInfo );
   }
 
   // restoreTetra
@@ -2115,24 +2190,26 @@ namespace ALUGrid
   }
 
   template< class A > typename Periodic3Top < A >:: myhface_t * Periodic3Top < A >::subface (int i, int j) {
-    switch (myhface (i)->getrule ()) {
+    myhface_t * face = myhface(i);
+    switch (face->getrule ())
+    {
     case myhface_t::myrule_t::e01 :
     case myhface_t::myrule_t::e12 :
     case myhface_t::myrule_t::e02 :
       alugrid_assert ( j < 2 );
-        return myhface(i)->subface(j) ;
-      std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-      return 0;
+      return myhface(i)->subface(j) ;
     case myhface_t::myrule_t::iso4 :
       // in 2d case do the same as e12
-      if(this->is2d()){
+      if(face->is2d())
+      {
         alugrid_assert ( j < 2 );
-          return myhface(i)->subface(j) ;
-        std::cerr << __FILE__ << " " << __LINE__ << "myhface(i)->subface()" << std::endl;
-        return 0;
+        return myhface(i)->subface(j) ;
       }
-      alugrid_assert ( j < 4 );
-      return myhface(i)->subface (j) ;
+      else
+      {
+        alugrid_assert ( j < 4 );
+        return myhface(i)->subface (j) ;
+      }
     case myhface_t::myrule_t::nosplit :
       std::cerr << "**FEHLER (FATAL): subface () auf nicht verfeinerter Fl\"ache aufgerufen. In " << __FILE__ << " " << __LINE__ << std::endl ;
       std::abort () ;
@@ -2150,6 +2227,7 @@ namespace ALUGrid
 
   template< class A > void Periodic3Top < A >::split_iso4 ()
   {
+    alugrid_assert( ! myhface(0)->is2d() );
     const int l = 1 + this->level () ;
     //TODO: This may be wrong unless we can guarantee twist-free periodic faces
     //which we should...
@@ -2163,7 +2241,23 @@ namespace ALUGrid
     p2->append(p3) ;
     _dwn = p0 ;
     _rule = myrule_t::iso4 ;
-    p0->_up = p1->_up = p2->_up = p3->_up = this; //us
+    p0->_up = p1->_up = p2->_up = p3->_up = this;
+    return ;
+  }
+
+  template< class A > void Periodic3Top < A >::split_bisection (myrule_t r)
+  {
+    alugrid_assert( myhface(0)->is2d() );
+    const int l = 1 + this->level () ;
+    innerperiodic3_t * p0 = new innerperiodic3_t (l, subface (0,1), twist (0), subface (1,0), twist (1), this , 0) ;
+    innerperiodic3_t * p1 = new innerperiodic3_t (l, subface (0,0), twist (0), subface (1,1), twist (1), this , 1) ;
+
+    alugrid_assert (p0 && p1) ;
+    p0->append(p1) ;
+    _dwn = p0 ;
+    // nevertheless, set iso4 rule
+    _rule = r ;
+    p0->_up = p1->_up = this;
     return ;
   }
 
@@ -2228,7 +2322,6 @@ namespace ALUGrid
         myhface (1)->refineImmediate (r) ;
         split_bisection () ;
         break ;
-
       default :
         std::cerr << "**ERROR (FATAL) refinement of Periodic3Top did not work: " ;
         std::cerr << "[" << r << "]. In " << __FILE__ << __LINE__ << std::endl ;

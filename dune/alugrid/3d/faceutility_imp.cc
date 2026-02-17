@@ -170,7 +170,7 @@ namespace Dune
       // this check is only need in the parallel case
       // if this cast fails we have a periodic element
       const BNDFaceType * bnd = dynamic_cast<const BNDFaceType *> (outerElement_);
-      const bool periodicBnd = ( bnd == 0 ) ;
+      const bool periodicBnd = ( bnd == nullptr ) ;
 
       if( periodicBnd ) // the periodic case
       {

@@ -5,6 +5,7 @@ set(DGFS
   cube-testgrid-2-2-inconsistent.dgf
   cube-testgrid-2-3.dgf
   cube-testgrid-3-3-inconsistent.dgf
+  another-testgrid-2-3.dgf
   grid2d_str1d.dgf
   periodic-2d.dgf
   periodic-3d.dgf

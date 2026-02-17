@@ -203,7 +203,7 @@ public:
 
 protected:
   // pointer to item
-  mutable KeyType* item_;
+  KeyType* item_;
 };
 
 template<int cd, class GridImp>

@@ -94,6 +94,8 @@ struct GridMarker
 
   void reset() { wasMarked_ = 0 ; }
 
+  bool adaptive() const { return adaptive_; }
+
 private:
   Grid &grid_;
   const int minLevel_;
@@ -346,6 +348,8 @@ inline size_t FiniteVolumeScheme< V, Model >
   const Iterator endit = gridView().template end< 0, ptype >();
   for( Iterator it = gridView().template begin< 0, ptype >(); it != endit; ++it, ++elements )
   {
+    if( ! marker.adaptive() ) continue ;
+
     const Entity &entity = *it;
 
     // if marked for refinement nothing has to be done for this element

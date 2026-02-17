@@ -170,6 +170,12 @@ namespace Dune
     void markLongestEdge( const bool resortElements = true  ) ;
 
   private:
+    // return refinement type that will be used by created grid
+    static auto getRefinementType()
+    {
+      return ALUGrid::getRefinementType( ALUGrid::refinementType );
+    }
+
     // return grid object
     virtual Grid* createGridObj( const std::string& name ) const
     {

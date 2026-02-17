@@ -239,6 +239,113 @@ public:
   const int problem_;
 };
 
+// Sod
+template< int dimD >
+class EulerProblemSod
+: public ProblemData< dimD, dimD+2 >
+{
+public:
+  typedef ProblemData< dimD, dimD+2 > Base;
+
+  typedef typename Base::DomainType DomainType;
+  typedef typename Base::RangeType RangeType;
+
+  static const int dimDomain = DomainType::dimension;
+  static const int dimRange = RangeType::dimension;
+
+  EulerProblemSod( const int problem )
+   : gamma(1.4)
+   , problem_( problem )
+  {
+  }
+
+  //! \copydoc ProblemData::gridFile
+  std::string gridFile ( const std::string &path, const int mpiSize ) const
+  {
+    std::ostringstream dgfFileName;
+    dgfFileName << path << "/dgf/grid2d_str1d.dgf";
+    return dgfFileName.str();
+  }
+
+  //! \copydoc ProblemData::initial
+  RangeType initial ( const DomainType &x ) const
+  {
+    RangeType val( 0 );
+
+    enum { dimR = RangeType :: dimension };
+
+    // behind shock
+    if ( x[0] <= 0.5 )
+    {
+      RangeType res(0);
+
+      // default is sod's rp
+      res[0]      = 1.0;
+      res[dimR-1] = 1.0;
+
+      return res;
+    }
+    else
+    {
+      RangeType res(0);
+
+      // default is sod's rp
+      res[0]      = 0.125;
+      res[dimR-1] = 0.1;
+      return res;
+    }
+  }
+
+  //! \copydoc ProblemData::boundaryValue
+  RangeType boundaryValue ( const DomainType &x, double time ) const
+  {
+    return initial( x );
+  }
+
+  int bndType( const DomainType &normal, const DomainType &x, const double time) const
+  {
+    if (normal[0]<-0.1 && x[0]<0.1)
+      return 1;
+    else if (normal[0]>0.1 && x[0]>1)
+      return 2;
+    return 3;
+  }
+
+  //! \copydoc ProblemData::endTime
+  double endTime () const
+  {
+    return 0.15;
+  }
+
+  //! \copydoc ProblemData::adaptationIndicator
+  double adaptationIndicator ( const DomainType& x, double time,
+                               const RangeType &uLeft, const RangeType &uRight ) const
+  {
+    return std::abs( uLeft[ 0 ] - uRight[ 0 ] )/(0.5*(uLeft[0]+uRight[0]));
+  }
+
+  //! \copydoc ProblemData::refineTol
+  double refineTol () const
+  {
+    return 0.1;
+  }
+
+  //! \copydoc ProblemData::saveInterval
+  double saveInterval() const
+  {
+    return 0.04 * endTime();
+  }
+
+  //! only every 10th timestep we want load balancing
+  int balanceStep() const { return 25; }
+
+  unsigned int maxTimeSteps() const { return (problem_ == 25) ? 50 : Base::maxTimeSteps(); }
+
+  private:
+  const double gamma;
+  const int problem_;
+};
+
 
 // Enumerations
 // ------------
@@ -378,6 +485,10 @@ struct EulerModel
     case 23:
     case 25:
       problem_ = new EulerProblemShockBubble< dimDomain >( problem );
+      break;
+
+    case 3:
+      problem_ = new EulerProblemSod< dimDomain >( problem );
       break;
 
     default:
