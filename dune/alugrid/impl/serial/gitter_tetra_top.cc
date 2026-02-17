@@ -754,7 +754,8 @@ namespace ALUGrid
           break;
         case balrule_t::iso4 :
           //in the 2d case we just to the same as e12
-          if( face.is2d()){
+          if( face.is2d())
+          {
             if (! face.refine (r, isRear (0))) return false ;
             split_bisection() ;
             break;
@@ -2245,7 +2246,8 @@ namespace ALUGrid
     return ;
   }
 
-  template< class A > void Periodic3Top < A >::split_bisection (myrule_t r)
+  /*
+  template< class A > void Periodic3Top < A >::split_bisection ()
   {
     alugrid_assert( myhface(0)->is2d() );
     const int l = 1 + this->level () ;
@@ -2260,6 +2262,7 @@ namespace ALUGrid
     p0->_up = p1->_up = this;
     return ;
   }
+  */
 
   template< class A > void Periodic3Top < A >::split_bisection ()
   {

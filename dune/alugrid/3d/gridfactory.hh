@@ -359,6 +359,9 @@ namespace Dune
     //! set longest edge marking for biscetion grids (default is off)
     void setLongestEdgeFlag (bool flag = true) { markLongestEdge_ = flag ; }
 
+    //! disable compatibility check for biscetion grids (default is on)
+    void disableCompatibilityCheck () { compatibilityCheck_ = false ; }
+
     //! set true if grid was created using DGF Interval or StructuredGridFactory
     void setCartesian ( const bool cartesian )
     {
@@ -455,6 +458,7 @@ namespace Dune
     std::vector< unsigned int > ordering_;
 
     bool markLongestEdge_;
+    bool compatibilityCheck_;
     bool cartesian_;
   };
 
@@ -575,6 +579,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3),
     cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();
@@ -601,6 +607,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3),
     cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();
@@ -627,6 +635,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    // this is only needed for simplex grids in 3d
+    compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3),
     cartesian_( false )
   {
     BoundarySegmentWrapperType::registerFactory();

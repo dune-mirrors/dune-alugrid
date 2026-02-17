@@ -504,7 +504,7 @@ namespace Dune
       }
     }
 
-    std::vector<int> simplexTypes(elementType == tetra ? elements_.size() : 0,0);
+    std::vector<int> simplexTypes((elementType == tetra) ? elements_.size() : 0,0);
     //use consistency algorithm or bisection compatibility
     bool madeCompatible = correctElementOrientation(simplexTypes);
     madeCompatible = bool(comm().max( int(madeCompatible) ) ) ;
@@ -514,7 +514,6 @@ namespace Dune
       if( numNonEmptyPartitions > 1)
           DUNE_THROW( GridError, "Cannot consistently orient a parallel hexahedral grid." );
     }
-
 
     numFacesInserted_ = boundaryIds_.size();
 
@@ -795,6 +794,7 @@ namespace Dune
     bool result = false;
     //if there are no elements, skip correction
     if(elements_.empty()) return result;
+
     // apply mesh-consistency algorithm to hexas if not Cartesian mesh
     // and mesh-consistency package was found during library build
     if( elementType == hexa && ! cartesian_ &&
@@ -878,7 +878,8 @@ namespace Dune
       }
     }
 
-    if(elementType == tetra)
+    // compatibilityCheck_ is false if grid was created from IntervalBlock
+    if(elementType == tetra ) //&& compatibilityCheck_ )
     {
       result = bisectionCompatibility(simplexTypes);
     }
@@ -971,7 +972,7 @@ namespace Dune
         }
         //For dim = 2 the ordering presets the refinement edge
         //for structured (and axis-aligned) grids the following results in
-        //criss-cross reffinement
+        //criss-cross refinement
         else
         {
           const VertexType& pos = position( i );
