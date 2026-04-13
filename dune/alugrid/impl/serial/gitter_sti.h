@@ -1339,6 +1339,7 @@ namespace ALUGrid
         none = DuneIndexProvider::interior,        // also the value of interior items
         closure = DuneIndexProvider::border,       // also the value of border items
         ghost_closure = DuneIndexProvider::ghost , // also the value of ghost items
+        not_inserted = 1,  // boundary segment without a user set id
         closure_2d = 203, // fake boundary for 2d elements
         periodic   = 254, // periodic boundaries (deprecated)
         undefined  = 255 } bnd_t;

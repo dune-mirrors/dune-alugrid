@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import logging
+from dune.grid import reader
 logger = logging.getLogger(__name__)
 
 # class holding an env variable name and whether to delete it again
@@ -30,8 +31,10 @@ def checkModule(includes, typeName, typeTag):
         gridModule = module(includes, typeName)
         return gridModule
 
+from dune.fem.importmesh import importMesh
+
 def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refinement=None, comm=None, serial=False, verbose=False,
-            lbMethod=9, lbUnder=0.0, lbOver=1.2, **parameters):
+            lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1, **parameters):
     """
     Create an ALUGrid instance.
 
@@ -72,17 +75,31 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
                             https://sandialabs.github.io/Zoltan/
         lbUnder      value between 0.0 and 1.0 (default 0.0)
         lbOver       value between 1.0 and 2.0 (default 1.2)
+        defaultBndId value used for the id when adding missing boundaries segments
+                     default set to '1' - but using the 'not_used' bnd_t enum would be better
 
     Returns:
     --------
 
     An ALUGrid instance with given refinement (conforming or nonconforming) and element type (simplex or cube).
     """
+    if type(constructor) == dict and "constructor" in constructor.keys():
+        return aluGrid(**constructor)
+    try:
+        useMeshio = constructor[0] == reader.meshio
+        fileName = constructor[1]
+    except:
+        useMeshio = False
+    if useMeshio:
+        return aluGrid(**importMesh(fileName, defaultBndId=defaultBndId),
+                       refinement=refinement, comm=comm, serial=serial, verbose=verbose,
+                       lbMethod=lbMethod, lbUnder=lbUnder, lbOver=lbOver,
+                       parameters=parameters)
+
     from dune.grid.grid_generator import module, getDimgrid
 
     if not dimgrid:
         dimgrid = getDimgrid(constructor)
-
     if dimworld is None:
         dimworld = dimgrid
     if elementType is None:
@@ -115,7 +132,9 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
         typeName += ", Dune::ALUGridNoComm"
 
     typeName += " >"
-    includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
+    includes = ["dune/alugrid/grid.hh",
+                "dune/alugrid/dgf.hh",
+                "dune/python/alugrid/hierarchical.hh"]
     gridModule = checkModule(includes, typeName, typeTag)
 
     if comm is not None:
