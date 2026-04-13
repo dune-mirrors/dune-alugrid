@@ -101,7 +101,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
         raise KeyError("Parameter error in ALUGrid with dimgrid=" + str(dimgrid) + ": dimgrid has to be either 2 or 3")
     if not (2 <= dimworld and dimworld <= 3):
         raise KeyError("Parameter error in ALUGrid with dimworld=" + str(dimworld) + ": dimworld has to be either 2 or 3")
-    if refinement=="Dune::conforming" and elementType=="Dune::cube":
+    if refinement=="Dune::conforming" and elementType=="cube":
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
     typeTag = str(dimgrid) + str(dimworld) + "_" + elementType

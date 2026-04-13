@@ -593,11 +593,18 @@ namespace Dune
 
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
-  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  insertBoundarySegment ( const std::vector< unsigned int >& v )
   {
+    unsigned int id=1;
+    std::vector< unsigned int > vertices(v);
+    if (vertices.size() == ALUGrid::dimension+1) // need to fixed for 3d cubes (2*dim)
+    {
+      id = vertices[0];
+      vertices.erase(vertices.begin());
+    }
     FaceType faceId = makeFace( vertices );
 
-    boundaryIds_.insert( makeBndPair( faceId, 1 ) );
+    boundaryIds_.insert( makeBndPair( faceId, id ) );
 
     std::sort( faceId.begin(), faceId.end() );
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )
