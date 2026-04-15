@@ -33,8 +33,10 @@ def checkModule(includes, typeName, typeTag):
 
 from dune.fem.importmesh import importMesh
 
-def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refinement=None, comm=None, serial=False, verbose=False,
-            lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1, **parameters):
+def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False,
+            lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1,
+            refinement=None, conforming=False,
+            **parameters):
     """
     Create an ALUGrid instance.
 
@@ -48,6 +50,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
                      dictionary holding macro grid information
         dimgrid      dimension of grid, i.e. 2 or 3
         dimworld     dimension of world, i.e. 2 or 3 and >= dimension
+        conforming   bool (default False): set to True for simplex grid to get conforming refinement
         comm         MPI communication (not yet implemented)
         serial       creates a grid without MPI support (default False)
         verbose      adds some verbosity output (default False)
@@ -105,6 +108,13 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     if elementType is None:
         elementType = parameters.pop("type")
 
+    # enable conforming refinement for duration of grid creation
+    if conforming or refinement=="Dune::conforming":
+        if not elementType == "simplex":
+            raise ValueError("conforming grids are only implemented for simplex meshes")
+        refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
+    else:
+        refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 0)
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
 
     if lbMethod < 0 or lbMethod > 15:
@@ -123,9 +133,6 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
 
     typeTag = str(dimgrid) + str(dimworld) + "_" + elementType
     typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType
-    if refinement is not None:
-        assert refinement == 'conforming' or refinement == 'nonconforming', "Refinement should be 'conforming' or 'nonconforming' if selected."
-        typeName += ", Dune::" + refinement
 
     # if serial flag is true serial version is forced.
     if serial:
@@ -153,9 +160,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     return gridView
 
 def aluConformGrid(*args, **kwargs):
-    # enable conforming refinement for duration of grid creation
-    refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
-    return aluGrid(*args, **kwargs, elementType="simplex")
+    return aluGrid(*args, **kwargs, elementType="simplex", conforming=True)
 aluConformGrid.__doc__ = aluGrid.__doc__
 
 def aluCubeGrid(*args, **kwargs):
@@ -163,7 +168,7 @@ def aluCubeGrid(*args, **kwargs):
 aluCubeGrid.__doc__ = aluGrid.__doc__
 
 def aluSimplexGrid(*args, **kwargs):
-    return aluGrid(*args, **kwargs, elementType="simplex")
+    return aluGrid(*args, **kwargs, elementType="simplex", conforming=False)
 aluSimplexGrid.__doc__ = aluGrid.__doc__
 
 grid_registry = {
