@@ -35,7 +35,7 @@ from dune.fem.importmesh import importMesh
 
 def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False,
             lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1,
-            refinement=None, conforming=False,
+            refinement=None, conforming=False, sfc='default',
             **parameters):
     """
     Create an ALUGrid instance.
@@ -80,6 +80,8 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         lbOver       value between 1.0 and 2.0 (default 1.2)
         defaultBndId value used for the id when adding missing boundaries segments
                      default set to '1' - but using the 'not_used' bnd_t enum would be better
+        sfc          space filling curve, i.e. None, 'Morton' or 'Hilbert'. Default
+                     is 'Hilbert' if Zoltan is available otherwise 'Morton'.
 
     Returns:
     --------
@@ -97,7 +99,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         return aluGrid(**importMesh(fileName, defaultBndId=defaultBndId),
                        refinement=refinement, comm=comm, serial=serial, verbose=verbose,
                        lbMethod=lbMethod, lbUnder=lbUnder, lbOver=lbOver,
-                       parameters=parameters)
+                       parameters=parameters, sfc=sfc)
 
     from dune.grid.grid_generator import module, getDimgrid
 
@@ -117,12 +119,21 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 0)
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
 
+    # load balancing parameters
     if lbMethod < 0 or lbMethod > 15:
         raise ValueError("lbMethod should be between 0 and 15!")
 
     lbMth = ALUGridEnvVar('ALUGRID_LB_METHOD', lbMethod)
     lbUnd = ALUGridEnvVar('ALUGRID_LB_UNDER',  lbUnder)
     lbOve = ALUGridEnvVar('ALUGRID_LB_OVER',   lbOver)
+
+    # space filling curve parameter
+    assert type(sfc) == str or sfc is None
+    if type(sfc) == str:
+       sfc = sfc.lower()
+    # allowed options
+    scfmth = {None: 0, "none" : 0, "morton" : 1, "z" : 1, "hilbert" : 2, "default": 2 }
+    sfcVar = ALUGridEnvVar('ALUGRID_SFC_ORDERING_MTH', scfmth[ sfc ])
 
     if not (2 <= dimgrid and dimgrid <= dimworld):
         raise KeyError("Parameter error in ALUGrid with dimgrid=" + str(dimgrid) + ": dimgrid has to be either 2 or 3")

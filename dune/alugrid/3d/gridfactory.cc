@@ -257,7 +257,7 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
     // if type of curve is chosen to be None, nothing more to be done here
-    if( curveType_ == SpaceFillingCurveOrderingType :: None )
+    if( curveType_ == ALUSpaceFillingCurveType :: None )
     {
 #ifndef NDEBUG
       std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;

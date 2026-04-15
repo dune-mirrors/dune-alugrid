@@ -541,7 +541,7 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
@@ -563,7 +563,7 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
@@ -585,7 +585,7 @@ namespace Dune
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)

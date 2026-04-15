@@ -27,6 +27,15 @@ namespace Dune
                   //!< conforming can be enabled by env flag (experimental).
   };
 
+  //! \brief types of available space filling curve orderings
+  enum ALUSpaceFillingCurveType
+  {
+    None    = 0, //! no ordering is applied and the ordering follows the insertion order
+    ZCurve  = 1, //! elements are ordered following a Morton (Z) curve
+    Hilbert = 2  //! elements are ordered following a Hilbert curve
+  };
+
+
   //! \brief type of class for specialization of serial ALUGrid (No_Comm as communicator)
   struct ALUGridNoComm
   {

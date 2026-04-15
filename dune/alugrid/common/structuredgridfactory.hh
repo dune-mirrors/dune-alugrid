@@ -84,7 +84,7 @@ namespace Dune
         pSize_( comm_.size() ),
         elementCuts_( pSize_, -1 ),
 #ifdef USE_ALUGRID_SFC_ORDERING
-        sfc_( SpaceFillingCurveOrderingType::ZCurve, lowerLeft, upperRight, comm_ ),
+        sfc_( ALUSpaceFillingCurveType::ZCurve, lowerLeft, upperRight, comm_ ),
 #endif
         maxIndex_( -1.0 )
       {
