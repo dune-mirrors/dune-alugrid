@@ -31,7 +31,7 @@ def checkModule(includes, typeName, typeTag):
         gridModule = module(includes, typeName)
         return gridModule
 
-from dune.fem.importmesh import importMesh
+from dune.alugrid.importmesh import importMesh
 
 def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False,
             lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1,

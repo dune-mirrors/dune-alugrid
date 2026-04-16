@@ -1,6 +1,7 @@
 add_python_targets(alugrid
   __init__
   _grids
+  importmesh
 )
 
 # link against alugrid library and enable all package flags
