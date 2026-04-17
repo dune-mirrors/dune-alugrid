@@ -76,6 +76,7 @@ namespace Dune
     static const unsigned int numCorners = EntityCount< elementType >::numVertices;
     static const unsigned int numFaces = EntityCount< elementType >::numFaces;
     static const unsigned int numFaceCorners = EntityCount< elementType >::numVerticesPerFace;
+    static const int not_inserted = ALU3DSPACE Gitter::hbndseg::bnd_t :: not_inserted;
 
     typedef ElementTopologyMapping< elementType > ElementTopologyMappingType;
     typedef FaceTopologyMapping< elementType > FaceTopologyMappingType;
@@ -283,9 +284,11 @@ namespace Dune
      */
     GridPtrType createGrid ();
 
-    GridPtrType createGrid ( const bool addMissingBoundaries, const std::string dgfName = "" );
+    // addMissingBoundaries: don't add if false or 0 else value is used as
+    // default boundary id for the missing boundaries
+    GridPtrType createGrid ( const unsigned int addMissingBoundaries, const std::string dgfName = "" );
 
-    GridPtrType createGrid ( const bool addMissingBoundaries, bool temporary, const std::string dgfName = "" );
+    GridPtrType createGrid ( const unsigned int addMissingBoundaries, bool temporary, const std::string dgfName = "" );
 
     virtual unsigned int
     insertionIndex ( const typename Codim< 0 >::Entity &entity ) const
@@ -394,7 +397,7 @@ namespace Dune
     bool identifyFaces ( const Transformation &transformation, const FaceType &key1, const FaceType &key2, const int defaultId );
     void searchPeriodicNeighbor ( FaceMap &faceMap, typename FaceMap::iterator &pos, const int defaultId  );
     void reinsertBoundary ( const FaceMap &faceMap, const typename FaceMap::const_iterator &pos, const int id );
-    void recreateBoundaryIds ( const int defaultId = 1 );
+    void recreateBoundaryIds ( const unsigned int defaultId = not_inserted );
 
     // sort elements according to hilbert space filling curve (if Zoltan is available)
     void sortElements( const VertexVector& vertices, const ElementVector& elements, std::vector< unsigned int >& ordering );
@@ -538,7 +541,7 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
@@ -560,7 +563,7 @@ namespace Dune
     allowGridGeneration_( rank_ == 0 ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
@@ -582,7 +585,7 @@ namespace Dune
     allowGridGeneration_( true ),
     foundGlobalIndex_( false ),
     communicator_( communicator ),
-    curveType_( SpaceFillingCurveOrderingType :: DefaultCurve ),
+    curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
@@ -593,11 +596,18 @@ namespace Dune
 
   template< class ALUGrid >
   inline void ALU3dGridFactory< ALUGrid > ::
-  insertBoundarySegment ( const std::vector< unsigned int >& vertices )
+  insertBoundarySegment ( const std::vector< unsigned int >& v )
   {
+    unsigned int id=not_inserted;
+    std::vector< unsigned int > vertices(v);
+    if (vertices.size() == ALUGrid::dimension+1) // need to fixed for 3d cubes (2*dim)
+    {
+      id = vertices[0];
+      vertices.erase(vertices.begin());
+    }
     FaceType faceId = makeFace( vertices );
 
-    boundaryIds_.insert( makeBndPair( faceId, 1 ) );
+    boundaryIds_.insert( makeBndPair( faceId, id ) );
 
     std::sort( faceId.begin(), faceId.end() );
     if( boundaryProjections_.find( faceId ) != boundaryProjections_.end() )

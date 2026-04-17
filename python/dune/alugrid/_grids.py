@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import logging
+from dune.grid import reader
 logger = logging.getLogger(__name__)
 
 # class holding an env variable name and whether to delete it again
@@ -30,8 +31,12 @@ def checkModule(includes, typeName, typeTag):
         gridModule = module(includes, typeName)
         return gridModule
 
-def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refinement=None, comm=None, serial=False, verbose=False,
-            lbMethod=9, lbUnder=0.0, lbOver=1.2, **parameters):
+from dune.alugrid.importmesh import importMesh
+
+def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=None, serial=False, verbose=False,
+            lbMethod=9, lbUnder=0.0, lbOver=1.2, defaultBndId=1,
+            refinement=None, conforming=False, sfc='default',
+            **parameters):
     """
     Create an ALUGrid instance.
 
@@ -45,6 +50,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
                      dictionary holding macro grid information
         dimgrid      dimension of grid, i.e. 2 or 3
         dimworld     dimension of world, i.e. 2 or 3 and >= dimension
+        conforming   bool (default False): set to True for simplex grid to get conforming refinement
         comm         MPI communication (not yet implemented)
         serial       creates a grid without MPI support (default False)
         verbose      adds some verbosity output (default False)
@@ -72,24 +78,48 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
                             https://sandialabs.github.io/Zoltan/
         lbUnder      value between 0.0 and 1.0 (default 0.0)
         lbOver       value between 1.0 and 2.0 (default 1.2)
+        defaultBndId value used for the id when adding missing boundaries segments
+                     default set to '1' - but using the 'not_used' bnd_t enum would be better
+        sfc          space filling curve, i.e. None, 'Morton' or 'Hilbert'. Default
+                     is 'Hilbert' if Zoltan is available otherwise 'Morton'.
 
     Returns:
     --------
 
     An ALUGrid instance with given refinement (conforming or nonconforming) and element type (simplex or cube).
     """
+    if type(constructor) == dict and "constructor" in constructor.keys():
+        return aluGrid(**constructor)
+    try:
+        useMeshio = constructor[0] == reader.meshio
+        fileName = constructor[1]
+    except:
+        useMeshio = False
+    if useMeshio:
+        return aluGrid(**importMesh(fileName, defaultBndId=defaultBndId),
+                       refinement=refinement, comm=comm, serial=serial, verbose=verbose,
+                       lbMethod=lbMethod, lbUnder=lbUnder, lbOver=lbOver,
+                       parameters=parameters, sfc=sfc)
+
     from dune.grid.grid_generator import module, getDimgrid
 
     if not dimgrid:
         dimgrid = getDimgrid(constructor)
-
     if dimworld is None:
         dimworld = dimgrid
     if elementType is None:
         elementType = parameters.pop("type")
 
+    # enable conforming refinement for duration of grid creation
+    if conforming or refinement=="Dune::conforming":
+        if not elementType == "simplex":
+            raise ValueError("conforming grids are only implemented for simplex meshes")
+        refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
+    else:
+        refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 0)
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
 
+    # load balancing parameters
     if lbMethod < 0 or lbMethod > 15:
         raise ValueError("lbMethod should be between 0 and 15!")
 
@@ -97,25 +127,32 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     lbUnd = ALUGridEnvVar('ALUGRID_LB_UNDER',  lbUnder)
     lbOve = ALUGridEnvVar('ALUGRID_LB_OVER',   lbOver)
 
+    # space filling curve parameter
+    assert type(sfc) == str or sfc is None
+    if type(sfc) == str:
+       sfc = sfc.lower()
+    # allowed options
+    scfmth = {None: 0, "none" : 0, "morton" : 1, "z" : 1, "hilbert" : 2, "default": 2 }
+    sfcVar = ALUGridEnvVar('ALUGRID_SFC_ORDERING_MTH', scfmth[ sfc ])
+
     if not (2 <= dimgrid and dimgrid <= dimworld):
         raise KeyError("Parameter error in ALUGrid with dimgrid=" + str(dimgrid) + ": dimgrid has to be either 2 or 3")
     if not (2 <= dimworld and dimworld <= 3):
         raise KeyError("Parameter error in ALUGrid with dimworld=" + str(dimworld) + ": dimworld has to be either 2 or 3")
-    if refinement=="Dune::conforming" and elementType=="Dune::cube":
+    if refinement=="Dune::conforming" and elementType=="cube":
         raise KeyError("Parameter error in ALUGrid with refinement=" + refinement + " and type=" + elementType + ": conforming refinement is only available with simplex element type")
 
     typeTag = str(dimgrid) + str(dimworld) + "_" + elementType
     typeName = "Dune::ALUGrid< " + str(dimgrid) + ", " + str(dimworld) + ", Dune::" + elementType
-    if refinement is not None:
-        assert refinement == 'conforming' or refinement == 'nonconforming', "Refinement should be 'conforming' or 'nonconforming' if selected."
-        typeName += ", Dune::" + refinement
 
     # if serial flag is true serial version is forced.
     if serial:
         typeName += ", Dune::ALUGridNoComm"
 
     typeName += " >"
-    includes = ["dune/alugrid/grid.hh", "dune/alugrid/dgf.hh"]
+    includes = ["dune/alugrid/grid.hh",
+                "dune/alugrid/dgf.hh",
+                "dune/python/alugrid/hierarchical.hh"]
     gridModule = checkModule(includes, typeName, typeTag)
 
     if comm is not None:
@@ -134,9 +171,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, refineme
     return gridView
 
 def aluConformGrid(*args, **kwargs):
-    # enable conforming refinement for duration of grid creation
-    refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
-    return aluGrid(*args, **kwargs, elementType="simplex")
+    return aluGrid(*args, **kwargs, elementType="simplex", conforming=True)
 aluConformGrid.__doc__ = aluGrid.__doc__
 
 def aluCubeGrid(*args, **kwargs):
@@ -144,7 +179,7 @@ def aluCubeGrid(*args, **kwargs):
 aluCubeGrid.__doc__ = aluGrid.__doc__
 
 def aluSimplexGrid(*args, **kwargs):
-    return aluGrid(*args, **kwargs, elementType="simplex")
+    return aluGrid(*args, **kwargs, elementType="simplex", conforming=False)
 aluSimplexGrid.__doc__ = aluGrid.__doc__
 
 grid_registry = {

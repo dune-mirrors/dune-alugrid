@@ -11,6 +11,7 @@
 #include <dune/common/parallel/mpihelper.hh>
 #include <dune/common/parallel/communication.hh>
 #include <dune/common/parallel/mpicommunication.hh>
+#include <dune/alugrid/common/declaration.hh>
 
 #include <dune/alugrid/impl/parallel/zcurve.hh>
 #if HAVE_ZOLTAN
@@ -32,7 +33,7 @@ namespace ALUGridSFC {
         Communication ;
 
 #if ! HAVE_ZOLTAN
-    typedef void                      Zoltan_Struct;
+    typedef void            Zoltan_Struct;
     typedef Communication   Zoltan;
 #endif
 
@@ -172,15 +173,15 @@ namespace Dune {
     typedef Dune :: Communication< typename MPIHelper :: MPICommunicator >
         Communication ;
   public:
-    enum CurveType { ZCurve, Hilbert, None };
+    using CurveType = ALUSpaceFillingCurveType;
 
 #ifdef DISABLE_ALUGRID_SFC_ORDERING
-    static const CurveType DefaultCurve = None ;
+    static const CurveType DefaultCurve = CurveType::None ;
 #else
 #if HAVE_ZOLTAN
-    static const CurveType DefaultCurve = Hilbert ;
+    static const CurveType DefaultCurve = CurveType::Hilbert ;
 #else
-    static const CurveType DefaultCurve = ZCurve ;
+    static const CurveType DefaultCurve = CurveType::ZCurve ;
 #endif // HAVE_ZOLTAN
 #endif // DISABLE_ALUGRID_SFC_ORDERING
 
@@ -191,6 +192,30 @@ namespace Dune {
     const CurveType curveType_;
 
   public:
+    static CurveType getCurveType()
+    {
+      // if curves are enabled check env variable
+      if constexpr ( DefaultCurve != CurveType::None )
+      {
+        // if environment var has been set (mainly from Python side)
+        if( getenv("ALUGRID_SFC_ORDERING_MTH") )
+        {
+          const int curveType = atoi(getenv("ALUGRID_SFC_ORDERING_MTH"));
+          if( curveType == int(CurveType::None) )
+            return CurveType::None;
+#if HAVE_ZOLTAN
+          if( curveType == int(CurveType::Hilbert) )
+            return CurveType::Hilbert;
+#endif
+          // return ZCurve if Zoltan was not found
+          if( curveType >= int(CurveType::ZCurve) )
+            return CurveType::ZCurve;
+        }
+      }
+      return DefaultCurve;
+    }
+
+
     SpaceFillingCurveOrdering( const CurveType& curveType,
                                const Coordinate& lower,
                                const Coordinate& upper,

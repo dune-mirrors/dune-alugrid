@@ -257,7 +257,7 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
     // if type of curve is chosen to be None, nothing more to be done here
-    if( curveType_ == SpaceFillingCurveOrderingType :: None )
+    if( curveType_ == ALUSpaceFillingCurveType :: None )
     {
 #ifndef NDEBUG
       std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
@@ -481,7 +481,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
-  ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, const std::string dgfName )
+  ALU3dGridFactory< ALUGrid >::createGrid ( const unsigned int addMissingBoundaries, const std::string dgfName )
   {
     return createGrid( addMissingBoundaries, true, dgfName );
   }
@@ -489,7 +489,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
-  ALU3dGridFactory< ALUGrid >::createGrid ( const bool addMissingBoundaries, bool temporary, const std::string name )
+  ALU3dGridFactory< ALUGrid >::createGrid ( const unsigned int addMissingBoundaries, bool temporary, const std::string name )
   {
     correctElementOrientation();
 
@@ -591,7 +591,7 @@ namespace Dune
     //Another way would be to store faces as element number + local face index and
     // create them AFTER correctelementorientation was called!!
     if( addMissingBoundaries || ! faceTrafoEmpty || dimension == 2 )
-      recreateBoundaryIds();
+      recreateBoundaryIds(addMissingBoundaries);
 
     // sort boundary ids to insert real boundaries first and then fake
     // boundaries
@@ -768,6 +768,8 @@ namespace Dune
 
         // only positive boundary id's are allowed
         assert( bndType > 0 );
+        if (! (bndType > 0) )
+          DUNE_THROW(GridError, "A boundary id is not greater than zero - provide a default (e.g. in the dgf DOMAIN block or in the constructor)");
 
         // generate boundary segment pointer
         FaceType faceId ( boundaryId.first);
@@ -1231,7 +1233,7 @@ namespace Dune
   template< class ALUGrid >
   alu_inline
   void ALU3dGridFactory< ALUGrid >
-    ::recreateBoundaryIds ( const int defaultId )
+    ::recreateBoundaryIds ( const unsigned int defaultId )
   {
     typedef typename FaceMap::iterator FaceIterator;
     FaceMap faceMap;
