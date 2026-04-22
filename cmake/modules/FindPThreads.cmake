@@ -21,6 +21,7 @@ if(CMAKE_USE_PTHREADS_INIT AND NOT HAVE_PTHREAD)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PTHREADS=1")
   endif(USE_PTHREADS)
 
+  include(CheckCXXSourceCompiles)
   check_cxx_source_compiles(
                 "include <pthread.h>
                 static const int maxThreads = 2 ;

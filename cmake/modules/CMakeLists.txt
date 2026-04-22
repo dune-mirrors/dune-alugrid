@@ -1,5 +1,4 @@
 set(modules
-    CMakeLists.txt
     DuneAlugridMacros.cmake
     FindDLMalloc.cmake
     FindPThreads.cmake
