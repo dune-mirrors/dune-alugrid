@@ -46,11 +46,21 @@
 #define USE_PARALLEL_TEST 1
 #endif
 
-template< int dim, int dimworld >
-struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimworld, Dune::simplex, Dune::conforming > >
+template< int dim, int dimworld, Dune::ALUGridRefinementType refineType, class Comm >
+struct EnableLevelIntersectionIteratorCheck< Dune::ALUGrid< dim, dimworld, Dune::simplex, refineType, Comm > >
 {
   static const bool v = false;
 };
+
+/* // false is currently the default
+#include <dune/grid/test/checkindexset.hh>
+template< int dim, int dimworld, Dune::ALUGridElementType elType, Dune::ALUGridRefinementType refineType, class Comm >
+struct EnableSubIndexCheck< Dune::ALUGrid< dim, dimworld, elType, refineType, Comm > >
+{
+  static const bool v = false;
+};
+*/
+
 
 template <class Grid>
 void checkCapabilities(const Grid& grid)
@@ -458,6 +468,7 @@ void checkGrid( GridType& grid )
   catch (const Dune::Exception& e )
   {
     std::cout << "Caught " << e.what() << std::endl;
+    std::abort();
   }
   catch (...)
   {
