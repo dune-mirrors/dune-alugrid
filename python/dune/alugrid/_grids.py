@@ -115,6 +115,8 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         if not elementType == "simplex":
             raise ValueError("conforming grids are only implemented for simplex meshes")
         refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
+        from dune.alugrid import _add_conforming_citation
+        _add_conforming_citation()
     else:
         refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 0)
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
