@@ -4,8 +4,10 @@ from ._grids import *
 registry = dict()
 registry["grid"] = grid_registry
 
+__conforming_citations__ = False
 # references for ALUGrid
-__cite_dune_module_as__ = """
+def _cite_dune_module_as():
+    _citation = """
 @article{alugrid:16,
   author = {Alk{\\"a}mper, M. and Dedner, A. and Kl{\\"o}fkorn, R. and Nolte, M.},
   title = {{The DUNE-ALUGrid Module.}},
@@ -17,16 +19,8 @@ __cite_dune_module_as__ = """
   doi = {10.11588/ans.2016.1.23252}
 }
 """
-__conforming_citations__ = None
-
-# references for conforming ALUGrid
-def _add_conforming_citation():
-    global __cite_dune_module_as__
-    global __conforming_citations__
-    if __conforming_citations__ is None:
-        __conforming_citations__ = True
-        __cite_dune_module_as__ += """
-@article{dnvb:16,
+    if __conforming_citations__:
+        _citation += """@article{dnvb:16,
   author    = {Alk{\\"{a}}mper, M. and  Kl{\\"o}fkorn, R.},
   title = {{Distributed Newest Vertex Bisection}},
   journal = {Journal of Parallel and Distributed Computing},
@@ -36,3 +30,8 @@ def _add_conforming_citation():
   doi = {10.1016/j.jpdc.2016.12.003}
 }
 """
+    return _citation
+
+def _add_conforming_citation():
+    global __conforming_citations__
+    __conforming_citations__ = True
