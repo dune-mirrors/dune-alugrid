@@ -1,0 +1,36 @@
+DGF
+
+VERTEX
+0 0
+1 0
+0 1
+-1 0
+0 -1
+#
+
+SIMPLEX
+0 1 2
+0 2 3
+0 3 4
+0 4 1
+#
+
+BondaryDomain
+default 1
+#
+
+GridParameter
+Name Disc
+RefinementEdge longest
+bisectioncompatibility 1
+
+#
+
+PROJECTION
+function p(x) = x / |x|
+function q(x) = 1 * p(x)
+segment 1 2 p
+segment 2 3 p
+segment 3 4 p
+segment 4 1 p
+#

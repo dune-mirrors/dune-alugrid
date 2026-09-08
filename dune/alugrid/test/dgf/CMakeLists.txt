@@ -1,6 +1,9 @@
 set(DGFS
   2-3-testgrid.dgf
   ball.dgf
+  circ.dgf
+  circle-cube.dgf
+  circle.dgf
   cube-testgrid-2-2.dgf
   cube-testgrid-2-3.dgf
   another-testgrid-2-3.dgf

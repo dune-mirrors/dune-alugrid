@@ -2195,7 +2195,7 @@ namespace ALUGrid
   }
 
   Gitter::Geometric::hbndseg4_GEO * GitterBasisPll::MacroGitterBasisPll::
-  insert_hbnd4 (hface4_GEO * f, int t, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, int t, Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
     if (b == Gitter::hbndseg_STI::closure)
@@ -2206,7 +2206,7 @@ namespace ALUGrid
     }
     else
     {
-      return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
+      return new Hbnd4PllExternal < Hbnd4DefaultType, BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b, pv);
     }
   }
 
@@ -2217,11 +2217,12 @@ namespace ALUGrid
                 MacroGhostInfoHexa* ghInfo)
   {
     typedef GitterBasis::Objects::Hbnd4Default Hbnd4DefaultType;
+    ProjectVertexPtr pv; // empty projection since this is internal boundary
     // if internal boundary create ghost
     if (b == Gitter::hbndseg_STI::closure )
     {
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
-        return insert_hbnd4( f, t, b );
+        return insert_hbnd4( f, t, b, pv);
 
       alugrid_assert ( ghInfo );
       return new Hbnd4PllInternal < Hbnd4DefaultType , BndsegPllBaseXClosure < Hbnd4DefaultType > ,
@@ -2231,7 +2232,7 @@ namespace ALUGrid
     else
     {
       return new Hbnd4PllExternal < Hbnd4DefaultType ,
-          BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg4_GEO > > (f,t, b, pv);
     }
   }
 
@@ -2242,10 +2243,13 @@ namespace ALUGrid
                 MacroGhostInfoTetra * ghInfo)
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
+    ProjectVertexPtr pv; // empty projection since this is internal boundary
     if (b == Gitter::hbndseg_STI::closure)
     {
       if( ! indexManagerStorage().myGrid()->ghostCellsEnabled() )
-        return insert_hbnd3( f, t, b );
+      {
+        return insert_hbnd3( f, t, b, pv );
+      }
 
       alugrid_assert ( ghInfo );
       // this HbnPll has a ghost element so is dosent get and index ==> dummyindex == 5 (see gitter_sti.h)
@@ -2256,14 +2260,14 @@ namespace ALUGrid
     else
     {
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-          BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+          BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b, pv );
     }
   }
 
   // version without point
   Gitter::Geometric::hbndseg3_GEO * GitterBasisPll::MacroGitterBasisPll::
   insert_hbnd3 (hface3_GEO * f, int t,
-                Gitter::hbndseg_STI::bnd_t b )
+                Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv )
   {
     typedef GitterBasis::Objects::Hbnd3Default Hbnd3DefaultType;
     if (b == Gitter::hbndseg_STI::closure)
@@ -2274,8 +2278,9 @@ namespace ALUGrid
     }
     else
     {
+      // pass ProjectVertex here, since this is the boundary projection
       return new Hbnd3PllExternal < Hbnd3DefaultType ,
-             BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b );
+             BndsegPllBaseXMacro < hbndseg3_GEO > > (f,t, b, pv);
     }
   }
 

@@ -548,30 +548,32 @@ namespace ALUGrid
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd3 (hface3_GEO * f, int i,
-                Gitter::hbndseg_STI::bnd_t b)
+                Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv)
   {
     // the NULL pointer is the pointer to the father which does not exists
-    return new Objects::hbndseg3_IMPL ( 0, f, i, b );
+    return new Objects::hbndseg3_IMPL ( 0, f, i, b, pv );
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd3 (hface3_GEO * f, int i,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoTetra* )
   {
-    return insert_hbnd3(f,i,b);
+    ProjectVertexPtr pv;
+    return insert_hbnd3(f,i,b, pv);
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, int i, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, int i, Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv)
   {
-    return new Objects::hbndseg4_IMPL ( 0, f, i, b );
+    return new Objects::hbndseg4_IMPL ( 0, f, i, b, pv );
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd4 (hface4_GEO * f, int i,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoHexa* )
   {
-    return insert_hbnd4 (f,i,b);
+    ProjectVertexPtr pv;
+    return insert_hbnd4 (f,i,b, pv);
   }
 
 

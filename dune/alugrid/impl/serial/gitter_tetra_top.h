@@ -202,7 +202,7 @@ namespace ALUGrid
 
     public:
       // constructor for serial macro boundary elements
-      inline Hbnd3Top (int,myhface_t *,int, const bnd_t b );
+      inline Hbnd3Top (int,myhface_t *,int, const bnd_t b, const ProjectVertexPtr& pv = ProjectVertexPtr() );
       // constructor for children
       inline Hbnd3Top (int, myhface_t *,int,
                        innerbndseg_t * up, const bnd_t b,
@@ -286,7 +286,7 @@ namespace ALUGrid
             else
             {
               std::cerr << "ERROR (FATAL): Wrong refinement rule." << std::endl;
-              abort();
+              std::abort();
             }
           }
         };
@@ -973,7 +973,7 @@ namespace ALUGrid
 
   // serial macro bnd constructor
   template < class A > inline Hbnd3Top < A > ::
-  Hbnd3Top (int l, myhface_t * f, int i, const bnd_t bt) :
+  Hbnd3Top (int l, myhface_t * f, int i, const bnd_t bt, const ProjectVertexPtr& pv) :
     A (f, i ),
     _bbb (0), _dwn (0), _up (0) ,
     _bt( bt )
@@ -986,6 +986,9 @@ namespace ALUGrid
 
     // for macro bnd faces store current index as segment index
     _segmentId = this->getIndex();
+
+    // set boundary projection (could be empty)
+    this->_pvPtr = pv;
 
     // set boundary id
     setBoundaryId( _bt );
@@ -1014,6 +1017,7 @@ namespace ALUGrid
     {
       // get segment index from father if existent
       _segmentId = _up->_segmentId;
+
       // set boundary projection from father
       this->_pvPtr = _up->_pvPtr;
     }
