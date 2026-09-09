@@ -24,7 +24,7 @@ namespace ALUGrid
       typedef typename A :: myhface3_t myhface3_t ;
       typedef typename A :: bnd_t     bnd_t ;
     public :
-      inline Hbnd3PllExternal (myhface3_t *, bool, const bnd_t bt) ;
+      inline Hbnd3PllExternal (myhface3_t *, bool, const bnd_t bt, const ProjectVertexPtr& pv) ;
       inline ~Hbnd3PllExternal () ;
       ElementPllXIF_t & accessPllX () ;
       const ElementPllXIF_t & accessPllX () const ;
@@ -145,8 +145,8 @@ namespace ALUGrid
   //    #    #    #  ######     #    #    #  ######
   //
   template < class A, class MX > inline Hbnd3PllExternal < A, MX > ::
-  Hbnd3PllExternal (myhface3_t * f, bool isRear, const bnd_t bt)
-      : Hbnd3Top < A > (0,f,isRear,bt), _mxt (new MX (*this)) {
+  Hbnd3PllExternal (myhface3_t * f, bool isRear, const bnd_t bt, const ProjectVertexPtr& pv)
+      : Hbnd3Top < A > (0,f,isRear,bt,pv), _mxt (new MX (*this)) {
     this->restoreFollowFace () ;
     return ;
   }
@@ -231,7 +231,7 @@ namespace ALUGrid
                 const bnd_t bt,
                 BuilderIF& mgb ,
                 MacroGhostInfoTetra* ghInfo)
-   : Hbnd3Top < micro_t > (0,f,isRear,bt)
+   : Hbnd3Top < micro_t > (0,f,isRear,bt, ProjectVertexPtr())
    , _mxt(0)
    , _mgb(mgb)
    , _gm( new MacroGhostTetra( _mgb , ghInfo, f ) )
@@ -249,7 +249,7 @@ namespace ALUGrid
   HbndPllMacro (myhface3_t * f, bool isRear,
                 const bnd_t bt,
                 BuilderIF& mgb )
-   : Hbnd3Top < micro_t > (0,f,isRear,bt)
+   : Hbnd3Top < micro_t > (0,f,isRear,bt, ProjectVertexPtr())
    , _mxt ( new MX (*this) )
    , _mgb(mgb)
    , _gm( 0 )

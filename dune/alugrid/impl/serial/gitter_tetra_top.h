@@ -197,7 +197,7 @@ namespace ALUGrid
 
     public:
       // constructor for serial macro boundary elements
-      inline Hbnd3Top (int,myhface_t *, bool, const bnd_t b );
+      inline Hbnd3Top (int,myhface_t *, bool, const bnd_t b, const ProjectVertexPtr& pv );
       // constructor for children
       inline Hbnd3Top (int, myhface_t *, bool,
                        innerbndseg_t * up, const bnd_t b,
@@ -1142,7 +1142,7 @@ namespace ALUGrid
 
   // serial macro bnd constructor
   template < class A > inline Hbnd3Top < A > ::
-  Hbnd3Top (int l, myhface_t * f, bool isRear, const bnd_t bt) :
+  Hbnd3Top (int l, myhface_t * f, bool isRear, const bnd_t bt, const ProjectVertexPtr& pv ) :
     A (f, isRear ),
     _bbb (0), _dwn (0), _up (0) ,
     _bt( bt )
@@ -1155,6 +1155,9 @@ namespace ALUGrid
 
     // for macro bnd faces store current index as segment index
     _segmentId = this->getIndex();
+
+    // set boundary projection (could be empty)
+    this->_pvPtr = pv;
 
     // set boundary id
     setBoundaryId( _bt );

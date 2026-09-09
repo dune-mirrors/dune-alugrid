@@ -561,32 +561,35 @@ namespace ALUGrid
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
-                Gitter::hbndseg_STI::bnd_t b)
+                Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv)
   {
     // the NULL pointer is the pointer to the father which does not exists
     return new Objects::hbndseg3_IMPL ( 0, // level
                                         f, isRear[0], // face and isRear
-                                        b ); // bnd value
+                                        b, // bnd value
+                                        pv); // bnd projection (could be empty)
   }
 
   GitterBasis::hbndseg3_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd3 (hface3_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoTetra* )
   {
-    return insert_hbnd3(f,isRear,b);
+    ProjectVertexPtr pv; // empty projection
+    return insert_hbnd3(f,isRear,b, pv);
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
-  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear, Gitter::hbndseg_STI::bnd_t b)
+  insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear, Gitter::hbndseg_STI::bnd_t b, const ProjectVertexPtr& pv)
   {
-    return new Objects::hbndseg4_IMPL ( 0, f, isRear[0], b );
+    return new Objects::hbndseg4_IMPL ( 0, f, isRear[0], b, pv );
   }
 
   GitterBasis::hbndseg4_GEO * GitterBasis::MacroGitterBasis::
   insert_hbnd4 (hface4_GEO * f, const IsRearFlag& isRear,
                 Gitter::hbndseg_STI::bnd_t b, MacroGhostInfoHexa* )
   {
-    return insert_hbnd4 (f, isRear, b);
+    ProjectVertexPtr pv; // empty projection
+    return insert_hbnd4 (f, isRear, b, pv);
   }
 
 

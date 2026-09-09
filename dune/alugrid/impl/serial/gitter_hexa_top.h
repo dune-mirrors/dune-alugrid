@@ -404,7 +404,7 @@ namespace ALUGrid
       inline Hbnd4Top (int,myhface4_t *, bool, innerbndseg_t *, Gitter::helement_STI *, int);
 
       // constructor for macro element in the serial case
-      inline Hbnd4Top (int,myhface4_t *, bool, const bnd_t bt );
+      inline Hbnd4Top (int,myhface4_t *, bool, const bnd_t bt, const ProjectVertexPtr& pv );
 
       virtual ~Hbnd4Top ();
       using A::refineBalance;
@@ -1051,7 +1051,7 @@ namespace ALUGrid
   }
 
   template < class A > inline Hbnd4Top < A >::
-  Hbnd4Top (int l, myhface4_t * f, bool isRear, const bnd_t bt )
+  Hbnd4Top (int l, myhface4_t * f, bool isRear, const bnd_t bt, const ProjectVertexPtr& pv )
     : A (f, isRear),
       _bbb (0), _dwn (0), _up(0) ,
       _bt(bt)
@@ -1064,6 +1064,9 @@ namespace ALUGrid
 
     // store segment by using index
     _segmentId = this->getIndex();
+
+    // set boundary projection (could be empty)
+    this->_pvPtr = pv;
 
     // store boundary id
     setBoundaryId( _bt );

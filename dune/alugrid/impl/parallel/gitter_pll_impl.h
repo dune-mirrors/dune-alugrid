@@ -844,12 +844,12 @@ namespace ALUGrid
           virtual VertexGeo     * insert_ghostvx (double,double,double,int);
 
           // insert hbnd_int without ghost hexa
-          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, const ProjectVertexPtr& pv);
           // insert hbnd_int with ghost hexa
           virtual hbndseg4_GEO  * insert_hbnd4  (hface4_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoHexa* );
 
           // normal insert hbnd3 version
-          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t);
+          virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, const ProjectVertexPtr& pv);
           // version that get point and create ghost macro
           virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, const IsRearFlag&, Gitter::hbndseg_STI::bnd_t, MacroGhostInfoTetra* );
           // version that created internal boundary on ghost elements
@@ -1115,8 +1115,14 @@ namespace ALUGrid
   packAsBnd (int fce, int who, ObjectStream & os, const bool ghostCellsEnabled ) const
   {
     alugrid_assert (!fce);
-    if (myhface_t::polygonlength == 3) os.writeObject (MacroGridMoverIF::HBND3EXT);
-    else if (myhface_t::polygonlength == 4) os.writeObject (MacroGridMoverIF::HBND4EXT);
+    if constexpr (myhface_t::polygonlength == 3)
+    {
+      os.writeObject (MacroGridMoverIF::HBND3EXT);
+    }
+    else if constexpr (myhface_t::polygonlength == 4)
+    {
+      os.writeObject (MacroGridMoverIF::HBND4EXT);
+    }
     else
     {
       std::cerr << "ERROR (fatal): Wrong face type in BndsegPllBaseXMacro::packAsBnd." << std::endl;
@@ -1127,7 +1133,9 @@ namespace ALUGrid
     os.writeObject (myhbnd ().bndtype ());
     {
       for (int i = 0; i < myhface_t::polygonlength; ++i)
+      {
         os.writeObject ( myhbnd ().myvertex (fce,i)->ident () );
+      }
     }
 
     // write isRear information

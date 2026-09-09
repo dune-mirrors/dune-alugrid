@@ -141,10 +141,9 @@ namespace ALUGrid
         hface3_GEO * face  = faceFrontPair.first;
         alugrid_assert( ! isRearFlag.valid() ? ( ! face->nb.emptyFront() || ! face->nb.emptyRear() ) : true);
         IsRearFlag isRear = isRearFlag.valid() ? isRearFlag : IsRearFlag(face->nb.emptyRear());
-        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face, isRear, bt);
+        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face, isRear, bt, pv);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
-        hb3->setBoundaryProjection( pv );
         _hbnd3Map [key] = hb3;
         return true;
       }
@@ -178,10 +177,9 @@ namespace ALUGrid
         // if isRearFlag is in-valid we need that already on neighbor of face has been set
         alugrid_assert( ! isRearFlag.valid() ? ( ! face->nb.emptyFront() || ! face->nb.emptyRear() ) : true);
         IsRearFlag isRear = isRearFlag.valid() ? isRearFlag : IsRearFlag(face->nb.emptyRear());
-        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face, isRear, bt);
+        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face, isRear, bt, pv);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
-        hb4->setBoundaryProjection( pv );
         _hbnd4Map [key] = hb4;
         return true;
       }
@@ -672,6 +670,8 @@ namespace ALUGrid
       // reserve memory for container in case it's vector
       reserve( myBuilder ()._hbndseg4List, _hbnd4Int.size() );
 
+      ProjectVertexPtr pv;
+
       typedef hbnd4intMap_t::iterator iterator;
       const iterator hbnd4IntEnd = _hbnd4Int.end ();
       for (hbnd4intMap_t::iterator i = _hbnd4Int.begin (); i != hbnd4IntEnd; ++i)
@@ -681,7 +681,7 @@ namespace ALUGrid
         {
           hbndseg4_GEO * hb4 =
              myBuilder ().insert_hbnd4 (p.first(), p.second(),
-                                        Gitter::hbndseg_STI::closure);
+                                        Gitter::hbndseg_STI::closure, pv);
           myBuilder ()._hbndseg4List.push_back (hb4);
         }
         delete (*i).second;
@@ -693,6 +693,8 @@ namespace ALUGrid
       // reserve memory for container in case it's vector
       reserve( myBuilder ()._hbndseg3List, _hbnd3Int.size() );
 
+      ProjectVertexPtr pv;
+
       typedef hbnd3intMap_t::iterator  iterator;
       const iterator hbnd3IntEnd = _hbnd3Int.end ();
       for (hbnd3intMap_t::iterator i = _hbnd3Int.begin (); i != hbnd3IntEnd; ++i)
@@ -701,7 +703,7 @@ namespace ALUGrid
         if (p.first()->ref == 1)
         {
           hbndseg3_GEO * hb3 =
-            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure);
+            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure, pv);
           myBuilder ()._hbndseg3List.push_back (hb3);
         }
         delete (*i).second;
