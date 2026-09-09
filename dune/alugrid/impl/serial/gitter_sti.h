@@ -1398,9 +1398,6 @@ namespace ALUGrid
         return 0;
       }
 
-      //! store shared pointer to boundary projection object (pass empty pointer to remove)
-      virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr ) = 0;
-
       //! return type of projection if set, otherwise none
       virtual typename ProjectVertex::ProjectionType projectionType() const
       {
@@ -2404,17 +2401,6 @@ namespace ALUGrid
         // unmark edges and vertices as leaf
         virtual void detachleafs();
 
-        //! store shared pointer to boundary projection object (pass empty pointer to remove)
-        virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
-        {
-          if( pvPtr && pvPtr->projectionType() != ProjectVertex::none )
-          {
-            _pvPtr = pvPtr;
-          }
-          else
-            _pvPtr.reset();
-        }
-
         //! return type of projection if set, otherwise none
         virtual typename ProjectVertex::ProjectionType projectionType() const
         {
@@ -2428,7 +2414,7 @@ namespace ALUGrid
 
       protected :
         myhface_t*       _face;   //  8 bytes
-        ProjectVertexPtr _pvPtr;  // 16 bytes
+        ProjectVertexPtr _pvPtr;  // 16 bytes, initialized in Hbnd3Top
 
         int _twist;               //  4 bytes
         unsigned char _lvl;       //  1 byte    = 8 bytes
@@ -2478,17 +2464,6 @@ namespace ALUGrid
 
         virtual void detachleafs();
 
-        //! store shared pointer to boundary projection object (pass empty pointer to remove)
-        virtual void setBoundaryProjection( const ProjectVertexPtr& pvPtr )
-        {
-          if( pvPtr && pvPtr->projectionType() != ProjectVertex::none )
-          {
-            _pvPtr = pvPtr;
-          }
-          else
-            _pvPtr.reset();
-        }
-
         //! return type of projection if set, otherwise none
         virtual typename ProjectVertex::ProjectionType projectionType() const
         {
@@ -2503,7 +2478,7 @@ namespace ALUGrid
 
       protected :
         myhface_t*       _face;   //  8 bytes
-        ProjectVertexPtr _pvPtr;  // 16 bytes
+        ProjectVertexPtr _pvPtr;  // 16 bytes, initialized in Hbnd4Top
 
         int _twist;               //  4 bytes
         unsigned char _lvl;       //  1 byte   = 8 bytes
@@ -2587,13 +2562,13 @@ namespace ALUGrid
 
         virtual hexa_GEO      * insert_hexa (hface4_GEO *(&)[6], int (&)[6]) = 0;
 
-        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI::bnd_t, const ProjectVertexPtr& pv) = 0;
 
         // insert ghost element
         virtual hbndseg3_GEO  * insert_hbnd3 (hface3_GEO *, int, hbndseg_STI:: bnd_t,
                                               MacroGhostInfoTetra* ) = 0;
 
-        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t) = 0;
+        virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t, const ProjectVertexPtr& pv) = 0;
 
         // method to insert internal boundary with ghost
         virtual hbndseg4_GEO  * insert_hbnd4 (hface4_GEO *, int, hbndseg_STI::bnd_t,

@@ -24,7 +24,7 @@ namespace ALUGrid
       typedef typename A :: myhface3_t myhface3_t ;
       typedef typename A :: bnd_t     bnd_t ;
     public :
-      inline Hbnd3PllExternal (myhface3_t *, int, const bnd_t bt) ;
+      inline Hbnd3PllExternal (myhface3_t *, int, const bnd_t bt, const ProjectVertexPtr& pv) ;
       inline ~Hbnd3PllExternal () ;
       ElementPllXIF_t & accessPllX () ;
       const ElementPllXIF_t & accessPllX () const ;
@@ -145,8 +145,8 @@ namespace ALUGrid
   //    #    #    #  ######     #    #    #  ######
   //
   template < class A, class MX > inline Hbnd3PllExternal < A, MX > ::
-  Hbnd3PllExternal (myhface3_t * f, int t, const bnd_t bt)
-      : Hbnd3Top < A > (0,f,t,bt), _mxt (new MX (*this)) {
+  Hbnd3PllExternal (myhface3_t * f, int t, const bnd_t bt, const ProjectVertexPtr& pv)
+      : Hbnd3Top < A > (0,f,t,bt,pv), _mxt (new MX (*this)) {
     this->restoreFollowFace () ;
     return ;
   }

@@ -143,10 +143,9 @@ namespace ALUGrid
       if (_hbnd3Map.find (key) == _hbnd3Map.end ())
       {
         hface3_GEO * face  = InsertUniqueHface (v).first;
-        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt);
+        hbndseg3_GEO * hb3 = myBuilder ().insert_hbnd3 (face,twst,bt,pv);
         hb3->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb3->setMaster( master );
-        hb3->setBoundaryProjection( pv );
         _hbnd3Map [key] = hb3;
         return true;
       }
@@ -172,10 +171,9 @@ namespace ALUGrid
       if (_hbnd4Map.find (key) == _hbnd4Map.end ())
       {
         hface4_GEO * face =  InsertUniqueHface (v).first;
-        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt);
+        hbndseg4_GEO * hb4 = myBuilder ().insert_hbnd4 (face,twst,bt,pv);
         hb4->setLoadBalanceVertexIndex( ldbVertexIndex );
         hb4->setMaster( master );
-        hb4->setBoundaryProjection( pv );
         _hbnd4Map [key] = hb4;
         return true;
       }
@@ -665,9 +663,10 @@ namespace ALUGrid
         const Hbnd4IntStorage & p = * ((*i).second);
         if (p.first()->ref == 1)
         {
+          ProjectVertexPtr pv;
           hbndseg4_GEO * hb4 =
              myBuilder ().insert_hbnd4 (p.first(), p.second(),
-                                        Gitter::hbndseg_STI::closure);
+                                        Gitter::hbndseg_STI::closure, pv);
           myBuilder ()._hbndseg4List.push_back (hb4);
         }
         delete (*i).second;
@@ -686,8 +685,9 @@ namespace ALUGrid
         const Hbnd3IntStorage & p = * ((*i).second);
         if (p.first()->ref == 1)
         {
+          ProjectVertexPtr pv;
           hbndseg3_GEO * hb3 =
-            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure);
+            myBuilder ().insert_hbnd3 (p.first(),p.second(), Gitter::hbndseg_STI::closure, pv);
           myBuilder ()._hbndseg3List.push_back (hb3);
         }
         delete (*i).second;
