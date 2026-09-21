@@ -107,7 +107,7 @@ public:
     //build the information about neighbours
     Dune::Timer timer;
     buildNeighbors();
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
     std::cout << "Build neighbors took " << timer.elapsed() << " sec." << std::endl;
 #endif
   }
@@ -117,7 +117,7 @@ public:
   {
     int result = 0;
     bool verbose = false;
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
     unsigned int bndFaces = 0;
 #endif
     std::vector<int> nonCompatFacesAtVertex(nVertices_, 0 );
@@ -125,7 +125,7 @@ public:
     {
       if( face.second[0] == face.second[1] )
       {
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
         bndFaces++;
 #endif
         continue;
@@ -139,7 +139,7 @@ public:
         }
       }
     }
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
     std::cout << "NotStrongCompatibleMacroFaces"  << " InnerFaces "  << " TotalFaces " << "Maximum/Vertex " << " Minimum/Vertex "  << std::endl;
     std::cout << result << " " << neighbours_.size() - bndFaces << " " << neighbours_.size() << " " <<  *(std::max_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << " " << *(std::min_element(nonCompatFacesAtVertex.begin(), nonCompatFacesAtVertex.end())) << std::endl << std::endl;
 #endif
@@ -350,7 +350,7 @@ public:
 
           if( (vxPair.first - newOrder) < eps )
           {
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
             Dune::Timer restimer;
             std::cout << "Rescale vertex order weights." << std::endl;
 #endif
@@ -379,7 +379,7 @@ public:
                   std::abort();
               }
             }
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
             std::cout << "Rescale done, time = " << restimer.elapsed() << std::endl;
 #endif
           }
@@ -474,7 +474,7 @@ public:
           activeFaceList.push_front(faceElement);
       }
 
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
       const int onePercent = numberOfElements / 100 ;
       if( onePercent > 0 && counter % onePercent == 0 )
       {
@@ -1096,7 +1096,7 @@ private:
         break;
       default: ;
     }
-#ifndef NDEBUG
+#ifndef NO_ALUGRID_DEBUG
     int sizeOfV1 = 0;
     int sizeOfV0 = 0;
     for(unsigned int i =0 ; i < nVertices_; ++i)
