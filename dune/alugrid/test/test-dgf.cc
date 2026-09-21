@@ -23,7 +23,7 @@ int main( int argc, char** argv )
 try
 {
   auto& mpiHelper = MPIHelper::instance( argc, argv );
-  const int rank = mpiHelper.rank();
+  //const int rank = mpiHelper.rank();
 
   std::string filename;
   if( argc > 1 )
@@ -37,7 +37,8 @@ try
   }
 
 #if 1
-  using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
+  //using GridType = Dune::ALUGrid<3, 3, Dune::simplex, Dune::conforming>;
+  using GridType = Dune::ALUGrid<3, 3, Dune::cube, Dune::nonconforming>;
   Dune::GridPtr< GridType > gridPtr( filename );
 
 
