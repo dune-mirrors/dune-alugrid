@@ -84,6 +84,7 @@ namespace Dune
     //! for given type, if type is not exisiting within grid 0 is returned
     int size ( GeometryType type ) const
     {
+      if( int(type.dim()) > GridType::dimension ) return 0;
       if( elType == tetra && !type.isSimplex() ) return 0;
       if( elType == hexa  && !type.isCube() ) return 0;
       // return size of hierarchic index set

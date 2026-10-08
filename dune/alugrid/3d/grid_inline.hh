@@ -311,6 +311,7 @@ namespace Dune
   alu_inline_tmp
   int ALU3dGrid< dim, dimworld, elType, Comm >::size ( int level, GeometryType type ) const
   {
+    if(int(type.dim()) > dimension) return 0;
     if(elType == tetra && !type.isSimplex()) return 0;
     if(elType == hexa  && !type.isCube   ()) return 0;
     return size( level, dimension - type.dim() );
@@ -333,6 +334,7 @@ namespace Dune
   alu_inline_tmp
   int ALU3dGrid< dim, dimworld, elType, Comm >::size ( GeometryType type ) const
   {
+    if(int(type.dim()) > dimension) return 0;
     if(elType == tetra && !type.isSimplex()) return 0;
     if(elType == hexa  && !type.isCube   ()) return 0;
     return size( dimension - type.dim() );
