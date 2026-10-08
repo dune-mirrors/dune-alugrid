@@ -762,6 +762,16 @@ namespace Dune
       return *geoImplPtr_;
     }
 
+    // return reference to geometry implementation that is not shared with
+    // other geometry objects, i.e., that can safely be modified without
+    // changing copies of this geometry handed out before
+    GeometryImplType& uniqueGeoImpl()
+    {
+      if( ! geoImplPtr_.unique() )
+        geoImplPtr_.invalidate();
+      return *geoImplPtr_;
+    }
+
     // proxy object holding GeometryImplType* with reference counting
     mutable ALU3DSPACE SharedPointer< GeometryImplType > geoImplPtr_;
   };
