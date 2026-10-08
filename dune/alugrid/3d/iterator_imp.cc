@@ -438,7 +438,9 @@ alu_inline void ALU3dGridIntersectionIterator< GridImp >::buildLocalGeometries()
 {
   intersectionSelfLocal_.buildGeom( geoProvider_.intersectionSelfLocal() );
   if ( !connector_.outerBoundary() )
+  {
     intersectionNeighborLocal_.buildGeom( geoProvider_.intersectionNeighborLocal() );
+  }
 }
 
 template <class GridImp>
@@ -479,6 +481,11 @@ template <class GridImp>
 alu_inline void ALU3dGridIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace)
 {
+  // invalidate geometries
+  this->intersectionGlobal_.invalidate();
+  this->intersectionSelfLocal_.invalidate();
+  this->intersectionNeighborLocal_.invalidate();
+
   alugrid_assert ( ! ghost_ );
   alugrid_assert ( innerLevel_ == item_->level() );
   connector_.updateFaceInfo(newFace,innerLevel_,
@@ -641,6 +648,11 @@ template <class GridImp>
 alu_inline void ALU3dGridLevelIntersectionIterator<GridImp>::
 setNewFace(const GEOFaceType& newFace)
 {
+  // invalidate geometries
+  this->intersectionGlobal_.invalidate();
+  this->intersectionSelfLocal_.invalidate();
+  this->intersectionNeighborLocal_.invalidate();
+
   alugrid_assert ( item_->level() == innerLevel_ );
   levelNeighbor_ = (newFace.level() == innerLevel_);
   connector_.updateFaceInfo(newFace, innerLevel_,
