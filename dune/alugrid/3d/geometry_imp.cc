@@ -296,7 +296,7 @@ buildGeom(const HFaceType & item, int t)
   return true;
 }
 
-// --buildFaceGeom
+// --buildFaceGeom for intersections
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
 alu_inline bool
@@ -311,7 +311,7 @@ buildGeom(const coord_t& p0,
   return true;
 }
 
-// --buildFaceGeom
+// --buildFaceGeom for intersections
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
 alu_inline bool
@@ -326,7 +326,7 @@ buildGeom(const coord_t& p0,
 }
 
 
-// --buildFaceGeom for edges
+// --buildFaceGeom for edges (intersections)
 template <int mydim, int cdim, class GridImp>
 template <class coord_t>
 alu_inline bool
@@ -335,12 +335,14 @@ buildGeom(const coord_t& p0,
           const coord_t& p1)
 {
   alugrid_assert (mydim == 1 );
+
   // update geometry implementation
   geoImpl().update( p0, p1 );
   return true;
 }
 
 
+// -buildFaceGeom for local geometries of intersections
 template <int mydim, int cdim, class GridImp> // for faces
 alu_inline bool
 ALU3dGridGeometry<mydim, cdim, GridImp >::
