@@ -327,6 +327,8 @@ namespace Dune
     bool typeNotValid (const GeometryType & type) const
     {
       int codim = GridType::dimension - type.dim();
+      // types of higher dimension than the grid are never contained
+      if( codim < 0 ) return true;
       const std::vector<GeometryType> & geomT = geomTypes(codim);
       for(size_t i=0; i<geomT.size(); ++i) if(geomT[i] == type) return false;
       return true;

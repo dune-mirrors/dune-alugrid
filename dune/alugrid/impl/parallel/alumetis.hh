@@ -33,7 +33,7 @@ extern "C" {
 #define HAVE_METIS_VERSION_4
 #endif // #if not defined IDXTYPEWIDTH && not defined REALTYPEWIDTH
 
-#else  // #if HAVE_METIS
+#else  // #if ALUGRID_HAVE_METIS
 
 static const char metmess [] =  "**INFO Due to license reasons the library METIS is\n"
         "       not part of the ALUGrid library distribution. \n"
@@ -43,12 +43,12 @@ static const char metmess [] =  "**INFO Due to license reasons the library METIS
         "       --with-metis=PATH_TO_METIS option, \n"
         "       or choose another Graph partitioning method. \n"
         "       Exiting program, bye! \n";
-#endif // #if HAVE_METIS
+#endif // #if ALUGRID_HAVE_METIS
 
 namespace ALUGridMETIS
 {
 
-#if HAVE_METIS && not defined HAVE_METIS_VERSION_4
+#if ALUGRID_HAVE_METIS && not defined HAVE_METIS_VERSION_4
   typedef idx_t  idxtype ;
   typedef real_t realtype ;
 #else
@@ -64,7 +64,7 @@ namespace ALUGridMETIS
                            realtype* tpwgts, realtype *ubvec, idxtype* options,
                            idxtype* edgecut, idxtype *neu)
   {
-#if HAVE_METIS
+#if ALUGRID_HAVE_METIS
 
 #ifdef HAVE_METIS_VERSION_4
     // METIS Version 4.0
@@ -112,7 +112,7 @@ namespace ALUGridMETIS
                                 realtype* tpwgts, realtype *ubvec, idxtype* options,
                                 idxtype* edgecut, idxtype *neu)
   {
-#if HAVE_METIS
+#if ALUGRID_HAVE_METIS
 #ifdef HAVE_METIS_VERSION_4
     // METIS Version 4.0
     // call metis function
