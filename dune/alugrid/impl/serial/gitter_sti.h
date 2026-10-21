@@ -104,7 +104,7 @@ namespace ALUGrid
 
     static int verbosityLevel()
     {
-      return getenv("ALUGRID_VERBOSITY_LEVEL") ? atoi (getenv("ALUGRID_VERBOSITY_LEVEL")) : 2;
+      return getenv("ALUGRID_VERBOSITY_LEVEL") ? atoi (getenv("ALUGRID_VERBOSITY_LEVEL")) : 0;
     }
   };
 
