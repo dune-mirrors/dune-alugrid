@@ -48,6 +48,9 @@
 /* Define if we have ZLIB */
 #cmakedefine HAVE_ZLIB 1
 
+/* Define if we mesh-consistency */
+#cmakedefine HAVE_MESH_CONSISTENCY 1
+
 /* Include source file for dlmalloc */
 #cmakedefine DLMALLOC_SOURCE_INCLUDE ${DLMALLOC_SOURCE_INCLUDE}
 

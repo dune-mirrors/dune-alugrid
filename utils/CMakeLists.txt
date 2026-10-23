@@ -1,2 +1,3 @@
 add_subdirectory(convert-macrogrid EXCLUDE_FROM_ALL)
 add_subdirectory(bisection-compatibility)
+add_subdirectory(mesh-consistency)
