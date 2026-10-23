@@ -8,9 +8,12 @@
 #include <dune/common/exceptions.hh>
 #include <dune/common/fvector.hh>
 
+// this has been included in alugrid/common/mesh-consistency
+#define HAVE_MESH_CONSISTENCY 1
+
 // provided by consistent-edge-orientation module
 #if HAVE_MESH_CONSISTENCY
-#include <utils/mesh-consistency/mesh-consistency.hh>
+#include <dune/alugrid/common/mesh-consistency/mesh-consistency.hh>
 #else
 #warning "mesh-consistency is disabled for cube meshes. Install manually or set cmake flag ALUGRID_DOWNLOAD_MESH_CONSISTENCY to TRUE."
 #endif
@@ -53,4 +56,6 @@ namespace Dune
   } // end namespace detail
 
 }// end namespace Dune
+
+#undef HAVE_MESH_CONSISTENCY
 #endif

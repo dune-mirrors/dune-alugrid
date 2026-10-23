@@ -21,12 +21,8 @@ if(ALUGRID_DISABLE_METIS)
   set(CMAKE_DISABLE_FIND_PACKAGE_METIS TRUE)
 endif()
 
-# set to on to aitmatically download the mesh-consistency package
-set(ALUGRID_DOWNLOAD_MESH_CONSISTENCY FALSE)
-
 # set to true to compile more things into library
 set(DUNE_ALUGRID_COMPILE_BINDINGS FALSE)
-set(HAVE_MESH_CONSISTENCY TRUE)
 
 # variable to be set in config.h
 if( DUNE_ALUGRID_COMPILE_BINDINGS )
