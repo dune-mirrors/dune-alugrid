@@ -24,11 +24,11 @@ namespace Dune
   {
     bool correctCubeOrientationAvailable()
     {
-#if HAVE_MESH_CONSISTENCY
-      return true;
-#else
+//#if HAVE_MESH_CONSISTENCY
+//      return true;
+//#else
       return false ;
-#endif
+//#endif
     }
 
     bool correctCubeOrientation(const int dimension,
