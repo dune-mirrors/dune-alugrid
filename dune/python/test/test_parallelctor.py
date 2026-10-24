@@ -31,5 +31,4 @@ def test(version):
 
 if dune.common.comm.size == 2:
     test(version=0)
-    # this does not work
-    # test(version=1)
+    test(version=1)

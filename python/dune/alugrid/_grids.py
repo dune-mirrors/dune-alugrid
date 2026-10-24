@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import logging
+from dune.common import comm as commonComm
 from dune.grid import reader
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,23 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
 
     if type(constructor) == dict and "constructor" in constructor.keys():
         return aluGrid(**constructor)
+
+    if not serial and commonComm.rank > 0:
+        try:
+            # if the first argument is a 'reader' then the values are
+            # 'dgf', 'dgfString', 'gmsh', 'meshio', 'structured'
+            # At least for 'gmsh' and 'meshio' we need to construct an
+            # empty grid on ranks other then zero while for dgf all ranks
+            # need to get constructed with the full information. Not sure
+            # about 'structured' (uses the `StructuredGridFactory").
+            # Assuming that needs to be handled like the other grid
+            # factories that are not dgf:
+            usingDGF = constructor[0] in [reader.dgf,reader.dgfString]
+        except:
+            # probably a dict so also using the standard grid factory
+            usingDGF = False
+        if not usingDGF:
+            constructor={}
 
     try:
         useMeshio = constructor[0] == reader.meshio
