@@ -88,18 +88,20 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
 
     An ALUGrid instance with given refinement (conforming or nonconforming) and element type (simplex or cube).
     """
+
     if type(constructor) == dict and "constructor" in constructor.keys():
         return aluGrid(**constructor)
+
     try:
         useMeshio = constructor[0] == reader.meshio
         fileName = constructor[1]
     except:
         useMeshio = False
     if useMeshio:
-        return aluGrid(**importMesh(fileName, defaultBndId=defaultBndId),
-                       refinement=refinement, comm=comm, serial=serial, verbose=verbose,
-                       lbMethod=lbMethod, lbUnder=lbUnder, lbOver=lbOver,
-                       parameters=parameters, sfc=sfc)
+        mesh = importMesh(fileName, defaultBndId=defaultBndId)
+        constructor = mesh["constructor"]
+        dimgrid = mesh["dimgrid"]
+        elementType = mesh["elementType"]
 
     from dune.grid.grid_generator import module, getDimgrid
 
