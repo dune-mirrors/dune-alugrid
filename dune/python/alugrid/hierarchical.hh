@@ -16,9 +16,12 @@ namespace Dune
 {
   namespace Python
   {
-    template< class Grid >
-    inline static auto reader ( const pybind11::dict &args, PriorityTag< 40 > ) // is called in dune-grid/dune/python/grid/hierarchical.hh with > PriorityTag<42>
-      -> std::enable_if_t< Capabilities::HasGridFactory< Grid >::value, std::shared_ptr< Grid > >
+
+    template< class Grid,
+              class = decltype( std::declval<GridFactory<Grid>&>().createGrid( std::declval<unsigned int>()))
+            >
+    inline static auto reader(const pybind11::dict& args, PriorityTag<40>)
+    -> std::enable_if_t< Capabilities::HasGridFactory<Grid>::value, std::shared_ptr<Grid>>
     {
       GridFactory< Grid > factory;
       if (args.empty())
