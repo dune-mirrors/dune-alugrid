@@ -137,8 +137,10 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 1)
         from dune.alugrid import _add_conforming_citation
         _add_conforming_citation()
+        isConforming = True
     else:
         refVar = ALUGridEnvVar('ALUGRID_CONFORMING_REFINEMENT', 0)
+        isConforming = False
     verbosity = ALUGridEnvVar('ALUGRID_VERBOSITY_LEVEL', 2 if verbose else 0)
 
     # load balancing parameters
@@ -182,6 +184,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
         # return gridModule.LeafGrid(gridModule.reader(constructor, comm))
 
     gridView = gridModule.LeafGrid(gridModule.reader(constructor))
+    gridView.hierarchicalGrid.aluConforming = isConforming
 
     # in case of a carteisan domain store if old or new boundary ids was used
     # this can be removed in later version - it is only used in dune-fem
