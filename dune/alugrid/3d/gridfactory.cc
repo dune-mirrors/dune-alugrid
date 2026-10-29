@@ -385,7 +385,9 @@ namespace Dune
   alu_inline
   void ALU3dGridFactory< ALUGrid >::markLongestEdge ( std::vector< bool >& elementOrientation, const bool resortElements )
   {
+#ifdef ALUGRID_DEBUG
     std::cerr << "Marking longest edge for initial refinement..." << std::endl;
+#endif
 
     // DUNE reference element edge numbering
     static const int edges[ 6 ][ 2 ] = { {0,1}, {0,2}, {1,2}, {0,3}, {1,3}, {2,3} };
