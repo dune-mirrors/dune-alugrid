@@ -3,6 +3,7 @@ set(TESTS
   test-structuredgridfactory
   test-backup-restore
   test-dgf
+  test-geometryinfather
 )
 
 set(EXTRA_TESTS
