@@ -183,7 +183,7 @@ namespace Dune
       if( type.isSimplex() )
       {
         // create static variable for this thread
-        static ThisType simplexGeoms( type, nonConforming );
+        static thread_local ThisType simplexGeoms( type, nonConforming );
         return simplexGeoms ;
       }
       else
@@ -191,9 +191,9 @@ namespace Dune
         // should be a cube geometry a this point
         alugrid_assert( type.isCube() );
 
-        // create static variable
-        static ThisType cubeGeoms( type, nonConforming );
-        return cubeGeoms ;
+        // create static variable for this thread
+        static thread_local ThisType cubeGeoms( type, nonConforming );
+        return cubeGeoms;
       }
     }
 
