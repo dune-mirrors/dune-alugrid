@@ -513,6 +513,16 @@ void checkALUSerial(GridType & grid, int mxl = 2)
     delete gr;
   }
 
+  /// test to create serial grid
+  {
+    Dune::GridFactory<GridType> factory(Dune::MPIHelper::getLocalCommunicator());
+    auto grd = factory.createGrid();
+    if( factory.comm().size() != 1 or grd->comm().size() != 1)
+    {
+      DUNE_THROW(Dune::InvalidStateException,"communicator not passed correctly to grid factory");
+    }
+  }
+
   writeFile( grid.leafGridView() );
 
   std::stringstream null;
