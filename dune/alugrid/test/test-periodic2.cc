@@ -42,7 +42,7 @@ void test (int n, bool simplex)
       } else
         factory.insertElement(Dune::GeometryTypes::cube(dim), {vid(i,j), vid(i+1,j), vid(i,j+1), vid(i+1,j+1)});
     }
-  factory.unsetAllFlags()
+  factory.unsetAllFlags();
   auto grid = factory.createGrid();
   std::cout << "elements: " << grid->size(0) << ", vertices: " << grid->size(dim) << std::endl;
 
