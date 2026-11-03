@@ -4,6 +4,7 @@ set(TESTS
   test-backup-restore
   test-dgf
   test-geometryinfather
+  test-periodic2
 )
 
 set(EXTRA_TESTS
