@@ -333,8 +333,19 @@ namespace Dune
     const std::vector<unsigned int>& ordering () const { return ordering_; }
 
 
-    //! set longest edge marking for biscetion grids (default is off)
+    //! set longest edge marking for biscetion grids (default is on)
     void setLongestEdgeFlag (bool flag = true) { markLongestEdge_ = flag ; }
+    //! set the correct orientation flag (default is on)
+    void setCorrectOrientationFlag (bool flag = true) { correctOrientation_= flag ; }
+    //! set the sorting (sfc) ordering flag (default is on)
+    void setSortElementsFlag (bool flag = true) { sortElements_= flag ; }
+    //! turn off all grid factory postprocessing steps
+    void unsetAllFlags()
+    {
+      setLongestEdgeFlag(false);
+      setCorrectOrientationFlag(false);
+      setSortElementsFlag(false);
+    }
 
     //! disable compatibility check for biscetion grids (default is on)
     void disableCompatibilityCheck () { compatibilityCheck_ = false ; }
@@ -423,6 +434,8 @@ namespace Dune
     std::vector< unsigned int > ordering_;
 
     bool markLongestEdge_;
+    bool correctOrientation_;
+    bool sortElements_;
     bool compatibilityCheck_;
   };
 
@@ -543,6 +556,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    correctOrientation_( true ),
+    sortElements_( true ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {
@@ -565,6 +580,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    correctOrientation_( true ),
+    sortElements_( true ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {
@@ -587,6 +604,8 @@ namespace Dune
     communicator_( communicator ),
     curveType_( SpaceFillingCurveOrderingType :: getCurveType() ),
     markLongestEdge_( ALUGrid::dimension == 2 ),
+    correctOrientation_( true ),
+    sortElements_( true ),
     // this is only needed for simplex grids in 3d
     compatibilityCheck_( getRefinementType() == conforming && ALUGrid::dimension == 3)
   {

@@ -257,10 +257,11 @@ namespace Dune
     for( size_t i=0; i<elemSize; ++i ) ordering[ i ] = i;
 
     // if type of curve is chosen to be None, nothing more to be done here
-    if( curveType_ == ALUSpaceFillingCurveType :: None )
+    if( curveType_ == ALUSpaceFillingCurveType :: None || !sortElements_)
     {
 #ifndef NDEBUG
-      std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
+      if (sortElements_)
+        std::cerr << "WARNING: ALUGRID_SFC_ORDERING disabled by DISABLE_ALUGRID_SFC_ORDERING" << std::endl;
 #endif
       return ;
     }
@@ -493,7 +494,8 @@ namespace Dune
   typename ALU3dGridFactory< ALUGrid >::GridPtrType
   ALU3dGridFactory< ALUGrid >::createGrid ( const unsigned int addMissingBoundaries, bool temporary, const std::string name )
   {
-    correctElementOrientation();
+    if ( correctOrientation_ )
+      correctElementOrientation();
 
     auto refinementType = getRefinementType();
     if( dimension == 2 && refinementType == conforming )
