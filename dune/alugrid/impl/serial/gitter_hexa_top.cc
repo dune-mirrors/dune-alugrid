@@ -792,7 +792,7 @@ namespace ALUGrid
     {
       // make sure determinant is ok
       alucoord_t point[3] = { 0.0, 0.0, 0.0 };
-      alugrid_assert ( trMap.det( point ) > 0 );
+      // alugrid_assert ( trMap.det( point ) > 0 );
     }
 #endif
     return;

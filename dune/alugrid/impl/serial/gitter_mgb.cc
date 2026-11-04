@@ -700,15 +700,17 @@ namespace ALUGrid
       typedef faceMap_t::iterator iterator;
       const iterator face4MapEnd = _face4Map.end ();
       for (faceMap_t::iterator i = _face4Map.begin (); i != face4MapEnd; )
-      if (!((hface4_GEO *)(*i).second)->ref)
       {
-        delete (hface4_GEO *)(*i).second;
-        _face4Map.erase (i++);
-      }
-      else
-      {
-        alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
-        myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
+        if (!((hface4_GEO *)(*i).second)->ref)
+        {
+          delete (hface4_GEO *)(*i).second;
+          _face4Map.erase (i++);
+        }
+        else
+        {
+          alugrid_assert (((hface4_GEO *)(*i).second)->ref == 2);
+          myBuilder ()._hface4List.push_back ((hface4_GEO *)(*i ++).second );
+        }
       }
     }
     {
