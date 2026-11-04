@@ -103,7 +103,7 @@ def aluGrid(constructor, dimgrid=None, dimworld=None, elementType=None, comm=Non
             # about 'structured' (uses the `StructuredGridFactory").
             # Assuming that needs to be handled like the other grid
             # factories that are not dgf:
-            usingDGF = constructor[0] in [reader.dgf,reader.dgfString]
+            usingDGF = constructor[0] in [reader.dgf,reader.dgfString,reader.dgfStringNoLB,reader.dgfNoLB]
         except:
             # probably a dict so also using the standard grid factory
             usingDGF = False
